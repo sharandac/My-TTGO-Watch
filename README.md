@@ -1,1 +1,1 @@
-# My-TTGO_Watch
+# My-TTGO-Watch
