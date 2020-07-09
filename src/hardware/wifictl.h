@@ -3,6 +3,7 @@
 
     #define WIFICTL_DELAY       10
     #define NETWORKLIST_ENTRYS  20
+    #define WIFICTL_CONFIG_FILE "/wifilist.cfg"
 
     struct networklist {
         char ssid[64]="";
@@ -28,6 +29,14 @@
      * @return  true if was success or false if fail
      */
     bool wifictl_insert_network( const char *ssid, const char *password );
+    /*
+     * @brief delete ssid from network list
+     * 
+     * @param   ssid    pointer to an network name
+     * 
+     * @return  true if was success or false if fail
+     */
+    bool wifictl_delete_network( const char *ssid );
     /*
      * @brief switch on wifi
      */

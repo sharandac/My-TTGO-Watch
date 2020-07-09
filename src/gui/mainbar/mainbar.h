@@ -12,6 +12,8 @@
         APP_TILE,
         WLAN_SETTINGS_TILE,
         WLAN_PASSWORD_TILE,
+        MOVE_SETTINGS_TILE,
+        DISPLAY_SETTINGS_TILE,
         TILE_NUM
     } lv_tile_number;
 
@@ -32,16 +34,18 @@
      * @param   x   x coordinate
      * @param   y   y coordinate
      */
-    void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y );
+    void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim );
     /*
      * @brief jump to the given tile
      * @param   tile    tile number
+     * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
-    void mainbar_jump_to_tilenumber( lv_tile_number tile_number );
+    void mainbar_jump_to_tilenumber( lv_tile_number tile_number, lv_anim_enable_t anim );
     /*
      * @brief jump direct to main tile
+     * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
-    void mainbar_jump_to_maintile( void );
+    void mainbar_jump_to_maintile( lv_anim_enable_t anim );
 
 
 #endif // _MAINBAR_H

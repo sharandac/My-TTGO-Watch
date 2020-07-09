@@ -3,8 +3,9 @@
 #include <WiFi.h>
 
 #include "powermgm.h"
-#include "statusbar.h"
 #include "wifictl.h"
+
+#include "gui/statusbar.h"
 
 bool wifi_init = false;
 TaskHandle_t _WIFICTL_Task;
@@ -107,10 +108,10 @@ void wifictl_setup( void ) {
  *
  */
 void wifictl_save_network( void ) {
-  fs::File file = SPIFFS.open( "/wifilist.cfg", FILE_WRITE );
+  fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf("Can't save file: %s\r\n", "/wifilist.cfg" );
+    Serial.printf("Can't save file: %s\r\n", WIFICTL_CONFIG_FILE );
   }
   else {
     file.write( (uint8_t *)wifictl_networklist, sizeof( wifictl_networklist  ) );
@@ -122,11 +123,10 @@ void wifictl_save_network( void ) {
  *
  */
 void wifictl_load_network( void ) {
-  fs::File file = SPIFFS.open( "/wifilist.cfg", FILE_READ );
-  Serial.printf("read config\r\n");
+  fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf("Can't open file!\r\n" );
+    Serial.printf("Can't open file: %s\r\n", WIFICTL_CONFIG_FILE );
   }
   else {
     int filesize = file.size();
@@ -134,7 +134,6 @@ void wifictl_load_network( void ) {
       Serial.printf("Failed to read configfile. Wrong filesize!\r\n" );
     }
     else {
-      Serial.printf("read file, bytes= %d\r\n", filesize );
       file.read( (uint8_t *)wifictl_networklist, filesize );
     }
     file.close();
@@ -147,6 +146,21 @@ void wifictl_load_network( void ) {
 bool wifictl_is_known( const char* networkname ) {
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( networkname, wifictl_networklist[ entry ].ssid ) ) {
+      return( true );
+    }
+  }
+  return( false );
+}
+
+/*
+ *
+ */
+bool wifictl_delete_network( const char *ssid ) {
+  for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
+    if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
+      wifictl_networklist[ entry ].ssid[ 0 ] = '\0';
+      wifictl_networklist[ entry ].password[ 0 ] = '\0';
+      wifictl_save_network();
       return( true );
     }
   }

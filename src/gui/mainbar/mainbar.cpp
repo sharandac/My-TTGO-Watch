@@ -3,11 +3,13 @@
 
 #include "mainbar.h"
 #include "main_tile/main_tile.h"
-#include "setup_tile/setup_tile.h"
+#include "setup_tile/setup.h"
 #include "note_tile/note_tile.h"
 #include "app_tile/app_tile.h"
 
-#include "wlan_settings_tile/wlan_settings_tile.h"
+#include "setup_tile/wlan_settings/wlan_settings.h"
+#include "setup_tile/move_settings/move_settings.h"
+#include "setup_tile/display_settings/display_settings.h"
 
 static lv_style_t mainbarstyle;
 static lv_obj_t *mainbar = NULL;
@@ -20,7 +22,9 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, APP_TILE, app_tile_setup, { 0 , 1 } },
     { NULL, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
     { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 1,3 } },
-    { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 2,3 } }
+    { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 2,3 } },
+    { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 3,3 } },
+    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 5,3 } }
 };
 
 void mainbar_setup( void ) {
@@ -51,26 +55,26 @@ void mainbar_setup( void ) {
         valid_pos[ tile ].x = tile_entry[ tile ].pos.x;
         valid_pos[ tile ].y = tile_entry[ tile ].pos.y;
     }
-    mainbar_jump_to_maintile();
+    mainbar_jump_to_maintile( LV_ANIM_OFF );
 }
 
-void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y ) {
-    lv_tileview_set_tile_act(mainbar, x, y,LV_ANIM_ON );
+void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim ) {
+    lv_tileview_set_tile_act(mainbar, x, y, anim );
 }
 
-void mainbar_jump_to_tilenumber( lv_tile_number tile_number ) {
+void mainbar_jump_to_tilenumber( lv_tile_number tile_number, lv_anim_enable_t anim ) {
     for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
         if ( tile_entry[ tile ].tile_number == tile_number ) {
-            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, LV_ANIM_ON );
+            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
             break;
         }
     }
 }
 
-void mainbar_jump_to_maintile( void ) {
+void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
     for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
         if ( tile_entry[ tile ].tile_number == MAIN_TILE ) {
-            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, LV_ANIM_ON );
+            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
             break;
         }
     }

@@ -3,10 +3,12 @@
 #include <TTGO.h>
 
 #include "gui.h"
-#include "powermgm.h"
 #include "statusbar.h"
-#include "mainbar/mainbar.h"
 #include "keyboard.h"
+#include "mainbar/mainbar.h"
+
+#include "hardware/powermgm.h"
+#include "hardware/display.h"
 
 LV_IMG_DECLARE(bg2)
 
@@ -28,7 +30,6 @@ void gui_setup(void)
     mainbar_setup();
     statusbar_setup();
     keyboard_setup();
-
     lv_disp_trig_activity(NULL);
 
     return;
@@ -41,13 +42,13 @@ void gui_loop( TTGOClass *ttgo ){
 
     // do task handler if still an useraction or go to standby after timeout
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if (lv_disp_get_inactive_time(NULL) < DEFAULT_SCREEN_TIMEOUT) {
+        if (lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
             lv_task_handler();
-            if ( lv_disp_get_inactive_time(NULL) > ( DEFAULT_SCREEN_TIMEOUT - DEFAULT_BACKLIGHT * 8 ) ) {
-                ttgo->bl->adjust( ( DEFAULT_SCREEN_TIMEOUT - lv_disp_get_inactive_time(NULL) ) / 8 );
+            if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                ttgo->bl->adjust( ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time(NULL) ) / 8 );
             }
             else {
-                ttgo->bl->adjust( DEFAULT_BACKLIGHT );
+                ttgo->bl->adjust( display_get_brightness() );
             }
         }
         else {

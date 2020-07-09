@@ -12,9 +12,10 @@
 #include "SD.h"
 
 #include "statusbar.h"
-#include "motor.h"
-#include "powermgm.h"
-#include "wifictl.h"
+
+#include "hardware/motor.h"
+#include "hardware/powermgm.h"
+#include "hardware/wifictl.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -114,11 +115,16 @@ void statusbar_setup( void )
     lv_style_init(&style);
     lv_style_copy( &style, &statusbarstyle[ STATUSBAR_STYLE_GRAY ] );
 
-    lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_CHECKED_RELEASED, LV_OPA_100);
-    lv_style_set_image_recolor(&style, LV_BTN_STATE_CHECKED_RELEASED, LV_COLOR_GRAY);
     lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_RELEASED, LV_OPA_100);
     lv_style_set_image_recolor(&style, LV_BTN_STATE_RELEASED, LV_COLOR_GRAY);
-    lv_style_set_text_color(&style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+    lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_PRESSED, LV_OPA_100);
+    lv_style_set_image_recolor(&style, LV_BTN_STATE_PRESSED, LV_COLOR_GREEN);
+    lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_CHECKED_RELEASED, LV_OPA_100);
+    lv_style_set_image_recolor(&style, LV_BTN_STATE_CHECKED_RELEASED, LV_COLOR_GRAY);
+    lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_CHECKED_PRESSED, LV_OPA_100);
+    lv_style_set_image_recolor(&style, LV_BTN_STATE_CHECKED_PRESSED, LV_COLOR_GRAY);
+    lv_style_set_image_recolor_opa(&style, LV_BTN_STATE_DISABLED, LV_OPA_100);
+    lv_style_set_image_recolor(&style, LV_BTN_STATE_DISABLED, LV_COLOR_GREEN);
 
     statusbar_wifi = lv_imgbtn_create( statusbar, NULL);
     lv_imgbtn_set_src(statusbar_wifi, LV_BTN_STATE_RELEASED, &wifi_64px);
@@ -134,7 +140,7 @@ void statusbar_setup( void )
     /*Create a label on the Image button*/
     statusbar_wifilabel = lv_label_create(statusbar, NULL);
     lv_obj_reset_style_list( statusbar_wifilabel, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( statusbar_wifilabel, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_BLUE ] );
+    lv_obj_add_style( statusbar_wifilabel, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_GREEN ] );
     lv_label_set_text(statusbar_wifilabel, "");
     lv_obj_align(statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 

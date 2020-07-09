@@ -4,8 +4,9 @@
 
 #include "pmu.h"
 #include "powermgm.h"
-#include "statusbar.h"
 #include "motor.h"
+
+#include "gui/statusbar.h"
 
 EventGroupHandle_t pmu_event_handle = NULL;
 

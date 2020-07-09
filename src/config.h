@@ -1,4 +1,3 @@
-
 #ifndef _CONFIG_H 
     #define _CONFIG_H 
 
@@ -7,8 +6,5 @@
     #include <LilyGoWatch.h>
 
     #define _DEBUG
-
-    #define DEFAULT_SCREEN_TIMEOUT  15*1000
-    #define DEFAULT_BACKLIGHT       32
 
 #endif // _CONFIG_H

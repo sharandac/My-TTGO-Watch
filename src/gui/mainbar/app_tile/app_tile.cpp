@@ -1,6 +1,6 @@
 #include "config.h"
 #include "../mainbar.h"
-#include "note_tile.h"
+#include "app_tile.h"
 
 static void btn_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -9,7 +9,7 @@ LV_IMG_DECLARE(bluetooth_64px);
 LV_IMG_DECLARE(time_64px);
 LV_IMG_DECLARE(brightness_64px);
 
-void note_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void app_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
 
     lv_obj_t * wifi_setup = lv_imgbtn_create(tile, NULL);
     lv_imgbtn_set_src(wifi_setup, LV_BTN_STATE_RELEASED, &wifi_64px);
@@ -48,7 +48,7 @@ void note_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coo
 
 static void btn_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile();
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }
 }

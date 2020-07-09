@@ -39,8 +39,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             ttgo->rtc->syncToSystem();
             ttgo->startLvglTick();
             lv_disp_trig_activity(NULL);
-            ttgo->bma->enableStepCountInterrupt(true);
-            ttgo->bma->enableWakeupInterrupt( false );
+            if ( bma_get_config( BMA_STEPCOUNTER ) )
+                ttgo->bma->enableStepCountInterrupt( true );
             motor_vibe( 1 );
         }
         // if we are nor in stand by, go sleep
@@ -51,8 +51,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
             while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) {}
             ttgo->stopLvglTick();
-            ttgo->bma->enableStepCountInterrupt(false);
-            ttgo->bma->enableWakeupInterrupt( true );
+            if ( bma_get_config( BMA_STEPCOUNTER ) )
+                ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
             rtc_clk_cpu_freq_set(RTC_CPU_FREQ_2M);
             // setCpuFrequencyMhz(2);
