@@ -18,8 +18,8 @@ static lv_point_t valid_pos[ TILE_NUM ];
 
 lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, MAIN_TILE, main_tile_setup, { 0 , 0 } },
-    { NULL, NOTE_TILE, note_tile_setup, { 1 , 0 } },
-    { NULL, APP_TILE, app_tile_setup, { 0 , 1 } },
+    { NULL, APP_TILE, app_tile_setup, { 1 , 0 } },
+    { NULL, NOTE_TILE, note_tile_setup, { 0 , 1 } },
     { NULL, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
     { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 1,3 } },
     { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 2,3 } },
