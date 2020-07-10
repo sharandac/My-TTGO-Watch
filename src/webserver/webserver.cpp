@@ -62,7 +62,7 @@ void asyncwebserver_setup(void){
   });
 
   asyncserver.on("/shot", HTTP_GET, [](AsyncWebServerRequest * request) {
-    request->send(200, "text/plain", "Firmwarestand: " __DATE__ " " __TIME__ "\r\nGCC-Version: " __VERSION__ "\r\n" );
+    request->send(200, "text/plain", "screen is taken\r\n" );
     screenshot_take();
     screenshot_save();
   });
