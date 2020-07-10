@@ -6,6 +6,7 @@
 #include "wifictl.h"
 
 #include "gui/statusbar.h"
+#include "webserver/webserver.h"
 
 bool wifi_init = false;
 TaskHandle_t _WIFICTL_Task;
@@ -76,6 +77,7 @@ void wifictl_setup( void ) {
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
         statusbar_show_icon( STATUSBAR_WIFI );
         statusbar_wifi_set_state( true, wifiname );
+        asyncwebserver_setup();
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {

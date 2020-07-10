@@ -4,6 +4,7 @@
 
 #include "gui.h"
 #include "statusbar.h"
+#include "screenshot.h"
 #include "keyboard.h"
 #include "mainbar/mainbar.h"
 

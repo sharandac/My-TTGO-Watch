@@ -3,34 +3,31 @@
 
     #include "config.h"
 
+    #define     SCREENSHOT_EVENT   _BV(0)
+
     void screenshot_setup( void );
     void screenshot_take( void );
+    void screenshot_save( void );
 
-    struct _PNG_HEADER {
-        uint8_t     png[8] = { 0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a };
-        uint32_t    len = 13;
-        uint8_t     IHDR[4] = { 'I', 'H', 'D', 'R' };
-        uint32_t    width = LV_HOR_RES_MAX;
-        uint32_t    height = LV_VER_RES_MAX;
-        uint8_t     bitdepth = 8;
-        uint8_t     colortype = 2;
-        uint8_t     compression = 0;
-        uint8_t     filter = 0;
-        uint8_t     interlace_method = 0;
-        uint32_t    crc = 0;
-    };
-
-    struct _PNG_RGB_PIXEL {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-    };
-
-    struct _PNG_IDAT_CHUNCK {
-        uint32_t    len;
-        uint8_t     IDAT[ 4 ] = { 'I', 'D', 'A', 'T' };
-        uint8_t     data[ LV_HOR_RES_MAX * LV_VER_RES_MAX * sizeof( _PNG_RGB_PIXEL ) ];
-        uint32_t    crc;
-    };
+    struct PNG_IMAGE {
+        uint8_t     png[ 8 ];
+        uint32_t    IHDR_len;
+        uint8_t     IHDR[ 4 ];
+        uint32_t    width;
+        uint32_t    height;
+        uint8_t     bitdepth;
+        uint8_t     colortype;
+        uint8_t     compression;
+        uint8_t     filter;
+        uint8_t     interlace_method;
+        uint32_t    IHDR_crc;
+        uint32_t    IDAT_len = LV_HOR_RES_MAX * LV_VER_RES_MAX * 3;
+        uint8_t     IDAT[ 4 ];
+        uint8_t     data[ LV_HOR_RES_MAX * LV_VER_RES_MAX * 3 ];
+        uint32_t    IDAT_crc;
+        uint32_t    IEND_len;
+        uint8_t     IEND[ 4 ];
+        uint32_t    IEND_crc;
+    } __attribute__((packed));
 
 #endif // _SCREENSHOT_H

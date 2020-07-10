@@ -37,8 +37,7 @@ void bma_setup( TTGOClass *ttgo ) {
     pinMode( BMA423_INT1, INPUT );
     attachInterrupt( BMA423_INT1, bma_irq, RISING );
 
-    ttgo->bma->enableStepCountInterrupt( bma_config[ BMA_STEPCOUNTER ].enable );
-    ttgo->bma->enableWakeupInterrupt( bma_config[ BMA_DOUBLECLICK ].enable );
+    bma_reload_settings();
 }
 
 /*

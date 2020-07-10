@@ -23,6 +23,7 @@ void setup()
 {
     motor_setup();
     Serial.begin(115200);
+    Serial.printf("starting t-watch V1\r\n");
     ttgo->begin();
     ttgo->lvgl_begin();    
 
@@ -61,9 +62,4 @@ void loop()
     static int i = 0;
     gui_loop( ttgo );
     powermgm_loop( ttgo );
-    if ( i == 0 ) {
-        screenshot_take();
-        i++;
-    }
-
 }
