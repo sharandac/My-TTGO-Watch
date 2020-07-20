@@ -5,8 +5,6 @@
 
 display_config_t display_config;
 
-void display_read_config( void );
-
 /*
  *
  */
@@ -27,10 +25,10 @@ void display_loop( TTGOClass *ttgo ) {
  *
  */
 void display_save_config( void ) {
-  fs::File file = SPIFFS.open( DISPLAY_COFIG_FILE, FILE_WRITE );
+  fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf("Can't save file: %s\r\n", DISPLAY_COFIG_FILE );
+    Serial.printf("Can't save file: %s\r\n", DISPLAY_CONFIG_FILE );
   }
   else {
     file.write( (uint8_t *)&display_config, sizeof( display_config ) );
@@ -42,10 +40,10 @@ void display_save_config( void ) {
  *
  */
 void display_read_config( void ) {
-  fs::File file = SPIFFS.open( DISPLAY_COFIG_FILE, FILE_READ );
+  fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf("Can't open file: %s!\r\n", DISPLAY_COFIG_FILE );
+    Serial.printf("Can't open file: %s!\r\n", DISPLAY_CONFIG_FILE );
   }
   else {
     int filesize = file.size();

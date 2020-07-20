@@ -11,6 +11,7 @@
 #include "setup_tile/wlan_settings/wlan_settings.h"
 #include "setup_tile/move_settings/move_settings.h"
 #include "setup_tile/display_settings/display_settings.h"
+#include "setup_tile/time_settings/time_settings.h"
 
 static lv_style_t mainbarstyle;
 static lv_obj_t *mainbar = NULL;
@@ -22,11 +23,12 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, APP_TILE, app_tile_setup, { 1 , 0 } },
     { NULL, NOTE_TILE, note_tile_setup, { 0 , 1 } },
     { NULL, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
-    { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 1,3 } },
-    { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 2,3 } },
-    { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 3,3 } },
-    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 5,3 } },
-    { NULL, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 7,3 } }
+    { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 0,4 } },
+    { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 0,5 } },
+    { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,4 } },
+    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,4 } },
+    { NULL, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,4 } },
+    { NULL, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,4 } }
 };
 
 void mainbar_setup( void ) {

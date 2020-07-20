@@ -1,6 +1,7 @@
 #include "config.h"
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 #include "powermgm.h"
 #include "wifictl.h"
@@ -237,9 +238,10 @@ void wifictl_Task( void * pvParameters ) {
         powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
       }
       else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
-        Serial.printf("wlan of request\r\n");
+        Serial.printf("wlan off request\r\n");
         statusbar_wifi_set_state( false, "" );
         WiFi.mode( WIFI_OFF );
+        esp_wifi_stop();
         powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
       }
     }

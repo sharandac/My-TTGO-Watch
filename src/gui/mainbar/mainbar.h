@@ -15,6 +15,7 @@
         MOVE_SETTINGS_TILE,
         DISPLAY_SETTINGS_TILE,
         BATTERY_SETTINGS_TILE,
+        TIME_SETTINGS_TILE,
         TILE_NUM
     } lv_tile_number;
 

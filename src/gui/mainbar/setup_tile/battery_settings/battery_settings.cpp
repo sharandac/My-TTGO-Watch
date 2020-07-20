@@ -6,7 +6,7 @@
 #include "gui/statusbar.h"
 #include "hardware/pmu.h"
 
-lv_obj_t *battery_settings_tile1=NULL;
+lv_obj_t *battery_settings_tile=NULL;
 lv_style_t battery_settings_style;
 
 lv_obj_t *battery_design_cap;
@@ -30,29 +30,29 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_style_set_text_color( &battery_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
     lv_style_set_image_recolor( &battery_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
 
-    battery_settings_tile1 = lv_obj_create( tile, NULL);
-    lv_obj_set_size(battery_settings_tile1, hres , vres);
-    lv_obj_align(battery_settings_tile1, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_add_style( battery_settings_tile1, LV_OBJ_PART_MAIN, &battery_settings_style );
+    battery_settings_tile = lv_obj_create( tile, NULL);
+    lv_obj_set_size(battery_settings_tile, hres , vres);
+    lv_obj_align(battery_settings_tile, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_style( battery_settings_tile, LV_OBJ_PART_MAIN, &battery_settings_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( battery_settings_tile1, NULL);
+    lv_obj_t *exit_btn = lv_imgbtn_create( battery_settings_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
     lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( exit_btn, battery_settings_tile1, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( exit_btn, battery_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     lv_obj_set_event_cb( exit_btn, exit_battery_setup_event_cb );
     
-    lv_obj_t *exit_label = lv_label_create( battery_settings_tile1, NULL);
+    lv_obj_t *exit_label = lv_label_create( battery_settings_tile, NULL);
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( exit_label, "battery");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
-    lv_obj_t *battery_design_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *battery_design_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( battery_design_cont, hres , 25 );
     lv_obj_add_style( battery_design_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( battery_design_cont, battery_settings_tile1, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( battery_design_cont, battery_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     lv_obj_t *battery_design_cap_label = lv_label_create( battery_design_cont, NULL);
     lv_obj_add_style( battery_design_cap_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( battery_design_cap_label, "designed cap");
@@ -62,7 +62,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( battery_design_cap, "380mAh");
     lv_obj_align( battery_design_cap, battery_design_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_obj_t *battery_current_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *battery_current_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( battery_current_cont, hres , 25 );
     lv_obj_add_style( battery_current_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( battery_current_cont, battery_design_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
@@ -75,7 +75,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( battery_current_cap, "380mAh");
     lv_obj_align( battery_current_cap, battery_current_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_obj_t *battery_voltage_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *battery_voltage_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( battery_voltage_cont, hres , 25 );
     lv_obj_add_style( battery_voltage_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( battery_voltage_cont, battery_current_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
@@ -88,7 +88,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( battery_voltage, "2.4mV");
     lv_obj_align( battery_voltage, battery_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_obj_t *battery_charge_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *battery_charge_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( battery_charge_cont, hres , 25 );
     lv_obj_add_style( battery_charge_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( battery_charge_cont, battery_voltage_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
@@ -101,7 +101,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( charge_current, "100mA");
     lv_obj_align( charge_current, battery_charge_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_obj_t *battery_discharge_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *battery_discharge_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( battery_discharge_cont, hres , 25 );
     lv_obj_add_style( battery_discharge_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( battery_discharge_cont, battery_charge_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
@@ -114,7 +114,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( discharge_current, "100mA");
     lv_obj_align( discharge_current, battery_discharge_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_obj_t *vbus_voltage_cont = lv_obj_create( battery_settings_tile1, NULL );
+    lv_obj_t *vbus_voltage_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size( vbus_voltage_cont, hres , 25 );
     lv_obj_add_style( vbus_voltage_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( vbus_voltage_cont, battery_discharge_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );

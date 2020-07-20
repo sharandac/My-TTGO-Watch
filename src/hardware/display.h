@@ -12,7 +12,7 @@
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;
     } display_config_t;
 
-    #define DISPLAY_COFIG_FILE  "/display.cfg"
+    #define DISPLAY_CONFIG_FILE  "/display.cfg"
 
     /*
      * @brief setup display
@@ -27,9 +27,13 @@
      */
     void display_loop( TTGOClass *ttgo );
     /*
-     * @brief save config for display to spiff
+     * @brief save config for display to spiffs
      */
     void display_save_config( void );
+    /*
+     * @brief read config for display from spiffs
+     */
+    void display_read_config( void );
     /*
      * @brief read the timeout from config
      * 

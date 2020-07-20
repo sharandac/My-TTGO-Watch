@@ -19,7 +19,7 @@ void pmu_setup( TTGOClass *ttgo ) {
     pmu_event_handle = xEventGroupCreate();
 
     // Turn on the IRQ used
-    ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON );
+    ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
     ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON );
     ttgo->power->clearIRQ();
 
@@ -57,7 +57,7 @@ void IRAM_ATTR  pmu_irq( void ) {
      * fast wake up from IRQ
      */
     // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
-    setCpuFrequencyMhz( 240 );
+    setCpuFrequencyMhz(240);
 }
 
 /*
@@ -73,14 +73,17 @@ void pmu_loop( TTGOClass *ttgo ) {
     if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {
+            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isVbusRemoveIRQ()) {
+            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isChargingDoneIRQ()) {
+            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
@@ -107,7 +110,7 @@ uint32_t pmu_get_byttery_percent( TTGOClass *ttgo ) {
     if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() )
         ttgo->power->ClearCoulombcounter();
 
-    printf("Coulumb data: %0.1fmAh %0.1f%% (charge current: %0.1fmA, discharge current: %0.1fmA)\r",ttgo->power->getCoulombData(), (ttgo->power->getCoulombData()/380)*100, ttgo->power->getBattChargeCurrent(), ttgo->power->getBattDischargeCurrent() );
+//    printf("Coulumb data: %0.1fmAh %0.1f%% (charge current: %0.1fmA, discharge current: %0.1fmA)\r",ttgo->power->getCoulombData(), (ttgo->power->getCoulombData()/380)*100, ttgo->power->getBattChargeCurrent(), ttgo->power->getBattDischargeCurrent() );
 
     return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
 }

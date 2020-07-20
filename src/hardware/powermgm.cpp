@@ -7,6 +7,7 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "wifictl.h"
+#include "timesync.h"
 #include "motor.h"
 
 EventGroupHandle_t powermgm_status = NULL;
@@ -22,6 +23,7 @@ void powermgm_setup( TTGOClass *ttgo ) {
     pmu_setup( ttgo );
     bma_setup( ttgo );
     wifictl_setup();
+    timesync_setup( ttgo );
 }
 
 /*
@@ -54,8 +56,11 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
-            // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_2M);
-            setCpuFrequencyMhz( 2 );
+            setCpuFrequencyMhz( 10 );
+            gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
+            gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
+            esp_sleep_enable_gpio_wakeup ();
+            esp_light_sleep_start();
         }
         // clear event
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP );
