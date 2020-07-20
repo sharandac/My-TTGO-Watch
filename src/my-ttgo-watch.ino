@@ -17,7 +17,7 @@ Created by Lewis he on October 10, 2019.
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 
-TTGOClass *ttgo = TTGOClass::getWatch();;
+TTGOClass *ttgo = TTGOClass::getWatch();
 
 void setup()
 {
@@ -59,7 +59,6 @@ void setup()
 
 void loop()
 {
-    static int i = 0;
     gui_loop( ttgo );
     powermgm_loop( ttgo );
 }

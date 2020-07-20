@@ -19,19 +19,26 @@ void pmu_setup( TTGOClass *ttgo ) {
     pmu_event_handle = xEventGroupCreate();
 
     // Turn on the IRQ used
-    ttgo->power->adc1Enable(AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ(AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON);
+    ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON );
+    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON );
     ttgo->power->clearIRQ();
 
+    // enable coulumb counter
+    if ( ttgo->power->EnableCoulombcounter() ) 
+        Serial.printf("enable coulumb counter failed!\r\n");    
+    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+        Serial.printf("target voltage set failed!\r\n");
+    if ( ttgo->power->setChargeControlCur( 300 ) )
+        Serial.printf("charge current set failed!\r\n");
+
     // Turn off unused power
-    ttgo->power->setPowerOutPut(AXP202_EXTEN, AXP202_OFF);
-    ttgo->power->setPowerOutPut(AXP202_DCDC2, AXP202_OFF);
-    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF);
-    ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_OFF);
+    ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP202_OFF );
+    ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
+    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
+    ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
 
-    pinMode(AXP202_INT, INPUT);
-
-    attachInterrupt(AXP202_INT, &pmu_irq , FALLING);
+    pinMode( AXP202_INT, INPUT );
+    attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
 }
 
 /*
@@ -49,8 +56,8 @@ void IRAM_ATTR  pmu_irq( void ) {
     /*
      * fast wake up from IRQ
      */
-    rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
-    // setCpuFrequencyMhz(240);
+    // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
+    setCpuFrequencyMhz( 240 );
 }
 
 /*
@@ -66,17 +73,14 @@ void pmu_loop( TTGOClass *ttgo ) {
     if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isVbusRemoveIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isChargingDoneIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
             motor_vibe( 1 );
             updatetrigger = true;
         }
@@ -93,7 +97,17 @@ void pmu_loop( TTGOClass *ttgo ) {
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
         if ( nextmillis < millis() || updatetrigger == true ) {
             nextmillis = millis() + 1000;
-            statusbar_update_battery( ttgo->power->getBattPercentage(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+            statusbar_update_battery( pmu_get_byttery_percent( ttgo ), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
         }
     }
+}
+
+uint32_t pmu_get_byttery_percent( TTGOClass *ttgo ) {
+    // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
+    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() )
+        ttgo->power->ClearCoulombcounter();
+
+    printf("Coulumb data: %0.1fmAh %0.1f%% (charge current: %0.1fmA, discharge current: %0.1fmA)\r",ttgo->power->getCoulombData(), (ttgo->power->getCoulombData()/380)*100, ttgo->power->getBattChargeCurrent(), ttgo->power->getBattDischargeCurrent() );
+
+    return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
 }

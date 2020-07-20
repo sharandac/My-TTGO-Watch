@@ -63,8 +63,8 @@ void IRAM_ATTR  bma_irq( void ) {
     {
         portYIELD_FROM_ISR ();
     }
-    rtc_clk_cpu_freq_set( RTC_CPU_FREQ_240M );
-    // setCpuFrequencyMhz(240);
+    // rtc_clk_cpu_freq_set( RTC_CPU_FREQ_240M );
+    setCpuFrequencyMhz( 240 );
 }
 
 /*

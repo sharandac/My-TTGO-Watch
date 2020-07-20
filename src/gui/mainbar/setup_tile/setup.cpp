@@ -4,11 +4,12 @@
 #include "gui/mainbar/mainbar.h"
 
 static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 LV_IMG_DECLARE(wifi_64px);
-LV_IMG_DECLARE(bluetooth_64px);
+LV_IMG_DECLARE(battery_icon_64px);
 LV_IMG_DECLARE(move_64px);
 LV_IMG_DECLARE(brightness_64px);
 
@@ -23,13 +24,14 @@ void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_co
     lv_obj_align(wifi_setup, tile, LV_ALIGN_IN_TOP_LEFT, 48, 48 );
     lv_obj_set_event_cb( wifi_setup, wifi_setup_event_cb );
 
-    lv_obj_t * bluetooth_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( bluetooth_setup, LV_BTN_STATE_RELEASED, &bluetooth_64px);
-    lv_imgbtn_set_src( bluetooth_setup, LV_BTN_STATE_PRESSED, &bluetooth_64px);
-    lv_imgbtn_set_src( bluetooth_setup, LV_BTN_STATE_CHECKED_RELEASED, &bluetooth_64px);
-    lv_imgbtn_set_src( bluetooth_setup, LV_BTN_STATE_CHECKED_PRESSED, &bluetooth_64px);
-    lv_obj_add_style( bluetooth_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( bluetooth_setup, tile, LV_ALIGN_IN_TOP_LEFT, 48+86, 48 );
+    lv_obj_t * battery_setup = lv_imgbtn_create(tile, NULL);
+    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_RELEASED, &battery_icon_64px);
+    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_PRESSED, &battery_icon_64px);
+    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_RELEASED, &battery_icon_64px);
+    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_PRESSED, &battery_icon_64px);
+    lv_obj_add_style( battery_setup, LV_IMGBTN_PART_MAIN, style);
+    lv_obj_align( battery_setup, tile, LV_ALIGN_IN_TOP_LEFT, 48+86, 48 );
+    lv_obj_set_event_cb( battery_setup, battery_setup_event_cb );
 
     lv_obj_t * move_setup = lv_imgbtn_create(tile, NULL);
     lv_imgbtn_set_src( move_setup, LV_BTN_STATE_RELEASED, &move_64px);
@@ -53,6 +55,13 @@ void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_co
 static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_OFF );
+                                        break;
+    }
+}
+
+static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( BATTERY_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }

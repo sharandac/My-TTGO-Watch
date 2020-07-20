@@ -43,17 +43,23 @@ void gui_loop( TTGOClass *ttgo ){
 
     // do task handler if still an useraction or go to standby after timeout
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if (lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
+        if ( display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
             lv_task_handler();
-            if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-                ttgo->bl->adjust( ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time(NULL) ) / 8 );
-            }
-            else {
-                ttgo->bl->adjust( display_get_brightness() );
-            }
+            ttgo->bl->adjust( display_get_brightness() );
         }
         else {
-            powermgm_set_event( POWERMGM_PMU_BUTTON );
+            if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
+                lv_task_handler();
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    ttgo->bl->adjust( ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time(NULL) ) / 8 );
+                }
+                else {
+                    ttgo->bl->adjust( display_get_brightness() );
+                }
+            }
+            else {
+                powermgm_set_event( POWERMGM_PMU_BUTTON );
+            }
         }
     }
 }

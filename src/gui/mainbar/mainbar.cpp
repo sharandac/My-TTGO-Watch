@@ -7,6 +7,7 @@
 #include "note_tile/note_tile.h"
 #include "app_tile/app_tile.h"
 
+#include "setup_tile/battery_settings/battery_settings.h"
 #include "setup_tile/wlan_settings/wlan_settings.h"
 #include "setup_tile/move_settings/move_settings.h"
 #include "setup_tile/display_settings/display_settings.h"
@@ -24,7 +25,8 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 1,3 } },
     { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 2,3 } },
     { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 3,3 } },
-    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 5,3 } }
+    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 5,3 } },
+    { NULL, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 7,3 } }
 };
 
 void mainbar_setup( void ) {

@@ -22,8 +22,8 @@ void screenshot_take( void ) {
 }
 
 void screenshot_save( void ) {
-    SPIFFS.remove("/screen.565");
-    fs::File file = SPIFFS.open( "/screen.565", FILE_WRITE );
+    SPIFFS.remove( SCREENSHOT_FILE_NAME );
+    fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
     
     file.write( (uint8_t *)png, LV_HOR_RES_MAX * LV_VER_RES_MAX * 2 );
     file.close();

@@ -52,7 +52,7 @@ void display_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_obj_add_style( brightness_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( brightness_cont, display_settings_tile1, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     display_brightness_slider = lv_slider_create( brightness_cont, NULL );
-    lv_slider_set_range( display_brightness_slider, 32, 255 );
+    lv_slider_set_range( display_brightness_slider, DISPLAY_MIN_BRIGHTNESS, DISPLAY_MAX_BRIGHTNESS );
     lv_obj_set_size( display_brightness_slider, hres - 100 , 10 );
     lv_obj_align( display_brightness_slider, brightness_cont, LV_ALIGN_IN_RIGHT_MID, -15, 0 );
     lv_obj_set_event_cb( display_brightness_slider, exit_display_brightness_setup_event_cb );
@@ -65,7 +65,7 @@ void display_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_obj_add_style( timeout_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( timeout_cont, brightness_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     display_timeout_slider = lv_slider_create( timeout_cont, NULL );
-    lv_slider_set_range( display_timeout_slider, 15, 300 );
+    lv_slider_set_range( display_timeout_slider, DISPLAY_MIN_TIMEOUT, DISPLAY_MAX_TIMEOUT );
     lv_obj_set_size(display_timeout_slider, hres - 100 , 10 );
     lv_obj_align( display_timeout_slider, timeout_cont, LV_ALIGN_IN_RIGHT_MID, -15, 0 );
     lv_obj_set_event_cb( display_timeout_slider, exit_display_timeout_setup_event_cb );
@@ -80,7 +80,12 @@ void display_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_slider_set_value( display_brightness_slider, display_get_brightness(), LV_ANIM_OFF );
     lv_slider_set_value( display_timeout_slider, display_get_timeout(), LV_ANIM_OFF );
     char temp[16]="";
-    snprintf( temp, sizeof( temp ), "%d secounds", display_get_timeout() );
+    if ( lv_slider_get_value( display_timeout_slider ) == DISPLAY_MAX_TIMEOUT ) {
+        snprintf( temp, sizeof( temp ), "no timeout" );
+    }
+    else {
+        snprintf( temp, sizeof( temp ), "%d secounds", lv_slider_get_value( display_timeout_slider ) );
+    }
     lv_label_set_text( display_timeout_slider_label, temp );
     lv_obj_align( display_timeout_slider_label, display_timeout_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
 }
@@ -105,7 +110,12 @@ static void exit_display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t even
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     display_set_timeout( lv_slider_get_value( obj ) );
                                             char temp[16]="";
-                                            snprintf( temp, sizeof( temp ), "%d secounds", lv_slider_get_value(obj) );
+                                            if ( lv_slider_get_value(obj) == DISPLAY_MAX_TIMEOUT ) {
+                                                snprintf( temp, sizeof( temp ), "no timeout" );
+                                            }
+                                            else {
+                                                snprintf( temp, sizeof( temp ), "%d secounds", lv_slider_get_value(obj) );
+                                            }
                                             lv_label_set_text( display_timeout_slider_label, temp );
                                             lv_obj_align( display_timeout_slider_label, display_timeout_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
                                             break;

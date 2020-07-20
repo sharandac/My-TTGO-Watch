@@ -222,7 +222,7 @@ void statusbar_bluetooth_set_state( bool state ) {
 /*
  *
  */
-void statusbar_hide_icon( int icon ) {
+void statusbar_hide_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
 
     lv_obj_set_hidden( statusicon[ icon ].icon, true );
@@ -232,7 +232,7 @@ void statusbar_hide_icon( int icon ) {
 /*
  *
  */
-void statusbar_show_icon( int icon ) {
+void statusbar_show_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
 
     lv_obj_set_hidden( statusicon[ icon ].icon, false );
@@ -242,7 +242,7 @@ void statusbar_show_icon( int icon ) {
 /*
  *
  */
-void statusbar_style_icon( int icon, int style ) {
+void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
     if ( icon >= STATUSBAR_NUM || style >= STATUSBAR_STYLE_NUM ) return;
 
     statusicon[ icon ].style = &statusbarstyle[ style ];

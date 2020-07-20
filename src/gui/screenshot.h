@@ -3,10 +3,19 @@
 
     #include "config.h"
 
-    #define     SCREENSHOT_EVENT   _BV(0)
+    #define SCREENSHOT_FILE_NAME    "/screen.565"
 
+    /*
+     * @brief setup screenshot
+     */
     void screenshot_setup( void );
+    /*
+     * @brief take a screenshoot an store it in psram
+     */
     void screenshot_take( void );
+    /*
+     * @brief store a screenshoot to spiffs
+     */
     void screenshot_save( void );
 
     struct PNG_IMAGE {

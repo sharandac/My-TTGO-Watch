@@ -54,8 +54,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
-            rtc_clk_cpu_freq_set(RTC_CPU_FREQ_2M);
-            // setCpuFrequencyMhz(2);
+            // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_2M);
+            setCpuFrequencyMhz( 2 );
         }
         // clear event
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP );
