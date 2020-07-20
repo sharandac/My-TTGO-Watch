@@ -23,7 +23,7 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      * 
-     * @return  charge in percent
+     * @return  charge in percent or -1 if unknown
      */
     uint32_t pmu_get_byttery_percent( TTGOClass *ttgo );
 

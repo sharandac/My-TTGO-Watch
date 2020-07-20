@@ -107,10 +107,9 @@ void pmu_loop( TTGOClass *ttgo ) {
 
 uint32_t pmu_get_byttery_percent( TTGOClass *ttgo ) {
     // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
-    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() )
+    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() ) {
         ttgo->power->ClearCoulombcounter();
-
-//    printf("Coulumb data: %0.1fmAh %0.1f%% (charge current: %0.1fmA, discharge current: %0.1fmA)\r",ttgo->power->getCoulombData(), (ttgo->power->getCoulombData()/380)*100, ttgo->power->getBattChargeCurrent(), ttgo->power->getBattDischargeCurrent() );
-
+        return( -1 );
+    }
     return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
 }

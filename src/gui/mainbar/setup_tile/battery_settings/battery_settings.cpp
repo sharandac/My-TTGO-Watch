@@ -15,6 +15,7 @@ lv_obj_t *battery_voltage;
 lv_obj_t *charge_current;
 lv_obj_t *discharge_current;
 lv_obj_t *vbus_voltage;
+lv_task_t *battery_task;
 
 LV_IMG_DECLARE(exit_32px);
 
@@ -127,7 +128,7 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
     lv_label_set_text( vbus_voltage, "2.4mV");
     lv_obj_align( vbus_voltage, vbus_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    lv_task_t * task = lv_task_create(battery_update_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
+    battery_task = lv_task_create(battery_update_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
 }
 
 
@@ -143,7 +144,12 @@ void battery_update_task( lv_task_t *task ) {
     char temp[16]="";
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    snprintf( temp, sizeof( temp ), "%0.1fmAh", ttgo->power->getCoulombData() );
+    if ( pmu_get_byttery_percent( ttgo ) >= 0 ) {
+        snprintf( temp, sizeof( temp ), "%0.1fmAh", ttgo->power->getCoulombData() );
+    }
+    else {
+        snprintf( temp, sizeof( temp ), "unknown" );        
+    }
     lv_label_set_text( battery_current_cap, temp );
     lv_obj_align( battery_current_cap, lv_obj_get_parent( battery_current_cap ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 

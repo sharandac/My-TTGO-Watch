@@ -10,12 +10,14 @@ lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
 lv_obj_t *utczone_list = NULL;
 lv_obj_t *wifisync_onoff = NULL;
+lv_obj_t *daylight_onoff = NULL;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(time_32px);
 
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
@@ -59,16 +61,29 @@ void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_label_set_text( wifisync_label, "sync when connect");
     lv_obj_align( wifisync_label, wifisync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *daylight_cont = lv_obj_create( time_settings_tile, NULL );
+    lv_obj_set_size(daylight_cont, hres , 40);
+    lv_obj_add_style( daylight_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_align( daylight_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    daylight_onoff = lv_switch_create( daylight_cont, NULL );
+    lv_switch_off( daylight_onoff, LV_ANIM_ON );
+    lv_obj_align( daylight_onoff, daylight_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( daylight_onoff, daylight_onoff_event_handler );
+    lv_obj_t *daylight_label = lv_label_create( daylight_cont, NULL);
+    lv_obj_add_style( daylight_label, LV_OBJ_PART_MAIN, style );
+    lv_label_set_text( daylight_label, "daylight saving");
+    lv_obj_align( daylight_label, daylight_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     lv_obj_t *utczone_cont = lv_obj_create( time_settings_tile, NULL );
     lv_obj_set_size(utczone_cont, hres , 40);
     lv_obj_add_style( utczone_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( utczone_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
+    lv_obj_align( utczone_cont, daylight_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
     lv_obj_t *utczone_label = lv_label_create( utczone_cont, NULL);
     lv_obj_add_style( utczone_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( utczone_label, "utc timezone");
     lv_obj_align( utczone_label, utczone_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     utczone_list = lv_dropdown_create( utczone_cont, NULL);
-    lv_dropdown_set_options( utczone_list, "-12\n-11\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n+1\n+2\n+3\n+4\n+5\n+6\n+7\n+8\n+9\n+10\n+11\n+12\n" );
+    lv_dropdown_set_options( utczone_list, "-12\n-11\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n+1\n+2\n+3\n+4\n+5\n+6\n+7\n+8\n+9\n+10\n+11\n+12" );
     lv_obj_align(utczone_list, utczone_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb(utczone_list, utczone_event_handler);
 
@@ -76,6 +91,11 @@ void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
         lv_switch_on( wifisync_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( wifisync_onoff, LV_ANIM_OFF );
+
+    if ( timesync_get_daylightsave() )
+        lv_switch_on( daylight_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( daylight_onoff, LV_ANIM_OFF );
 
     lv_dropdown_set_selected( utczone_list, timesync_get_timezone() + 12 );
 }
@@ -98,10 +118,20 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     }
 }
 
+static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    if(event == LV_EVENT_VALUE_CHANGED) {
+        if( lv_switch_get_state( obj ) ) {
+            timesync_set_daylightsave( true );
+        }
+        else {
+            timesync_set_daylightsave( false );
+        }
+    }
+}
+
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event)
 {
     if(event == LV_EVENT_VALUE_CHANGED) {
         timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
-        printf("timezone: %d\n", lv_dropdown_get_selected( obj ) - 12 );
     }
 }

@@ -18,6 +18,9 @@
     void bma_setup( TTGOClass *ttgo );
     void bma_loop( TTGOClass *ttgo );
 
+    void bma_reload_settings( void );
+    void bma_save_config( void );
+    void bma_read_config( void );
     bool bma_get_config( int config );
     void bma_set_config( int config, bool enable );
 

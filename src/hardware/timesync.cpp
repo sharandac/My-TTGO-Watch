@@ -13,8 +13,10 @@ void timesync_setup( TTGOClass *ttgo ) {
     timesync_read_config();
 
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-        vTaskResume( _timesync_Task );
+        if ( timesync_config.timesync ) {
+          xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+          vTaskResume( _timesync_Task );
+        }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     time_event_handle = xEventGroupCreate();
@@ -90,15 +92,16 @@ void timesync_set_timezone( int32_t timezone ) {
 void timesync_Task( void * pvParameters ) {
 
     while( true ) {
-        vTaskDelay( 50 );
-
         if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
             struct tm timeinfo;
             TTGOClass *ttgo = TTGOClass::getWatch();
 
             long gmtOffset_sec = timesync_config.timezone * 3600;
-        
-            configTime( gmtOffset_sec, 0, "pool.ntp.org" );
+            int daylightOffset_sec = 0;
+            if ( timesync_config.daylightsave )
+              daylightOffset_sec = 3600;
+                    
+            configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
 
             if( !getLocalTime( &timeinfo ) ) {
                 Serial.println( "Failed to obtain time\r\n" );
@@ -106,7 +109,6 @@ void timesync_Task( void * pvParameters ) {
             ttgo->rtc->syncToRtc();
             xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
         }
-
         vTaskSuspend( _timesync_Task );
     }
 }

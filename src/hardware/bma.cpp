@@ -13,10 +13,6 @@ void IRAM_ATTR  bma_irq( void );
 
 bma_config_t bma_config[ BMA_CONFIG_NUM ];
 
-void bma_reload_settings( void );
-void bma_read_config( void );
-void bma_save_config( void );
-
 /*
  *
  */
