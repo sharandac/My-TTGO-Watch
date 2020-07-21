@@ -30,6 +30,8 @@ void pmu_setup( TTGOClass *ttgo ) {
         Serial.printf("target voltage set failed!\r\n");
     if ( ttgo->power->setChargeControlCur( 300 ) )
         Serial.printf("charge current set failed!\r\n");
+    if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) )
+        Serial.printf("adc sample set failed!\r\n");
 
     // Turn off unused power
     ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP202_OFF );

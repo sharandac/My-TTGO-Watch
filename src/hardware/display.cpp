@@ -13,6 +13,7 @@ void display_setup( TTGOClass *ttgo ) {
 
     ttgo->openBL();
     ttgo->bl->adjust( 0 );
+    ttgo->tft->setRotation( display_config.rotation / 90 );
 }
 
 /*
@@ -74,4 +75,16 @@ void display_set_brightness( uint32_t brightness ) {
 
     display_config.brightness = brightness;
     ttgo->bl->adjust( brightness );
+}
+
+uint32_t display_get_rotation( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+  return( display_config.rotation );
+}
+
+void display_set_rotation( uint32_t rotation ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+  display_config.rotation = rotation;
+  ttgo->tft->setRotation( rotation / 90 );
+  lv_obj_invalidate( lv_scr_act() );
 }

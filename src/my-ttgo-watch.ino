@@ -25,7 +25,7 @@ void setup()
     Serial.begin(115200);
     Serial.printf("starting t-watch V1\r\n");
     ttgo->begin();
-    ttgo->lvgl_begin();    
+    ttgo->lvgl_begin();
 
     SPIFFS.begin();
     display_setup( ttgo );

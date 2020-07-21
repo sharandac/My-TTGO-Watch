@@ -1,4 +1,3 @@
-#include <TTGO.h>
 #include "motor.h"
 #include "powermgm.h"
 

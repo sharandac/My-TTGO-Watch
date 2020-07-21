@@ -7,9 +7,13 @@
     #define DISPLAY_MIN_BRIGHTNESS      32
     #define DISPLAY_MAX_BRIGHTNESS      255
 
+    #define DISPLAY_MIN_ROTATE          0
+    #define DISPLAY_MAX_ROTATE          270
+
     typedef struct {
         uint32_t brightness = DISPLAY_MIN_BRIGHTNESS;
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;
+        uint32_t rotation = 0;
     } display_config_t;
 
     #define DISPLAY_CONFIG_FILE  "/display.cfg"
@@ -58,5 +62,17 @@
      * @param brightness brightness from 0-255
      */
     void display_set_brightness( uint32_t brightness );
+    /*
+     * @brief read the rotate from the display
+     * 
+     * @return  rotation from 0-270 degree in 90 degree steps
+     */
+    uint32_t display_get_rotation( void );
+    /*
+     * @brief set the rotate for the display
+     * 
+     * @param rotation from 0-270 in 90 degree steps
+     */
+    void display_set_rotation( uint32_t rotation );
 
 #endif // _DISPLAY_H

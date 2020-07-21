@@ -1,6 +1,8 @@
 #ifndef _POWERMGM_H
     #define _POWERMGM_H
 
+    #include "TTGO.h"
+
     #define POWERMGM_STANDBY            _BV(0)
     #define POWERMGM_PMU_BUTTON         _BV(1)
     #define POWERMGM_PMU_BATTERY        _BV(2)

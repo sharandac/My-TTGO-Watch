@@ -9,6 +9,7 @@
 #include "wifictl.h"
 #include "timesync.h"
 #include "motor.h"
+#include "touch.h"
 
 EventGroupHandle_t powermgm_status = NULL;
 
@@ -24,6 +25,7 @@ void powermgm_setup( TTGOClass *ttgo ) {
     bma_setup( ttgo );
     wifictl_setup();
     timesync_setup( ttgo );
+    touch_setup( ttgo );
 }
 
 /*
