@@ -10,7 +10,9 @@ void keyboard_setup( void ) {
         return;
         
     kb = lv_keyboard_create( lv_scr_act() , NULL);
-    lv_obj_set_size(kb,  LV_HOR_RES, LV_VER_RES / 2);
+    lv_obj_set_size(kb,  LV_HOR_RES, LV_VER_RES / 2 );
+//    lv_obj_set_size(kb,  LV_HOR_RES, LV_VER_RES / 3);
+//    lv_obj_align( kb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_keyboard_set_cursor_manage(kb, true);
     lv_obj_set_event_cb( kb, kb_event_cb );
     lv_obj_set_hidden( kb, true );

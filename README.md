@@ -28,3 +28,4 @@ wget x.x.x.x/shot ; wget x.x.x.x/screen.565
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen8.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen9.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen10.png)
+![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen11.png)

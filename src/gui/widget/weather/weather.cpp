@@ -24,8 +24,10 @@ void weather_widget_setup( void ) {
     mainbar_set_tile_setup_cb( weather_widget_tile_num, weather_widget_tile_setup );
     mainbar_set_tile_setup_cb( weather_widget_setup_tile_num, weather_widget_setup_tile_setup );
 
+    // get an widget container from main_tile
     widget_cont = main_tile_register_widget();
 
+    // create widget weather condition icon and temperature label
     widget_weather_condition_img = lv_imgbtn_create( widget_cont, NULL );
     lv_imgbtn_set_src( widget_weather_condition_img, LV_BTN_STATE_RELEASED, &weather_48px);
     lv_imgbtn_set_src( widget_weather_condition_img, LV_BTN_STATE_PRESSED, &weather_48px);
@@ -86,6 +88,8 @@ void weather_widget_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coor
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( exit_label, "exit weather setup");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+
+
 }
 
 static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
