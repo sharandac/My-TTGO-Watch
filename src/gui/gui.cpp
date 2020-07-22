@@ -8,6 +8,8 @@
 #include "keyboard.h"
 #include "mainbar/mainbar.h"
 
+#include "widget/weather/weather.h"
+
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 
@@ -27,11 +29,13 @@ void gui_setup(void)
     lv_obj_set_width( img_bin, hres );
     lv_obj_set_height( img_bin, vres );
     lv_obj_align(img_bin, NULL, LV_ALIGN_CENTER, 0, 0);
-    
+
     mainbar_setup();
     statusbar_setup();
     keyboard_setup();
     lv_disp_trig_activity(NULL);
+
+    weather_widget_setup();
 
     return;
 }

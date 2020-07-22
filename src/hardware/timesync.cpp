@@ -98,6 +98,7 @@ void timesync_Task( void * pvParameters ) {
 
             long gmtOffset_sec = timesync_config.timezone * 3600;
             int daylightOffset_sec = 0;
+            
             if ( timesync_config.daylightsave )
               daylightOffset_sec = 3600;
                     

@@ -20,17 +20,21 @@ static lv_obj_t *mainbar = NULL;
 static lv_point_t valid_pos[ TILE_NUM ];
 
 lv_tile_entry_t tile_entry[ TILE_NUM ] {
-    { NULL, MAIN_TILE, main_tile_setup, { 0 , 0 } },
-    { NULL, APP_TILE, app_tile_setup, { 1 , 0 } },
-    { NULL, NOTE_TILE, note_tile_setup, { 0 , 1 } },
-    { NULL, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
-    { NULL, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 0,4 } },
-    { NULL, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 0,5 } },
-    { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,4 } },
-    { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,4 } },
-    { NULL, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,4 } },
-    { NULL, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,4 } },
-    { NULL, UPDATE_SETTINGS_TILE, update_tile_setup, { 10,4 } }
+    { NULL, TILE_TYPE_MAIN_TILE, MAIN_TILE, main_tile_setup, { 0 , 0 } },
+    { NULL, TILE_TYPE_APP_TILE, APP_TILE, app_tile_setup, { 1 , 0 } },
+    { NULL, TILE_TYPE_NOTE_TILE, NOTE_TILE, note_tile_setup, { 0 , 1 } },
+    { NULL, TILE_TYPE_SETUP_TILE, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
+    { NULL, TILE_TYPE_SETUP, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 0,3 } },
+    { NULL, TILE_TYPE_SETUP, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 0,4 } },
+    { NULL, TILE_TYPE_SETUP, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,3 } },
+    { NULL, TILE_TYPE_SETUP, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,3 } },
+    { NULL, TILE_TYPE_SETUP, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,3 } },
+    { NULL, TILE_TYPE_SETUP, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,3 } },
+    { NULL, TILE_TYPE_SETUP, UPDATE_SETTINGS_TILE, update_tile_setup, { 10,3 } },
+    { NULL, TILE_TYPE_WIDGET_TILE, WIDGET1_1_TILE, NULL, { 12,3 } },
+    { NULL, TILE_TYPE_WIDGET_SETUP, WIDGET1_2_TILE, NULL, { 12,4 } },
+    { NULL, TILE_TYPE_WIDGET_TILE, WIDGET2_1_TILE, NULL, { 14,3 } },
+    { NULL, TILE_TYPE_WIDGET_SETUP, WIDGET2_2_TILE, NULL, { 14,4 } }
 };
 
 void mainbar_setup( void ) {
@@ -64,14 +68,42 @@ void mainbar_setup( void ) {
     mainbar_jump_to_maintile( LV_ANIM_OFF );
 }
 
+lv_obj_t * mainbar_get_tile_obj( lv_tile_number tile_number ) {
+    if ( tile_number < TILE_NUM ) {
+        for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
+            if ( tile_entry[ tile ].tile_number == tile_number ) {
+                return( tile_entry[ tile ].tile );
+            }
+        }
+    }
+    return( NULL );
+}
+
+lv_tile_number mainbar_get_next_free_tile( lv_tile_type tile_type ) {
+    for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
+        if ( tile_entry[ tile ].tile_type == tile_type && tile_entry[ tile ].tilecallback == NULL ) {
+            return( tile_entry[ tile ].tile_number );
+        }
+    }
+    return( NO_TILE );
+}
+
+void mainbar_set_tile_setup_cb( lv_tile_number tile_number, TILE_CALLBACK_FUNC callback ) {
+    if ( tile_number < TILE_NUM ) {
+        tile_entry[ tile_number ].tilecallback = callback;
+        tile_entry[ tile_number ].tilecallback( tile_entry[ tile_number ].tile, &mainbarstyle, LV_HOR_RES , LV_VER_RES );
+    }
+}
+
+
 void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim ) {
-    lv_tileview_set_tile_act(mainbar, x, y, anim );
+    lv_tileview_set_tile_act( mainbar, x, y, anim );
 }
 
 void mainbar_jump_to_tilenumber( lv_tile_number tile_number, lv_anim_enable_t anim ) {
     for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
         if ( tile_entry[ tile ].tile_number == tile_number ) {
-            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
+            lv_tileview_set_tile_act( mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
             break;
         }
     }
