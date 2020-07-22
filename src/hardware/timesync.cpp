@@ -1,3 +1,24 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+ 
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 #include "config.h"
 #include "timesync.h"
 #include <WiFi.h>
@@ -92,8 +113,9 @@ void timesync_set_timezone( int32_t timezone ) {
 void timesync_Task( void * pvParameters ) {
 
     while( true ) {
+        vTaskDelay( 250 );
         if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
-            struct tm timeinfo;
+            struct tm info;
             TTGOClass *ttgo = TTGOClass::getWatch();
 
             long gmtOffset_sec = timesync_config.timezone * 3600;
@@ -104,10 +126,11 @@ void timesync_Task( void * pvParameters ) {
                     
             configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
 
-            if( !getLocalTime( &timeinfo ) ) {
+            if( !getLocalTime( &info ) ) {
                 Serial.println( "Failed to obtain time\r\n" );
             }
             ttgo->rtc->syncToRtc();
+
             xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
         }
         vTaskSuspend( _timesync_Task );

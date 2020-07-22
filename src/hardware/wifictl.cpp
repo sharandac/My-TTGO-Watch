@@ -1,3 +1,24 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+ 
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 #include "config.h"
 #include <Arduino.h>
 #include <WiFi.h>
@@ -187,7 +208,6 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
   // check for an emty entry
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( strlen( wifictl_networklist[ entry ].ssid ) == 0 ) {
-      Serial.printf("wifictl: insert network\r\n");
       strncpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
       strncpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_network();
@@ -215,6 +235,7 @@ void wifictl_on( void ) {
 void wifictl_off( void ) {
   if ( wifi_init == false )
     return;
+  vTaskResume( _wifictl_Task );
   powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
 }
 
@@ -227,23 +248,17 @@ void wifictl_Task( void * pvParameters ) {
 
   while( true ) {
     vTaskDelay( 50 );
-    if ( powermgm_get_event( POWERMGM_STANDBY ) ) {   
-        vTaskSuspend( _wifictl_Task );
+    if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
+      statusbar_wifi_set_state( true, "activate" );
+      WiFi.mode( WIFI_STA );
+      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
     }
-    else {
-      if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-        Serial.printf("wlan on request\r\n");
-        statusbar_wifi_set_state( true, "activate" );
-        WiFi.mode( WIFI_STA );
-        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-      }
-      else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
-        Serial.printf("wlan off request\r\n");
-        statusbar_wifi_set_state( false, "" );
-        WiFi.mode( WIFI_OFF );
-        esp_wifi_stop();
-        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-      }
+    else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
+      statusbar_wifi_set_state( false, "" );
+      WiFi.mode( WIFI_OFF );
+      esp_wifi_stop();
+      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
     }
+    vTaskSuspend( _wifictl_Task );
   }
 }

@@ -1,3 +1,24 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+ 
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 #include <stdio.h>
 #include "config.h"
 
@@ -6,6 +27,7 @@
 #include "setup_tile/setup.h"
 #include "note_tile/note_tile.h"
 #include "app_tile/app_tile.h"
+#include "gui/keyboard.h"
 
 #include "setup_tile/battery_settings/battery_settings.h"
 #include "setup_tile/wlan_settings/wlan_settings.h"
@@ -23,6 +45,7 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, TILE_TYPE_MAIN_TILE, MAIN_TILE, main_tile_setup, { 0 , 0 } },
     { NULL, TILE_TYPE_APP_TILE, APP_TILE, app_tile_setup, { 1 , 0 } },
     { NULL, TILE_TYPE_NOTE_TILE, NOTE_TILE, note_tile_setup, { 0 , 1 } },
+    { NULL, TILE_TYPE_KEYBOARD_TILE, KEYBOARD_TILE, NULL, { 0 , 6 } },
     { NULL, TILE_TYPE_SETUP_TILE, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
     { NULL, TILE_TYPE_SETUP, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 0,3 } },
     { NULL, TILE_TYPE_SETUP, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 0,4 } },

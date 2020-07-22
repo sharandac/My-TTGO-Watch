@@ -1,7 +1,29 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+ 
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 #include "config.h"
 #include <TTGO.h>
 #include <soc/rtc.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
 
 #include "pmu.h"
 #include "bma.h"
@@ -10,6 +32,8 @@
 #include "timesync.h"
 #include "motor.h"
 #include "touch.h"
+
+#include "gui/mainbar/mainbar.h"
 
 EventGroupHandle_t powermgm_status = NULL;
 
@@ -40,8 +64,10 @@ void powermgm_loop( TTGOClass *ttgo ) {
             powermgm_clear_event( POWERMGM_STANDBY );
             ttgo->openBL();
             ttgo->displayWakeup();
+            ttgo->bl->adjust( 0 );
             ttgo->rtc->syncToSystem();
             ttgo->startLvglTick();
+            mainbar_jump_to_maintile( LV_ANIM_OFF );
             lv_disp_trig_activity(NULL);
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( true );
