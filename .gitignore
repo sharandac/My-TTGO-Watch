@@ -1,2 +1,5 @@
 .pio
 .vscode
+deploy.sh
+.gitignore
+data/tile_map.ods

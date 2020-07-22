@@ -291,15 +291,20 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
  */
 void statusbar_update_stepcounter( int step ) {
     char stepcounter[12]="";
-    snprintf( stepcounter, sizeof( stepcounter ), "%d%", step );    
+    snprintf( stepcounter, sizeof( stepcounter ), "%d", step );    
     lv_label_set_text( statusbar_stepcounterlabel, (const char *)stepcounter );
 }
 /*
  *
  */
-void statusbar_update_battery( uint32_t percent, bool charging, bool plug ) {
+void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
     char level[8]="";
-    snprintf( level, sizeof( level ), "%d%%", percent );
+    if ( percent >= 0 ) {
+        snprintf( level, sizeof( level ), "%d%%", percent );
+    }
+    else {
+        snprintf( level, sizeof( level ), "?" );
+    }
     lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );   
 
     if ( charging && plug ) {

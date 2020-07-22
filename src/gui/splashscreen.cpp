@@ -36,7 +36,7 @@ void splash_screen_stage_one( TTGOClass *ttgo ) {
 
     for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
         ttgo->bl->adjust( bl );
-        delay(1);
+        delay(5);
     }    
 }
 

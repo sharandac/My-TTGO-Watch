@@ -59,7 +59,7 @@
     void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style );
     void statusbar_refresh( void );
     void statusbar_update_stepcounter( int step );
-    void statusbar_update_battery( uint32_t percent, bool charging, bool plug );
+    void statusbar_update_battery( int32_t percent, bool charging, bool plug );
     void statusbar_wifi_set_state( bool state, const char *wifiname );
     void statusbar_bluetooth_set_state( bool state );
 

@@ -8,13 +8,14 @@ static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 LV_IMG_DECLARE(wifi_64px);
 LV_IMG_DECLARE(battery_icon_64px);
 LV_IMG_DECLARE(move_64px);
 LV_IMG_DECLARE(brightness_64px);
 LV_IMG_DECLARE(time_64px);
-
+LV_IMG_DECLARE(update_64px);
 
 void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
 
@@ -62,6 +63,15 @@ void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_co
     lv_obj_add_style( time_setup, LV_IMGBTN_PART_MAIN, style);
     lv_obj_align( time_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70+70, 48 );
     lv_obj_set_event_cb( time_setup, time_setup_event_cb );
+
+    lv_obj_t * update_setup = lv_imgbtn_create(tile, NULL);
+    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_RELEASED, &update_64px);
+    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_PRESSED, &update_64px);
+    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_RELEASED, &update_64px);
+    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_PRESSED, &update_64px);
+    lv_obj_add_style( update_setup, LV_IMGBTN_PART_MAIN, style);
+    lv_obj_align( update_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70+70, 48+86 );
+    lv_obj_set_event_cb( update_setup, update_setup_event_cb );
 }
 
 static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -95,6 +105,13 @@ static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( TIME_SETTINGS_TILE, LV_ANIM_OFF );
+                                        break;
+    }
+}
+
+static void update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( UPDATE_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }

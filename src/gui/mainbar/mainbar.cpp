@@ -12,6 +12,7 @@
 #include "setup_tile/move_settings/move_settings.h"
 #include "setup_tile/display_settings/display_settings.h"
 #include "setup_tile/time_settings/time_settings.h"
+#include "setup_tile/update/update.h"
 
 static lv_style_t mainbarstyle;
 static lv_obj_t *mainbar = NULL;
@@ -28,7 +29,8 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,4 } },
     { NULL, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,4 } },
     { NULL, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,4 } },
-    { NULL, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,4 } }
+    { NULL, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,4 } },
+    { NULL, UPDATE_SETTINGS_TILE, update_tile_setup, { 10,4 } }
 };
 
 void mainbar_setup( void ) {

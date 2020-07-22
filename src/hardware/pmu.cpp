@@ -109,7 +109,7 @@ void pmu_loop( TTGOClass *ttgo ) {
 
 uint32_t pmu_get_byttery_percent( TTGOClass *ttgo ) {
     // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
-    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() ) {
+    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
         ttgo->power->ClearCoulombcounter();
         return( -1 );
     }

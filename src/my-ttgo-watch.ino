@@ -53,7 +53,7 @@ void setup()
 
     for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
         ttgo->bl->adjust( bl );
-        delay(1);
+        delay(5);
     } 
 }
 

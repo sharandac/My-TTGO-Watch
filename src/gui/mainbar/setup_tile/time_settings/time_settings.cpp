@@ -84,6 +84,7 @@ void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_obj_align( utczone_label, utczone_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     utczone_list = lv_dropdown_create( utczone_cont, NULL);
     lv_dropdown_set_options( utczone_list, "-12\n-11\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n+1\n+2\n+3\n+4\n+5\n+6\n+7\n+8\n+9\n+10\n+11\n+12" );
+    lv_obj_set_size( utczone_list, 70, 40 );
     lv_obj_align(utczone_list, utczone_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb(utczone_list, utczone_event_handler);
 

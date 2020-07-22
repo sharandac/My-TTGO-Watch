@@ -5,6 +5,9 @@
     #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
     #include <LilyGoWatch.h>
 
-    #define _DEBUG
+    /*
+    * firmeware version string
+    */
+    #define __FIRMWARE__            "2020072201"
 
 #endif // _CONFIG_H

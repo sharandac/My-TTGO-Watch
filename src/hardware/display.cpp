@@ -78,7 +78,6 @@ void display_set_brightness( uint32_t brightness ) {
 }
 
 uint32_t display_get_rotation( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
   return( display_config.rotation );
 }
 
