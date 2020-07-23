@@ -24,11 +24,11 @@
 
     #include <TTGO.h>
 
-    #define WEATHER_CONFIG_FILE     "/weather.cfg"
+    #define WEATHER_CONFIG_FILE             "/weather.cfg"
 
-    #define WEATHER_SYNC_REQUEST    _BV(0)
+    #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
 
-    #define WEATHER_MAX_FORECAST    4
+    #define WEATHER_MAX_FORECAST            4
 
     typedef struct {
         char apikey[64] = "";
@@ -51,6 +51,14 @@
     void weather_widget_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
 
     void weather_widget_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+
+    weather_config_t *weather_get_config( void );
+
+    void weather_jump_to_forecast( void );
+
+    void weather_jump_to_setup( void );
+
+    void weather_sync_request( void );
 
     void weather_save_config( void );
 

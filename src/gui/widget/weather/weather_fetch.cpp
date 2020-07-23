@@ -35,6 +35,8 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
     char json[2000] = "";
     StaticJsonDocument<2000> doc;
 
+    weather_today->valide = false;
+
 	if ( !client.connect( OWM_HOST, OWM_PORT ) ) {
     	Serial.println("Connection failed");
         return;
@@ -52,7 +54,6 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 	while ( client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
 			client.stop();
-            weather_today->valide = false;
 			return;
 		}
 	}
@@ -71,12 +72,15 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
         }
 	}
     *ptr = '\0';
+    if ( data_begin == false ) {
+        return;
+    }
+
 
     DeserializationError error = deserializeJson( doc, json);
     if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.c_str());
-        weather_today->valide = false;
         return;
     }
 
