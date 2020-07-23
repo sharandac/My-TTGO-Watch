@@ -62,6 +62,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
         // if we are in standby, wake up
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             powermgm_clear_event( POWERMGM_STANDBY );
+            ttgo->power->setDCDC3Voltage( 3000 );
             ttgo->openBL();
             ttgo->displayWakeup();
             ttgo->bl->adjust( 0 );
@@ -72,6 +73,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( true );
             motor_vibe( 1 );
+            wifictl_on();
         }
         // if we are nor in stand by, go sleep
         else {
@@ -84,6 +86,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
+            ttgo->power->setDCDC3Voltage( 2600 );
             setCpuFrequencyMhz( 10 );
             gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
             gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);

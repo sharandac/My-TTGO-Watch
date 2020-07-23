@@ -88,7 +88,7 @@ void main_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coo
         widget_entry[ widget ].y = 0;
         lv_obj_reset_style_list( widget_entry[ widget ].widget, LV_OBJ_PART_MAIN );
         lv_obj_add_style( widget_entry[ widget ].widget, LV_OBJ_PART_MAIN, style );
-        lv_obj_set_size( widget_entry[ widget ].widget, 64, 64 );
+        lv_obj_set_size( widget_entry[ widget ].widget, 64, 80 );
         lv_obj_set_hidden( widget_entry[ widget ].widget, true );
     }
 

@@ -24,7 +24,7 @@
 
     #define PMU_EVENT_AXP_INT       _BV(0)
 
-    #define PMU_BATTERY_CAP         380
+    #define PMU_BATTERY_CAP         350
 
     /*
      * @brief setup pmu: axp202

@@ -24,13 +24,27 @@
 
     #include <TTGO.h>
 
-    #define WEATHER_CONFIG_FILE "/weather.cfg"
+    #define WEATHER_CONFIG_FILE     "/weather.cfg"
+
+    #define WEATHER_SYNC_REQUEST    _BV(0)
+
+    #define WEATHER_MAX_FORECAST    4
 
     typedef struct {
-        char apikey[64]="";
-        char lon[16]="";
-        char lat[16]="";
+        char apikey[64] = "";
+        char lon[16] = "";
+        char lat[16] = "";
+        bool autosync = true;
     } weather_config_t;
+
+    typedef struct {
+        bool valide = false;
+        char temp[8] = "";
+        char pressure[8] = "";
+        char humidity[8] = "";
+        char name[32] = "";
+        char icon[8] = "";
+    } weather_forcast_t;
 
     void weather_widget_setup( void );
 

@@ -109,10 +109,10 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
 void update_update_firmware( void ) {
     if((WiFi.status() == WL_CONNECTED)) {
 
-        WiFiClientSecure client;
-        client.setTimeout(12000 / 1000);
+        WiFiClient client;
+        client.setTimeout( 10 );
 
-        t_httpUpdate_return ret = httpUpdate.update( client, "https://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
+        t_httpUpdate_return ret = httpUpdate.update( client, "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
 
         switch(ret) {
             case HTTP_UPDATE_FAILED:

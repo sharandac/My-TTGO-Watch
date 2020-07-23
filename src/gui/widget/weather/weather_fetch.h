@@ -1,9 +1,7 @@
 /****************************************************************************
-              config.h
-
-    Tu May 22 21:23:51 2020
-    Copyright  2020  Dirk Brosswick
- *  Email: dirk.brosswick@googlemail.com
+ *   July 23 00:23:05 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -21,16 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CONFIG_H 
-    #define _CONFIG_H 
+#ifndef _WEATHER_FETCH_H
+    #define _WEATHER_FETCH_H
 
-    #define LILYGO_WATCH_2020_V1             //To use T-Watch2020, please uncomment this line
-    #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
-    #include <LilyGoWatch.h>
+    #define OWM_HOST    "api.openweathermap.org"
+    #define OWM_PORT    80
 
-    /*
-    * firmeware version string
-    */
-    #define __FIRMWARE__            "2020072304"
+    void weather_fetch_today( weather_config_t * weather_config, weather_forcast_t * weather_today );
 
-#endif // _CONFIG_H
+#endif // _WEATHER_FETCH_H
