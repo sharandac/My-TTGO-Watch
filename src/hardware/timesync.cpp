@@ -46,7 +46,7 @@ void timesync_setup( TTGOClass *ttgo ) {
     xTaskCreate(
                         timesync_Task,      /* Function to implement the task */
                         "timesync Task",    /* Name of the task */
-                        10000,              /* Stack size in words */
+                        2000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
                         &_timesync_Task );  /* Task handle. */

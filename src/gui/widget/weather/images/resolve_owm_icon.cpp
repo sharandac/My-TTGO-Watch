@@ -53,15 +53,15 @@ struct owm_icon owm_icon[ 18 ] = {
     { "11d", &owm_11d_64px },
     { "12d", &owm_13d_64px },
     { "50d", &owm_50d_64px },
-    { "01d", &owm_01n_64px },
-    { "02d", &owm_02n_64px },
-    { "03d", &owm_03n_64px },
-    { "04d", &owm_04n_64px },
-    { "09d", &owm_09n_64px },
-    { "10d", &owm_10n_64px },
-    { "11d", &owm_11n_64px },
-    { "12d", &owm_13n_64px },
-    { "50d", &owm_50n_64px }
+    { "01n", &owm_01n_64px },
+    { "02n", &owm_02n_64px },
+    { "03n", &owm_03n_64px },
+    { "04n", &owm_04n_64px },
+    { "09n", &owm_09n_64px },
+    { "10n", &owm_10n_64px },
+    { "11n", &owm_11n_64px },
+    { "12n", &owm_13n_64px },
+    { "50n", &owm_50n_64px }
 };
 
 const void * resolve_owm_icon( char *iconname ) {

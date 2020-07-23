@@ -27,22 +27,20 @@
 
 #include "weather.h"
 #include "weather_fetch.h"
+#include "weather_forecast.h"
 
 void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
     
-    WiFiClient client;
-    char *ptr = NULL;
-    char json[2000] = "";
-    StaticJsonDocument<2000> doc;
+    WiFiClient today_client;
 
     weather_today->valide = false;
 
-	if ( !client.connect( OWM_HOST, OWM_PORT ) ) {
+	if ( !today_client.connect( OWM_HOST, OWM_PORT ) ) {
     	Serial.println("Connection failed");
         return;
 	}
 
-	client.printf(  "GET /data/2.5/weather?lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
+	today_client.printf(  "GET /data/2.5/weather?lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
                     "Host: %s\r\n"
 		            "Connection: close\r\n"
 		            "Pragma: no-cache\r\n"
@@ -51,21 +49,23 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 		            "Accept: text/html,application/json\r\n\r\n", weather_config->lat, weather_config->lon, weather_config->apikey, OWM_HOST );
 
 	uint64_t startMillis = millis();
-	while ( client.available() == 0 ) {
+	while ( today_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
-			client.stop();
+			today_client.stop();
 			return;
 		}
 	}
 
-    ptr = json;
+    char *json = (char *)ps_malloc( 40000 );
+    char *ptr = json;
+
     bool data_begin = false;
-    while( client.available() ) {
+    while( today_client.available() ) {
         if ( data_begin ) {
-            *ptr = client.read();
+            *ptr = today_client.read();
             ptr++;
         }
-		else if ( client.read() == '{' ) {
+		else if ( today_client.read() == '{' ) {
             data_begin = true;
             *ptr = '{';
             ptr++;
@@ -76,20 +76,99 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
         return;
     }
 
+    today_client.stop();
+
+    DynamicJsonDocument doc(20000);
 
     DeserializationError error = deserializeJson( doc, json);
     if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.c_str());
+        doc.clear();
+        free( json );
         return;
     }
 
     weather_today->valide = true;
     snprintf( weather_today->temp, sizeof( weather_today->temp ),"%0.1f°C", doc["main"]["temp"].as<float>() - 273.15 );
     snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
-    snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["ressure"].as<float>() );
+    snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["pressure"].as<float>() );
     strcpy( weather_today->icon, doc["weather"][0]["icon"] );
     strcpy( weather_today->name, doc["name"] );
 
-    client.stop();
+    doc.clear();
+    free( json );
+}
+
+void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
+    
+    WiFiClient forecast_client;
+
+    weather_forecast[ 0 ].valide = false;
+
+	if ( !forecast_client.connect( OWM_HOST, OWM_PORT ) ) {
+    	Serial.println("Connection failed");
+        return;
+	}
+
+	forecast_client.printf(  "GET /data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
+                    "Host: %s\r\n"
+		            "Connection: close\r\n"
+		            "Pragma: no-cache\r\n"
+		            "Cache-Control: no-cache\r\n"
+		            "User-Agent: ESP32\r\n"
+		            "Accept: text/html,application/json\r\n\r\n", WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey, OWM_HOST );
+
+	uint64_t startMillis = millis();
+	while ( forecast_client.available() == 0 ) {
+		if ( millis() - startMillis > 5000 ) {
+			forecast_client.stop();
+			return;
+		}
+	}
+
+    char *json = (char *)ps_malloc( 20000 );
+    char *ptr = json;
+
+    bool data_begin = false;
+    while( forecast_client.available() ) {
+        if ( data_begin ) {
+            ptr[ forecast_client.readBytes( ptr, 40000 ) ] = '\0';
+        }
+		else if ( forecast_client.read() == '{' ) {
+            data_begin = true;
+            *ptr = '{';
+            ptr++;
+        }
+	}
+
+    forecast_client.stop();
+
+    if ( data_begin == false ) {
+        Serial.printf("No json data\r\n");
+        free( json );
+        return;
+    }
+
+    DynamicJsonDocument doc(20000);
+    DeserializationError error = deserializeJson( doc, json );
+    if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+        doc.clear();
+        free( json );
+        return;
+    }
+
+    weather_forecast[0].valide = true;
+    for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
+        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
+        snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f", doc["list"][i]["main"]["humidity"].as<float>() );
+        snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%f", doc["list"][i]["main"]["pressure"].as<float>() );
+        strcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] );
+        strcpy( weather_forecast[ i ].name, doc["city"]["name"] );
+    }
+
+    doc.clear();
+    free( json );
 }

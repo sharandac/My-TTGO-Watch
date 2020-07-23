@@ -121,7 +121,7 @@ void wifictl_setup( void ) {
   xTaskCreatePinnedToCore(
                             wifictl_Task,    /* Function to implement the task */
                             "wifictl Task",       /* Name of the task */
-                            10000,                  /* Stack size in words */
+                            2000,                  /* Stack size in words */
                             NULL,                   /* Task input parameter */
                             1,                      /* Priority of the task */
                             &_wifictl_Task,       /* Task handle. */

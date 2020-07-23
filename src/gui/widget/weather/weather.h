@@ -28,8 +28,6 @@
 
     #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
 
-    #define WEATHER_MAX_FORECAST            4
-
     typedef struct {
         char apikey[64] = "";
         char lon[16] = "";
@@ -58,7 +56,7 @@
 
     void weather_jump_to_setup( void );
 
-    void weather_sync_request( void );
+    void weather_widget_sync_request( void );
 
     void weather_save_config( void );
 

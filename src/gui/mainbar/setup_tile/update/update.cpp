@@ -103,7 +103,7 @@ void update_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_c
     xTaskCreate(
                         update_Task,      /* Function to implement the task */
                         "update Task",    /* Name of the task */
-                        10000,              /* Stack size in words */
+                        5000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
                         &_update_Task );  /* Task handle. */

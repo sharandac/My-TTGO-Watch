@@ -37,7 +37,6 @@ void weather_widget_sync_Task( void * pvParameters );
 
 weather_config_t weather_config;
 weather_forcast_t weather_today;
-weather_forcast_t weather_forecast[ WEATHER_MAX_FORECAST ];
 
 lv_tile_number weather_widget_tile_num = NO_TILE;
 lv_tile_number weather_widget_setup_tile_num = NO_TILE;
@@ -90,7 +89,7 @@ void weather_widget_setup( void ) {
     xTaskCreate(
                         weather_widget_sync_Task,      /* Function to implement the task */
                         "weather sync Task",    /* Name of the task */
-                        10000,              /* Stack size in words */
+                        2000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
                         &_weather_widget_sync_Task );  /* Task handle. */  
@@ -111,7 +110,7 @@ void weather_jump_to_setup( void ) {
     mainbar_jump_to_tilenumber( weather_widget_setup_tile_num, LV_ANIM_ON );    
 }
 
-void weather_sync_request( void ) {
+void weather_widget_sync_request( void ) {
     xEventGroupSetBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
     vTaskResume( _weather_widget_sync_Task );    
 }
@@ -128,7 +127,6 @@ void weather_widget_sync_Task( void * pvParameters ) {
             if ( weather_config.autosync ) {
                 weather_fetch_today( &weather_config, &weather_today );
                 if ( weather_today.valide ) {
-                    Serial.printf("weather fetch ok\r\n");
                     lv_label_set_text( weather_widget_temperature_label, weather_today.temp );
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_RELEASED, resolve_owm_icon( weather_today.icon ) );
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, resolve_owm_icon( weather_today.icon ) );

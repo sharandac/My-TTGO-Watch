@@ -69,7 +69,11 @@ void setup()
     for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
         ttgo->bl->adjust( bl );
         delay(5);
-    } 
+    }
+    Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
+    Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
+    Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
+    Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
 }
 
 void loop()
