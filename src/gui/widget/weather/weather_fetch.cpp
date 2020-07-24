@@ -50,6 +50,7 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 
 	uint64_t startMillis = millis();
 	while ( today_client.available() == 0 ) {
+        yield();
 		if ( millis() - startMillis > 5000 ) {
 			today_client.stop();
 			return;
@@ -61,6 +62,7 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 
     bool data_begin = false;
     while( today_client.available() ) {
+        yield();
         if ( data_begin ) {
             *ptr = today_client.read();
             ptr++;
@@ -76,6 +78,7 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
         return;
     }
 
+    yield();
     today_client.stop();
 
     DynamicJsonDocument doc(20000);
@@ -89,6 +92,7 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
         return;
     }
 
+    yield();
     weather_today->valide = true;
     snprintf( weather_today->temp, sizeof( weather_today->temp ),"%0.1f°C", doc["main"]["temp"].as<float>() - 273.15 );
     snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
@@ -121,6 +125,7 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
 
 	uint64_t startMillis = millis();
 	while ( forecast_client.available() == 0 ) {
+        yield();
 		if ( millis() - startMillis > 5000 ) {
 			forecast_client.stop();
 			return;
@@ -132,6 +137,7 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
 
     bool data_begin = false;
     while( forecast_client.available() ) {
+        yield();
         if ( data_begin ) {
             ptr[ forecast_client.readBytes( ptr, 40000 ) ] = '\0';
         }
@@ -149,6 +155,7 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
         free( json );
         return;
     }
+    yield();
 
     DynamicJsonDocument doc(20000);
     DeserializationError error = deserializeJson( doc, json );
@@ -160,6 +167,7 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
         return;
     }
 
+    yield();
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
         snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°C", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );

@@ -39,7 +39,8 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
 
     if ( !ttgo->touch->touched() ) {
         return false;
-    }    
+    }
+
     p = ttgo->touch->getPoint();
 
     uint8_t rotation = ttgo->tft->getRotation();

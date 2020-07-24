@@ -31,6 +31,8 @@
 #include "gui/keyboard.h"
 #include "images/resolve_owm_icon.h"
 
+#include "hardware/motor.h"
+
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
 void weather_widget_sync_Task( void * pvParameters );
@@ -97,7 +99,8 @@ void weather_widget_setup( void ) {
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( weather_widget_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( weather_widget_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }
