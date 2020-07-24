@@ -162,9 +162,9 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
 
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
-        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
-        snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f", doc["list"][i]["main"]["humidity"].as<float>() );
-        snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%f", doc["list"][i]["main"]["pressure"].as<float>() );
+        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°C", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
+        snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
+        snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
         strcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] );
         strcpy( weather_forecast[ i ].name, doc["city"]["name"] );
     }

@@ -113,7 +113,7 @@ void timesync_set_timezone( int32_t timezone ) {
 void timesync_Task( void * pvParameters ) {
 
     while( true ) {
-        vTaskDelay( 250 );
+        vTaskDelay( 500 );
         if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
             struct tm info;
             TTGOClass *ttgo = TTGOClass::getWatch();

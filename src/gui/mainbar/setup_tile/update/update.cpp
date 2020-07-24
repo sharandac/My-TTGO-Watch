@@ -125,7 +125,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 void update_Task( void * pvParameters ) {
     while( true ) {
-        vTaskDelay( 250 );
+        vTaskDelay( 500 );
         if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
             if( WiFi.status() == WL_CONNECTED ) {
 

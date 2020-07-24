@@ -122,7 +122,7 @@ weather_config_t *weather_get_config( void ) {
 void weather_widget_sync_Task( void * pvParameters ) {
 
     while( true ) {
-        vTaskDelay( 250 );
+        vTaskDelay( 500 );
         if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {   
             if ( weather_config.autosync ) {
                 weather_fetch_today( &weather_config, &weather_today );

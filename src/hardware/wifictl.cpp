@@ -247,7 +247,7 @@ void wifictl_Task( void * pvParameters ) {
     return;
 
   while( true ) {
-    vTaskDelay( 50 );
+    vTaskDelay( 500 );
     if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
       statusbar_wifi_set_state( true, "activate" );
       WiFi.mode( WIFI_STA );
