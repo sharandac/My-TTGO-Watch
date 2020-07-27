@@ -24,6 +24,7 @@
 #include <soc/rtc.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <time.h>
 
 #include "pmu.h"
 #include "bma.h"
@@ -82,7 +83,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
                 display_go_silence_wakeup( ttgo );
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             }
-            ttgo->rtc->syncToSystem();
+            timesyncToSystem();
             ttgo->startLvglTick();
             mainbar_jump_to_maintile( LV_ANIM_OFF );
             lv_disp_trig_activity(NULL);
@@ -95,7 +96,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
         else {
             Serial.printf("go to standby\r\n");
             display_go_sleep( ttgo );
-            ttgo->rtc->syncToRtc();
+            timesyncToRTC();
             if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
             while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
             ttgo->stopLvglTick();

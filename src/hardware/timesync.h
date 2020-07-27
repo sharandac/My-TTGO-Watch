@@ -85,4 +85,7 @@
      */
     void timesync_set_timezone( int32_t timezone );
 
+    void timesyncToSystem( void );
+    void timesyncToRTC( void );
+
 #endif // _TIME_SYNC_H

@@ -19,9 +19,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include "time.h"
+#include <WiFi.h>
 #include "config.h"
 #include "timesync.h"
-#include <WiFi.h>
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
@@ -30,7 +31,12 @@ void timesync_Task( void * pvParameters );
 timesync_config_t timesync_config;
 
 void timesync_setup( TTGOClass *ttgo ) {
-
+/*
+    char buff[16]="";
+    snprintf( buff, sizeof(buff),"UTC%d", timesync_config.timezone);
+    setenv("TZ", buff, 1);
+    tzset();
+*/
     timesync_read_config();
 
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -115,13 +121,22 @@ void timesync_set_timezone( int32_t timezone ) {
     timesync_save_config();
 }
 
+void timesyncToSystem( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+  ttgo->rtc->syncToSystem();
+}
+
+void timesyncToRTC( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+  ttgo->rtc->syncToRtc();
+}
+
 void timesync_Task( void * pvParameters ) {
 
     while( true ) {
         vTaskDelay( 500 );
         if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
             struct tm info;
-            TTGOClass *ttgo = TTGOClass::getWatch();
 
             long gmtOffset_sec = timesync_config.timezone * 3600;
             int daylightOffset_sec = 0;
