@@ -148,9 +148,6 @@ static void weather_apikey_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         keyboard_set_textarea( obj );
     }
-    else if ( event == LV_EVENT_DEFOCUSED ) {
-        keyboard_hide();
-    }
 }
 
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
