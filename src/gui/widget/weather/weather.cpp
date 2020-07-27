@@ -81,8 +81,7 @@ void weather_widget_setup( void ) {
 
     // regster callback for wifi sync
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        xEventGroupSetBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
-        vTaskResume( _weather_widget_sync_Task );
+        weather_widget_sync_request();
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     weather_widget_event_handle = xEventGroupCreate();

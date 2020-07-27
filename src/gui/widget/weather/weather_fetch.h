@@ -25,6 +25,9 @@
     #define OWM_HOST    "api.openweathermap.org"
     #define OWM_PORT    80
 
+    #define WEATHER_TODAY_BUFFER_SIZE       10000
+    #define WEATHER_FORECAST_BUFFER_SIZE    40000
+
     uint32_t weather_fetch_today( weather_config_t * weather_config, weather_forcast_t * weather_today );
     uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast );
 

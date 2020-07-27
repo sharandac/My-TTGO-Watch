@@ -116,8 +116,7 @@ void weather_widget_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hr
 
     // regster callback for wifi sync
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        xEventGroupSetBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
-        vTaskResume( _weather_forecast_sync_Task );
+        weather_forecast_sync_request();
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     weather_forecast_event_handle = xEventGroupCreate();

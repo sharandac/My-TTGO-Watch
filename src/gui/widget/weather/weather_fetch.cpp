@@ -29,13 +29,15 @@
 #include "weather_fetch.h"
 #include "weather_forecast.h"
 
+#include "hardware/powermgm.h"
+
 uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
     
     WiFiClient today_client;
     uint32_t retval = -1;
 
 	if ( !today_client.connect( OWM_HOST, OWM_PORT ) ) {
-    	Serial.println("Connection failed");
+        Serial.printf("connection failed\r\n");
         return( -1 );
 	}
 
@@ -50,19 +52,24 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
 	uint64_t startMillis = millis();
 	while ( today_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
+            Serial.printf("connection timeout\r\n");
 			today_client.stop();
 			return( retval );
 		}
 	}
 
-    char *json = (char *)ps_malloc( 40000 );
+    char *json = (char *)ps_malloc( WEATHER_TODAY_BUFFER_SIZE );
+    if ( json == NULL ) {
+        Serial.printf("memory alloc failed\r\n");
+        today_client.stop();
+        return( retval );
+    }
     char *ptr = json;
 
     bool data_begin = false;
     while( today_client.available() ) {
         if ( data_begin ) {
-            *ptr = today_client.read();
-            ptr++;
+            ptr[ today_client.readBytes( ptr, WEATHER_TODAY_BUFFER_SIZE - 1 ) ] = '\0';
         }
 		else if ( today_client.read() == '{' ) {
             data_begin = true;
@@ -70,11 +77,13 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
             ptr++;
         }
 	}
-    *ptr = '\0';
+
+    today_client.stop();
+
     if ( data_begin == false ) {
+        free( json );
         return( retval );
     }
-
     today_client.stop();
 
     DynamicJsonDocument doc(20000);
@@ -91,6 +100,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
     retval = doc["cod"].as<int>();
 
     if ( retval != 200 ) {
+        Serial.printf("get weather failed, returncode: %d\r\n", retval );
         doc.clear();
         free( json );
         return( retval );
@@ -113,10 +123,8 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     WiFiClient forecast_client;
     uint32_t retval = -1;
 
-    weather_forecast[ 0 ].valide = false;
-
 	if ( !forecast_client.connect( OWM_HOST, OWM_PORT ) ) {
-    	Serial.println("Connection failed");
+        Serial.printf("connection failed\r\n");
         return( retval );
 	}
 
@@ -131,19 +139,24 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
 	uint64_t startMillis = millis();
 	while ( forecast_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
+            Serial.printf("connection timeout\r\n");
 			forecast_client.stop();
 			return( retval );
 		}
 	}
 
-    char *json = (char *)ps_malloc( 20000 );
+    char *json = (char *)ps_malloc( WEATHER_FORECAST_BUFFER_SIZE );
+    if ( json == NULL ) {
+        Serial.printf("memory alloc failed\r\n");
+        forecast_client.stop();
+        return( retval );
+    }
     char *ptr = json;
 
     bool data_begin = false;
     while( forecast_client.available() ) {
-        yield();
         if ( data_begin ) {
-            ptr[ forecast_client.readBytes( ptr, 40000 ) ] = '\0';
+            ptr[ forecast_client.readBytes( ptr, WEATHER_FORECAST_BUFFER_SIZE - 1 ) ] = '\0';
         }
 		else if ( forecast_client.read() == '{' ) {
             data_begin = true;
@@ -155,7 +168,6 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     forecast_client.stop();
 
     if ( data_begin == false ) {
-        Serial.printf("No json data\r\n");
         free( json );
         return( retval );
     }
@@ -173,6 +185,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     retval = doc["cod"].as<int>();
 
     if ( retval != 200 ) {
+        Serial.printf("get weather failed, returncode: %d\r\n", retval );
         doc.clear();
         free( json );
         return( retval );
