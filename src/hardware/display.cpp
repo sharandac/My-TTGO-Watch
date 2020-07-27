@@ -55,11 +55,13 @@ void display_loop( TTGOClass *ttgo ) {
         ttgo->bl->adjust( brightness );
       }
     }
-    if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-        dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
-    }
-    else {
-        dest_brightness = display_get_brightness();
+    if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+      if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+          dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+      }
+      else {
+          dest_brightness = display_get_brightness();
+      }
     }
   }
 }
