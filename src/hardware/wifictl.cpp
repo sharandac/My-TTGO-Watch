@@ -118,14 +118,12 @@ void wifictl_setup( void ) {
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
 
   // start Wifo controll task
-  xTaskCreatePinnedToCore(
-                            wifictl_Task,    /* Function to implement the task */
-                            "wifictl Task",       /* Name of the task */
-                            2000,                  /* Stack size in words */
-                            NULL,                   /* Task input parameter */
-                            1,                      /* Priority of the task */
-                            &_wifictl_Task,       /* Task handle. */
-                            1 );  /* Core where the task should run */ 
+  xTaskCreate(  wifictl_Task,    /* Function to implement the task */
+                "wifictl Task",       /* Name of the task */
+                2000,                  /* Stack size in words */
+                NULL,                   /* Task input parameter */
+                1,                      /* Priority of the task */
+                &_wifictl_Task );       /* Task handle. */ 
 }
 
 /*
@@ -225,8 +223,13 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
 void wifictl_on( void ) {
   if ( wifi_init == false )
     return;
-  vTaskResume( _wifictl_Task );
-  powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
+    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
+      return;
+    }
+    else {
+      powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
+      vTaskResume( _wifictl_Task );
+    }
 }
 
 /*
@@ -235,8 +238,13 @@ void wifictl_on( void ) {
 void wifictl_off( void ) {
   if ( wifi_init == false )
     return;
-  vTaskResume( _wifictl_Task );
-  powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
+    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
+      return;
+    }
+    else {
+      powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
+      vTaskResume( _wifictl_Task );
+    }
 }
 
 /*

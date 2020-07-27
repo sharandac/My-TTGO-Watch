@@ -35,8 +35,13 @@ void timesync_setup( TTGOClass *ttgo ) {
 
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
         if ( timesync_config.timesync ) {
-          xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-          vTaskResume( _timesync_Task );
+          if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
+              return;
+          }
+          else {
+              xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+              vTaskResume( _timesync_Task );
+          }
         }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 

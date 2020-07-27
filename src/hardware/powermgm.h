@@ -25,14 +25,16 @@
     #include "TTGO.h"
 
     #define POWERMGM_STANDBY            _BV(0)
-    #define POWERMGM_PMU_BUTTON         _BV(1)
-    #define POWERMGM_PMU_BATTERY        _BV(2)
-    #define POWERMGM_BMA_WAKEUP         _BV(3)
-    #define POWERMGM_WIFI_ON_REQUEST    _BV(5)
-    #define POWERMGM_WIFI_OFF_REQUEST   _BV(6)
-    #define POWERMGM_WIFI_ACTIVE        _BV(7)
-    #define POWERMGM_WIFI_SCAN          _BV(8)
-    #define POWERMGM_WIFI_CONNECTED     _BV(9)
+    #define POWERMGM_SILENCE_WAKEUP     _BV(1)
+    #define POWERMGM_PMU_BUTTON         _BV(2)
+    #define POWERMGM_PMU_BATTERY        _BV(3)
+    #define POWERMGM_PMU_ALARM          _BV(4)
+    #define POWERMGM_BMA_WAKEUP         _BV(5)
+    #define POWERMGM_WIFI_ON_REQUEST    _BV(6)
+    #define POWERMGM_WIFI_OFF_REQUEST   _BV(7)
+    #define POWERMGM_WIFI_ACTIVE        _BV(8)
+    #define POWERMGM_WIFI_SCAN          _BV(9)
+    #define POWERMGM_WIFI_CONNECTED     _BV(10)
 
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl

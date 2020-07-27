@@ -29,15 +29,14 @@
 #include "weather_fetch.h"
 #include "weather_forecast.h"
 
-void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
+uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
     
     WiFiClient today_client;
-
-    weather_today->valide = false;
+    uint32_t retval = -1;
 
 	if ( !today_client.connect( OWM_HOST, OWM_PORT ) ) {
     	Serial.println("Connection failed");
-        return;
+        return( -1 );
 	}
 
 	today_client.printf(  "GET /data/2.5/weather?lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
@@ -50,10 +49,9 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 
 	uint64_t startMillis = millis();
 	while ( today_client.available() == 0 ) {
-        yield();
 		if ( millis() - startMillis > 5000 ) {
 			today_client.stop();
-			return;
+			return( retval );
 		}
 	}
 
@@ -62,7 +60,6 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 
     bool data_begin = false;
     while( today_client.available() ) {
-        yield();
         if ( data_begin ) {
             *ptr = today_client.read();
             ptr++;
@@ -75,10 +72,9 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 	}
     *ptr = '\0';
     if ( data_begin == false ) {
-        return;
+        return( retval );
     }
 
-    yield();
     today_client.stop();
 
     DynamicJsonDocument doc(20000);
@@ -89,10 +85,17 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
         Serial.println(error.c_str());
         doc.clear();
         free( json );
-        return;
+        return( retval );
     }
 
-    yield();
+    retval = doc["cod"].as<int>();
+
+    if ( retval != 200 ) {
+        doc.clear();
+        free( json );
+        return( retval );
+    }
+
     weather_today->valide = true;
     snprintf( weather_today->temp, sizeof( weather_today->temp ),"%0.1f°C", doc["main"]["temp"].as<float>() - 273.15 );
     snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
@@ -102,17 +105,19 @@ void weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *w
 
     doc.clear();
     free( json );
+    return( retval );
 }
 
-void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
+uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
     
     WiFiClient forecast_client;
+    uint32_t retval = -1;
 
     weather_forecast[ 0 ].valide = false;
 
 	if ( !forecast_client.connect( OWM_HOST, OWM_PORT ) ) {
     	Serial.println("Connection failed");
-        return;
+        return( retval );
 	}
 
 	forecast_client.printf(  "GET /data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
@@ -125,10 +130,9 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
 
 	uint64_t startMillis = millis();
 	while ( forecast_client.available() == 0 ) {
-        yield();
 		if ( millis() - startMillis > 5000 ) {
 			forecast_client.stop();
-			return;
+			return( retval );
 		}
 	}
 
@@ -153,9 +157,8 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
     if ( data_begin == false ) {
         Serial.printf("No json data\r\n");
         free( json );
-        return;
+        return( retval );
     }
-    yield();
 
     DynamicJsonDocument doc(20000);
     DeserializationError error = deserializeJson( doc, json );
@@ -164,10 +167,17 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
         Serial.println(error.c_str());
         doc.clear();
         free( json );
-        return;
+        return( retval );
     }
 
-    yield();
+    retval = doc["cod"].as<int>();
+
+    if ( retval != 200 ) {
+        doc.clear();
+        free( json );
+        return( retval );
+    }
+
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
         snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°C", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
@@ -179,4 +189,5 @@ void weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t
 
     doc.clear();
     free( json );
+    return( 200 );
 }

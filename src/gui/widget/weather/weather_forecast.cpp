@@ -126,7 +126,7 @@ void weather_widget_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hr
     xTaskCreate(
                         weather_forecast_sync_Task,      /* Function to implement the task */
                         "weather sync Task",    /* Name of the task */
-                        10000,              /* Stack size in words */
+                        5000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
                         &_weather_forecast_sync_Task );  /* Task handle. */ 
@@ -164,21 +164,20 @@ void weather_forecast_sync_request( void ) {
     }
     else {
         xEventGroupSetBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
+        vTaskResume( _weather_forecast_sync_Task );    
     }
-    vTaskResume( _weather_forecast_sync_Task );    
 }
 
 void weather_forecast_sync_Task( void * pvParameters ) {
     weather_config_t *weather_config = weather_get_config();
+    uint32_t retval = -1;
 
     while( true ) {
         vTaskDelay( 500 );
         if ( xEventGroupGetBits( weather_forecast_event_handle ) & WEATHER_FORECAST_SYNC_REQUEST ) {   
             if ( weather_config->autosync ) {
-                weather_fetch_forecast( weather_get_config() , &weather_forecast[ 0 ] );
-                if ( !weather_forecast[ 0 ].valide )
-                    weather_fetch_forecast( weather_get_config() , &weather_forecast[ 0 ] );
-                if ( weather_forecast[ 0 ].valide ) {
+                retval = weather_fetch_forecast( weather_get_config() , &weather_forecast[ 0 ] );
+                if ( retval == 200 ) {
                     for( int i = 0 ; i < WEATHER_MAX_FORECAST / 4 ; i++ ) {
                         lv_label_set_text( weather_forecast_location_label, weather_forecast[ i * 4 ].name );
                         lv_label_set_text( weather_forecast_temperature_label[ i ], weather_forecast[ i * 4 ].temp );
@@ -196,7 +195,13 @@ void weather_forecast_sync_Task( void * pvParameters ) {
                         strftime( buf, sizeof(buf), "updated: %d.%b %H:%M", &info );
                         lv_label_set_text( weather_forecast_update_label, buf );
                     }
-                }            
+                    motor_vibe( 1 );        
+                }
+                else {
+                    char buf[64];
+                    snprintf( buf, sizeof(buf), "Error: %d", retval );
+                    lv_label_set_text( weather_forecast_update_label, buf );
+                }
             }
             xEventGroupClearBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
         }

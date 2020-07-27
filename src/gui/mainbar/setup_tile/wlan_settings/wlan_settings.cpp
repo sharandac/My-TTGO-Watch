@@ -224,7 +224,6 @@ static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if(event == LV_EVENT_CLICKED) {
-//        strcpy( ssid,  lv_list_get_btn_text(obj) );
         lv_label_set_text( wlan_password_name_label, lv_list_get_btn_text(obj) );
         lv_textarea_set_text( wlan_password_pass_textfield, "");
         mainbar_jump_to_tilenumber( WLAN_PASSWORD_TILE, LV_ANIM_ON );

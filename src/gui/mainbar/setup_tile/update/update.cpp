@@ -118,8 +118,13 @@ static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_CLICKED) {
-        xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
-        vTaskResume( _update_Task );
+        if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST )  {
+            return;
+        }
+        else {
+            xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
+            vTaskResume( _update_Task );
+        }
     }
 }
 
@@ -133,7 +138,6 @@ void update_Task( void * pvParameters ) {
                 display_set_timeout( DISPLAY_MAX_TIMEOUT );
 
                 WiFiClient client;
-                client.setTimeout( 10 );
 
                 lv_label_set_text( update_status_label, "start update ..." );
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
@@ -164,6 +168,7 @@ void update_Task( void * pvParameters ) {
             }
             xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
         }
+        lv_disp_trig_activity(NULL);
         vTaskSuspend( _update_Task );
     }
 }
