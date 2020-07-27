@@ -80,6 +80,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
             ttgo->bl->adjust( 0 );
             ttgo->displaySleep();
             ttgo->closeBL();
+            ttgo->rtc->syncToRtc();
             if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
             while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
             ttgo->stopLvglTick();

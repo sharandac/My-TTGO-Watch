@@ -134,8 +134,6 @@ void timesync_Task( void * pvParameters ) {
             if( !getLocalTime( &info ) ) {
                 Serial.println( "Failed to obtain time\r\n" );
             }
-            ttgo->rtc->syncToRtc();
-
             xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
         }
         vTaskSuspend( _timesync_Task );
