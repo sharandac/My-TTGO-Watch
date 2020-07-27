@@ -95,5 +95,8 @@
      * @param rotation from 0-270 in 90 degree steps
      */
     void display_set_rotation( uint32_t rotation );
+    void display_go_silence_wakeup( TTGOClass *ttgo );
+    void display_go_wakeup( TTGOClass *ttgo );
+    void display_go_sleep( TTGOClass *ttgo );
 
 #endif // _DISPLAY_H

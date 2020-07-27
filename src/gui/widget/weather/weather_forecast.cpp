@@ -194,7 +194,6 @@ void weather_forecast_sync_Task( void * pvParameters ) {
                         strftime( buf, sizeof(buf), "updated: %d.%b %H:%M", &info );
                         lv_label_set_text( weather_forecast_update_label, buf );
                     }
-                    motor_vibe( 1 );        
                 }
                 else {
                     char buf[64];

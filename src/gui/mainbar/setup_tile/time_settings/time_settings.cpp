@@ -26,6 +26,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/timesync.h"
+#include "hardware/motor.h"
 
 lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
@@ -124,13 +125,15 @@ void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
 
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         if( lv_switch_get_state( obj ) ) {
             timesync_set_timesync( true );
         }
@@ -142,6 +145,7 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         if( lv_switch_get_state( obj ) ) {
             timesync_set_daylightsave( true );
         }
@@ -154,6 +158,7 @@ static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event)
 {
     if(event == LV_EVENT_VALUE_CHANGED) {
-        timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
+            motor_vibe( 1 );
+            timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
     }
 }

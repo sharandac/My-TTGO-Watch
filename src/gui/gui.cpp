@@ -64,27 +64,23 @@ void gui_setup(void)
 /*
  *
  */
-void gui_loop( TTGOClass *ttgo ){
-
-    // do task handler if still an useraction or go to standby after timeout
-    if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+void gui_loop( TTGOClass *ttgo ) {
+    // if we run in silence mode 
+    if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
+        if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
             lv_task_handler();
-            ttgo->bl->adjust( display_get_brightness() );
         }
         else {
-            if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
-                lv_task_handler();
-                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-                    ttgo->bl->adjust( ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time(NULL) ) / 8 );
-                }
-                else {
-                    ttgo->bl->adjust( display_get_brightness() );
-                }
-            }
-            else {
-                powermgm_set_event( POWERMGM_PMU_BUTTON );
-            }
+            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+        }
+    }
+    // if we run on normal mode
+    else if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
+        if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+            lv_task_handler();
+        }
+        else {
+            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
         }
     }
 }

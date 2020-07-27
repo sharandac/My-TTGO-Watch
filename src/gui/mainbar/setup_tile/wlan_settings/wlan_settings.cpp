@@ -27,6 +27,7 @@
 #include "gui/keyboard.h"
 
 #include "hardware/wifictl.h"
+#include "hardware/motor.h"
 
 #include <WiFi.h>
 
@@ -172,6 +173,7 @@ void wlan_password_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
 static void apply_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {
 
     if(event == LV_EVENT_CLICKED) {
+        motor_vibe( 1 );
         wifictl_insert_network( lv_label_get_text( wlan_password_name_label ), lv_textarea_get_text( wlan_password_pass_textfield ) );
         keyboard_hide();
         mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_ON );
@@ -182,6 +184,7 @@ static void apply_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {
 static void delete_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {
 
     if(event == LV_EVENT_CLICKED) {
+        motor_vibe( 1 );
         wifictl_delete_network( lv_label_get_text( wlan_password_name_label ) );
         keyboard_hide();
         mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_ON );
@@ -192,13 +195,15 @@ static void delete_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {
 static void wlan_password_event_cb( lv_obj_t * obj, lv_event_t event )
 {
     if( event == LV_EVENT_CLICKED ) {
+        motor_vibe( 1 );
         keyboard_set_textarea( obj );
     }
 }
 
 static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
@@ -206,6 +211,7 @@ static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_wifi_password_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       keyboard_hide();
+                                        motor_vibe( 1 );
                                         mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_ON );
                                         break;
     }
@@ -213,6 +219,7 @@ static void exit_wifi_password_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         if( lv_switch_get_state( obj ) ) {
             wifictl_on();
         }
@@ -224,6 +231,7 @@ static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if(event == LV_EVENT_CLICKED) {
+        motor_vibe( 1 );
         lv_label_set_text( wlan_password_name_label, lv_list_get_btn_text(obj) );
         lv_textarea_set_text( wlan_password_pass_textfield, "");
         mainbar_jump_to_tilenumber( WLAN_PASSWORD_TILE, LV_ANIM_ON );

@@ -32,6 +32,7 @@
 #include "timesync.h"
 #include "motor.h"
 #include "touch.h"
+#include "display.h"
 
 #include "gui/mainbar/mainbar.h"
 
@@ -43,7 +44,7 @@ EventGroupHandle_t powermgm_status = NULL;
 void powermgm_setup( TTGOClass *ttgo ) {
 
     powermgm_status = xEventGroupCreate();
-    xEventGroupClearBits( powermgm_status, POWERMGM_STANDBY | POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY );
+    xEventGroupClearBits( powermgm_status, POWERMGM_STANDBY | POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
 
     pmu_setup( ttgo );
     bma_setup( ttgo );
@@ -58,28 +59,42 @@ void powermgm_setup( TTGOClass *ttgo ) {
 void powermgm_loop( TTGOClass *ttgo ) {
 
     // event-tripper pmu-button or pmu-battery state change
-    if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {        
-        // if we are in standby, wake up
+    if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST ) ) {        
+        
+        // if we have an request when we are in silence mode, emulate an wakeup from standby
+        if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) && powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
+            powermgm_set_event( POWERMGM_STANDBY );
+            powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
+        }
+
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             powermgm_clear_event( POWERMGM_STANDBY );
             ttgo->power->setDCDC3Voltage( 3300 );
-            ttgo->openBL();
-            ttgo->displayWakeup();
-            ttgo->bl->adjust( 0 );
+            // normal wake up from standby
+            if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
+                Serial.printf("wakeup\r\n");
+                display_go_wakeup( ttgo );
+                motor_vibe( 1 );
+            }
+            // silence wakeup request from standby
+            else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+                Serial.printf("silence wakeup\r\n");
+                display_go_silence_wakeup( ttgo );
+                powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
+            }
             ttgo->rtc->syncToSystem();
             ttgo->startLvglTick();
             mainbar_jump_to_maintile( LV_ANIM_OFF );
             lv_disp_trig_activity(NULL);
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( true );
-            motor_vibe( 1 );
-            wifictl_on();
-        }
-        // if we are nor in stand by, go sleep
+            wifictl_on();         
+            ttgo->power->clearTimerStatus();
+            ttgo->power->offTimer();
+        }        
         else {
-            ttgo->bl->adjust( 0 );
-            ttgo->displaySleep();
-            ttgo->closeBL();
+            Serial.printf("go to standby\r\n");
+            display_go_sleep( ttgo );
             ttgo->rtc->syncToRtc();
             if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
             while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
@@ -87,7 +102,10 @@ void powermgm_loop( TTGOClass *ttgo ) {
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
+            powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
             ttgo->power->setDCDC3Voltage( 3000 );
+            ttgo->power->clearTimerStatus();
+            ttgo->power->setTimer( 30 );
             setCpuFrequencyMhz( 10 );
             gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
             gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
@@ -95,10 +113,11 @@ void powermgm_loop( TTGOClass *ttgo ) {
             esp_light_sleep_start();
         }
         // clear event
-        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP );
+        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP | POWERMGM_STANDBY_REQUEST | POWERMGM_SILENCE_WAKEUP_REQUEST );
     }
     pmu_loop( ttgo );
     bma_loop( ttgo );
+    display_loop( ttgo );
 }
 
 /*

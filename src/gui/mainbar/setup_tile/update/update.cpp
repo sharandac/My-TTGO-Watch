@@ -29,6 +29,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/display.h"
+#include "hardware/motor.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -111,13 +112,15 @@ void update_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_c
 
 static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_CLICKED) {
+        motor_vibe( 1 );
         if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST )  {
             return;
         }

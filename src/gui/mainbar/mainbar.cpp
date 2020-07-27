@@ -52,6 +52,7 @@ lv_tile_entry_t tile_entry[ TILE_NUM ] {
     { NULL, TILE_TYPE_SETUP, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,3 } },
     { NULL, TILE_TYPE_SETUP, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,3 } },
     { NULL, TILE_TYPE_SETUP, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,3 } },
+    { NULL, TILE_TYPE_SETUP, BATTERY_OVERVIEW_TILE, NULL, { 6,4 } },
     { NULL, TILE_TYPE_SETUP, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,3 } },
     { NULL, TILE_TYPE_SETUP, UPDATE_SETTINGS_TILE, update_tile_setup, { 10,3 } },
     { NULL, TILE_TYPE_WIDGET_TILE, WIDGET1_1_TILE, NULL, { 12,3 } },

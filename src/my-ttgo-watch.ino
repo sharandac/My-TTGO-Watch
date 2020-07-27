@@ -31,6 +31,7 @@
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
+#include "hardware/wifictl.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -70,6 +71,8 @@ void setup()
         ttgo->bl->adjust( bl );
         delay(5);
     }
+    wifictl_on();
+    
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());

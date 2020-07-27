@@ -26,6 +26,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/pmu.h"
+#include "hardware/motor.h"
 
 lv_obj_t *battery_settings_tile=NULL;
 lv_style_t battery_settings_style;
@@ -155,7 +156,8 @@ void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
 
 static void exit_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         break;
     }
 }

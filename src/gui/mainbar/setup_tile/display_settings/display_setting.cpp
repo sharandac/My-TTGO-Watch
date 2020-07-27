@@ -25,6 +25,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/display.h"
+#include "hardware/motor.h"
 
 lv_obj_t *display_settings_tile1 = NULL;
 lv_obj_t *display_brightness_slider = NULL;
@@ -131,7 +132,8 @@ void display_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t 
 
 static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         display_save_config();
                                         break;
     }
@@ -163,6 +165,7 @@ static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void display_rotation_event_handler( lv_obj_t * obj, lv_event_t event )
 {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         display_set_rotation( lv_dropdown_get_selected( obj ) * 90 );
     }
 }

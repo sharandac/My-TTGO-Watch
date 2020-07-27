@@ -23,6 +23,7 @@
 #include "setup.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "hardware/motor.h"
 
 static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -97,42 +98,48 @@ void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_co
 
 static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( BATTERY_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( BATTERY_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( MOVE_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( MOVE_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( DISPLAY_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( DISPLAY_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( TIME_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( TIME_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( UPDATE_SETTINGS_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( UPDATE_SETTINGS_TILE, LV_ANIM_OFF );
                                         break;
     }
 }

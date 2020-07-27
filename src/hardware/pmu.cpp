@@ -20,7 +20,7 @@ void pmu_setup( TTGOClass *ttgo ) {
 
     // Turn on the IRQ used
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ, AXP202_ON );
+    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
     ttgo->power->clearIRQ();
 
     // enable coulumb counter
@@ -92,6 +92,14 @@ void pmu_loop( TTGOClass *ttgo ) {
         if (ttgo->power->isPEKShortPressIRQ()) {
             updatetrigger = true;
             powermgm_set_event( POWERMGM_PMU_BUTTON );
+            ttgo->power->clearIRQ();
+            return;
+        }
+        if ( ttgo->power->isTimerTimeoutIRQ() ) {
+            updatetrigger = true;
+            powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+            ttgo->power->clearTimerStatus();
+            ttgo->power->offTimer();
             ttgo->power->clearIRQ();
             return;
         }

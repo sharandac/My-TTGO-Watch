@@ -23,9 +23,12 @@
 #include <TTGO.h>
 
 #include "display.h"
+#include "powermgm.h"
 
 display_config_t display_config;
 
+static uint8_t dest_brightness = 0;
+static uint8_t brightness = 0;
 /*
  *
  */
@@ -41,8 +44,49 @@ void display_setup( TTGOClass *ttgo ) {
  * loop routine for handling IRQ in main loop
  */
 void display_loop( TTGOClass *ttgo ) {
+  if ( !powermgm_get_event( POWERMGM_STANDBY ) && !powermgm_get_event( POWERMGM_SILENCE_WAKEUP )) {
+    if ( dest_brightness != brightness ) {
+      if ( brightness < dest_brightness ) {
+        brightness++;
+        ttgo->bl->adjust( brightness );
+      }
+      else {
+        brightness--;
+        ttgo->bl->adjust( brightness );
+      }
+    }
+    if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+        dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+    }
+    else {
+        dest_brightness = display_get_brightness();
+    }
+  }
 }
 
+void display_go_wakeup( TTGOClass *ttgo ) {
+  ttgo->openBL();
+  ttgo->displayWakeup();
+  ttgo->bl->adjust( 0 );
+  brightness = 0;
+  dest_brightness = display_get_brightness();
+}
+
+void display_go_silence_wakeup( TTGOClass *ttgo ) {
+  ttgo->openBL();
+  ttgo->displayWakeup();
+  ttgo->bl->adjust( 0 );
+  brightness = 0;
+  dest_brightness = 0;
+}
+
+void display_go_sleep( TTGOClass *ttgo ) {
+  ttgo->bl->adjust( 0 );
+  ttgo->displaySleep();
+  ttgo->closeBL();
+  brightness = 0;
+  dest_brightness = 0;
+}
 /*
  *
  */
@@ -92,10 +136,8 @@ uint32_t display_get_brightness( void ) {
 }
 
 void display_set_brightness( uint32_t brightness ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
     display_config.brightness = brightness;
-    ttgo->bl->adjust( brightness );
+    dest_brightness = brightness;
 }
 
 uint32_t display_get_rotation( void ) {

@@ -25,6 +25,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/bma.h"
+#include "hardware/motor.h"
 
 lv_obj_t *move_settings_tile1=NULL;
 lv_obj_t *stepcounter_onoff=NULL;
@@ -106,13 +107,15 @@ void move_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
 
 static void exit_move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         if( lv_switch_get_state( obj ) ) {
             bma_set_config( BMA_STEPCOUNTER, true );
         }
@@ -124,6 +127,7 @@ static void stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 static void doubleclick_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_VALUE_CHANGED) {
+        motor_vibe( 1 );
         if( lv_switch_get_state( obj ) ) {
             bma_set_config( BMA_DOUBLECLICK, true );
         }
