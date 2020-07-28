@@ -37,6 +37,7 @@
 
     typedef struct {
         bool valide = false;
+        time_t timestamp = 0;
         char temp[8] = "";
         char pressure[8] = "";
         char humidity[8] = "";

@@ -185,7 +185,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     retval = doc["cod"].as<int>();
 
     if ( retval != 200 ) {
-        Serial.printf("get weather failed, returncode: %d\r\n", retval );
+        Serial.printf("get weather forecast failed, returncode: %d\r\n", retval );
         doc.clear();
         free( json );
         return( retval );
@@ -193,6 +193,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
 
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
+        weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>();
         snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°C", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
         snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
         snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );

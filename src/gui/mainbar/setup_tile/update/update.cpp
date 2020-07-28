@@ -26,6 +26,8 @@
 #include <HTTPUpdate.h>
 
 #include "update.h"
+#include "update_check_version.h"
+
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "hardware/display.h"
@@ -97,7 +99,12 @@ void update_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_c
     lv_obj_add_style( update_status_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
-    
+
+    // regster callback
+    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
+        update_check_version();
+    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
+
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
 
@@ -131,9 +138,26 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     }
 }
 
+void update_check_version( void ) {
+    if ( xEventGroupGetBits( update_event_handle ) & UPDATE_GET_VERSION_REQUEST ) {
+        return;
+    }
+    else {
+        xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
+        vTaskResume( _update_Task );    
+    }
+}
+
 void update_Task( void * pvParameters ) {
     while( true ) {
         vTaskDelay( 500 );
+        if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
+            if ( update_check_new_version() > atol( __FIRMWARE__ ) ) {
+                lv_label_set_text( update_status_label, "new version available" );
+                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            }
+            xEventGroupClearBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
+        }
         if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
             if( WiFi.status() == WL_CONNECTED ) {
 

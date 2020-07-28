@@ -1,9 +1,7 @@
 /****************************************************************************
-              config.h
-
-    Tu May 22 21:23:51 2020
-    Copyright  2020  Dirk Brosswick
- *  Email: dirk.brosswick@googlemail.com
+ *   July 28 00:23:05 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -21,16 +19,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CONFIG_H 
-    #define _CONFIG_H 
+#ifndef _UPDATE_CHECK_VERSION_H
+    #define _UPDATE_CHECK_VERSION_H
 
-    #define LILYGO_WATCH_2020_V1             //To use T-Watch2020, please uncomment this line
-    #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
-    #include <LilyGoWatch.h>
+    #include <TTGO.h>
 
-    /*
-    * firmeware version string
-    */
-    #define __FIRMWARE__            "2020072804"
+    #define FIRMWARE_HOST       "www.neo-guerillaz.de"
+    #define FIRMWARE_HOST_PORT  80
 
-#endif // _CONFIG_H
+    uint64_t update_check_new_version();
+
+#endif // _UPDATE_CHECK_VERSION_H
