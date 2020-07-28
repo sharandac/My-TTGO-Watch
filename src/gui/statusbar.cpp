@@ -222,7 +222,9 @@ void statusbar_wifi_set_state( bool state, const char *wifiname ) {
     else {
         lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_RELEASED );
     }
-    lv_label_set_text( statusbar_wifilabel, wifiname );
+    lv_label_set_long_mode( statusbar_wifilabel, LV_LABEL_LONG_SROLL_CIRC);
+    lv_obj_set_width( statusbar_wifilabel, LV_HOR_RES);
+    lv_label_set_text( statusbar_wifilabel, wifiname);
     lv_obj_align( statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
     statusbar_refresh();
 }

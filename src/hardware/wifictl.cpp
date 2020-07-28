@@ -98,7 +98,13 @@ void wifictl_setup( void ) {
         powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN );
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
         statusbar_show_icon( STATUSBAR_WIFI );
-        statusbar_wifi_set_state( true, wifiname );
+        String label(wifiname);
+        label.concat(' ');
+        label.concat(WiFi.localIP().toString());
+        //If you want to see your IPv6 address too, uncomment this. 
+        // label.concat('\n');
+        // label.concat(WiFi.localIPv6().toString());
+        statusbar_wifi_set_state( true, label.c_str() );
         asyncwebserver_setup();
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 

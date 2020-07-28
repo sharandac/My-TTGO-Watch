@@ -150,6 +150,12 @@ void wlan_password_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_obj_align( wlan_password_pass_textfield, wlan_password_tile1, LV_ALIGN_IN_TOP_LEFT, 0, 75);
     lv_obj_set_event_cb( wlan_password_pass_textfield, wlan_password_event_cb );
 
+    lv_obj_t *mac_label = lv_label_create( wlan_password_tile1, NULL);
+    lv_obj_add_style( mac_label, LV_IMGBTN_PART_MAIN, style);
+    lv_obj_set_width( mac_label, LV_HOR_RES);
+    lv_obj_align( mac_label, wlan_password_tile1, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
+    lv_label_set_text_fmt( mac_label, "MAC: %s", WiFi.macAddress().c_str());
+
     lv_obj_t *apply_btn = lv_imgbtn_create( wlan_password_tile1, NULL);
     lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_RELEASED, &check_32px);
     lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_PRESSED, &check_32px);
