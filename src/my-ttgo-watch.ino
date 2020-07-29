@@ -33,7 +33,7 @@
 #include "hardware/motor.h"
 #include "hardware/wifictl.h"
 
-#include "gui/widget/weather/weather.h"
+#include "app/weather/weather.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
