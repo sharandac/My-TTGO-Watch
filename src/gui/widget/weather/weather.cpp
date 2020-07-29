@@ -46,6 +46,7 @@ lv_tile_number weather_widget_setup_tile_num = NO_TILE;
 lv_obj_t *weather_widget_cont = NULL;
 lv_obj_t *weather_widget_condition_img = NULL;
 lv_obj_t *weather_widget_temperature_label = NULL;
+lv_obj_t *weather_widget_wind_label = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 LV_IMG_DECLARE(owm_01d_64px);
@@ -79,6 +80,17 @@ void weather_app_setup( void ) {
     lv_label_set_text( weather_widget_temperature_label, "n/a");
     lv_obj_reset_style_list( weather_widget_temperature_label, LV_OBJ_PART_MAIN );
     lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+
+    weather_widget_wind_label = lv_label_create( weather_widget_cont , NULL);
+    lv_label_set_text( weather_widget_wind_label, "");
+    lv_obj_reset_style_list( weather_widget_wind_label, LV_OBJ_PART_MAIN );
+    lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+
+    if( weather_config.showWind)
+    {
+        lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -20);
+        lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, +5);
+    }
 
     // regster callback for wifi sync
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -139,7 +151,19 @@ void weather_widget_sync_Task( void * pvParameters ) {
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, resolve_owm_icon( weather_today.icon ) );
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_RELEASED, resolve_owm_icon( weather_today.icon ) );
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_PRESSED, resolve_owm_icon( weather_today.icon ) );
-                    lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+
+                    if (weather_config.showWind)
+                    {
+                        lv_label_set_text( weather_widget_wind_label, weather_today.wind);
+                        lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -22);
+                        lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+                    }
+                    else
+                    {
+                        lv_label_set_text( weather_widget_wind_label, "");
+                        lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+                        lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+                    }
                 }
             }
             xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
@@ -175,13 +199,51 @@ void weather_load_config( void ) {
         Serial.printf( __FILE__ "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
-        int filesize = file.size();
-        if ( filesize > sizeof( weather_config ) ) {
-            Serial.printf( __FILE__ "Failed to read configfile. Wrong filesize!\r\n" );
+        size_t filesize = file.size();
+
+        // Special case, convert V1 of the file to a versioned V2 format
+        if (filesize == sizeof(weather_config_t_v1))
+        {
+            log_i("Reading weather config v1");
+            weather_config_t_v1 v1Config;
+            weather_config_t_v2 &v2Config = weather_config; // For now, V2 is current.
+            file.read((uint8_t *)&v1Config, filesize);
+            log_i("Converting weather config v1 to v2");
+            v2Config.version = 2;
+            memcpy(&v2Config.apikey[0], &v1Config, sizeof(weather_config_t_v1));
+            v2Config.autosync = v1Config.autosync;
+            v2Config.showWind = false;
         }
-        else {
-            file.read( (uint8_t *)&weather_config, filesize );
+        else if ( filesize > 0)
+        {
+            // Read version number, then verify and catch up as needed
+            uint8_t version = 0;
+            file.read(&version, 1);
+            file.seek(0, fs::SeekSet);
+            log_v("Reading weather config version: %d", version);
+
+            if ( version > currentConfigVersion)
+            {
+                log_e( "Unexpected weather config version. Expected at most %d found %d", currentConfigVersion, version);
+            }
+            if ( version == 2 )
+            {
+                if (filesize != sizeof(weather_config_t_v2))
+                {
+                    log_e( "Failed to read weather config file. Wrong filesize! Expected %d found %d", sizeof(weather_config_t_v2), filesize);
+                }
+                else
+                {
+                    file.read((uint8_t *)&weather_config, filesize);
+                }
+            }
         }
+        else
+        {
+            log_e( "Failed to read weather config file. File size is %d", filesize);
+        }
+
         file.close();
     }
 }
+

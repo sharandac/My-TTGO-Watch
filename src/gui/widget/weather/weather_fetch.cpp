@@ -31,6 +31,9 @@
 
 #include "hardware/powermgm.h"
 
+/* Utility function to convert numbers to directions */
+static void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree);
+
 uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
     
     WiFiClient today_client;
@@ -112,6 +115,10 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
     snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["pressure"].as<float>() );
     strcpy( weather_today->icon, doc["weather"][0]["icon"] );
     strcpy( weather_today->name, doc["name"] );
+
+    int directionDegree = doc["wind"]["deg"].as<int>();
+    int speed = doc["wind"]["speed"].as<int>();
+    weather_wind_to_string( weather_today, speed, directionDegree );
 
     doc.clear();
     free( json );
@@ -199,9 +206,52 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
         snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
         strcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] );
         strcpy( weather_forecast[ i ].name, doc["city"]["name"] );
+
+        int directionDegree = doc["list"][i]["wind"]["deg"].as<int>();
+        int speed = doc["list"][i]["wind"]["speed"].as<int>();
+        weather_wind_to_string( &weather_forecast[i], speed, directionDegree );
     }
 
     doc.clear();
     free( json );
     return( 200 );
+}
+
+void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree )
+{
+    const char *dir = "N";
+    if ( directionDegree > 348 )
+        ; // already set to "N"
+    else if ( directionDegree > 326 )
+        dir = "NNW";
+    else if ( directionDegree > 303 )
+        dir = "NW";
+    else if ( directionDegree > 281 )
+        dir = "WNW";
+    else if ( directionDegree > 258 )
+        dir = "W";
+    else if ( directionDegree > 236 )
+        dir = "WSW";
+    else if ( directionDegree > 213 )
+        dir = "SW";
+    else if ( directionDegree > 191 )
+        dir = "SSW";
+    else if ( directionDegree > 168 )
+        dir = "S";
+    else if ( directionDegree > 146 )
+        dir = "SSE";
+    else if ( directionDegree > 123 )
+        dir = "SE";
+    else if ( directionDegree > 101 )
+        dir = "ESE";
+    else if ( directionDegree > 78 )
+        dir = "E";
+    else if ( directionDegree > 56 )
+        dir = "ENE";
+    else if ( directionDegree > 33 )
+        dir = "NE";
+    else if ( directionDegree > 11 )
+        dir = "NNE";
+    snprintf( container->wind, sizeof(container->wind), "%d %s", speed, dir);
+    return;
 }
