@@ -86,7 +86,7 @@ void weather_app_setup( void ) {
     lv_obj_reset_style_list( weather_widget_wind_label, LV_OBJ_PART_MAIN );
     lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
 
-    if( weather_config.showWind)
+    if( weather_config.showWind )
     {
         lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -20);
         lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, +5);
@@ -152,15 +152,15 @@ void weather_widget_sync_Task( void * pvParameters ) {
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_RELEASED, resolve_owm_icon( weather_today.icon ) );
                     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_PRESSED, resolve_owm_icon( weather_today.icon ) );
 
-                    if (weather_config.showWind)
+                    if ( weather_config.showWind )
                     {
-                        lv_label_set_text( weather_widget_wind_label, weather_today.wind);
+                        lv_label_set_text( weather_widget_wind_label, weather_today.wind );
                         lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -22);
                         lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
                     }
                     else
                     {
-                        lv_label_set_text( weather_widget_wind_label, "");
+                        lv_label_set_text( weather_widget_wind_label, "" );
                         lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
                         lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
                     }

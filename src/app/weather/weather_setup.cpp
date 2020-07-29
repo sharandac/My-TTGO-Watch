@@ -40,7 +40,7 @@ lv_style_t weather_widget_setup_style;
 
 LV_IMG_DECLARE(exit_32px);
 
-static void weather_apikey_event_cb( lv_obj_t * obj, lv_event_t event );
+static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
@@ -91,7 +91,7 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_textarea_set_cursor_hidden( weather_apikey_textfield, true);
     lv_obj_set_width( weather_apikey_textfield, LV_HOR_RES /4 * 3 );
     lv_obj_align( weather_apikey_textfield, weather_apikey_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( weather_apikey_textfield, weather_apikey_event_cb );
+    lv_obj_set_event_cb( weather_apikey_textfield, weather_textarea_event_cb );
 
     lv_obj_t *weather_lat_cont = lv_obj_create( weather_widget_setup_tile, NULL );
     lv_obj_set_size(weather_lat_cont, hres / 2 , 40 );
@@ -108,7 +108,7 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_textarea_set_cursor_hidden( weather_lat_textfield, true);
     lv_obj_set_width( weather_lat_textfield, LV_HOR_RES / 4 );
     lv_obj_align( weather_lat_textfield, weather_lat_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( weather_lat_textfield, weather_apikey_event_cb );
+    lv_obj_set_event_cb( weather_lat_textfield, weather_textarea_event_cb );
 
     lv_obj_t *weather_lon_cont = lv_obj_create( weather_widget_setup_tile, NULL );
     lv_obj_set_size(weather_lon_cont, hres / 2 , 40 );
@@ -125,37 +125,39 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_textarea_set_cursor_hidden( weather_lon_textfield, true);
     lv_obj_set_width( weather_lon_textfield, LV_HOR_RES / 4 );
     lv_obj_align( weather_lon_textfield, weather_lon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( weather_lon_textfield, weather_apikey_event_cb );
+    lv_obj_set_event_cb( weather_lon_textfield, weather_textarea_event_cb );
 
     lv_obj_t *weather_autosync_cont = lv_obj_create( weather_widget_setup_tile, NULL );
     lv_obj_set_size( weather_autosync_cont, hres , 40);
     lv_obj_add_style( weather_autosync_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( weather_autosync_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, -5 );
+    lv_obj_align( weather_autosync_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
     weather_autosync_onoff = lv_switch_create( weather_autosync_cont, NULL );
     lv_switch_off( weather_autosync_onoff, LV_ANIM_ON );
-    lv_obj_align( weather_autosync_onoff, weather_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, -5 );
+    lv_obj_align( weather_autosync_onoff, weather_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_autosync_onoff, weather_autosync_onoff_event_handler );
     lv_obj_t *weather_autosync_label = lv_label_create( weather_autosync_cont, NULL);
     lv_obj_add_style( weather_autosync_label, LV_OBJ_PART_MAIN, style );
     lv_label_set_text( weather_autosync_label, "Sync if wifi connected");
-    lv_obj_align( weather_autosync_label, weather_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, -5 );
-    if (weather_config->autosync)
+    lv_obj_align( weather_autosync_label, weather_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
+    lv_obj_t *weather_wind_cont = lv_obj_create( weather_widget_setup_tile, NULL);
+    lv_obj_set_size( weather_wind_cont, hres, 40);
+    lv_obj_add_style( weather_wind_cont, LV_OBJ_PART_MAIN, style);
+    lv_obj_align( weather_wind_cont, weather_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    weather_wind_onoff = lv_switch_create( weather_wind_cont, NULL);
+    lv_switch_off( weather_wind_onoff, LV_ANIM_ON);
+    lv_obj_align( weather_wind_onoff, weather_wind_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_set_event_cb( weather_wind_onoff, weather_wind_onoff_event_handler);
+    lv_obj_t *weather_wind_label = lv_label_create(weather_wind_cont, NULL);
+    lv_obj_add_style( weather_wind_label, LV_OBJ_PART_MAIN, style);
+    lv_label_set_text( weather_wind_label, "Display wind");
+    lv_obj_align( weather_wind_label, weather_wind_cont, LV_ALIGN_IN_LEFT_MID, 5, 0);
+
+    if ( weather_config->autosync)
         lv_switch_on(weather_autosync_onoff, LV_ANIM_OFF);
     else
         lv_switch_off(weather_autosync_onoff, LV_ANIM_OFF);
 
-    lv_obj_t *weather_wind_cont = lv_obj_create(weather_widget_setup_tile, NULL);
-    lv_obj_set_size(weather_wind_cont, hres, 40);
-    lv_obj_add_style(weather_wind_cont, LV_OBJ_PART_MAIN, style);
-    lv_obj_align(weather_wind_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-    weather_wind_onoff = lv_switch_create(weather_wind_cont, NULL);
-    lv_switch_off(weather_wind_onoff, LV_ANIM_ON);
-    lv_obj_align(weather_wind_onoff, weather_wind_cont, LV_ALIGN_IN_RIGHT_MID, -5, 10);
-    lv_obj_set_event_cb(weather_wind_onoff, weather_wind_onoff_event_handler);
-    lv_obj_t *weather_wind_label = lv_label_create(weather_wind_cont, NULL);
-    lv_obj_add_style(weather_wind_label, LV_OBJ_PART_MAIN, style);
-    lv_label_set_text(weather_wind_label, "Display wind");
-    lv_obj_align(weather_wind_label, weather_wind_cont, LV_ALIGN_IN_LEFT_MID, 5, 10);
     if ( weather_config->showWind )
         lv_switch_on( weather_wind_onoff, LV_ANIM_OFF );
     else
@@ -163,46 +165,38 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     log_e("Display wind currently set to %d", weather_config->showWind);
 }
 
-static void weather_apikey_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         keyboard_set_textarea( obj );
     }
 }
 
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        weather_config_t *weather_config = weather_get_config();
-        if( lv_switch_get_state( obj ) ) {
-            weather_config->autosync = true;
-        }
-        else {
-            weather_config->autosync = false;
-        }
-    }
-}
-
-static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       keyboard_hide();
-                                        weather_config_t *weather_config = weather_get_config();
-                                        strcpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ) );
-                                        strcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ) );
-                                        strcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ) );
-                                        weather_save_config();
-                                        weather_jump_to_forecast();
-                                        break;
+    switch (event) {
+        case (LV_EVENT_VALUE_CHANGED):      weather_config_t *weather_config = weather_get_config();
+                                            weather_config->autosync = lv_switch_get_state( obj );
+                                            break;
     }
 }
 
 static void weather_wind_onoff_event_handler(lv_obj_t *obj, lv_event_t event)
 {
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        weather_config_t *weather_config = weather_get_config();
-        weather_config->showWind = lv_switch_get_state( weather_wind_onoff);
-        weather_save_config();
-        weather_jump_to_forecast();
-        break;
+    switch (event) {
+        case ( LV_EVENT_VALUE_CHANGED ):    weather_config_t *weather_config = weather_get_config();
+                                            weather_config->showWind = lv_switch_get_state( obj );
+                                            break;
+    }
+}
+
+static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):           keyboard_hide();
+                                            weather_config_t *weather_config = weather_get_config();
+                                            strcpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ) );
+                                            strcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ) );
+                                            strcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ) );
+                                            weather_save_config();
+                                            weather_jump_to_forecast();
+                                            break;
     }
 }

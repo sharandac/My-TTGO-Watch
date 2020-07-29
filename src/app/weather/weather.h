@@ -49,8 +49,6 @@
 
     typedef weather_config_t_v2 weather_config_t;
 
-
-
     typedef struct {
         bool valide = false;
         time_t timestamp = 0;
