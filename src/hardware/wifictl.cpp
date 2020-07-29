@@ -139,7 +139,7 @@ void wifictl_save_network( void ) {
   fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf("Can't save file: %s\r\n", WIFICTL_CONFIG_FILE );
+    log_e("Can't save file: %s", WIFICTL_CONFIG_FILE );
   }
   else {
     file.write( (uint8_t *)wifictl_networklist, sizeof( wifictl_networklist  ) );
@@ -154,12 +154,12 @@ void wifictl_load_network( void ) {
   fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf("Can't open file: %s\r\n", WIFICTL_CONFIG_FILE );
+    log_e("Can't open file: %s", WIFICTL_CONFIG_FILE );
   }
   else {
     int filesize = file.size();
     if ( filesize > sizeof( wifictl_networklist  ) ) {
-      Serial.printf("Failed to read configfile. Wrong filesize!\r\n" );
+      log_e("Failed to read configfile. Wrong filesize!" );
     }
     else {
       file.read( (uint8_t *)wifictl_networklist, filesize );

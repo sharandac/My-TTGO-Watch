@@ -68,7 +68,7 @@ void timesync_save_config( void ) {
   fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf("Can't save file: %s\r\n", TIMESYNC_CONFIG_FILE );
+    log_e("Can't save file: %s", TIMESYNC_CONFIG_FILE );
   }
   else {
     file.write( (uint8_t *)&timesync_config, sizeof( timesync_config ) );
@@ -80,12 +80,12 @@ void timesync_read_config( void ) {
   fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf("Can't open file: %s!\r\n", TIMESYNC_CONFIG_FILE );
+    log_e("Can't open file: %s!", TIMESYNC_CONFIG_FILE );
   }
   else {
     int filesize = file.size();
     if ( filesize > sizeof( timesync_config ) ) {
-      Serial.printf("Failed to read configfile. Wrong filesize!\r\n" );
+      log_e("Failed to read configfile. Wrong filesize!" );
     }
     else {
       file.read( (uint8_t *)&timesync_config, filesize );
@@ -147,7 +147,7 @@ void timesync_Task( void * pvParameters ) {
             configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
 
             if( !getLocalTime( &info ) ) {
-                Serial.println( "Failed to obtain time\r\n" );
+                log_e("Failed to obtain time" );
             }
             xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
         }

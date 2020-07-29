@@ -162,7 +162,6 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
         lv_switch_on( weather_wind_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( weather_wind_onoff, LV_ANIM_OFF );
-    log_e("Display wind currently set to %d", weather_config->showWind);
 }
 
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {

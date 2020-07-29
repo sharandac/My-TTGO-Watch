@@ -73,13 +73,13 @@ void powermgm_loop( TTGOClass *ttgo ) {
             ttgo->power->setDCDC3Voltage( 3300 );
             // normal wake up from standby
             if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
-                Serial.printf("wakeup\r\n");
+                log_e("wakeup");
                 display_go_wakeup( ttgo );
                 motor_vibe( 1 );
             }
             // silence wakeup request from standby
             else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
-                Serial.printf("silence wakeup\r\n");
+                log_e("silence wakeup");
                 display_go_silence_wakeup( ttgo );
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             }
@@ -94,7 +94,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
             ttgo->power->offTimer();
         }        
         else {
-            Serial.printf("go to standby\r\n");
+            log_e("go to standby");
             display_go_sleep( ttgo );
             timesyncToRTC();
             if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();

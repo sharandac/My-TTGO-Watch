@@ -96,7 +96,7 @@ void display_save_config( void ) {
   fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf( __FILE__ "Can't save file: %s\r\n", DISPLAY_CONFIG_FILE );
+    log_e("Can't save file: %s", DISPLAY_CONFIG_FILE );
   }
   else {
     file.write( (uint8_t *)&display_config, sizeof( display_config ) );
@@ -111,12 +111,12 @@ void display_read_config( void ) {
   fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf( __FILE__ "Can't open file: %s!\r\n", DISPLAY_CONFIG_FILE );
+    log_e("Can't open file: %s!", DISPLAY_CONFIG_FILE );
   }
   else {
     int filesize = file.size();
     if ( filesize > sizeof( display_config ) ) {
-      Serial.printf( __FILE__ "Failed to read configfile. Wrong filesize!\r\n" );
+      log_e("Failed to read configfile. Wrong filesize!" );
     }
     else {
       file.read( (uint8_t *)&display_config, filesize );
