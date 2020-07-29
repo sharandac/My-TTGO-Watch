@@ -40,7 +40,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
     uint32_t retval = -1;
 
 	if ( !today_client.connect( OWM_HOST, OWM_PORT ) ) {
-        Serial.printf("connection failed\r\n");
+        Serial.printf( __FILE__ "connection failed\r\n");
         return( -1 );
 	}
 
@@ -55,7 +55,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
 	uint64_t startMillis = millis();
 	while ( today_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
-            Serial.printf("connection timeout\r\n");
+            Serial.printf( __FILE__ "connection timeout\r\n");
 			today_client.stop();
 			return( retval );
 		}
@@ -63,7 +63,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
 
     char *json = (char *)ps_malloc( WEATHER_TODAY_BUFFER_SIZE );
     if ( json == NULL ) {
-        Serial.printf("memory alloc failed\r\n");
+        Serial.printf( __FILE__ "memory alloc failed\r\n");
         today_client.stop();
         return( retval );
     }
@@ -93,7 +93,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
 
     DeserializationError error = deserializeJson( doc, json);
     if (error) {
-        Serial.print(F("deserializeJson() failed: "));
+        Serial.print(F( __FILE__ "weather today deserializeJson() failed: "));
         Serial.println(error.c_str());
         doc.clear();
         free( json );
@@ -103,7 +103,7 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
     retval = doc["cod"].as<int>();
 
     if ( retval != 200 ) {
-        Serial.printf("get weather failed, returncode: %d\r\n", retval );
+        Serial.printf( __FILE__ "get weather failed, returncode: %d\r\n", retval );
         doc.clear();
         free( json );
         return( retval );
@@ -131,7 +131,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     uint32_t retval = -1;
 
 	if ( !forecast_client.connect( OWM_HOST, OWM_PORT ) ) {
-        Serial.printf("connection failed\r\n");
+        Serial.printf( __FILE__ "connection failed\r\n");
         return( retval );
 	}
 
@@ -146,7 +146,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
 	uint64_t startMillis = millis();
 	while ( forecast_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
-            Serial.printf("connection timeout\r\n");
+            Serial.printf( __FILE__ "connection timeout\r\n");
 			forecast_client.stop();
 			return( retval );
 		}
@@ -154,7 +154,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
 
     char *json = (char *)ps_malloc( WEATHER_FORECAST_BUFFER_SIZE );
     if ( json == NULL ) {
-        Serial.printf("memory alloc failed\r\n");
+        Serial.printf( __FILE__ "memory alloc failed\r\n");
         forecast_client.stop();
         return( retval );
     }
@@ -182,7 +182,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     DynamicJsonDocument doc(20000);
     DeserializationError error = deserializeJson( doc, json );
     if (error) {
-        Serial.print(F("deserializeJson() failed: "));
+        Serial.print(F( __FILE__ "weather forecast deserializeJson() failed: "));
         Serial.println(error.c_str());
         doc.clear();
         free( json );
@@ -192,7 +192,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     retval = doc["cod"].as<int>();
 
     if ( retval != 200 ) {
-        Serial.printf("get weather forecast failed, returncode: %d\r\n", retval );
+        Serial.printf( __FILE__ "get weather forecast failed, returncode: %d\r\n", retval );
         doc.clear();
         free( json );
         return( retval );

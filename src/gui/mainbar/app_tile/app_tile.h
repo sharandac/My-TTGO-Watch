@@ -24,6 +24,28 @@
 
     #include <TTGO.h>
 
+    #define MAX_APPS_ICON_HORZ      3
+    #define MAX_APPS_ICON_VERT      2
+    #define MAX_APPS_ICON           ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT )
+
+    #define APP_ICON_X_SIZE         48
+    #define APP_ICON_Y_SIZE         48
+    #define APP_ICON_X_CLEARENCE    32
+    #define APP_ICON_Y_CLEARENCE    32
+    #define APP_LABEL_X_SIZE        APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE
+    #define APP_LABEL_Y_SIZE        APP_ICON_Y_CLEARENCE / 2
+
+    #define APP_FIRST_X_POS         ( 240 - ( APP_ICON_X_SIZE * MAX_APPS_ICON_HORZ + APP_ICON_X_CLEARENCE * ( MAX_APPS_ICON_HORZ - 1 ) ) ) / 2
+    #define APP_FIRST_Y_POS         ( 240 - ( APP_ICON_Y_SIZE * MAX_APPS_ICON_VERT + APP_ICON_Y_CLEARENCE * ( MAX_APPS_ICON_VERT - 1 ) ) ) / 2
+
+    typedef struct {
+        lv_obj_t *app;
+        lv_obj_t *label;
+        lv_coord_t x;
+        lv_coord_t y;
+        bool active;
+    } lv_app_entry_t;
+
     void app_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
 
 #endif // _APP_TILE_H

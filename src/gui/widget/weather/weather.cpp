@@ -21,8 +21,6 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include "weather.h"
-#include "weather_fetch.h"
 #include <WiFi.h>
 
 #include "gui/mainbar/mainbar.h"
@@ -30,8 +28,11 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "images/resolve_owm_icon.h"
-
 #include "hardware/motor.h"
+
+#include "weather.h"
+#include "weather_fetch.h"
+#include "weather_setup.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
@@ -51,7 +52,7 @@ static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 LV_IMG_DECLARE(owm_01d_64px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
-void weather_widget_setup( void ) {
+void weather_app_setup( void ) {
 
     weather_load_config();
 
@@ -59,8 +60,8 @@ void weather_widget_setup( void ) {
     weather_widget_tile_num = mainbar_get_next_free_tile( TILE_TYPE_WIDGET_TILE );
     weather_widget_setup_tile_num = mainbar_get_next_free_tile( TILE_TYPE_WIDGET_SETUP );
     // register the widget setup function
-    mainbar_set_tile_setup_cb( weather_widget_tile_num, weather_widget_tile_setup );
-    mainbar_set_tile_setup_cb( weather_widget_setup_tile_num, weather_widget_setup_tile_setup );
+    mainbar_set_tile_setup_cb( weather_widget_tile_num, weather_tile_setup );
+    mainbar_set_tile_setup_cb( weather_widget_setup_tile_num, weather_setup_tile_setup );
 
     // get an widget container from main_tile
     weather_widget_cont = main_tile_register_widget();
@@ -179,7 +180,7 @@ void weather_save_config( void ) {
     fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_WRITE );
 
     if ( !file ) {
-        Serial.printf("Can't save file: %s\r\n", WEATHER_CONFIG_FILE );
+        Serial.printf( __FILE__ "Can't save file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
         file.write( (uint8_t *)&weather_config, sizeof( weather_config ) );
@@ -195,7 +196,7 @@ void weather_load_config( void ) {
     fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_READ );
 
     if (!file) {
-        Serial.printf("Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
+        Serial.printf( __FILE__ "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
         size_t filesize = file.size();
