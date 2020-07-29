@@ -28,12 +28,28 @@
 
     #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
 
-    typedef struct {
+    constexpr uint8_t currentConfigVersion = 2;
+
+    typedef struct
+    {
         char apikey[64] = "";
         char lon[16] = "";
         char lat[16] = "";
         bool autosync = true;
-    } weather_config_t;
+    } weather_config_t_v1;
+
+    typedef struct {
+        char version = 2;
+        char apikey[64] = "";
+        char lon[16] = "";
+        char lat[16] = "";
+        char autosync : 1;
+        char showWind : 1;
+    } weather_config_t_v2;
+
+    typedef weather_config_t_v2 weather_config_t;
+
+
 
     typedef struct {
         bool valide = false;
@@ -43,6 +59,7 @@
         char humidity[8] = "";
         char name[32] = "";
         char icon[8] = "";
+        char wind[8] = "";
     } weather_forcast_t;
 
     void weather_widget_setup( void );
