@@ -33,7 +33,7 @@ uint64_t update_check_new_version( void ) {
     uint64_t retval = -1;
 
 	if ( !check_version_client.connect( FIRMWARE_HOST, FIRMWARE_HOST_PORT ) ) {
-        Serial.printf("connection failed\r\n");
+        Serial.printf( __FILE__ "connection failed\r\n");
         return( -1 );
 	}
 
@@ -48,15 +48,15 @@ uint64_t update_check_new_version( void ) {
 	uint64_t startMillis = millis();
 	while ( check_version_client.available() == 0 ) {
 		if ( millis() - startMillis > 5000 ) {
-            Serial.printf("connection timeout\r\n");
+            Serial.printf( __FILE__ "connection timeout\r\n");
 			check_version_client.stop();
 			return( retval );
 		}
 	}
 
-    char *json = (char *)ps_malloc( 100 );
+    char *json = (char *)ps_malloc( 200 );
     if ( json == NULL ) {
-        Serial.printf("memory alloc failed\r\n");
+        Serial.printf( __FILE__ "memory alloc failed\r\n");
         check_version_client.stop();
         return( retval );
     }
@@ -82,11 +82,11 @@ uint64_t update_check_new_version( void ) {
     }
     check_version_client.stop();
 
-    DynamicJsonDocument doc(200);
+    DynamicJsonDocument doc( 400 );
 
     DeserializationError error = deserializeJson( doc, json);
     if (error) {
-        Serial.print(F("deserializeJson() failed: "));
+        Serial.print(F( __FILE__ "update version deserializeJson() failed: "));
         Serial.println(error.c_str());
         doc.clear();
         free( json );

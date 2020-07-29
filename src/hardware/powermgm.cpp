@@ -106,7 +106,7 @@ void powermgm_loop( TTGOClass *ttgo ) {
             powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
             ttgo->power->setDCDC3Voltage( 3000 );
             ttgo->power->clearTimerStatus();
-            ttgo->power->setTimer( 30 );
+            ttgo->power->setTimer( 60 );
             setCpuFrequencyMhz( 10 );
             gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
             gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);

@@ -43,7 +43,7 @@ static void weather_apikey_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 
-void weather_widget_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
 
     weather_config_t *weather_config = weather_get_config();
 

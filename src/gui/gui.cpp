@@ -29,8 +29,6 @@
 #include "keyboard.h"
 #include "mainbar/mainbar.h"
 
-#include "widget/weather/weather.h"
-
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 
@@ -55,8 +53,6 @@ void gui_setup(void)
     statusbar_setup();
     keyboard_setup();
     lv_disp_trig_activity(NULL);
-
-    weather_widget_setup();
 
     return;
 }

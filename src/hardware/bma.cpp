@@ -113,7 +113,7 @@ void bma_save_config( void ) {
   fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
-    Serial.printf("Can't save file: %s\r\n", BMA_COFIG_FILE );
+    Serial.printf( __FILE__ "Can't save file: %s\r\n", BMA_COFIG_FILE );
   }
   else {
     file.write( (uint8_t *)bma_config, sizeof( bma_config ) );
@@ -128,12 +128,12 @@ void bma_read_config( void ) {
   fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_READ );
 
   if (!file) {
-    Serial.printf("Can't open file: %s!\r\n", BMA_COFIG_FILE );
+    Serial.printf( __FILE__ "Can't open file: %s!\r\n", BMA_COFIG_FILE );
   }
   else {
     int filesize = file.size();
     if ( filesize > sizeof( bma_config ) ) {
-      Serial.printf("Failed to read configfile. Wrong filesize!\r\n" );
+      Serial.printf( __FILE__ "Failed to read configfile. Wrong filesize!\r\n" );
     }
     else {
       file.read( (uint8_t *)bma_config, filesize );

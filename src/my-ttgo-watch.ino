@@ -33,6 +33,8 @@
 #include "hardware/motor.h"
 #include "hardware/wifictl.h"
 
+#include "app/weather/weather.h"
+
 TTGOClass *ttgo = TTGOClass::getWatch();
 
 void setup()
@@ -67,12 +69,17 @@ void setup()
     gui_setup(); 
     lv_task_handler();
 
-    for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
-        ttgo->bl->adjust( bl );
-        delay(5);
-    }
-    wifictl_on();
+    /*
+     * add apps and widgets here!!!
+     */
+    weather_app_setup();
+    /*
+     *
+     */
     
+    wifictl_on();
+    display_set_brightness( display_get_brightness() );
+
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
