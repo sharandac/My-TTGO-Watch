@@ -38,14 +38,16 @@ EventGroupHandle_t weather_forecast_event_handle = NULL;
 TaskHandle_t _weather_forecast_sync_Task;
 void weather_forecast_sync_Task( void * pvParameters );
 
-lv_obj_t *weather_widget_tile = NULL;
+lv_obj_t *weather_forecast_tile = NULL;
+lv_style_t weather_forecast_style;
+uint32_t weather_forecast_tile_num;
+
 lv_obj_t *weather_forecast_location_label = NULL;
 lv_obj_t *weather_forecast_update_label = NULL;
 lv_obj_t *weather_forecast_time_label[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_icon_imgbtn[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_temperature_label[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_wind_label[ WEATHER_MAX_FORECAST ];
-lv_style_t weather_widget_style;
 
 weather_forcast_t weather_forecast[ WEATHER_MAX_FORECAST ];
 
@@ -58,48 +60,52 @@ static void exit_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 static void setup_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 static void refresh_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
-void weather_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
-    lv_obj_t * exit_btn = lv_imgbtn_create(tile, NULL);
+void weather_forecast_tile_setup( uint32_t tile_num ) {
+    weather_forecast_tile_num = tile_num;
+    weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
+    lv_style_copy( &weather_forecast_style, mainbar_get_style() );
+
+    lv_obj_t * exit_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align(exit_btn, tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &weather_forecast_style );
+    lv_obj_align(exit_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
     lv_obj_set_event_cb( exit_btn, exit_weather_widget_event_cb );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create(tile, NULL);
+    lv_obj_t * setup_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align(setup_btn, tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &weather_forecast_style );
+    lv_obj_align(setup_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, setup_weather_widget_event_cb );
 
-    lv_obj_t * reload_btn = lv_imgbtn_create(tile, NULL);
+    lv_obj_t * reload_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_RELEASED, &refresh_32px);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_PRESSED, &refresh_32px);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_RELEASED, &refresh_32px);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_PRESSED, &refresh_32px);
-    lv_obj_add_style(reload_btn, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align(reload_btn, tile, LV_ALIGN_IN_TOP_RIGHT, -10 , STATUSBAR_HEIGHT + 10 );
+    lv_obj_add_style(reload_btn, LV_IMGBTN_PART_MAIN, &weather_forecast_style );
+    lv_obj_align(reload_btn, weather_forecast_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , STATUSBAR_HEIGHT + 10 );
     lv_obj_set_event_cb( reload_btn, refresh_weather_widget_event_cb );
 
-    weather_forecast_location_label = lv_label_create( tile , NULL);
+    weather_forecast_location_label = lv_label_create( weather_forecast_tile , NULL);
     lv_label_set_text( weather_forecast_location_label, "n/a");
     lv_obj_reset_style_list( weather_forecast_location_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( weather_forecast_location_label, tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    weather_forecast_update_label = lv_label_create( tile , NULL);
+    weather_forecast_update_label = lv_label_create( weather_forecast_tile , NULL);
     lv_label_set_text( weather_forecast_update_label, "");
     lv_obj_reset_style_list( weather_forecast_update_label, LV_OBJ_PART_MAIN );
     lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
-    lv_obj_t * weater_forecast_cont = lv_obj_create( tile, NULL );
-    lv_obj_set_size( weater_forecast_cont, hres , 96 );
-    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( weater_forecast_cont, tile, LV_ALIGN_CENTER, 0, 10 );
+    lv_obj_t * weater_forecast_cont = lv_obj_create( weather_forecast_tile, NULL );
+    lv_obj_set_size( weater_forecast_cont, LV_HOR_RES_MAX , 96 );
+    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, &weather_forecast_style  );
+    lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 10 );
 
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST / 4 ; i++ ) {
         weather_forecast_icon_imgbtn[ i ] = lv_imgbtn_create( weater_forecast_cont, NULL);
@@ -107,7 +113,7 @@ void weather_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_
         lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_PRESSED, &owm_01d_64px);
         lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_CHECKED_RELEASED, &owm_01d_64px);
         lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_CHECKED_PRESSED, &owm_01d_64px);
-        lv_obj_add_style( weather_forecast_icon_imgbtn[ i ], LV_IMGBTN_PART_MAIN, style);
+        lv_obj_add_style( weather_forecast_icon_imgbtn[ i ], LV_IMGBTN_PART_MAIN, &weather_forecast_style );
         lv_obj_align( weather_forecast_icon_imgbtn[ i ], weater_forecast_cont, LV_ALIGN_IN_LEFT_MID, i*58, 0 );
 
         weather_forecast_temperature_label[ i ] = lv_label_create( weater_forecast_cont , NULL);
@@ -147,7 +153,7 @@ void weather_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_
 static void exit_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( MAIN_TILE, LV_ANIM_OFF );
+                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }
 }

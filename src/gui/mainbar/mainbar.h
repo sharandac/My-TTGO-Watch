@@ -68,6 +68,13 @@
         lv_point_t pos;
     } lv_tile_entry_t;
 
+    typedef struct {
+        lv_obj_t *tile;
+    } lv_tile_t;
+
+    #define MAINBAR_APP_TILE_X_START     0
+    #define MAINBAR_APP_TILE_Y_START     4
+
     /*
      * @brief mainbar setup funktion
      * @param none
@@ -84,14 +91,19 @@
      * @param   tile    tile number
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
-    void mainbar_jump_to_tilenumber( lv_tile_number tile_number, lv_anim_enable_t anim );
+    void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim );
     /*
      * @brief jump direct to main tile
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
 
-    lv_obj_t * mainbar_get_tile_obj( lv_tile_number tile_number );
+    lv_obj_t * mainbar_get_tile_obj( uint32_t tile_number );
+    uint32_t mainbar_add_tile( uint16_t x, uint16_t y );
+    lv_style_t *mainbar_get_style( void );
+    void mainbar_print_cont( void );
+    uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y );
+
     lv_tile_number mainbar_get_next_free_tile( lv_tile_type tile_type );
     void mainbar_set_tile_setup_cb( lv_tile_number tile_number, TILE_CALLBACK_FUNC callback );
 

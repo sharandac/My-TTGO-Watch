@@ -68,6 +68,7 @@ void setup()
 
     gui_setup(); 
     lv_task_handler();
+    ttgo->bl->adjust( 32 );
 
     /*
      * add apps and widgets here!!!

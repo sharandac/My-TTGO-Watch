@@ -27,7 +27,19 @@
 #include "statusbar.h"
 #include "screenshot.h"
 #include "keyboard.h"
+
 #include "mainbar/mainbar.h"
+#include "mainbar/main_tile/main_tile.h"
+#include "mainbar/app_tile/app_tile.h"
+#include "mainbar/note_tile/note_tile.h"
+#include "mainbar/setup_tile/setup.h"
+
+#include "mainbar/setup_tile/battery_settings/battery_settings.h"
+#include "mainbar/setup_tile/display_settings/display_settings.h"
+#include "mainbar/setup_tile/move_settings/move_settings.h"
+#include "mainbar/setup_tile/time_settings/time_settings.h"
+#include "mainbar/setup_tile/update/update.h"
+#include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
@@ -50,9 +62,24 @@ void gui_setup(void)
     lv_obj_align(img_bin, NULL, LV_ALIGN_CENTER, 0, 0);
 
     mainbar_setup();
+    /* add the four mainbar screens */
+    main_tile_setup();
+    app_tile_setup();
+    note_tile_setup();
+    setup_tile_setup();
+
+    /* add setup */
+    battery_settings_tile_setup();
+    display_settings_tile_setup();
+    move_settings_tile_setup();
+    time_settings_tile_setup();
+    wlan_settings_tile_setup();
+    update_tile_setup();
+
     statusbar_setup();
-    keyboard_setup();
     lv_disp_trig_activity(NULL);
+
+    keyboard_setup();
 
     return;
 }

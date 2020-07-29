@@ -28,10 +28,10 @@
     #define MAX_APPS_ICON_VERT      2
     #define MAX_APPS_ICON           ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT )
 
-    #define APP_ICON_X_SIZE         48
-    #define APP_ICON_Y_SIZE         48
-    #define APP_ICON_X_CLEARENCE    32
-    #define APP_ICON_Y_CLEARENCE    32
+    #define APP_ICON_X_SIZE         64
+    #define APP_ICON_Y_SIZE         64
+    #define APP_ICON_X_CLEARENCE    8
+    #define APP_ICON_Y_CLEARENCE    20
     #define APP_LABEL_X_SIZE        APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE
     #define APP_LABEL_Y_SIZE        APP_ICON_Y_CLEARENCE / 2
 
@@ -46,6 +46,7 @@
         bool active;
     } lv_app_entry_t;
 
-    void app_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+    void app_tile_setup( void );
+    lv_obj_t *app_tile_register_app( const char* appname );
 
 #endif // _APP_TILE_H

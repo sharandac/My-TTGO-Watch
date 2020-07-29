@@ -32,6 +32,6 @@
      * @param   hres    horizonal resolution
      * @param   vres    vertical resolution
      */
-    void battery_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+    void battery_settings_tile_setup( void );
 
 #endif // _BATTERY_SETTINGS_H

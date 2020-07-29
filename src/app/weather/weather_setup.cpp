@@ -30,7 +30,10 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-lv_obj_t *weather_widget_setup_tile = NULL;
+lv_obj_t *weather_setup_tile = NULL;
+lv_style_t weather_setup_style;
+uint32_t weather_setup_tile_num;
+
 lv_obj_t *weather_apikey_textfield = NULL;
 lv_obj_t *weather_lat_textfield = NULL;
 lv_obj_t *weather_lon_textfield = NULL;
@@ -45,43 +48,39 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
 
-void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void weather_setup_tile_setup( uint32_t tile_num ) {
 
     weather_config_t *weather_config = weather_get_config();
 
-    lv_style_init( &weather_widget_setup_style );
-    lv_style_set_radius( &weather_widget_setup_style, LV_OBJ_PART_MAIN, 0);
-    lv_style_set_bg_color( &weather_widget_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &weather_widget_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &weather_widget_setup_style, LV_OBJ_PART_MAIN, 0);
-    lv_style_set_text_color( &weather_widget_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-    lv_style_set_image_recolor( &weather_widget_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
+    weather_setup_tile_num = tile_num;
+    weather_setup_tile = mainbar_get_tile_obj( weather_setup_tile_num );
 
-    weather_widget_setup_tile = lv_obj_create( tile, NULL);
-    lv_obj_set_size( weather_widget_setup_tile, hres , vres);
-    lv_obj_align( weather_widget_setup_tile, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_add_style( weather_widget_setup_tile, LV_OBJ_PART_MAIN, &weather_widget_setup_style );
+    lv_style_copy( &weather_setup_style, mainbar_get_style() );
+    lv_style_set_bg_color( &weather_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
+    lv_style_set_bg_opa( &weather_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &weather_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_obj_add_style( weather_setup_tile, LV_OBJ_PART_MAIN, &weather_setup_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( weather_widget_setup_tile, NULL);
+    lv_obj_t *exit_btn = lv_imgbtn_create( weather_setup_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( exit_btn, weather_widget_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &weather_setup_style );
+    lv_obj_align( exit_btn, weather_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     lv_obj_set_event_cb( exit_btn, exit_weather_widget_setup_event_cb );
     
-    lv_obj_t *exit_label = lv_label_create( weather_widget_setup_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_t *exit_label = lv_label_create( weather_setup_tile, NULL);
+    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( exit_label, "open weather setup");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
-    lv_obj_t *weather_apikey_cont = lv_obj_create( weather_widget_setup_tile, NULL );
-    lv_obj_set_size(weather_apikey_cont, hres , 40);
-    lv_obj_add_style( weather_apikey_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( weather_apikey_cont, weather_widget_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_t *weather_apikey_cont = lv_obj_create( weather_setup_tile, NULL );
+    lv_obj_set_size(weather_apikey_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( weather_apikey_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
+    lv_obj_align( weather_apikey_cont, weather_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     lv_obj_t *weather_apikey_label = lv_label_create( weather_apikey_cont, NULL);
-    lv_obj_add_style( weather_apikey_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( weather_apikey_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( weather_apikey_label, "appid");
     lv_obj_align( weather_apikey_label, weather_apikey_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     weather_apikey_textfield = lv_textarea_create( weather_apikey_cont, NULL);
@@ -93,12 +92,12 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_obj_align( weather_apikey_textfield, weather_apikey_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_apikey_textfield, weather_textarea_event_cb );
 
-    lv_obj_t *weather_lat_cont = lv_obj_create( weather_widget_setup_tile, NULL );
-    lv_obj_set_size(weather_lat_cont, hres / 2 , 40 );
-    lv_obj_add_style( weather_lat_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_t *weather_lat_cont = lv_obj_create( weather_setup_tile, NULL );
+    lv_obj_set_size(weather_lat_cont, LV_HOR_RES_MAX / 2 , 40 );
+    lv_obj_add_style( weather_lat_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_obj_align( weather_lat_cont, weather_apikey_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
     lv_obj_t *weather_lat_label = lv_label_create( weather_lat_cont, NULL);
-    lv_obj_add_style( weather_lat_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( weather_lat_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( weather_lat_label, "lat");
     lv_obj_align( weather_lat_label, weather_lat_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     weather_lat_textfield = lv_textarea_create( weather_lat_cont, NULL);
@@ -110,12 +109,12 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_obj_align( weather_lat_textfield, weather_lat_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_lat_textfield, weather_textarea_event_cb );
 
-    lv_obj_t *weather_lon_cont = lv_obj_create( weather_widget_setup_tile, NULL );
-    lv_obj_set_size(weather_lon_cont, hres / 2 , 40 );
-    lv_obj_add_style( weather_lon_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_t *weather_lon_cont = lv_obj_create( weather_setup_tile, NULL );
+    lv_obj_set_size(weather_lon_cont, LV_HOR_RES_MAX / 2 , 40 );
+    lv_obj_add_style( weather_lon_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_obj_align( weather_lon_cont, weather_apikey_cont, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 0 );
     lv_obj_t *weather_lon_label = lv_label_create( weather_lon_cont, NULL);
-    lv_obj_add_style( weather_lon_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( weather_lon_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( weather_lon_label, "lon");
     lv_obj_align( weather_lon_label, weather_lon_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     weather_lon_textfield = lv_textarea_create( weather_lon_cont, NULL);
@@ -127,29 +126,29 @@ void weather_setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_obj_align( weather_lon_textfield, weather_lon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_lon_textfield, weather_textarea_event_cb );
 
-    lv_obj_t *weather_autosync_cont = lv_obj_create( weather_widget_setup_tile, NULL );
-    lv_obj_set_size( weather_autosync_cont, hres , 40);
-    lv_obj_add_style( weather_autosync_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_t *weather_autosync_cont = lv_obj_create( weather_setup_tile, NULL );
+    lv_obj_set_size( weather_autosync_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( weather_autosync_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_obj_align( weather_autosync_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
     weather_autosync_onoff = lv_switch_create( weather_autosync_cont, NULL );
     lv_switch_off( weather_autosync_onoff, LV_ANIM_ON );
     lv_obj_align( weather_autosync_onoff, weather_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_autosync_onoff, weather_autosync_onoff_event_handler );
     lv_obj_t *weather_autosync_label = lv_label_create( weather_autosync_cont, NULL);
-    lv_obj_add_style( weather_autosync_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( weather_autosync_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( weather_autosync_label, "Sync if wifi connected");
     lv_obj_align( weather_autosync_label, weather_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
-    lv_obj_t *weather_wind_cont = lv_obj_create( weather_widget_setup_tile, NULL);
-    lv_obj_set_size( weather_wind_cont, hres, 40);
-    lv_obj_add_style( weather_wind_cont, LV_OBJ_PART_MAIN, style);
+    lv_obj_t *weather_wind_cont = lv_obj_create( weather_setup_tile, NULL);
+    lv_obj_set_size( weather_wind_cont, LV_HOR_RES_MAX, 40);
+    lv_obj_add_style( weather_wind_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_obj_align( weather_wind_cont, weather_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     weather_wind_onoff = lv_switch_create( weather_wind_cont, NULL);
     lv_switch_off( weather_wind_onoff, LV_ANIM_ON);
     lv_obj_align( weather_wind_onoff, weather_wind_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( weather_wind_onoff, weather_wind_onoff_event_handler);
     lv_obj_t *weather_wind_label = lv_label_create(weather_wind_cont, NULL);
-    lv_obj_add_style( weather_wind_label, LV_OBJ_PART_MAIN, style);
+    lv_obj_add_style( weather_wind_label, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_label_set_text( weather_wind_label, "Display wind");
     lv_obj_align( weather_wind_label, weather_wind_cont, LV_ALIGN_IN_LEFT_MID, 5, 0);
 

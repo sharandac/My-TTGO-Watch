@@ -23,7 +23,7 @@
 #include <time.h>
 
 #include "config.h"
-#include "../mainbar.h"
+#include "gui/mainbar/mainbar.h"
 #include "main_tile.h"
 
 static lv_obj_t *main_cont = NULL;
@@ -31,6 +31,7 @@ static lv_obj_t *clock_cont = NULL;
 static lv_obj_t *timelabel = NULL;
 static lv_obj_t *datelabel = NULL;
 
+static lv_style_t *style;
 static lv_style_t timestyle;
 static lv_style_t datestyle;
 
@@ -41,9 +42,10 @@ lv_task_t * task;
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
-void main_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void main_tile_setup( void ) {
 
-    main_cont = tile;
+    main_cont = mainbar_get_tile_obj( mainbar_add_tile( 0, 0 ) );
+    style = mainbar_get_style();
 
     lv_style_copy( &timestyle, style);
     lv_style_set_text_font( &timestyle, LV_STATE_DEFAULT, &Ubuntu_72px);
@@ -51,10 +53,10 @@ void main_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coo
     lv_style_copy( &datestyle, style);
     lv_style_set_text_font( &datestyle, LV_STATE_DEFAULT, &Ubuntu_16px);
 
-    clock_cont = lv_obj_create( tile, NULL );
-    lv_obj_set_size( clock_cont, hres , hres/2 );
+    clock_cont = lv_obj_create( main_cont, NULL );
+    lv_obj_set_size( clock_cont, LV_HOR_RES , LV_VER_RES / 2 );
     lv_obj_add_style( clock_cont, LV_OBJ_PART_MAIN, style );
-    lv_obj_align( clock_cont, tile, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_align( clock_cont, main_cont, LV_ALIGN_CENTER, 0, 0 );
 
     timelabel = lv_label_create( clock_cont , NULL);
     lv_label_set_text(timelabel, "00:00");

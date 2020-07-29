@@ -24,6 +24,6 @@
 
     #include <TTGO.h>
 
-    void note_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+    void note_tile_setup( void );
 
 #endif // _NOTE_TILE_H

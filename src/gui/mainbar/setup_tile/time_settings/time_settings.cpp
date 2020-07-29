@@ -24,84 +24,95 @@
 #include <WiFi.h>
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/mainbar/setup_tile/setup.h"
 #include "gui/statusbar.h"
 #include "hardware/timesync.h"
 #include "hardware/motor.h"
 
 lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
+uint32_t time_tile_num;
+
 lv_obj_t *utczone_list = NULL;
 lv_obj_t *wifisync_onoff = NULL;
 lv_obj_t *daylight_onoff = NULL;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(time_32px);
+LV_IMG_DECLARE(time_64px);
 
+static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event);
 
-void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
-    lv_style_init( &time_settings_style );
-    lv_style_set_radius( &time_settings_style, LV_OBJ_PART_MAIN, 0);
+void time_settings_tile_setup( void ) {
+    // get an app tile and copy mainstyle
+    time_tile_num = mainbar_add_app_tile( 1, 1 );
+    time_settings_tile = mainbar_get_tile_obj( time_tile_num );
+    lv_style_copy( &time_settings_style, mainbar_get_style() );
     lv_style_set_bg_color( &time_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &time_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &time_settings_style, LV_OBJ_PART_MAIN, 0);
-    lv_style_set_text_color( &time_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-    lv_style_set_image_recolor( &time_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-
-    time_settings_tile = lv_obj_create( tile, NULL);
-    lv_obj_set_size(time_settings_tile, hres , vres);
-    lv_obj_align(time_settings_tile, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_style( time_settings_tile, LV_OBJ_PART_MAIN, &time_settings_style );
+
+    // register an setup icon an set an callback
+    lv_obj_t *move_setup = lv_imgbtn_create ( setup_tile_register_setup(), NULL);
+    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_RELEASED, &time_64px);
+    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_PRESSED, &time_64px);
+    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_CHECKED_RELEASED, &time_64px);
+    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_CHECKED_PRESSED, &time_64px);
+    lv_obj_add_style( move_setup, LV_IMGBTN_PART_MAIN,  mainbar_get_style() );
+    lv_obj_align( move_setup, NULL, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_event_cb( move_setup, enter_time_setup_event_cb );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( time_settings_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, style);
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &time_settings_style );
     lv_obj_align( exit_btn, time_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     lv_obj_set_event_cb( exit_btn, exit_time_setup_event_cb );
     
     lv_obj_t *exit_label = lv_label_create( time_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_label_set_text( exit_label, "time settings");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *wifisync_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(wifisync_cont, hres , 40);
-    lv_obj_add_style( wifisync_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_set_size(wifisync_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( wifisync_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( wifisync_cont, time_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     wifisync_onoff = lv_switch_create( wifisync_cont, NULL );
     lv_switch_off( wifisync_onoff, LV_ANIM_ON );
     lv_obj_align( wifisync_onoff, wifisync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifisync_onoff, wifisync_onoff_event_handler );
     lv_obj_t *wifisync_label = lv_label_create( wifisync_cont, NULL);
-    lv_obj_add_style( wifisync_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( wifisync_label, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_label_set_text( wifisync_label, "sync when connect");
     lv_obj_align( wifisync_label, wifisync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *daylight_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(daylight_cont, hres , 40);
-    lv_obj_add_style( daylight_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_set_size(daylight_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( daylight_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( daylight_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     daylight_onoff = lv_switch_create( daylight_cont, NULL );
     lv_switch_off( daylight_onoff, LV_ANIM_ON );
     lv_obj_align( daylight_onoff, daylight_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( daylight_onoff, daylight_onoff_event_handler );
     lv_obj_t *daylight_label = lv_label_create( daylight_cont, NULL);
-    lv_obj_add_style( daylight_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( daylight_label, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_label_set_text( daylight_label, "daylight saving");
     lv_obj_align( daylight_label, daylight_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *utczone_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(utczone_cont, hres , 40);
-    lv_obj_add_style( utczone_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_set_size(utczone_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( utczone_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( utczone_cont, daylight_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
     lv_obj_t *utczone_label = lv_label_create( utczone_cont, NULL);
-    lv_obj_add_style( utczone_label, LV_OBJ_PART_MAIN, style );
+    lv_obj_add_style( utczone_label, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_label_set_text( utczone_label, "utc timezone");
     lv_obj_align( utczone_label, utczone_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     utczone_list = lv_dropdown_create( utczone_cont, NULL);
@@ -123,10 +134,18 @@ void time_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hre
     lv_dropdown_set_selected( utczone_list, timesync_get_timezone() + 12 );
 }
 
+static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
+                                        mainbar_jump_to_tilenumber( time_tile_num, LV_ANIM_OFF );
+                                        break;
+    }
+}
+
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( SETUP_TILE, LV_ANIM_OFF );
+                                        mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         break;
     }
 }

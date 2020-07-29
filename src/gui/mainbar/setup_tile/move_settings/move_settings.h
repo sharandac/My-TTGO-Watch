@@ -24,6 +24,6 @@
 
     #include <TTGO.h>
 
-    void move_settings_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+    void move_settings_tile_setup( void );
 
 #endif // _MOVE_SETTINGS_TILE_H

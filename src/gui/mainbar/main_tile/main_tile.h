@@ -33,7 +33,7 @@
         bool active;
     } lv_widget_entry_t;
 
-    void main_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
+    void main_tile_setup( void );
     void main_tile_task( lv_task_t * task );
     lv_obj_t *main_tile_register_widget( void );
 

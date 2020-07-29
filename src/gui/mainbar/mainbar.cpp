@@ -39,30 +39,12 @@
 static lv_style_t mainbarstyle;
 static lv_obj_t *mainbar = NULL;
 
-static lv_point_t valid_pos[ TILE_NUM ];
-
-lv_tile_entry_t tile_entry[ TILE_NUM ] {
-    { NULL, TILE_TYPE_MAIN_TILE, MAIN_TILE, main_tile_setup, { 0 , 0 } },
-    { NULL, TILE_TYPE_APP_TILE, APP_TILE, app_tile_setup, { 1 , 0 } },
-    { NULL, TILE_TYPE_NOTE_TILE, NOTE_TILE, note_tile_setup, { 0 , 1 } },
-    { NULL, TILE_TYPE_KEYBOARD_TILE, KEYBOARD_TILE, NULL, { 0 , 6 } },
-    { NULL, TILE_TYPE_SETUP_TILE, SETUP_TILE, setup_tile_setup, { 1 , 1 } },
-    { NULL, TILE_TYPE_SETUP, WLAN_SETTINGS_TILE, wlan_settings_tile_setup, { 0,3 } },
-    { NULL, TILE_TYPE_SETUP, WLAN_PASSWORD_TILE, wlan_password_tile_setup, { 0,4 } },
-    { NULL, TILE_TYPE_SETUP, MOVE_SETTINGS_TILE, move_settings_tile_setup, { 2,3 } },
-    { NULL, TILE_TYPE_SETUP, DISPLAY_SETTINGS_TILE, display_settings_tile_setup, { 4,3 } },
-    { NULL, TILE_TYPE_SETUP, BATTERY_SETTINGS_TILE, battery_settings_tile_setup, { 6,3 } },
-    { NULL, TILE_TYPE_SETUP, BATTERY_OVERVIEW_TILE, NULL, { 6,4 } },
-    { NULL, TILE_TYPE_SETUP, TIME_SETTINGS_TILE, time_settings_tile_setup, { 8,3 } },
-    { NULL, TILE_TYPE_SETUP, UPDATE_SETTINGS_TILE, update_tile_setup, { 10,3 } },
-    { NULL, TILE_TYPE_WIDGET_TILE, WIDGET1_1_TILE, NULL, { 12,3 } },
-    { NULL, TILE_TYPE_WIDGET_SETUP, WIDGET1_2_TILE, NULL, { 12,4 } },
-    { NULL, TILE_TYPE_WIDGET_TILE, WIDGET2_1_TILE, NULL, { 14,3 } },
-    { NULL, TILE_TYPE_WIDGET_SETUP, WIDGET2_2_TILE, NULL, { 14,4 } }
-};
+static lv_tile_t *tile = NULL;
+static lv_point_t *tile_pos_table = NULL;
+static uint32_t tile_entrys = 0;
+static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
 
 void mainbar_setup( void ) {
-
     lv_style_init( &mainbarstyle );
     lv_style_set_radius(&mainbarstyle, LV_OBJ_PART_MAIN, 0);
     lv_style_set_bg_color(&mainbarstyle, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
@@ -70,74 +52,92 @@ void mainbar_setup( void ) {
     lv_style_set_border_width(&mainbarstyle, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_color(&mainbarstyle, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
     lv_style_set_image_recolor(&mainbarstyle, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-    
+
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
-    lv_tileview_set_valid_positions(mainbar, valid_pos, TILE_NUM );
-    lv_tileview_set_edge_flash(mainbar, false);
+    lv_tileview_set_valid_positions(mainbar, tile_pos_table, tile_entrys );
+    lv_tileview_set_edge_flash( mainbar, false);
     lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, &mainbarstyle );
     lv_page_set_scrlbar_mode(mainbar, LV_SCRLBAR_MODE_OFF);
-
-    for( int tile = 0 ; tile < TILE_NUM ; tile++ ) {
-        tile_entry[ tile ].tile = lv_obj_create( mainbar, NULL);
-        lv_obj_set_size( tile_entry[ tile ].tile, LV_HOR_RES, LV_VER_RES);
-        lv_obj_reset_style_list( tile_entry[ tile ].tile, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( tile_entry[ tile ].tile, LV_OBJ_PART_MAIN, &mainbarstyle );
-        lv_obj_set_pos( tile_entry[ tile ].tile, tile_entry[ tile ].pos.x * LV_HOR_RES , tile_entry[ tile ].pos.y * LV_VER_RES );
-        lv_tileview_add_element( mainbar, tile_entry[ tile ].tile);
-        if ( tile_entry[ tile ].tilecallback != NULL )
-            tile_entry[ tile ].tilecallback( tile_entry[ tile ].tile, &mainbarstyle, LV_HOR_RES , LV_VER_RES );
-        valid_pos[ tile ].x = tile_entry[ tile ].pos.x;
-        valid_pos[ tile ].y = tile_entry[ tile ].pos.y;
-    }
-    mainbar_jump_to_maintile( LV_ANIM_OFF );
 }
 
-lv_obj_t * mainbar_get_tile_obj( lv_tile_number tile_number ) {
-    if ( tile_number < TILE_NUM ) {
-        for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
-            if ( tile_entry[ tile ].tile_number == tile_number ) {
-                return( tile_entry[ tile ].tile );
+uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
+    
+    tile_entrys++;
+
+    if ( tile_pos_table == NULL ) {
+        tile_pos_table = ( lv_point_t * )malloc( sizeof( lv_point_t ) * tile_entrys );
+        tile = ( lv_tile_t * )malloc( sizeof( lv_tile_t ) * tile_entrys );
+    }
+    else {
+        tile_pos_table = ( lv_point_t * )realloc( tile_pos_table, sizeof( lv_point_t ) * tile_entrys );
+        tile = ( lv_tile_t * )realloc( tile, sizeof( lv_tile_t ) * tile_entrys );
+    }
+
+    if ( tile_pos_table == NULL || tile == NULL ) {
+        log_e("memory alloc faild");
+        while(true);
+    }
+
+    tile_pos_table[ tile_entrys - 1 ].x = x;
+    tile_pos_table[ tile_entrys - 1 ].y = y;
+
+    lv_obj_t *my_tile = lv_obj_create( mainbar, NULL);  
+    tile[ tile_entrys - 1 ].tile = my_tile;
+    lv_obj_set_size( tile[ tile_entrys - 1 ].tile, LV_HOR_RES, LV_VER_RES);
+    lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, &mainbarstyle );
+    lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * LV_HOR_RES , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
+    lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
+    lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
+    log_d("add tile: x=%d, y=%d", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y );
+
+    return( tile_entrys - 1 );
+}
+
+lv_style_t *mainbar_get_style( void ) {
+    return( &mainbarstyle );
+}
+
+uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y ) {
+    uint32_t retval = -1;
+
+    for ( int hor = 0 ; hor < x ; hor++ ) {
+        for ( int ver = 0 ; ver < y ; ver++ ) {
+            if ( retval == -1 ) {
+                retval = mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START );
+            }
+            else {
+                mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START );
             }
         }
+    }
+    app_tile_pos = app_tile_pos + x + 1;
+    return( retval );
+}
+
+lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
+    if ( tile_number < tile_entrys ) {
+        return( tile[ tile_number ].tile );
+    }
+    else {
+        log_e("tile number %d do not exist", tile_number );
     }
     return( NULL );
 }
 
-lv_tile_number mainbar_get_next_free_tile( lv_tile_type tile_type ) {
-    for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
-        if ( tile_entry[ tile ].tile_type == tile_type && tile_entry[ tile ].tilecallback == NULL ) {
-            return( tile_entry[ tile ].tile_number );
-        }
-    }
-    return( NO_TILE );
+void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
+    lv_tileview_set_tile_act( mainbar, 0, 0, anim );
 }
-
-void mainbar_set_tile_setup_cb( lv_tile_number tile_number, TILE_CALLBACK_FUNC callback ) {
-    if ( tile_number < TILE_NUM ) {
-        tile_entry[ tile_number ].tilecallback = callback;
-        tile_entry[ tile_number ].tilecallback( tile_entry[ tile_number ].tile, &mainbarstyle, LV_HOR_RES , LV_VER_RES );
-    }
-}
-
 
 void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim ) {
     lv_tileview_set_tile_act( mainbar, x, y, anim );
 }
 
-void mainbar_jump_to_tilenumber( lv_tile_number tile_number, lv_anim_enable_t anim ) {
-    for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
-        if ( tile_entry[ tile ].tile_number == tile_number ) {
-            lv_tileview_set_tile_act( mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
-            break;
-        }
+void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
+    if ( tile_number < tile_entrys ) {
+        lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
     }
-}
-
-void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
-    for ( int tile = 0 ; tile < TILE_NUM; tile++ ) {
-        if ( tile_entry[ tile ].tile_number == MAIN_TILE ) {
-            lv_tileview_set_tile_act(mainbar, tile_entry[ tile ].pos.x, tile_entry[ tile ].pos.y, anim );
-            break;
-        }
+    else {
+        log_e("tile number %d do not exist", tile_number );
     }
 }

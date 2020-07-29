@@ -25,121 +25,47 @@
 #include "gui/mainbar/mainbar.h"
 #include "hardware/motor.h"
 
-static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+lv_setup_entry_t setup_entry[ MAX_SETUP_ICON ];
 
-LV_IMG_DECLARE(wifi_64px);
-LV_IMG_DECLARE(battery_icon_64px);
-LV_IMG_DECLARE(move_64px);
-LV_IMG_DECLARE(brightness_64px);
-LV_IMG_DECLARE(time_64px);
-LV_IMG_DECLARE(update_64px);
+lv_obj_t *setup_cont = NULL;
+lv_style_t setup_style;
+uint32_t setup_tile_num;
 
-void setup_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void setup_tile_setup( void ) {
+    setup_tile_num = mainbar_add_tile( 1, 1 );
+    setup_cont = mainbar_get_tile_obj( setup_tile_num );
+    lv_style_copy( &setup_style, mainbar_get_style() );
 
-    lv_obj_t * wifi_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src(wifi_setup, LV_BTN_STATE_RELEASED, &wifi_64px);
-    lv_imgbtn_set_src(wifi_setup, LV_BTN_STATE_PRESSED, &wifi_64px);
-    lv_imgbtn_set_src(wifi_setup, LV_BTN_STATE_CHECKED_RELEASED, &wifi_64px);
-    lv_imgbtn_set_src(wifi_setup, LV_BTN_STATE_CHECKED_PRESSED, &wifi_64px);
-    lv_obj_add_style(wifi_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align(wifi_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16, 48 );
-    lv_obj_set_event_cb( wifi_setup, wifi_setup_event_cb );
+    for ( int setup = 0 ; setup < MAX_SETUP_ICON ; setup++ ) {
+        // set x, y and mark it as inactive
+        setup_entry[ setup ].x = SETUP_FIRST_X_POS + ( ( setup % MAX_SETUP_ICON_HORZ ) * ( SETUP_ICON_X_SIZE + SETUP_ICON_X_CLEARENCE ) );
+        setup_entry[ setup ].y = SETUP_FIRST_Y_POS + ( ( setup / MAX_SETUP_ICON_HORZ ) * ( SETUP_ICON_Y_SIZE + SETUP_ICON_Y_CLEARENCE ) );
+        setup_entry[ setup ].active = false;
+        // create app icon container
+        setup_entry[ setup ].setup = lv_obj_create( setup_cont, NULL );
+        lv_obj_reset_style_list( setup_entry[ setup ].setup, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( setup_entry[ setup ].setup, LV_OBJ_PART_MAIN, &setup_style );
+        lv_obj_set_size( setup_entry[ setup ].setup, SETUP_ICON_X_SIZE, SETUP_ICON_Y_SIZE );
+        lv_obj_align( setup_entry[ setup ].setup , setup_cont, LV_ALIGN_IN_TOP_LEFT, setup_entry[ setup ].x, setup_entry[ setup ].y );
 
-    lv_obj_t * battery_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_RELEASED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_PRESSED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_RELEASED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_PRESSED, &battery_icon_64px);
-    lv_obj_add_style( battery_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( battery_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70, 48 );
-    lv_obj_set_event_cb( battery_setup, battery_setup_event_cb );
+        lv_obj_set_hidden( setup_entry[ setup ].setup, true );
 
-    lv_obj_t * move_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_RELEASED, &move_64px);
-    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_PRESSED, &move_64px);
-    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_CHECKED_RELEASED, &move_64px);
-    lv_imgbtn_set_src( move_setup, LV_BTN_STATE_CHECKED_PRESSED, &move_64px);
-    lv_obj_add_style( move_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( move_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16, 48+86 );
-    lv_obj_set_event_cb( move_setup, move_setup_event_cb );
-
-    lv_obj_t * brightness_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( brightness_setup, LV_BTN_STATE_RELEASED, &brightness_64px);
-    lv_imgbtn_set_src( brightness_setup, LV_BTN_STATE_PRESSED, &brightness_64px);
-    lv_imgbtn_set_src( brightness_setup, LV_BTN_STATE_CHECKED_RELEASED, &brightness_64px);
-    lv_imgbtn_set_src( brightness_setup, LV_BTN_STATE_CHECKED_PRESSED, &brightness_64px);
-    lv_obj_add_style( brightness_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( brightness_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70, 48+86 );
-    lv_obj_set_event_cb( brightness_setup, display_setup_event_cb );
-
-    lv_obj_t * time_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( time_setup, LV_BTN_STATE_RELEASED, &time_64px);
-    lv_imgbtn_set_src( time_setup, LV_BTN_STATE_PRESSED, &time_64px);
-    lv_imgbtn_set_src( time_setup, LV_BTN_STATE_CHECKED_RELEASED, &time_64px);
-    lv_imgbtn_set_src( time_setup, LV_BTN_STATE_CHECKED_PRESSED, &time_64px);
-    lv_obj_add_style( time_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( time_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70+70, 48 );
-    lv_obj_set_event_cb( time_setup, time_setup_event_cb );
-
-    lv_obj_t * update_setup = lv_imgbtn_create(tile, NULL);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_RELEASED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_PRESSED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_RELEASED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_PRESSED, &update_64px);
-    lv_obj_add_style( update_setup, LV_IMGBTN_PART_MAIN, style);
-    lv_obj_align( update_setup, tile, LV_ALIGN_IN_TOP_LEFT, 16+70+70, 48+86 );
-    lv_obj_set_event_cb( update_setup, update_setup_event_cb );
-}
-
-static void wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( WLAN_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
+        log_d("icon x/y: %d/%d", setup_entry[ setup ].x, setup_entry[ setup ].y );
     }
 }
 
-static void battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( BATTERY_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
+lv_obj_t *setup_tile_register_setup( void ) {
+    for( int setup = 0 ; setup < MAX_SETUP_ICON ; setup++ ) {
+        if ( setup_entry[ setup ].active == false ) {
+            setup_entry[ setup ].active = true;
+            lv_obj_set_hidden( setup_entry[ setup ].setup, false );
+            return( setup_entry[ setup ].setup );
+        }
     }
+    log_e("no space for an setup icon");
+    return( NULL );
 }
 
-static void move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( MOVE_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
-    }
-}
-
-static void display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( DISPLAY_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
-    }
-}
-
-static void time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( TIME_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
-    }
-}
-
-static void update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( UPDATE_SETTINGS_TILE, LV_ANIM_OFF );
-                                        break;
-    }
+uint32_t setup_get_tile_num( void ) {
+    return( setup_tile_num );
 }

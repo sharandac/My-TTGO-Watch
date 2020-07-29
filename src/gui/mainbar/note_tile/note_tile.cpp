@@ -20,25 +20,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "../mainbar.h"
+
+#include "gui/mainbar/mainbar.h"
 #include "note_tile.h"
 
+static lv_obj_t *note_cont = NULL;
 static lv_obj_t *notelabel = NULL;
 
+static lv_style_t *style;
 static lv_style_t notestyle;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
-void note_tile_setup( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres ) {
+void note_tile_setup( void ) {
+
+    note_cont = mainbar_get_tile_obj( mainbar_add_tile( 0, 1 ) );
+    style = mainbar_get_style();
 
     lv_style_copy( &notestyle, style);
     lv_style_set_text_font( &notestyle, LV_STATE_DEFAULT, &Ubuntu_72px);
 
-    notelabel = lv_label_create(tile, NULL);
+    notelabel = lv_label_create( note_cont, NULL);
     lv_label_set_text( notelabel, "note");
     lv_obj_reset_style_list( notelabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( notelabel, LV_OBJ_PART_MAIN, &notestyle );
     lv_obj_align( notelabel, NULL, LV_ALIGN_CENTER, 0, 0);
-
 }

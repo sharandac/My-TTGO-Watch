@@ -23,16 +23,18 @@
 #include <TTGO.h>
 #include <WiFi.h>
 
+#include "weather.h"
+#include "weather_fetch.h"
+#include "weather_forecast.h"
+#include "weather_setup.h"
+#include "images/resolve_owm_icon.h"
+
+#include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
-#include "images/resolve_owm_icon.h"
 #include "hardware/motor.h"
-
-#include "weather.h"
-#include "weather_fetch.h"
-#include "weather_setup.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
@@ -41,8 +43,10 @@ void weather_widget_sync_Task( void * pvParameters );
 weather_config_t weather_config;
 weather_forcast_t weather_today;
 
-lv_tile_number weather_widget_tile_num = NO_TILE;
-lv_tile_number weather_widget_setup_tile_num = NO_TILE;
+uint32_t weather_app_tile_num;
+uint32_t weather_app_setup_tile_num;
+
+lv_obj_t *weather_app_cont = NULL;
 lv_obj_t *weather_widget_cont = NULL;
 lv_obj_t *weather_widget_condition_img = NULL;
 lv_obj_t *weather_widget_temperature_label = NULL;
@@ -56,17 +60,26 @@ void weather_app_setup( void ) {
 
     weather_load_config();
 
-    // get a free widget tile and a widget setup tile
-    weather_widget_tile_num = mainbar_get_next_free_tile( TILE_TYPE_WIDGET_TILE );
-    weather_widget_setup_tile_num = mainbar_get_next_free_tile( TILE_TYPE_WIDGET_SETUP );
-    // register the widget setup function
-    mainbar_set_tile_setup_cb( weather_widget_tile_num, weather_tile_setup );
-    mainbar_set_tile_setup_cb( weather_widget_setup_tile_num, weather_setup_tile_setup );
+    // get an app tile and copy mainstyle
+    weather_app_tile_num = mainbar_add_app_tile( 1, 2 );
+    weather_app_setup_tile_num = weather_app_tile_num + 1;
 
+    weather_forecast_tile_setup( weather_app_tile_num );
+    weather_setup_tile_setup( weather_app_setup_tile_num );
+
+    weather_app_cont = app_tile_register_app( "weather");
+    lv_obj_t *weather_app_icon = lv_imgbtn_create( weather_app_cont, NULL );
+    lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_RELEASED, &owm_01d_64px);
+    lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_PRESSED, &owm_01d_64px);
+    lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_CHECKED_RELEASED, &owm_01d_64px);
+    lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_CHECKED_PRESSED, &owm_01d_64px);
+    lv_obj_reset_style_list( weather_app_icon, LV_OBJ_PART_MAIN );
+    lv_obj_align( weather_app_icon , weather_widget_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+    lv_obj_set_event_cb( weather_app_icon, enter_weather_widget_event_cb );
+    
     // get an widget container from main_tile
-    weather_widget_cont = main_tile_register_widget();
-
     // create widget weather condition icon and temperature label
+    weather_widget_cont = main_tile_register_widget();
     weather_widget_condition_img = lv_imgbtn_create( weather_widget_cont, NULL );
     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_RELEASED, &owm_01d_64px);
     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, &owm_01d_64px);
@@ -112,17 +125,17 @@ void weather_app_setup( void ) {
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( weather_widget_tile_num, LV_ANIM_OFF );
+                                        mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }
 
 void weather_jump_to_forecast( void ) {
-    mainbar_jump_to_tilenumber( weather_widget_tile_num, LV_ANIM_ON );
+    mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_ON );
 }
 
 void weather_jump_to_setup( void ) {
-    mainbar_jump_to_tilenumber( weather_widget_setup_tile_num, LV_ANIM_ON );    
+    mainbar_jump_to_tilenumber( weather_app_setup_tile_num, LV_ANIM_ON );    
 }
 
 void weather_widget_sync_request( void ) {
