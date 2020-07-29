@@ -33,7 +33,7 @@
 #include "hardware/motor.h"
 #include "hardware/wifictl.h"
 
-#include "app/weather/weather.h"
+#include "gui/widget/weather/weather.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -76,7 +76,7 @@ void setup()
     /*
      *
      */
-    
+
     wifictl_on();
     display_set_brightness( display_get_brightness() );
 
