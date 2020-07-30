@@ -44,6 +44,8 @@ uint32_t update_tile_num;
 
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
+lv_obj_t *update_setup_icon_cont = NULL;
+lv_obj_t *update_info_img = NULL;
 
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -51,6 +53,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event );
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(update_64px);
+LV_IMG_DECLARE(info_1_16px);
 
 void update_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -63,14 +66,20 @@ void update_tile_setup( void ) {
     lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, &update_settings_style );
 
     // register an setup icon an set an callback
-    lv_obj_t *update_setup = lv_imgbtn_create ( setup_tile_register_setup(), NULL);
+    update_setup_icon_cont = setup_tile_register_setup();
+    lv_obj_t *update_setup = lv_imgbtn_create ( update_setup_icon_cont, NULL);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_RELEASED, &update_64px);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_PRESSED, &update_64px);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_RELEASED, &update_64px);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_PRESSED, &update_64px);
-    lv_obj_add_style( update_setup, LV_IMGBTN_PART_MAIN,  mainbar_get_style() );
-    lv_obj_align( update_setup, NULL, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_add_style( update_setup, LV_IMGBTN_PART_MAIN, mainbar_get_style() );
+    lv_obj_align( update_setup, update_setup_icon_cont, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( update_setup, enter_update_setup_event_cb );
+
+    update_info_img = lv_img_create( update_setup_icon_cont, NULL );
+    lv_img_set_src( update_info_img, &info_1_16px );
+    lv_obj_align( update_info_img, update_setup_icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
+    lv_obj_set_hidden( update_info_img, true );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( update_settings_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -176,8 +185,15 @@ void update_Task( void * pvParameters ) {
             char version_msg[48] = "";
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
             lv_label_set_text( update_status_label, (const char*)version_msg );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+            lv_obj_set_hidden( update_info_img, false );
         }
+        else if ( firmware_version == atol( __FIRMWARE__ ) ) {
+            lv_label_set_text( update_status_label, "yeah! up to date ..." );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_set_hidden( update_info_img, true );
+        }
+        lv_obj_invalidate( lv_scr_act() );
     }
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
         if( WiFi.status() == WL_CONNECTED ) {
