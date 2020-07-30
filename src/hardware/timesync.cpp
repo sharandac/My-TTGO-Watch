@@ -31,12 +31,7 @@ void timesync_Task( void * pvParameters );
 timesync_config_t timesync_config;
 
 void timesync_setup( TTGOClass *ttgo ) {
-/*
-    char buff[16]="";
-    snprintf( buff, sizeof(buff),"UTC%d", timesync_config.timezone);
-    setenv("TZ", buff, 1);
-    tzset();
-*/
+
     timesync_read_config();
 
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -46,22 +41,18 @@ void timesync_setup( TTGOClass *ttgo ) {
           }
           else {
               xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-              vTaskResume( _timesync_Task );
+              xTaskCreate(  timesync_Task,      /* Function to implement the task */
+                            "timesync Task",    /* Name of the task */
+                            2000,              /* Stack size in words */
+                            NULL,               /* Task input parameter */
+                            1,                  /* Priority of the task */
+                            &_timesync_Task );  /* Task handle. */
           }
         }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     time_event_handle = xEventGroupCreate();
     xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
-
-    xTaskCreate(
-                        timesync_Task,      /* Function to implement the task */
-                        "timesync Task",    /* Name of the task */
-                        2000,              /* Stack size in words */
-                        NULL,               /* Task input parameter */
-                        1,                  /* Priority of the task */
-                        &_timesync_Task );  /* Task handle. */
-
 }
 
 void timesync_save_config( void ) {
@@ -132,25 +123,23 @@ void timesyncToRTC( void ) {
 }
 
 void timesync_Task( void * pvParameters ) {
+  log_i("start time sync task");
 
-    while( true ) {
-        vTaskDelay( 500 );
-        if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
-            struct tm info;
+  if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
+    struct tm info;
 
-            long gmtOffset_sec = timesync_config.timezone * 3600;
-            int daylightOffset_sec = 0;
+    long gmtOffset_sec = timesync_config.timezone * 3600;
+    int daylightOffset_sec = 0;
+    
+    if ( timesync_config.daylightsave )
+      daylightOffset_sec = 3600;
             
-            if ( timesync_config.daylightsave )
-              daylightOffset_sec = 3600;
-                    
-            configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
+    configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
 
-            if( !getLocalTime( &info ) ) {
-                log_e("Failed to obtain time" );
-            }
-            xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
-        }
-        vTaskSuspend( _timesync_Task );
+    if( !getLocalTime( &info ) ) {
+        log_e("Failed to obtain time" );
     }
+  }
+  xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
+  vTaskDelete( NULL );
 }

@@ -120,17 +120,18 @@ lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
         return( tile[ tile_number ].tile );
     }
     else {
-        log_e("tile number %d do not exist", tile_number );
+        log_e( "tile number %d do not exist", tile_number );
     }
     return( NULL );
 }
 
 void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
-    lv_tileview_set_tile_act( mainbar, 0, 0, anim );
-}
-
-void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim ) {
-    lv_tileview_set_tile_act( mainbar, x, y, anim );
+    if ( tile_entrys != 0 ) {
+        lv_tileview_set_tile_act( mainbar, 0, 0, anim );
+    }
+    else {
+        log_e( "main tile do not exist" );
+    }
 }
 
 void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
@@ -138,6 +139,6 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
     }
     else {
-        log_e("tile number %d do not exist", tile_number );
+        log_e( "tile number %d do not exist", tile_number );
     }
 }

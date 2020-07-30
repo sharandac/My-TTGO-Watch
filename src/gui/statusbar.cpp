@@ -42,7 +42,6 @@ static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
 static lv_obj_t *statusbar_wifilabel = NULL;
 static lv_obj_t *statusbar_bluetooth = NULL;
-static lv_obj_t *statusbar_bluetoothlabel = NULL;
 static lv_obj_t *statusbar_stepcounterlabel = NULL;
 static lv_style_t statusbarstyle[ STATUSBAR_STYLE_NUM ];
 

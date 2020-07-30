@@ -24,50 +24,6 @@
 
     #include <TTGO.h>
 
-    typedef void ( * TILE_CALLBACK_FUNC ) ( lv_obj_t *tile, lv_style_t *style, lv_coord_t hres, lv_coord_t vres );
-    
-    typedef enum {
-        TILE_TYPE_MAIN_TILE,
-        TILE_TYPE_APP_TILE,
-        TILE_TYPE_NOTE_TILE,
-        TILE_TYPE_KEYBOARD_TILE,
-        TILE_TYPE_SETUP_TILE,
-        TILE_TYPE_SETUP,
-        TILE_TYPE_WIDGET_TILE,
-        TILE_TYPE_WIDGET_SETUP,
-        TILE_TYPE_NUM
-    } lv_tile_type;
-    
-    typedef enum {
-        NO_TILE = -1,
-        MAIN_TILE,
-        SETUP_TILE,
-        NOTE_TILE,
-        APP_TILE,
-        KEYBOARD_TILE,
-        WLAN_SETTINGS_TILE,
-        WLAN_PASSWORD_TILE,
-        MOVE_SETTINGS_TILE,
-        DISPLAY_SETTINGS_TILE,
-        BATTERY_OVERVIEW_TILE,
-        BATTERY_SETTINGS_TILE,
-        TIME_SETTINGS_TILE,
-        UPDATE_SETTINGS_TILE,
-        WIDGET1_1_TILE,
-        WIDGET1_2_TILE,
-        WIDGET2_1_TILE,
-        WIDGET2_2_TILE,
-        TILE_NUM
-    } lv_tile_number;
-
-    typedef struct {
-        lv_obj_t *tile;
-        lv_tile_type tile_type;
-        lv_tile_number tile_number;
-        TILE_CALLBACK_FUNC tilecallback;
-        lv_point_t pos;
-    } lv_tile_entry_t;
-
     typedef struct {
         lv_obj_t *tile;
     } lv_tile_t;
@@ -82,12 +38,6 @@
     void mainbar_setup( void );
     /*
      * @brief jump to the given tile
-     * @param   x   x coordinate
-     * @param   y   y coordinate
-     */
-    void mainbar_jump_to_tile( lv_coord_t x, lv_coord_t y, lv_anim_enable_t anim );
-    /*
-     * @brief jump to the given tile
      * @param   tile    tile number
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
@@ -97,15 +47,41 @@
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
-
-    lv_obj_t * mainbar_get_tile_obj( uint32_t tile_number );
+    /*
+     * @brief add a tile at a specific position
+     * @param   x   x position
+     * @param   y   y position
+     * 
+     * @return  tile number
+     */
     uint32_t mainbar_add_tile( uint16_t x, uint16_t y );
-    lv_style_t *mainbar_get_style( void );
-    void mainbar_print_cont( void );
+    /*
+     * @brief add a independent app tile formation
+     * 
+     *  +---+---+    +---+   +---+---+
+     *  | n |n+1|    | n |   | n |n+1|
+     *  +---+---+    +---+   +---+---+
+     *  |n+2|n+3|    |n+1|
+     *  +---+---+    +---+
+     * 
+     * @param   x   x size in tiles
+     * @param   y   y size in tiles
+     * 
+     * @return  tile number, if get more than 1 tile it is the first tile number
+     */
     uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y );
-
-    lv_tile_number mainbar_get_next_free_tile( lv_tile_type tile_type );
-    void mainbar_set_tile_setup_cb( lv_tile_number tile_number, TILE_CALLBACK_FUNC callback );
-
+    /*
+     * @brief get the lv_obj_t for a specific tile number
+     * @param   tile_number   tile number
+     * 
+     * @return  lv_obj_t
+     */
+    lv_obj_t * mainbar_get_tile_obj( uint32_t tile_number );
+    /*
+     * @brief get main tile style
+     * 
+     * @return  lv_style_t
+     */
+    lv_style_t *mainbar_get_style( void );
 
 #endif // _MAINBAR_H

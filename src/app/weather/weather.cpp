@@ -113,14 +113,6 @@ void weather_app_setup( void ) {
 
     weather_widget_event_handle = xEventGroupCreate();
     xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
-
-    xTaskCreate(
-                        weather_widget_sync_Task,      /* Function to implement the task */
-                        "weather widget sync Task",    /* Name of the task */
-                        5000,              /* Stack size in words */
-                        NULL,               /* Task input parameter */
-                        1,                  /* Priority of the task */
-                        &_weather_widget_sync_Task );  /* Task handle. */  
 }
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -145,7 +137,12 @@ void weather_widget_sync_request( void ) {
     }
     else {
         xEventGroupSetBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
-        vTaskResume( _weather_widget_sync_Task );    
+        xTaskCreate(    weather_widget_sync_Task,       /* Function to implement the task */
+                        "weather widget sync Task",     /* Name of the task */
+                        5000,                           /* Stack size in words */
+                        NULL,                           /* Task input parameter */
+                        1,                              /* Priority of the task */
+                        &_weather_widget_sync_Task );   /* Task handle. */
     }
 }
 
@@ -154,37 +151,33 @@ weather_config_t *weather_get_config( void ) {
 }
 
 void weather_widget_sync_Task( void * pvParameters ) {
-    while( true ) {
-        vTaskDelay( 500 );
-        esp_task_wdt_delete( _weather_widget_sync_Task );
-        if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {   
-            if ( weather_config.autosync ) {
-                uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
-                if ( retval == 200 ) {
-                    lv_label_set_text( weather_widget_temperature_label, weather_today.temp );
-                    lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_RELEASED, resolve_owm_icon( weather_today.icon ) );
-                    lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, resolve_owm_icon( weather_today.icon ) );
-                    lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_RELEASED, resolve_owm_icon( weather_today.icon ) );
-                    lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_PRESSED, resolve_owm_icon( weather_today.icon ) );
+    log_i("start weather widget task");
 
-                    if ( weather_config.showWind )
-                    {
-                        lv_label_set_text( weather_widget_wind_label, weather_today.wind );
-                        lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -22);
-                        lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-                    }
-                    else
-                    {
-                        lv_label_set_text( weather_widget_wind_label, "" );
-                        lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-                        lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-                    }
+    if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {   
+        if ( weather_config.autosync ) {
+            uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
+            if ( retval == 200 ) {
+                lv_label_set_text( weather_widget_temperature_label, weather_today.temp );
+                lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_RELEASED, resolve_owm_icon( weather_today.icon ) );
+                lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, resolve_owm_icon( weather_today.icon ) );
+                lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_RELEASED, resolve_owm_icon( weather_today.icon ) );
+                lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_PRESSED, resolve_owm_icon( weather_today.icon ) );
+
+                if ( weather_config.showWind ) {
+                    lv_label_set_text( weather_widget_wind_label, weather_today.wind );
+                    lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, -22);
+                    lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+                }
+                else {
+                    lv_label_set_text( weather_widget_wind_label, "" );
+                    lv_obj_align( weather_widget_temperature_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+                    lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
                 }
             }
-            xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
         }
-        vTaskSuspend( _weather_widget_sync_Task );
     }
+    xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
+    vTaskDelete( NULL );
 }
 
 /*

@@ -68,7 +68,7 @@ void wlan_settings_tile_setup( void ) {
 
     wifi_settings_tile = mainbar_get_tile_obj( wifi_settings_tile_num );
     lv_style_copy( &wifi_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
+    lv_style_set_bg_color( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
     lv_style_set_bg_opa( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &wifi_settings_style, LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( wifi_settings_tile, LV_OBJ_PART_MAIN, &wifi_settings_style );

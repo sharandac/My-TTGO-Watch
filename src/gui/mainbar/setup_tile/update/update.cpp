@@ -117,14 +117,6 @@ void update_tile_setup( void ) {
 
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
-
-    xTaskCreate(
-                        update_Task,      /* Function to implement the task */
-                        "update Task",    /* Name of the task */
-                        5000,              /* Stack size in words */
-                        NULL,               /* Task input parameter */
-                        1,                  /* Priority of the task */
-                        &_update_Task );  /* Task handle. */
 }
 
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -145,74 +137,82 @@ static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_CLICKED) {
         motor_vibe( 1 );
-        if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST )  {
+        if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
             return;
         }
         else {
             xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
-            vTaskResume( _update_Task );
+            xTaskCreate(    update_Task,        /* Function to implement the task */
+                            "update Task",      /* Name of the task */
+                            10000,               /* Stack size in words */
+                            NULL,               /* Task input parameter */
+                            0,                  /* Priority of the task */
+                            &_update_Task );    /* Task handle. */
         }
     }
 }
 
 void update_check_version( void ) {
-    if ( xEventGroupGetBits( update_event_handle ) & UPDATE_GET_VERSION_REQUEST ) {
+    if ( xEventGroupGetBits( update_event_handle ) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
         return;
     }
     else {
         xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
-        vTaskResume( _update_Task );    
+        xTaskCreate(    update_Task,        /* Function to implement the task */
+                        "update Task",      /* Name of the task */
+                        2000,               /* Stack size in words */
+                        NULL,               /* Task input parameter */
+                        1,                  /* Priority of the task */
+                        &_update_Task );    /* Task handle. */
     }
 }
 
 void update_Task( void * pvParameters ) {
-    while( true ) {
-        vTaskDelay( 500 );
-        if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
-            if ( update_check_new_version() > atol( __FIRMWARE__ ) ) {
-                lv_label_set_text( update_status_label, "new version available" );
-                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-            }
-            xEventGroupClearBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
+    log_i("start update task");
+
+    if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
+        if ( update_check_new_version() > atol( __FIRMWARE__ ) ) {
+            lv_label_set_text( update_status_label, "new version available" );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
         }
-        if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
-            if( WiFi.status() == WL_CONNECTED ) {
-
-                uint32_t display_timeout = display_get_timeout();
-                display_set_timeout( DISPLAY_MAX_TIMEOUT );
-
-                WiFiClient client;
-
-                lv_label_set_text( update_status_label, "start update ..." );
-                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-
-                t_httpUpdate_return ret = httpUpdate.update( client, "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
-
-                switch(ret) {
-                    case HTTP_UPDATE_FAILED:
-                        lv_label_set_text( update_status_label, "update failed" );
-                        lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-                        break;
-
-                    case HTTP_UPDATE_NO_UPDATES:
-                        lv_label_set_text( update_status_label, "no update" );
-                        lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-                        break;
-
-                    case HTTP_UPDATE_OK:
-                        lv_label_set_text( update_status_label, "update ok" );
-                        lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-                        break;
-                }
-                display_set_timeout( display_timeout );
-            }
-            else {
-                lv_label_set_text( update_status_label, "turn wifi on!" );
-                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-            }
-            xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
-        }
-        lv_disp_trig_activity(NULL);
-        vTaskSuspend( _update_Task );
     }
+    if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
+        if( WiFi.status() == WL_CONNECTED ) {
+
+            uint32_t display_timeout = display_get_timeout();
+            display_set_timeout( DISPLAY_MAX_TIMEOUT );
+
+            WiFiClient client;
+
+            lv_label_set_text( update_status_label, "start update ..." );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+
+            t_httpUpdate_return ret = httpUpdate.update( client, "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
+
+            switch(ret) {
+                case HTTP_UPDATE_FAILED:
+                    lv_label_set_text( update_status_label, "update failed" );
+                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+                    break;
+
+                case HTTP_UPDATE_NO_UPDATES:
+                    lv_label_set_text( update_status_label, "no update" );
+                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+                    break;
+
+                case HTTP_UPDATE_OK:
+                    lv_label_set_text( update_status_label, "update ok" );
+                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+                    break;
+            }
+            display_set_timeout( display_timeout );
+        }
+        else {
+            lv_label_set_text( update_status_label, "turn wifi on!" );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+        }
+    }
+    xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
+    lv_disp_trig_activity(NULL);
+    vTaskDelete( NULL );
 }

@@ -50,8 +50,9 @@ void battery_update_task( lv_task_t *task );
 
 void battery_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    battery_tile_num = mainbar_add_app_tile( 1, 1 );
+    battery_tile_num = mainbar_add_app_tile( 1, 2 );
     battery_settings_tile = mainbar_get_tile_obj( battery_tile_num );
+
     lv_style_copy( &battery_settings_style, mainbar_get_style() );
     lv_style_set_bg_color( &battery_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &battery_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
