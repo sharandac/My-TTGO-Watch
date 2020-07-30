@@ -41,7 +41,7 @@ void setup()
 {
     motor_setup();
     Serial.begin(115200);
-    Serial.printf("starting t-watch V1\r\n");
+    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
     ttgo->begin();
     ttgo->lvgl_begin();
 

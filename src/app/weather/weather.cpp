@@ -22,6 +22,7 @@
 #include "config.h"
 #include <TTGO.h>
 #include <WiFi.h>
+#include "esp_task_wdt.h"
 
 #include "weather.h"
 #include "weather_fetch.h"
@@ -115,7 +116,7 @@ void weather_app_setup( void ) {
 
     xTaskCreate(
                         weather_widget_sync_Task,      /* Function to implement the task */
-                        "weather sync Task",    /* Name of the task */
+                        "weather widget sync Task",    /* Name of the task */
                         5000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
@@ -155,6 +156,7 @@ weather_config_t *weather_get_config( void ) {
 void weather_widget_sync_Task( void * pvParameters ) {
     while( true ) {
         vTaskDelay( 500 );
+        esp_task_wdt_delete( _weather_widget_sync_Task );
         if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {   
             if ( weather_config.autosync ) {
                 uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
@@ -193,7 +195,7 @@ void weather_save_config( void ) {
     fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_WRITE );
 
     if ( !file ) {
-        Serial.printf( __FILE__ "Can't save file: %s\r\n", WEATHER_CONFIG_FILE );
+        log_e( "Can't save file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
         file.write( (uint8_t *)&weather_config, sizeof( weather_config ) );
@@ -209,7 +211,7 @@ void weather_load_config( void ) {
     fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_READ );
 
     if (!file) {
-        Serial.printf( __FILE__ "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
+        log_e( "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
         size_t filesize = file.size();

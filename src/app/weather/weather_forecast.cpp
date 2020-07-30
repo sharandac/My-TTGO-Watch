@@ -21,6 +21,7 @@
  */
 #include <config.h>
 #include <WiFi.h>
+#include "esp_task_wdt.h"
 
 #include "weather.h"
 #include "weather_fetch.h"
@@ -142,7 +143,7 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     xTaskCreate(
                         weather_forecast_sync_Task,      /* Function to implement the task */
-                        "weather sync Task",    /* Name of the task */
+                        "weather forecast sync Task",    /* Name of the task */
                         5000,              /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
@@ -191,6 +192,7 @@ void weather_forecast_sync_Task( void * pvParameters ) {
 
     while( true ) {
         vTaskDelay( 500 );
+        esp_task_wdt_delete( _weather_forecast_sync_Task );
         if ( xEventGroupGetBits( weather_forecast_event_handle ) & WEATHER_FORECAST_SYNC_REQUEST ) {   
             if ( weather_config->autosync ) {
                 retval = weather_fetch_forecast( weather_get_config() , &weather_forecast[ 0 ] );

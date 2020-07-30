@@ -27,6 +27,7 @@
 lv_app_entry_t app_entry[ MAX_APPS_ICON ];
 
 static lv_obj_t *app_cont = NULL;
+static lv_obj_t *app_label = NULL;
 static lv_style_t *style;
 static lv_style_t appstyle;
 
@@ -39,7 +40,14 @@ void app_tile_setup( void ) {
     style = mainbar_get_style();
 
     lv_style_copy( &appstyle, style);
+    lv_style_set_text_opa( &appstyle, LV_OBJ_PART_MAIN, LV_OPA_30);
     lv_style_set_text_font( &appstyle, LV_STATE_DEFAULT, &Ubuntu_72px);
+
+    app_label = lv_label_create( app_cont, NULL);
+    lv_label_set_text( app_label, "apps");
+    lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &appstyle );
+    lv_obj_align( app_label, NULL, LV_ALIGN_CENTER, 0, 0);
 
     for ( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         // set x, y and mark it as inactive

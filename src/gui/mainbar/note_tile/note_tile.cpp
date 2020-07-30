@@ -39,6 +39,7 @@ void note_tile_setup( void ) {
     style = mainbar_get_style();
 
     lv_style_copy( &notestyle, style);
+    lv_style_set_text_opa( &notestyle, LV_OBJ_PART_MAIN, LV_OPA_30);
     lv_style_set_text_font( &notestyle, LV_STATE_DEFAULT, &Ubuntu_72px);
 
     notelabel = lv_label_create( note_cont, NULL);

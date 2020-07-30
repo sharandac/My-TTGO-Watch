@@ -42,7 +42,7 @@ uint64_t update_check_new_version( void ) {
                                     "Connection: close\r\n"
                                     "Pragma: no-cache\r\n"
                                     "Cache-Control: no-cache\r\n"
-                                    "User-Agent: ESP32\r\n"
+                                    "User-Agent: ESP32-" __FIRMWARE__ "\r\n"
                                     "Accept: text/html,application/json\r\n\r\n", FIRMWARE_HOST );
 
 	uint64_t startMillis = millis();
