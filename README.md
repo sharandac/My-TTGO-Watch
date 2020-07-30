@@ -15,7 +15,7 @@ or simple press "build and upload" in platformIO.
 # how to use
 
 On startup you see the main screen (time tile). It show the time and the current weather (if correct configure). Now you can swipe with you fingers up, down, left and right between the four main screens. The four screens are organized in time, apps, note and setup tile.
-For the weather app you need an openweather.com api-id. http://https://openweathermap.org/appid is a good starting point.
+For the weather app you need an openweather.com api-id. http://openweathermap.org/appid is a good starting point.
 
 # how to make a screenshot
 The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
