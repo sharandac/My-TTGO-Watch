@@ -33,8 +33,21 @@
         bool active;
     } lv_widget_entry_t;
 
+    /*
+     * @brief setup the app tile
+     */
     void main_tile_setup( void );
-    void main_tile_task( lv_task_t * task );
+    /*
+     * @brief register an widget icon an the main tile
+     * 
+     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn or NULL if failed
+     */
     lv_obj_t *main_tile_register_widget( void );
+    /*
+     * @brief get the tile number for the main tile
+     * 
+     * @return  tile number
+     */
+    uint32_t main_tile_get_tile_num( void );
 
 #endif // _MAIL_TILE_H

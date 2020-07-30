@@ -24,14 +24,6 @@
 
     #include <TTGO.h>
 
-    /*
-     * @brief setup the display setup tile
-     * 
-     * @param   tile    pointer to the tile obj
-     * @param   style   pointer to the style obj
-     * @param   hres    horizonal resolution
-     * @param   vres    vertical resolution
-     */
     void time_settings_tile_setup( void );
 
 #endif // _TIME_SETTINGS_H

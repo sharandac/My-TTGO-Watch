@@ -171,8 +171,11 @@ void update_Task( void * pvParameters ) {
     log_i("start update task");
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
-        if ( update_check_new_version() > atol( __FIRMWARE__ ) ) {
-            lv_label_set_text( update_status_label, "new version available" );
+        int64_t firmware_version = update_check_new_version();
+        if ( firmware_version > atol( __FIRMWARE__ ) && firmware_version > 0 ) {
+            char version_msg[48] = "";
+            snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
+            lv_label_set_text( update_status_label, (const char*)version_msg );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
         }
     }

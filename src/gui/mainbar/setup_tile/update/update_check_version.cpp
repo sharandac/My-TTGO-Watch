@@ -37,13 +37,13 @@ uint64_t update_check_new_version( void ) {
         return( -1 );
 	}
 
-	check_version_client.printf(    "GET /ttgo-t-watch2020_v1.version.json HTTP/1.1\r\n"
-                                    "Host: %s\r\n"
+	check_version_client.printf(    "GET /" FIRMWARE_VERSION_FILE " HTTP/1.1\r\n"
+                                    "Host: " FIRMWARE_HOST "\r\n"
                                     "Connection: close\r\n"
                                     "Pragma: no-cache\r\n"
                                     "Cache-Control: no-cache\r\n"
                                     "User-Agent: ESP32-" __FIRMWARE__ "\r\n"
-                                    "Accept: text/html,application/json\r\n\r\n", FIRMWARE_HOST );
+                                    "Accept: text/html,application/json\r\n\r\n" );
 
 	uint64_t startMillis = millis();
 	while ( check_version_client.available() == 0 ) {

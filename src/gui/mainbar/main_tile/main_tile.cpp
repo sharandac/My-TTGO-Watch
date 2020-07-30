@@ -30,6 +30,7 @@ static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
 static lv_obj_t *timelabel = NULL;
 static lv_obj_t *datelabel = NULL;
+uint32_t main_tile_num;
 
 static lv_style_t *style;
 static lv_style_t timestyle;
@@ -37,14 +38,15 @@ static lv_style_t datestyle;
 
 lv_widget_entry_t widget_entry[ MAX_WIDGET_NUM ];
 
-lv_task_t * task;
-
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
-void main_tile_setup( void ) {
+lv_task_t * task;
+void main_tile_task( lv_task_t * task );
 
-    main_cont = mainbar_get_tile_obj( mainbar_add_tile( 0, 0 ) );
+void main_tile_setup( void ) {
+    main_tile_num = mainbar_add_tile( 0, 0 );
+    main_cont = mainbar_get_tile_obj( main_tile_num );
     style = mainbar_get_style();
 
     lv_style_copy( &timestyle, style);
@@ -110,9 +112,11 @@ lv_obj_t *main_tile_register_widget( void ) {
     return( NULL );
 }
 
-/*
- *
- */
+uint32_t main_tile_get_tile_num( void ) {
+    return( main_tile_num );
+}
+
+
 void main_tile_task( lv_task_t * task ) {
     time_t now;
     struct tm  info;

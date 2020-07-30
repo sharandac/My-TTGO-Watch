@@ -97,8 +97,9 @@ void wlan_settings_tile_setup( void ) {
     lv_label_set_text( exit_label, "wlan settings");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
-    /*Copy the first switch and turn it ON*/
+    /*Copy the first switch and turn it ON*/    
     wifi_onoff = lv_switch_create( wifi_settings_tile, NULL );
+    lv_obj_add_style( wifi_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style()  );
     lv_switch_off( wifi_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_onoff, exit_label, LV_ALIGN_OUT_RIGHT_MID, 30, 0 );
     lv_obj_set_event_cb( wifi_onoff, wifi_onoff_event_handler);

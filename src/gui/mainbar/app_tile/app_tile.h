@@ -46,7 +46,23 @@
         bool active;
     } lv_app_entry_t;
 
+    /*
+     * @brief setup the app tile
+     */
     void app_tile_setup( void );
+    /*
+     * @brief register an app icon an the app tile
+     * 
+     * @param   appname     app name
+     * 
+     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn
+     */
     lv_obj_t *app_tile_register_app( const char* appname );
+    /*
+     * @brief get the tile number for the app tile
+     * 
+     * @return  tile number
+     */
+    uint32_t app_tile_get_tile_num( void );
 
 #endif // _APP_TILE_H

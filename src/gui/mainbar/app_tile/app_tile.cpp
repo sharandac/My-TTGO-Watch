@@ -28,6 +28,7 @@ lv_app_entry_t app_entry[ MAX_APPS_ICON ];
 
 static lv_obj_t *app_cont = NULL;
 static lv_obj_t *app_label = NULL;
+static uint32_t app_tile_num;
 static lv_style_t *style;
 static lv_style_t appstyle;
 
@@ -35,8 +36,8 @@ LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
 void app_tile_setup( void ) {
-
-    app_cont = mainbar_get_tile_obj( mainbar_add_tile( 1, 0 ) );
+    app_tile_num = mainbar_add_tile( 1, 0 );
+    app_cont = mainbar_get_tile_obj( app_tile_num );
     style = mainbar_get_style();
 
     lv_style_copy( &appstyle, style);
@@ -84,4 +85,8 @@ lv_obj_t *app_tile_register_app( const char* appname ) {
     }
     log_e("no space for an app icon");
     return( NULL );
+}
+
+uint32_t app_tile_get_tile_num( void ) {
+    return( app_tile_num );
 }

@@ -131,6 +131,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( weather_autosync_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_obj_align( weather_autosync_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
     weather_autosync_onoff = lv_switch_create( weather_autosync_cont, NULL );
+    lv_obj_add_style( weather_autosync_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( weather_autosync_onoff, LV_ANIM_ON );
     lv_obj_align( weather_autosync_onoff, weather_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_autosync_onoff, weather_autosync_onoff_event_handler );
@@ -144,6 +145,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( weather_wind_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_obj_align( weather_wind_cont, weather_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     weather_wind_onoff = lv_switch_create( weather_wind_cont, NULL);
+    lv_obj_add_style( weather_wind_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( weather_wind_onoff, LV_ANIM_ON);
     lv_obj_align( weather_wind_onoff, weather_wind_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( weather_wind_onoff, weather_wind_onoff_event_handler);

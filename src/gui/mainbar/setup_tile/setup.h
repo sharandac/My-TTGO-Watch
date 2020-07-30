@@ -48,14 +48,19 @@
 
     /*
      * @brief setup the setup tile
-     * 
-     * @param   tile    pointer to the tile obj
-     * @param   style   pointer to the style obj
-     * @param   hres    horizonal resolution
-     * @param   vres    vertical resolution
      */
     void setup_tile_setup( void );
+    /*
+     * @brief register an setup icon an the setup tile
+     * 
+     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn
+     */
     lv_obj_t *setup_tile_register_setup( void );
+    /*
+     * @brief get the tile number for the setup tile
+     * 
+     * @return  tile number
+     */
     uint32_t setup_get_tile_num( void );
 
 #endif // _SETUP_H

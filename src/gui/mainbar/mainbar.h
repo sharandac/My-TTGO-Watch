@@ -83,5 +83,11 @@
      * @return  lv_style_t
      */
     lv_style_t *mainbar_get_style( void );
+    /*
+     * @brief get main tile switch style
+     * 
+     * @return  lv_style_t
+     */
+    lv_style_t *mainbar_get_switch_style( void );
 
 #endif // _MAINBAR_H
