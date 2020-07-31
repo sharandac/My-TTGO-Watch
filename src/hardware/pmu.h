@@ -26,6 +26,13 @@
 
     #define PMU_BATTERY_CAP         300
 
+    #define PMU_CONFIG_FILE         "/pmu.cfg"
+
+    typedef struct {
+        bool compute_percent = false;
+        bool experimental_power_save = false;
+    } pmu_config_t;
+
     /*
      * @brief setup pmu: axp202
      * 
@@ -46,6 +53,12 @@
      * 
      * @return  charge in percent or -1 if unknown
      */
-    uint32_t pmu_get_byttery_percent( TTGOClass *ttgo );
+    int32_t pmu_get_battery_percent( TTGOClass *ttgo );
+    void pmu_save_config( void );
+    void pmu_read_config( void );
+    bool pmu_get_calculated_percent( void );
+    bool pmu_get_experimental_power_save( void );
+    void pmu_set_calculated_percent( bool value );
+    void pmu_set_experimental_power_save( bool value );
 
 #endif // _PMU_H

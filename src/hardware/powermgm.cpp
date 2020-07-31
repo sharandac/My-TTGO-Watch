@@ -70,7 +70,14 @@ void powermgm_loop( TTGOClass *ttgo ) {
 
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             powermgm_clear_event( POWERMGM_STANDBY );
-            ttgo->power->setDCDC3Voltage( 3300 );
+            if ( pmu_get_experimental_power_save() ) {
+                ttgo->power->setDCDC3Voltage( 3000 );
+                log_e("enable 3.0V voltage");
+            } 
+            else {
+                ttgo->power->setDCDC3Voltage( 3300 );
+                log_e("enable 3.3V voltage");
+            }
             // normal wake up from standby
             if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
                 log_i("wakeup");
@@ -89,7 +96,11 @@ void powermgm_loop( TTGOClass *ttgo ) {
             lv_disp_trig_activity(NULL);
             if ( bma_get_config( BMA_STEPCOUNTER ) )
                 ttgo->bma->enableStepCountInterrupt( true );
-            wifictl_on();         
+
+            if ( ttgo->power->getBattVoltage() > 3300 ) {
+                wifictl_on();         
+            }
+
             ttgo->power->clearTimerStatus();
             ttgo->power->offTimer();
         }        
@@ -104,9 +115,16 @@ void powermgm_loop( TTGOClass *ttgo ) {
                 ttgo->bma->enableStepCountInterrupt( false );
             powermgm_set_event( POWERMGM_STANDBY );
             powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
-            ttgo->power->setDCDC3Voltage( 3000 );
             ttgo->power->clearTimerStatus();
             ttgo->power->setTimer( 60 );
+            if ( pmu_get_experimental_power_save() ) {
+                ttgo->power->setDCDC3Voltage( 2700 );
+                log_e("enable 2.7V standby voltage");
+            } 
+            else {
+                ttgo->power->setDCDC3Voltage( 3000 );
+                log_e("enable 3.0V standby voltage");
+            }
             setCpuFrequencyMhz( 10 );
             gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
             gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);

@@ -52,6 +52,7 @@ void wifictl_Task( void * pvParameters );
 void wifictl_setup( void ) {
     if ( wifi_init == true )
         return;
+
     wifi_init = true;
     powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN );
 
@@ -122,14 +123,6 @@ void wifictl_setup( void ) {
         statusbar_hide_icon( STATUSBAR_WIFI );
         statusbar_wifi_set_state( false, "" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
-
-  // start Wifo controll task
-  xTaskCreate(  wifictl_Task,    /* Function to implement the task */
-                "wifictl Task",       /* Name of the task */
-                2000,                  /* Stack size in words */
-                NULL,                   /* Task input parameter */
-                1,                      /* Priority of the task */
-                &_wifictl_Task );       /* Task handle. */ 
 }
 
 /*
@@ -172,6 +165,9 @@ void wifictl_load_network( void ) {
  *
  */
 bool wifictl_is_known( const char* networkname ) {
+  if ( wifi_init == false )
+    return( false );
+
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( networkname, wifictl_networklist[ entry ].ssid ) ) {
       return( true );
@@ -184,6 +180,9 @@ bool wifictl_is_known( const char* networkname ) {
  *
  */
 bool wifictl_delete_network( const char *ssid ) {
+  if ( wifi_init == false )
+    return( false );
+
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
       wifictl_networklist[ entry ].ssid[ 0 ] = '\0';
@@ -199,6 +198,9 @@ bool wifictl_delete_network( const char *ssid ) {
  *
  */
 bool wifictl_insert_network( const char *ssid, const char *password ) {
+  if ( wifi_init == false )
+    return( false );
+
   // check if existin
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
@@ -229,13 +231,19 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
 void wifictl_on( void ) {
   if ( wifi_init == false )
     return;
-    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
-      return;
-    }
-    else {
-      powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
-      vTaskResume( _wifictl_Task );
-    }
+
+  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
+    return;
+  }
+  else {
+    powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
+    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
+                  "wifictl Task",       /* Name of the task */
+                  2000,                  /* Stack size in words */
+                  NULL,                   /* Task input parameter */
+                  1,                      /* Priority of the task */
+                  &_wifictl_Task );       /* Task handle. */ 
+  }
 }
 
 /*
@@ -244,13 +252,19 @@ void wifictl_on( void ) {
 void wifictl_off( void ) {
   if ( wifi_init == false )
     return;
-    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
-      return;
-    }
-    else {
-      powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
-      vTaskResume( _wifictl_Task );
-    }
+  
+  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
+    return;
+  }
+  else {
+    powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
+    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
+                  "wifictl Task",       /* Name of the task */
+                  2000,                  /* Stack size in words */
+                  NULL,                   /* Task input parameter */
+                  1,                      /* Priority of the task */
+                  &_wifictl_Task );       /* Task handle. */ 
+  }
 }
 
 /*
@@ -260,19 +274,16 @@ void wifictl_Task( void * pvParameters ) {
   if ( wifi_init == false )
     return;
 
-  while( true ) {
-    vTaskDelay( 125 );
-    if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-      statusbar_wifi_set_state( true, "activate" );
-      WiFi.mode( WIFI_STA );
-      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-    }
-    else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
-      statusbar_wifi_set_state( false, "" );
-      WiFi.mode( WIFI_OFF );
-      esp_wifi_stop();
-      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-    }
-    vTaskSuspend( _wifictl_Task );
+  if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
+    statusbar_wifi_set_state( true, "activate" );
+    WiFi.mode( WIFI_STA );
+    powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
   }
+  else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
+    statusbar_wifi_set_state( false, "" );
+    WiFi.mode( WIFI_OFF );
+    esp_wifi_stop();
+    powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+  }
+  vTaskDelete( NULL );
 }

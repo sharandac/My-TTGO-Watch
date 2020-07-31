@@ -29,10 +29,12 @@
 #include "gui/statusbar.h"
 
 EventGroupHandle_t bma_event_handle = NULL;
-
-void IRAM_ATTR  bma_irq( void );
-
 bma_config_t bma_config[ BMA_CONFIG_NUM ];
+
+__NOINIT_ATTR uint32_t stepcounter_valid;
+__NOINIT_ATTR uint32_t stepcounter;
+
+void IRAM_ATTR bma_irq( void );
 
 /*
  *
@@ -43,6 +45,12 @@ void bma_setup( TTGOClass *ttgo ) {
 
     for ( int i = 0 ; i < BMA_CONFIG_NUM ; i++ ) {
         bma_config[ i ].enable = true;
+    }
+
+    if ( stepcounter_valid != 0xa5a5a5a5 ) {
+      stepcounter = 0;
+      stepcounter_valid = 0xa5a5a5a5;
+      log_e("stepcounter not valid. reset");
     }
 
     bma_read_config();
@@ -101,7 +109,8 @@ void bma_loop( TTGOClass *ttgo ) {
     }
 
     if ( !powermgm_get_event( POWERMGM_STANDBY ) && xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {
-        statusbar_update_stepcounter( ttgo->bma->getCounter() );
+        stepcounter =+ ttgo->bma->getCounter();
+        statusbar_update_stepcounter( stepcounter );
         xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
     }
 }

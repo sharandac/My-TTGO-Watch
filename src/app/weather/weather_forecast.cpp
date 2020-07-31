@@ -185,7 +185,7 @@ void weather_forecast_sync_request( void ) {
 
 void weather_forecast_sync_Task( void * pvParameters ) {
     weather_config_t *weather_config = weather_get_config();
-    uint32_t retval = -1;
+    int32_t retval = -1;
 
     log_i("start weather forecast task");
 

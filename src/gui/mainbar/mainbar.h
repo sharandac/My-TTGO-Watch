@@ -58,6 +58,16 @@
     /*
      * @brief add a independent app tile formation
      * 
+     *  predefine tiles
+     * 
+     *  +---+---+       1 = main tile
+     *  | 1 | 2 |       2 = app tile
+     *  +---+---+       3 = note tile
+     *  | 3 | 4 |       4 = setup tile
+     *  +---+---+
+     * 
+     *  app tile
+     * 
      *  +---+---+    +---+   +---+---+
      *  | n |n+1|    | n |   | n |n+1|
      *  +---+---+    +---+   +---+---+
@@ -72,6 +82,7 @@
     uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y );
     /*
      * @brief get the lv_obj_t for a specific tile number
+     *
      * @param   tile_number   tile number
      * 
      * @return  lv_obj_t
@@ -89,5 +100,11 @@
      * @return  lv_style_t
      */
     lv_style_t *mainbar_get_switch_style( void );
+    /*
+     * @brief get main tile slider style
+     * 
+     * @return  lv_style_t
+     */
+    lv_style_t *mainbar_get_slider_style( void );
 
 #endif // _MAINBAR_H

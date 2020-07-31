@@ -1,9 +1,7 @@
 /****************************************************************************
-              config.h
-
-    Tu May 22 21:23:51 2020
-    Copyright  2020  Dirk Brosswick
- *  Email: dirk.brosswick@googlemail.com
+ *   July 31 07:31:12 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -21,16 +19,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CONFIG_H 
-    #define _CONFIG_H 
+#ifndef _UPDATE_SETUP_H
+    #define _UPDATE_SETUP_H
 
-    #define LILYGO_WATCH_2020_V1             //To use T-Watch2020, please uncomment this line
-    #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
-    #include <LilyGoWatch.h>
+    #include <TTGO.h>
 
-    /*
-    * firmeware version string
-    */
-    #define __FIRMWARE__            "2020073109"
+    #define UPDATE_CONFIG_FILE             "/update.cfg"
 
-#endif // _CONFIG_H
+    typedef struct {
+        bool autosync = true;
+    } update_config_t;
+
+    void update_setup_tile_setup( uint32_t tile_num );
+    bool update_setup_get_autosync( void );
+
+#endif // _UPDATE_SETUP_H

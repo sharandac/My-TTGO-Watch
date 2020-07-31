@@ -25,7 +25,7 @@
     #define DISPLAY_MIN_TIMEOUT         15
     #define DISPLAY_MAX_TIMEOUT         300
 
-    #define DISPLAY_MIN_BRIGHTNESS      32
+    #define DISPLAY_MIN_BRIGHTNESS      8
     #define DISPLAY_MAX_BRIGHTNESS      255
 
     #define DISPLAY_MIN_ROTATE          0

@@ -12,11 +12,15 @@ EventGroupHandle_t pmu_event_handle = NULL;
 
 void IRAM_ATTR pmu_irq( void );
 
+pmu_config_t pmu_config;
+
 /*
  * init the pmu: AXP202 
  */
 void pmu_setup( TTGOClass *ttgo ) {
     pmu_event_handle = xEventGroupCreate();
+
+    pmu_read_config();
 
     // Turn on the IRQ used
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
@@ -60,6 +64,61 @@ void IRAM_ATTR  pmu_irq( void ) {
      */
     // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
     setCpuFrequencyMhz(240);
+}
+
+/*
+ *
+ */
+void pmu_save_config( void ) {
+  fs::File file = SPIFFS.open( PMU_CONFIG_FILE, FILE_WRITE );
+
+  if ( !file ) {
+    log_e("Can't save file: %s", PMU_CONFIG_FILE );
+  }
+  else {
+    file.write( (uint8_t *)&pmu_config, sizeof( pmu_config ) );
+    file.close();
+  }
+}
+
+/*
+ *
+ */
+void pmu_read_config( void ) {
+  fs::File file = SPIFFS.open( PMU_CONFIG_FILE, FILE_READ );
+
+  if (!file) {
+    log_e("Can't open file: %s!", PMU_CONFIG_FILE );
+  }
+  else {
+    int filesize = file.size();
+    if ( filesize > sizeof( pmu_config ) ) {
+      log_e("Failed to read configfile. Wrong filesize!" );
+    }
+    else {
+      file.read( (uint8_t *)&pmu_config, filesize );
+    }
+    file.close();
+  }
+}
+
+
+bool pmu_get_calculated_percent( void ) {
+    return( pmu_config.compute_percent );
+}
+
+bool pmu_get_experimental_power_save( void ) {
+    return( pmu_config.experimental_power_save );
+}
+
+void pmu_set_calculated_percent( bool value ) {
+    pmu_config.compute_percent = value;
+    pmu_save_config();
+}
+
+void pmu_set_experimental_power_save( bool value ) {
+    pmu_config.experimental_power_save = value;
+    pmu_save_config();
 }
 
 /*
@@ -110,16 +169,21 @@ void pmu_loop( TTGOClass *ttgo ) {
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
         if ( nextmillis < millis() || updatetrigger == true ) {
             nextmillis = millis() + 1000;
-            statusbar_update_battery( pmu_get_byttery_percent( ttgo ), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+            statusbar_update_battery( pmu_get_battery_percent( ttgo ), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
         }
     }
 }
 
-uint32_t pmu_get_byttery_percent( TTGOClass *ttgo ) {
-    // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
-    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
-        ttgo->power->ClearCoulombcounter();
-        return( -1 );
+int32_t pmu_get_battery_percent( TTGOClass *ttgo ) {
+    if ( pmu_get_calculated_percent() ) {
+        if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
+            ttgo->power->ClearCoulombcounter();
+            return( -1 );
+        }
+        return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
     }
-    return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
+    else {
+        return( ttgo->power->getBattPercentage() );
+    }
+    // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
 }
