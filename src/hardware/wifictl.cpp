@@ -123,6 +123,12 @@ void wifictl_setup( void ) {
         statusbar_hide_icon( STATUSBAR_WIFI );
         statusbar_wifi_set_state( false, "" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
+    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
+                  "wifictl Task",       /* Name of the task */
+                  5000,                  /* Stack size in words */
+                  NULL,                   /* Task input parameter */
+                  1,                      /* Priority of the task */
+                  &_wifictl_Task );       /* Task handle. */ 
 }
 
 /*
@@ -237,12 +243,7 @@ void wifictl_on( void ) {
   }
   else {
     powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
-    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
-                  "wifictl Task",       /* Name of the task */
-                  2000,                  /* Stack size in words */
-                  NULL,                   /* Task input parameter */
-                  1,                      /* Priority of the task */
-                  &_wifictl_Task );       /* Task handle. */ 
+    vTaskResume( _wifictl_Task );
   }
 }
 
@@ -258,12 +259,7 @@ void wifictl_off( void ) {
   }
   else {
     powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
-    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
-                  "wifictl Task",       /* Name of the task */
-                  2000,                  /* Stack size in words */
-                  NULL,                   /* Task input parameter */
-                  1,                      /* Priority of the task */
-                  &_wifictl_Task );       /* Task handle. */ 
+    vTaskResume( _wifictl_Task );
   }
 }
 
@@ -274,16 +270,19 @@ void wifictl_Task( void * pvParameters ) {
   if ( wifi_init == false )
     return;
 
-  if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-    statusbar_wifi_set_state( true, "activate" );
-    WiFi.mode( WIFI_STA );
-    powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+  while ( true ) {
+    vTaskDelay( 100 );
+    if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
+      statusbar_wifi_set_state( true, "activate" );
+      WiFi.mode( WIFI_STA );
+      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+    }
+    else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
+      statusbar_wifi_set_state( false, "" );
+      WiFi.mode( WIFI_OFF );
+      esp_wifi_stop();
+      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+    }
+    vTaskSuspend( _wifictl_Task );
   }
-  else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
-    statusbar_wifi_set_state( false, "" );
-    WiFi.mode( WIFI_OFF );
-    esp_wifi_stop();
-    powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-  }
-  vTaskDelete( NULL );
 }
