@@ -41,8 +41,11 @@ void pmu_setup( TTGOClass *ttgo ) {
     // Turn off unused power
     ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
+
+    // Turn i2s DAC on
+    ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_ON );
 
     pinMode( AXP202_INT, INPUT );
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
@@ -81,6 +84,7 @@ void pmu_standby( void ) {
         ttgo->power->setDCDC3Voltage( 3000 );
         log_i("enable 3.0V standby voltage");
     }
+    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF );
 }
 
 void pmu_wakeup( void ) {
@@ -97,6 +101,8 @@ void pmu_wakeup( void ) {
 
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
+
+    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
 }
 /*
  *

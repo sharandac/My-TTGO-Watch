@@ -24,6 +24,7 @@
 
 #include "config.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/mainbar/setup_tile/time_settings/time_settings.h"
 #include "main_tile.h"
 
 static lv_obj_t *main_cont = NULL;
@@ -71,7 +72,7 @@ void main_tile_setup( void ) {
     lv_label_set_text(datelabel, "1.Jan 1970");
     lv_obj_reset_style_list( datelabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( datelabel, LV_OBJ_PART_MAIN, &datestyle );
-    lv_obj_align(datelabel, timelabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
 
     time_t now;
     struct tm  info;
@@ -147,7 +148,9 @@ void main_tile_task( lv_task_t * task ) {
 
     strftime( buf, sizeof(buf), "%H:%M", &info );
     lv_label_set_text( timelabel, buf );
+    lv_obj_align( timelabel, clock_cont, LV_ALIGN_CENTER, 0, 0 );
+
     strftime( buf, sizeof(buf), "%a %d.%b %Y", &info );
     lv_label_set_text( datelabel, buf );
-    lv_obj_align( datelabel, timelabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
 }

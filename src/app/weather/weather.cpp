@@ -228,50 +228,13 @@ void weather_load_config( void ) {
         log_e( "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
     }
     else {
-        size_t filesize = file.size();
-
-        // Special case, convert V1 of the file to a versioned V2 format
-        if (filesize == sizeof(weather_config_t_v1))
-        {
-            log_i("Reading weather config v1");
-            weather_config_t_v1 v1Config;
-            weather_config_t_v2 &v2Config = weather_config; // For now, V2 is current.
-            file.read((uint8_t *)&v1Config, filesize);
-            log_i("Converting weather config v1 to v2");
-            v2Config.version = 2;
-            memcpy(&v2Config.apikey[0], &v1Config, sizeof(weather_config_t_v1));
-            v2Config.autosync = v1Config.autosync;
-            v2Config.showWind = false;
+        int filesize = file.size();
+        if ( filesize > sizeof( weather_config ) ) {
+            log_e("Failed to read configfile. Wrong filesize!" );
         }
-        else if ( filesize > 0)
-        {
-            // Read version number, then verify and catch up as needed
-            uint8_t version = 0;
-            file.read(&version, 1);
-            file.seek(0, fs::SeekSet);
-            log_v("Reading weather config version: %d", version);
-
-            if ( version > currentConfigVersion)
-            {
-                log_e( "Unexpected weather config version. Expected at most %d found %d", currentConfigVersion, version);
-            }
-            if ( version == 2 )
-            {
-                if (filesize != sizeof(weather_config_t_v2))
-                {
-                    log_e( "Failed to read weather config file. Wrong filesize! Expected %d found %d", sizeof(weather_config_t_v2), filesize);
-                }
-                else
-                {
-                    file.read((uint8_t *)&weather_config, filesize);
-                }
-            }
+        else {
+            file.read( (uint8_t *)&weather_config, filesize );
         }
-        else
-        {
-            log_e( "Failed to read weather config file. File size is %d", filesize);
-        }
-
         file.close();
     }
 }

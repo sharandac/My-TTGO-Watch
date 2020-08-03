@@ -34,6 +34,7 @@
 #include "motor.h"
 #include "touch.h"
 #include "display.h"
+#include "sound.h"
 
 #include "gui/mainbar/mainbar.h"
 
@@ -52,6 +53,7 @@ void powermgm_setup( TTGOClass *ttgo ) {
     wifictl_setup();
     timesync_setup( ttgo );
     touch_setup( ttgo );
+    sound_setup();
 }
 
 /*

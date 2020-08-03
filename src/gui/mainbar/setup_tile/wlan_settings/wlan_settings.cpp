@@ -177,23 +177,21 @@ void WiFiScanDone(WiFiEvent_t event, WiFiEventInfo_t info) {
 }
 
 static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        motor_vibe( 1 );
-        if( lv_switch_get_state( obj ) ) {
-            wifictl_on();
-        }
-        else {
-            wifictl_off();
-        }
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ): if( lv_switch_get_state( obj ) ) {
+                                            wifictl_on();
+                                        }
+                                        else {
+                                            wifictl_off();
+                                        }
     }
 }
 
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    if(event == LV_EVENT_CLICKED) {
-        motor_vibe( 1 );
-        lv_label_set_text( wifi_password_name_label, lv_list_get_btn_text(obj) );
-        lv_textarea_set_text( wifi_password_pass_textfield, "");
-        mainbar_jump_to_tilenumber( wifi_password_tile_num, LV_ANIM_ON );
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):   lv_label_set_text( wifi_password_name_label, lv_list_get_btn_text(obj) );
+                                    lv_textarea_set_text( wifi_password_pass_textfield, "");
+                                    mainbar_jump_to_tilenumber( wifi_password_tile_num, LV_ANIM_ON );
     }
 }
 
@@ -357,7 +355,7 @@ static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
-        case (LV_EVENT_VALUE_CHANGED):      wifictl_set_autoon( lv_switch_get_state( obj ) );
-                                            break;
+        case (LV_EVENT_VALUE_CHANGED):  wifictl_set_autoon( lv_switch_get_state( obj ) );
+                                        break;
     }
 }
