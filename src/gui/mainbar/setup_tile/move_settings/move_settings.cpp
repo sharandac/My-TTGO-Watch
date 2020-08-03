@@ -134,25 +134,13 @@ static void exit_move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 static void stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        motor_vibe( 1 );
-        if( lv_switch_get_state( obj ) ) {
-            bma_set_config( BMA_STEPCOUNTER, true );
-        }
-        else {
-            bma_set_config( BMA_STEPCOUNTER, false );
-        }
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED):  bma_set_config( BMA_STEPCOUNTER, lv_switch_get_state( obj ) );
     }
 }
 
 static void doubleclick_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        motor_vibe( 1 );
-        if( lv_switch_get_state( obj ) ) {
-            bma_set_config( BMA_DOUBLECLICK, true );
-        }
-        else {
-            bma_set_config( BMA_DOUBLECLICK, false );
-        }
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED):  bma_set_config( BMA_DOUBLECLICK, lv_switch_get_state( obj ) );
     }
 }

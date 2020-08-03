@@ -24,12 +24,17 @@
 
     #define WIFICTL_DELAY       10
     #define NETWORKLIST_ENTRYS  20
-    #define WIFICTL_CONFIG_FILE "/wifilist.cfg"
+    #define WIFICTL_LIST_FILE   "/wifilist.cfg"
+    #define WIFICTL_CONFIG_FILE "/wificfg.cfg"
 
     struct networklist {
         char ssid[64]="";
         char password[64]="";
     };
+
+    typedef struct {
+        bool autoon = true;
+    } wifictl_config_t;
 
     /*
      * @brief setup wifi controller routine
@@ -68,5 +73,7 @@
     void wifictl_off( void );
     void wifictl_standby( void );
     void wifictl_wakeup( void );
+    bool wifictl_get_autoon( void );
+    void wifictl_set_autoon( bool autoon );
 
 #endif // _WIFICTL_H

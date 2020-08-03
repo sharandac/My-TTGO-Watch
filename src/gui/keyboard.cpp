@@ -49,6 +49,7 @@ void keyboard_setup( void ) {
     lv_obj_align( kb_screen, lv_scr_act(), LV_ALIGN_CENTER, 0, 20);
     
     kb_textarea = lv_textarea_create( kb_screen, NULL );
+    lv_obj_add_protect( kb_textarea, LV_PROTECT_CLICK_FOCUS);
     lv_obj_set_size( kb_textarea, LV_HOR_RES_MAX - 10, 60 );
     lv_textarea_set_one_line( kb_textarea, true);
     lv_obj_align( kb_textarea, kb_screen, LV_ALIGN_IN_TOP_MID, 0, 5 );
@@ -64,13 +65,12 @@ void keyboard_setup( void ) {
 
 static void kb_event_cb( lv_obj_t * ta, lv_event_t event ) {
     lv_keyboard_def_event_cb( ta, event );
-    Serial.printf("Keyboard event: %d\r\n", event );
-    if ( event == LV_EVENT_CANCEL ) {
-        keyboard_hide();
-    }
-    if ( event == LV_EVENT_APPLY ) {
-        lv_textarea_set_text( kb_user_textarea, lv_textarea_get_text( kb_textarea ) );
-        keyboard_hide();
+    switch( event ) {
+        case( LV_EVENT_CANCEL ):    keyboard_hide();
+                                    break;
+        case( LV_EVENT_APPLY ):     lv_textarea_set_text( kb_user_textarea, lv_textarea_get_text( kb_textarea ) );
+                                    keyboard_hide();
+                                    break;
     }
 }
 

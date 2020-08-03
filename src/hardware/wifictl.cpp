@@ -40,9 +40,12 @@ char *wifiname=NULL;
 char *wifipassword=NULL;
 
 struct networklist wifictl_networklist[ NETWORKLIST_ENTRYS ];
+wifictl_config_t wifictl_config;
 
 void wifictl_save_network( void );
 void wifictl_load_network( void );
+void wifictl_save_config( void );
+void wifictl_load_config( void );
 void wifictl_Task( void * pvParameters );
 
 /*
@@ -63,6 +66,7 @@ void wifictl_setup( void ) {
 
     // load network list from spiff
     wifictl_load_network();
+    wifictl_load_config();
 
     // register WiFi events
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -131,14 +135,59 @@ void wifictl_setup( void ) {
     vTaskSuspend( _wifictl_Task );
 }
 
+
 /*
  *
  */
-void wifictl_save_network( void ) {
+void wifictl_save_config( void ) {
   fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_WRITE );
 
   if ( !file ) {
     log_e("Can't save file: %s", WIFICTL_CONFIG_FILE );
+  }
+  else {
+    file.write( (uint8_t *)&wifictl_config, sizeof( wifictl_config ) );
+    file.close();
+  }
+}
+
+/*
+ *
+ */
+void wifictl_load_config( void ) {
+  fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_READ );
+
+  if (!file) {
+    log_e("Can't open file: %s", WIFICTL_CONFIG_FILE );
+  }
+  else {
+    int filesize = file.size();
+    if ( filesize > sizeof( wifictl_config ) ) {
+      log_e("Failed to read configfile. Wrong filesize!" );
+    }
+    else {
+      file.read( (uint8_t *)&wifictl_config, filesize );
+    }
+    file.close();
+  }
+}
+
+bool wifictl_get_autoon( void ) {
+  return( wifictl_config.autoon );
+}
+
+void wifictl_set_autoon( bool autoon ) {
+  wifictl_config.autoon = autoon;
+  wifictl_save_config();
+}
+/*
+ *
+ */
+void wifictl_save_network( void ) {
+  fs::File file = SPIFFS.open( WIFICTL_LIST_FILE, FILE_WRITE );
+
+  if ( !file ) {
+    log_e("Can't save file: %s", WIFICTL_LIST_FILE );
   }
   else {
     file.write( (uint8_t *)wifictl_networklist, sizeof( wifictl_networklist  ) );
@@ -150,10 +199,10 @@ void wifictl_save_network( void ) {
  *
  */
 void wifictl_load_network( void ) {
-  fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_READ );
+  fs::File file = SPIFFS.open( WIFICTL_LIST_FILE, FILE_READ );
 
   if (!file) {
-    log_e("Can't open file: %s", WIFICTL_CONFIG_FILE );
+    log_e("Can't open file: %s", WIFICTL_LIST_FILE );
   }
   else {
     int filesize = file.size();
@@ -269,7 +318,9 @@ void wifictl_standby( void ) {
 }
 
 void wifictl_wakeup( void ) {
-  wifictl_on();
+  if ( wifictl_config.autoon ) {
+    wifictl_on();
+  }
 }
 /*
  * 

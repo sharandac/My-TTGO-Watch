@@ -153,33 +153,19 @@ static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        motor_vibe( 1 );
-        if( lv_switch_get_state( obj ) ) {
-            timesync_set_timesync( true );
-        }
-        else {
-            timesync_set_timesync( false );
-        }
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_timesync( lv_switch_get_state( obj ) );
     }
 }
 
 static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        motor_vibe( 1 );
-        if( lv_switch_get_state( obj ) ) {
-            timesync_set_daylightsave( true );
-        }
-        else {
-            timesync_set_daylightsave( false );
-        }
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_daylightsave( lv_switch_get_state( obj ) );
     }
 }
 
-static void utczone_event_handler(lv_obj_t * obj, lv_event_t event)
-{
-    if(event == LV_EVENT_VALUE_CHANGED) {
-            motor_vibe( 1 );
-            timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
+static void utczone_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
     }
 }
