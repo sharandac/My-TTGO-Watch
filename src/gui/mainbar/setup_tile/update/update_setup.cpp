@@ -29,8 +29,6 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-#include "hardware/motor.h"
-
 update_config_t update_config;
 
 lv_obj_t *update_setup_tile = NULL;

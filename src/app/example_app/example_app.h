@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
+ *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,38 +19,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MAIL_TILE_H
-    #define _MAIL_TILE_H
+#ifndef _EXAMPLE_APP_H
+    #define _EXAMPLE_APP_H
 
     #include <TTGO.h>
 
-    #define MAX_WIDGET_NUM      3
-    #define WIDGET_X_SIZE       64
-    #define WIDGET_Y_SIZE       80
-    #define WIDGET_X_CLEARENCE  16
+//    #define EXAMPLE_WIDGET    // uncomment if an widget need
 
-    typedef struct {
-        lv_obj_t *widget;
-        lv_coord_t x;
-        lv_coord_t y;
-        bool active;
-    } lv_widget_entry_t;
+    void example_app_setup( void );
+    void example_app_hide_app_icon_info( bool show );
+    void example_app_hide_widget_icon_info( bool show );
+    uint32_t example_app_get_app_setup_tile_num( void );
+    uint32_t example_app_get_app_main_tile_num( void );
 
-    /*
-     * @brief setup the app tile
-     */
-    void main_tile_setup( void );
-    /*
-     * @brief register an widget icon an the main tile
-     * 
-     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn or NULL if failed
-     */
-    lv_obj_t *main_tile_register_widget( void );
-    /*
-     * @brief get the tile number for the main tile
-     * 
-     * @return  tile number
-     */
-    uint32_t main_tile_get_tile_num( void );
-
-#endif // _MAIL_TILE_H
+#endif // _EXAMPLE_APP_H

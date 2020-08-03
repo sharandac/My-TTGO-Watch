@@ -33,8 +33,6 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-#include "hardware/motor.h"
-
 EventGroupHandle_t weather_forecast_event_handle = NULL;
 TaskHandle_t _weather_forecast_sync_Task;
 void weather_forecast_sync_Task( void * pvParameters );

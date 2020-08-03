@@ -33,7 +33,6 @@
 #include "gui/mainbar/setup_tile/setup.h"
 #include "gui/statusbar.h"
 #include "hardware/display.h"
-#include "hardware/motor.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -167,7 +166,6 @@ static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if(event == LV_EVENT_CLICKED) {
-        motor_vibe( 1 );
         if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
             return;
         }

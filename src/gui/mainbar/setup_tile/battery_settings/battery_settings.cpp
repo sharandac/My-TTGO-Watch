@@ -48,6 +48,7 @@ static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_t event );
+void battery_set_experimental_indicator( void );
 
 void battery_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -138,28 +139,35 @@ void battery_settings_tile_setup( void ) {
 
     if ( pmu_get_experimental_power_save() ) {
         lv_switch_on( battery_experimental_switch, LV_ANIM_OFF);
-        lv_obj_set_hidden( battery_setup_info_img, false );
     }
     else
         lv_switch_off( battery_experimental_switch, LV_ANIM_OFF);
+
+    battery_set_experimental_indicator();
 }
 
+void battery_set_experimental_indicator( void ) {
+    if ( pmu_get_experimental_power_save() || pmu_get_calculated_percent() ) {
+        lv_obj_set_hidden( battery_setup_info_img, false );
+    }
+    else {
+        lv_obj_set_hidden( battery_setup_info_img, true );
+    }
+}
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): pmu_set_calculated_percent( lv_switch_get_state( obj ) );
                                         break;
     }
+    battery_set_experimental_indicator();
 }
 
 static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): pmu_set_experimental_power_save( lv_switch_get_state( obj ) );
-                                        if ( pmu_get_experimental_power_save() )
-                                            lv_obj_set_hidden( battery_setup_info_img, false );
-                                        else
-                                            lv_obj_set_hidden( battery_setup_info_img, true );
                                         break;
     }
+    battery_set_experimental_indicator();
 }
 
 static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

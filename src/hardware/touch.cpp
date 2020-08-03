@@ -52,7 +52,7 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
 
     if ( !touch_press ) {
         touch_press = true;
-        motor_vibe( 2 );
+        motor_vibe( 1 );
     }
 
     p = ttgo->touch->getPoint();

@@ -70,6 +70,7 @@ void bma_standby( void ) {
 
   if ( bma_get_config( BMA_STEPCOUNTER ) )
       ttgo->bma->enableStepCountInterrupt( false );
+
 }
 
 void bma_wakeup( void ) {
@@ -77,6 +78,9 @@ void bma_wakeup( void ) {
 
   if ( bma_get_config( BMA_STEPCOUNTER ) )
     ttgo->bma->enableStepCountInterrupt( true );
+
+  stepcounter =+ ttgo->bma->getCounter();
+  statusbar_update_stepcounter( stepcounter );
 }
 
 /*
@@ -102,7 +106,6 @@ void IRAM_ATTR  bma_irq( void ) {
     {
         portYIELD_FROM_ISR ();
     }
-    // rtc_clk_cpu_freq_set( RTC_CPU_FREQ_240M );
     setCpuFrequencyMhz( 240 );
 }
 
