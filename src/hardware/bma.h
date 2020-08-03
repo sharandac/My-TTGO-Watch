@@ -38,7 +38,8 @@
 
     void bma_setup( TTGOClass *ttgo );
     void bma_loop( TTGOClass *ttgo );
-
+    void bma_standby( void );
+    void bma_wakeup( void );
     void bma_reload_settings( void );
     void bma_save_config( void );
     void bma_read_config( void );

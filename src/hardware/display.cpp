@@ -24,6 +24,7 @@
 
 #include "display.h"
 #include "powermgm.h"
+#include "motor.h"
 
 display_config_t display_config;
 
@@ -66,29 +67,41 @@ void display_loop( TTGOClass *ttgo ) {
   }
 }
 
-void display_go_wakeup( TTGOClass *ttgo ) {
-  ttgo->openBL();
-  ttgo->displayWakeup();
-  ttgo->bl->adjust( 0 );
-  brightness = 0;
-  dest_brightness = display_get_brightness();
-}
+void display_standby( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
 
-void display_go_silence_wakeup( TTGOClass *ttgo ) {
-  ttgo->openBL();
-  ttgo->displayWakeup();
-  ttgo->bl->adjust( 0 );
-  brightness = 0;
-  dest_brightness = 0;
-}
-
-void display_go_sleep( TTGOClass *ttgo ) {
   ttgo->bl->adjust( 0 );
   ttgo->displaySleep();
   ttgo->closeBL();
   brightness = 0;
   dest_brightness = 0;
 }
+
+void display_wakeup( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+
+  // normal wake up from standby
+  if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
+    log_i("wakeup");
+    ttgo->openBL();
+    ttgo->displayWakeup();
+    ttgo->bl->adjust( 0 );
+    brightness = 0;
+    dest_brightness = display_get_brightness();
+    motor_vibe( 1 );
+  }
+  // silence wakeup request from standby
+  else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+    log_i("silence wakeup");
+    ttgo->openBL();
+    ttgo->displayWakeup();
+    ttgo->bl->adjust( 0 );
+    brightness = 0;
+    dest_brightness = 0;
+    powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
+  }
+}
+
 /*
  *
  */

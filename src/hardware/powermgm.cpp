@@ -70,64 +70,36 @@ void powermgm_loop( TTGOClass *ttgo ) {
 
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             powermgm_clear_event( POWERMGM_STANDBY );
-            if ( pmu_get_experimental_power_save() ) {
-                ttgo->power->setDCDC3Voltage( 3000 );
-                log_e("enable 3.0V voltage");
-            } 
-            else {
-                ttgo->power->setDCDC3Voltage( 3300 );
-                log_e("enable 3.3V voltage");
-            }
-            // normal wake up from standby
-            if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
-                log_i("wakeup");
-                display_go_wakeup( ttgo );
-                motor_vibe( 1 );
-            }
-            // silence wakeup request from standby
-            else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
-                log_i("silence wakeup");
-                display_go_silence_wakeup( ttgo );
-                powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
-            }
+
+            pmu_wakeup();
+            bma_wakeup();
+            display_wakeup();
+
             timesyncToSystem();
             ttgo->startLvglTick();
-            mainbar_jump_to_maintile( LV_ANIM_OFF );
             lv_disp_trig_activity(NULL);
-            if ( bma_get_config( BMA_STEPCOUNTER ) )
-                ttgo->bma->enableStepCountInterrupt( true );
 
-            if ( ttgo->power->getBattVoltage() > 3300 ) {
-                wifictl_on();         
-            }
-
-            ttgo->power->clearTimerStatus();
-            ttgo->power->offTimer();
+            wifictl_wakeup();
+            log_i("go wakeup");
         }        
         else {
-            log_i("go to standby");
-            display_go_sleep( ttgo );
-            timesyncToRTC();
-            if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
-            while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
+            log_i("go standby");
+            display_standby();
+            mainbar_jump_to_maintile( LV_ANIM_OFF );
+
             ttgo->stopLvglTick();
-            if ( bma_get_config( BMA_STEPCOUNTER ) )
-                ttgo->bma->enableStepCountInterrupt( false );
+            timesyncToRTC();
+
+            bma_standby();
+            pmu_standby();
+            wifictl_standby();
+
             powermgm_set_event( POWERMGM_STANDBY );
             powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
-            ttgo->power->clearTimerStatus();
-            ttgo->power->setTimer( 60 );
-            if ( pmu_get_experimental_power_save() ) {
-                ttgo->power->setDCDC3Voltage( 2700 );
-                log_e("enable 2.7V standby voltage");
-            } 
-            else {
-                ttgo->power->setDCDC3Voltage( 3000 );
-                log_e("enable 3.0V standby voltage");
-            }
+
             setCpuFrequencyMhz( 10 );
-            gpio_wakeup_enable ((gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL);
-            gpio_wakeup_enable ((gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
+            gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
+            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
             esp_sleep_enable_gpio_wakeup ();
             esp_light_sleep_start();
         }

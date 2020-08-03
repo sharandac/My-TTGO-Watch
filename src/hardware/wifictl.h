@@ -66,5 +66,7 @@
      * @brief switch off wifi
      */
     void wifictl_off( void );
+    void wifictl_standby( void );
+    void wifictl_wakeup( void );
 
 #endif // _WIFICTL_H

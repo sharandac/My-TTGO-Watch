@@ -82,6 +82,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_add_style( stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
     lv_obj_align( stepcounter_cont, move_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     stepcounter_onoff = lv_switch_create( stepcounter_cont, NULL );
+    lv_obj_add_protect( stepcounter_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( stepcounter_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( stepcounter_onoff, LV_ANIM_ON );
     lv_obj_align( stepcounter_onoff, stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -96,6 +97,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_add_style( doubleclick_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
     lv_obj_align( doubleclick_cont, stepcounter_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     doubleclick_onoff = lv_switch_create( doubleclick_cont, NULL );
+    lv_obj_add_protect( doubleclick_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( doubleclick_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( doubleclick_onoff, LV_ANIM_ON );
     lv_obj_align( doubleclick_onoff, doubleclick_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -119,16 +121,14 @@ void move_settings_tile_setup( void ) {
 
 static void enter_move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( move_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( move_tile_num, LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void exit_move_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         break;
     }
 }

@@ -2,6 +2,7 @@
 #include <TTGO.h>
 #include <soc/rtc.h>
 
+#include "display.h"
 #include "pmu.h"
 #include "powermgm.h"
 #include "motor.h"
@@ -66,6 +67,37 @@ void IRAM_ATTR  pmu_irq( void ) {
     setCpuFrequencyMhz(240);
 }
 
+void pmu_standby( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
+    ttgo->power->clearTimerStatus();
+    ttgo->power->setTimer( 60 );
+
+    if ( pmu_get_experimental_power_save() ) {
+        ttgo->power->setDCDC3Voltage( 2700 );
+        log_i("enable 2.7V standby voltage");
+    } 
+    else {
+        ttgo->power->setDCDC3Voltage( 3000 );
+        log_i("enable 3.0V standby voltage");
+    }
+}
+
+void pmu_wakeup( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
+    if ( pmu_get_experimental_power_save() ) {
+        ttgo->power->setDCDC3Voltage( 3000 );
+        log_i("enable 3.0V voltage");
+    } 
+    else {
+        ttgo->power->setDCDC3Voltage( 3300 );
+        log_i("enable 3.3V voltage");
+    }
+
+    ttgo->power->clearTimerStatus();
+    ttgo->power->offTimer();
+}
 /*
  *
  */
@@ -185,5 +217,4 @@ int32_t pmu_get_battery_percent( TTGOClass *ttgo ) {
     else {
         return( ttgo->power->getBattPercentage() );
     }
-    // discharg coulumb higher then charge coulumb, battery state unknow and set to zero
 }

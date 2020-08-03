@@ -22,6 +22,7 @@
 #include "config.h"
 #include "touch.h"
 #include "powermgm.h"
+#include "motor.h"
 
 lv_indev_t *touch_indev = NULL;
 
@@ -37,6 +38,7 @@ void touch_setup( TTGOClass *ttgo ) {
 static bool touch_getXY( int16_t &x, int16_t &y ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     TP_Point p;
+    static bool touch_press = false;
 
     // disable touch when we are in standby or silence wakeup
     if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP ) ) {
@@ -44,7 +46,13 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
     }
 
     if ( !ttgo->touch->touched() ) {
+        touch_press = false;
         return( false );
+    }
+
+    if ( !touch_press ) {
+        touch_press = true;
+        motor_vibe( 2 );
     }
 
     p = ttgo->touch->getPoint();

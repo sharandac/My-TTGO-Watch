@@ -54,6 +54,8 @@
      * @return  charge in percent or -1 if unknown
      */
     int32_t pmu_get_battery_percent( TTGOClass *ttgo );
+    void pmu_standby( void );
+    void pmu_wakeup( void );
     void pmu_save_config( void );
     void pmu_read_config( void );
     bool pmu_get_calculated_percent( void );

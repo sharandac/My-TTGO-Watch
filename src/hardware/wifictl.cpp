@@ -31,7 +31,6 @@
 #include "webserver/webserver.h"
 
 bool wifi_init = false;
-TaskHandle_t _WIFICTL_Task;
 
 void wifictl_StartTask( void );
 void wifictl_Task( void * pvParameters );
@@ -128,7 +127,8 @@ void wifictl_setup( void ) {
                   5000,                  /* Stack size in words */
                   NULL,                   /* Task input parameter */
                   1,                      /* Priority of the task */
-                  &_wifictl_Task );       /* Task handle. */ 
+                  &_wifictl_Task );       /* Task handle. */
+    vTaskSuspend( _wifictl_Task );
 }
 
 /*
@@ -263,6 +263,14 @@ void wifictl_off( void ) {
   }
 }
 
+void wifictl_standby( void ) {
+  if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
+  while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
+}
+
+void wifictl_wakeup( void ) {
+  wifictl_on();
+}
 /*
  * 
  */
@@ -271,7 +279,7 @@ void wifictl_Task( void * pvParameters ) {
     return;
 
   while ( true ) {
-    vTaskDelay( 100 );
+    vTaskDelay( 500 );
     if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
       statusbar_wifi_set_state( true, "activate" );
       WiFi.mode( WIFI_STA );

@@ -95,8 +95,14 @@
      * @param rotation from 0-270 in 90 degree steps
      */
     void display_set_rotation( uint32_t rotation );
-    void display_go_silence_wakeup( TTGOClass *ttgo );
-    void display_go_wakeup( TTGOClass *ttgo );
-    void display_go_sleep( TTGOClass *ttgo );
+    /*
+     * @brief set display into standby
+     */
+    void display_standby( void );
+    /*
+     * @brief set display into normal mode or leave it in standby if a silence wakeup occur
+     */
+    void display_wakeup( void );
+
 
 #endif // _DISPLAY_H

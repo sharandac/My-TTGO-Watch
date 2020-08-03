@@ -80,6 +80,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_align( update_check_autosync_cont, update_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
 
     update_check_autosync_onoff = lv_switch_create( update_check_autosync_cont, NULL );
+    lv_obj_add_protect( update_check_autosync_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( update_check_autosync_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( update_check_autosync_onoff, LV_ANIM_ON );
     lv_obj_align( update_check_autosync_onoff, update_check_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -99,8 +100,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
 
 static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
-        case (LV_EVENT_VALUE_CHANGED):      motor_vibe( 1 );
-                                            update_config.autosync = lv_switch_get_state( obj );
+        case (LV_EVENT_VALUE_CHANGED):      update_config.autosync = lv_switch_get_state( obj );
                                             update_save_config();
                                             break;
     }
@@ -108,8 +108,7 @@ static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_
 
 static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):           motor_vibe( 1 );
-                                            mainbar_jump_to_tilenumber( update_setup_tile_num - 1, false );
+        case( LV_EVENT_CLICKED ):           mainbar_jump_to_tilenumber( update_setup_tile_num - 1, false );
                                             break;
     }
 }

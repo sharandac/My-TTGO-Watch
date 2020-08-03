@@ -88,6 +88,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_add_style( brightness_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( brightness_cont, display_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     display_brightness_slider = lv_slider_create( brightness_cont, NULL );
+    lv_obj_add_protect( display_brightness_slider, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
     lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
     lv_slider_set_range( display_brightness_slider, DISPLAY_MIN_BRIGHTNESS, DISPLAY_MAX_BRIGHTNESS );
@@ -103,6 +104,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_add_style( timeout_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( timeout_cont, brightness_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     display_timeout_slider = lv_slider_create( timeout_cont, NULL );
+    lv_obj_add_protect( display_timeout_slider, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
     lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
     lv_slider_set_range( display_timeout_slider, DISPLAY_MIN_TIMEOUT, DISPLAY_MAX_TIMEOUT );
@@ -147,8 +149,7 @@ void display_settings_tile_setup( void ) {
 
 static void enter_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( display_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( display_tile_num, LV_ANIM_OFF );
                                         break;
     }
 
@@ -156,8 +157,7 @@ static void enter_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         display_save_config();
                                         break;
     }

@@ -145,24 +145,21 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
 static void exit_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }
 }
 
 static void setup_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        weather_jump_to_setup();
+        case( LV_EVENT_CLICKED ):       weather_jump_to_setup();
                                         break;
     }
 }
 
 static void refresh_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        weather_forecast_sync_request();
+        case( LV_EVENT_CLICKED ):       weather_forecast_sync_request();
                                         weather_widget_sync_request();
                                         break;
     }

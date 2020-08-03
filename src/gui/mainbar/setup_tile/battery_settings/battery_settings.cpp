@@ -106,6 +106,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_add_style( battery_percent_switch_cont, LV_OBJ_PART_MAIN, &battery_settings_style  );
     lv_obj_align( battery_percent_switch_cont, battery_setup_label_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_percent_switch = lv_switch_create( battery_percent_switch_cont, NULL );
+    lv_obj_add_protect( battery_percent_switch, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( battery_percent_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( battery_percent_switch, LV_ANIM_ON );
     lv_obj_align( battery_percent_switch, battery_percent_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -120,6 +121,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_add_style( battery_experimental_switch_cont, LV_OBJ_PART_MAIN, &battery_settings_style  );
     lv_obj_align( battery_experimental_switch_cont, battery_percent_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_experimental_switch = lv_switch_create( battery_experimental_switch_cont, NULL );
+    lv_obj_add_protect( battery_experimental_switch, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( battery_experimental_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
     lv_switch_off( battery_experimental_switch, LV_ANIM_ON );
     lv_obj_align( battery_experimental_switch, battery_experimental_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -144,16 +146,14 @@ void battery_settings_tile_setup( void ) {
 
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): motor_vibe( 1 );
-                                        pmu_set_calculated_percent( lv_switch_get_state( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ): pmu_set_calculated_percent( lv_switch_get_state( obj ) );
                                         break;
     }
 }
 
 static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): motor_vibe( 1 );
-                                        pmu_set_experimental_power_save( lv_switch_get_state( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ): pmu_set_experimental_power_save( lv_switch_get_state( obj ) );
                                         if ( pmu_get_experimental_power_save() )
                                             lv_obj_set_hidden( battery_setup_info_img, false );
                                         else
@@ -164,8 +164,7 @@ static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_
 
 static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( battery_settings_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_settings_tile_num, LV_ANIM_OFF );
                                         break;
     }
 
@@ -173,8 +172,7 @@ static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       motor_vibe( 1 );
-                                        mainbar_jump_to_tilenumber( battery_settings_tile_num,  LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_settings_tile_num,  LV_ANIM_OFF );
                                         break;
     }
 }

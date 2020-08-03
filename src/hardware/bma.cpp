@@ -65,6 +65,20 @@ void bma_setup( TTGOClass *ttgo ) {
     bma_reload_settings();
 }
 
+void bma_standby( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+
+  if ( bma_get_config( BMA_STEPCOUNTER ) )
+      ttgo->bma->enableStepCountInterrupt( false );
+}
+
+void bma_wakeup( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+
+  if ( bma_get_config( BMA_STEPCOUNTER ) )
+    ttgo->bma->enableStepCountInterrupt( true );
+}
+
 /*
  *
  */
