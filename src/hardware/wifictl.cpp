@@ -23,6 +23,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_wps.h>
 
 #include "powermgm.h"
 #include "wifictl.h"
@@ -42,6 +43,8 @@ char *wifipassword=NULL;
 struct networklist wifictl_networklist[ NETWORKLIST_ENTRYS ];
 wifictl_config_t wifictl_config;
 
+static esp_wps_config_t esp_wps_config;
+
 void wifictl_save_network( void );
 void wifictl_load_network( void );
 void wifictl_save_config( void );
@@ -56,7 +59,7 @@ void wifictl_setup( void ) {
         return;
 
     wifi_init = true;
-    powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN );
+    powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST );
 
     // clean network list table
     for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
@@ -74,13 +77,19 @@ void wifictl_setup( void ) {
         powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_CONNECTED );
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
         statusbar_show_icon( STATUSBAR_WIFI );
-        statusbar_wifi_set_state( true, "scan ..." );
-        WiFi.scanNetworks();
+        if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) )
+          statusbar_wifi_set_state( true, "wait for WPS" );
+        else {
+          powermgm_set_event( POWERMGM_WIFI_SCAN );
+          statusbar_wifi_set_state( true, "scan ..." );
+          WiFi.scanNetworks();
+        }
+        lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         powermgm_set_event( POWERMGM_WIFI_ACTIVE );
-        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_CONNECTED );
+        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_WPS_REQUEST );
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
         statusbar_show_icon( STATUSBAR_WIFI );
         int len = WiFi.scanComplete();
@@ -95,11 +104,17 @@ void wifictl_setup( void ) {
             }
           }
         }
+        lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         powermgm_set_event( POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_ACTIVE );
-        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN );
+        if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) ) {
+          Serial.printf("SSID: %s, psk: %s\r\n", WiFi.SSID().c_str(), WiFi.psk().c_str() );
+          wifictl_insert_network( WiFi.SSID().c_str(), WiFi.psk().c_str() );
+          wifictl_save_config();
+        }
+        powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST  );
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
         statusbar_show_icon( STATUSBAR_WIFI );
         String label(wifiname);
@@ -110,22 +125,49 @@ void wifictl_setup( void ) {
         // label.concat(WiFi.localIPv6().toString());
         statusbar_wifi_set_state( true, label.c_str() );
         asyncwebserver_setup();
+        lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        powermgm_set_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_SCAN );
+        powermgm_set_event( POWERMGM_WIFI_ACTIVE );
         powermgm_clear_event( POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST );
         statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
         statusbar_show_icon( STATUSBAR_WIFI );
-        statusbar_wifi_set_state( true, "scan ..." );
-        WiFi.scanNetworks();
+        if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) )
+          statusbar_wifi_set_state( true, "wait for WPS" );
+        else {
+          powermgm_set_event( POWERMGM_WIFI_SCAN );
+          statusbar_wifi_set_state( true, "scan ..." );
+          WiFi.scanNetworks();
+        }
+        lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN );
+        powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST );
         statusbar_hide_icon( STATUSBAR_WIFI );
         statusbar_wifi_set_state( false, "" );
+        lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
+
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+      esp_wifi_wps_disable();
+      WiFi.begin();
+      lv_obj_invalidate( lv_scr_act() );
+    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
+
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+      esp_wifi_wps_disable();
+      statusbar_wifi_set_state( true, "WPS failed" );
+      lv_obj_invalidate( lv_scr_act() );
+    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_FAILED );
+
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+      esp_wifi_wps_disable();
+      statusbar_wifi_set_state( true, "WPS timeout" );
+      lv_obj_invalidate( lv_scr_act() );
+    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
+
     xTaskCreate(  wifictl_Task,    /* Function to implement the task */
                   "wifictl Task",       /* Name of the task */
                   5000,                  /* Stack size in words */
@@ -259,7 +301,7 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
   // check if existin
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
-      strncpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
+      strncpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_network();
       WiFi.scanNetworks();
       powermgm_set_event( POWERMGM_WIFI_SCAN );
@@ -287,7 +329,7 @@ void wifictl_on( void ) {
   if ( wifi_init == false )
     return;
 
-  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
+  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
     return;
   }
   else {
@@ -315,7 +357,7 @@ void wifictl_off( void ) {
 void wifictl_standby( void ) {
   log_i("standby");
   if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
-  while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN ) ) { yield(); }
+  while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST ) ) { yield(); }
 }
 
 void wifictl_wakeup( void ) {
@@ -324,6 +366,37 @@ void wifictl_wakeup( void ) {
     wifictl_on();
   }
 }
+
+void wifictl_start_wps( void ) {
+  if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) )
+    return;
+
+  log_e("start WPS");
+
+  esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+  esp_wps_config.wps_type = ESP_WPS_MODE;
+  strcpy(esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER);
+  strcpy(esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER);
+  strcpy(esp_wps_config.factory_info.model_name, ESP_MODEL_NAME);
+  strcpy(esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME);
+
+  WiFi.mode( WIFI_OFF );
+  esp_wifi_stop();
+
+  statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
+  statusbar_show_icon( STATUSBAR_WIFI );
+  statusbar_wifi_set_state( true, "wait for WPS" );
+  lv_obj_invalidate( lv_scr_act() );
+
+  powermgm_set_event( POWERMGM_WIFI_WPS_REQUEST );
+
+  ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
+  ESP_ERROR_CHECK( esp_wifi_start() );
+
+  ESP_ERROR_CHECK( esp_wifi_wps_enable( &esp_wps_config ) );
+  ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
+}
+
 /*
  * 
  */
@@ -335,11 +408,13 @@ void wifictl_Task( void * pvParameters ) {
     vTaskDelay( 500 );
     if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
       statusbar_wifi_set_state( true, "activate" );
+      lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_STA );
       powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
     }
     else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
       statusbar_wifi_set_state( false, "" );
+      lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_OFF );
       esp_wifi_stop();
       powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );

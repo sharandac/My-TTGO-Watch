@@ -292,6 +292,7 @@ static void exit_wifi_password_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 lv_obj_t *wifi_autoon_onoff;
+static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 
 void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
@@ -333,10 +334,23 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_label_set_text( wifi_autoon_label, "enable on wakeup");
     lv_obj_align( wifi_autoon_label, wifi_autoon_onoff_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *wps_btn = lv_btn_create( wifi_setup_tile, NULL);
+    lv_obj_set_event_cb( wps_btn, wps_start_event_handler );
+    lv_obj_align( wps_btn, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, -40);
+    lv_obj_t *wps_btn_label = lv_label_create( wps_btn, NULL );
+    lv_label_set_text( wps_btn_label, "start WPS");
+
     if ( wifictl_get_autoon() )
         lv_switch_on( wifi_autoon_onoff, LV_ANIM_OFF);
     else
         lv_switch_off( wifi_autoon_onoff, LV_ANIM_OFF);
+}
+
+static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       wifictl_start_wps();
+                                        break;
+    }
 }
 
 static void enter_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

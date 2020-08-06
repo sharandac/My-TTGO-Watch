@@ -27,6 +27,12 @@
     #define WIFICTL_LIST_FILE   "/wifilist.cfg"
     #define WIFICTL_CONFIG_FILE "/wificfg.cfg"
 
+    #define ESP_WPS_MODE      WPS_TYPE_PBC
+    #define ESP_MANUFACTURER  "ESPRESSIF"
+    #define ESP_MODEL_NUMBER  "ESP32"
+    #define ESP_MODEL_NAME    "ESPRESSIF IOT"
+    #define ESP_DEVICE_NAME   "ESP STATION"
+
     struct networklist {
         char ssid[64]="";
         char password[64]="";
@@ -75,5 +81,6 @@
     void wifictl_wakeup( void );
     bool wifictl_get_autoon( void );
     void wifictl_set_autoon( bool autoon );
+    void wifictl_start_wps( void );
 
 #endif // _WIFICTL_H
