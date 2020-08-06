@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <Arduino.h>
-#include <WiFi.h>
 #include "ArduinoJson.h"
 #include "HTTPClient.h"
 
@@ -31,82 +29,46 @@
 
 #include "hardware/powermgm.h"
 
+// arduinoJson allocator for external PSRAM
+// see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
+struct SpiRamAllocator {
+  void* allocate( size_t size ) { return ps_calloc( size, 1 ); }
+  void deallocate( void* pointer ) { free( pointer ); }
+};
+using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+
 /* Utility function to convert numbers to directions */
 static void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree);
 
-uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
-    
-    WiFiClient today_client;
-    uint32_t retval = -1;
+int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
+    char url[512]="";
+    int httpcode = -1;
 
-	if ( !today_client.connect( OWM_HOST, OWM_PORT ) ) {
-        log_e("connection failed");
+    snprintf( url, sizeof( url ), "http://%s/data/2.5/weather?lat=%s&lon=%s&appid=%s", OWM_HOST, weather_config->lat, weather_config->lon, weather_config->apikey);
+
+    HTTPClient today_client;
+
+    today_client.useHTTP10( true );
+    today_client.begin( url );
+    httpcode = today_client.GET();
+
+    if ( httpcode != 200 ) {
+        log_e("HTTPClient error %d", httpcode );
+        today_client.end();
         return( -1 );
-	}
-
-	today_client.printf(  "GET /data/2.5/weather?lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
-                    "Host: %s\r\n"
-		            "Connection: close\r\n"
-		            "Pragma: no-cache\r\n"
-		            "Cache-Control: no-cache\r\n"
-		            "User-Agent: ESP32\r\n"
-		            "Accept: text/html,application/json\r\n\r\n", weather_config->lat, weather_config->lon, weather_config->apikey, OWM_HOST );
-
-	uint64_t startMillis = millis();
-	while ( today_client.available() == 0 ) {
-		if ( millis() - startMillis > 5000 ) {
-            log_e("connection timeout");
-			today_client.stop();
-			return( retval );
-		}
-	}
-
-    char *json = (char *)ps_malloc( WEATHER_TODAY_BUFFER_SIZE );
-    if ( json == NULL ) {
-        log_e("memory alloc failed");
-        today_client.stop();
-        return( retval );
     }
-    char *ptr = json;
 
-    bool data_begin = false;
-    while( today_client.available() ) {
-        if ( data_begin ) {
-            ptr[ today_client.readBytes( ptr, WEATHER_TODAY_BUFFER_SIZE - 1 ) ] = '\0';
-        }
-		else if ( today_client.read() == '{' ) {
-            data_begin = true;
-            *ptr = '{';
-            ptr++;
-        }
-	}
+    SpiRamJsonDocument doc( today_client.getSize() * 2 );
 
-    today_client.stop();
-
-    if ( data_begin == false ) {
-        free( json );
-        return( retval );
-    }
-    today_client.stop();
-
-    DynamicJsonDocument doc(20000);
-
-    DeserializationError error = deserializeJson( doc, json);
+    DeserializationError error = deserializeJson( doc, today_client.getStream() );
     if (error) {
         log_e("weather today deserializeJson() failed: %s", error.c_str() );
         doc.clear();
-        free( json );
-        return( retval );
+        today_client.end();
+        return( -1 );
     }
 
-    retval = doc["cod"].as<int>();
-
-    if ( retval != 200 ) {
-        log_e("get weather failed, returncode: %d", retval );
-        doc.clear();
-        free( json );
-        return( retval );
-    }
+    today_client.end();
 
     weather_today->valide = true;
     snprintf( weather_today->temp, sizeof( weather_today->temp ),"%0.1f°C", doc["main"]["temp"].as<float>() - 273.15 );
@@ -120,81 +82,38 @@ uint32_t weather_fetch_today( weather_config_t *weather_config, weather_forcast_
     weather_wind_to_string( weather_today, speed, directionDegree );
 
     doc.clear();
-    free( json );
-    return( retval );
+    return( httpcode );
 }
 
-uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
-    
-    WiFiClient forecast_client;
-    uint32_t retval = -1;
+int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
+    char url[512]="";
+    int httpcode = -1;
 
-	if ( !forecast_client.connect( OWM_HOST, OWM_PORT ) ) {
-        log_e("connection failed");
-        return( retval );
-	}
+    snprintf( url, sizeof( url ), "http://%s/data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s", OWM_HOST, WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey);
 
-	forecast_client.printf(  "GET /data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s HTTP/1.1\r\n"
-                    "Host: %s\r\n"
-		            "Connection: close\r\n"
-		            "Pragma: no-cache\r\n"
-		            "Cache-Control: no-cache\r\n"
-		            "User-Agent: ESP32\r\n"
-		            "Accept: text/html,application/json\r\n\r\n", WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey, OWM_HOST );
+    HTTPClient forecast_client;
 
-	uint64_t startMillis = millis();
-	while ( forecast_client.available() == 0 ) {
-		if ( millis() - startMillis > 5000 ) {
-            log_e("connection timeout");
-			forecast_client.stop();
-			return( retval );
-		}
-	}
+    forecast_client.useHTTP10( true );
+    forecast_client.begin( url );
+    httpcode = forecast_client.GET();
 
-    char *json = (char *)ps_malloc( WEATHER_FORECAST_BUFFER_SIZE );
-    if ( json == NULL ) {
-        log_e("memory alloc failed");
-        forecast_client.stop();
-        return( retval );
-    }
-    char *ptr = json;
-
-    bool data_begin = false;
-    while( forecast_client.available() ) {
-        if ( data_begin ) {
-            ptr[ forecast_client.readBytes( ptr, WEATHER_FORECAST_BUFFER_SIZE - 1 ) ] = '\0';
-        }
-		else if ( forecast_client.read() == '{' ) {
-            data_begin = true;
-            *ptr = '{';
-            ptr++;
-        }
-	}
-
-    forecast_client.stop();
-
-    if ( data_begin == false ) {
-        free( json );
-        return( retval );
+    if ( httpcode != 200 ) {
+        log_e("HTTPClient error %d", httpcode );
+        forecast_client.end();
+        return( -1 );
     }
 
-    DynamicJsonDocument doc(20000);
-    DeserializationError error = deserializeJson( doc, json );
+    SpiRamJsonDocument doc( forecast_client.getSize() * 2 );
+
+    DeserializationError error = deserializeJson( doc, forecast_client.getStream() );
     if (error) {
         log_e("weather forecast deserializeJson() failed: %s", error.c_str() );
         doc.clear();
-        free( json );
-        return( retval );
+        forecast_client.end();
+        return( -1 );
     }
 
-    retval = doc["cod"].as<int>();
-
-    if ( retval != 200 ) {
-        log_e("get weather forecast failed, returncode: %d", retval );
-        doc.clear();
-        free( json );
-        return( retval );
-    }
+    forecast_client.end();
 
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
@@ -211,8 +130,7 @@ uint32_t weather_fetch_forecast( weather_config_t *weather_config, weather_forca
     }
 
     doc.clear();
-    free( json );
-    return( 200 );
+    return( httpcode );
 }
 
 void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree )

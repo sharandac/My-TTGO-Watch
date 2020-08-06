@@ -34,9 +34,10 @@
     #define POWERMGM_BMA_WAKEUP                 _BV(7)
     #define POWERMGM_WIFI_ON_REQUEST            _BV(8)
     #define POWERMGM_WIFI_OFF_REQUEST           _BV(9)
-    #define POWERMGM_WIFI_ACTIVE                _BV(10)
-    #define POWERMGM_WIFI_SCAN                  _BV(11)
-    #define POWERMGM_WIFI_CONNECTED             _BV(12)
+    #define POWERMGM_WIFI_WPS_REQUEST           _BV(10)
+    #define POWERMGM_WIFI_ACTIVE                _BV(11)
+    #define POWERMGM_WIFI_SCAN                  _BV(12)
+    #define POWERMGM_WIFI_CONNECTED             _BV(13)
 
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl

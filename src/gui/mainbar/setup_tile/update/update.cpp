@@ -189,7 +189,7 @@ void update_check_version( void ) {
         xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
         xTaskCreate(    update_Task,        /* Function to implement the task */
                         "update Task",      /* Name of the task */
-                        2000,               /* Stack size in words */
+                        5000,               /* Stack size in words */
                         NULL,               /* Task input parameter */
                         1,                  /* Priority of the task */
                         &_update_Task );    /* Task handle. */

@@ -34,7 +34,6 @@
 
 #include "statusbar.h"
 
-#include "hardware/motor.h"
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 
@@ -193,7 +192,6 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
                                             break;
             default:                        break;
         }
-        motor_vibe( 1 );
     }
 }
 
@@ -207,7 +205,6 @@ void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
             case( LV_BTN_STATE_PRESSED ):    break;
             default:                        break;
         }
-        motor_vibe( 1 );
     }
 }
 
@@ -361,4 +358,8 @@ void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
         }
     }
     statusbar_refresh();
+}
+
+void statusbar_hide( bool hide ) {
+    lv_obj_set_hidden( statusbar, hide );
 }

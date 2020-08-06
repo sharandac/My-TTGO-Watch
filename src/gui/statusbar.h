@@ -83,6 +83,7 @@
     void statusbar_update_battery( int32_t percent, bool charging, bool plug );
     void statusbar_wifi_set_state( bool state, const char *wifiname );
     void statusbar_bluetooth_set_state( bool state );
+    void statusbar_hide( bool hide );
 
 #endif // _STATUSBAR_H
 

@@ -132,16 +132,19 @@ void weather_app_setup( void ) {
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
+                                        mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }
 
 void weather_jump_to_forecast( void ) {
+    statusbar_hide( true );
     mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_ON );
 }
 
 void weather_jump_to_setup( void ) {
+    statusbar_hide( true );
     mainbar_jump_to_tilenumber( weather_app_setup_tile_num, LV_ANIM_ON );    
 }
 
@@ -167,6 +170,8 @@ weather_config_t *weather_get_config( void ) {
 
 void weather_widget_sync_Task( void * pvParameters ) {
     log_i("start weather widget task");
+
+    vTaskDelay( 250 );
 
     if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {       
         uint32_t retval = weather_fetch_today( &weather_config, &weather_today );

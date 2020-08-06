@@ -29,6 +29,7 @@
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/statusbar.h"
 
 uint32_t example_app_main_tile_num;
 uint32_t example_app_setup_tile_num;
@@ -123,7 +124,8 @@ uint32_t example_app_get_app_setup_tile_num( void ) {
  */
 static void enter_example_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       example_app_hide_app_icon_info( true );
+        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
+                                        example_app_hide_app_icon_info( true );
                                         #ifdef EXAMPLE_WIDGET
                                             example_app_hide_widget_icon_info( true );
                                         #endif

@@ -28,6 +28,7 @@
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/statusbar.h"
 
 lv_obj_t *example_app_main_tile = NULL;
 lv_style_t example_app_main_style;
@@ -73,7 +74,7 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_label_set_text( app_label, "myapp");
     lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
     lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &example_app_main_style );
-    lv_obj_align( app_label, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align( app_label, example_app_main_tile, LV_ALIGN_CENTER, 0, 0);
 
     // create an task that runs every secound
     _example_app_task = lv_task_create( example_app_task, 1000, LV_TASK_PRIO_MID, NULL );
@@ -81,7 +82,8 @@ void example_app_main_setup( uint32_t tile_num ) {
 
 static void enter_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( example_app_get_app_setup_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
+                                        mainbar_jump_to_tilenumber( example_app_get_app_setup_tile_num(), LV_ANIM_ON );
                                         break;
     }
 }
