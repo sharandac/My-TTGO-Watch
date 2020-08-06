@@ -26,6 +26,7 @@
 #include "gui/sound/snd_start.h"
 #include "gui/sound/snd_signal.h"
 
+EventGroupHandle_t sound_event_handle = NULL;
 TaskHandle_t _sound_Task;
 void sound_Task( void * pvParameters );
 
@@ -62,6 +63,8 @@ void sound_setup( void ) {
         log_e("Failed settings pin config: %d\r\n", err );
         while (true);
     }
+
+    sound_event_handle = xEventGroupCreate();
 
     xTaskCreate(    sound_Task,      /* Function to implement the task */
                     "sound Task",    /* Name of the task */

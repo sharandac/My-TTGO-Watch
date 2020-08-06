@@ -24,7 +24,10 @@
 #include <soc/rtc.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <esp_bt.h>
+#include <esp_bt_main.h>
 #include <time.h>
+#include "driver/adc.h"
 
 #include "pmu.h"
 #include "bma.h"
@@ -73,6 +76,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             powermgm_clear_event( POWERMGM_STANDBY );
 
+            log_i("go wakeup");
+
             pmu_wakeup();
             bma_wakeup();
             display_wakeup();
@@ -82,10 +87,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             lv_disp_trig_activity(NULL);
 
             wifictl_wakeup();
-            log_i("go wakeup");
         }        
         else {
-            log_i("go standby");
             display_standby();
             mainbar_jump_to_maintile( LV_ANIM_OFF );
 
@@ -99,11 +102,17 @@ void powermgm_loop( TTGOClass *ttgo ) {
             powermgm_set_event( POWERMGM_STANDBY );
             powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
 
-            setCpuFrequencyMhz( 10 );
+            adc_power_off();
+
+            log_i("go standby");
+
+            setCpuFrequencyMhz( 80 );
             gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
             gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
             esp_sleep_enable_gpio_wakeup ();
             esp_light_sleep_start();
+            // from here, the consumption is round about 2.5mA
+            // total standby time is 152h (6days) without use?
         }
         // clear event
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP | POWERMGM_STANDBY_REQUEST | POWERMGM_SILENCE_WAKEUP_REQUEST );

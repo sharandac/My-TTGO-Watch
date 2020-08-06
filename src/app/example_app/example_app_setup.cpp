@@ -51,7 +51,7 @@ void example_app_setup_setup( uint32_t tile_num ) {
     lv_obj_t *exit_cont = lv_obj_create( example_app_setup_tile, NULL );
     lv_obj_set_size( exit_cont, LV_HOR_RES_MAX , 40);
     lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
-    lv_obj_align( exit_cont, example_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( exit_cont, example_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( exit_cont, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -94,7 +94,7 @@ static void example_app_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event
 
 static void exit_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( example_app_get_app_main_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( example_app_get_app_main_tile_num(), LV_ANIM_ON );
                                         break;
     }
 }

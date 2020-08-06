@@ -28,6 +28,7 @@
 #include "note_tile/note_tile.h"
 #include "app_tile/app_tile.h"
 #include "gui/keyboard.h"
+#include "gui/statusbar.h"
 
 #include "setup_tile/battery_settings/battery_settings.h"
 #include "setup_tile/wlan_settings/wlan_settings.h"
@@ -160,6 +161,7 @@ lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
 }
 
 void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
+    statusbar_hide( false );
     if ( tile_entrys != 0 ) {
         lv_tileview_set_tile_act( mainbar, 0, 0, anim );
     }

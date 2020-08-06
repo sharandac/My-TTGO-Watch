@@ -74,7 +74,12 @@ void pmu_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     ttgo->power->clearTimerStatus();
-    ttgo->power->setTimer( 60 );
+    if ( ttgo->power->isChargeing() ) {
+        ttgo->power->setTimer( 10 );
+    }
+    else {
+        ttgo->power->setTimer( 60 );
+    }
 
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( 2700 );
@@ -213,11 +218,11 @@ void pmu_loop( TTGOClass *ttgo ) {
 }
 
 int32_t pmu_get_battery_percent( TTGOClass *ttgo ) {
+    if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
+        ttgo->power->ClearCoulombcounter();
+    }
+
     if ( pmu_get_calculated_percent() ) {
-        if ( ttgo->power->getBattChargeCoulomb() < ttgo->power->getBattDischargeCoulomb() || ttgo->power->getBattVoltage() < 3200 ) {
-            ttgo->power->ClearCoulombcounter();
-            return( -1 );
-        }
         return( ( ttgo->power->getCoulombData() / PMU_BATTERY_CAP ) * 100 );
     }
     else {

@@ -69,7 +69,7 @@ void display_loop( TTGOClass *ttgo ) {
 
 void display_standby( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
-
+  log_i("standby");
   ttgo->bl->adjust( 0 );
   ttgo->displaySleep();
   ttgo->closeBL();

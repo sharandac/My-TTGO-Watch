@@ -24,6 +24,10 @@
 
     #include <TTGO.h>
 
+    #define SOUND_EVENT_PLAYING             _BV(0)
+    #define SOUND_EVENT_STARTUP             _BV(1)
+    #define SOUND_EVENT_NOTIFICATION        _BV(2)
+
     #define I2S_PORT              I2S_NUM_0
 
     void sound_setup( void );

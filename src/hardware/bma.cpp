@@ -32,6 +32,7 @@ EventGroupHandle_t bma_event_handle = NULL;
 bma_config_t bma_config[ BMA_CONFIG_NUM ];
 
 __NOINIT_ATTR uint32_t stepcounter_valid;
+__NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
 void IRAM_ATTR bma_irq( void );
@@ -49,9 +50,12 @@ void bma_setup( TTGOClass *ttgo ) {
 
     if ( stepcounter_valid != 0xa5a5a5a5 ) {
       stepcounter = 0;
+      stepcounter_before_reset = 0;
       stepcounter_valid = 0xa5a5a5a5;
-      log_e("stepcounter not valid. reset");
+      log_i("stepcounter not valid. reset");
     }
+
+    stepcounter = stepcounter + stepcounter_before_reset;
 
     bma_read_config();
 
@@ -68,6 +72,8 @@ void bma_setup( TTGOClass *ttgo ) {
 void bma_standby( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
+  log_i("standby");
+
   if ( bma_get_config( BMA_STEPCOUNTER ) )
       ttgo->bma->enableStepCountInterrupt( false );
 
@@ -76,11 +82,13 @@ void bma_standby( void ) {
 void bma_wakeup( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
+  log_i("wakeup");
+
   if ( bma_get_config( BMA_STEPCOUNTER ) )
     ttgo->bma->enableStepCountInterrupt( true );
 
-  stepcounter =+ ttgo->bma->getCounter();
-  statusbar_update_stepcounter( stepcounter );
+  stepcounter_before_reset = ttgo->bma->getCounter();
+  statusbar_update_stepcounter( stepcounter + ttgo->bma->getCounter() );
 }
 
 /*
@@ -126,8 +134,8 @@ void bma_loop( TTGOClass *ttgo ) {
     }
 
     if ( !powermgm_get_event( POWERMGM_STANDBY ) && xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {
-        stepcounter =+ ttgo->bma->getCounter();
-        statusbar_update_stepcounter( stepcounter );
+        stepcounter_before_reset = ttgo->bma->getCounter();
+        statusbar_update_stepcounter( stepcounter + ttgo->bma->getCounter() );
         xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
     }
 }

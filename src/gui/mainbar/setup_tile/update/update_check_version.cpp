@@ -20,81 +20,53 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <Arduino.h>
-#include <WiFi.h>
 #include "ArduinoJson.h"
 #include "HTTPClient.h"
 
 #include "update_check_version.h"
 
+// arduinoJson allocator for external PSRAM
+// see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
+struct SpiRamAllocator {
+  void* allocate( size_t size ) { return ps_calloc( size, 1 ); }
+  void deallocate( void* pointer ) { free( pointer ); }
+};
+using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+
 uint64_t update_check_new_version( void ) {
-    
-    WiFiClient check_version_client;
-    uint64_t retval = -1;
+    char url[512]="";
+    int httpcode = -1;
+    uint64_t version = -1;
 
-	if ( !check_version_client.connect( FIRMWARE_HOST, FIRMWARE_HOST_PORT ) ) {
-        log_e("connection failed");
+    snprintf( url, sizeof( url ), "http://%s/%s", FIRMWARE_HOST, FIRMWARE_VERSION_FILE );
+
+    HTTPClient check_update_client;
+
+    check_update_client.useHTTP10( true );
+    check_update_client.setUserAgent( "ESP32-" __FIRMWARE__ );
+    check_update_client.begin( url );
+    httpcode = check_update_client.GET();
+
+    if ( httpcode != 200 ) {
+        log_e("HTTPClient error %d", httpcode );
+        check_update_client.end();
         return( -1 );
-	}
-
-	check_version_client.printf(    "GET /" FIRMWARE_VERSION_FILE " HTTP/1.1\r\n"
-                                    "Host: " FIRMWARE_HOST "\r\n"
-                                    "Connection: close\r\n"
-                                    "Pragma: no-cache\r\n"
-                                    "Cache-Control: no-cache\r\n"
-                                    "User-Agent: ESP32-" __FIRMWARE__ "\r\n"
-                                    "Accept: text/html,application/json\r\n\r\n" );
-
-	uint64_t startMillis = millis();
-	while ( check_version_client.available() == 0 ) {
-		if ( millis() - startMillis > 5000 ) {
-            log_e("connection timeout");
-			check_version_client.stop();
-			return( retval );
-		}
-	}
-
-    char *json = (char *)ps_malloc( 200 );
-    if ( json == NULL ) {
-        log_e("memory alloc failed");
-        check_version_client.stop();
-        return( retval );
     }
-    char *ptr = json;
 
-    bool data_begin = false;
-    while( check_version_client.available() ) {
-        if ( data_begin ) {
-            ptr[ check_version_client.readBytes( ptr, 100 - 1 ) ] = '\0';
-        }
-		else if ( check_version_client.read() == '{' ) {
-            data_begin = true;
-            *ptr = '{';
-            ptr++;
-        }
-	}
+    SpiRamJsonDocument doc( check_update_client.getSize() * 2 );
 
-    check_version_client.stop();
-
-    if ( data_begin == false ) {
-        free( json );
-        return( retval );
-    }
-    check_version_client.stop();
-
-    DynamicJsonDocument doc( 400 );
-
-    DeserializationError error = deserializeJson( doc, json);
+    DeserializationError error = deserializeJson( doc, check_update_client.getStream() );
     if (error) {
-        log_e("update version deserializeJson() failed: ", error.c_str() );
+        log_e("update check deserializeJson() failed: %s", error.c_str() );
         doc.clear();
-        free( json );
-        return( retval );
+        check_update_client.end();
+        return( -1 );
     }
 
-    retval = atoll( doc["version"] );
+    check_update_client.end();
+
+    version = atoll( doc["version"] );
 
     doc.clear();
-    free( json );
-    return( retval );
+    return( version );
 }
