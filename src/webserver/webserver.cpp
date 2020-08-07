@@ -27,6 +27,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
+#include <ESP32SSDP.h>
 
 #include "webserver.h"
 #include "config.h"
@@ -167,6 +168,53 @@ void asyncwebserver_setup(void){
     [](AsyncWebServerRequest *request) {},
     [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) { handleUpdate(request, filename, index, data, len, final); }
   );
+
+  asyncserver.on("/description.xml", HTTP_GET, [](AsyncWebServerRequest *request) {
+    byte mac[6];
+    WiFi.macAddress(mac);
+    char tmp[12 + 1];
+    snprintf(tmp, sizeof(tmp), "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    String MacStrPart = String(tmp).substring(6);
+
+    String xmltext = String("<?xml version=\"1.0\"?>\n") +
+            "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
+            "<specVersion>\n"
+            "\t<major>1</major>\n"
+            "\t<minor>0</minor>\n"
+            "</specVersion>\n"
+            "<URLBase>http://" + WiFi.localIP().toString() + "/</URLBase>\n" 
+            "<device>\n"
+            "\t<deviceType>upnp:rootdevice</deviceType>\n"
+
+            /*this is the icon name in Windows*/
+            /*"\t<friendlyName>" + WiFi.getHostname() + "</friendlyName>\n"*/ 
+            "\t<friendlyName>" + DEV_NAME + " " + MacStrPart + "</friendlyName>\n" /*because the hostename is 'Espressif' */
+
+            "\t<presentationURL>/</presentationURL>\n"
+            "\t<manufacturer>" + "Dirk Broßwick (sharandac)" + "</manufacturer>\n"
+            "\t<manufacturerURL>https://github.com/sharandac/My-TTGO-Watch</manufacturerURL>\n"
+            "\t<modelName>" +  DEV_INFO + "</modelName>\n"
+
+            "\t<modelNumber>" + WiFi.getHostname() + "</modelNumber>\n"
+            "\t<modelURL>" +
+            "/" + "</modelURL>\n"
+
+            "\t<serialNumber>Build: " + __FIRMWARE__ + "</serialNumber>\n"
+            //The last six bytes of the UUID are the hardware address of the first Ethernet adapter in the system the UUID was generated on.
+            "\t<UDN>uuid:38323636-4558-4DDA-9188-CDA0E6" + MacStrPart + "</UDN>\n"
+            "</device>\n"
+            "</root>\r\n"
+            "\r\n";
+
+    request->send(200, "text/xml", xmltext);
+  });
+
+  //Upnp / SSDP presentation - Multicast  - link to description.xml
+  SSDP.setSchemaURL("description.xml");
+  SSDP.setHTTPPort( UPNPPORT );
+  SSDP.setURL("/");
+  SSDP.setDeviceType("upnp:rootdevice");
+  SSDP.begin();
 
   asyncserver.begin();
 }

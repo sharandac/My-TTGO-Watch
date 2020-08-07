@@ -30,7 +30,7 @@
     #define ESP_WPS_MODE      WPS_TYPE_PBC
     #define ESP_MANUFACTURER  "ESPRESSIF"
     #define ESP_MODEL_NUMBER  "ESP32"
-    #define ESP_MODEL_NAME    "ESPRESSIF IOT"
+    #define ESP_MODEL_NAME    "LILYGO T-WATCH2020 V1"
     #define ESP_DEVICE_NAME   "ESP STATION"
 
     struct networklist {

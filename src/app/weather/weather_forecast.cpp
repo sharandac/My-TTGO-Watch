@@ -226,11 +226,7 @@ void weather_forecast_sync_Task( void * pvParameters ) {
                 localtime_r( &now, &info );
                 strftime( buf, sizeof(buf), "updated: %d.%b %H:%M", &info );
                 lv_label_set_text( weather_forecast_update_label, buf );
-            }
-            else {
-                char buf[64];
-                snprintf( buf, sizeof(buf), "Error: %d", retval );
-                lv_label_set_text( weather_forecast_update_label, buf );
+                lv_obj_invalidate( lv_scr_act() );
             }
         }
     }
