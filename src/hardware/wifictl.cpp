@@ -110,7 +110,7 @@ void wifictl_setup( void ) {
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         powermgm_set_event( POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_ACTIVE );
         if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) ) {
-          Serial.printf("SSID: %s, psk: %s\r\n", WiFi.SSID().c_str(), WiFi.psk().c_str() );
+          log_i("store new SSID and psk from WPS");
           wifictl_insert_network( WiFi.SSID().c_str(), WiFi.psk().c_str() );
           wifictl_save_config();
         }
@@ -371,7 +371,7 @@ void wifictl_start_wps( void ) {
   if ( powermgm_get_event( POWERMGM_WIFI_WPS_REQUEST ) )
     return;
 
-  log_e("start WPS");
+  log_i("start WPS");
 
   esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
   esp_wps_config.wps_type = ESP_WPS_MODE;
