@@ -83,16 +83,26 @@ void powermgm_loop( TTGOClass *ttgo ) {
             display_wakeup();
 
             timesyncToSystem();
-            ttgo->startLvglTick();
-            lv_disp_trig_activity(NULL);
 
             wifictl_wakeup();
+            Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
+            Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
+            Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
+            Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
+
+            ttgo->startLvglTick();
+            lv_disp_trig_activity(NULL);
         }        
         else {
+            ttgo->stopLvglTick();
+
+            Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
+            Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
+            Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
+            Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
             display_standby();
             mainbar_jump_to_maintile( LV_ANIM_OFF );
 
-            ttgo->stopLvglTick();
             timesyncToRTC();
 
             bma_standby();
