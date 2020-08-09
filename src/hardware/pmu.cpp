@@ -63,11 +63,6 @@ void IRAM_ATTR  pmu_irq( void ) {
     if ( xHigherPriorityTaskWoken ) {
         portYIELD_FROM_ISR();
     }
-    /*
-     * fast wake up from IRQ
-     */
-    // rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M);
-    setCpuFrequencyMhz(240);
 }
 
 void pmu_standby( void ) {
@@ -175,6 +170,8 @@ void pmu_loop( TTGOClass *ttgo ) {
      * handle IRQ event
      */
     if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
+        setCpuFrequencyMhz(240);
+        
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {
             powermgm_set_event( POWERMGM_PMU_BATTERY );
