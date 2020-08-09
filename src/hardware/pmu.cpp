@@ -49,6 +49,9 @@ void pmu_setup( TTGOClass *ttgo ) {
 
     pinMode( AXP202_INT, INPUT );
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
+
+    // Turn off bluetooth
+    btStop();
 }
 
 /*
