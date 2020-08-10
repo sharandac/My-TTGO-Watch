@@ -83,6 +83,7 @@ void wlan_settings_tile_setup( void ) {
 
     // register an setup icon an set an callback
     lv_obj_t *wifi_setup = lv_imgbtn_create ( setup_tile_register_setup(), NULL);
+    mainbar_add_slide_element(wifi_setup);
     lv_imgbtn_set_src( wifi_setup, LV_BTN_STATE_RELEASED, &wifi_64px);
     lv_imgbtn_set_src( wifi_setup, LV_BTN_STATE_PRESSED, &wifi_64px);
     lv_imgbtn_set_src( wifi_setup, LV_BTN_STATE_CHECKED_RELEASED, &wifi_64px);

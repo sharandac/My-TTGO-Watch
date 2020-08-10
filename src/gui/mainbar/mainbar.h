@@ -109,4 +109,6 @@
 
     lv_obj_t * mainbar_obj_create(lv_obj_t *parent);
 
+    void mainbar_add_slide_element(lv_obj_t *element);
+
 #endif // _MAINBAR_H

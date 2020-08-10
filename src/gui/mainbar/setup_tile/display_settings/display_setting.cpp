@@ -65,6 +65,7 @@ void display_settings_tile_setup( void ) {
     // register an setup icon an set an callback
     display_setup_icon_cont = setup_tile_register_setup();
     lv_obj_t *display_setup_icon = lv_imgbtn_create ( display_setup_icon_cont, NULL);
+    mainbar_add_slide_element(display_setup_icon);
     lv_imgbtn_set_src( display_setup_icon, LV_BTN_STATE_RELEASED, &brightness_64px);
     lv_imgbtn_set_src( display_setup_icon, LV_BTN_STATE_PRESSED, &brightness_64px);
     lv_imgbtn_set_src( display_setup_icon, LV_BTN_STATE_CHECKED_RELEASED, &brightness_64px);
