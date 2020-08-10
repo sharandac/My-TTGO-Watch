@@ -74,6 +74,7 @@ void update_tile_setup( void ) {
     // register an setup icon an set an callback
     update_setup_icon_cont = setup_tile_register_setup();
     lv_obj_t *update_setup = lv_imgbtn_create ( update_setup_icon_cont, NULL);
+    mainbar_add_slide_element(update_setup);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_RELEASED, &update_64px);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_PRESSED, &update_64px);
     lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_RELEASED, &update_64px);

@@ -186,3 +186,8 @@ lv_obj_t * mainbar_obj_create(lv_obj_t *parent)
 
     return child;
 }
+
+void mainbar_add_slide_element(lv_obj_t *element)
+{
+    lv_tileview_add_element( mainbar, element );
+}

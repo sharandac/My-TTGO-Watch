@@ -66,6 +66,7 @@ void battery_settings_tile_setup( void ) {
     // register an setup icon an set an callback
     battery_setup_icon_cont = setup_tile_register_setup();
     lv_obj_t *battery_setup = lv_imgbtn_create ( battery_setup_icon_cont, NULL);
+    mainbar_add_slide_element(battery_setup);
     lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_RELEASED, &battery_icon_64px);
     lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_PRESSED, &battery_icon_64px);
     lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_RELEASED, &battery_icon_64px);

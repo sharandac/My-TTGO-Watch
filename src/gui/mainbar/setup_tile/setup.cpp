@@ -42,7 +42,7 @@ void setup_tile_setup( void ) {
         setup_entry[ setup ].y = SETUP_FIRST_Y_POS + ( ( setup / MAX_SETUP_ICON_HORZ ) * ( SETUP_ICON_Y_SIZE + SETUP_ICON_Y_CLEARENCE ) );
         setup_entry[ setup ].active = false;
         // create app icon container
-        setup_entry[ setup ].setup = lv_obj_create( setup_cont, NULL );
+        setup_entry[ setup ].setup = mainbar_obj_create( setup_cont );
         lv_obj_reset_style_list( setup_entry[ setup ].setup, LV_OBJ_PART_MAIN );
         lv_obj_add_style( setup_entry[ setup ].setup, LV_OBJ_PART_MAIN, &setup_style );
         lv_obj_set_size( setup_entry[ setup ].setup, SETUP_ICON_X_SIZE, SETUP_ICON_Y_SIZE );

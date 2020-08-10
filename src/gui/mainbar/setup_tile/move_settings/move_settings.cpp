@@ -55,6 +55,7 @@ void move_settings_tile_setup( void ) {
 
     // register an setup icon an set an callback
     lv_obj_t *move_setup = lv_imgbtn_create ( setup_tile_register_setup(), NULL);
+    mainbar_add_slide_element(move_setup);
     lv_imgbtn_set_src( move_setup, LV_BTN_STATE_RELEASED, &move_64px);
     lv_imgbtn_set_src( move_setup, LV_BTN_STATE_PRESSED, &move_64px);
     lv_imgbtn_set_src( move_setup, LV_BTN_STATE_CHECKED_RELEASED, &move_64px);
