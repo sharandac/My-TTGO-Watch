@@ -42,6 +42,7 @@
 #include "gui/mainbar/mainbar.h"
 
 EventGroupHandle_t powermgm_status = NULL;
+portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
 /*
  *
@@ -83,16 +84,26 @@ void powermgm_loop( TTGOClass *ttgo ) {
             display_wakeup();
 
             timesyncToSystem();
-            ttgo->startLvglTick();
-            lv_disp_trig_activity(NULL);
 
             wifictl_wakeup();
+            Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
+            Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
+            Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
+            Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
+
+            ttgo->startLvglTick();
+            lv_disp_trig_activity(NULL);
         }        
         else {
+            ttgo->stopLvglTick();
+
+            Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
+            Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
+            Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
+            Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
             display_standby();
             mainbar_jump_to_maintile( LV_ANIM_OFF );
 
-            ttgo->stopLvglTick();
             timesyncToRTC();
 
             bma_standby();
@@ -126,19 +137,26 @@ void powermgm_loop( TTGOClass *ttgo ) {
  *
  */
 void powermgm_set_event( EventBits_t bits ) {
+    portENTER_CRITICAL_ISR(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );
+    portEXIT_CRITICAL_ISR(&powermgmMux);
 }
 
 /*
  *
  */
 void powermgm_clear_event( EventBits_t bits ) {
+    portENTER_CRITICAL_ISR(&powermgmMux);
     xEventGroupClearBits( powermgm_status, bits );
+    portEXIT_CRITICAL_ISR(&powermgmMux);
 }
 
 /*
  *
  */
 EventBits_t powermgm_get_event( EventBits_t bits ) {
-    return( xEventGroupGetBits( powermgm_status ) & bits );
+    portENTER_CRITICAL_ISR(&powermgmMux);
+    EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
+    portEXIT_CRITICAL_ISR(&powermgmMux);
+    return( temp );
 }

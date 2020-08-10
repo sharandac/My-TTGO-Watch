@@ -72,7 +72,7 @@ void bma_setup( TTGOClass *ttgo ) {
 void bma_standby( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
-  log_i("standby");
+  log_i("go standby");
 
   if ( bma_get_config( BMA_STEPCOUNTER ) )
       ttgo->bma->enableStepCountInterrupt( false );
@@ -82,7 +82,7 @@ void bma_standby( void ) {
 void bma_wakeup( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
-  log_i("wakeup");
+  log_i("go wakeup");
 
   if ( bma_get_config( BMA_STEPCOUNTER ) )
     ttgo->bma->enableStepCountInterrupt( true );
@@ -114,7 +114,6 @@ void IRAM_ATTR  bma_irq( void ) {
     {
         portYIELD_FROM_ISR ();
     }
-    setCpuFrequencyMhz( 240 );
 }
 
 /*
@@ -125,7 +124,9 @@ void bma_loop( TTGOClass *ttgo ) {
      * handle IRQ event
      */
     if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {
-        while( !ttgo->bma->readInterrupt() );
+      setCpuFrequencyMhz(240);
+                
+      while( !ttgo->bma->readInterrupt() );
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_WAKEUP );
             xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );

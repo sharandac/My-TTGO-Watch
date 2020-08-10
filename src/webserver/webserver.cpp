@@ -77,7 +77,7 @@ void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_
 /*
  *
  */
-void asyncwebserver_setup(void){
+void asyncwebserver_start(void){
 
   asyncserver.on("/info", HTTP_GET, [](AsyncWebServerRequest *request) {
     String message("Firmwarestand: " __DATE__ " " __TIME__ "\nGCC-Version: " __VERSION__ "\n");
@@ -217,4 +217,12 @@ void asyncwebserver_setup(void){
   SSDP.begin();
 
   asyncserver.begin();
+
+  log_i("enable webserver and ssdp");
+}
+
+void asyncwebserver_end(void) {
+  SSDP.end();
+  asyncserver.end();
+  log_i("disable webserver and ssdp");
 }

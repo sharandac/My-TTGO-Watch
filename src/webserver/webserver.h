@@ -33,6 +33,7 @@
     /*
      *  @brief setup builtin webserver, call after first wifi-connection. otherwise esp32 will crash
      */
-    void asyncwebserver_setup(void);
+    void asyncwebserver_start(void);
+    void asyncwebserver_end(void);
 
 #endif // _ASYNCWEBSERVER_H
