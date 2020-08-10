@@ -170,11 +170,6 @@ weather_config_t *weather_get_config( void ) {
 }
 
 void weather_widget_sync_Task( void * pvParameters ) {
-    if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_STANDBY_REQUEST ) ) {
-        log_i("block weather widget task");
-        xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
-        vTaskDelete( NULL );
-    }
     log_i("start weather widget task");
 
     vTaskDelay( 250 );

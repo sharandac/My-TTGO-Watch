@@ -184,11 +184,6 @@ void weather_forecast_sync_Task( void * pvParameters ) {
     weather_config_t *weather_config = weather_get_config();
     int32_t retval = -1;
 
-    if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_STANDBY_REQUEST ) ) {
-        log_i("block weather forecast task");
-        xEventGroupClearBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
-        vTaskDelete( NULL );
-    }
     log_i("start weather forecast task");
 
     vTaskDelay( 250 );

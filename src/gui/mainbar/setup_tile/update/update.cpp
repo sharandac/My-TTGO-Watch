@@ -198,11 +198,6 @@ void update_check_version( void ) {
 }
 
 void update_Task( void * pvParameters ) {
-    if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_STANDBY_REQUEST ) ) {
-        log_i("block update task");
-        xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
-        vTaskDelete( NULL );
-    }
     log_i("start update task");
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {

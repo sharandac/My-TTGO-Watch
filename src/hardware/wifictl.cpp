@@ -427,8 +427,8 @@ void wifictl_Task( void * pvParameters ) {
     if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
       statusbar_wifi_set_state( true, "activate" );
       lv_obj_invalidate( lv_scr_act() );
-      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
       WiFi.mode( WIFI_STA );
+      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
       log_i("request wifictl on done");
     }
     else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
