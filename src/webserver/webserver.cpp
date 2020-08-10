@@ -36,6 +36,65 @@
 AsyncWebServer asyncserver( WEBSERVERPORT );
 TaskHandle_t _WEBSERVER_Task;
 
+  static const char* serverIndex =
+    "<!DOCTYPE html>\n <html><head>\n <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
+    "\n <script src='/jquery.min.js'></script>"
+
+    "\n <style>"
+    "\n #progressbarfull {"
+    "\n background-color: #20201F;"
+    "\n border-radius: 20px;"
+    "\n width: 320px;"
+    "\n padding: 4px;"
+    "\n}"
+    "\n #progressbar {"
+    "\n background-color: #20CC00;"
+    "\n width: 3%;"
+    "\n height: 16px;"
+    "\n border-radius: 10px;"
+    "\n}"
+    "\n</style>"
+    "\n </head><body>"
+    "<h2>Update by Browser</h2>"
+    "\n <form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
+    "\n <input type='file' name='update'>"
+    "\n <br><br><input type='submit' value='Update'>"
+    "\n </form>"
+    "\n <div id='prg'>Progress: 0%</div>"
+    "\n <div id=\"progressbarfull\"><div id=\"progressbar\"></div></div>"
+    "\n <script>"
+    "\n $('form').submit(function(e){"
+    "\n e.preventDefault();"
+    "\n var form = $('#upload_form')[0];"
+    "\n var data = new FormData(form);"
+    "\n $.ajax({"
+    "\n url: '/update',"
+    "\n type: 'POST',"
+    "\n data: data,"
+    "\n contentType: false,"
+    "\n processData:false,"
+    "\n xhr: function() {"
+    "\n var xhr = new window.XMLHttpRequest();"
+    "\n xhr.upload.addEventListener('progress', function(evt) {"
+    "\n if (evt.lengthComputable) {"
+    "\n var per = evt.loaded / evt.total;"
+    "\n document.getElementById(\"prg\").innerHTML = 'Progress: ' + Math.round(per*100) + '%';"
+    "\n document.getElementById(\"progressbar\").style.width=Math.round(per*100)+ '%';"
+    "}"
+    "}, false);"
+    "return xhr;"
+    "},"
+    "\n success:function(d, s) {"
+    "\n document.getElementById(\"prg\").innerHTML = 'Progress: success';"
+    "\n console.log('success!')"
+    "},"
+    "\n error: function (a, b, c) {"
+    "\n document.getElementById(\"prg\").innerHTML = 'Progress: error';"
+    "}"
+    "});"
+    "});"
+    "\n </script>"
+    "\n </body></html>";
 
 void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
 
@@ -79,10 +138,97 @@ void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_
  */
 void asyncwebserver_start(void){
 
+  asyncserver.on("/index.htm", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String html = (String) "<!DOCTYPE html>"
+      "<html>"
+      "<frameset cols=\"300, *\">"
+      "<frame src=\"/nav.htm\" name=\"nav\">"
+      "<frame name=\"cont\">"
+      "</frameset>"
+      "</html>";
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/nav.htm", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String html = (String) "<!DOCTYPE html>"
+      "<html><head>"
+      "<meta http-equiv='Content-type' content='text/html; charset=utf-8'>"
+      "<title>Web Interface</title>"
+      "</head><body>"
+      "<h1>TTGo Watch Web Server</h1>"
+      "<p>This is your device, program it as you see fit."
+      "<p>Here are some URLs the device already supports, which you might find helpful:"
+      "<ul>"
+      "<li><a target=\"cont\" href=\"/info\">/info</a> - Display information about the device"
+      "<li><a target=\"cont\" href=\"/network\">/network</a> - Display network information"
+      "<li><a target=\"cont\" href=\"/shot\">/shot</a> - Capture a screen shot"
+      "<li><a target=\"cont\" href=\"/screen.565\">/screen.565</a> - Retrieve the image in RGB565 format"
+      "<li><a target=\"_blank\" href=\"/edit\">/edit</a> - View, edit, upload, and delete files"
+      "</ul>"
+      "<p><div style=\"color:red;\">Caution:</div> Use these with care:"
+      "<ul><li><a target=\"cont\"  href=\"/reset\">/reset</a> Reboot the device"
+      "<li><a target=\"_top\" href=\"/update\">/update</a> Transmit a firmware update through POST request"
+      "</body></html>";
+    request->send(200, "text/html", html);
+  });
+
   asyncserver.on("/info", HTTP_GET, [](AsyncWebServerRequest *request) {
-    String message("Firmwarestand: " __DATE__ " " __TIME__ "\nGCC-Version: " __VERSION__ "\n");
-    message = message + "Heap: " + ESP.getFreeHeap() + " bytes used of " + ESP.getHeapSize() + " bytes total\nHeap low water mark: " + ESP.getMinFreeHeap() + " bytes available\nPsram: " + ESP.getFreePsram() + " bytes used of " + ESP.getPsramSize() + " bytes available\nCurrent battery voltage: " + TTGOClass::getWatch()->power->getBattVoltage() / 1000 + " Volts";
-    request->send(200, "text/plain", message.c_str());
+    FlashMode_t mode = ESP.getFlashChipMode();
+    int SketchFull = ESP.getSketchSize() + ESP.getFreeSketchSpace();
+
+    String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Information</h3>" +
+                  "<b><u>Memory</u></b><br>" +
+                  "<b>Heap size: </b>" + ESP.getHeapSize() + "<br>" +
+                  "<b>Heap free: </b>" + ESP.getFreeHeap() + "<br>" +
+                  "<b>Heap free min: </b>" + ESP.getMinFreeHeap() + "<br>" +
+                  "<b>Heap size: </b>" + ESP.getHeapSize() + "<br>" +
+                  "<b>Psram size: </b>" + ESP.getPsramSize() + "<br>" +
+                  "<b>Psram free: </b>" + ESP.getFreePsram() + "<br>" +
+
+                  "<br><b><u>System</u></b><br>" +
+                  "\t<b>Battery voltage: </b>" + TTGOClass::getWatch()->power->getBattVoltage() / 1000 + " Volts" + "<br>" +
+
+                  "\t<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                  "<br><b><u>Chip</u></b>" +
+                  "<br><b>SdkVersion: </b>" + String(ESP.getSdkVersion()) + "<br>" +
+                  "<b>CpuFreq: </b>" + String(ESP.getCpuFreqMHz()) + " MHz<br>" +
+                  
+                  "<br><b><u>Flash</u></b><br>" +
+                  "<b>FlashChipSpeed: </b>" + String(ESP.getFlashChipSpeed() / 1000000) + " MHz<br>" +
+                  "<b>Flash mode: </b>" + String( mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN") + "</b><br>" +
+                  "<b>Flash sector size: </b>" + String( SPI_FLASH_SEC_SIZE) + "<br>" +
+                  "<b>FlashChipMode: </b>" + ESP.getFlashChipMode() + "<br>" +
+                  "<b>FlashChipSize (SDK): </b>" + ESP.getFlashChipSize() + "<br>" +
+                  
+                  "<br><b><u>Firmware</u></b><br>" +
+                  "<b>SketchSpace free: </b>" + ESP.getFreeSketchSpace() + " (" + (ESP.getFreeSketchSpace() / (SketchFull / 100)) + "%)<br>" +
+                  "<b>BuildTime: </b>" +  __DATE__ + " " + __TIME__  + "<br>" +
+                  "<b>Version: </b>" + __FIRMWARE__ + "<br>" +
+                  "<b>GCC-Version: </b>" + __VERSION__ + "<br>" +
+                  "<b>SketchMD5: </b>" + String(ESP.getSketchMD5()) + "<br>" +
+                  
+                  "<br><b><u>Filesystem</u></b><br>" +
+                  "<b>Total size: </b>" + SPIFFS.totalBytes() + "<br>" +
+                  "<b>Used size: </b>" + SPIFFS.usedBytes() + "<br>" +
+
+                  "<br>";
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/network", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Network</h3>" +
+                  "<b>IP Addr: </b>" + WiFi.localIP().toString() + "<br>" +
+                  "<b>MAC: </b>" + WiFi.macAddress() + "<br>" +
+                  "<b>SNMask: </b>" + WiFi.subnetMask().toString() + "<br>" +
+                  "<b>GW IP: </b>" + WiFi.gatewayIP().toString() + "<br>" +
+                  "<b>DNS 1: </b>" + WiFi.dnsIP(0).toString() + "<br>" +
+                  "<b>DNS 2: </b>" + WiFi.dnsIP(1).toString() + "<br>" +
+                  "<b>RSSI: </b>" + String(WiFi.RSSI()) + "dB<br>" +
+                  "<b>Hostname: </b>" + WiFi.getHostname() + "<br>" +
+                  "<b>SSID: </b>" + WiFi.SSID() + "<br>" +
+                  "<br>Upnp Info: <a target=\"_blank\" href='/description.xml'>description.xml</a>" + "<br>" +
+                  "</body></head></html>";
+    request->send(200, "text/html", html);
   });
 
   asyncserver.on("/shot", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -92,7 +238,8 @@ void asyncwebserver_start(void){
   });
 
   asyncserver.addHandler(new SPIFFSEditor(SPIFFS));
-  asyncserver.serveStatic("/", SPIFFS, "/").setDefaultFile("index.htm");
+  asyncserver.rewrite("/", "/index.htm");
+  asyncserver.serveStatic("/", SPIFFS, "/");
 
   asyncserver.onNotFound([](AsyncWebServerRequest *request){
     Serial.printf( "NOT_FOUND: ");
@@ -164,9 +311,14 @@ void asyncwebserver_start(void){
     ESP.restart();    
   });
 
-  asyncserver.on("/update", HTTP_POST,
+  asyncserver.on("/update", HTTP_GET, [](AsyncWebServerRequest * request) {
+    request->send(200, "text/html", serverIndex);
+  });
+
+  asyncserver.on(
+    "/update", HTTP_POST,
     [](AsyncWebServerRequest *request) {},
-    [](AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) { handleUpdate(request, filename, index, data, len, final); }
+    [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) { handleUpdate(request, filename, index, data, len, final); }
   );
 
   asyncserver.on("/description.xml", HTTP_GET, [](AsyncWebServerRequest *request) {
