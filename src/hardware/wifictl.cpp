@@ -342,13 +342,11 @@ void wifictl_on( void ) {
     return;
 
   log_i("request wifictl on");
-  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-    return;
+  while( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST ) ) { 
+    yield();
   }
-  else {
-    powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
-    vTaskResume( _wifictl_Task );
-  }
+  powermgm_set_event( POWERMGM_WIFI_ON_REQUEST );
+  vTaskResume( _wifictl_Task );
 }
 
 /*
@@ -359,13 +357,11 @@ void wifictl_off( void ) {
     return;
   
   log_i("request wifictl off");
-  if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
-    return;
+  while( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST ) ) { 
+    yield();
   }
-  else {
-    powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
-    vTaskResume( _wifictl_Task );
-  }
+  powermgm_set_event( POWERMGM_WIFI_OFF_REQUEST );
+  vTaskResume( _wifictl_Task );
 }
 
 void wifictl_standby( void ) {
