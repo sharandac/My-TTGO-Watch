@@ -37,6 +37,7 @@ uint32_t battery_settings_tile_num;
 lv_obj_t *battery_setup_icon_cont = NULL;
 lv_obj_t *battery_setup_info_img = NULL;
 
+lv_obj_t *battery_silence_wakeup_switch = NULL;
 lv_obj_t *battery_percent_switch = NULL;
 lv_obj_t *battery_experimental_switch = NULL;
 
@@ -46,6 +47,7 @@ LV_IMG_DECLARE(info_update_16px);
 
 static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void battery_silence_wakeup_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 void battery_set_experimental_indicator( void );
@@ -91,13 +93,28 @@ void battery_settings_tile_setup( void ) {
     
     lv_obj_t *exit_label = lv_label_create( battery_settings_tile, NULL );
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &battery_settings_style  );
-    lv_label_set_text( exit_label, "battery settings");
+    lv_label_set_text( exit_label, "energy settings");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+
+    lv_obj_t *battery_silence_wakeup_switch_cont = lv_obj_create( battery_settings_tile, NULL );
+    lv_obj_set_size(battery_silence_wakeup_switch_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( battery_silence_wakeup_switch_cont, LV_OBJ_PART_MAIN, &battery_settings_style  );
+    lv_obj_align( battery_silence_wakeup_switch_cont, battery_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    battery_silence_wakeup_switch = lv_switch_create( battery_silence_wakeup_switch_cont, NULL );
+    lv_obj_add_protect( battery_silence_wakeup_switch, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( battery_silence_wakeup_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( battery_silence_wakeup_switch, LV_ANIM_ON );
+    lv_obj_align( battery_silence_wakeup_switch, battery_silence_wakeup_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( battery_silence_wakeup_switch, battery_silence_wakeup_switch_event_handler );
+    lv_obj_t *battery_silence_wakeup_label = lv_label_create( battery_silence_wakeup_switch_cont, NULL);
+    lv_obj_add_style( battery_silence_wakeup_label, LV_OBJ_PART_MAIN, &battery_settings_style  );
+    lv_label_set_text( battery_silence_wakeup_label, "silence wakeup");
+    lv_obj_align( battery_silence_wakeup_label, battery_silence_wakeup_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *battery_setup_label_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size(battery_setup_label_cont, LV_HOR_RES_MAX , 40);
     lv_obj_add_style( battery_setup_label_cont, LV_OBJ_PART_MAIN, &battery_settings_style  );
-    lv_obj_align( battery_setup_label_cont, battery_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( battery_setup_label_cont, battery_silence_wakeup_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *battery_setup_label = lv_label_create( battery_setup_label_cont, NULL);
     lv_obj_add_style( battery_setup_label, LV_OBJ_PART_MAIN, &battery_settings_style  );
     lv_label_set_text( battery_setup_label, "experimental functions");
@@ -144,6 +161,12 @@ void battery_settings_tile_setup( void ) {
     else
         lv_switch_off( battery_experimental_switch, LV_ANIM_OFF);
 
+    if ( pmu_get_silence_wakeup() ) {
+        lv_switch_on( battery_silence_wakeup_switch, LV_ANIM_OFF);
+    }
+    else
+        lv_switch_off( battery_silence_wakeup_switch, LV_ANIM_OFF);
+
     battery_set_experimental_indicator();
 }
 
@@ -155,6 +178,14 @@ void battery_set_experimental_indicator( void ) {
         lv_obj_set_hidden( battery_setup_info_img, true );
     }
 }
+
+static void battery_silence_wakeup_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ): pmu_set_silence_wakeup( lv_switch_get_state( obj ) );
+                                        break;
+    }
+}
+
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): pmu_set_calculated_percent( lv_switch_get_state( obj ) );

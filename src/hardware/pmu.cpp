@@ -69,11 +69,15 @@ void pmu_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     ttgo->power->clearTimerStatus();
-    if ( ttgo->power->isChargeing() ) {
-        ttgo->power->setTimer( 10 );
-    }
-    else {
-        ttgo->power->setTimer( 60 );
+    if ( pmu_get_silence_wakeup() ) {
+        if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
+            ttgo->power->setTimer( 3 );
+            log_i("enable silence wakeup timer, 3min");
+        }
+        else {
+            ttgo->power->setTimer( 60 );
+            log_i("enable silence wakeup timer, 60min");
+        }
     }
 
     if ( pmu_get_experimental_power_save() ) {
@@ -140,6 +144,14 @@ void pmu_read_config( void ) {
   }
 }
 
+bool pmu_get_silence_wakeup( void ) {
+    return( pmu_config.silence_wakeup );
+}
+
+void pmu_set_silence_wakeup( bool value ) {
+    pmu_config.silence_wakeup = value;
+    pmu_save_config();
+}
 
 bool pmu_get_calculated_percent( void ) {
     return( pmu_config.compute_percent );

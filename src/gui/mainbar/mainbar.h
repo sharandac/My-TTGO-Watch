@@ -106,9 +106,13 @@
      * @return  lv_style_t
      */
     lv_style_t *mainbar_get_slider_style( void );
-
+    /*
+     * @brief
+     */
     lv_obj_t * mainbar_obj_create(lv_obj_t *parent);
-
+    /*
+     * @brief
+     */
     void mainbar_add_slide_element(lv_obj_t *element);
 
 #endif // _MAINBAR_H

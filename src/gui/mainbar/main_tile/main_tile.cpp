@@ -44,7 +44,7 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 lv_task_t * task;
 void main_tile_task( lv_task_t * task );
-void main_tile_aling_widgets( void );
+void main_tile_align_widgets( void );
 
 void main_tile_setup( void ) {
     main_tile_num = mainbar_add_tile( 0, 0 );
@@ -104,7 +104,7 @@ lv_obj_t *main_tile_register_widget( void ) {
         if ( widget_entry[ widget ].active == false ) {
             widget_entry[ widget ].active = true;
             lv_obj_set_hidden( widget_entry[ widget ].widget, false );
-            main_tile_aling_widgets();
+            main_tile_align_widgets();
             return( widget_entry[ widget ].widget );
         }
     }
@@ -112,7 +112,7 @@ lv_obj_t *main_tile_register_widget( void ) {
     return( NULL );
 }
 
-void main_tile_aling_widgets( void ) {
+void main_tile_align_widgets( void ) {
     int active_widgets = 0;
     lv_coord_t xpos = 0;
 

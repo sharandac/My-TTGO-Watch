@@ -31,6 +31,7 @@
     typedef struct {
         bool compute_percent = false;
         bool experimental_power_save = false;
+        bool silence_wakeup = true;
     } pmu_config_t;
 
     /*
@@ -54,13 +55,39 @@
      * @return  charge in percent or -1 if unknown
      */
     int32_t pmu_get_battery_percent( TTGOClass *ttgo );
+    /*
+     * @brief set the axp202 in standby
+     */
     void pmu_standby( void );
+    /*
+     * @brief wakeup to axp202
+     */
     void pmu_wakeup( void );
+    /*
+     * @ brief save the config structure to SPIFF
+     */
     void pmu_save_config( void );
+    /*
+     * @ brief read the config structure from SPIFF
+     */
     void pmu_read_config( void );
+    /*
+     * @brief read the config for calculated mAh based on the axp202 coloumb counter
+     */
     bool pmu_get_calculated_percent( void );
+    /*
+     * @brief read the config for experimental power save
+     */
     bool pmu_get_experimental_power_save( void );
+    /*
+     * @brief set the config to use calculated mAh
+     */
     void pmu_set_calculated_percent( bool value );
+    /*
+     * @brief set experimental power save
+     */
     void pmu_set_experimental_power_save( bool value );
+    bool pmu_get_silence_wakeup( void );
+    void pmu_set_silence_wakeup( bool value );
 
 #endif // _PMU_H

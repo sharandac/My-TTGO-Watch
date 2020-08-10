@@ -82,7 +82,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
 
     lv_obj_t *exit_label = lv_label_create( battery_view_tile, NULL);
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &battery_view_style );
-    lv_label_set_text( exit_label, "battery");
+    lv_label_set_text( exit_label, "battery / energy");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *battery_design_cont = lv_obj_create( battery_view_tile, NULL );

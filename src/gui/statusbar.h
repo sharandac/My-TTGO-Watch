@@ -78,11 +78,37 @@
      * @param style style name
      */
     void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style );
+    /*
+     * @brief refresh/redraw statusbar
+     */
     void statusbar_refresh( void );
+    /*
+     * @brief update stepcounter from statusbar
+     * 
+     * @param   step    stepcounter value
+     */
     void statusbar_update_stepcounter( int step );
+    /*
+     * @brief update battery icon and ther state
+     * 
+     * @param   percent     displayed value in percent
+     * @param   charging    true or false, true means charging
+     * @param   plug        true or false, true means pluged
+     */
     void statusbar_update_battery( int32_t percent, bool charging, bool plug );
+    /*
+     * @brief   set wifistate and label
+     * 
+     * @param   state       true or false, true means active
+     * @param   wifiname    label to displayed text like "scan","connecting" and so on
+     */
     void statusbar_wifi_set_state( bool state, const char *wifiname );
     void statusbar_bluetooth_set_state( bool state );
+    /*
+     * @brief hide the statusbar
+     * 
+     * @param   hide    true or false, ture means statusbar is hide
+     */
     void statusbar_hide( bool hide );
 
 #endif // _STATUSBAR_H
