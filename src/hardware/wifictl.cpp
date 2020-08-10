@@ -370,7 +370,7 @@ void wifictl_off( void ) {
 
 void wifictl_standby( void ) {
   log_i("request wifictl standby");
-  if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
+  wifictl_off();
   while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST ) ) { 
     yield();
   }
