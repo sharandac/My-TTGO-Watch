@@ -171,6 +171,11 @@ void pmu_loop( TTGOClass *ttgo ) {
      */
     if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
         setCpuFrequencyMhz(240);
+        if ( powermgm_get_event( POWERMGM_PMU_BATTERY | POWERMGM_PMU_BUTTON | POWERMGM_STANDBY_REQUEST ) ) {
+            ttgo->power->clearIRQ();
+            xEventGroupClearBits( pmu_event_handle, PMU_EVENT_AXP_INT );            
+            return;
+        }
         
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {

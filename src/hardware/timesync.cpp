@@ -23,6 +23,7 @@
 #include <WiFi.h>
 #include "config.h"
 #include "timesync.h"
+#include "powermgm.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
@@ -123,6 +124,11 @@ void timesyncToRTC( void ) {
 }
 
 void timesync_Task( void * pvParameters ) {
+  if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_STANDBY_REQUEST ) ) {
+    log_i("block time sync task");
+    xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
+    vTaskDelete( NULL );
+  }
   log_i("start time sync task");
 
   if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   

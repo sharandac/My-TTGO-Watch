@@ -33,6 +33,7 @@
 #include "gui/mainbar/setup_tile/setup.h"
 #include "gui/statusbar.h"
 #include "hardware/display.h"
+#include "hardware/powermgm.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -197,6 +198,11 @@ void update_check_version( void ) {
 }
 
 void update_Task( void * pvParameters ) {
+    if ( powermgm_get_event( POWERMGM_STANDBY | POWERMGM_STANDBY_REQUEST ) ) {
+        log_i("block update task");
+        xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
+        vTaskDelete( NULL );
+    }
     log_i("start update task");
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
