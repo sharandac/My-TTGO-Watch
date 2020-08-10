@@ -181,7 +181,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
 
 lv_obj_t * mainbar_obj_create(lv_obj_t *parent)
 {
-    lv_obj_t * child = lv_cont_create( parent, NULL );
+    lv_obj_t * child = lv_obj_create( parent, NULL );
     lv_tileview_add_element( mainbar, child );
 
     return child;
