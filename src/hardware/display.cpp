@@ -69,7 +69,7 @@ void display_loop( TTGOClass *ttgo ) {
 
 void display_standby( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
-  log_i("standby");
+  log_i("go standby");
   ttgo->bl->adjust( 0 );
   ttgo->displaySleep();
   ttgo->closeBL();
@@ -82,7 +82,7 @@ void display_wakeup( void ) {
 
   // normal wake up from standby
   if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
-    log_i("wakeup");
+    log_i("go wakeup");
     ttgo->openBL();
     ttgo->displayWakeup();
     ttgo->bl->adjust( 0 );
@@ -92,7 +92,7 @@ void display_wakeup( void ) {
   }
   // silence wakeup request from standby
   else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
-    log_i("silence wakeup");
+    log_i("go silence wakeup");
     ttgo->openBL();
     ttgo->displayWakeup();
     ttgo->bl->adjust( 0 );

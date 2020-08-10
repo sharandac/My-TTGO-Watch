@@ -40,6 +40,8 @@ TTGOClass *ttgo = TTGOClass::getWatch();
 
 void setup()
 {
+//    heap_caps_malloc_extmem_enable( 512 );
+
     motor_setup();
     Serial.begin(115200);
     Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
@@ -91,6 +93,7 @@ void setup()
 
 void loop()
 {
+    delay(10);
     gui_loop( ttgo );
     powermgm_loop( ttgo );
 }

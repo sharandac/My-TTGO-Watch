@@ -78,11 +78,11 @@ void pmu_standby( void ) {
 
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( 2700 );
-        log_i("enable 2.7V standby voltage");
+        log_i("go standby, enable 2.7V standby voltage");
     } 
     else {
         ttgo->power->setDCDC3Voltage( 3000 );
-        log_i("enable 3.0V standby voltage");
+        log_i("go standby, enable 3.0V standby voltage");
     }
     ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF );
 }
@@ -92,11 +92,11 @@ void pmu_wakeup( void ) {
 
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( 3000 );
-        log_i("enable 3.0V voltage");
+        log_i("go wakeup, enable 3.0V voltage");
     } 
     else {
         ttgo->power->setDCDC3Voltage( 3300 );
-        log_i("enable 3.3V voltage");
+        log_i("go wakeup, enable 3.3V voltage");
     }
 
     ttgo->power->clearTimerStatus();
