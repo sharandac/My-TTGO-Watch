@@ -108,10 +108,10 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
     tile_pos_table[ tile_entrys - 1 ].x = x;
     tile_pos_table[ tile_entrys - 1 ].y = y;
 
-    lv_obj_t *my_tile = lv_obj_create( mainbar, NULL);  
+    lv_obj_t *my_tile = lv_cont_create( mainbar, NULL);  
     tile[ tile_entrys - 1 ].tile = my_tile;
     lv_obj_set_size( tile[ tile_entrys - 1 ].tile, LV_HOR_RES, LV_VER_RES);
-    lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
+    //lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
     lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, &mainbar_style );
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * LV_HOR_RES , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
@@ -177,4 +177,12 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
     else {
         log_e( "tile number %d do not exist", tile_number );
     }
+}
+
+lv_obj_t * mainbar_obj_create(lv_obj_t *parent)
+{
+    lv_obj_t * child = lv_obj_create( parent, NULL );
+    lv_tileview_add_element( mainbar, child );
+
+    return child;
 }
