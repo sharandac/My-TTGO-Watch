@@ -28,6 +28,10 @@ static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *are
 
 void screenshot_setup( void ) {
     png = (uint16_t*)ps_malloc( LV_HOR_RES_MAX * LV_VER_RES_MAX * sizeof( lv_color_t ) );
+    if ( png == NULL ) {
+        log_e("error memory alloc");
+        while(1);
+    }
 }
 
 void screenshot_take( void ) {

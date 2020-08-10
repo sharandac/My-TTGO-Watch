@@ -91,6 +91,7 @@ void setup()
 
 void loop()
 {
+    delay(10);
     gui_loop( ttgo );
     powermgm_loop( ttgo );
 }

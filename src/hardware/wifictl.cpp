@@ -124,7 +124,9 @@ void wifictl_setup( void ) {
         // label.concat('\n');
         // label.concat(WiFi.localIPv6().toString());
         statusbar_wifi_set_state( true, label.c_str() );
-        asyncwebserver_setup();
+        if ( wifictl_config.webserver ) {
+          asyncwebserver_start();
+        }
         lv_obj_invalidate( lv_scr_act() );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
@@ -144,10 +146,11 @@ void wifictl_setup( void ) {
     }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST );
         statusbar_hide_icon( STATUSBAR_WIFI );
         statusbar_wifi_set_state( false, "" );
         lv_obj_invalidate( lv_scr_act() );
+        asyncwebserver_end();
+        powermgm_clear_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -220,6 +223,15 @@ bool wifictl_get_autoon( void ) {
 
 void wifictl_set_autoon( bool autoon ) {
   wifictl_config.autoon = autoon;
+  wifictl_save_config();
+}
+
+bool wifictl_get_webserver( void ) {
+  return( wifictl_config.webserver );
+}
+
+void wifictl_set_webserver( bool webserver ) {
+  wifictl_config.webserver = webserver;
   wifictl_save_config();
 }
 /*
@@ -329,6 +341,7 @@ void wifictl_on( void ) {
   if ( wifi_init == false )
     return;
 
+  log_i("request wifictl on");
   if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
     return;
   }
@@ -345,6 +358,7 @@ void wifictl_off( void ) {
   if ( wifi_init == false )
     return;
   
+  log_i("request wifictl off");
   if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) || powermgm_get_event( POWERMGM_WIFI_ON_REQUEST )) {
     return;
   }
@@ -355,15 +369,19 @@ void wifictl_off( void ) {
 }
 
 void wifictl_standby( void ) {
-  log_i("standby");
-  if ( powermgm_get_event( POWERMGM_WIFI_ACTIVE ) ) wifictl_off();
-  while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST ) ) { yield(); }
+  log_i("request wifictl standby");
+  wifictl_off();
+  while( powermgm_get_event( POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ON_REQUEST | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_WPS_REQUEST ) ) { 
+    yield();
+  }
+  log_i("request wifictl standby done");
 }
 
 void wifictl_wakeup( void ) {
   if ( wifictl_config.autoon ) {
-    log_i("wakeup");
+    log_i("request wifictl wakeup");
     wifictl_on();
+    log_i("request wifictl wakeup done");
   }
 }
 
@@ -411,6 +429,7 @@ void wifictl_Task( void * pvParameters ) {
       lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_STA );
       powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+      log_i("request wifictl on done");
     }
     else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
       statusbar_wifi_set_state( false, "" );
@@ -418,6 +437,7 @@ void wifictl_Task( void * pvParameters ) {
       WiFi.mode( WIFI_OFF );
       esp_wifi_stop();
       powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
+      log_i("request wifictl off done");
     }
     vTaskSuspend( _wifictl_Task );
   }

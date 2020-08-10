@@ -42,6 +42,7 @@
 #include "gui/mainbar/mainbar.h"
 
 EventGroupHandle_t powermgm_status = NULL;
+portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
 /*
  *
@@ -136,19 +137,26 @@ void powermgm_loop( TTGOClass *ttgo ) {
  *
  */
 void powermgm_set_event( EventBits_t bits ) {
+    portENTER_CRITICAL_ISR(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );
+    portEXIT_CRITICAL_ISR(&powermgmMux);
 }
 
 /*
  *
  */
 void powermgm_clear_event( EventBits_t bits ) {
+    portENTER_CRITICAL_ISR(&powermgmMux);
     xEventGroupClearBits( powermgm_status, bits );
+    portEXIT_CRITICAL_ISR(&powermgmMux);
 }
 
 /*
  *
  */
 EventBits_t powermgm_get_event( EventBits_t bits ) {
-    return( xEventGroupGetBits( powermgm_status ) & bits );
+    portENTER_CRITICAL_ISR(&powermgmMux);
+    EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
+    portEXIT_CRITICAL_ISR(&powermgmMux);
+    return( temp );
 }

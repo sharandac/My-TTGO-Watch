@@ -23,6 +23,7 @@
 #include <WiFi.h>
 #include "config.h"
 #include "timesync.h"
+#include "powermgm.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;

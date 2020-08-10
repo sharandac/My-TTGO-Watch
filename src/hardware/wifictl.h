@@ -40,6 +40,7 @@
 
     typedef struct {
         bool autoon = true;
+        bool webserver = true;
     } wifictl_config_t;
 
     /*
@@ -82,5 +83,7 @@
     bool wifictl_get_autoon( void );
     void wifictl_set_autoon( bool autoon );
     void wifictl_start_wps( void );
+    bool wifictl_get_webserver( void );
+    void wifictl_set_webserver( bool webserver );
 
 #endif // _WIFICTL_H

@@ -36,6 +36,7 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "hardware/motor.h"
+#include "hardware/powermgm.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
