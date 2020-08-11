@@ -24,6 +24,12 @@
 
     #include "TTGO.h"
 
+    #define MOTOR_CONFIG_FILE  "/motor.cfg"
+
+    typedef struct {
+        bool vibe = true;
+    } motor_config_t;
+
     /*
      * @ brief setup motor I/O
      */
@@ -33,5 +39,9 @@
      * @param   time    time in 10ms
      */
     void motor_vibe( int time );
+    bool motor_get_vibe_config( void );
+    void motor_set_vibe_config( bool enable );
+    void motor_save_config( void );
+    void motor_read_config( void );
 
 #endif // _MOTOR_H

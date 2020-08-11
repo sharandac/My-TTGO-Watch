@@ -89,11 +89,6 @@ void gui_setup(void)
  */
 void gui_loop( TTGOClass *ttgo ) {
     // if we run in silence mode    
-    if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) &&!powermgm_get_event( POWERMGM_STANDBY ) ) {
-        log_e("error while silence standby");
-        while(1);
-    }
-
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
         if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
             lv_task_handler();

@@ -19,6 +19,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include "config.h"
+#include <TTGO.h>
+
 #include "motor.h"
 #include "powermgm.h"
 
@@ -27,6 +30,8 @@ hw_timer_t * timer = NULL;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 bool motor_init = false;
+
+motor_config_t motor_config;
 
 /*
  *
@@ -67,7 +72,54 @@ void motor_vibe( int time ) {
     if ( motor_init == false )
         return;
 
-    portENTER_CRITICAL(&timerMux);
-    motor_run_time_counter = time;
-    portEXIT_CRITICAL(&timerMux);
+    if ( motor_get_vibe_config() ) {
+        portENTER_CRITICAL(&timerMux);
+        motor_run_time_counter = time;
+        portEXIT_CRITICAL(&timerMux);
+    }
+}
+
+bool motor_get_vibe_config( void ) {
+    return( motor_config.vibe );
+}
+
+void motor_set_vibe_config( bool enable ) {
+    motor_config.vibe = enable;
+    motor_save_config();
+}
+
+/*
+ *
+ */
+void motor_save_config( void ) {
+  fs::File file = SPIFFS.open( MOTOR_CONFIG_FILE, FILE_WRITE );
+
+  if ( !file ) {
+    log_e("Can't save file: %s", MOTOR_CONFIG_FILE );
+  }
+  else {
+    file.write( (uint8_t *)&motor_config, sizeof( motor_config ) );
+    file.close();
+  }
+}
+
+/*
+ *
+ */
+void motor_read_config( void ) {
+  fs::File file = SPIFFS.open( MOTOR_CONFIG_FILE, FILE_READ );
+
+  if (!file) {
+    log_e("Can't open file: %s!", MOTOR_CONFIG_FILE );
+  }
+  else {
+    int filesize = file.size();
+    if ( filesize > sizeof( motor_config ) ) {
+      log_e("Failed to read configfile. Wrong filesize!" );
+    }
+    else {
+      file.read( (uint8_t *)&motor_config, filesize );
+    }
+    file.close();
+  }
 }
