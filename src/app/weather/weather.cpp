@@ -37,6 +37,7 @@
 #include "gui/keyboard.h"
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
+#include "hardware/json_config_psram_allocator.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
@@ -211,37 +212,81 @@ void weather_widget_sync_Task( void * pvParameters ) {
  *
  */
 void weather_save_config( void ) {
+    if ( SPIFFS.exists( WEATHER_CONFIG_FILE ) ) {
+        SPIFFS.remove( WEATHER_CONFIG_FILE );
+        log_i("remove old binary weather config");
+    }
 
-    fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_WRITE );
+    fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_WRITE );
 
-    if ( !file ) {
-        log_e( "Can't save file: %s\r\n", WEATHER_CONFIG_FILE );
+    if (!file) {
+        log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
     }
     else {
-        file.write( (uint8_t *)&weather_config, sizeof( weather_config ) );
-        file.close();
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["apikey"] = weather_config.apikey;
+        doc["lat"] = weather_config.lat;
+        doc["lon"] = weather_config.lon;
+        doc["autosync"] = weather_config.autosync;
+        doc["showWind"] = weather_config.showWind;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
     }
+    file.close();
 }
 
 /*
  *
  */
 void weather_load_config( void ) {
-
-    fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e( "Can't open file: %s\r\n", WEATHER_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        if ( filesize > sizeof( weather_config ) ) {
-            log_e("Failed to read configfile. Wrong filesize!" );
+    if ( SPIFFS.exists( WEATHER_JSON_CONFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
         }
         else {
-            file.read( (uint8_t *)&weather_config, filesize );
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
+
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                strlcpy( weather_config.apikey, doc["apikey"], sizeof( weather_config.apikey ) );
+                strlcpy( weather_config.lat, doc["lat"], sizeof( weather_config.lat ) );
+                strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
+                weather_config.autosync = doc["autosync"].as<bool>();
+                weather_config.showWind = doc["showWind"].as<bool>();
+            }        
+            doc.clear();
         }
         file.close();
+    }
+    else {
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", WEATHER_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( weather_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)&weather_config, filesize );
+                file.close();
+                weather_save_config();
+                return; 
+            }
+            file.close();
+        }
     }
 }
 

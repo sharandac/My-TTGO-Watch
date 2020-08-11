@@ -27,6 +27,7 @@
     #define PMU_BATTERY_CAP         300
 
     #define PMU_CONFIG_FILE         "/pmu.cfg"
+    #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 
     typedef struct {
         bool compute_percent = false;

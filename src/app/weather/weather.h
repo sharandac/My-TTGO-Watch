@@ -25,6 +25,7 @@
     #include <TTGO.h>
 
     #define WEATHER_CONFIG_FILE             "/weather.cfg"
+    #define WEATHER_JSON_CONFIG_FILE        "/weather.json"
 
     #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
 

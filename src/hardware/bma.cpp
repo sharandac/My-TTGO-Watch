@@ -25,6 +25,7 @@
 
 #include "bma.h"
 #include "powermgm.h"
+#include "json_config_psram_allocator.h"
 
 #include "gui/statusbar.h"
 
@@ -145,36 +146,76 @@ void bma_loop( TTGOClass *ttgo ) {
  *
  */
 void bma_save_config( void ) {
-  fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_WRITE );
+    if ( SPIFFS.exists( BMA_COFIG_FILE ) ) {
+        SPIFFS.remove( BMA_COFIG_FILE );
+        log_i("remove old binary bma config");
+    }
 
-  if ( !file ) {
-    log_e("Can't save file: %s", BMA_COFIG_FILE );
-  }
-  else {
-    file.write( (uint8_t *)bma_config, sizeof( bma_config ) );
+    fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["stepcounter"] = bma_config[ BMA_STEPCOUNTER ].enable;
+        doc["doubleclick"] = bma_config[ BMA_DOUBLECLICK ].enable;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
     file.close();
-  }
 }
 
 /*
  *
  */
 void bma_read_config( void ) {
-  fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_READ );
+    if ( SPIFFS.exists( BMA_JSON_COFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
 
-  if (!file) {
-    log_e("Can't open file: %s!", BMA_COFIG_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( bma_config ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"].as<bool>();
+                bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"].as<bool>();
+            }        
+            doc.clear();
+        }
+        file.close();
     }
     else {
-      file.read( (uint8_t *)bma_config, filesize );
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", BMA_COFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( bma_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)bma_config, filesize );
+                file.close();
+                bma_save_config();
+                return; 
+            }
+        file.close();
+        }
     }
-    file.close();
-  }
 }
 
 /*

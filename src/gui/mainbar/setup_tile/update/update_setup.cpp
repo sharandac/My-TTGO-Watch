@@ -29,6 +29,8 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
+#include "hardware/json_config_psram_allocator.h"
+
 update_config_t update_config;
 
 lv_obj_t *update_setup_tile = NULL;
@@ -88,7 +90,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( update_check_autosync_label, "check for updates");
     lv_obj_align( update_check_autosync_label, update_check_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
-    if ( update_config.autosync)
+    if ( update_config.autosync )
         lv_switch_on( update_check_autosync_onoff, LV_ANIM_OFF);
     else
         lv_switch_off( update_check_autosync_onoff, LV_ANIM_OFF);
@@ -112,33 +114,71 @@ static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event )
 }
 
 void update_save_config( void ) {
-  fs::File file = SPIFFS.open( UPDATE_CONFIG_FILE, FILE_WRITE );
+    if ( SPIFFS.exists( UPDATE_CONFIG_FILE ) ) {
+        SPIFFS.remove( UPDATE_CONFIG_FILE );
+        log_i("remove old binary update config");
+    }
 
-  if ( !file ) {
-    log_e("Can't save file: %s", UPDATE_CONFIG_FILE );
-  }
-  else {
-    file.write( (uint8_t *)&update_config, sizeof( update_config ) );
+    fs::File file = SPIFFS.open( UPDATE_JSON_CONFIG_FILE, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", UPDATE_JSON_CONFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["autosync"] = update_config.autosync;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
     file.close();
-  }
 }
 
 void update_read_config( void ) {
-  fs::File file = SPIFFS.open( UPDATE_CONFIG_FILE, FILE_READ );
+    if ( SPIFFS.exists( UPDATE_JSON_CONFIG_FILE ) ) {       
+        fs::File file = SPIFFS.open( UPDATE_JSON_CONFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", UPDATE_JSON_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
 
-  if (!file) {
-    log_e("Can't open file: %s!", UPDATE_CONFIG_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( update_config ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                update_config.autosync = doc["autosync"].as<bool>();
+            }        
+            doc.clear();
+        }
+        file.close();
     }
     else {
-      file.read( (uint8_t *)&update_config, filesize );
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( UPDATE_CONFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", UPDATE_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( update_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)&update_config, filesize );
+                file.close();
+                update_save_config();
+                return; 
+            }
+        file.close();
+        }
     }
-    file.close();
-  }
 }
 
 bool update_setup_get_autosync( void ) {

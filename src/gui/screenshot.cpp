@@ -32,6 +32,7 @@ void screenshot_setup( void ) {
         log_e("error memory alloc");
         while(1);
     }
+    SPIFFS.remove( SCREENSHOT_FILE_NAME );
 }
 
 void screenshot_take( void ) {

@@ -24,6 +24,7 @@
 #include "config.h"
 #include "timesync.h"
 #include "powermgm.h"
+#include "json_config_psram_allocator.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
@@ -57,33 +58,75 @@ void timesync_setup( TTGOClass *ttgo ) {
 }
 
 void timesync_save_config( void ) {
-  fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_WRITE );
+    if ( SPIFFS.exists( TIMESYNC_CONFIG_FILE ) ) {
+        SPIFFS.remove( TIMESYNC_CONFIG_FILE );
+        log_i("remove old binary timesync config");
+    }
 
-  if ( !file ) {
-    log_e("Can't save file: %s", TIMESYNC_CONFIG_FILE );
-  }
-  else {
-    file.write( (uint8_t *)&timesync_config, sizeof( timesync_config ) );
+    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["daylightsave"] = timesync_config.daylightsave;
+        doc["timesync"] = timesync_config.timesync;
+        doc["timezone"] = timesync_config.timezone;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
     file.close();
-  }
 }
 
 void timesync_read_config( void ) {
-  fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_READ );
+    if ( SPIFFS.exists( TIMESYNC_JSON_CONFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
 
-  if (!file) {
-    log_e("Can't open file: %s!", TIMESYNC_CONFIG_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( timesync_config ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                timesync_config.daylightsave = doc["daylightsave"].as<bool>();
+                timesync_config.timesync = doc["timesync"].as<bool>();
+                timesync_config.timezone = doc["timezone"].as<uint32_t>();
+            }        
+            doc.clear();
+        }
+        file.close();
     }
     else {
-      file.read( (uint8_t *)&timesync_config, filesize );
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", TIMESYNC_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( timesync_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)&timesync_config, filesize );
+                file.close();
+                timesync_save_config();
+                return;
+            }
+        file.close();
+        }
     }
-    file.close();
-  }
 }
 
 bool timesync_get_timesync( void ) {

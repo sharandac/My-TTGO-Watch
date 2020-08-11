@@ -26,6 +26,8 @@
 #include "powermgm.h"
 #include "motor.h"
 
+#include "json_config_psram_allocator.h"
+
 display_config_t display_config;
 
 static uint8_t dest_brightness = 0;
@@ -106,36 +108,78 @@ void display_wakeup( void ) {
  *
  */
 void display_save_config( void ) {
-  fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_WRITE );
+    if ( SPIFFS.exists( DISPLAY_CONFIG_FILE ) ) {
+        SPIFFS.remove( DISPLAY_CONFIG_FILE );
+        log_i("remove old binary display config");
+    }
 
-  if ( !file ) {
-    log_e("Can't save file: %s", DISPLAY_CONFIG_FILE );
-  }
-  else {
-    file.write( (uint8_t *)&display_config, sizeof( display_config ) );
+    fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["brightness"] = display_config.brightness;
+        doc["rotation"] = display_config.rotation;
+        doc["timeout"] = display_config.timeout;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
     file.close();
-  }
 }
 
 /*
  *
  */
 void display_read_config( void ) {
-  fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_READ );
+    if ( SPIFFS.exists( DISPLAY_JSON_CONFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
 
-  if (!file) {
-    log_e("Can't open file: %s!", DISPLAY_CONFIG_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( display_config ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                display_config.brightness = doc["brightness"].as<uint32_t>();
+                display_config.rotation = doc["rotation"].as<uint32_t>();
+                display_config.timeout = doc["timeout"].as<uint32_t>();
+            }        
+            doc.clear();
+        }
+        file.close();
     }
     else {
-      file.read( (uint8_t *)&display_config, filesize );
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", DISPLAY_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( display_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)&display_config, filesize );
+                file.close();
+                display_save_config();
+                return; 
+            }
+        file.close();
+        }
     }
-    file.close();
-  }
 }
 
 uint32_t display_get_timeout( void ) {

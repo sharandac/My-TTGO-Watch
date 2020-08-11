@@ -24,9 +24,10 @@
 
     #include <TTGO.h>
 
-    #define TIME_SYNC_REQUEST    _BV(0)
+    #define TIME_SYNC_REQUEST       _BV(0)
 
-    #define TIMESYNC_CONFIG_FILE  "/timesync.cfg"
+    #define TIMESYNC_CONFIG_FILE        "/timesync.cfg"
+    #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"
 
     typedef struct {
         bool timesync = true;

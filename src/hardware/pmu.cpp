@@ -1,6 +1,7 @@
 #include "config.h"
 #include <TTGO.h>
 #include <soc/rtc.h>
+#include "json_config_psram_allocator.h"
 
 #include "display.h"
 #include "pmu.h"
@@ -112,36 +113,78 @@ void pmu_wakeup( void ) {
  *
  */
 void pmu_save_config( void ) {
-  fs::File file = SPIFFS.open( PMU_CONFIG_FILE, FILE_WRITE );
+    if ( SPIFFS.exists( PMU_CONFIG_FILE ) ) {
+        SPIFFS.remove( PMU_CONFIG_FILE );
+        log_i("remove old binary pmu config");
+    }
+    
+    fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_WRITE );
 
-  if ( !file ) {
-    log_e("Can't save file: %s", PMU_CONFIG_FILE );
-  }
-  else {
-    file.write( (uint8_t *)&pmu_config, sizeof( pmu_config ) );
+    if (!file) {
+        log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["silence_wakeup"] = pmu_config.silence_wakeup;
+        doc["experimental_power_save"] = pmu_config.experimental_power_save;
+        doc["compute_percent"] = pmu_config.compute_percent;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
     file.close();
-  }
 }
 
 /*
  *
  */
 void pmu_read_config( void ) {
-  fs::File file = SPIFFS.open( PMU_CONFIG_FILE, FILE_READ );
+    if ( SPIFFS.exists( PMU_JSON_CONFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
 
-  if (!file) {
-    log_e("Can't open file: %s!", PMU_CONFIG_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( pmu_config ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("update check deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                pmu_config.silence_wakeup = doc["silence_wakeup"].as<bool>();
+                pmu_config.experimental_power_save = doc["experimental_power_save"].as<bool>();
+                pmu_config.compute_percent = doc["compute_percent"].as<bool>();
+            }        
+            doc.clear();
+        }
+        file.close();
     }
     else {
-      file.read( (uint8_t *)&pmu_config, filesize );
+        log_i("no json config exists, read from binary");
+        fs::File file = SPIFFS.open( PMU_CONFIG_FILE, FILE_READ );
+
+        if (!file) {
+            log_e("Can't open file: %s!", PMU_CONFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            if ( filesize > sizeof( pmu_config ) ) {
+                log_e("Failed to read configfile. Wrong filesize!" );
+            }
+            else {
+                file.read( (uint8_t *)&pmu_config, filesize );
+                file.close();
+                pmu_save_config();
+                return;                
+            }
+            file.close();
+        }
     }
-    file.close();
-  }
 }
 
 bool pmu_get_silence_wakeup( void ) {

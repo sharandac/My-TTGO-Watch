@@ -22,7 +22,10 @@
 #ifndef _BMA_H
     #define _BMA_H
     
-    #define     BMA_EVENT_INT   _BV(0)
+    #define     BMA_EVENT_INT       _BV(0)
+
+    #define BMA_COFIG_FILE          "/bma.cfg"
+    #define BMA_JSON_COFIG_FILE     "/bma.json"
 
     typedef struct {
         bool enable=true;
@@ -33,8 +36,6 @@
         BMA_DOUBLECLICK,
         BMA_CONFIG_NUM
     };
-
-    #define BMA_COFIG_FILE  "/bma.cfg"
 
     /*
      * @brief setup bma activity measurement

@@ -20,31 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "ArduinoJson.h"
 #include "HTTPClient.h"
 
 #include "update_check_version.h"
 
-// arduinoJson allocator for external PSRAM
-// see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
-struct UpdateSpiRamAllocator {
-    void* allocate( size_t size ) { 
-        void *psram = ps_calloc( size, 1 );
-        if ( psram ) {
-            log_i("allocate %dbytes(%p) json psram", size, psram );
-            return( psram );
-        }
-        else {
-            log_e("allocate %dbytes(%p) json psram failed", size, psram );
-            while(1);
-        }
-    }
-    void deallocate( void* pointer ) {
-        log_i("deallocate (%p) json psram", pointer );
-        free( pointer );
-    }
-};
-using SpiRamJsonDocument = BasicJsonDocument<UpdateSpiRamAllocator>;
+#include "hardware/json_config_psram_allocator.h"
 
 uint64_t update_check_new_version( void ) {
     char url[512]="";

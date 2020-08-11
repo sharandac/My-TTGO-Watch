@@ -25,6 +25,7 @@
     #include <TTGO.h>
 
     #define UPDATE_CONFIG_FILE             "/update.cfg"
+    #define UPDATE_JSON_CONFIG_FILE        "/update.json"
 
     typedef struct {
         bool autosync = true;

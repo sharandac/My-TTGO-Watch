@@ -22,16 +22,17 @@
 #ifndef _WIFICTL_H
     #define _WIFICTL_H
 
-    #define WIFICTL_DELAY       10
-    #define NETWORKLIST_ENTRYS  20
-    #define WIFICTL_LIST_FILE   "/wifilist.cfg"
-    #define WIFICTL_CONFIG_FILE "/wificfg.cfg"
+    #define WIFICTL_DELAY               10
+    #define NETWORKLIST_ENTRYS          20
+    #define WIFICTL_LIST_FILE           "/wifilist.cfg"
+    #define WIFICTL_CONFIG_FILE         "/wificfg.cfg"
+    #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"
 
-    #define ESP_WPS_MODE      WPS_TYPE_PBC
-    #define ESP_MANUFACTURER  "ESPRESSIF"
-    #define ESP_MODEL_NUMBER  "ESP32"
-    #define ESP_MODEL_NAME    "LILYGO T-WATCH2020 V1"
-    #define ESP_DEVICE_NAME   "ESP STATION"
+    #define ESP_WPS_MODE                WPS_TYPE_PBC
+    #define ESP_MANUFACTURER            "ESPRESSIF"
+    #define ESP_MODEL_NUMBER            "ESP32"
+    #define ESP_MODEL_NAME              "LILYGO T-WATCH2020 V1"
+    #define ESP_DEVICE_NAME             "ESP STATION"
 
     struct networklist {
         char ssid[64]="";

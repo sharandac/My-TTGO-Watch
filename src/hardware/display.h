@@ -32,12 +32,13 @@
     #define DISPLAY_MAX_ROTATE          270
 
     typedef struct {
-        uint32_t brightness = DISPLAY_MIN_BRIGHTNESS;
+        uint32_t brightness = DISPLAY_MAX_BRIGHTNESS;
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;
         uint32_t rotation = 0;
     } display_config_t;
 
-    #define DISPLAY_CONFIG_FILE  "/display.cfg"
+    #define DISPLAY_CONFIG_FILE         "/display.cfg"
+    #define DISPLAY_JSON_CONFIG_FILE    "/display.json"
 
     /*
      * @brief setup display

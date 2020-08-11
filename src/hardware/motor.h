@@ -25,6 +25,7 @@
     #include "TTGO.h"
 
     #define MOTOR_CONFIG_FILE  "/motor.cfg"
+    #define MOTOR_JSON_CONFIG_FILE  "/motor.json"
 
     typedef struct {
         bool vibe = true;
