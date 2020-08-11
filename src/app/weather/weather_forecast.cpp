@@ -135,7 +135,9 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     // regster callback for wifi sync
     WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        weather_forecast_sync_request();
+        weather_config_t *weather_config = weather_get_config();
+        if ( weather_config->autosync )
+            weather_forecast_sync_request();
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     weather_forecast_event_handle = xEventGroupCreate();

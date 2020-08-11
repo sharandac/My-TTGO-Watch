@@ -31,11 +31,24 @@
 
 // arduinoJson allocator for external PSRAM
 // see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
-struct SpiRamAllocator {
-  void* allocate( size_t size ) { return ps_calloc( size, 1 ); }
-  void deallocate( void* pointer ) { free( pointer ); }
+struct WeatherSpiRamAllocator {
+    void* allocate( size_t size ) { 
+        void *psram = ps_calloc( size, 1 );
+        if ( psram ) {
+            log_i("allocate %dbytes(%p) json psram", size, psram );
+            return( psram );
+        }
+        else {
+            log_e("allocate %dbytes(%p) json psram failed", size, psram );
+            while(1);
+        }
+    }
+    void deallocate( void* pointer ) {
+        log_i("deallocate (%p) json psram", pointer );
+        free( pointer );
+    }
 };
-using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+using WeatherSpiRamJsonDocument = BasicJsonDocument<WeatherSpiRamAllocator>;
 
 /* Utility function to convert numbers to directions */
 static void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree);
@@ -58,7 +71,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
         return( -1 );
     }
 
-    SpiRamJsonDocument doc( today_client.getSize() * 2 );
+    WeatherSpiRamJsonDocument doc( today_client.getSize() * 2 );
 
     DeserializationError error = deserializeJson( doc, today_client.getStream() );
     if (error) {
@@ -103,7 +116,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
         return( -1 );
     }
 
-    SpiRamJsonDocument doc( forecast_client.getSize() * 2 );
+    WeatherSpiRamJsonDocument doc( forecast_client.getSize() * 2 );
 
     DeserializationError error = deserializeJson( doc, forecast_client.getStream() );
     if (error) {
