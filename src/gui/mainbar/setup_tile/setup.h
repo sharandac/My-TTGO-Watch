@@ -26,7 +26,8 @@
 
     #define MAX_SETUP_ICON_HORZ       3
     #define MAX_SETUP_ICON_VERT       2
-    #define MAX_SETUP_ICON            ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT )
+    #define MAX_SETUP_TILES           2
+    #define MAX_SETUP_ICON            ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT * MAX_SETUP_TILES )
 
     #define SETUP_ICON_X_SIZE         64
     #define SETUP_ICON_Y_SIZE         64

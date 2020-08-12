@@ -41,7 +41,7 @@
 
     typedef struct {
         bool autoon = true;
-        bool webserver = true;
+        bool webserver = false;
     } wifictl_config_t;
 
     /*

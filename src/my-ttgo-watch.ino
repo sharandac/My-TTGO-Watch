@@ -23,6 +23,7 @@
  */
 #include "config.h"
 #include <Arduino.h>
+#include "esp_bt.h"
 
 #include "gui/gui.h"
 #include "gui/splashscreen.h"
@@ -41,7 +42,6 @@ TTGOClass *ttgo = TTGOClass::getWatch();
 
 void setup()
 {
-
     Serial.begin(115200);
     Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
     ttgo->begin();
@@ -51,7 +51,7 @@ void setup()
 
     motor_setup();
 
-    // force to store all heap data in psram to get more internal ram
+    // force to store all new heap allocations in psram to get more internal ram
     heap_caps_malloc_extmem_enable( 1 );
 
     display_setup( ttgo );
@@ -69,15 +69,12 @@ void setup()
 
     splash_screen_stage_update( "init rtc", 50 );
     ttgo->rtc->syncToSystem();
-    splash_screen_stage_update( "init powermgm", 100 );
+
+    splash_screen_stage_update( "init powermgm", 60 );
     powermgm_setup( ttgo );
-    splash_screen_stage_update( "init gui", 100 );
-    splash_screen_stage_finish( ttgo );
 
+    splash_screen_stage_update( "init gui", 80 );
     gui_setup(); 
-    lv_task_handler();
-    ttgo->bl->adjust( 32 );
-
     /*
      * add apps and widgets here!!!
      */
@@ -88,20 +85,23 @@ void setup()
      */
 
     wifictl_on();
-    display_set_brightness( display_get_brightness() );
-
     // enable to store data in normal heap
     heap_caps_malloc_extmem_enable( 16*1024 );
+
+    splash_screen_stage_finish( ttgo );
+    display_set_brightness( display_get_brightness() );
 
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
+
+    blectl_setup();
 }
 
 void loop()
 {
-    delay(1);
+    delay(5);
     gui_loop( ttgo );
     powermgm_loop( ttgo );
 }

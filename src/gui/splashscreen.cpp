@@ -53,6 +53,9 @@ void splash_screen_stage_one( TTGOClass *ttgo ) {
     lv_obj_align(preload_label, preload, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
 
     lv_disp_trig_activity(NULL);
+
+    lv_obj_move_foreground( preload );
+
     lv_task_handler();
 
     for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
@@ -62,6 +65,7 @@ void splash_screen_stage_one( TTGOClass *ttgo ) {
 }
 
 void splash_screen_stage_update( const char* msg, int value ) {
+    lv_obj_move_foreground( preload );
     lv_disp_trig_activity(NULL);
     lv_task_handler();
     delay(100);
@@ -72,7 +76,7 @@ void splash_screen_stage_update( const char* msg, int value ) {
 }
 
 void splash_screen_stage_finish( TTGOClass *ttgo ) {
-    ttgo->bl->adjust( 0 );
+//    ttgo->bl->adjust( 0 );
     for( int bl = display_get_brightness() ; bl > 0 ; bl-- ) {
         ttgo->bl->adjust( bl );
         delay(1);

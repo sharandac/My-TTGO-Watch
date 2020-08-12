@@ -34,6 +34,8 @@
 
 #include "blectl.h"
 
+#include "gui/statusbar.h"
+
 EventGroupHandle_t blectl_status = NULL;
 portMUX_TYPE blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -50,11 +52,13 @@ String message;
 class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
         blectl_set_event( BLECTL_CONNECT );
+        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
         Serial.printf("BLE connected\r\n");
     };
 
     void onDisconnect(BLEServer* pServer) {
         blectl_clear_event( BLECTL_CONNECT );
+        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
         Serial.printf("BLE disconnected\r\n");
         delay(500);
         pServer->getAdvertising()->start();
@@ -128,7 +132,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                         return;
                     }
                     message[message.length()] = 0;
-//                    processMessage();
+                    Serial.println("BLE message: " + message );
                     message.clear();
                 } else {
                     message += rxValue[i];
@@ -150,11 +154,15 @@ void blectl_setup( void ) {
     blectl_status = xEventGroupCreate();
     blectl_set_event( BLECTL_CONNECT | BLECTL_OFF_REQUEST | BLECTL_ON_REQUEST | BLECTL_PAIRING | BLECTL_STANDBY_REQUEST | BLECTL_ACTIVE | BLECTL_SCAN );
 
+    esp_bt_controller_enable( ESP_BT_MODE_BLE );
+    esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
+    esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
+
     // Create the BLE Device
     // Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
     // This is too long I think:
     // BLEDevice::init("Espruino Gadgetbridge Compatible Device");
-    BLEDevice::init("Espruino");
+    BLEDevice::init("Espruino (T-Watch2020)");
     // The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
     BLEDevice::setPower( ESP_PWR_LVL_N9 );
 
@@ -193,8 +201,8 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
     // Slow advertising interval for battery life
     // The maximum 0x4000 interval of ~16 sec was too slow, I could not reliably connect
-    pServer->getAdvertising()->setMinInterval( 1000 );
-    pServer->getAdvertising()->setMaxInterval( 2000 );
+    pServer->getAdvertising()->setMinInterval( 100 );
+    pServer->getAdvertising()->setMaxInterval( 200 );
     pServer->getAdvertising()->start();
     Serial.printf("BLE advertising...\r\n");
 }
