@@ -27,7 +27,7 @@
 
 #include "powermgm.h"
 #include "wifictl.h"
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
 #include "webserver/webserver.h"
@@ -461,21 +461,24 @@ void wifictl_Task( void * pvParameters ) {
 
   while ( true ) {
     vTaskDelay( 500 );
-    if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-      statusbar_wifi_set_state( true, "activate" );
-      lv_obj_invalidate( lv_scr_act() );
-      WiFi.mode( WIFI_STA );
-      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
-      log_i("request wifictl on done");
+    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) && powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
+      log_e("confused by wifictl on/off at the same time. off request accept");
     }
-    else if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
+
+    if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
       statusbar_wifi_set_state( false, "" );
       lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_OFF );
       esp_wifi_stop();
-      powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
       log_i("request wifictl off done");
     }
+    else if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
+      statusbar_wifi_set_state( true, "activate" );
+      lv_obj_invalidate( lv_scr_act() );
+      WiFi.mode( WIFI_STA );
+      log_i("request wifictl on done");
+    }
+    powermgm_clear_event( POWERMGM_WIFI_OFF_REQUEST | POWERMGM_WIFI_ACTIVE | POWERMGM_WIFI_CONNECTED | POWERMGM_WIFI_SCAN | POWERMGM_WIFI_ON_REQUEST );
     vTaskSuspend( _wifictl_Task );
   }
 }

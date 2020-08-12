@@ -21,7 +21,7 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 #include "motor.h"
 #include "powermgm.h"

@@ -7,11 +7,11 @@ struct SpiRamAllocator {
     void* allocate( size_t size ) { 
         void *psram = ps_calloc( size, 1 );
         if ( psram ) {
-            log_i("allocate %dbytes(%p) json psram", size, psram );
+            log_i("allocate %d bytes (%p) json psram", size, psram );
             return( psram );
         }
         else {
-            log_e("allocate %dbytes(%p) json psram failed", size, psram );
+            log_e("allocate %d bytes (%p) json psram failed", size, psram );
             while(1);
         }
     }

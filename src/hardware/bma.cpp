@@ -25,7 +25,7 @@
 
 #include "bma.h"
 #include "powermgm.h"
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
 

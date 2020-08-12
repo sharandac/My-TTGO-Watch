@@ -29,7 +29,7 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-#include "hardware/json_config_psram_allocator.h"
+#include "hardware/json_psram_allocator.h"
 
 update_config_t update_config;
 

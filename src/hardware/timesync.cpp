@@ -24,7 +24,7 @@
 #include "config.h"
 #include "timesync.h"
 #include "powermgm.h"
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;

@@ -226,7 +226,9 @@ void update_Task( void * pvParameters ) {
             WiFiClient client;
 
             lv_label_set_text( update_status_label, "start update ..." );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+
+            httpUpdate.rebootOnUpdate( false );
 
             t_httpUpdate_return ret = httpUpdate.update( client, "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
 
@@ -242,7 +244,7 @@ void update_Task( void * pvParameters ) {
                     break;
 
                 case HTTP_UPDATE_OK:
-                    lv_label_set_text( update_status_label, "update ok" );
+                    lv_label_set_text( update_status_label, "update ok, turn off and on!" );
                     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
                     break;
             }

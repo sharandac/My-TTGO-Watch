@@ -24,8 +24,6 @@
 #include <soc/rtc.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
-#include <esp_bt.h>
-#include <esp_bt_main.h>
 #include <time.h>
 #include "driver/adc.h"
 

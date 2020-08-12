@@ -12,10 +12,35 @@ pio run -t upload
 
 or simple press "build and upload" in platformIO.
 
+# known issues
+
+* the webserver crashes the ESP32 really often
+* the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
+* from time to time the esp32 crashes accidentally
+* and some other small things
+
+
 # how to use
 
 On startup you see the main screen (time tile). It show the time and the current weather (if correct configure). Now you can swipe with you fingers up, down, left and right between the four main screens. The four screens are organized in time, apps, note and setup tile.
 For the weather app you need an openweather.com api-id. http://openweathermap.org/appid is a good starting point.
+
+# for the programmers
+
+Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this
+
+```#include "hardware/json_psram_allocator.h"```
+
+and create your json with
+
+```SpiRamJsonDocument doc( 1000 );```
+
+to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
+
+```ps_malloc(), ps_calloc() and ps_realloc()```
+
+as often as possible.
+And one very important thing: Do not talk directly to the hardware!
 
 # how to make a screenshot
 The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this

@@ -1,7 +1,7 @@
 #include "config.h"
 #include <TTGO.h>
 #include <soc/rtc.h>
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 #include "display.h"
 #include "pmu.h"

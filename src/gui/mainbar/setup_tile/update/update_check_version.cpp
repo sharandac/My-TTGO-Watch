@@ -24,7 +24,7 @@
 
 #include "update_check_version.h"
 
-#include "hardware/json_config_psram_allocator.h"
+#include "hardware/json_psram_allocator.h"
 
 uint64_t update_check_new_version( void ) {
     char url[512]="";

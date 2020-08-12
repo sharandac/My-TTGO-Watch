@@ -75,12 +75,12 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
     tile_entrys++;
 
     if ( tile_pos_table == NULL ) {
-        tile_pos_table = ( lv_point_t * )malloc( sizeof( lv_point_t ) * tile_entrys );
+        tile_pos_table = ( lv_point_t * )ps_malloc( sizeof( lv_point_t ) * tile_entrys );
         if ( tile_pos_table == NULL ) {
             log_e("tile_pos_table malloc faild");
             while(true);
         }
-        tile = ( lv_tile_t * )malloc( sizeof( lv_tile_t ) * tile_entrys );
+        tile = ( lv_tile_t * )ps_malloc( sizeof( lv_tile_t ) * tile_entrys );
         if ( tile == NULL ) {
             log_e("tile malloc faild");
             while(true);
@@ -90,14 +90,14 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
         lv_point_t *new_tile_pos_table;
         lv_tile_t *new_tile;
 
-        new_tile_pos_table = ( lv_point_t * )realloc( tile_pos_table, sizeof( lv_point_t ) * tile_entrys );
+        new_tile_pos_table = ( lv_point_t * )ps_realloc( tile_pos_table, sizeof( lv_point_t ) * tile_entrys );
         if ( new_tile_pos_table == NULL ) {
             log_e("tile_pos_table realloc faild");
             while(true);
         }
         tile_pos_table = new_tile_pos_table;
         
-        new_tile = ( lv_tile_t * )realloc( tile, sizeof( lv_tile_t ) * tile_entrys );
+        new_tile = ( lv_tile_t * )ps_realloc( tile, sizeof( lv_tile_t ) * tile_entrys );
         if ( new_tile == NULL ) {
             log_e("tile realloc faild");
             while(true);

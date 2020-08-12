@@ -26,7 +26,7 @@
 #include "powermgm.h"
 #include "motor.h"
 
-#include "json_config_psram_allocator.h"
+#include "json_psram_allocator.h"
 
 display_config_t display_config;
 
