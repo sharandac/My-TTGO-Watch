@@ -53,16 +53,16 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
         blectl_set_event( BLECTL_CONNECT );
         statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
-        Serial.printf("BLE connected\r\n");
+        log_i("BLE connected");
     };
 
     void onDisconnect(BLEServer* pServer) {
         blectl_clear_event( BLECTL_CONNECT );
         statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
-        Serial.printf("BLE disconnected\r\n");
+        log_i("BLE disconnected");
         delay(500);
         pServer->getAdvertising()->start();
-        Serial.printf("BLE advertising...\r\n");
+        log_i("BLE advertising...");
     }
 };
 
@@ -72,29 +72,29 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
 class BtlCtlSecurity : public BLESecurityCallbacks {
 
     uint32_t onPassKeyRequest(){
-        Serial.printf("BLE: PassKeyRequest\r\n");
+        log_i("BLE: PassKeyRequest");
         // TODO: when is this used?
         return 123456;
     }
     void onPassKeyNotify(uint32_t pass_key){
         blectl_set_event( BLECTL_PAIRING );
-        Serial.printf("Bluetooth Pairing Request\r\nPIN: %06d\r\n", pass_key);
+        log_i("Bluetooth Pairing Request\r\nPIN: %06d", pass_key);
     }
     bool onConfirmPIN(uint32_t pass_key){
-        Serial.printf("BLE: The passkey YES/NO number :%06d\r\n", pass_key);
+        log_i("BLE: The passkey YES/NO number :%06d", pass_key);
         // vTaskDelay(5000);
         // return true;
         // TODO: when is this used?
         return false;
     }
     bool onSecurityRequest(){
-        Serial.printf("BLE: SecurityRequest\r\n");
+        log_i("BLE: SecurityRequest");
         // TODO: when is this used?
         return true;
     }
 
     void onAuthenticationComplete( esp_ble_auth_cmpl_t cmpl ){
-        Serial.printf("Bluetooth pairing %s\r\n", cmpl.success ? "successful" : "unsuccessful");
+        log_i("Bluetooth pairing %s", cmpl.success ? "successful" : "unsuccessful");
 
         if( cmpl.success ){
             uint16_t length;
@@ -122,7 +122,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
             for (int i = 0; i < rxValue.length(); i++) {
                 if (rxValue[i] == 0x10) {
                     if ( message.length() ) {
-                        log_i("BLE: Discarding %d bytes\n", message.length());
+                        log_i("BLE: Discarding %d bytes", message.length());
                     }
                     message.clear();
                 } else if (rxValue[i] == '\n') {
@@ -157,6 +157,8 @@ void blectl_setup( void ) {
     esp_bt_controller_enable( ESP_BT_MODE_BLE );
     esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
     esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
+    esp_bt_controller_mem_release( ESP_BT_MODE_IDLE );
+    esp_bt_mem_release( ESP_BT_MODE_IDLE );
 
     // Create the BLE Device
     // Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
@@ -204,33 +206,41 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->setMinInterval( 100 );
     pServer->getAdvertising()->setMaxInterval( 200 );
     pServer->getAdvertising()->start();
-    Serial.printf("BLE advertising...\r\n");
+    log_i("BLE advertising...");
 }
 
 /*
  *
  */
 void blectl_set_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&blectlMux);
+    portENTER_CRITICAL(&blectlMux);
     xEventGroupSetBits( blectl_status, bits );
-    portEXIT_CRITICAL_ISR(&blectlMux);
+    portEXIT_CRITICAL(&blectlMux);
 }
 
 /*
  *
  */
 void blectl_clear_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&blectlMux);
+    portENTER_CRITICAL(&blectlMux);
     xEventGroupClearBits( blectl_status, bits );
-    portEXIT_CRITICAL_ISR(&blectlMux);
+    portEXIT_CRITICAL(&blectlMux);
 }
 
 /*
  *
  */
 EventBits_t blectl_get_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&blectlMux);
+    portENTER_CRITICAL(&blectlMux);
     EventBits_t temp = xEventGroupGetBits( blectl_status ) & bits;
-    portEXIT_CRITICAL_ISR(&blectlMux);
+    portEXIT_CRITICAL(&blectlMux);
     return( temp );
+}
+
+void blectl_standby( void ) {
+    statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
+}
+
+void blectl_wakeup( void ) {
+    statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 }

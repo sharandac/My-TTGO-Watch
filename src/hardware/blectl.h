@@ -58,5 +58,7 @@
      * @param   bits    event state, example: POWERMGM_STANDBY to evaluate if the system in standby
      */
     EventBits_t blectl_get_event( EventBits_t bits );
+    void blectl_standby( void );
+    void blectl_wakeup( void );
 
 #endif // _BLECTL_H

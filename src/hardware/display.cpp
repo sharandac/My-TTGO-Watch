@@ -124,6 +124,7 @@ void display_save_config( void ) {
         doc["brightness"] = display_config.brightness;
         doc["rotation"] = display_config.rotation;
         doc["timeout"] = display_config.timeout;
+        doc["block_return_maintile"] = display_config.block_return_maintile;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -154,6 +155,7 @@ void display_read_config( void ) {
                 display_config.brightness = doc["brightness"].as<uint32_t>();
                 display_config.rotation = doc["rotation"].as<uint32_t>();
                 display_config.timeout = doc["timeout"].as<uint32_t>();
+                display_config.block_return_maintile = doc["block_return_maintile"].as<bool>();
             }        
             doc.clear();
         }
@@ -201,6 +203,14 @@ void display_set_brightness( uint32_t brightness ) {
 
 uint32_t display_get_rotation( void ) {
   return( display_config.rotation );
+}
+
+bool display_get_block_return_maintile( void ) {
+  return( display_config.block_return_maintile );
+}
+
+void display_set_block_return_maintile( bool block_return_maintile ) {
+  display_config.block_return_maintile = block_return_maintile;
 }
 
 void display_set_rotation( uint32_t rotation ) {

@@ -46,7 +46,7 @@ void setup()
     Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
     ttgo->begin();
     ttgo->lvgl_begin();
-
+    
     SPIFFS.begin();
 
     motor_setup();
@@ -91,12 +91,12 @@ void setup()
     splash_screen_stage_finish( ttgo );
     display_set_brightness( display_get_brightness() );
 
+    blectl_setup();
+
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
-
-    blectl_setup();
 }
 
 void loop()

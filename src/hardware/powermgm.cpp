@@ -31,6 +31,7 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "wifictl.h"
+#include "blectl.h"
 #include "timesync.h"
 #include "motor.h"
 #include "touch.h"
@@ -84,6 +85,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             timesyncToSystem();
 
             wifictl_wakeup();
+            blectl_wakeup();
+
             Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
             Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
             Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
@@ -91,6 +94,10 @@ void powermgm_loop( TTGOClass *ttgo ) {
 
             ttgo->startLvglTick();
             lv_disp_trig_activity(NULL);
+
+            if ( !display_get_block_return_maintile() ) {
+                mainbar_jump_to_maintile( LV_ANIM_OFF );
+            }
         }        
         else {
             ttgo->stopLvglTick();
@@ -100,18 +107,21 @@ void powermgm_loop( TTGOClass *ttgo ) {
             Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
             Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
             display_standby();
-            mainbar_jump_to_maintile( LV_ANIM_OFF );
 
             timesyncToRTC();
 
             bma_standby();
             pmu_standby();
             wifictl_standby();
+            blectl_standby();
 
             powermgm_set_event( POWERMGM_STANDBY );
             powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
 
             adc_power_off();
+
+            motor_vibe(1);
+            delay(50);
 
             log_i("go standby");
 
@@ -135,26 +145,26 @@ void powermgm_loop( TTGOClass *ttgo ) {
  *
  */
 void powermgm_set_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&powermgmMux);
+    portENTER_CRITICAL(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );
-    portEXIT_CRITICAL_ISR(&powermgmMux);
+    portEXIT_CRITICAL(&powermgmMux);
 }
 
 /*
  *
  */
 void powermgm_clear_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&powermgmMux);
+    portENTER_CRITICAL(&powermgmMux);
     xEventGroupClearBits( powermgm_status, bits );
-    portEXIT_CRITICAL_ISR(&powermgmMux);
+    portEXIT_CRITICAL(&powermgmMux);
 }
 
 /*
  *
  */
 EventBits_t powermgm_get_event( EventBits_t bits ) {
-    portENTER_CRITICAL_ISR(&powermgmMux);
+    portENTER_CRITICAL(&powermgmMux);
     EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
-    portEXIT_CRITICAL_ISR(&powermgmMux);
+    portEXIT_CRITICAL(&powermgmMux);
     return( temp );
 }

@@ -29,6 +29,7 @@
 
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
+#include "webserver/webserver.h"
 
 #include <WiFi.h>
 
@@ -401,6 +402,12 @@ static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) 
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_webserver( lv_switch_get_state( obj ) );
+                                        if ( lv_switch_get_state( obj ) ) {
+                                            asyncwebserver_start();
+                                        }
+                                        else {
+                                            asyncwebserver_end();
+                                        }
                                         break;
     }
 }
