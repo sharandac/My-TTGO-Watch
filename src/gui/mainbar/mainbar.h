@@ -24,8 +24,12 @@
 
     #include <TTGO.h>
 
+    typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
+
     typedef struct {
         lv_obj_t *tile;
+        MAINBAR_CALLBACK_FUNC activate_cb;
+        MAINBAR_CALLBACK_FUNC hibernate_cb;
     } lv_tile_t;
 
     #define MAINBAR_APP_TILE_X_START     0
@@ -88,6 +92,24 @@
      * @return  lv_obj_t
      */
     lv_obj_t * mainbar_get_tile_obj( uint32_t tile_number );
+    /*
+     * @brief register an hibernate callback function when leave the tile
+     * 
+     * @param   tile_number     tile number
+     * @param   hibernate_cb    pointer to the hibernate callback function
+     * 
+     * @return  true or false   true means registration was success
+     */
+    bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC hibernate_cb );
+    /*
+     * @brief register an activate callback function when enter the tile
+     * 
+     * @param   tile_number     tile number
+     * @param   activate_cb     pointer to the activate callback function
+     * 
+     * @return  true or false   true means registration was success
+     */
+    bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb );
     /*
      * @brief get main tile style
      * 

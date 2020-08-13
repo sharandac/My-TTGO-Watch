@@ -85,12 +85,12 @@ void setup()
      */
 
     wifictl_on();
-    // enable to store data in normal heap
-    heap_caps_malloc_extmem_enable( 16*1024 );
 
     splash_screen_stage_finish( ttgo );
     display_set_brightness( display_get_brightness() );
 
+    // enable to store data in normal heap
+    heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
 
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());

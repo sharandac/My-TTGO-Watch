@@ -48,6 +48,8 @@ static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 void battery_view_update_task( lv_task_t *task );
+void battery_activate_cb( void );
+void battery_hibernate_cb( void );
 
 void battery_view_tile_setup( uint32_t tile_num ) {
     // get an app tile and copy mainstyle
@@ -163,7 +165,18 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( vbus_view_voltage, "2.4mV");
     lv_obj_align( vbus_view_voltage, vbus_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
+    mainbar_add_tile_activate_cb( battery_view_tile_num, battery_activate_cb );
+    mainbar_add_tile_activate_cb( battery_view_tile_num + 1, battery_activate_cb );
+    mainbar_add_tile_hibernate_cb( battery_view_tile_num, battery_hibernate_cb );
+    mainbar_add_tile_hibernate_cb( battery_view_tile_num + 1, battery_hibernate_cb );
+}
+
+void battery_activate_cb( void ) {
     battery_view_task = lv_task_create(battery_view_update_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
+}
+
+void battery_hibernate_cb( void ) {
+    lv_task_del( battery_view_task );
 }
 
 static void enter_battery_view_event_cb( lv_obj_t * obj, lv_event_t event ) {

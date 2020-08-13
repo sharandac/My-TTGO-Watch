@@ -173,7 +173,7 @@ void wifictl_setup( void ) {
 
     xTaskCreate(  wifictl_Task,    /* Function to implement the task */
                   "wifictl Task",       /* Name of the task */
-                  5000,                  /* Stack size in words */
+                  2000,                  /* Stack size in words */
                   NULL,                   /* Task input parameter */
                   1,                      /* Priority of the task */
                   &_wifictl_Task );       /* Task handle. */
@@ -438,11 +438,6 @@ void wifictl_start_wps( void ) {
   WiFi.mode( WIFI_OFF );
   esp_wifi_stop();
 
-  statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-  statusbar_show_icon( STATUSBAR_WIFI );
-  statusbar_wifi_set_state( true, "wait for WPS" );
-  lv_obj_invalidate( lv_scr_act() );
-
   powermgm_set_event( POWERMGM_WIFI_WPS_REQUEST );
 
   ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
@@ -466,15 +461,11 @@ void wifictl_Task( void * pvParameters ) {
     }
 
     if ( powermgm_get_event( POWERMGM_WIFI_OFF_REQUEST ) ) {
-      statusbar_wifi_set_state( false, "" );
-      lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_OFF );
       esp_wifi_stop();
       log_i("request wifictl off done");
     }
     else if ( powermgm_get_event( POWERMGM_WIFI_ON_REQUEST ) ) {
-      statusbar_wifi_set_state( true, "activate" );
-      lv_obj_invalidate( lv_scr_act() );
       WiFi.mode( WIFI_STA );
       log_i("request wifictl on done");
     }
