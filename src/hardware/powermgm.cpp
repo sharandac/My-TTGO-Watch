@@ -54,6 +54,7 @@ void powermgm_setup( TTGOClass *ttgo ) {
     pmu_setup( ttgo );
     bma_setup( ttgo );
     wifictl_setup();
+    blectl_read_config();
     timesync_setup( ttgo );
     touch_setup( ttgo );
     sound_setup();
@@ -77,6 +78,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
             powermgm_clear_event( POWERMGM_STANDBY );
 
             log_i("go wakeup");
+
+            setCpuFrequencyMhz(240);
 
             pmu_wakeup();
             bma_wakeup();
@@ -120,18 +123,24 @@ void powermgm_loop( TTGOClass *ttgo ) {
 
             adc_power_off();
 
-            motor_vibe(1);
-            delay(50);
-
-            log_i("go standby");
-
-            setCpuFrequencyMhz( 80 );
-            gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
-            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
-            esp_sleep_enable_gpio_wakeup ();
-            esp_light_sleep_start();
-            // from here, the consumption is round about 2.5mA
-            // total standby time is 152h (6days) without use?
+            if ( !blectl_get_enable_on_standby() ) {
+                motor_vibe(3);
+                delay(50);
+                log_i("go standby");
+                setCpuFrequencyMhz( 10 );
+                gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
+                gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+                esp_sleep_enable_gpio_wakeup ();
+                esp_light_sleep_start();
+                // from here, the consumption is round about 2.5mA
+                // total standby time is 152h (6days) without use?
+            }
+            else {
+                log_i("standby block by bluetooth");
+                setCpuFrequencyMhz( 80 );
+                // from here, the consumption is round about 23mA
+                // total standby time is 19h without use?
+            }
         }
         // clear event
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP | POWERMGM_STANDBY_REQUEST | POWERMGM_SILENCE_WAKEUP_REQUEST );

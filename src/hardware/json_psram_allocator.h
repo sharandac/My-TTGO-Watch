@@ -7,7 +7,6 @@ struct SpiRamAllocator {
     void* allocate( size_t size ) { 
         void *psram = ps_calloc( size, 1 );
         if ( psram ) {
-            log_i("allocate %d bytes (%p) json psram", size, psram );
             return( psram );
         }
         else {
@@ -16,7 +15,6 @@ struct SpiRamAllocator {
         }
     }
     void deallocate( void* pointer ) {
-        log_i("deallocate (%p) json psram", pointer );
         free( pointer );
     }
 };

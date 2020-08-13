@@ -30,6 +30,13 @@
     #define CHARACTERISTIC_UUID_RX BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     #define CHARACTERISTIC_UUID_TX BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
+    #define BLECTL_JSON_COFIG_FILE         "/blectl.json"
+
+    typedef struct {
+        bool advertising = true;
+        bool enable_on_standby = false;
+    } blectl_config_t;
+
     #define BLECTL_CONNECT               _BV(0)
     #define BLECTL_STANDBY_REQUEST       _BV(1)
     #define BLECTL_ON_REQUEST            _BV(2)
@@ -60,5 +67,11 @@
     EventBits_t blectl_get_event( EventBits_t bits );
     void blectl_standby( void );
     void blectl_wakeup( void );
+    void blectl_set_enable_on_standby( bool enable_on_standby );
+    void blectl_set_advertising( bool advertising );
+    bool blectl_get_enable_on_standby( void );
+    bool blectl_get_advertising( void );
+    void blectl_save_config( void );
+    void blectl_read_config( void );
 
 #endif // _BLECTL_H

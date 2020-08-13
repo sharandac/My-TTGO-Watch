@@ -36,7 +36,7 @@ void pmu_setup( TTGOClass *ttgo ) {
         log_e("target voltage set failed!");
     if ( ttgo->power->setChargeControlCur( 300 ) )
         log_e("charge current set failed!");
-    if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) )
+    if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_25HZ ) )
         log_e("adc sample set failed!");
 
     // Turn off unused power
@@ -225,7 +225,6 @@ void pmu_loop( TTGOClass *ttgo ) {
      * handle IRQ event
      */
     if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
-        setCpuFrequencyMhz(240);
         if ( powermgm_get_event( POWERMGM_PMU_BATTERY | POWERMGM_PMU_BUTTON | POWERMGM_STANDBY_REQUEST ) ) {
             ttgo->power->clearIRQ();
             xEventGroupClearBits( pmu_event_handle, PMU_EVENT_AXP_INT );            

@@ -33,11 +33,14 @@
 #include <BLE2902.h>
 
 #include "blectl.h"
+#include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
 
 EventGroupHandle_t blectl_status = NULL;
 portMUX_TYPE blectlMux = portMUX_INITIALIZER_UNLOCKED;
+
+blectl_config_t blectl_config;
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -61,8 +64,10 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
         log_i("BLE disconnected");
         delay(500);
-        pServer->getAdvertising()->start();
-        log_i("BLE advertising...");
+        if ( blectl_get_advertising() ) {
+            pServer->getAdvertising()->start();
+            log_i("BLE advertising...");
+        }
     }
 };
 
@@ -151,6 +156,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
  *
  */
 void blectl_setup( void ) {
+
     blectl_status = xEventGroupCreate();
     blectl_set_event( BLECTL_CONNECT | BLECTL_OFF_REQUEST | BLECTL_ON_REQUEST | BLECTL_PAIRING | BLECTL_STANDBY_REQUEST | BLECTL_ACTIVE | BLECTL_SCAN );
 
@@ -205,8 +211,11 @@ void blectl_setup( void ) {
     // The maximum 0x4000 interval of ~16 sec was too slow, I could not reliably connect
     pServer->getAdvertising()->setMinInterval( 100 );
     pServer->getAdvertising()->setMaxInterval( 200 );
-    pServer->getAdvertising()->start();
-    log_i("BLE advertising...");
+
+    if ( blectl_get_advertising() ) {
+        pServer->getAdvertising()->start();
+        log_i("BLE advertising...");
+    }
 }
 
 /*
@@ -243,4 +252,80 @@ void blectl_standby( void ) {
 
 void blectl_wakeup( void ) {
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
+}
+
+void blectl_set_enable_on_standby( bool enable_on_standby ) {        
+    blectl_config.enable_on_standby = enable_on_standby;
+    blectl_save_config();
+}
+
+void blectl_set_advertising( bool advertising ) {
+    blectl_config.advertising = advertising;
+    blectl_save_config();
+    if ( blectl_get_event( BLECTL_CONNECT ) )
+        return;
+
+    if ( advertising ) {
+        pServer->getAdvertising()->start();
+    }
+    else {
+        pServer->getAdvertising()->stop();
+    }
+}
+
+bool blectl_get_enable_on_standby( void ) {
+    return( blectl_config.enable_on_standby );
+}
+
+bool blectl_get_advertising( void ) {
+    return( blectl_config.enable_on_standby );
+}
+/*
+ *
+ */
+void blectl_save_config( void ) {
+    fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
+    }
+    else {
+        SpiRamJsonDocument doc( 1000 );
+
+        doc["advertising"] = blectl_config.advertising;
+        doc["enable_on_standby"] = blectl_config.enable_on_standby;
+
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
+    }
+    file.close();
+}
+
+/*
+ *
+ */
+void blectl_read_config( void ) {
+    if ( SPIFFS.exists( BLECTL_JSON_COFIG_FILE ) ) {        
+        fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_READ );
+        if (!file) {
+            log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
+        }
+        else {
+            int filesize = file.size();
+            SpiRamJsonDocument doc( filesize * 2 );
+
+            DeserializationError error = deserializeJson( doc, file );
+            if ( error ) {
+                log_e("blectl deserializeJson() failed: %s", error.c_str() );
+            }
+            else {                
+                blectl_config.advertising = doc["advertising"].as<bool>();
+                blectl_config.enable_on_standby = doc["enable_on_standby"].as<bool>();
+            }        
+            doc.clear();
+        }
+        file.close();
+    }
 }

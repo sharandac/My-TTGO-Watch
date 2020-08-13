@@ -124,9 +124,7 @@ void bma_loop( TTGOClass *ttgo ) {
     /*
      * handle IRQ event
      */
-    if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {
-      setCpuFrequencyMhz(240);
-                
+    if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {                
       while( !ttgo->bma->readInterrupt() );
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_WAKEUP );
