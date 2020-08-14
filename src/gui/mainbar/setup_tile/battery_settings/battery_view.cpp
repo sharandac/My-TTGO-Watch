@@ -45,7 +45,6 @@ LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 
 static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event );
-static void enter_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 void battery_view_update_task( lv_task_t *task );
 void battery_activate_cb( void );
@@ -177,14 +176,6 @@ void battery_activate_cb( void ) {
 
 void battery_hibernate_cb( void ) {
     lv_task_del( battery_view_task );
-}
-
-static void enter_battery_view_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_view_tile_num, LV_ANIM_OFF );
-                                        break;
-    }
-
 }
 
 static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {

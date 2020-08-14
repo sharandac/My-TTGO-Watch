@@ -74,10 +74,15 @@ void powermgm_loop( TTGOClass *ttgo ) {
         }
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK );
     }
-        
+
+    if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {
+        lv_disp_trig_activity( NULL );
+        powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
+    }
+  
     // drive into
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
-        powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP );
+        powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
         log_i("go wakeup");
 
@@ -103,10 +108,12 @@ void powermgm_loop( TTGOClass *ttgo ) {
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
         }
+        else {
+            powermgm_set_event( POWERMGM_WAKEUP );
+        }
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
-        powermgm_set_event( POWERMGM_STANDBY );
-        powermgm_clear_event( POWERMGM_SILENCE_WAKEUP );
+        powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
         if ( !display_get_block_return_maintile() ) {
             mainbar_jump_to_maintile( LV_ANIM_OFF );
@@ -128,6 +135,8 @@ void powermgm_loop( TTGOClass *ttgo ) {
         blectl_standby();
 
         adc_power_off();
+
+        powermgm_set_event( POWERMGM_STANDBY );
 
         if ( !blectl_get_enable_on_standby() ) {
             motor_vibe(3);
