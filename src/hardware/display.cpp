@@ -79,11 +79,20 @@ void display_standby( void ) {
   dest_brightness = 0;
 }
 
-void display_wakeup( void ) {
+void display_wakeup( bool silence ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
-  // normal wake up from standby
-  if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_PMU_BATTERY | POWERMGM_BMA_WAKEUP ) ) {
+  // wakeup without display
+  if ( silence ) {
+    log_i("go silence wakeup");
+    ttgo->openBL();
+    ttgo->displayWakeup();
+    ttgo->bl->adjust( 0 );
+    brightness = 0;
+    dest_brightness = 0;
+  }
+  // wakeup with display
+  else {
     log_i("go wakeup");
     ttgo->openBL();
     ttgo->displayWakeup();
@@ -91,16 +100,6 @@ void display_wakeup( void ) {
     brightness = 0;
     dest_brightness = display_get_brightness();
     motor_vibe( 1 );
-  }
-  // silence wakeup request from standby
-  else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
-    log_i("go silence wakeup");
-    ttgo->openBL();
-    ttgo->displayWakeup();
-    ttgo->bl->adjust( 0 );
-    brightness = 0;
-    dest_brightness = 0;
-    powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
   }
 }
 

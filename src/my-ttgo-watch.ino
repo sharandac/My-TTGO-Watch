@@ -97,6 +97,9 @@ void setup()
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
+
+    disableCore0WDT();
+    disableCore1WDT();
 }
 
 void loop()

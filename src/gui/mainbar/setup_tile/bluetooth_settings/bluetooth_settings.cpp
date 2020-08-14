@@ -21,6 +21,8 @@
  */
 #include "config.h"
 #include "bluetooth_settings.h"
+#include "bluetooth_pairing.h"
+#include "bluetooth_call.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup.h"
@@ -141,6 +143,9 @@ void bluetooth_settings_tile_setup( void ) {
     else {
         lv_switch_off( bluetooth_standby_onoff, LV_ANIM_OFF );
     }
+
+    bluetooth_pairing_tile_setup();
+    bluetooth_call_tile_setup();
 }
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

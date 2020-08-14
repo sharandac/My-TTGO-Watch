@@ -116,7 +116,7 @@
     /*
      * @brief set display into normal mode or leave it in standby if a silence wakeup occur
      */
-    void display_wakeup( void );
+    void display_wakeup( bool silence );
 
 
 #endif // _DISPLAY_H

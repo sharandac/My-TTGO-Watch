@@ -127,7 +127,7 @@ void bma_loop( TTGOClass *ttgo ) {
     if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {                
       while( !ttgo->bma->readInterrupt() );
         if ( ttgo->bma->isDoubleClick() ) {
-            powermgm_set_event( POWERMGM_BMA_WAKEUP );
+            powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
             xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
             return;
         }

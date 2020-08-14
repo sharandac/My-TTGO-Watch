@@ -224,26 +224,20 @@ void pmu_loop( TTGOClass *ttgo ) {
     /*
      * handle IRQ event
      */
-    if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {
-        if ( powermgm_get_event( POWERMGM_PMU_BATTERY | POWERMGM_PMU_BUTTON | POWERMGM_STANDBY_REQUEST ) ) {
-            ttgo->power->clearIRQ();
-            xEventGroupClearBits( pmu_event_handle, PMU_EVENT_AXP_INT );            
-            return;
-        }
-        
+    if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {        
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isVbusRemoveIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             motor_vibe( 1 );
             updatetrigger = true;
         }
         if (ttgo->power->isChargingDoneIRQ()) {
-            powermgm_set_event( POWERMGM_PMU_BATTERY );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             motor_vibe( 1 );
             updatetrigger = true;
         }

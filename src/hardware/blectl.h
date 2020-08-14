@@ -32,18 +32,33 @@
 
     #define BLECTL_JSON_COFIG_FILE         "/blectl.json"
 
+    #define EndofText               0x03
+    #define LineFeed                0x0a
+    #define DataLinkEscape          0x10
+
     typedef struct {
         bool advertising = true;
         bool enable_on_standby = false;
     } blectl_config_t;
 
+    typedef void ( * BLECTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
+
+    typedef struct {
+        EventBits_t event;
+        BLECTL_CALLBACK_FUNC event_cb;
+    } blectl_event_t;
+
     #define BLECTL_CONNECT               _BV(0)
-    #define BLECTL_STANDBY_REQUEST       _BV(1)
-    #define BLECTL_ON_REQUEST            _BV(2)
-    #define BLECTL_OFF_REQUEST           _BV(3)
-    #define BLECTL_ACTIVE                _BV(4)
-    #define BLECTL_SCAN                  _BV(5)
-    #define BLECTL_PAIRING               _BV(6)
+    #define BLECTL_DISCONNECT            _BV(1)
+    #define BLECTL_STANDBY               _BV(2)
+    #define BLECTL_ON                    _BV(3)
+    #define BLECTL_OFF                   _BV(4)
+    #define BLECTL_ACTIVE                _BV(5)
+    #define BLECTL_MSG                   _BV(6)
+    #define BLECTL_PIN_AUTH              _BV(7)
+    #define BLECTL_PAIRING               _BV(8)
+    #define BLECTL_PAIRING_SUCCESS       _BV(9)
+    #define BLECTL_PAIRING_ABORT         _BV(10)
 
     void blectl_setup( void );
 
@@ -64,7 +79,9 @@
      * 
      * @param   bits    event state, example: POWERMGM_STANDBY to evaluate if the system in standby
      */
-    EventBits_t blectl_get_event( EventBits_t bits );
+    bool blectl_get_event( EventBits_t bits );
+
+    void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb );
     void blectl_standby( void );
     void blectl_wakeup( void );
     void blectl_set_enable_on_standby( bool enable_on_standby );
