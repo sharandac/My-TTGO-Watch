@@ -22,6 +22,8 @@
 #ifndef _WIFICTL_H
     #define _WIFICTL_H
 
+    #include "TTGO.h"
+
     #define WIFICTL_DELAY               10
     #define NETWORKLIST_ENTRYS          20
     #define WIFICTL_LIST_FILE           "/wifilist.cfg"
@@ -43,6 +45,25 @@
         bool autoon = true;
         bool webserver = false;
     } wifictl_config_t;
+
+    typedef void ( * WIFICTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
+    
+    typedef struct {
+        EventBits_t event;
+        WIFICTL_CALLBACK_FUNC event_cb;
+    } wifictl_event_t;
+
+    #define WIFICTL_CONNECT                 _BV(0)
+    #define WIFICTL_DISCONNECT              _BV(1)
+    #define WIFICTL_ON                      _BV(3)
+    #define WIFICTL_OFF                     _BV(4)
+    #define WIFICTL_ACTIVE                  _BV(5)
+    #define WIFICTL_ON_REQUEST              _BV(6)
+    #define WIFICTL_OFF_REQUEST             _BV(7)
+    #define WIFICTL_WPS_REQUEST             _BV(8)
+    #define WIFICTL_WPS_SUCCESS             _BV(9)
+    #define WIFICTL_WPS_FAILED              _BV(10)
+    #define WIFICTL_SCAN                    _BV(11)
 
     /*
      * @brief setup wifi controller routine
@@ -79,6 +100,11 @@
      * @brief switch off wifi
      */
     void wifictl_off( void );
+    void wifictl_set_event( EventBits_t bits );
+    bool wifictl_get_event( EventBits_t bits );
+    void wifictl_clear_event( EventBits_t bits );
+    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC blectl_event_cb );
+    void wifictl_send_event_cb( EventBits_t event, char *msg );
     void wifictl_standby( void );
     void wifictl_wakeup( void );
     bool wifictl_get_autoon( void );

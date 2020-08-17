@@ -21,7 +21,6 @@
  */
 #include "config.h"
 #include <Arduino.h>
-#include <WiFi.h>
 #include <HTTPClient.h>
 #include <HTTPUpdate.h>
 
@@ -34,6 +33,7 @@
 #include "gui/statusbar.h"
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
+#include "hardware/wifictl.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -57,6 +57,8 @@ LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
+
+void update_wifictl_event_cb( EventBits_t event, char* msg );
 
 void update_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -135,15 +137,16 @@ void update_tile_setup( void ) {
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-    // regster callback
-    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        if ( update_setup_get_autosync() ) {
-            update_check_version();
-        }
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
+    wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb );
 
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
+}
+
+void update_wifictl_event_cb( EventBits_t event, char* msg ) {
+    if ( update_setup_get_autosync() ) {
+        update_check_version();
+    }
 }
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

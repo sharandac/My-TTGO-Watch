@@ -94,6 +94,8 @@ static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 void bluetooth_call_msg_pharse( char* msg ) {
+    static bool standby = false;
+
     SpiRamJsonDocument doc( strlen( msg ) * 2 );
 
     DeserializationError error = deserializeJson( doc, msg );
@@ -103,6 +105,13 @@ void bluetooth_call_msg_pharse( char* msg ) {
     else {
         if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "accept" ) ) {
             statusbar_hide( true );
+            if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
+                standby = true;
+            }
+            else {
+                standby = false;
+            }
+            
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             mainbar_jump_to_tilenumber( bluetooth_call_tile_num, LV_ANIM_OFF );
             if ( doc["number"] ) {
@@ -117,7 +126,9 @@ void bluetooth_call_msg_pharse( char* msg ) {
         }
 
         if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            if ( standby = true ) {
+                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+            }
             mainbar_jump_to_maintile( LV_ANIM_OFF );
             lv_obj_invalidate( lv_scr_act() );
         }

@@ -36,7 +36,7 @@ void pmu_setup( TTGOClass *ttgo ) {
         log_e("target voltage set failed!");
     if ( ttgo->power->setChargeControlCur( 300 ) )
         log_e("charge current set failed!");
-    if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_25HZ ) )
+    if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) )
         log_e("adc sample set failed!");
 
     // Turn off unused power

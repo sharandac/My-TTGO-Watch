@@ -21,7 +21,6 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include <WiFi.h>
 #include "esp_task_wdt.h"
 
 #include "weather.h"
@@ -38,6 +37,7 @@
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
 #include "hardware/json_psram_allocator.h"
+#include "hardware/wifictl.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;
@@ -57,6 +57,8 @@ lv_obj_t *weather_widget_temperature_label = NULL;
 lv_obj_t *weather_widget_wind_label = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
+void weather_widget_wifictl_event_cb( EventBits_t event, char* msg );
+
 LV_IMG_DECLARE(owm_01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
 LV_IMG_DECLARE(info_fail_16px);
@@ -116,20 +118,20 @@ void weather_app_setup( void ) {
         lv_obj_align( weather_widget_wind_label, weather_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, +5);
     }
 
-    // regster callback for wifi sync
-    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        if ( weather_config.autosync ) {
-            weather_widget_sync_request();
-        }
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
-
-    // regster callback for wifi sync
-    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        lv_obj_set_hidden( weather_widget_info_img, true );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
-
     weather_widget_event_handle = xEventGroupCreate();
-    xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
+
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb );
+}
+
+void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
+    switch( event ) {
+        case WIFICTL_CONNECT:       if ( weather_config.autosync ) {
+                                        weather_widget_sync_request();
+                                    }
+                                    break;
+        case WIFICTL_OFF:           lv_obj_set_hidden( weather_widget_info_img, true );
+                                    break;
+    }
 }
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {

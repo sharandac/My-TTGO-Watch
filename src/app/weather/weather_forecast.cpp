@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include <config.h>
-#include <WiFi.h>
 #include "esp_task_wdt.h"
 
 #include "weather.h"
@@ -34,10 +33,10 @@
 #include "gui/keyboard.h"
 
 #include "hardware/powermgm.h"
+#include "hardware/wifictl.h"
 
 EventGroupHandle_t weather_forecast_event_handle = NULL;
 TaskHandle_t _weather_forecast_sync_Task;
-void weather_forecast_sync_Task( void * pvParameters );
 
 lv_obj_t *weather_forecast_tile = NULL;
 lv_style_t weather_forecast_style;
@@ -51,6 +50,9 @@ lv_obj_t *weather_forecast_temperature_label[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_wind_label[ WEATHER_MAX_FORECAST ];
 
 weather_forcast_t weather_forecast[ WEATHER_MAX_FORECAST ];
+
+void weather_forecast_sync_Task( void * pvParameters );
+void weather_forecast_wifictl_event_cb( EventBits_t event, char* msg );
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -133,16 +135,19 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
         lv_obj_align( weather_forecast_time_label[ i ], weather_forecast_icon_imgbtn[ i ], LV_ALIGN_OUT_TOP_MID, 0, 0);
     }
 
-    // regster callback for wifi sync
-    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        weather_config_t *weather_config = weather_get_config();
-        if ( weather_config->autosync )
-            weather_forecast_sync_request();
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
-
     weather_forecast_event_handle = xEventGroupCreate();
-    xEventGroupClearBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
 
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_forecast_wifictl_event_cb );
+}
+
+void weather_forecast_wifictl_event_cb( EventBits_t event, char* msg ) {
+    switch( event ) {
+        case WIFICTL_CONNECT:       weather_config_t *tmp_weather_config = weather_get_config();
+                                    if ( tmp_weather_config->autosync ) {
+                                        weather_forecast_sync_request();
+                                    }
+                                    break;
+    }
 }
 
 static void exit_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -19,8 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include "config.h"
+#include "TTGO.h"
+
 #include "time.h"
-#include <WiFi.h>
+#include "wifictl.h"
 #include "config.h"
 #include "timesync.h"
 #include "powermgm.h"
@@ -32,29 +35,31 @@ void timesync_Task( void * pvParameters );
 
 timesync_config_t timesync_config;
 
+void timesync_wifictl_event_cb( EventBits_t event, char* msg );
+
 void timesync_setup( TTGOClass *ttgo ) {
 
     timesync_read_config();
-
-    WiFi.onEvent( [](WiFiEvent_t event, WiFiEventInfo_t info) {
-        if ( timesync_config.timesync ) {
-          if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
-              return;
-          }
-          else {
-              xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-              xTaskCreate(  timesync_Task,      /* Function to implement the task */
-                            "timesync Task",    /* Name of the task */
-                            2000,              /* Stack size in words */
-                            NULL,               /* Task input parameter */
-                            1,                  /* Priority of the task */
-                            &_timesync_Task );  /* Task handle. */
-          }
-        }
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
-
     time_event_handle = xEventGroupCreate();
-    xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
+
+    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb );
+}
+
+void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {
+    if ( timesync_config.timesync ) {
+        if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
+            return;
+        }
+        else {
+            xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+            xTaskCreate(  timesync_Task,      /* Function to implement the task */
+                        "timesync Task",    /* Name of the task */
+                        2000,              /* Stack size in words */
+                        NULL,               /* Task input parameter */
+                        1,                  /* Priority of the task */
+                        &_timesync_Task );  /* Task handle. */
+        }
+    }
 }
 
 void timesync_save_config( void ) {

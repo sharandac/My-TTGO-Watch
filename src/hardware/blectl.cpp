@@ -57,10 +57,11 @@ uint32_t gadgetbridge_msg_size = 0;
  *
  */
 class BleCtlServerCallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) {
+    void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (char*)"connected" );
+//        pServer->updateConnParams( param->connect.remote_bda, 120, 180, 150, 10000 );
         log_i("BLE connected");
     };
 
@@ -323,15 +324,16 @@ void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb
 
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event = event;
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb = blectl_event_cb;
-    log_i("register event_cb success");
+    log_i("register blectl_event_cb success");
 }
 /*
  *
  */
 void blectl_send_event_cb( EventBits_t event, char *msg ) {
-    for ( int entry = 0 ; entry < blectl_event_cb_entrys ; entry++ ){
+    for ( int entry = 0 ; entry < blectl_event_cb_entrys ; entry++ ) {
+        yield();
         if ( event & blectl_event_cb_table[ entry ].event ) {
-            log_i("call event_cb");
+            log_i("call blectl_event_cb");
             blectl_event_cb_table[ entry ].event_cb( event, msg );
         }
     }

@@ -32,12 +32,6 @@
     #define POWERMGM_WAKEUP_REQUEST             _BV(5)
     #define POWERMGM_PMU_BUTTON                 _BV(6)
     #define POWERMGM_BMA_DOUBLECLICK            _BV(9)
-    #define POWERMGM_WIFI_ON_REQUEST            _BV(10)
-    #define POWERMGM_WIFI_OFF_REQUEST           _BV(11)
-    #define POWERMGM_WIFI_WPS_REQUEST           _BV(12)
-    #define POWERMGM_WIFI_ACTIVE                _BV(13)
-    #define POWERMGM_WIFI_SCAN                  _BV(14)
-    #define POWERMGM_WIFI_CONNECTED             _BV(15)
 
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
