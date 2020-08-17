@@ -213,7 +213,7 @@ void display_settings_tile_setup( void ) {
         lv_obj_set_hidden( display_setup_info_img, false );
     }
     else {
-        snprintf( temp, sizeof( temp ), "%d secounds", lv_slider_get_value( display_timeout_slider ) );
+        snprintf( temp, sizeof( temp ), "%d seconds", lv_slider_get_value( display_timeout_slider ) );
     }
     lv_label_set_text( display_timeout_slider_label, temp );
     lv_obj_align( display_timeout_slider_label, display_timeout_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
@@ -298,7 +298,7 @@ static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                                 lv_obj_set_hidden( display_setup_info_img, false );
                                             }
                                             else {
-                                                snprintf( temp, sizeof( temp ), "%d secounds", lv_slider_get_value(obj) );
+                                                snprintf( temp, sizeof( temp ), "%d seconds", lv_slider_get_value(obj) );
                                                         lv_obj_set_hidden( display_setup_info_img, true );
                                             }
                                             lv_label_set_text( display_timeout_slider_label, temp );
