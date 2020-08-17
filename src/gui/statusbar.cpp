@@ -65,6 +65,9 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg );
 LV_IMG_DECLARE(wifi_64px);
 LV_IMG_DECLARE(bluetooth_64px);
 LV_IMG_DECLARE(foot_16px);
+
+lv_task_t * statusbar_task;
+void statusbar_update_task( lv_task_t * task );
     
 /**
  * Create a demo application
@@ -187,6 +190,12 @@ void statusbar_setup( void )
 
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED, statusbar_wifictl_event_cb );
+
+    statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
+}
+
+void statusbar_update_task( lv_task_t * task ) {
+    statusbar_refresh();
 }
 
 void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
@@ -231,7 +240,6 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
     }
-    statusbar_refresh();
 }
 /*
  *
@@ -270,11 +278,8 @@ void statusbar_wifi_set_state( bool state, const char *wifiname ) {
     else {
         lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_RELEASED );
     }
-//    lv_label_set_long_mode( statusbar_wifilabel, LV_LABEL_LONG_SROLL_CIRC);
-//    lv_obj_set_width( statusbar_wifilabel, LV_HOR_RES);
     lv_label_set_text( statusbar_wifilabel, wifiname);
     lv_obj_align( statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
-    statusbar_refresh();
 }
 
 /*
@@ -287,7 +292,6 @@ void statusbar_bluetooth_set_state( bool state ) {
     else {
         lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_PRESSED );
     }
-    statusbar_refresh();
 }
 
 /*
@@ -295,9 +299,7 @@ void statusbar_bluetooth_set_state( bool state ) {
  */
 void statusbar_hide_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
-
     lv_obj_set_hidden( statusicon[ icon ].icon, true );
-    statusbar_refresh();
 }
 
 /*
@@ -307,7 +309,6 @@ void statusbar_show_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
 
     lv_obj_set_hidden( statusicon[ icon ].icon, false );
-    statusbar_refresh();
 }
 
 /*
@@ -315,9 +316,7 @@ void statusbar_show_icon( statusbar_icon_t icon ) {
  */
 void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
     if ( icon >= STATUSBAR_NUM || style >= STATUSBAR_STYLE_NUM ) return;
-
     statusicon[ icon ].style = &statusbarstyle[ style ];
-    statusbar_refresh();
 }
 /*
  *
@@ -352,7 +351,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
         lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     }
-    statusbar_refresh();
 }
 
 
@@ -408,7 +406,6 @@ void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
             statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
         }
     }
-    statusbar_refresh();
 }
 
 void statusbar_hide( bool hide ) {
