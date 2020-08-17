@@ -387,7 +387,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
-
 /*
  *
  */
@@ -399,14 +398,6 @@ void statusbar_update_stepcounter( int step ) {
 /*
  *
  */
-
-
-void statusbar_update_time(  ) {
-    char timecounter[12]="";
-    snprintf( timecounter, sizeof( timecounter ), "%s", "12:50" );    
-    lv_label_set_text( statusbar_timelabel, timecounter );
-}
-
 
 void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
     char level[8]="";
