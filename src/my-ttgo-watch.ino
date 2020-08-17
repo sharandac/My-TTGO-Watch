@@ -99,7 +99,6 @@ void setup()
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
 
     disableCore0WDT();
-    disableCore1WDT();
 }
 
 void loop()

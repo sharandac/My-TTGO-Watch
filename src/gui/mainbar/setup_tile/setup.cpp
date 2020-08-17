@@ -54,7 +54,7 @@ void setup_tile_setup( void ) {
 
         lv_obj_set_hidden( setup_entry[ setup ].setup, true );
 
-        log_d("icon screen/x/y: %d/%d/%d", setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ), setup_entry[ setup ].x, setup_entry[ setup ].y );
+        log_i("icon screen/x/y: %d/%d/%d", setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ), setup_entry[ setup ].x, setup_entry[ setup ].y );
     }
 }
 

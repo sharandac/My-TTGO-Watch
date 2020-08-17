@@ -72,12 +72,12 @@ void pmu_standby( void ) {
     ttgo->power->clearTimerStatus();
     if ( pmu_get_silence_wakeup() ) {
         if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
-            ttgo->power->setTimer( 3 );
-            log_i("enable silence wakeup timer, 3min");
+            ttgo->power->setTimer( pmu_config.silence_wakeup_time_vbplug );
+            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_time_vbplug );
         }
         else {
-            ttgo->power->setTimer( 60 );
-            log_i("enable silence wakeup timer, 60min");
+            ttgo->power->setTimer( pmu_config.silence_wakeup_time );
+            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_time );
         }
     }
 
@@ -127,6 +127,8 @@ void pmu_save_config( void ) {
         SpiRamJsonDocument doc( 1000 );
 
         doc["silence_wakeup"] = pmu_config.silence_wakeup;
+        doc["silence_wakeup_time"] = pmu_config.silence_wakeup_time;
+        doc["silence_wakeup_time_vbplug"] = pmu_config.silence_wakeup_time_vbplug;
         doc["experimental_power_save"] = pmu_config.experimental_power_save;
         doc["compute_percent"] = pmu_config.compute_percent;
 
@@ -156,9 +158,11 @@ void pmu_read_config( void ) {
                 log_e("update check deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                pmu_config.silence_wakeup = doc["silence_wakeup"].as<bool>();
-                pmu_config.experimental_power_save = doc["experimental_power_save"].as<bool>();
-                pmu_config.compute_percent = doc["compute_percent"].as<bool>();
+                pmu_config.silence_wakeup = doc["silence_wakeup"].as<bool>() | false;
+                pmu_config.silence_wakeup_time = doc["compute_percent"].as<int8_t>() | 60;
+                pmu_config.silence_wakeup_time_vbplug = doc["compute_percent"].as<int8_t>() | 3;
+                pmu_config.experimental_power_save = doc["experimental_power_save"].as<bool>() | false;
+                pmu_config.compute_percent = doc["compute_percent"].as<bool>() | false;
             }        
             doc.clear();
         }

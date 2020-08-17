@@ -22,6 +22,8 @@
 #ifndef _PMU_H
     #define _PMU_H
 
+    #include "TTGO.h"
+
     #define PMU_EVENT_AXP_INT       _BV(0)
 
     #define PMU_BATTERY_CAP         300
@@ -33,6 +35,8 @@
         bool compute_percent = false;
         bool experimental_power_save = false;
         bool silence_wakeup = true;
+        uint8_t silence_wakeup_time = 60;
+        uint8_t silence_wakeup_time_vbplug = 3;
     } pmu_config_t;
 
     /*

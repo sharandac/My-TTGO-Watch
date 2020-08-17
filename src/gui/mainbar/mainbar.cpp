@@ -119,7 +119,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * LV_HOR_RES , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
-    log_d("add tile: x=%d, y=%d", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y );
+    log_i("add tile: x=%d, y=%d", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y );
 
     return( tile_entrys - 1 );
 }

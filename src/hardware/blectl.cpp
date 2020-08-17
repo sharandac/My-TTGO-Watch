@@ -186,7 +186,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                             log_i("attention, new message");
                                             break;
                     case LineFeed:          log_i("message complete, fire BLTCTL_MSG callback");
-                                            if( gadgetbridge_msg[ 0 ] == 'G' && gadgetbridge_msg[ 1 ] == 'B' ) {
+                                            if( gadgetbridge_msg[ 0 ] == 'G' && gadgetbridge_msg[ 1 ] == 'B' || gadgetbridge_msg[ 2 ] == '(' ) {
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = '\0';
                                                 log_i("msg: %s", &gadgetbridge_msg[ 3 ] );
@@ -324,7 +324,7 @@ void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb
 
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event = event;
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb = blectl_event_cb;
-    log_i("register blectl_event_cb success");
+    log_i("register blectl_event_cb success (%p)", blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb );
 }
 /*
  *
@@ -333,7 +333,7 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
     for ( int entry = 0 ; entry < blectl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & blectl_event_cb_table[ entry ].event ) {
-            log_i("call blectl_event_cb");
+            log_i("call blectl_event_cb (%p)", blectl_event_cb_table[ entry ].event_cb );
             blectl_event_cb_table[ entry ].event_cb( event, msg );
         }
     }

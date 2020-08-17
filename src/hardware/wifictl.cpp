@@ -331,7 +331,7 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
 
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event = event;
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb = wifictl_event_cb;
-    log_i("register wifictl_event_cb success");
+    log_i("register wifictl_event_cb success (%p)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb );
 }
 /*
  *
@@ -340,7 +340,7 @@ void wifictl_send_event_cb( EventBits_t event, char *msg ) {
     for ( int entry = 0 ; entry < wifictl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & wifictl_event_cb_table[ entry ].event ) {
-            log_i("call wifictl_event_cb");
+            log_i("call wifictl_event_cb (%p)", wifictl_event_cb_table[ entry ].event_cb );
             wifictl_event_cb_table[ entry ].event_cb( event, msg );
         }
     }
@@ -513,7 +513,7 @@ void wifictl_Task( void * pvParameters ) {
   while ( true ) {
     vTaskDelay( 500 );
     if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) && wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
-      log_e("confused by wifictl on/off at the same time. off request accept");
+      log_w("confused by wifictl on/off at the same time. off request accept");
     }
 
     if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) ) {

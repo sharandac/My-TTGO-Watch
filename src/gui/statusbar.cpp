@@ -332,7 +332,6 @@ void statusbar_refresh( void ) {
             }
             lv_obj_reset_style_list( statusicon[ i ].icon, LV_OBJ_PART_MAIN );
             lv_obj_add_style( statusicon[ i ].icon, LV_OBJ_PART_MAIN, statusicon[i].style );
-//            lv_obj_set_style( statusicon[ i ].icon, statusicon[i].style );
         }
     }
 }
