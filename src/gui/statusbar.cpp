@@ -43,6 +43,7 @@ static lv_obj_t *statusbar_wifi = NULL;
 static lv_obj_t *statusbar_wifilabel = NULL;
 static lv_obj_t *statusbar_bluetooth = NULL;
 static lv_obj_t *statusbar_stepcounterlabel = NULL;
+static lv_obj_t *statusbar_timelabel = NULL;
 static lv_style_t statusbarstyle[ STATUSBAR_STYLE_NUM ];
 
 lv_status_bar_t statusicon[ STATUSBAR_NUM ] = 
@@ -171,11 +172,17 @@ void statusbar_setup( void )
     lv_label_set_text(statusbar_wifilabel, "");
     lv_obj_align(statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
+    statusbar_timelabel = lv_label_create(statusbar, NULL);
+    lv_obj_reset_style_list( statusbar_timelabel, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( statusbar_timelabel, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] );
+    lv_label_set_text(statusbar_timelabel, "00:00");
+    lv_obj_align(statusbar_timelabel, statusbar, LV_ALIGN_IN_TOP_LEFT, 5, 4 );
+
     lv_obj_t *statusbar_stepicon = lv_img_create(statusbar, NULL );
     lv_img_set_src( statusbar_stepicon, &foot_16px );
     lv_obj_reset_style_list( statusbar_stepicon, LV_OBJ_PART_MAIN );
     lv_obj_add_style( statusbar_stepicon, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] );
-    lv_obj_align(statusbar_stepicon, statusbar, LV_ALIGN_IN_TOP_LEFT, 5, 4 );
+    lv_obj_align(statusbar_stepicon, statusbar_timelabel, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     statusbar_stepcounterlabel = lv_label_create(statusbar, NULL);
     lv_obj_reset_style_list( statusbar_stepcounterlabel, LV_OBJ_PART_MAIN );
@@ -196,6 +203,33 @@ void statusbar_setup( void )
 
 void statusbar_update_task( lv_task_t * task ) {
     statusbar_refresh();
+
+    time_t now;
+    struct tm  info;
+    char time_str[64]="";
+    static char *old_time_str = NULL;
+
+    // on first run, alloc psram
+    if ( old_time_str == NULL ) {
+        old_time_str = (char *)ps_calloc( sizeof( time_str), 1 );
+        if ( old_time_str == NULL ) {
+            log_e("old_time_str allocation failed");
+            while(true);
+        }
+    }
+
+    time( &now );
+    localtime_r( &now, &info );
+
+    strftime( time_str, sizeof(time_str), "%H:%M", &info );
+
+    // only update while time_str changes
+    if ( strcmp( time_str, old_time_str ) ) {
+        log_i("renew time_str: %s != %s", time_str, old_time_str );
+        lv_label_set_text( statusbar_timelabel, time_str );
+        strlcpy( old_time_str, time_str, sizeof( time_str ) );
+    }
+
 }
 
 void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
@@ -365,6 +399,15 @@ void statusbar_update_stepcounter( int step ) {
 /*
  *
  */
+
+
+void statusbar_update_time(  ) {
+    char timecounter[12]="";
+    snprintf( timecounter, sizeof( timecounter ), "%s", "12:50" );    
+    lv_label_set_text( statusbar_timelabel, timecounter );
+}
+
+
 void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
     char level[8]="";
     if ( percent >= 0 ) {

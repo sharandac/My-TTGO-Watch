@@ -90,6 +90,12 @@
      */
     void statusbar_update_stepcounter( int step );
     /*
+     * @brief update timecounter from statusbar
+     * 
+     * @param
+     */
+    void statusbar_update_time( );
+    /*
      * @brief update battery icon and ther state
      * 
      * @param   percent     displayed value in percent
