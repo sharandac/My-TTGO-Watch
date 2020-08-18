@@ -126,7 +126,7 @@ void bluetooth_call_msg_pharse( char* msg ) {
         }
 
         if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
-            if ( standby = true ) {
+            if ( standby == true ) {
                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
             }
             mainbar_jump_to_maintile( LV_ANIM_OFF );
