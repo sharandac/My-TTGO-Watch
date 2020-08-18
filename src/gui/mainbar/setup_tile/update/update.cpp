@@ -144,8 +144,12 @@ void update_tile_setup( void ) {
 }
 
 void update_wifictl_event_cb( EventBits_t event, char* msg ) {
-    if ( update_setup_get_autosync() ) {
-        update_check_version();
+    log_i("update wifictl event: %04x", event );
+    switch( event ) {
+        case WIFICTL_CONNECT:       if ( update_setup_get_autosync() ) {
+                                    update_check_version();
+                                    break;
+        }
     }
 }
 

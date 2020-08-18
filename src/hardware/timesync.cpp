@@ -46,19 +46,24 @@ void timesync_setup( TTGOClass *ttgo ) {
 }
 
 void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {
-    if ( timesync_config.timesync ) {
-        if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
-            return;
-        }
-        else {
-            xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-            xTaskCreate(  timesync_Task,      /* Function to implement the task */
-                        "timesync Task",    /* Name of the task */
-                        2000,              /* Stack size in words */
-                        NULL,               /* Task input parameter */
-                        1,                  /* Priority of the task */
-                        &_timesync_Task );  /* Task handle. */
-        }
+    log_i("timesync wifictl event: %04x", event );
+
+    switch ( event ) {
+        case WIFICTL_CONNECT:       if ( timesync_config.timesync ) {
+                                        if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
+                                            return;
+                                        }
+                                        else {
+                                            xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+                                            xTaskCreate(  timesync_Task,      /* Function to implement the task */
+                                                        "timesync Task",    /* Name of the task */
+                                                        2000,              /* Stack size in words */
+                                                        NULL,               /* Task input parameter */
+                                                        1,                  /* Priority of the task */
+                                                        &_timesync_Task );  /* Task handle. */
+                                        }
+                                    }
+                                    break;
     }
 }
 
