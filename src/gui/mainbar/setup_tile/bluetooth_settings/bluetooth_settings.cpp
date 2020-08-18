@@ -23,6 +23,7 @@
 #include "bluetooth_settings.h"
 #include "bluetooth_pairing.h"
 #include "bluetooth_call.h"
+#include "bluetooth_message.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup.h"
@@ -146,6 +147,7 @@ void bluetooth_settings_tile_setup( void ) {
 
     bluetooth_pairing_tile_setup();
     bluetooth_call_tile_setup();
+    bluetooth_message_tile_setup();
 }
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

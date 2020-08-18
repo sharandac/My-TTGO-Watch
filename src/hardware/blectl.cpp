@@ -61,7 +61,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (char*)"connected" );
-//        pServer->updateConnParams( param->connect.remote_bda, 120, 180, 150, 10000 );
+        pServer->updateConnParams( param->connect.remote_bda, 500, 1000, 750, 10000 );
         log_i("BLE connected");
     };
 
@@ -186,7 +186,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                             log_i("attention, new message");
                                             break;
                     case LineFeed:          log_i("message complete, fire BLTCTL_MSG callback");
-                                            if( gadgetbridge_msg[ 0 ] == 'G' && gadgetbridge_msg[ 1 ] == 'B' || gadgetbridge_msg[ 2 ] == '(' ) {
+                                            if( gadgetbridge_msg[ 0 ] == 'G' && gadgetbridge_msg[ 1 ] == 'B' ) {
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = '\0';
                                                 log_i("msg: %s", &gadgetbridge_msg[ 3 ] );
@@ -333,8 +333,16 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
     for ( int entry = 0 ; entry < blectl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & blectl_event_cb_table[ entry ].event ) {
-            log_i("call blectl_event_cb (%p)", blectl_event_cb_table[ entry ].event_cb );
-            blectl_event_cb_table[ entry ].event_cb( event, msg );
+            char * tmp_msg = (char *)ps_malloc( strlen( msg ) + 1 );
+            if ( tmp_msg != NULL ) {
+                strcpy( tmp_msg, msg );
+                log_i("call blectl_event_cb (%p)", blectl_event_cb_table[ entry ].event_cb );
+                blectl_event_cb_table[ entry ].event_cb( event, tmp_msg );
+                free( tmp_msg );
+            }
+            else {
+                log_e("ps_alloc error");
+            }
         }
     }
 }

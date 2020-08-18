@@ -100,7 +100,7 @@ void bluetooth_call_msg_pharse( char* msg ) {
 
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {
-        log_e("update check deserializeJson() failed: %s", error.c_str() );
+        log_e("bluetooth call deserializeJson() failed: %s", error.c_str() );
     }
     else {
         if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "accept" ) ) {
@@ -122,7 +122,7 @@ void bluetooth_call_msg_pharse( char* msg ) {
             }
             lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
             lv_obj_invalidate( lv_scr_act() );
-            motor_vibe(20);            
+            motor_vibe(100);            
         }
 
         if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
