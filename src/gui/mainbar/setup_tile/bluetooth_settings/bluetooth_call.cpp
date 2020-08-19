@@ -58,15 +58,6 @@ void bluetooth_call_tile_setup( void ) {
     lv_style_set_text_font( &bluetooth_call_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( bluetooth_call_tile, LV_OBJ_PART_MAIN, &bluetooth_call_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_call_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_call_style );
-    lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
-    lv_obj_set_event_cb( exit_btn, exit_bluetooth_call_event_cb );
-
     bluetooth_call_img = lv_img_create( bluetooth_call_tile, NULL );
     lv_img_set_src( bluetooth_call_img, &call_ok_128px );
     lv_obj_align( bluetooth_call_img, bluetooth_call_tile, LV_ALIGN_CENTER, 0, 0 );
@@ -75,6 +66,15 @@ void bluetooth_call_tile_setup( void ) {
     lv_obj_add_style( bluetooth_call_number_label, LV_OBJ_PART_MAIN, &bluetooth_call_style  );
     lv_label_set_text( bluetooth_call_number_label, "");
     lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+
+    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_call_tile, NULL);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_call_style );
+    lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_set_event_cb( exit_btn, exit_bluetooth_call_event_cb );
 
     blectl_register_cb( BLECTL_MSG, bluetooth_call_event_cb );
 }
