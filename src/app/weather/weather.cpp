@@ -89,6 +89,7 @@ void weather_app_setup( void ) {
     // create widget weather condition icon and temperature label
     weather_widget_cont = main_tile_register_widget();
     weather_widget_condition_img = lv_imgbtn_create( weather_widget_cont, NULL );
+    mainbar_add_slide_element(weather_widget_condition_img);
     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_RELEASED, &owm_01d_64px);
     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_PRESSED, &owm_01d_64px);
     lv_imgbtn_set_src( weather_widget_condition_img, LV_BTN_STATE_CHECKED_RELEASED, &owm_01d_64px);
