@@ -128,6 +128,7 @@ void update_save_config( void ) {
         SpiRamJsonDocument doc( 1000 );
 
         doc["autosync"] = update_config.autosync;
+        doc["updateurl"] = update_config.updateurl;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -153,6 +154,7 @@ void update_read_config( void ) {
             }
             else {
                 update_config.autosync = doc["autosync"].as<bool>();
+                strlcpy( update_config.updateurl, doc["updateurl"] | FIRMWARE_UPDATE_URL, sizeof( update_config.updateurl ) );
             }        
             doc.clear();
         }
@@ -183,4 +185,8 @@ void update_read_config( void ) {
 
 bool update_setup_get_autosync( void ) {
     return( update_config.autosync );
+}
+
+char* update_setup_get_url( void ) {
+    return( update_config.updateurl );
 }

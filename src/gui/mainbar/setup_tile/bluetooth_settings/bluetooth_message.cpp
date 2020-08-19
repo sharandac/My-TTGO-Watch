@@ -143,8 +143,12 @@ void bluetooth_message_msg_pharse( char* msg ) {
                 lv_img_set_src( bluetooth_message_img, &message_32px );
             }
             
+
             if ( doc["body"] )
                 lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
+            else
+                lv_label_set_text( bluetooth_message_msg_label, "" );
+            
 
             if ( doc["title"] )
                 lv_label_set_text( bluetooth_message_sender_label, doc["title"] );

@@ -23,15 +23,15 @@
 #include "HTTPClient.h"
 
 #include "update_check_version.h"
-
 #include "hardware/json_psram_allocator.h"
 
-uint64_t update_check_new_version( void ) {
-    char url[512]="";
-    int httpcode = -1;
-    uint64_t version = -1;
+char *firmwarehost = NULL;
+char *firmwarefile = NULL;
+char* firmwareurl = NULL;
+int64_t firmwareversion = -1;
 
-    snprintf( url, sizeof( url ), "http://%s/%s", FIRMWARE_HOST, FIRMWARE_VERSION_FILE );
+int64_t update_check_new_version( char *url ) {
+    int httpcode = -1;
 
     HTTPClient check_update_client;
 
@@ -58,8 +58,77 @@ uint64_t update_check_new_version( void ) {
 
     check_update_client.end();
 
-    version = atoll( doc["version"] );
+    if ( doc["host"] ) {
+        if ( firmwarehost == NULL ) {
+            firmwarehost = (char*)ps_calloc( strlen( doc["host"] ) + 1, 1 );
+            if ( firmwarehost == NULL ) {
+                log_e("ps_calloc error");
+                while(true);
+            }
+        }
+        else {
+            char * tmp_firmwarehost = (char*)ps_realloc( firmwarehost, strlen( doc["host"] ) + 1 );
+            if ( tmp_firmwarehost == NULL ) {
+                log_e("ps_realloc error");
+                while(true);
+            }
+            firmwarehost = tmp_firmwarehost;
+        }
+        strcpy( firmwarehost, doc["host"] );
+        log_i("firmwarehost: %s", firmwarehost );
+    }
+
+    if ( doc["file"] ) {
+        if ( firmwarefile == NULL ) {
+            firmwarefile = (char*)ps_calloc( strlen( doc["file"] ) + 1, 1 );
+            if ( firmwarefile == NULL ) {
+                log_e("ps_calloc error");
+                while(true);
+            }
+        }
+        else {
+            char * tmp_firmwarefile = (char*)ps_realloc( firmwarefile, strlen( doc["file"] ) + 1 );
+            if ( tmp_firmwarefile == NULL ) {
+                log_e("ps_realloc error");
+                while(true);
+            }
+            firmwarefile = tmp_firmwarefile;
+        }
+        strcpy( firmwarefile, doc["file"] );
+        log_i("firmwarefile: %s", firmwarefile );
+    }
+
+    if ( firmwarehost != NULL && firmwarefile != NULL ) {
+        if ( firmwareurl == NULL ) {
+            firmwareurl = (char*)ps_calloc( strlen( firmwarehost ) + strlen( firmwarefile ) + 5, 1 );
+            if ( firmwareurl == NULL ) {
+                log_e("ps_calloc error");
+                while(true);
+            }
+        }
+        else {
+            char * tmp_firmwareurl = (char*)ps_realloc( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5 );
+            if ( tmp_firmwareurl == NULL ) {
+                log_e("ps_realloc error");
+                while(true);
+            }
+            firmwareurl = tmp_firmwareurl;            
+        }
+        snprintf( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5, "%s/%s", firmwarehost, firmwarefile );
+        log_i("firmwareurl: %s", firmwareurl );
+    }
+
+    if ( doc["version"] ) {
+        firmwareversion = atoll( doc["version"] );
+    }
 
     doc.clear();
-    return( version );
+    return( firmwareversion );
+}
+
+const char* update_get_url( void ) {
+    if ( firmwareversion > 0 ) {
+        return( (const char*)firmwareurl );
+    }
+    return( NULL );
 }

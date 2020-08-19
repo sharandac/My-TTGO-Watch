@@ -26,6 +26,8 @@
 #include <esp_wifi.h>
 #include <time.h>
 #include "driver/adc.h"
+#include "esp_pm.h"
+
 
 #include "pmu.h"
 #include "bma.h"

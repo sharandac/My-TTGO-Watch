@@ -24,12 +24,9 @@
 
     #include <TTGO.h>
 
-    #define FIRMWARE_HOST               "www.neo-guerillaz.de"
-    #define FIRMWARE_HOST_PORT          80
-    #define FIRMWARE_VERSION_FILE       "ttgo-t-watch2020_v1.version.json"
-
     #define UPDATE_JSON_BUFFER_SIZE     200
 
-    uint64_t update_check_new_version();
+    int64_t update_check_new_version( char *url );
+    const char* update_get_url( void );
 
 #endif // _UPDATE_CHECK_VERSION_H

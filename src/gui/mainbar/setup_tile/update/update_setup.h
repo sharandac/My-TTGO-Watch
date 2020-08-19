@@ -27,11 +27,15 @@
     #define UPDATE_CONFIG_FILE             "/update.cfg"
     #define UPDATE_JSON_CONFIG_FILE        "/update.json"
 
+    #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.version.json"
+
     typedef struct {
         bool autosync = true;
+        char updateurl[512] = FIRMWARE_UPDATE_URL;
     } update_config_t;
 
     void update_setup_tile_setup( uint32_t tile_num );
     bool update_setup_get_autosync( void );
+    char* update_setup_get_url( void );
 
 #endif // _UPDATE_SETUP_H

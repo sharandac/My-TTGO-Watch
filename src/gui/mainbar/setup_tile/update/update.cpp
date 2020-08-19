@@ -209,7 +209,7 @@ void update_Task( void * pvParameters ) {
     log_i("start update task");
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
-        int64_t firmware_version = update_check_new_version();
+        int64_t firmware_version = update_check_new_version( update_setup_get_url() );
         if ( firmware_version > atol( __FIRMWARE__ ) && firmware_version > 0 ) {
             char version_msg[48] = "";
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
@@ -224,7 +224,7 @@ void update_Task( void * pvParameters ) {
         }
         lv_obj_invalidate( lv_scr_act() );
     }
-    if ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) {
+    if ( ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {
         if( WiFi.status() == WL_CONNECTED ) {
 
             uint32_t display_timeout = display_get_timeout();
@@ -237,7 +237,7 @@ void update_Task( void * pvParameters ) {
 
             httpUpdate.rebootOnUpdate( false );
 
-            t_httpUpdate_return ret = httpUpdate.update( client, "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.ino.bin" );
+            t_httpUpdate_return ret = httpUpdate.update( client, update_get_url() );
 
             switch(ret) {
                 case HTTP_UPDATE_FAILED:
