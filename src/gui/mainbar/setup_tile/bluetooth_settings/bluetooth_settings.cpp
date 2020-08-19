@@ -112,7 +112,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluettoth_info_label_cont, bluetooth_advertising_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *bluetooth_info_label = lv_label_create( bluettoth_info_label_cont, NULL);
     lv_obj_add_style( bluetooth_info_label, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
-    lv_label_set_text( bluetooth_info_label, "increases battery life");
+    lv_label_set_text( bluetooth_info_label, "increases power consumption");
     lv_obj_align( bluetooth_info_label, bluettoth_info_label_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     
     lv_obj_t *bluetooth_standby_cont = lv_obj_create( bluetooth_settings_tile, NULL );
