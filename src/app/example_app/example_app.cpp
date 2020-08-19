@@ -73,6 +73,9 @@ void example_app_setup( void ) {
     lv_obj_align( example_app_icon , example_app_icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_obj_set_event_cb( example_app_icon, enter_example_app_event_cb );
 
+    // make app icon drag scroll the mainbar
+    mainbar_add_slide_element(example_app_icon);
+
     // set an small info indicator at your app icon to inform the user about the state or news
     example_app_icon_info = lv_img_create( example_app_icon_cont, NULL );
     lv_img_set_src( example_app_icon_info, &info_1_16px );
@@ -96,6 +99,9 @@ void example_app_setup( void ) {
     lv_obj_reset_style_list( example_app_widget_icon, LV_OBJ_PART_MAIN );
     lv_obj_align( example_app_widget_icon , example_app_widget_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_obj_set_event_cb( example_app_widget_icon, enter_example_app_event_cb );
+
+    // make widget icon drag scroll the mainbar
+    mainbar_add_slide_element(example_app_widget_icon);
 
     // set an small info icon at your widget icon to inform the user about the state or news
     example_app_widget_icon_info = lv_img_create( example_app_widget_cont, NULL );
