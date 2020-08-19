@@ -222,6 +222,11 @@ void update_Task( void * pvParameters ) {
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
             lv_obj_set_hidden( update_info_img, true );
         }
+        else {
+            lv_label_set_text( update_status_label, "get update info failed" );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_set_hidden( update_info_img, true );
+        }
         lv_obj_invalidate( lv_scr_act() );
     }
     if ( ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {

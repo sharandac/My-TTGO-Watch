@@ -41,13 +41,10 @@
     typedef struct {
         lv_obj_t *app;
         lv_obj_t *label;
-        lv_obj_t *icon_cont;
-        lv_obj_t *icon;
-        lv_obj_t *icon_indicator;
         lv_coord_t x;
         lv_coord_t y;
         bool active;
-    } lv_app_entry_t;
+    } lv_app_icon_t;
 
     /*
      * @brief setup the app tile

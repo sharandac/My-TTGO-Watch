@@ -24,7 +24,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "app_tile.h"
 
-lv_app_entry_t app_entry[ MAX_APPS_ICON ];
+lv_app_icon_t app_entry[ MAX_APPS_ICON ];
 
 static lv_obj_t *app_cont = NULL;
 static lv_obj_t *app_label = NULL;

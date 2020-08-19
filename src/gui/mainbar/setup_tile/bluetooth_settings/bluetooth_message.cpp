@@ -132,6 +132,9 @@ void bluetooth_message_msg_pharse( char* msg ) {
                 else if ( !strcmp( doc["src"], "K-9 Mail" ) ) {
                     lv_img_set_src( bluetooth_message_img, &k9mail_32px );
                 }
+                else if ( !strcmp( doc["src"], "Gmail" ) ) {
+                    lv_img_set_src( bluetooth_message_img, &email_32px );
+                }
                 else if ( !strcmp( doc["src"], "E-Mail" ) ) {
                     lv_img_set_src( bluetooth_message_img, &email_32px );
                 }
