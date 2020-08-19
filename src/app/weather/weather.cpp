@@ -77,6 +77,7 @@ void weather_app_setup( void ) {
 
     weather_app_cont = app_tile_register_app( "weather");
     lv_obj_t *weather_app_icon = lv_imgbtn_create( weather_app_cont, NULL );
+    mainbar_add_slide_element(weather_app_icon);
     lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_RELEASED, &owm_01d_64px);
     lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_PRESSED, &owm_01d_64px);
     lv_imgbtn_set_src( weather_app_icon, LV_BTN_STATE_CHECKED_RELEASED, &owm_01d_64px);
