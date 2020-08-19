@@ -162,7 +162,7 @@ void asyncwebserver_start(void){
       "<li><a target=\"cont\" href=\"/info\">/info</a> - Display information about the device"
       "<li><a target=\"cont\" href=\"/network\">/network</a> - Display network information"
       "<li><a target=\"cont\" href=\"/shot\">/shot</a> - Capture a screen shot"
-      "<li><a target=\"cont\" href=\"/screen.565\">/screen.565</a> - Retrieve the image in RGB565 format"
+      "<li><a target=\"cont\" href=\"/screen.data\">/screen.data</a> - Retrieve the image in RGB565 format, open it with gimp"
       "<li><a target=\"_blank\" href=\"/edit\">/edit</a> - View, edit, upload, and delete files"
       "</ul>"
       "<p><div style=\"color:red;\">Caution:</div> Use these with care:"

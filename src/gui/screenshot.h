@@ -24,7 +24,7 @@
 
     #include "config.h"
 
-    #define SCREENSHOT_FILE_NAME    "/screen.565"
+    #define SCREENSHOT_FILE_NAME    "/screen.data"
 
     /*
      * @brief setup screenshot
