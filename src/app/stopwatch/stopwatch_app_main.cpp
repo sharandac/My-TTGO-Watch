@@ -177,7 +177,7 @@ static void stop_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
 
 static void reset_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       Serial.println("Reset clicked");
+        case( LV_EVENT_CLICKED ):       log_i("Reset clicked");
                                         stopwatch_milliseconds = 0;
                                         stopwatch_app_main_update_stopwatchlabel();
                                         break;
