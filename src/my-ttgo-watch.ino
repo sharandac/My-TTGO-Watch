@@ -36,6 +36,7 @@
 #include "hardware/blectl.h"
 
 #include "app/weather/weather.h"
+#include "app/stopwatch/stopwatch_app.h"
 #include "app/example_app/example_app.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
@@ -79,6 +80,7 @@ void setup()
      * add apps and widgets here!!!
      */
     weather_app_setup();
+    stopwatch_app_setup();
     example_app_setup();
     /*
      *
