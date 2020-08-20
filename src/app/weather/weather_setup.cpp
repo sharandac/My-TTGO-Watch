@@ -30,6 +30,10 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
+#include "hardware/blectl.h"
+#include "hardware/motor.h"
+#include "hardware/json_psram_allocator.h"
+
 lv_obj_t *weather_setup_tile = NULL;
 lv_style_t weather_setup_style;
 uint32_t weather_setup_tile_num;
@@ -48,6 +52,9 @@ static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
+
+static void bluetooth_message_event_cb( EventBits_t event, char* msg );
+static void bluetooth_message_msg_pharse( char* msg );
 
 void weather_setup_tile_setup( uint32_t tile_num ) {
 
@@ -181,6 +188,8 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
         lv_switch_on( weather_wind_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( weather_wind_onoff, LV_ANIM_OFF );
+
+    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb );
 }
 
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -217,4 +226,37 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
                                             weather_jump_to_forecast();
                                             break;
     }
+}
+
+
+static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
+    switch( event ) {
+        case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
+                                    break;
+    }
+}
+
+void bluetooth_message_msg_pharse( char* msg ) {
+
+    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+
+    DeserializationError error = deserializeJson( doc, msg );
+    if ( error ) {
+        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        if( !strcmp( doc["t"], "conf" ) ) {
+            if ( !strcmp( doc["app"], "weather" ) ) {
+
+                weather_config_t *weather_config = weather_get_config();
+                strcpy( weather_config->apikey, doc["apikey"] );
+                strcpy( weather_config->lat, doc["lat"] );
+                strcpy( weather_config->lon, doc["lon"] );
+                weather_save_config();
+                motor_vibe(100);
+            }
+
+        }
+    }        
+    doc.clear();
 }
