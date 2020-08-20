@@ -26,8 +26,6 @@
 
     #define PMU_EVENT_AXP_INT       _BV(0)
 
-    #define PMU_BATTERY_CAP         300
-
     #define PMU_CONFIG_FILE         "/pmu.cfg"
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 
@@ -37,6 +35,8 @@
         bool silence_wakeup = true;
         uint8_t silence_wakeup_time = 60;
         uint8_t silence_wakeup_time_vbplug = 3;
+        int32_t charging_target_voltage = 3200;
+        int32_t designed_battery_cap = 300;
     } pmu_config_t;
 
     /*
@@ -92,6 +92,7 @@
      * @brief set experimental power save
      */
     void pmu_set_experimental_power_save( bool value );
+    int32_t pmu_get_designed_battery_cap( void );
     bool pmu_get_silence_wakeup( void );
     void pmu_set_silence_wakeup( bool value );
 

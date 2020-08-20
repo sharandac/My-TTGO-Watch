@@ -207,6 +207,10 @@ void battery_view_update_task( lv_task_t *task ) {
     lv_label_set_text( battery_view_current_cap, temp );
     lv_obj_align( battery_view_current_cap, lv_obj_get_parent( battery_view_current_cap ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
+    snprintf( temp, sizeof( temp ), "%dmAh", pmu_get_designed_battery_cap() );
+    lv_label_set_text( battery_view_design_cap, temp );
+    lv_obj_align( battery_view_design_cap, lv_obj_get_parent( battery_view_design_cap ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
     snprintf( temp, sizeof( temp ), "%0.2fV", ttgo->power->getBattVoltage() / 1000 );
     lv_label_set_text( battery_view_voltage, temp );
     lv_obj_align( battery_view_voltage, lv_obj_get_parent( battery_view_voltage ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );

@@ -48,6 +48,7 @@ void blectl_send_event_cb( EventBits_t event, char *msg );
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
+BLECharacteristic *pRxCharacteristic;
 uint8_t txValue = 0;
 
 char *gadgetbridge_msg = NULL;
@@ -251,7 +252,7 @@ void blectl_setup( void ) {
     pTxCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
     pTxCharacteristic->addDescriptor( new BLE2902() );
 
-    BLECharacteristic *pRxCharacteristic = pService->createCharacteristic( CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE );
+    pRxCharacteristic = pService->createCharacteristic( CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE );
     pRxCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
     pRxCharacteristic->setCallbacks( new BleCtlCallbacks() );
 
