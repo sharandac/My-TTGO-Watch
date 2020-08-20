@@ -135,36 +135,41 @@ void bluetooth_message_msg_pharse( char* msg ) {
         if( !strcmp( doc["t"], "notify" ) ) {
             statusbar_hide( true );
 
-            // set notify source
-            if ( doc["src"] )
-                lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
-
             // set notify source icon
             if ( doc["src"] ) {
                 if ( !strcmp( doc["src"], "Telegram" ) ) {
                     lv_img_set_src( bluetooth_message_img, &telegram_32px );
+                    motor_vibe(100);
                 }
                 else if ( !strcmp( doc["src"], "Whatsapp" ) ) {
                     lv_img_set_src( bluetooth_message_img, &whatsapp_32px );
+                    motor_vibe(100);
                 }
                 else if ( !strcmp( doc["src"], "K-9 Mail" ) ) {
                     lv_img_set_src( bluetooth_message_img, &k9mail_32px );
+                    motor_vibe(100);
                 }
                 else if ( !strcmp( doc["src"], "Gmail" ) ) {
                     lv_img_set_src( bluetooth_message_img, &email_32px );
+                    motor_vibe(100);
                 }
                 else if ( !strcmp( doc["src"], "E-Mail" ) ) {
                     lv_img_set_src( bluetooth_message_img, &email_32px );
+                    motor_vibe(100);
                 }
                 else if ( !strcmp( doc["src"], "OsmAnd" ) ) {
                     lv_img_set_src( bluetooth_message_img, &osmand_32px );
                 }
                 else {
                     lv_img_set_src( bluetooth_message_img, &message_32px );
+                    motor_vibe(100);
                 }
+                lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
             }
             else {
                 lv_img_set_src( bluetooth_message_img, &message_32px );
+                lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
+                motor_vibe(100);
             }
             
             // set message
@@ -174,7 +179,8 @@ void bluetooth_message_msg_pharse( char* msg ) {
                 lv_label_set_text( bluetooth_message_msg_label, "" );
 
             // scroll back to the top
-            lv_page_scroll_ver( bluetooth_message_page, lv_page_get_scrl_height( bluetooth_message_page ) );
+            if ( lv_page_get_scrl_height( bluetooth_message_page ) > 160 )
+                lv_page_scroll_ver( bluetooth_message_page, lv_page_get_scrl_height( bluetooth_message_page ) );
             
             // set sender label
             if ( doc["title"] )
@@ -190,10 +196,6 @@ void bluetooth_message_msg_pharse( char* msg ) {
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
 
             lv_obj_invalidate( lv_scr_act() );
-
-            if ( strcmp( doc["src"], "OsmAnd" ) ){
-                motor_vibe(100);
-            }
         }
     }        
     doc.clear();
