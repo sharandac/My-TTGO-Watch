@@ -284,6 +284,11 @@ void bluetooth_message_msg_pharse( char* msg ) {
                 strlcpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
                 strlcpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
                 weather_save_config();
+
+                lv_textarea_set_text( weather_apikey_textfield, weather_config->apikey );
+                lv_textarea_set_text( weather_lat_textfield, weather_config->lat );
+                lv_textarea_set_text( weather_lon_textfield, weather_config->lon );
+
                 motor_vibe(100);
             }
 
