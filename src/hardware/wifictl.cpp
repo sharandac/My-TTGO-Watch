@@ -410,7 +410,7 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
   // check if existin
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
-      strncpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
+      strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_config();
       WiFi.scanNetworks();
       wifictl_set_event( WIFICTL_SCAN );
@@ -420,8 +420,8 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
   // check for an emty entry
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
     if( strlen( wifictl_networklist[ entry ].ssid ) == 0 ) {
-      strncpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
-      strncpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
+      strlcpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
+      strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_config();
       WiFi.scanNetworks();
       wifictl_set_event( WIFICTL_SCAN );
@@ -486,10 +486,10 @@ void wifictl_start_wps( void ) {
 
   esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
   esp_wps_config.wps_type = ESP_WPS_MODE;
-  strcpy(esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER);
-  strcpy(esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER);
-  strcpy(esp_wps_config.factory_info.model_name, ESP_MODEL_NAME);
-  strcpy(esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME);
+  strlcpy( esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER, sizeof( esp_wps_config.factory_info.manufacturer ) );
+  strlcpy( esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER, sizeof( esp_wps_config.factory_info.model_number ) );
+  strlcpy( esp_wps_config.factory_info.model_name, ESP_MODEL_NAME, sizeof( esp_wps_config.factory_info.model_name ) );
+  strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
 
   WiFi.mode( WIFI_OFF );
   esp_wifi_stop();

@@ -74,7 +74,7 @@ int64_t update_check_new_version( char *url ) {
             }
             firmwarehost = tmp_firmwarehost;
         }
-        strcpy( firmwarehost, doc["host"] );
+        strlcpy( firmwarehost, doc["host"], sizeof( firmwarehost ) );
         log_i("firmwarehost: %s", firmwarehost );
     }
 
@@ -94,7 +94,7 @@ int64_t update_check_new_version( char *url ) {
             }
             firmwarefile = tmp_firmwarefile;
         }
-        strcpy( firmwarefile, doc["file"] );
+        strlcpy( firmwarefile, doc["file"], sizeof( firmwarefile ) );
         log_i("firmwarefile: %s", firmwarefile );
     }
 

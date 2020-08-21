@@ -117,8 +117,8 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
         snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°%s", doc["list"][i]["main"]["temp"].as<float>(), weather_units_symbol );
         snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
         snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
-        strcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] );
-        strcpy( weather_forecast[ i ].name, doc["city"]["name"] );
+        strlcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"], sizeof(  weather_forecast[ i ].icon ) );
+        strlcpy( weather_forecast[ i ].name, doc["city"]["name"], sizeof( weather_forecast[ i ].name ) );
 
         int directionDegree = doc["list"][i]["wind"]["deg"].as<int>();
         int speed = doc["list"][i]["wind"]["speed"].as<int>();

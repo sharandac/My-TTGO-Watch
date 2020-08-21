@@ -250,9 +250,9 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
     switch( event ) {
         case( LV_EVENT_CLICKED ):           keyboard_hide();
                                             weather_config_t *weather_config = weather_get_config();
-                                            strcpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ) );
-                                            strcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ) );
-                                            strcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ) );
+                                            strlcpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ), sizeof( weather_config->apikey ) );
+                                            strlcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ), sizeof( weather_config->lat ) );
+                                            strlcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ), sizeof( weather_config->lon ) );
                                             weather_save_config();
                                             weather_jump_to_forecast();
                                             break;
@@ -280,9 +280,9 @@ void bluetooth_message_msg_pharse( char* msg ) {
             if ( !strcmp( doc["app"], "weather" ) ) {
 
                 weather_config_t *weather_config = weather_get_config();
-                strcpy( weather_config->apikey, doc["apikey"] );
-                strcpy( weather_config->lat, doc["lat"] );
-                strcpy( weather_config->lon, doc["lon"] );
+                strlcpy( weather_config->apikey, doc["apikey"], sizeof( weather_config->apikey ) );
+                strlcpy( weather_config->lat, doc["lat"], sizeof( weather_config->lat ) );
+                strlcpy( weather_config->lon, doc["lon"], sizeof( weather_config->lon ) );
                 weather_save_config();
                 motor_vibe(100);
             }
