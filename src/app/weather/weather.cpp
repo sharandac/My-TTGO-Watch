@@ -236,6 +236,7 @@ void weather_save_config( void ) {
         doc["lon"] = weather_config.lon;
         doc["autosync"] = weather_config.autosync;
         doc["showWind"] = weather_config.showWind;
+        doc["imperial"] = weather_config.imperial;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -268,6 +269,7 @@ void weather_load_config( void ) {
                 strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
                 weather_config.autosync = doc["autosync"].as<bool>();
                 weather_config.showWind = doc["showWind"].as<bool>();
+                weather_config.imperial = doc["imperial"].as<bool>();
             }        
             doc.clear();
         }

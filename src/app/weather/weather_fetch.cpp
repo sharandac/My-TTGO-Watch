@@ -35,8 +35,10 @@ static void weather_wind_to_string( weather_forcast_t* container, int speed, int
 int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
     char url[512]="";
     int httpcode = -1;
-
-    snprintf( url, sizeof( url ), "http://%s/data/2.5/weather?lat=%s&lon=%s&appid=%s", OWM_HOST, weather_config->lat, weather_config->lon, weather_config->apikey);
+    const char* weather_units_symbol = weather_config->imperial ? "F" : "C";
+    const char* weather_units_char = weather_config->imperial ? "imperial" : "metric";
+    
+    snprintf( url, sizeof( url ), "http://%s/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s", OWM_HOST, weather_config->lat, weather_config->lon, weather_config->apikey, weather_units_char);
 
     HTTPClient today_client;
 
@@ -45,7 +47,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
     httpcode = today_client.GET();
 
     if ( httpcode != 200 ) {
-        log_e("HTTPClient error %d", httpcode );
+        log_e("HTTPClient error %d", httpcode, url );
         today_client.end();
         return( -1 );
     }
@@ -63,7 +65,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
     today_client.end();
 
     weather_today->valide = true;
-    snprintf( weather_today->temp, sizeof( weather_today->temp ),"%0.1f°C", doc["main"]["temp"].as<float>() - 273.15 );
+    snprintf( weather_today->temp, sizeof( weather_today->temp ), "%0.1f°%s", doc["main"]["temp"].as<float>(), weather_units_symbol);
     snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
     snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["pressure"].as<float>() );
     strcpy( weather_today->icon, doc["weather"][0]["icon"] );
@@ -80,8 +82,10 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
 int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast ) {
     char url[512]="";
     int httpcode = -1;
+    const char* weather_units_symbol = weather_config->imperial ? "F" : "C";
+    const char* weather_units_char = weather_config->imperial ? "imperial" : "metric";
 
-    snprintf( url, sizeof( url ), "http://%s/data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s", OWM_HOST, WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey);
+    snprintf( url, sizeof( url ), "http://%s/data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s&units=%s", OWM_HOST, WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey, weather_units_char);
 
     HTTPClient forecast_client;
 
@@ -90,7 +94,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
     httpcode = forecast_client.GET();
 
     if ( httpcode != 200 ) {
-        log_e("HTTPClient error %d", httpcode );
+        log_e("HTTPClient error %d", httpcode, url );
         forecast_client.end();
         return( -1 );
     }
@@ -110,7 +114,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
         weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>();
-        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°C", doc["list"][i]["main"]["temp"].as<float>() - 273.15 );
+        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°%s", doc["list"][i]["main"]["temp"].as<float>(), weather_units_symbol );
         snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
         snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
         strcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] );
