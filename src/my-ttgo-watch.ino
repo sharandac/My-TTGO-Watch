@@ -86,7 +86,8 @@ void setup()
      *
      */
 
-    wifictl_on();
+    if (wifictl_get_autoon() && (ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() || (ttgo->power->getBattVoltage() > 3400)))
+        wifictl_on();
 
     splash_screen_stage_finish( ttgo );
     display_set_brightness( display_get_brightness() );
