@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Aug 21 17:26:00 2020
+ *   Copyright  2020  Chris McNamee
+ *   Email: chris.mcna@gmail.com
  ****************************************************************************/
  
 /*
@@ -75,16 +75,6 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( stopwatch_app_main_stopwatchlabel, LV_OBJ_PART_MAIN, &stopwatch_app_main_stopwatchstyle );
     lv_obj_align(stopwatch_app_main_stopwatchlabel, NULL, LV_ALIGN_CENTER, 0, 0);
 
-
-    //stopwatch_app_main_start_btn = lv_imgbtn_create( stopwatch_app_main_tile, NULL);
-    //lv_imgbtn_set_src(stopwatch_app_main_start_btn, LV_BTN_STATE_RELEASED, &LV_SYMBOL_PLAY);
-    //lv_imgbtn_set_src(stopwatch_app_main_start_btn, LV_BTN_STATE_PRESSED, &LV_SYMBOL_PLAY);
-    //lv_imgbtn_set_src(stopwatch_app_main_start_btn, LV_BTN_STATE_CHECKED_RELEASED, &LV_SYMBOL_PLAY);
-    //lv_imgbtn_set_src(stopwatch_app_main_start_btn, LV_BTN_STATE_CHECKED_PRESSED, &LV_SYMBOL_PLAY);
-    //lv_obj_add_style(stopwatch_app_main_start_btn, LV_IMGBTN_PART_MAIN, &stopwatch_app_main_style );
-    //lv_obj_set_size(stopwatch_app_main_start_btn, 32, 32);
-    //lv_obj_align(stopwatch_app_main_start_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, -30, -10 );
-    //lv_obj_set_event_cb( stopwatch_app_main_start_btn, start_stopwatch_app_main_event_cb );
 
     stopwatch_app_main_start_btn = lv_btn_create(stopwatch_app_main_tile, NULL);  
     lv_obj_set_size(stopwatch_app_main_start_btn, 50, 50);
