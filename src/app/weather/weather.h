@@ -36,6 +36,7 @@
         char lat[16] = "";
         bool autosync = true;
         bool showWind = false;
+        bool imperial = false;
     } weather_config_t;
 
     typedef struct {
