@@ -457,6 +457,12 @@ void wifictl_off( void ) {
   while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
     yield();
   }
+
+  if ( !wifictl_get_event( WIFICTL_ACTIVE ) ) {
+    log_i("wifictl not active");
+    return;
+  }
+
   wifictl_set_event( WIFICTL_OFF_REQUEST );
   vTaskResume( _wifictl_Task );
 }
