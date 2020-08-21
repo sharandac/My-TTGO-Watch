@@ -110,7 +110,7 @@ void timesync_read_config( void ) {
             else {
                 timesync_config.daylightsave = doc["daylightsave"].as<bool>();
                 timesync_config.timesync = doc["timesync"].as<bool>();
-                timesync_config.timezone = doc["timezone"].as<uint32_t>();
+                timesync_config.timezone = doc["timezone"].as<int32_t>();
             }        
             doc.clear();
         }
