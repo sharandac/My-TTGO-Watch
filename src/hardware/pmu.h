@@ -30,13 +30,13 @@
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 
     typedef struct {
+        int32_t designed_battery_cap = 300;
+        int32_t silence_wakeup_time = 60;
+        int32_t silence_wakeup_time_vbplug = 3;
+        bool high_charging_target_voltage = true;
         bool compute_percent = false;
         bool experimental_power_save = false;
         bool silence_wakeup = true;
-        uint8_t silence_wakeup_time = 60;
-        uint8_t silence_wakeup_time_vbplug = 3;
-        int32_t charging_target_voltage = 3200;
-        int32_t designed_battery_cap = 300;
     } pmu_config_t;
 
     /*
