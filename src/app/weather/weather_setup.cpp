@@ -184,7 +184,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_t *weather_imperial_cont = lv_obj_create( weather_setup_tile, NULL);
     lv_obj_set_size( weather_imperial_cont, LV_HOR_RES_MAX, 32);
     lv_obj_add_style( weather_imperial_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
-    lv_obj_align( weather_imperial_cont, weather_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( weather_imperial_cont, weather_wind_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     weather_imperial_onoff = lv_switch_create( weather_imperial_cont, NULL);
     lv_obj_add_protect( weather_imperial_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( weather_imperial_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
