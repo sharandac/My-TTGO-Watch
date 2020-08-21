@@ -280,9 +280,9 @@ void bluetooth_message_msg_pharse( char* msg ) {
             if ( !strcmp( doc["app"], "weather" ) ) {
 
                 weather_config_t *weather_config = weather_get_config();
-                strlcpy( weather_config->apikey, doc["apikey"], sizeof( weather_config->apikey ) );
-                strlcpy( weather_config->lat, doc["lat"], sizeof( weather_config->lat ) );
-                strlcpy( weather_config->lon, doc["lon"], sizeof( weather_config->lon ) );
+                strlcpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
+                strlcpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
+                strlcpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
                 weather_save_config();
                 motor_vibe(100);
             }

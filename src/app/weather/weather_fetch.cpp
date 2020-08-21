@@ -113,15 +113,15 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
 
     weather_forecast[0].valide = true;
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
-        weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>();
+        weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>() | 0;
         snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°%s", doc["list"][i]["main"]["temp"].as<float>(), weather_units_symbol );
         snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
         snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
-        strlcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"], sizeof(  weather_forecast[ i ].icon ) );
-        strlcpy( weather_forecast[ i ].name, doc["city"]["name"], sizeof( weather_forecast[ i ].name ) );
+        strlcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] | "n/a", sizeof(  weather_forecast[ i ].icon ) );
+        strlcpy( weather_forecast[ i ].name, doc["city"]["name"] | "n/a", sizeof( weather_forecast[ i ].name ) );
 
-        int directionDegree = doc["list"][i]["wind"]["deg"].as<int>();
-        int speed = doc["list"][i]["wind"]["speed"].as<int>();
+        int directionDegree = doc["list"][i]["wind"]["deg"].as<int>() | 0;
+        int speed = doc["list"][i]["wind"]["speed"].as<int>() | 0;
         weather_wind_to_string( &weather_forecast[i], speed, directionDegree );
     }
 

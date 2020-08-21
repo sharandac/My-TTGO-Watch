@@ -70,6 +70,6 @@ const void * resolve_owm_icon( char *iconname ) {
             return( owm_icon[ icon ].icon );
         }
     }
-    return( NULL );
+    return( &owm_01d_64px );
 }
 
