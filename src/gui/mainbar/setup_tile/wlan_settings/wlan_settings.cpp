@@ -30,6 +30,8 @@
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
 #include "webserver/webserver.h"
+#include "hardware/blectl.h"
+#include "hardware/json_psram_allocator.h"
 
 #include <WiFi.h>
 
@@ -60,6 +62,9 @@ static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event );
 void WiFiScanDone(WiFiEvent_t event, WiFiEventInfo_t info);
+
+static void bluetooth_message_event_cb( EventBits_t event, char* msg );
+static void bluetooth_message_msg_pharse( char* msg );
 
 LV_IMG_DECLARE(lock_16px);
 LV_IMG_DECLARE(unlock_16px);
@@ -369,6 +374,8 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
         lv_switch_on( wifi_webserver_onoff, LV_ANIM_OFF);
     else
         lv_switch_off( wifi_webserver_onoff, LV_ANIM_OFF);
+
+    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb );
 }
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
@@ -410,4 +417,35 @@ static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event
                                         }
                                         break;
     }
+}
+
+
+
+static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
+    switch( event ) {
+        case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
+                                    break;
+    }
+}
+
+void bluetooth_message_msg_pharse( char* msg ) {
+
+    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+
+    DeserializationError error = deserializeJson( doc, msg );
+    if ( error ) {
+        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        if( !strcmp( doc["t"], "conf" ) ) {
+             if ( !strcmp( doc["app"], "settings" ) ) {
+                if ( !strcmp( doc["settings"], "wlan" ) ) {
+                    motor_vibe(100);
+                    wifictl_insert_network(  doc["ssid"] |"" , doc["key"] |"" );
+                }
+             }
+
+        }
+    }        
+    doc.clear();
 }
