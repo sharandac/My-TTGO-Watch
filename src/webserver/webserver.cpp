@@ -324,9 +324,9 @@ void asyncwebserver_start(void){
   asyncserver.on("/description.xml", HTTP_GET, [](AsyncWebServerRequest *request) {
     byte mac[6];
     WiFi.macAddress(mac);
-    char tmp[12 + 1];
-    snprintf(tmp, sizeof(tmp), "%02X%02X%02X%02X%02X%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    String MacStrPart = String(tmp).substring(6);
+    char tmp[6 + 1];
+    snprintf(tmp, sizeof(tmp), "%02X%02X%02X", mac[3], mac[4], mac[5]);
+    String MacStrPart = String(tmp);
 
     String xmltext = String("<?xml version=\"1.0\"?>\n") +
             "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n"
