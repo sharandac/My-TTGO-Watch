@@ -7,6 +7,8 @@
 #include "pmu.h"
 #include "powermgm.h"
 #include "motor.h"
+#include "blectl.h"
+
 
 #include "gui/statusbar.h"
 
@@ -283,6 +285,7 @@ void pmu_loop( TTGOClass *ttgo ) {
         if ( nextmillis < millis() || updatetrigger == true ) {
             nextmillis = millis() + 1000;
             statusbar_update_battery( pmu_get_battery_percent( ttgo ), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+            blectl_update_battery( pmu_get_battery_percent( ttgo ), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
         }
     }
 }

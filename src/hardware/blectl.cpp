@@ -51,6 +51,8 @@ BLECharacteristic *pTxCharacteristic;
 BLECharacteristic *pRxCharacteristic;
 uint8_t txValue = 0;
 
+BLECharacteristic *pBatteryServiceBatteryLevelCharacteristic;
+
 char *gadgetbridge_msg = NULL;
 uint32_t gadgetbridge_msg_size = 0;
 
@@ -261,6 +263,22 @@ void blectl_setup( void ) {
 
     // Start advertising
     pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
+
+    // Create battery service
+    BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
+
+    // Create a BLE battery service, batttery level Characteristic - 
+    pBatteryServiceBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryServiceBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pBatteryServiceBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID) );
+    pBatteryServiceBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
+
+    // Start battery service
+    pBatteryService->start();
+
+    // Start advertising battery service
+    pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
+
     // Slow advertising interval for battery life
     // The maximum 0x4000 interval of ~16 sec was too slow, I could not reliably connect
     pServer->getAdvertising()->setMinInterval( 100 );
@@ -433,4 +451,15 @@ void blectl_read_config( void ) {
         }
         file.close();
     }
+}
+
+
+
+void blectl_update_battery( int32_t percent, bool charging, bool plug )
+{
+    uint8_t level = (uint8_t)percent;
+    if (level > 100) level = 100;
+
+    pBatteryServiceBatteryLevelCharacteristic->setValue(&level, 1);
+    pBatteryServiceBatteryLevelCharacteristic->notify();
 }

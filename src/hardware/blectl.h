@@ -30,6 +30,10 @@
     #define CHARACTERISTIC_UUID_RX BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     #define CHARACTERISTIC_UUID_TX BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
+    #define BATTERY_SERVICE_UUID  BLEUUID((uint16_t)0x180F) // Battery service UUID
+    #define BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A19) // Battery service - battery level characteristic  UUID
+    #define BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID  BLEUUID((uint16_t)0x2901) // Battery service - battery level descriptor UUID
+
     #define BLECTL_JSON_COFIG_FILE         "/blectl.json"
 
     #define EndofText               0x03
@@ -90,5 +94,7 @@
     bool blectl_get_advertising( void );
     void blectl_save_config( void );
     void blectl_read_config( void );
+
+    void blectl_update_battery( int32_t percent, bool charging, bool plug );
 
 #endif // _BLECTL_H
