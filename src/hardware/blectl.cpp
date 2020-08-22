@@ -460,6 +460,6 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug )
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
 
-    pBatteryServiceBatteryLevelCharacteristic->setValue(&level, 1);
-    pBatteryServiceBatteryLevelCharacteristic->notify();
+    pBatteryLevelCharacteristic->setValue(&level, 1);
+    pBatteryLevelCharacteristic->notify();
 }
