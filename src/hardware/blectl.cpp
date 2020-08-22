@@ -264,6 +264,29 @@ void blectl_setup( void ) {
     // Start advertising
     pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
 
+
+    // Create device information service
+    BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
+
+    // Create manufacturer name string Characteristic - 
+    BLECharacteristic* pManufacturerNameStringCharacteristic = pDeviceInformationService->createCharacteristic( MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
+    pManufacturerNameStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pManufacturerNameStringCharacteristic->addDescriptor( new BLE2902() );
+    pManufacturerNameStringCharacteristic->setValue("Lily Go");
+
+    // Create manufacturer name string Characteristic - 
+    BLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
+    pFirmwareRevisionStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pFirmwareRevisionStringCharacteristic->addDescriptor( new BLE2902() );
+    pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
+
+    // Start battery service
+    pDeviceInformationService->start();
+
+    // Start advertising battery service
+    pServer->getAdvertising()->addServiceUUID( pDeviceInformationService->getUUID() );
+
+
     // Create battery service
     BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
 

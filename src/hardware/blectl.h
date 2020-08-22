@@ -30,6 +30,11 @@
     #define CHARACTERISTIC_UUID_RX BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     #define CHARACTERISTIC_UUID_TX BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
+
+    #define DEVICE_INFORMATION_SERVICE_UUID  BLEUUID((uint16_t)0x180A) // Device Information server UUID
+    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A29) // Device Information - manufacturer name string  UUID
+    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A26) // Device Information - firmware revision  UUID
+
     #define BATTERY_SERVICE_UUID  BLEUUID((uint16_t)0x180F) // Battery service UUID
     #define BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A19) // Battery service - battery level characteristic  UUID
     #define BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID  BLEUUID((uint16_t)0x2901) // Battery service - battery level descriptor UUID
