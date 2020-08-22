@@ -52,6 +52,7 @@ BLECharacteristic *pRxCharacteristic;
 uint8_t txValue = 0;
 
 BLECharacteristic *pBatteryLevelCharacteristic;
+BLECharacteristic *pBatteryPowerStateCharacteristic;
 
 char *gadgetbridge_msg = NULL;
 uint32_t gadgetbridge_msg_size = 0;
@@ -291,10 +292,14 @@ void blectl_setup( void ) {
     BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
 
     // Create a BLE battery service, batttery level Characteristic - 
-    pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
     pBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-    pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID) );
+    pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_LEVEL_DESCRIPTOR_UUID) );
     pBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
+
+    pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryPowerStateCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pBatteryPowerStateCharacteristic->addDescriptor( new BLE2902() );
 
     // Start battery service
     pBatteryService->start();
@@ -485,4 +490,11 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug )
 
     pBatteryLevelCharacteristic->setValue(&level, 1);
     pBatteryLevelCharacteristic->notify();
+
+    uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT | 
+        (plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING) |
+        (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 
+        (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
+    pBatteryPowerStateCharacteristic->setValue(&batteryPowerState, 1);
+    pBatteryPowerStateCharacteristic->notify();
 }
