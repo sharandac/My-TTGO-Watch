@@ -51,7 +51,7 @@ BLECharacteristic *pTxCharacteristic;
 BLECharacteristic *pRxCharacteristic;
 uint8_t txValue = 0;
 
-BLECharacteristic *pBatteryServiceBatteryLevelCharacteristic;
+BLECharacteristic *pBatteryLevelCharacteristic;
 
 char *gadgetbridge_msg = NULL;
 uint32_t gadgetbridge_msg_size = 0;
@@ -268,10 +268,10 @@ void blectl_setup( void ) {
     BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
 
     // Create a BLE battery service, batttery level Characteristic - 
-    pBatteryServiceBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
-    pBatteryServiceBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-    pBatteryServiceBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID) );
-    pBatteryServiceBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
+    pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_SERVICE_BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_SERVICE_BATTERY_LEVEL_DESCRIPTOR_UUID) );
+    pBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
 
     // Start battery service
     pBatteryService->start();
