@@ -19,12 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _crypto_ticker_MAIN_H
-    #define _crypto_ticker_MAIN_H
+#ifndef _CRYPTO_TICKER_MAIN_H
+    #define _CRYPTO_TICKER_MAIN_H
 
     #include <TTGO.h>
 
-    #define crypto_ticker_main_SYNC_REQUEST   _BV(0)
+    #define CRYPTO_TICKER_MAIN_SYNC_REQUEST   _BV(0)
 
     typedef struct {
         bool valide = false;
@@ -37,4 +37,4 @@
     void crypto_ticker_main_setup( uint32_t tile_num );
     void crypto_ticker_main_sync_request( void );
 
-#endif // _crypto_ticker_MAIN_H
+#endif // _CRYPTO_TICKER_MAIN_H

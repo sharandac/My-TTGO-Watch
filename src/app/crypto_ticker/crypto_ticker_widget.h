@@ -19,12 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef crypto_ticker_widget_H
-    #define crypto_ticker_widget_H
+#ifndef CRYPTO_TICKER_WIDGET_H
+    #define CRYPTO_TICKER_WIDGET_H
 
     #include <TTGO.h>
 
-    #define crypto_ticker_widget_SYNC_REQUEST    _BV(0)
+    #define CRYPTO_TICKER_WIDGET_SYNC_REQUEST    _BV(0)
 
 
     typedef struct {
@@ -38,4 +38,4 @@
 
     void crypto_ticker_widget_sync_request( void );
 
-#endif // crypto_ticker_widget_H
+#endif // CRYPTO_TICKER_WIDGET_H

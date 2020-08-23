@@ -19,12 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _crypto_ticker_H
-    #define _crypto_ticker_H
+#ifndef _CRYPTO_TICKER_H
+    #define _CRYPTO_TICKER_H
 
     #include <TTGO.h>
 
-    #define CRYPTO_TICKER_WIDGET    // uncomment if an widget need
+    //#define CRYPTO_TICKER_WIDGET    // uncomment if an widget need, comment to hide
 
     #define crypto_ticker_JSON_CONFIG_FILE        "/crypto-ticker.json"
 
@@ -42,9 +42,9 @@
     void crypto_ticker_hide_widget_icon_info( bool show );
     uint32_t crypto_ticker_get_app_setup_tile_num( void );
     uint32_t crypto_ticker_get_app_main_tile_num( void );
-    void crypto_ticker_jump_to_forecast( void ) ;
+    void crypto_ticker_jump_to_main( void ) ;
     void crypto_ticker_jump_to_setup( void );
 
     void crypto_ticker_save_config( void );
 
-#endif // _crypto_ticker_H
+#endif // _CRYPTO_TICKER_H

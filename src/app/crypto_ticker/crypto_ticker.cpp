@@ -26,7 +26,12 @@
 #include "crypto_ticker_fetch.h"
 #include "crypto_ticker_main.h"
 #include "crypto_ticker_setup.h"
+
+#ifdef CRYPTO_TICKER_WIDGET
+
 #include "crypto_ticker_widget.h"
+
+#endif // CRYPTO_TICKER_WIDGET
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -112,7 +117,7 @@ uint32_t crypto_ticker_get_app_setup_tile_num( void ) {
     return( crypto_ticker_setup_tile_num );
 }
 
-void crypto_ticker_jump_to_forecast( void ) {
+void crypto_ticker_jump_to_main( void ) {
     statusbar_hide( true );
     mainbar_jump_to_tilenumber( crypto_ticker_main_tile_num, LV_ANIM_ON );
 }
@@ -127,7 +132,7 @@ void crypto_ticker_jump_to_setup( void ) {
  */
 static void enter_crypto_ticker_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       crypto_ticker_jump_to_forecast();
+        case( LV_EVENT_CLICKED ):       crypto_ticker_jump_to_main();
                                         break;
     }    
 }

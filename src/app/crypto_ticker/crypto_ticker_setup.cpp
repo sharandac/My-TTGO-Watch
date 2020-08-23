@@ -133,7 +133,7 @@ static void exit_crypto_ticker_setup_event_cb( lv_obj_t * obj, lv_event_t event 
                                         crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
                                         strlcpy( crypto_ticker_config->symbol, lv_textarea_get_text( crypto_ticker_symbol_textfield ), sizeof( crypto_ticker_config->symbol ) );
                                         crypto_ticker_save_config();
-                                        crypto_ticker_jump_to_forecast();
+                                        crypto_ticker_jump_to_main();
                                         break;
     }
 }

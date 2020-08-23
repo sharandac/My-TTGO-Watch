@@ -23,8 +23,14 @@
 #include <TTGO.h>
 
 #include "crypto_ticker.h"
-#include "crypto_ticker_main.h"
 #include "crypto_ticker_fetch.h"
+#include "crypto_ticker_main.h"
+
+#ifdef CRYPTO_TICKER_WIDGET
+
+#include "crypto_ticker_widget.h"
+
+#endif // CRYPTO_TICKER_WIDGET
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -173,17 +179,23 @@ static void exit_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event )
 static void refresh_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       crypto_ticker_main_sync_request();
+
+#ifdef CRYPTO_TICKER_WIDGET
+
+                                        crypto_ticker_widget_sync_request();
+
+#endif // CRYPTO_TICKER_WIDGET
                                         break;
     }
 }
 
 
 void crypto_ticker_main_sync_request( void ) {
-    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & crypto_ticker_main_SYNC_REQUEST ) {
+    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & CRYPTO_TICKER_MAIN_SYNC_REQUEST ) {
         return;
     }
     else {
-        xEventGroupSetBits( crypto_ticker_main_event_handle, crypto_ticker_main_SYNC_REQUEST );
+        xEventGroupSetBits( crypto_ticker_main_event_handle, CRYPTO_TICKER_MAIN_SYNC_REQUEST );
         xTaskCreate(    crypto_ticker_main_sync_Task,      /* Function to implement the task */
                         "crypto ticker main sync Task",    /* Name of the task */
                         5000,                            /* Stack size in words */
@@ -201,7 +213,7 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
 
     vTaskDelay( 250 );
 
-    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & crypto_ticker_main_SYNC_REQUEST ) {   
+    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & CRYPTO_TICKER_MAIN_SYNC_REQUEST ) {   
         if ( crypto_ticker_config->autosync ) {
             retval = crypto_ticker_fetch_statistics( crypto_ticker_config , &crypto_ticker_main_data );
             if ( retval == 200 ) {
@@ -228,6 +240,6 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
             }
         }
     }
-    xEventGroupClearBits( crypto_ticker_main_event_handle, crypto_ticker_main_SYNC_REQUEST );
+    xEventGroupClearBits( crypto_ticker_main_event_handle, CRYPTO_TICKER_MAIN_SYNC_REQUEST );
     vTaskDelete( NULL );
 }

@@ -141,11 +141,11 @@ static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t even
 
 
 void crypto_ticker_widget_sync_request( void ) {
-    if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & crypto_ticker_widget_SYNC_REQUEST ) {
+    if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & CRYPTO_TICKER_WIDGET_SYNC_REQUEST ) {
         return;
     }
     else {
-        xEventGroupSetBits( crypto_ticker_widget_event_handle, crypto_ticker_widget_SYNC_REQUEST );
+        xEventGroupSetBits( crypto_ticker_widget_event_handle, CRYPTO_TICKER_WIDGET_SYNC_REQUEST );
         lv_obj_set_hidden( crypto_ticker_widget_icon_info, true );
         xTaskCreate(    crypto_ticker_widget_sync_Task,       /* Function to implement the task */
                         "crypto_ticker widget sync Task",     /* Name of the task */
@@ -164,7 +164,7 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
 
     vTaskDelay( 250 );
 
-    if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & crypto_ticker_widget_SYNC_REQUEST ) {       
+    if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & CRYPTO_TICKER_WIDGET_SYNC_REQUEST ) {       
         uint32_t retval = crypto_ticker_fetch_price(crypto_ticker_get_config() , &crypto_ticker_widget_data );
         if ( retval == 200 ) {
            
@@ -179,7 +179,7 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
         }
         lv_obj_invalidate( lv_scr_act() );
     }
-    xEventGroupClearBits( crypto_ticker_widget_event_handle, crypto_ticker_widget_SYNC_REQUEST );
+    xEventGroupClearBits( crypto_ticker_widget_event_handle, CRYPTO_TICKER_WIDGET_SYNC_REQUEST );
     vTaskDelete( NULL );
 }
 

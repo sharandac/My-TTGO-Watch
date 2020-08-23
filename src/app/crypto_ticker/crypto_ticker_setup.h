@@ -19,11 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _crypto_ticker_SETUP_H
-    #define _crypto_ticker_SETUP_H
+#ifndef _CRYPTO_TICKER_SETUP_H
+    #define _CRYPTO_TICKER_SETUP_H
 
     #include <TTGO.h>
 
     void crypto_ticker_setup_setup( uint32_t tile_num );
 
-#endif // _crypto_ticker_SETUP_H
+#endif // _CRYPTO_TICKER_SETUP_H
