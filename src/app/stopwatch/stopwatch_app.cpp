@@ -31,7 +31,6 @@
 #include "gui/statusbar.h"
 
 uint32_t stopwatch_app_main_tile_num;
-uint32_t stopwatch_app_setup_tile_num;
 
 // app icon container
 lv_obj_t *stopwatch_app_icon_cont = NULL;
@@ -54,8 +53,7 @@ static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event );
 // setup routine for stopwatch app
 void stopwatch_app_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    stopwatch_app_main_tile_num = mainbar_add_app_tile( 1, 2 );
-    stopwatch_app_setup_tile_num = stopwatch_app_main_tile_num + 1;
+    stopwatch_app_main_tile_num = mainbar_add_app_tile( 1, 1 );
 
     // create an app icon, label it and get the lv_obj_t icon container
     stopwatch_app_icon_cont = app_tile_register_app( "stop\nwatch");
@@ -117,10 +115,6 @@ void stopwatch_app_setup( void ) {
 
 uint32_t stopwatch_app_get_app_main_tile_num( void ) {
     return( stopwatch_app_main_tile_num );
-}
-
-uint32_t stopwatch_app_get_app_setup_tile_num( void ) {
-    return( stopwatch_app_setup_tile_num );
 }
 
 /*
