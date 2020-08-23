@@ -51,6 +51,8 @@ LV_IMG_DECLARE(osmand_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
+static bool bluetooth_message_active = true;
+
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_message_event_cb( EventBits_t event, char* msg );
 static void bluetooth_message_msg_pharse( char* msg );
@@ -122,7 +124,19 @@ static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
     }
 }
 
+void bluetooth_message_disable( void ) {
+    bluetooth_message_active = false;
+}
+
+void bluetooth_message_enable( void ) {
+    bluetooth_message_active = true;    
+}
+
 void bluetooth_message_msg_pharse( char* msg ) {
+    if ( bluetooth_message_active == false ) {
+        return;
+    }
+    
     log_i("msg: %s", msg );
 
     SpiRamJsonDocument doc( strlen( msg ) * 2 );

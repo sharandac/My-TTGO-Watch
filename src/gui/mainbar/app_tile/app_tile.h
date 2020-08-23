@@ -31,7 +31,7 @@
     #define APP_ICON_X_SIZE         64
     #define APP_ICON_Y_SIZE         64
     #define APP_ICON_X_CLEARENCE    8
-    #define APP_ICON_Y_CLEARENCE    20
+    #define APP_ICON_Y_CLEARENCE    36
     #define APP_LABEL_X_SIZE        APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE
     #define APP_LABEL_Y_SIZE        APP_ICON_Y_CLEARENCE / 2
 

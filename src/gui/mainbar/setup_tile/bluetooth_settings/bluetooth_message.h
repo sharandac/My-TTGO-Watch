@@ -25,5 +25,7 @@
     #include <TTGO.h>
 
     void bluetooth_message_tile_setup( void );
+    void bluetooth_message_disable( void );
+    void bluetooth_message_enable( void );
 
 #endif // _BLUETOOTH_MESSAGE_H
