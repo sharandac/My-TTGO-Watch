@@ -35,12 +35,13 @@ int crypto_ticker_fetch_today( crypto_ticker_config_t *crypto_ticker_config, cry
     int httpcode = -1;
 
     
-    snprintf( url, sizeof( url ), "https://%s/api/v3/ticker/price?symbol=%s", OWM_HOST, crypto_ticker_config->symbol);
+    snprintf( url, sizeof( url ), "http://%s/api/CryptoTicker/Price/%s", MY_TTGO_WATCH_HOST, crypto_ticker_config->symbol);
 
     HTTPClient today_client;
 
     today_client.useHTTP10( true );
     today_client.begin( url );
+    today_client.addHeader("force-unsecure","true");
     httpcode = today_client.GET();
 
     if ( httpcode != 200 ) {
@@ -49,7 +50,9 @@ int crypto_ticker_fetch_today( crypto_ticker_config_t *crypto_ticker_config, cry
         return( -1 );
     }
 
-    SpiRamJsonDocument doc( today_client.getSize() * 2 );
+    Serial.println(ESP.getFreeHeap());
+
+    SpiRamJsonDocument doc( 1000 );
 
     DeserializationError error = deserializeJson( doc, today_client.getStream() );
     if (error) {

@@ -25,10 +25,7 @@
 #ifndef _crypto_ticker_FETCH_H
     #define _crypto_ticker_FETCH_H
 
-    #define OWM_HOST    "api.binance.com"
-    #define OWM_PORT    443
-
-    #define crypto_ticker_PRICE_BUFFER_SIZE       10000
+    #define MY_TTGO_WATCH_HOST    "my-ttgo-watch.co.uk"
 
     int crypto_ticker_fetch_today( crypto_ticker_config_t * crypto_ticker_config, crypto_ticker_widget_data_t * crypto_ticker_today );
 

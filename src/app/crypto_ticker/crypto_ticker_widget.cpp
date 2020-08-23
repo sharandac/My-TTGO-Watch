@@ -170,6 +170,7 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
            
             lv_img_set_src( crypto_ticker_widget_icon_info, &info_ok_16px );
             lv_obj_set_hidden( crypto_ticker_widget_icon_info, false );
+            lv_label_set_text( crypto_ticker_widget_label, crypto_ticker_widget_data.price);
         }
         else {
             lv_img_set_src( crypto_ticker_widget_icon_info, &info_fail_16px );

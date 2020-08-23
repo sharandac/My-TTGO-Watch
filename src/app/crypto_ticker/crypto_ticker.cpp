@@ -53,11 +53,17 @@ lv_obj_t *crypto_ticker_icon_info = NULL;
 LV_IMG_DECLARE(bitcoin_64px);
 LV_IMG_DECLARE(bitcoin_48px);
 LV_IMG_DECLARE(info_1_16px);
+
 // declare callback functions
 static void enter_crypto_ticker_event_cb( lv_obj_t * obj, lv_event_t event );
 
+void crypto_ticker_load_config( void );
+
 // setup routine for example app
 void crypto_ticker_setup( void ) {
+
+    crypto_ticker_load_config();
+
     // register 2 vertical tiles and get the first tile number and save it for later use
     crypto_ticker_main_tile_num = mainbar_add_app_tile( 1, 2 );
     crypto_ticker_setup_tile_num = crypto_ticker_main_tile_num + 1;
