@@ -51,8 +51,6 @@ int crypto_ticker_fetch_price( crypto_ticker_config_t *crypto_ticker_config, cry
         return( -1 );
     }
 
-    Serial.println(ESP.getFreeHeap());
-
     SpiRamJsonDocument doc( 1000 );
 
     DeserializationError error = deserializeJson( doc, today_client.getStream() );
@@ -94,8 +92,6 @@ int crypto_ticker_fetch_statistics( crypto_ticker_config_t *crypto_ticker_config
         today_client.end();
         return( -1 );
     }
-
-    Serial.println(ESP.getFreeHeap());
 
     SpiRamJsonDocument doc( 1000 );
 
