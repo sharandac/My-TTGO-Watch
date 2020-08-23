@@ -40,7 +40,9 @@ lv_obj_t *crypto_ticker_main_tile = NULL;
 lv_style_t crypto_ticker_main_style;
 
 lv_obj_t *crypto_ticker_main_update_label = NULL;
-
+lv_obj_t *crypto_ticker_main_last_price_label = NULL;
+lv_obj_t *crypto_ticker_main_price_change_label = NULL;
+lv_obj_t *crypto_ticker_main_volume_label = NULL;
 
 crypto_ticker_main_data_t crypto_ticker_main_data;
 
@@ -89,13 +91,25 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, enter_crypto_ticker_setup_event_cb );
 
-    
     crypto_ticker_main_update_label = lv_label_create( crypto_ticker_main_tile , NULL);
     lv_label_set_text( crypto_ticker_main_update_label, "");
     lv_obj_reset_style_list( crypto_ticker_main_update_label, LV_OBJ_PART_MAIN );
     lv_obj_align( crypto_ticker_main_update_label, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 
+    crypto_ticker_main_last_price_label = lv_label_create( crypto_ticker_main_tile , NULL);
+    lv_label_set_text( crypto_ticker_main_last_price_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_last_price_label, LV_OBJ_PART_MAIN );
+    lv_obj_align( crypto_ticker_main_last_price_label, crypto_ticker_main_update_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
+    crypto_ticker_main_price_change_label = lv_label_create( crypto_ticker_main_tile , NULL);
+    lv_label_set_text( crypto_ticker_main_price_change_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_price_change_label, LV_OBJ_PART_MAIN );
+    lv_obj_align( crypto_ticker_main_price_change_label, crypto_ticker_main_last_price_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+
+    crypto_ticker_main_volume_label = lv_label_create( crypto_ticker_main_tile , NULL);
+    lv_label_set_text( crypto_ticker_main_volume_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_volume_label, LV_OBJ_PART_MAIN );
+    lv_obj_align( crypto_ticker_main_volume_label, crypto_ticker_main_price_change_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
     crypto_ticker_main_event_handle = xEventGroupCreate();
 
@@ -166,6 +180,10 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
                 struct tm info;
                 char buf[64];
 
+
+                lv_label_set_text( crypto_ticker_main_last_price_label, crypto_ticker_main_data.lastPrice );
+                lv_label_set_text( crypto_ticker_main_price_change_label, crypto_ticker_main_data.priceChangePercent );
+                lv_label_set_text( crypto_ticker_main_volume_label, crypto_ticker_main_data.volume );
                
 
                 time( &now );
