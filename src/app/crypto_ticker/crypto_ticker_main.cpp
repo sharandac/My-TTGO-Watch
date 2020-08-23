@@ -24,16 +24,29 @@
 
 #include "crypto_ticker.h"
 #include "crypto_ticker_main.h"
+#include "crypto_ticker_fetch.h"
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 
+#include "hardware/wifictl.h"
+
+EventGroupHandle_t crypto_ticker_main_event_handle = NULL;
+TaskHandle_t _crypto_ticker_main_sync_Task;
+
 lv_obj_t *crypto_ticker_main_tile = NULL;
 lv_style_t crypto_ticker_main_style;
 
-lv_task_t * _crypto_ticker_task;
+lv_obj_t *crypto_ticker_main_update_label = NULL;
+
+
+crypto_ticker_main_data_t crypto_ticker_main_data;
+
+
+void crypto_ticker_main_sync_Task( void * pvParameters );
+void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg );
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -42,7 +55,7 @@ LV_FONT_DECLARE(Ubuntu_72px);
 
 static void exit_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_crypto_ticker_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-void crypto_ticker_task( lv_task_t * task );
+static void refresh_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void crypto_ticker_main_setup( uint32_t tile_num ) {
 
@@ -58,6 +71,15 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_obj_align(exit_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
     lv_obj_set_event_cb( exit_btn, exit_crypto_ticker_main_event_cb );
 
+    lv_obj_t * reload_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
+    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_RELEASED, &refresh_32px);
+    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_PRESSED, &refresh_32px);
+    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_RELEASED, &refresh_32px);
+    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_PRESSED, &refresh_32px);
+    lv_obj_add_style(reload_btn, LV_IMGBTN_PART_MAIN, &crypto_ticker_main_style );
+    lv_obj_align(reload_btn, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , 10 );
+    lv_obj_set_event_cb( reload_btn, refresh_crypto_ticker_main_event_cb );
+
     lv_obj_t * setup_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
@@ -67,17 +89,27 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, enter_crypto_ticker_setup_event_cb );
 
-    // uncomment the following block of code to remove the "myapp" label in background
-    lv_style_set_text_opa( &crypto_ticker_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
-    lv_style_set_text_font( &crypto_ticker_main_style, LV_STATE_DEFAULT, &Ubuntu_72px);
-    lv_obj_t *app_label = lv_label_create( crypto_ticker_main_tile, NULL);
-    lv_label_set_text( app_label, "myapp");
-    lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &crypto_ticker_main_style );
-    lv_obj_align( app_label, crypto_ticker_main_tile, LV_ALIGN_CENTER, 0, 0);
+    
+    crypto_ticker_main_update_label = lv_label_create( crypto_ticker_main_tile , NULL);
+    lv_label_set_text( crypto_ticker_main_update_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_update_label, LV_OBJ_PART_MAIN );
+    lv_obj_align( crypto_ticker_main_update_label, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 
-    // create an task that runs every secound
-    _crypto_ticker_task = lv_task_create( crypto_ticker_task, 1000, LV_TASK_PRIO_MID, NULL );
+
+
+    crypto_ticker_main_event_handle = xEventGroupCreate();
+
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_main_wifictl_event_cb );
+}
+
+void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg ) {    
+    switch( event ) {
+        case WIFICTL_CONNECT:       crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
+                                    if ( crypto_ticker_config->autosync ) {
+                                        crypto_ticker_main_sync_request();
+                                    }
+                                    break;
+    }
 }
 
 static void enter_crypto_ticker_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -94,6 +126,56 @@ static void exit_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event )
     }
 }
 
-void crypto_ticker_task( lv_task_t * task ) {
-    // put your code her
+
+static void refresh_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       crypto_ticker_main_sync_request();
+                                        break;
+    }
+}
+
+
+void crypto_ticker_main_sync_request( void ) {
+    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & crypto_ticker_main_SYNC_REQUEST ) {
+        return;
+    }
+    else {
+        xEventGroupSetBits( crypto_ticker_main_event_handle, crypto_ticker_main_SYNC_REQUEST );
+        xTaskCreate(    crypto_ticker_main_sync_Task,      /* Function to implement the task */
+                        "crypto ticker main sync Task",    /* Name of the task */
+                        5000,                            /* Stack size in words */
+                        NULL,                            /* Task input parameter */
+                        1,                               /* Priority of the task */
+                        &_crypto_ticker_main_sync_Task );  /* Task handle. */ 
+    }
+}
+
+void crypto_ticker_main_sync_Task( void * pvParameters ) {
+    crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
+    int32_t retval = -1;
+
+    log_i("start crypto ticker main task");
+
+    vTaskDelay( 250 );
+
+    if ( xEventGroupGetBits( crypto_ticker_main_event_handle ) & crypto_ticker_main_SYNC_REQUEST ) {   
+        if ( crypto_ticker_config->autosync ) {
+            retval = crypto_ticker_fetch_statistics( crypto_ticker_config , &crypto_ticker_main_data );
+            if ( retval == 200 ) {
+                time_t now;
+                struct tm info;
+                char buf[64];
+
+               
+
+                time( &now );
+                localtime_r( &now, &info );
+                strftime( buf, sizeof(buf), "updated: %d.%b %H:%M", &info );
+                lv_label_set_text( crypto_ticker_main_update_label, buf );
+                lv_obj_invalidate( lv_scr_act() );
+            }
+        }
+    }
+    xEventGroupClearBits( crypto_ticker_main_event_handle, crypto_ticker_main_SYNC_REQUEST );
+    vTaskDelete( NULL );
 }

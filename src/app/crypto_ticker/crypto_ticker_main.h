@@ -24,6 +24,17 @@
 
     #include <TTGO.h>
 
+    #define crypto_ticker_main_SYNC_REQUEST   _BV(0)
+
+    typedef struct {
+        bool valide = false;
+        time_t timestamp = 0;
+        char lastPrice[50] = "";
+        char priceChangePercent[50] = "";
+        char volume[50] = "";
+    } crypto_ticker_main_data_t;
+
     void crypto_ticker_main_setup( uint32_t tile_num );
+    void crypto_ticker_main_sync_request( void );
 
 #endif // _crypto_ticker_MAIN_H

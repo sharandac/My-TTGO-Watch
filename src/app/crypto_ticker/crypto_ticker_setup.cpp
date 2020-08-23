@@ -87,7 +87,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
     lv_textarea_set_pwd_mode( crypto_ticker_symbol_textfield, false);
     lv_textarea_set_one_line( crypto_ticker_symbol_textfield, true);
     lv_textarea_set_cursor_hidden( crypto_ticker_symbol_textfield, true);
-    lv_obj_set_width( crypto_ticker_symbol_textfield, LV_HOR_RES /4 * 3 );
+    lv_obj_set_width( crypto_ticker_symbol_textfield, LV_HOR_RES /4 * 2 );
     lv_obj_align( crypto_ticker_symbol_textfield, crypto_ticker_symbol_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( crypto_ticker_symbol_textfield, crypto_ticker_textarea_event_cb );
 

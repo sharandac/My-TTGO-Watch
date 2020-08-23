@@ -20,13 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "crypto_ticker_widget.h"
+#include "crypto_ticker_widget.h" //TODO: why is this needed
+#include "crypto_ticker_main.h"   //TODO: why is this needed
 
 #ifndef _crypto_ticker_FETCH_H
     #define _crypto_ticker_FETCH_H
 
     #define MY_TTGO_WATCH_HOST    "my-ttgo-watch.co.uk"
 
-    int crypto_ticker_fetch_today( crypto_ticker_config_t * crypto_ticker_config, crypto_ticker_widget_data_t * crypto_ticker_today );
+    int crypto_ticker_fetch_price( crypto_ticker_config_t * crypto_ticker_config, crypto_ticker_widget_data_t * crypto_ticker_today );
+    int crypto_ticker_fetch_statistics( crypto_ticker_config_t *crypto_ticker_config, crypto_ticker_main_data_t *crypto_ticker_main_data );
 
 #endif // _crypto_ticker_FETCH_H

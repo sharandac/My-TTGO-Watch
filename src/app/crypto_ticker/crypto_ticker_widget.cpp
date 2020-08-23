@@ -165,7 +165,7 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
     vTaskDelay( 250 );
 
     if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & crypto_ticker_widget_SYNC_REQUEST ) {       
-        uint32_t retval = crypto_ticker_fetch_today(crypto_ticker_get_config() , &crypto_ticker_widget_data );
+        uint32_t retval = crypto_ticker_fetch_price(crypto_ticker_get_config() , &crypto_ticker_widget_data );
         if ( retval == 200 ) {
            
             lv_img_set_src( crypto_ticker_widget_icon_info, &info_ok_16px );
