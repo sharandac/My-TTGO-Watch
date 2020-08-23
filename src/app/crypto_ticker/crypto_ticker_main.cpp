@@ -40,9 +40,9 @@ lv_obj_t *crypto_ticker_main_tile = NULL;
 lv_style_t crypto_ticker_main_style;
 
 lv_obj_t *crypto_ticker_main_update_label = NULL;
-lv_obj_t *crypto_ticker_main_last_price_label = NULL;
-lv_obj_t *crypto_ticker_main_price_change_label = NULL;
-lv_obj_t *crypto_ticker_main_volume_label = NULL;
+lv_obj_t *crypto_ticker_main_last_price_value_label = NULL;
+lv_obj_t *crypto_ticker_main_price_change_value_label = NULL;
+lv_obj_t *crypto_ticker_main_volume_value_label = NULL;
 
 crypto_ticker_main_data_t crypto_ticker_main_data;
 
@@ -96,20 +96,49 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_obj_reset_style_list( crypto_ticker_main_update_label, LV_OBJ_PART_MAIN );
     lv_obj_align( crypto_ticker_main_update_label, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 
-    crypto_ticker_main_last_price_label = lv_label_create( crypto_ticker_main_tile , NULL);
-    lv_label_set_text( crypto_ticker_main_last_price_label, "");
-    lv_obj_reset_style_list( crypto_ticker_main_last_price_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_main_last_price_label, crypto_ticker_main_update_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
-    crypto_ticker_main_price_change_label = lv_label_create( crypto_ticker_main_tile , NULL);
-    lv_label_set_text( crypto_ticker_main_price_change_label, "");
-    lv_obj_reset_style_list( crypto_ticker_main_price_change_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_main_price_change_label, crypto_ticker_main_last_price_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *crypto_ticker_main_last_price_cont = lv_obj_create( crypto_ticker_main_tile, NULL );
+    lv_obj_set_size(crypto_ticker_main_last_price_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( crypto_ticker_main_last_price_cont, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_obj_align( crypto_ticker_main_last_price_cont, crypto_ticker_main_update_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20 );
+    lv_obj_t *crypto_ticker_main_last_price_label = lv_label_create( crypto_ticker_main_last_price_cont, NULL);
+    lv_obj_add_style( crypto_ticker_main_last_price_label, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_label_set_text( crypto_ticker_main_last_price_label, "Last Price");
+    lv_obj_align( crypto_ticker_main_last_price_label, NULL, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    crypto_ticker_main_last_price_value_label = lv_label_create( crypto_ticker_main_last_price_cont , NULL);
+    lv_label_set_text( crypto_ticker_main_last_price_value_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_last_price_value_label, LV_OBJ_PART_MAIN );
+    lv_obj_set_width( crypto_ticker_main_last_price_value_label, LV_HOR_RES /4 * 2 );
+    lv_obj_align( crypto_ticker_main_last_price_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    crypto_ticker_main_volume_label = lv_label_create( crypto_ticker_main_tile , NULL);
-    lv_label_set_text( crypto_ticker_main_volume_label, "");
-    lv_obj_reset_style_list( crypto_ticker_main_volume_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_main_volume_label, crypto_ticker_main_price_change_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *crypto_ticker_main_price_change_cont = lv_obj_create( crypto_ticker_main_tile, NULL );
+    lv_obj_set_size(crypto_ticker_main_price_change_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( crypto_ticker_main_price_change_cont, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_obj_align( crypto_ticker_main_price_change_cont, crypto_ticker_main_last_price_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
+    lv_obj_t *crypto_ticker_main_price_change_label = lv_label_create( crypto_ticker_main_price_change_cont, NULL);
+    lv_obj_add_style( crypto_ticker_main_price_change_label, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_label_set_text( crypto_ticker_main_price_change_label, "Price Change");
+    lv_obj_align( crypto_ticker_main_price_change_label, NULL, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    crypto_ticker_main_price_change_value_label = lv_label_create( crypto_ticker_main_price_change_cont , NULL);
+    lv_label_set_text( crypto_ticker_main_price_change_value_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_price_change_value_label, LV_OBJ_PART_MAIN );
+    lv_obj_set_width( crypto_ticker_main_price_change_value_label, LV_HOR_RES /4 * 2 );
+    lv_obj_align( crypto_ticker_main_price_change_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
+    lv_obj_t *crypto_ticker_main_volume_cont = lv_obj_create( crypto_ticker_main_tile, NULL );
+    lv_obj_set_size(crypto_ticker_main_volume_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_add_style( crypto_ticker_main_volume_cont, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_obj_align( crypto_ticker_main_volume_cont, crypto_ticker_main_price_change_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
+    lv_obj_t *crypto_ticker_main_volume_label = lv_label_create( crypto_ticker_main_volume_cont, NULL);
+    lv_obj_add_style( crypto_ticker_main_volume_label, LV_OBJ_PART_MAIN, &crypto_ticker_main_style  );
+    lv_label_set_text( crypto_ticker_main_volume_label, "Volume");
+    lv_obj_align( crypto_ticker_main_volume_label, NULL, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    crypto_ticker_main_volume_value_label = lv_label_create( crypto_ticker_main_volume_cont , NULL);
+    lv_label_set_text( crypto_ticker_main_volume_value_label, "");
+    lv_obj_reset_style_list( crypto_ticker_main_volume_value_label, LV_OBJ_PART_MAIN );
+    lv_obj_set_width( crypto_ticker_main_volume_value_label, LV_HOR_RES /4 * 2 );
+    lv_obj_align( crypto_ticker_main_volume_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
 
     crypto_ticker_main_event_handle = xEventGroupCreate();
 
@@ -181,9 +210,14 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
                 char buf[64];
 
 
-                lv_label_set_text( crypto_ticker_main_last_price_label, crypto_ticker_main_data.lastPrice );
-                lv_label_set_text( crypto_ticker_main_price_change_label, crypto_ticker_main_data.priceChangePercent );
-                lv_label_set_text( crypto_ticker_main_volume_label, crypto_ticker_main_data.volume );
+                lv_label_set_text( crypto_ticker_main_last_price_value_label, crypto_ticker_main_data.lastPrice );
+                lv_obj_align( crypto_ticker_main_last_price_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
+                lv_label_set_text( crypto_ticker_main_price_change_value_label, crypto_ticker_main_data.priceChangePercent );
+                lv_obj_align( crypto_ticker_main_price_change_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
+                lv_label_set_text( crypto_ticker_main_volume_value_label, crypto_ticker_main_data.volume );
+                lv_obj_align( crypto_ticker_main_volume_value_label, NULL, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
                
 
                 time( &now );
