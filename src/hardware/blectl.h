@@ -30,6 +30,39 @@
     #define CHARACTERISTIC_UUID_RX BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     #define CHARACTERISTIC_UUID_TX BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
+
+    #define DEVICE_INFORMATION_SERVICE_UUID  BLEUUID((uint16_t)0x180A) // Device Information server UUID
+    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A29) // Device Information - manufacturer name string  UUID
+    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A26) // Device Information - firmware revision  UUID
+
+    #define BATTERY_SERVICE_UUID  BLEUUID((uint16_t)0x180F) // Battery service UUID
+    #define BATTERY_LEVEL_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A19) // battery level characteristic  UUID
+    #define BATTERY_LEVEL_DESCRIPTOR_UUID  BLEUUID((uint16_t)0x2901) // battery level descriptor UUID
+    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A1A) // battery power state characteristic  UUID
+
+
+    #define BATTERY_POWER_STATE_BATTERY_UNKNOWN 0x0
+    #define BATTERY_POWER_STATE_BATTERY_NOT_SUPPORTED 0x1
+    #define BATTERY_POWER_STATE_BATTERY_NOT_PRESENT 0x2
+    #define BATTERY_POWER_STATE_BATTERY_PRESENT 0x3
+
+    #define BATTERY_POWER_STATE_DISCHARGE_UNKNOWN 0x0
+    #define BATTERY_POWER_STATE_DISCHARGE_NOT_SUPPORTED 0x4
+    #define BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING 0x8
+    #define BATTERY_POWER_STATE_DISCHARGE_DISCHARING 0xc
+
+    #define BATTERY_POWER_STATE_CHARGE_UNKNOWN 0x0
+    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARGEABLE  0x10
+    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARING 0x20
+    #define BATTERY_POWER_STATE_CHARGE_CHARING 0x30
+
+    #define BATTERY_POWER_STATE_LEVEL_UNKNOWN 0x0
+    #define BATTERY_POWER_STATE_LEVEL_NOT_SUPPORTED 0x40
+    #define BATTERY_POWER_STATE_LEVEL_GOOD 0x80
+    #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW 0xC0
+
+    
+
     #define BLECTL_JSON_COFIG_FILE         "/blectl.json"
 
     #define EndofText               0x03
@@ -90,5 +123,7 @@
     bool blectl_get_advertising( void );
     void blectl_save_config( void );
     void blectl_read_config( void );
+
+    void blectl_update_battery( int32_t percent, bool charging, bool plug );
 
 #endif // _BLECTL_H

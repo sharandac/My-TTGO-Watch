@@ -51,6 +51,9 @@ BLECharacteristic *pTxCharacteristic;
 BLECharacteristic *pRxCharacteristic;
 uint8_t txValue = 0;
 
+BLECharacteristic *pBatteryLevelCharacteristic;
+BLECharacteristic *pBatteryPowerStateCharacteristic;
+
 char *gadgetbridge_msg = NULL;
 uint32_t gadgetbridge_msg_size = 0;
 
@@ -261,6 +264,49 @@ void blectl_setup( void ) {
 
     // Start advertising
     pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
+
+
+    // Create device information service
+    BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
+
+    // Create manufacturer name string Characteristic - 
+    BLECharacteristic* pManufacturerNameStringCharacteristic = pDeviceInformationService->createCharacteristic( MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
+    pManufacturerNameStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pManufacturerNameStringCharacteristic->addDescriptor( new BLE2902() );
+    pManufacturerNameStringCharacteristic->setValue("Lily Go");
+
+    // Create manufacturer name string Characteristic - 
+    BLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
+    pFirmwareRevisionStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pFirmwareRevisionStringCharacteristic->addDescriptor( new BLE2902() );
+    pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
+
+    // Start battery service
+    pDeviceInformationService->start();
+
+    // Start advertising battery service
+    pServer->getAdvertising()->addServiceUUID( pDeviceInformationService->getUUID() );
+
+
+    // Create battery service
+    BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
+
+    // Create a BLE battery service, batttery level Characteristic - 
+    pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_LEVEL_DESCRIPTOR_UUID) );
+    pBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
+
+    pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
+    pBatteryPowerStateCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+    pBatteryPowerStateCharacteristic->addDescriptor( new BLE2902() );
+
+    // Start battery service
+    pBatteryService->start();
+
+    // Start advertising battery service
+    pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
+
     // Slow advertising interval for battery life
     // The maximum 0x4000 interval of ~16 sec was too slow, I could not reliably connect
     pServer->getAdvertising()->setMinInterval( 100 );
@@ -433,4 +479,22 @@ void blectl_read_config( void ) {
         }
         file.close();
     }
+}
+
+
+
+void blectl_update_battery( int32_t percent, bool charging, bool plug )
+{
+    uint8_t level = (uint8_t)percent;
+    if (level > 100) level = 100;
+
+    pBatteryLevelCharacteristic->setValue(&level, 1);
+    pBatteryLevelCharacteristic->notify();
+
+    uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT | 
+        (plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING) |
+        (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 
+        (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
+    pBatteryPowerStateCharacteristic->setValue(&batteryPowerState, 1);
+    pBatteryPowerStateCharacteristic->notify();
 }
