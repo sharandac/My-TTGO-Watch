@@ -52,7 +52,6 @@ uint32_t crypto_ticker_setup_tile_num;
 // app icon container
 lv_obj_t *crypto_ticker_icon_cont = NULL;
 lv_obj_t *crypto_ticker_icon = NULL;
-lv_obj_t *crypto_ticker_icon_info = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(bitcoin_64px);
@@ -74,7 +73,7 @@ void crypto_ticker_setup( void ) {
     crypto_ticker_setup_tile_num = crypto_ticker_main_tile_num + 1;
 
     // create an app icon, label it and get the lv_obj_t icon container
-    crypto_ticker_icon_cont = app_tile_register_app( "crypto_ticker");
+    crypto_ticker_icon_cont = app_tile_register_app( "crypto\nticker");
     // set your own icon and register her callback to activate by an click
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
@@ -90,12 +89,6 @@ void crypto_ticker_setup( void ) {
 
     // make app icon drag scroll the mainbar
     mainbar_add_slide_element(crypto_ticker_icon);
-
-    // set an small info indicator at your app icon to inform the user about the state or news
-    crypto_ticker_icon_info = lv_img_create( crypto_ticker_icon_cont, NULL );
-    lv_img_set_src( crypto_ticker_icon_info, &info_1_16px );
-    lv_obj_align( crypto_ticker_icon_info, crypto_ticker_icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
-    lv_obj_set_hidden( crypto_ticker_icon_info, false );
 
     // init main and setup tile, see crypto_ticker_main.cpp and crypto_ticker_setup.cpp
     crypto_ticker_main_setup( crypto_ticker_main_tile_num );
@@ -136,19 +129,6 @@ static void enter_crypto_ticker_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         break;
     }    
 }
-
-/*
- *
- */
-void crypto_ticker_hide_app_icon_info( bool show ) {
-    if ( crypto_ticker_icon_info == NULL )
-        return;
-    
-    lv_obj_set_hidden( crypto_ticker_icon_info, show );
-    lv_obj_invalidate( lv_scr_act() );
-}
-
-
 
 
 
