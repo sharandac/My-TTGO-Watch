@@ -37,6 +37,7 @@
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
+#include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
 #include "app/osmand/osmand_app.h"
 
@@ -82,6 +83,7 @@ void setup()
      */
     weather_app_setup();
     stopwatch_app_setup();
+    crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
     /*
