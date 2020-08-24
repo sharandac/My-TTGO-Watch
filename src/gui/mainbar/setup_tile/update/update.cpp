@@ -206,7 +206,7 @@ void update_check_version( void ) {
 }
 
 void update_Task( void * pvParameters ) {
-    log_i("start update task");
+    log_i("start update task, heap: %d", ESP.getFreeHeap() );
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
         int64_t firmware_version = update_check_new_version( update_setup_get_url() );
@@ -269,5 +269,6 @@ void update_Task( void * pvParameters ) {
     }
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
     lv_disp_trig_activity(NULL);
+    log_i("finish update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

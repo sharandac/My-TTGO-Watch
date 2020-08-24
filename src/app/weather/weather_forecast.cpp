@@ -193,7 +193,7 @@ void weather_forecast_sync_Task( void * pvParameters ) {
     weather_config_t *weather_config = weather_get_config();
     int32_t retval = -1;
 
-    log_i("start weather forecast task");
+    log_i("start weather forecast task, heap: %d", ESP.getFreeHeap() );
 
     vTaskDelay( 250 );
 
@@ -242,5 +242,6 @@ void weather_forecast_sync_Task( void * pvParameters ) {
         }
     }
     xEventGroupClearBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
+    log_i("finsh weather forecast task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

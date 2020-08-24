@@ -116,10 +116,15 @@ void bluetooth_call_msg_pharse( char* msg ) {
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 mainbar_jump_to_tilenumber( bluetooth_call_tile_num, LV_ANIM_OFF );
                 if ( doc["number"] ) {
-                    lv_label_set_text( bluetooth_call_number_label, doc["number"] );
+                    if ( doc["name"] ) {
+                        lv_label_set_text( bluetooth_call_number_label, doc["name"] );
+                    }
+                    else {
+                        lv_label_set_text( bluetooth_call_number_label, doc["number"] );
+                    }
                 }
                 else {
-                    lv_label_set_text( bluetooth_call_number_label, "" );
+                    lv_label_set_text( bluetooth_call_number_label, "n/a" );
                 }
                 lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
                 lv_obj_invalidate( lv_scr_act() );

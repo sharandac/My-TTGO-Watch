@@ -136,7 +136,7 @@ void bluetooth_message_msg_pharse( char* msg ) {
     if ( bluetooth_message_active == false ) {
         return;
     }
-    
+
     log_i("msg: %s", msg );
 
     SpiRamJsonDocument doc( strlen( msg ) * 2 );
@@ -189,7 +189,9 @@ void bluetooth_message_msg_pharse( char* msg ) {
             // set message
             if ( doc["body"] )
                 lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
-            else
+            else if ( doc["title"] )
+                lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
+            else 
                 lv_label_set_text( bluetooth_message_msg_label, "" );
 
             // scroll back to the top

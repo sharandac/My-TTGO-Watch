@@ -209,7 +209,7 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
     crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
     int32_t retval = -1;
 
-    log_i("start crypto ticker main task");
+    log_i("start crypto ticker main task, heap: %d", ESP.getFreeHeap() );
 
     vTaskDelay( 250 );
 
@@ -241,5 +241,6 @@ void crypto_ticker_main_sync_Task( void * pvParameters ) {
         }
     }
     xEventGroupClearBits( crypto_ticker_main_event_handle, CRYPTO_TICKER_MAIN_SYNC_REQUEST );
+    log_i("finish crypto ticker main task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

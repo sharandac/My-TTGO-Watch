@@ -177,7 +177,7 @@ void timesyncToRTC( void ) {
 }
 
 void timesync_Task( void * pvParameters ) {
-  log_i("start time sync task");
+  log_i("start time sync task, heap: %d", ESP.getFreeHeap() );
 
   if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
     struct tm info;
@@ -195,5 +195,6 @@ void timesync_Task( void * pvParameters ) {
     }
   }
   xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
+  log_i("finish time sync task, heap: %d", ESP.getFreeHeap() );
   vTaskDelete( NULL );
 }

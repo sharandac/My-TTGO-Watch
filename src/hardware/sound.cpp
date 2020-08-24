@@ -76,6 +76,8 @@ void sound_setup( void ) {
 }
 
 void sound_Task( void * pvParameters ) {
+    log_i("start sound task, heap: %d", ESP.getFreeHeap() );
+
     esp_err_t err;
     size_t written = 0;
     
@@ -84,5 +86,7 @@ void sound_Task( void * pvParameters ) {
         log_e("Failed write bytes: %d\r\n", err );
     }
     i2s_stop( I2S_PORT );
+
+    log_i("finish sound task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

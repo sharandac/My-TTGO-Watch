@@ -56,7 +56,7 @@ void osmand_app_setup( void ) {
     osmand_app_main_tile_num = mainbar_add_app_tile( 1, 1 );
 
     // create an app icon, label it and get the lv_obj_t icon container
-    osmand_app_icon_cont = app_tile_register_app( "osmand");
+    osmand_app_icon_cont = app_tile_register_app( "OsmAnd");
     // set your own icon and register her callback to activate by an click
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
@@ -94,9 +94,6 @@ static void enter_osmand_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       statusbar_hide( true );
                                         osmand_app_hide_app_icon_info( true );
-                                        #ifdef EXAMPLE_WIDGET
-                                            example_app_hide_widget_icon_info( true );
-                                        #endif
                                         mainbar_jump_to_tilenumber( osmand_app_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    

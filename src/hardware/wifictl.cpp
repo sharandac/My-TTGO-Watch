@@ -337,6 +337,10 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
  *
  */
 void wifictl_send_event_cb( EventBits_t event, char *msg ) {
+    if ( wifictl_event_cb_entrys == 0 ) {
+      return;
+    }
+      
     for ( int entry = 0 ; entry < wifictl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & wifictl_event_cb_table[ entry ].event ) {
@@ -458,7 +462,7 @@ void wifictl_off( void ) {
     yield();
   }
 
-  if ( !wifictl_get_event( WIFICTL_ACTIVE ) ) {
+  if ( !wifictl_get_event( WIFICTL_ACTIVE | WIFICTL_SCAN | WIFICTL_WPS_REQUEST | WIFICTL_CONNECT ) ) {
     log_i("wifictl not active");
     return;
   }
@@ -515,6 +519,8 @@ void wifictl_start_wps( void ) {
 void wifictl_Task( void * pvParameters ) {
   if ( wifi_init == false )
     return;
+
+  log_i("start wifictl task, heap: %d", ESP.getFreeHeap() );
 
   while ( true ) {
     vTaskDelay( 500 );

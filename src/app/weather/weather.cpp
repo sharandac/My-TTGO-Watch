@@ -177,7 +177,7 @@ weather_config_t *weather_get_config( void ) {
 }
 
 void weather_widget_sync_Task( void * pvParameters ) {
-    log_i("start weather widget task");
+    log_i("start weather widget task, heap: %d", ESP.getFreeHeap() );
 
     vTaskDelay( 250 );
 
@@ -211,6 +211,7 @@ void weather_widget_sync_Task( void * pvParameters ) {
         lv_obj_invalidate( lv_scr_act() );
     }
     xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
+    log_i("finish weather widget task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }
 

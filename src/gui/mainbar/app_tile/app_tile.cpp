@@ -25,52 +25,45 @@
 #include "app_tile.h"
 
 lv_app_icon_t app_entry[ MAX_APPS_ICON ];
-
-static lv_obj_t *app_cont = NULL;
-static lv_obj_t *app_label = NULL;
-static uint32_t app_tile_num;
-static lv_style_t *style;
-static lv_style_t appstyle;
+lv_obj_t *app_cont[ MAX_APPS_TILES ];
+uint32_t app_tile_num[ MAX_APPS_TILES ];
+static lv_style_t app_style;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
 void app_tile_setup( void ) {
-    app_tile_num = mainbar_add_tile( 1, 0 );
-    app_cont = mainbar_get_tile_obj( app_tile_num );
-    style = mainbar_get_style();
 
-    lv_style_copy( &appstyle, style);
-    lv_style_set_text_opa( &appstyle, LV_OBJ_PART_MAIN, LV_OPA_30);
-    lv_style_set_text_font( &appstyle, LV_STATE_DEFAULT, &Ubuntu_72px);
+    for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 0 );
+        app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
+    }
 
-    app_label = lv_label_create( app_cont, NULL);
-    lv_label_set_text( app_label, "apps");
-    lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &appstyle );
-    lv_obj_align( app_label, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_style_copy( &app_style, mainbar_get_style() );
 
     for ( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         // set x, y and mark it as inactive
         app_entry[ app ].x = APP_FIRST_X_POS + ( ( app % MAX_APPS_ICON_HORZ ) * ( APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE ) );
-        app_entry[ app ].y = APP_FIRST_Y_POS + ( ( app / MAX_APPS_ICON_HORZ ) * ( APP_ICON_Y_SIZE + APP_ICON_Y_CLEARENCE ) );
+        app_entry[ app ].y = APP_FIRST_Y_POS + ( ( ( app % ( MAX_APPS_ICON_VERT * MAX_APPS_ICON_HORZ  ) ) / MAX_APPS_ICON_HORZ ) * ( APP_ICON_Y_SIZE + APP_ICON_Y_CLEARENCE ) );
         app_entry[ app ].active = false;
         // create app icon container
-        app_entry[ app ].app = lv_obj_create( app_cont, NULL );
-        mainbar_add_slide_element(app_entry[ app ].app);
+        app_entry[ app ].app = lv_obj_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
+        mainbar_add_slide_element( app_entry[ app ].app);
         lv_obj_reset_style_list( app_entry[ app ].app, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].app, LV_OBJ_PART_MAIN, style );
+        lv_obj_add_style( app_entry[ app ].app, LV_OBJ_PART_MAIN, &app_style );
         lv_obj_set_size( app_entry[ app ].app, APP_ICON_X_SIZE, APP_ICON_Y_SIZE );
-        lv_obj_align( app_entry[ app ].app , app_cont, LV_ALIGN_IN_TOP_LEFT, app_entry[ app ].x, app_entry[ app ].y );
+        lv_obj_align( app_entry[ app ].app , app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], LV_ALIGN_IN_TOP_LEFT, app_entry[ app ].x, app_entry[ app ].y );
         // create app label
-        app_entry[ app ].label = lv_label_create( app_cont, NULL );
+        app_entry[ app ].label = lv_label_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
         mainbar_add_slide_element(app_entry[ app ].label);
         lv_obj_reset_style_list( app_entry[ app ].label, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, style );
+        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, &app_style );
         lv_obj_set_size( app_entry[ app ].label, APP_LABEL_X_SIZE, APP_LABEL_Y_SIZE );
         lv_obj_align( app_entry[ app ].label , app_entry[ app ].app, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
         lv_obj_set_hidden( app_entry[ app ].app, true );
         lv_obj_set_hidden( app_entry[ app ].label, true );
+
+        log_i("icon screen/x/y: %d/%d/%d", app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ), app_entry[ app ].x, app_entry[ app ].y );
     }
 }
 
@@ -90,5 +83,5 @@ lv_obj_t *app_tile_register_app( const char* appname ) {
 }
 
 uint32_t app_tile_get_tile_num( void ) {
-    return( app_tile_num );
+    return( app_tile_num[ 0 ] );
 }

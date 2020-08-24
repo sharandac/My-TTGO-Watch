@@ -62,22 +62,30 @@ LV_FONT_DECLARE(Ubuntu_32px);
 
 struct direction_t direction[] PROGMEM = {
     // english directions
-    { "ahead", &ahead_128px },
-    { "slightly left", &slightly_left_128px },
-    { "slightly right", &slightly_right_128px },
-    { "sharply left", &sharply_left_128px },
-    { "sharply right", &sharply_right_128px },
-    { "turn left", &turn_left_128px },
-    { "turn right", &turn_right_128px },
+    { "ahead", "", &ahead_128px },
+    { "left", "slightly", &slightly_left_128px },
+    { "right", "slightly", &slightly_right_128px },
+    { "left", "sharply", &sharply_left_128px },
+    { "right", "sharply", &sharply_right_128px },
+    { "turn left", "", &turn_left_128px },
+    { "turn right", "", &turn_right_128px },
     // german direction
-    { "Geradeaus", &ahead_128px },
-    { "halb links abbiegen", &slightly_left_128px },
-    { "halb rechts abbiegen", &slightly_right_128px },
-    { "scharf links abbiegen", &sharply_left_128px },
-    { "scharf rechts abbiegen", &sharply_right_128px },
-    { "links abbiegen", &turn_left_128px },
-    { "rechts abbiegen", &turn_right_128px },
-    { "", NULL }
+    { "Geradeaus", "", &ahead_128px },
+    { "links abbiegen", "halb", &slightly_left_128px },
+    { "rechts abbiegen", "halb", &slightly_right_128px },
+    { "links abbiegen", "scharf", &sharply_left_128px },
+    { "rechts abbiegen", "scharf", &sharply_right_128px },
+    { "links abbiegen", "", &turn_left_128px },
+    { "rechts abbiegen", "", &turn_right_128px },
+    // french direction
+    { "Avancez", "", &ahead_128px },
+    { "gauche et continuez", "vers la", &slightly_left_128px },
+    { "droite et continuez", "vers la", &slightly_right_128px },
+    { "gauche et continuez", "franchement", &sharply_left_128px },
+    { "droite et continuez", "franchement", &sharply_right_128px },
+    { "gauche et continuez", "", &turn_left_128px },
+    { "droite et continuez", "", &turn_right_128px },
+    { "", "", NULL }
 };
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -186,7 +194,7 @@ void osmand_bluetooth_message_msg_pharse( char* msg ) {
 
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg ) {
     for ( int i = 0; direction[ i ].img != NULL; i++ ) {
-        if ( strstr( msg, direction[ i ].direction ) ) {
+        if ( strstr( msg, direction[ i ].direction ) && strstr( msg, direction[ i ].direction_helper ) ) {
             log_i("hit: %s -> %s", msg, direction[ i ].direction );
             return( direction[ i ].img );
         }
@@ -200,7 +208,7 @@ void osmand_activate_cb( void ) {
     osmand_block_return_maintile = display_get_block_return_maintile();
     display_set_block_return_maintile( true );
     _osmand_app_task = lv_task_create(osmand_app_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
-    lv_label_set_text( osmand_app_info_label, "wait for osmand msg");
+    lv_label_set_text( osmand_app_info_label, "wait for OsmAnd msg");
     lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 }
 
