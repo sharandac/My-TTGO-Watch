@@ -33,6 +33,10 @@
         int32_t designed_battery_cap = 300;
         int32_t silence_wakeup_time = 60;
         int32_t silence_wakeup_time_vbplug = 3;
+        int32_t normal_voltage = 3300;
+        int32_t normal_power_save_voltage = 3000;
+        int32_t experimental_normal_voltage = 3000;
+        int32_t experimental_power_save_voltage = 2700;
         bool high_charging_target_voltage = true;
         bool compute_percent = false;
         bool experimental_power_save = false;

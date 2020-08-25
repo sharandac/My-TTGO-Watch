@@ -160,9 +160,16 @@ void powermgm_loop( TTGOClass *ttgo ) {
     }
     powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
 
-    pmu_loop( ttgo );
-    bma_loop( ttgo );
-    display_loop( ttgo );
+    if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
+        vTaskDelay( 100 );
+        pmu_loop( ttgo );
+        bma_loop( ttgo );
+    }
+    else {
+        pmu_loop( ttgo );
+        bma_loop( ttgo );
+        display_loop( ttgo );
+    }
 }
 
 /*

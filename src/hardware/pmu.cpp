@@ -56,7 +56,7 @@ void pmu_setup( TTGOClass *ttgo ) {
 
     // Turn i2s DAC on
     ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_ON );
+    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
 
     pinMode( AXP202_INT, INPUT );
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
@@ -92,32 +92,34 @@ void pmu_standby( void ) {
     }
 
     if ( pmu_get_experimental_power_save() ) {
-        ttgo->power->setDCDC3Voltage( 2700 );
-        log_i("go standby, enable 2.7V standby voltage");
+        ttgo->power->setDCDC3Voltage( pmu_config.experimental_power_save_voltage );
+        log_i("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
     } 
     else {
-        ttgo->power->setDCDC3Voltage( 3000 );
-        log_i("go standby, enable 3.0V standby voltage");
+        ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
+        log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
     }
-    ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF );
+    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
+    ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
 }
 
 void pmu_wakeup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( pmu_get_experimental_power_save() ) {
-        ttgo->power->setDCDC3Voltage( 3000 );
-        log_i("go wakeup, enable 3.0V voltage");
+        ttgo->power->setDCDC3Voltage( pmu_config.experimental_normal_voltage );
+        log_i("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
     } 
     else {
-        ttgo->power->setDCDC3Voltage( 3300 );
-        log_i("go wakeup, enable 3.3V voltage");
+        ttgo->power->setDCDC3Voltage( pmu_config.normal_voltage );
+        log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
     }
 
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
 
     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
+    ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
 }
 /*
  *
@@ -134,12 +136,16 @@ void pmu_save_config( void ) {
         log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
     }
     else {
-        SpiRamJsonDocument doc( 1000 );
+        SpiRamJsonDocument doc( 3000 );
 
         doc["silence_wakeup"] = pmu_config.silence_wakeup;
         doc["silence_wakeup_time"] = pmu_config.silence_wakeup_time;
         doc["silence_wakeup_time_vbplug"] = pmu_config.silence_wakeup_time_vbplug;
         doc["experimental_power_save"] = pmu_config.experimental_power_save;
+        doc["normal_voltage"] = pmu_config.normal_voltage;
+        doc["normal_power_save_voltage"] = pmu_config.normal_power_save_voltage;
+        doc["experimental_normal_voltage"] = pmu_config.experimental_normal_voltage;
+        doc["experimental_power_save_voltage"] = pmu_config.experimental_power_save_voltage;
         doc["compute_percent"] = pmu_config.compute_percent;
         doc["high_charging_target_voltage"] = pmu_config.high_charging_target_voltage;
         doc["designed_battery_cap"] = pmu_config.designed_battery_cap;
@@ -177,6 +183,10 @@ void pmu_read_config( void ) {
                 pmu_config.compute_percent = doc["compute_percent"] | false;
                 pmu_config.high_charging_target_voltage = doc["high_charging_target_voltage"] | false;
                 pmu_config.designed_battery_cap = doc["designed_battery_cap"] | 300;
+                pmu_config.normal_voltage = doc["normal_voltage"] | 3300;
+                pmu_config.normal_power_save_voltage = doc["normal_power_save_voltage"] | 3000;
+                pmu_config.experimental_normal_voltage = doc["experimental_normal_voltage"] | 3000;
+                pmu_config.experimental_power_save_voltage = doc["experimental_power_save_voltage"] | 2700;
             }        
             doc.clear();
         }
