@@ -27,11 +27,12 @@
     #define LILYGO_WATCH_2020_V1             //To use T-Watch2020, please uncomment this line
     #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
     #define TWATCH_USE_PSRAM_ALLOC_LVGL
+    #define ENABLE_LVGL_FLUSH_DMA
     #include <LilyGoWatch.h>
 
     /*
     * firmeware version string
     */
-    #define __FIRMWARE__            "2020082401"
+    #define __FIRMWARE__            "2020082501"
 
 #endif // _CONFIG_H
