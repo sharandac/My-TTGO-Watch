@@ -24,6 +24,12 @@
 
     #include <TTGO.h>
 
+    struct src_icon_t {
+        char src_name[ 48 ];
+        int32_t vibe;
+        const lv_img_dsc_t *img;
+    };
+
     void bluetooth_message_tile_setup( void );
     void bluetooth_message_disable( void );
     void bluetooth_message_enable( void );

@@ -64,6 +64,7 @@
     #define WIFICTL_WPS_SUCCESS             _BV(9)
     #define WIFICTL_WPS_FAILED              _BV(10)
     #define WIFICTL_SCAN                    _BV(11)
+    #define WIFICTL_FIRST_RUN               _BV(12)
 
     /*
      * @brief setup wifi controller routine

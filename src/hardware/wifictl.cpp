@@ -446,7 +446,7 @@ void wifictl_on( void ) {
   while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
     yield();
   }
-  wifictl_set_event( WIFICTL_ON_REQUEST );
+  wifictl_set_event( WIFICTL_ON_REQUEST | WIFICTL_FIRST_RUN );
   vTaskResume( _wifictl_Task );
 }
 
@@ -462,8 +462,8 @@ void wifictl_off( void ) {
     yield();
   }
 
-  if ( !wifictl_get_event( WIFICTL_ACTIVE | WIFICTL_SCAN | WIFICTL_WPS_REQUEST | WIFICTL_CONNECT ) ) {
-    log_i("wifictl not active");
+  if ( !wifictl_get_event( WIFICTL_FIRST_RUN ) ) {
+    log_i("wifictl not active, prevent first run crash");
     return;
   }
 

@@ -48,14 +48,29 @@ LV_IMG_DECLARE(k9mail_32px);
 LV_IMG_DECLARE(email_32px);
 LV_IMG_DECLARE(message_32px);
 LV_IMG_DECLARE(osmand_32px);
+LV_IMG_DECLARE(youtube_32px);
+LV_IMG_DECLARE(instagram_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
+
+src_icon_t src_icon[] = {
+    { "Telegram", 100, &telegram_32px },
+    { "Whatsapp", 100, &whatsapp_32px },
+    { "K-9 Mail", 100, &k9mail_32px },
+    { "Gmail", 100, &email_32px },
+    { "E-Mail", 100, &message_32px },
+    { "OsmAnd", 100, &osmand_32px },
+    { "YouTube", 100, &youtube_32px },
+    { "Instagram", 100, &instagram_32px },
+    { "", 0, NULL }
+};
 
 static bool bluetooth_message_active = true;
 
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_message_event_cb( EventBits_t event, char* msg );
 static void bluetooth_message_msg_pharse( char* msg );
+const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name );
 
 void bluetooth_message_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -132,6 +147,17 @@ void bluetooth_message_enable( void ) {
     bluetooth_message_active = true;    
 }
 
+const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
+    for ( int i = 0; src_icon[ i ].img != NULL; i++ ) {
+        if ( strstr( src_name, src_icon[ i ].src_name ) ) {
+            log_i("hit: %s -> %s", src_name, src_icon[ i ].src_name );
+            motor_vibe( src_icon[ i ].vibe );
+            return( src_icon[ i ].img );
+        }
+    }
+    return( &message_32px );
+}
+
 void bluetooth_message_msg_pharse( char* msg ) {
     if ( bluetooth_message_active == false ) {
         return;
@@ -151,33 +177,7 @@ void bluetooth_message_msg_pharse( char* msg ) {
 
             // set notify source icon
             if ( doc["src"] ) {
-                if ( !strcmp( doc["src"], "Telegram" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &telegram_32px );
-                    motor_vibe(100);
-                }
-                else if ( !strcmp( doc["src"], "Whatsapp" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &whatsapp_32px );
-                    motor_vibe(100);
-                }
-                else if ( !strcmp( doc["src"], "K-9 Mail" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &k9mail_32px );
-                    motor_vibe(100);
-                }
-                else if ( !strcmp( doc["src"], "Gmail" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &email_32px );
-                    motor_vibe(100);
-                }
-                else if ( !strcmp( doc["src"], "E-Mail" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &email_32px );
-                    motor_vibe(100);
-                }
-                else if ( !strcmp( doc["src"], "OsmAnd" ) ) {
-                    lv_img_set_src( bluetooth_message_img, &osmand_32px );
-                }
-                else {
-                    lv_img_set_src( bluetooth_message_img, &message_32px );
-                    motor_vibe(100);
-                }
+                lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
                 lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
             }
             else {
