@@ -104,5 +104,7 @@
     float pmu_get_battery_discharge_current( void );
     float pmu_get_vbus_voltage( void );
     float pmu_get_coulumb_data( void );
+    bool pmu_is_charging( void );
+    bool pmu_is_vbus_plug( void );
 
 #endif // _PMU_H

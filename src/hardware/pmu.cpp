@@ -341,3 +341,13 @@ float pmu_get_coulumb_data( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     return( ttgo->power->getCoulombData() );
 }
+
+bool pmu_is_charging( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    return( ttgo->power->isChargeing() );
+}
+
+bool pmu_is_vbus_plug( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    return( ttgo->power->isVBUSPlug() );
+}

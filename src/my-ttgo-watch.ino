@@ -34,6 +34,8 @@
 #include "hardware/motor.h"
 #include "hardware/wifictl.h"
 #include "hardware/blectl.h"
+#include "hardware/pmu.h"
+#include "hardware/timesync.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
@@ -51,17 +53,13 @@ void setup()
     ttgo->lvgl_begin();
     
     SPIFFS.begin();
-
     motor_setup();
 
     // force to store all new heap allocations in psram to get more internal ram
     heap_caps_malloc_extmem_enable( 1 );
-
-    display_setup( ttgo );
-
+    display_setup();
     screenshot_setup();
-
-    splash_screen_stage_one( ttgo );
+    splash_screen_stage_one();
     splash_screen_stage_update( "init serial", 10 );
 
     splash_screen_stage_update( "init spiff", 20 );
@@ -71,11 +69,9 @@ void setup()
     }
 
     splash_screen_stage_update( "init rtc", 50 );
-    ttgo->rtc->syncToSystem();
-
+    timesyncToSystem();
     splash_screen_stage_update( "init powermgm", 60 );
     powermgm_setup();
-
     splash_screen_stage_update( "init gui", 80 );
     gui_setup(); 
     /*
@@ -89,13 +85,11 @@ void setup()
     /*
      *
      */
-
-    if (wifictl_get_autoon() && (ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() || (ttgo->power->getBattVoltage() > 3400)))
+    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) )
         wifictl_on();
 
-    splash_screen_stage_finish( ttgo );
+    splash_screen_stage_finish();
     display_set_brightness( display_get_brightness() );
-
     // enable to store data in normal heap
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
@@ -111,6 +105,6 @@ void setup()
 void loop()
 {
     delay(5);
-    gui_loop( ttgo );
+    gui_loop();
     powermgm_loop();
 }

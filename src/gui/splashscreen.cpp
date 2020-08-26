@@ -27,7 +27,10 @@ lv_obj_t *preload = NULL;
 lv_obj_t *preload_label = NULL;
 lv_style_t style;
 
-void splash_screen_stage_one( TTGOClass *ttgo ) {
+void splash_screen_stage_one( void ) {
+
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
     lv_style_init( &style );
     lv_style_set_radius(&style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_bg_color(&style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
@@ -75,8 +78,9 @@ void splash_screen_stage_update( const char* msg, int value ) {
     lv_task_handler();
 }
 
-void splash_screen_stage_finish( TTGOClass *ttgo ) {
-//    ttgo->bl->adjust( 0 );
+void splash_screen_stage_finish( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
     for( int bl = display_get_brightness() ; bl > 0 ; bl-- ) {
         ttgo->bl->adjust( bl );
         delay(1);

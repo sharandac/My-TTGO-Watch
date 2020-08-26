@@ -35,8 +35,10 @@ static uint8_t brightness = 0;
 /*
  *
  */
-void display_setup( TTGOClass *ttgo ) {
+void display_setup( void ) {
     display_read_config();
+
+    TTGOClass *ttgo = TTGOClass::getWatch();
 
     ttgo->openBL();
     ttgo->bl->adjust( 0 );
@@ -46,7 +48,9 @@ void display_setup( TTGOClass *ttgo ) {
 /*
  * loop routine for handling IRQ in main loop
  */
-void display_loop( TTGOClass *ttgo ) {
+void display_loop( void ) {
+  TTGOClass *ttgo = TTGOClass::getWatch();
+
   if ( !powermgm_get_event( POWERMGM_STANDBY ) && !powermgm_get_event( POWERMGM_SILENCE_WAKEUP )) {
     if ( dest_brightness != brightness ) {
       if ( brightness < dest_brightness ) {

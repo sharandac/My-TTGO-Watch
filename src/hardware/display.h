@@ -46,13 +46,13 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void display_setup( TTGOClass *ttgo );
+    void display_setup( void );
     /*
      * @brief display loop
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void display_loop( TTGOClass *ttgo );
+    void display_loop( void );
     /*
      * @brief save config for display to spiffs
      */

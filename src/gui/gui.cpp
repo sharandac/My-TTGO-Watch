@@ -86,7 +86,7 @@ void gui_setup(void)
 /*
  *
  */
-void gui_loop( TTGOClass *ttgo ) {
+void gui_loop( void ) {
     // if we run in silence mode    
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
         if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {

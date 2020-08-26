@@ -170,7 +170,7 @@ void powermgm_loop( void ) {
     else {
         pmu_loop();
         bma_loop();
-        display_loop( ttgo );
+        display_loop();
     }
 }
 

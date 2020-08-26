@@ -27,7 +27,7 @@
      * 
      * @param ttgo  pointer to TTGOClass
      */
-    void splash_screen_stage_one( TTGOClass *ttgo );
+    void splash_screen_stage_one( void );
     /*
      * @brief update spash screen text and bar
      * 
@@ -40,6 +40,6 @@
      * 
      * @param   ttgo    pointer to TTGOClass
      */
-    void splash_screen_stage_finish( TTGOClass *ttgo );
+    void splash_screen_stage_finish( void );
 
 #endif // _SPLASHSCREEN_H
