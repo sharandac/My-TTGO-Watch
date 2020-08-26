@@ -196,10 +196,9 @@ static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 void battery_view_update_task( lv_task_t *task ) {
     char temp[16]="";
-    TTGOClass *ttgo = TTGOClass::getWatch();
 
-    if ( pmu_get_battery_percent( ttgo ) >= 0 ) {
-        snprintf( temp, sizeof( temp ), "%0.1fmAh", ttgo->power->getCoulombData() );
+    if ( pmu_get_battery_percent( ) >= 0 ) {
+        snprintf( temp, sizeof( temp ), "%0.1fmAh", pmu_get_coulumb_data() );
     }
     else {
         snprintf( temp, sizeof( temp ), "unknown" );        
@@ -211,19 +210,19 @@ void battery_view_update_task( lv_task_t *task ) {
     lv_label_set_text( battery_view_design_cap, temp );
     lv_obj_align( battery_view_design_cap, lv_obj_get_parent( battery_view_design_cap ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    snprintf( temp, sizeof( temp ), "%0.2fV", ttgo->power->getBattVoltage() / 1000 );
+    snprintf( temp, sizeof( temp ), "%0.2fV", pmu_get_battery_voltage() / 1000 );
     lv_label_set_text( battery_view_voltage, temp );
     lv_obj_align( battery_view_voltage, lv_obj_get_parent( battery_view_voltage ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    snprintf( temp, sizeof( temp ), "%0.1fmA", ttgo->power->getBattChargeCurrent() );
+    snprintf( temp, sizeof( temp ), "%0.1fmA", pmu_get_battery_charge_current() );
     lv_label_set_text( charge_view_current, temp );
     lv_obj_align( charge_view_current, lv_obj_get_parent( charge_view_current ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    snprintf( temp, sizeof( temp ), "%0.1fmA", ttgo->power->getBattDischargeCurrent() );
+    snprintf( temp, sizeof( temp ), "%0.1fmA", pmu_get_battery_discharge_current() );
     lv_label_set_text( discharge_view_current, temp );
     lv_obj_align( discharge_view_current, lv_obj_get_parent( discharge_view_current ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    snprintf( temp, sizeof( temp ), "%0.2fV", ttgo->power->getVbusVoltage() / 1000 );
+    snprintf( temp, sizeof( temp ), "%0.2fV", pmu_get_vbus_voltage() / 1000 );
     lv_label_set_text( vbus_view_voltage, temp );
     lv_obj_align( vbus_view_voltage, lv_obj_get_parent( vbus_view_voltage ), LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 }

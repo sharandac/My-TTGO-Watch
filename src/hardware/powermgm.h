@@ -38,13 +38,13 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void powermgm_setup( TTGOClass *ttgo );
+    void powermgm_setup( void );
     /*
      * @brief power managment loop routine, call from loop. not for user use
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void powermgm_loop( TTGOClass *ttgo );
+    void powermgm_loop( void );
     /*
      * @brief trigger a power managemt event
      * 

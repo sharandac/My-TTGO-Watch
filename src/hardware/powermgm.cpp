@@ -48,23 +48,25 @@ portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 /*
  *
  */
-void powermgm_setup( TTGOClass *ttgo ) {
+void powermgm_setup( void ) {
 
     powermgm_status = xEventGroupCreate();
 
-    pmu_setup( ttgo );
-    bma_setup( ttgo );
+    pmu_setup();
+    bma_setup();
     wifictl_setup();
     blectl_read_config();
-    timesync_setup( ttgo );
-    touch_setup( ttgo );
+    timesync_setup();
+    touch_setup();
     sound_setup();
 }
 
 /*
  *
  */
-void powermgm_loop( TTGOClass *ttgo ) {
+void powermgm_loop( void ) {
+
+    TTGOClass *ttgo = TTGOClass::getWatch();
 
     // check if a button or doubleclick was release
     if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
@@ -162,12 +164,12 @@ void powermgm_loop( TTGOClass *ttgo ) {
 
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
         vTaskDelay( 100 );
-        pmu_loop( ttgo );
-        bma_loop( ttgo );
+        pmu_loop();
+        bma_loop();
     }
     else {
-        pmu_loop( ttgo );
-        bma_loop( ttgo );
+        pmu_loop();
+        bma_loop();
         display_loop( ttgo );
     }
 }

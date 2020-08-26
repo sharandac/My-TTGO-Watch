@@ -74,7 +74,7 @@ void setup()
     ttgo->rtc->syncToSystem();
 
     splash_screen_stage_update( "init powermgm", 60 );
-    powermgm_setup( ttgo );
+    powermgm_setup();
 
     splash_screen_stage_update( "init gui", 80 );
     gui_setup(); 
@@ -112,5 +112,5 @@ void loop()
 {
     delay(5);
     gui_loop( ttgo );
-    powermgm_loop( ttgo );
+    powermgm_loop();
 }

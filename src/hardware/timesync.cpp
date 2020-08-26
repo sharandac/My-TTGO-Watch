@@ -37,7 +37,7 @@ timesync_config_t timesync_config;
 
 void timesync_wifictl_event_cb( EventBits_t event, char* msg );
 
-void timesync_setup( TTGOClass *ttgo ) {
+void timesync_setup( void ) {
 
     timesync_read_config();
     time_event_handle = xEventGroupCreate();

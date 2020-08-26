@@ -29,13 +29,14 @@ lv_indev_t *touch_indev = NULL;
 static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data);
 static bool touch_getXY( int16_t &x, int16_t &y );
 
-void touch_setup( TTGOClass *ttgo ) {
+void touch_setup( void ) {
     touch_indev = lv_indev_get_next( NULL );
 
     touch_indev->driver.read_cb = touch_read;
 }
 
 static bool touch_getXY( int16_t &x, int16_t &y ) {
+    
     TTGOClass *ttgo = TTGOClass::getWatch();
     TP_Point p;
     static bool touch_press = false;

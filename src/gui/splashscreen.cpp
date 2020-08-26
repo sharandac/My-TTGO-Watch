@@ -82,5 +82,6 @@ void splash_screen_stage_finish( TTGOClass *ttgo ) {
         delay(1);
     }    
     lv_obj_del( preload );
+    lv_obj_del( preload_label );
     lv_task_handler();
 }

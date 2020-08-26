@@ -48,13 +48,13 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void pmu_setup( TTGOClass *ttgo );
+    void pmu_setup( void );
     /*
      * @brief pmu loop routine, call from powermgm. not for user use
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void pmu_loop( TTGOClass *ttgo );
+    void pmu_loop( void );
     /*
      *
      * @brief get the charge of battery in percent
@@ -63,7 +63,7 @@
      * 
      * @return  charge in percent or -1 if unknown
      */
-    int32_t pmu_get_battery_percent( TTGOClass *ttgo );
+    int32_t pmu_get_battery_percent( void );
     /*
      * @brief set the axp202 in standby
      */
@@ -99,5 +99,10 @@
     int32_t pmu_get_designed_battery_cap( void );
     bool pmu_get_silence_wakeup( void );
     void pmu_set_silence_wakeup( bool value );
+    float pmu_get_battery_voltage( void );
+    float pmu_get_battery_charge_current( void );
+    float pmu_get_battery_discharge_current( void );
+    float pmu_get_vbus_voltage( void );
+    float pmu_get_coulumb_data( void );
 
 #endif // _PMU_H

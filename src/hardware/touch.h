@@ -29,6 +29,6 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void touch_setup( TTGOClass *ttgo );
+    void touch_setup( void );
 
 #endif // _TOUCH_H

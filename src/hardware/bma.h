@@ -42,11 +42,11 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void bma_setup( TTGOClass *ttgo );
+    void bma_setup( void );
     /*
      * @brief loop function for activity measurement
      */
-    void bma_loop( TTGOClass *ttgo );
+    void bma_loop( void );
     /*
      * @brief put bma into standby, depending on ther config
      */

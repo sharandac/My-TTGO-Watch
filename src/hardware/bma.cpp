@@ -41,7 +41,8 @@ void IRAM_ATTR bma_irq( void );
 /*
  *
  */
-void bma_setup( TTGOClass *ttgo ) {
+void bma_setup( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
 
     bma_event_handle = xEventGroupCreate();
 
@@ -120,7 +121,8 @@ void IRAM_ATTR  bma_irq( void ) {
 /*
  * loop routine for handling IRQ in main loop
  */
-void bma_loop( TTGOClass *ttgo ) {
+void bma_loop( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * handle IRQ event
      */

@@ -40,7 +40,7 @@
      * 
      * @param   ttgo    pointer to an TTGOClass
      */
-    void timesync_setup( TTGOClass *ttgo );
+    void timesync_setup( void );
     /*
      * @brief save config for timesync to spiffs
      */
