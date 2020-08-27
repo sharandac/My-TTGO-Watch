@@ -27,7 +27,7 @@ uint16_t *png;
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
 
 void screenshot_setup( void ) {
-    png = (uint16_t*)ps_malloc( LV_HOR_RES_MAX * LV_VER_RES_MAX * sizeof( lv_color_t ) );
+    png = (uint16_t*)ps_malloc( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
     if ( png == NULL ) {
         log_e("error memory alloc");
         while(1);
@@ -50,7 +50,7 @@ void screenshot_save( void ) {
     SPIFFS.remove( SCREENSHOT_FILE_NAME );
     fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
     
-    file.write( (uint8_t *)png, LV_HOR_RES_MAX * LV_VER_RES_MAX * 2 );
+    file.write( (uint8_t *)png, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * 2 );
     file.close();
 }
 
@@ -61,7 +61,7 @@ static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *are
 
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
-            *(png + (y * LV_HOR_RES_MAX + x )) = *data;
+            *(png + (y * lv_disp_get_hor_res( NULL ) + x )) = *data;
             data++;
         }
     } 

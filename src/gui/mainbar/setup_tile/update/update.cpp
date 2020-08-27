@@ -114,7 +114,7 @@ void update_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *update_version_cont = lv_obj_create( update_settings_tile, NULL );
-    lv_obj_set_size(update_version_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(update_version_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( update_version_cont, LV_OBJ_PART_MAIN, &update_settings_style  );
     lv_obj_align( update_version_cont, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     lv_obj_t *update_version_label = lv_label_create( update_version_cont, NULL);

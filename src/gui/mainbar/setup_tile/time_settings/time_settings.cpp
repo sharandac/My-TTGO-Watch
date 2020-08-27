@@ -83,7 +83,7 @@ void time_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *wifisync_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(wifisync_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(wifisync_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( wifisync_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( wifisync_cont, time_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     wifisync_onoff = lv_switch_create( wifisync_cont, NULL );
@@ -98,7 +98,7 @@ void time_settings_tile_setup( void ) {
     lv_obj_align( wifisync_label, wifisync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *daylight_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(daylight_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(daylight_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( daylight_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( daylight_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     daylight_onoff = lv_switch_create( daylight_cont, NULL );
@@ -113,7 +113,7 @@ void time_settings_tile_setup( void ) {
     lv_obj_align( daylight_label, daylight_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *utczone_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(utczone_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(utczone_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( utczone_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
     lv_obj_align( utczone_cont, daylight_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
     lv_obj_t *utczone_label = lv_label_create( utczone_cont, NULL);

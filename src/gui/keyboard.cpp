@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
+#include <TTGO.h>
 
 #include "keyboard.h"
 
@@ -45,17 +46,17 @@ void keyboard_setup( void ) {
         
     kb_screen = lv_cont_create( lv_scr_act(), NULL );
     lv_obj_add_style( kb_screen, LV_OBJ_PART_MAIN, &kb_style );
-    lv_obj_set_size( kb_screen, LV_HOR_RES_MAX , LV_VER_RES_MAX - 20 );
+    lv_obj_set_size( kb_screen, lv_disp_get_hor_res( NULL ) , lv_disp_get_ver_res( NULL ) - 20 );
     lv_obj_align( kb_screen, lv_scr_act(), LV_ALIGN_CENTER, 0, 20);
     
     kb_textarea = lv_textarea_create( kb_screen, NULL );
     lv_obj_add_protect( kb_textarea, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_set_size( kb_textarea, LV_HOR_RES_MAX - 10, 60 );
+    lv_obj_set_size( kb_textarea, lv_disp_get_hor_res( NULL ) - 10, 60 );
     lv_textarea_set_one_line( kb_textarea, true);
     lv_obj_align( kb_textarea, kb_screen, LV_ALIGN_IN_TOP_MID, 0, 5 );
 
     kb = lv_keyboard_create( lv_scr_act() , NULL);
-    lv_obj_set_size (kb, LV_HOR_RES, ( LV_VER_RES / 4 ) * 3 - 20);
+    lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
     lv_obj_align( kb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_keyboard_set_cursor_manage( kb, true);
     lv_obj_set_event_cb( kb, kb_event_cb );

@@ -106,7 +106,7 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
     lv_obj_t * weater_forecast_cont = lv_obj_create( weather_forecast_tile, NULL );
-    lv_obj_set_size( weater_forecast_cont, LV_HOR_RES_MAX , 96 );
+    lv_obj_set_size( weater_forecast_cont, lv_disp_get_hor_res( NULL ) , 96 );
     lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, &weather_forecast_style  );
     lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 0 );
 

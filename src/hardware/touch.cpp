@@ -79,10 +79,10 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
     }
 
     // issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
-    float temp_x = ( x - ( LV_HOR_RES_MAX / 2 ) ) * 1.15;
-    float temp_y = ( y - ( LV_VER_RES_MAX / 2 ) ) * 1.0;
-    x = temp_x + ( LV_HOR_RES_MAX / 2 );
-    y = temp_y + ( LV_VER_RES_MAX / 2 );
+    float temp_x = ( x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * 1.15;
+    float temp_y = ( y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
+    x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
+    y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
 
     return( true );
 }

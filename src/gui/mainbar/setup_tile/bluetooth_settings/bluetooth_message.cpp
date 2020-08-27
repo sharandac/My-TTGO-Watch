@@ -104,7 +104,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_obj_align( bluetooth_message_sender_label, bluetooth_message_img, LV_ALIGN_OUT_BOTTOM_LEFT, 5, 5 );
 
     bluetooth_message_page = lv_page_create( bluetooth_message_tile, NULL);
-    lv_obj_set_size( bluetooth_message_page, LV_HOR_RES_MAX - 20, 160 );
+    lv_obj_set_size( bluetooth_message_page, lv_disp_get_hor_res( NULL ) - 20, 160 );
     lv_obj_add_style( bluetooth_message_page, LV_OBJ_PART_MAIN, &bluetooth_message_style );
     lv_page_set_scrlbar_mode( bluetooth_message_page, LV_SCRLBAR_MODE_DRAG );
     lv_obj_align( bluetooth_message_page, bluetooth_message_sender_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );

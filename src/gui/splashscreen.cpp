@@ -39,12 +39,12 @@ void splash_screen_stage_one( void ) {
     lv_style_set_text_color(&style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
 
     lv_obj_t *background = lv_bar_create(lv_scr_act(), NULL);
-    lv_obj_set_size( background, LV_HOR_RES_MAX, LV_VER_RES_MAX );
+    lv_obj_set_size( background, lv_disp_get_hor_res(  NULL ), lv_disp_get_ver_res( NULL ) );
     lv_obj_add_style( background, LV_OBJ_PART_MAIN, &style );
     lv_obj_align(background, NULL, LV_ALIGN_CENTER, 0, 0);
 
     preload = lv_bar_create( background, NULL);
-    lv_obj_set_size(preload, LV_HOR_RES_MAX - 40, 20);
+    lv_obj_set_size(preload, lv_disp_get_hor_res( NULL ) - 40, 20);
     lv_obj_add_style( preload, LV_OBJ_PART_MAIN, &style );
     lv_obj_align(preload, NULL, LV_ALIGN_CENTER, 0, 0);
     lv_bar_set_anim_time(preload, 2000);

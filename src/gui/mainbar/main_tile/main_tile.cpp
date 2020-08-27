@@ -59,7 +59,7 @@ void main_tile_setup( void ) {
     lv_style_set_text_font( &datestyle, LV_STATE_DEFAULT, &Ubuntu_16px);
 
     clock_cont = mainbar_obj_create( main_cont );
-    lv_obj_set_size( clock_cont, LV_HOR_RES , LV_VER_RES / 2 );
+    lv_obj_set_size( clock_cont, lv_disp_get_hor_res( NULL ) , lv_disp_get_ver_res( NULL ) / 2 );
     lv_obj_add_style( clock_cont, LV_OBJ_PART_MAIN, style );
     lv_obj_align( clock_cont, main_cont, LV_ALIGN_CENTER, 0, 0 );
 

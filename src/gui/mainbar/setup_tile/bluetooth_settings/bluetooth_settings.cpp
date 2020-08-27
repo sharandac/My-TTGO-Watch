@@ -92,7 +92,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *bluetooth_advertising_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size( bluetooth_advertising_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( bluetooth_advertising_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( bluetooth_advertising_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluetooth_advertising_cont, bluetooth_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     bluetooth_advertising_onoff = lv_switch_create( bluetooth_advertising_cont, NULL );
@@ -107,7 +107,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_advertising_label, bluetooth_advertising_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *bluettoth_info_label_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size(bluettoth_info_label_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(bluettoth_info_label_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( bluettoth_info_label_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluettoth_info_label_cont, bluetooth_advertising_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *bluetooth_info_label = lv_label_create( bluettoth_info_label_cont, NULL);
@@ -116,7 +116,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_info_label, bluettoth_info_label_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     
     lv_obj_t *bluetooth_standby_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size( bluetooth_standby_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( bluetooth_standby_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( bluetooth_standby_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluetooth_standby_cont, bluettoth_info_label_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_standby_onoff = lv_switch_create( bluetooth_standby_cont, NULL );

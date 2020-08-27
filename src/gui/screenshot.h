@@ -39,6 +39,7 @@
      */
     void screenshot_save( void );
 
+/*
     struct PNG_IMAGE {
         uint8_t     png[ 8 ];
         uint32_t    IHDR_len;
@@ -59,5 +60,6 @@
         uint8_t     IEND[ 4 ];
         uint32_t    IEND_crc;
     } __attribute__((packed));
+*/
 
 #endif // _SCREENSHOT_H

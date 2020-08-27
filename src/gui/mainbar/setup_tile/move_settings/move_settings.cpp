@@ -79,7 +79,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *stepcounter_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(stepcounter_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(stepcounter_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
     lv_obj_align( stepcounter_cont, move_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     stepcounter_onoff = lv_switch_create( stepcounter_cont, NULL );
@@ -94,7 +94,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( stepcounter_label, stepcounter_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *doubleclick_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(doubleclick_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(doubleclick_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( doubleclick_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
     lv_obj_align( doubleclick_cont, stepcounter_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     doubleclick_onoff = lv_switch_create( doubleclick_cont, NULL );

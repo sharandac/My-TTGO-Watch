@@ -55,7 +55,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( crypto_ticker_setup_tile, LV_OBJ_PART_MAIN, &crypto_ticker_setup_style );
 
     lv_obj_t *exit_cont = lv_obj_create( crypto_ticker_setup_tile, NULL );
-    lv_obj_set_size( exit_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( exit_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &crypto_ticker_setup_style  );
     lv_obj_align( exit_cont, crypto_ticker_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
@@ -75,7 +75,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
 
 
     lv_obj_t *crypto_ticker_symbol_cont = lv_obj_create( crypto_ticker_setup_tile, NULL );
-    lv_obj_set_size(crypto_ticker_symbol_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(crypto_ticker_symbol_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( crypto_ticker_symbol_cont, LV_OBJ_PART_MAIN, &crypto_ticker_setup_style  );
     lv_obj_align( crypto_ticker_symbol_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 20 );
     lv_obj_t *crypto_ticker_symbol_label = lv_label_create( crypto_ticker_symbol_cont, NULL);
@@ -93,7 +93,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
 
 
     lv_obj_t *crypto_ticker_autosync_switch_cont = lv_obj_create( crypto_ticker_setup_tile, NULL );
-    lv_obj_set_size( crypto_ticker_autosync_switch_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( crypto_ticker_autosync_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( crypto_ticker_autosync_switch_cont, LV_OBJ_PART_MAIN, &crypto_ticker_setup_style  );
     lv_obj_align( crypto_ticker_autosync_switch_cont, crypto_ticker_symbol_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 

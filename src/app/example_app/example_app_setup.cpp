@@ -49,7 +49,7 @@ void example_app_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( example_app_setup_tile, LV_OBJ_PART_MAIN, &example_app_setup_style );
 
     lv_obj_t *exit_cont = lv_obj_create( example_app_setup_tile, NULL );
-    lv_obj_set_size( exit_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( exit_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
     lv_obj_align( exit_cont, example_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
@@ -68,7 +68,7 @@ void example_app_setup_setup( uint32_t tile_num ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *example_app_foobar_switch_cont = lv_obj_create( example_app_setup_tile, NULL );
-    lv_obj_set_size( example_app_foobar_switch_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size( example_app_foobar_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( example_app_foobar_switch_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
     lv_obj_align( example_app_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 

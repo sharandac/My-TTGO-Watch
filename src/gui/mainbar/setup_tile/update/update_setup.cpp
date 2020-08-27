@@ -77,7 +77,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *update_check_autosync_cont = lv_obj_create( update_setup_tile, NULL );
-    lv_obj_set_size(update_check_autosync_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(update_check_autosync_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( update_check_autosync_cont, LV_OBJ_PART_MAIN, &update_setup_style  );
     lv_obj_align( update_check_autosync_cont, update_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
 
@@ -93,7 +93,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_align( update_check_autosync_label, update_check_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *update_check_url_cont = lv_obj_create( update_setup_tile, NULL );
-    lv_obj_set_size(update_check_url_cont, LV_HOR_RES_MAX , 60);
+    lv_obj_set_size(update_check_url_cont, lv_disp_get_hor_res( NULL ) , 60);
     lv_obj_add_style( update_check_url_cont, LV_OBJ_PART_MAIN, &update_setup_style  );
     lv_obj_align( update_check_url_cont, update_check_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *update_check_url_label = lv_label_create( update_check_url_cont, NULL);
@@ -105,7 +105,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_textarea_set_pwd_mode( update_check_url_textfield, false);
     lv_textarea_set_one_line( update_check_url_textfield, true);
     lv_textarea_set_cursor_hidden( update_check_url_textfield, true);
-    lv_obj_set_width( update_check_url_textfield, LV_HOR_RES - 10 );
+    lv_obj_set_width( update_check_url_textfield, lv_disp_get_hor_res( NULL ) - 10 );
     lv_obj_align( update_check_url_textfield, update_check_url_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_set_event_cb( update_check_url_textfield, update_check_url_textarea_event_cb );
 

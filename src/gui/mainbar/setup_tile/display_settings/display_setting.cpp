@@ -126,7 +126,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_set_event_cb( up_btn_1, up_display_setup_event_cb );
     
     lv_obj_t *brightness_cont = lv_obj_create( display_settings_tile_1, NULL );
-    lv_obj_set_size( brightness_cont, LV_HOR_RES_MAX , 48 );
+    lv_obj_set_size( brightness_cont, lv_disp_get_hor_res( NULL ) , 48 );
     lv_obj_add_style( brightness_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( brightness_cont, display_settings_tile_1, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     display_brightness_slider = lv_slider_create( brightness_cont, NULL );
@@ -134,7 +134,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
     lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
     lv_slider_set_range( display_brightness_slider, DISPLAY_MIN_BRIGHTNESS, DISPLAY_MAX_BRIGHTNESS );
-    lv_obj_set_size( display_brightness_slider, LV_HOR_RES_MAX - 100 , 10 );
+    lv_obj_set_size( display_brightness_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( display_brightness_slider, brightness_cont, LV_ALIGN_IN_RIGHT_MID, -30, 0 );
     lv_obj_set_event_cb( display_brightness_slider, display_brightness_setup_event_cb );
     lv_obj_t *brightness_icon = lv_img_create( brightness_cont, NULL );
@@ -142,7 +142,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_align( brightness_icon, brightness_cont, LV_ALIGN_IN_LEFT_MID, 15, 0 );
 
     lv_obj_t *timeout_cont = lv_obj_create( display_settings_tile_1, NULL );
-    lv_obj_set_size( timeout_cont, LV_HOR_RES_MAX , 58 );
+    lv_obj_set_size( timeout_cont, lv_disp_get_hor_res( NULL ) , 58 );
     lv_obj_add_style( timeout_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( timeout_cont, brightness_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     display_timeout_slider = lv_slider_create( timeout_cont, NULL );
@@ -150,7 +150,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
     lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
     lv_slider_set_range( display_timeout_slider, DISPLAY_MIN_TIMEOUT, DISPLAY_MAX_TIMEOUT );
-    lv_obj_set_size(display_timeout_slider, LV_HOR_RES_MAX - 100 , 10 );
+    lv_obj_set_size(display_timeout_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( display_timeout_slider, timeout_cont, LV_ALIGN_IN_TOP_RIGHT, -30, 10 );
     lv_obj_set_event_cb( display_timeout_slider, display_timeout_setup_event_cb );
     display_timeout_slider_label = lv_label_create( timeout_cont, NULL );
@@ -162,7 +162,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_align( timeout_icon, timeout_cont, LV_ALIGN_IN_LEFT_MID, 15, 0 );
 
     lv_obj_t *rotation_cont = lv_obj_create( display_settings_tile_1, NULL );
-    lv_obj_set_size(rotation_cont, LV_HOR_RES_MAX , 40 );
+    lv_obj_set_size(rotation_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( rotation_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( rotation_cont, timeout_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *display_rotation_label = lv_label_create( rotation_cont, NULL );
@@ -176,7 +176,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_set_event_cb(display_rotation_list, display_rotation_event_handler);
 
     lv_obj_t *vibe_cont = lv_obj_create( display_settings_tile_2, NULL );
-    lv_obj_set_size(vibe_cont, LV_HOR_RES_MAX , 40);
+    lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( vibe_cont, LV_OBJ_PART_MAIN, &display_settings_style );
     lv_obj_align( vibe_cont, display_settings_tile_2, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     display_vibe_onoff = lv_switch_create( vibe_cont, NULL );
@@ -191,7 +191,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_align( display_vibe_label, vibe_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *block_return_maintile_cont = lv_obj_create( display_settings_tile_2, NULL );
-    lv_obj_set_size(block_return_maintile_cont, LV_HOR_RES_MAX , 40 );
+    lv_obj_set_size(block_return_maintile_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( block_return_maintile_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( block_return_maintile_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     display_block_return_maintile_onoff = lv_switch_create( block_return_maintile_cont, NULL );
