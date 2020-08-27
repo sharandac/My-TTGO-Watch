@@ -54,7 +54,8 @@
     } wifictl_event_t;
 
     #define WIFICTL_CONNECT                 _BV(0)
-    #define WIFICTL_DISCONNECT              _BV(1)
+    #define WIFICTL_CONNECT_IP              _BV(1)
+    #define WIFICTL_DISCONNECT              _BV(2)
     #define WIFICTL_ON                      _BV(3)
     #define WIFICTL_OFF                     _BV(4)
     #define WIFICTL_ACTIVE                  _BV(5)

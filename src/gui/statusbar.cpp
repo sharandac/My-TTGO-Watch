@@ -41,6 +41,7 @@
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
 static lv_obj_t *statusbar_wifilabel = NULL;
+static lv_obj_t *statusbar_wifiiplabel = NULL;
 static lv_obj_t *statusbar_bluetooth = NULL;
 static lv_obj_t *statusbar_stepcounterlabel = NULL;
 static lv_style_t statusbarstyle[ STATUSBAR_STYLE_NUM ];
@@ -171,6 +172,13 @@ void statusbar_setup( void )
     lv_label_set_text(statusbar_wifilabel, "");
     lv_obj_align(statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
+    /*Create a label on the Image button*/
+    statusbar_wifiiplabel = lv_label_create(statusbar, NULL);
+    lv_obj_reset_style_list( statusbar_wifiiplabel, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( statusbar_wifiiplabel, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_GREEN ] );
+    lv_label_set_text(statusbar_wifiiplabel, "");
+    lv_obj_align(statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+
     lv_obj_t *statusbar_stepicon = lv_img_create(statusbar, NULL );
     lv_img_set_src( statusbar_stepicon, &foot_16px );
     lv_obj_reset_style_list( statusbar_stepicon, LV_OBJ_PART_MAIN );
@@ -189,7 +197,7 @@ void statusbar_setup( void )
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb );
-    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED, statusbar_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb );
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -214,6 +222,10 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
                                     statusbar_wifi_set_state( true, msg );
+                                    statusbar_show_icon( STATUSBAR_WIFI );
+                                    break;
+        case WIFICTL_CONNECT_IP:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
+                                    statusbar_wifi_set_ip_state( true, msg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_DISCONNECT:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
@@ -280,7 +292,17 @@ void statusbar_wifi_set_state( bool state, const char *wifiname ) {
         lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_RELEASED );
     }
     lv_label_set_text( statusbar_wifilabel, wifiname);
+    lv_label_set_text( statusbar_wifiiplabel, "" );
     lv_obj_align( statusbar_wifilabel, statusbar_wifi, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_obj_align( statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+}
+
+/*
+ *
+ */
+void statusbar_wifi_set_ip_state( bool state, const char *ip ) {
+    lv_label_set_text( statusbar_wifiiplabel, ip );
+    lv_obj_align( statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
 }
 
 /*
