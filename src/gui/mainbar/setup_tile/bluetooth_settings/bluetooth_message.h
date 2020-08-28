@@ -25,8 +25,8 @@
     #include <TTGO.h>
 
     struct src_icon_t {
-        char src_name[ 48 ];
-        int32_t vibe;
+        const char src_name[ 24 ];
+        const int32_t vibe;
         const lv_img_dsc_t *img;
     };
 

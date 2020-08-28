@@ -24,8 +24,6 @@
 
     #include <TTGO.h>
 
-    #define UPDATE_JSON_BUFFER_SIZE     200
-
     int64_t update_check_new_version( char *url );
     const char* update_get_url( void );
 

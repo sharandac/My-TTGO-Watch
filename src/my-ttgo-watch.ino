@@ -49,9 +49,10 @@ void setup()
 {
     Serial.begin(115200);
     Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
+    
     ttgo->begin();
     ttgo->lvgl_begin();
-    
+ 
     SPIFFS.begin();
     motor_setup();
 
@@ -73,6 +74,7 @@ void setup()
     splash_screen_stage_update( "init powermgm", 60 );
     powermgm_setup();
     splash_screen_stage_update( "init gui", 80 );
+    splash_screen_stage_finish();
     gui_setup(); 
     /*
      * add apps and widgets here!!!
@@ -88,11 +90,13 @@ void setup()
     if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) )
         wifictl_on();
 
-    splash_screen_stage_finish();
-    display_set_brightness( display_get_brightness() );
     // enable to store data in normal heap
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
+
+    display_set_brightness( display_get_brightness() );
+
+    delay(500);
 
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());

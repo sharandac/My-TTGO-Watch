@@ -49,7 +49,7 @@ lv_obj_t *weather_forecast_icon_imgbtn[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_temperature_label[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_wind_label[ WEATHER_MAX_FORECAST ];
 
-weather_forcast_t weather_forecast[ WEATHER_MAX_FORECAST ];
+static weather_forcast_t *weather_forecast = NULL;
 
 void weather_forecast_sync_Task( void * pvParameters );
 void weather_forecast_wifictl_event_cb( EventBits_t event, char* msg );
@@ -64,6 +64,13 @@ static void setup_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 static void refresh_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void weather_forecast_tile_setup( uint32_t tile_num ) {
+
+    weather_forecast = (weather_forcast_t*)ps_calloc( sizeof( weather_forcast_t ) * WEATHER_MAX_FORECAST , 1 );
+    if( !weather_forecast ) {
+      log_e("weather forecast calloc faild");
+      while(true);
+    }
+
     weather_forecast_tile_num = tile_num;
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
     lv_style_copy( &weather_forecast_style, mainbar_get_style() );

@@ -54,7 +54,7 @@ LV_IMG_DECLARE(tinder_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-src_icon_t src_icon[] PROGMEM = {
+src_icon_t src_icon[] = {
     { "Telegram", 50, &telegram_32px },
     { "Whatsapp", 50, &whatsapp_32px },
     { "K-9 Mail", 50, &k9mail_32px },

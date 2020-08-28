@@ -36,10 +36,10 @@
     #define ESP_MODEL_NAME              "LILYGO T-WATCH2020 V1"
     #define ESP_DEVICE_NAME             "ESP STATION"
 
-    struct networklist {
+    typedef struct {
         char ssid[64]="";
         char password[64]="";
-    };
+    } networklist;
 
     typedef struct {
         bool autoon = true;

@@ -61,7 +61,7 @@ LV_IMG_DECLARE(sharply_right_128px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-struct direction_t direction[] PROGMEM = {
+struct direction_t direction[] = {
     // english directions
     { "ahead", "", &ahead_128px },
     { "left", "slightly", &slightly_left_128px },
