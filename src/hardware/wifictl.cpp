@@ -532,6 +532,7 @@ void wifictl_Task( void * pvParameters ) {
       log_i("request wifictl off done");
     }
     else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
+      esp_wifi_start();
       WiFi.mode( WIFI_STA );
       log_i("request wifictl on done");
     }

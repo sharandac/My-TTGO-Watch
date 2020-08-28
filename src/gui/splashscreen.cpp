@@ -23,9 +23,12 @@
 
 #include "hardware/display.h"
 
+lv_obj_t *logo = NULL;
 lv_obj_t *preload = NULL;
 lv_obj_t *preload_label = NULL;
 lv_style_t style;
+
+LV_IMG_DECLARE(hedgehog);
 
 void splash_screen_stage_one( void ) {
 
@@ -43,10 +46,14 @@ void splash_screen_stage_one( void ) {
     lv_obj_add_style( background, LV_OBJ_PART_MAIN, &style );
     lv_obj_align(background, NULL, LV_ALIGN_CENTER, 0, 0);
 
+    logo = lv_img_create( background , NULL );
+    lv_img_set_src( logo, &hedgehog );
+    lv_obj_align( logo, NULL, LV_ALIGN_CENTER, 0, 0 );
+
     preload = lv_bar_create( background, NULL);
     lv_obj_set_size(preload, lv_disp_get_hor_res( NULL ) - 40, 20);
     lv_obj_add_style( preload, LV_OBJ_PART_MAIN, &style );
-    lv_obj_align(preload, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(preload, logo, LV_ALIGN_OUT_BOTTOM_MID, 0, 30 );
     lv_bar_set_anim_time(preload, 2000);
     lv_bar_set_value(preload, 0, LV_ANIM_ON);
 
@@ -85,6 +92,7 @@ void splash_screen_stage_finish( void ) {
         ttgo->bl->adjust( bl );
         delay(1);
     }    
+    lv_obj_del( logo );
     lv_obj_del( preload );
     lv_obj_del( preload_label );
     lv_task_handler();

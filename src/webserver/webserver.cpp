@@ -36,7 +36,6 @@
 AsyncWebServer asyncserver( WEBSERVERPORT );
 TaskHandle_t _WEBSERVER_Task;
 
-bool webserver_running = false;
 
   static const char* serverIndex =
     "<!DOCTYPE html>\n <html><head>\n <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
@@ -139,9 +138,6 @@ void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_
  *
  */
 void asyncwebserver_start(void){
-
-  if ( webserver_running )
-    return;
 
   asyncserver.on("/index.htm", HTTP_GET, [](AsyncWebServerRequest *request) {
     String html = (String) "<!DOCTYPE html>"
@@ -379,9 +375,6 @@ void asyncwebserver_start(void){
 }
 
 void asyncwebserver_end(void) {
-  if ( !webserver_running )
-    return;
-
   SSDP.end();
   asyncserver.end();
   log_i("disable webserver and ssdp");

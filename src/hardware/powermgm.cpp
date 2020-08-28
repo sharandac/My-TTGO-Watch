@@ -58,7 +58,7 @@ void powermgm_setup( void ) {
     blectl_read_config();
     timesync_setup();
     touch_setup();
-    sound_setup();
+//    sound_setup();
 }
 
 /*
