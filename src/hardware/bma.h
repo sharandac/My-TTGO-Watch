@@ -39,8 +39,6 @@
 
     /*
      * @brief setup bma activity measurement
-     * 
-     * @param   ttgo    pointer to an TTGOClass
      */
     void bma_setup( void );
     /*
@@ -60,24 +58,24 @@
      */
     void bma_reload_settings( void );
     /*
-     * @ brief save the config structure to SPIFF
+     * @brief save the config structure to SPIFFS
      */
     void bma_save_config( void );
     /*
-     * @ brief read the config structure from SPIFF
+     * @brief read the config structure from SPIFFS
      */
     void bma_read_config( void );
     /*
      * @brief get config
      * 
-     * @param   config  configitem
+     * @param   config     configitem: BMA_STEPCOUNTER, BMA_DOUBLECLICK or BMA_CONFIG_NUM
      */
     bool bma_get_config( int config );
     /*
      * @brief set config
      * 
-     * @param   config  configitem
-     * @param   enable  true or false
+     * @param   config     configitem: BMA_STEPCOUNTER, BMA_DOUBLECLICK or BMA_CONFIG_NUM
+     * @param   bool    true or false
      */
     void bma_set_config( int config, bool enable );
 

@@ -54,7 +54,7 @@
     /*
      * @brief register an setup icon an the setup tile
      * 
-     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn
+     * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn
      */
     lv_obj_t *setup_tile_register_setup( void );
     /*

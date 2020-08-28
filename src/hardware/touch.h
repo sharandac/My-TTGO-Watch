@@ -26,8 +26,6 @@
     #include "TTGO.h"
     /*
      * @brief setup touch
-     * 
-     * @param   ttgo    pointer to an TTGOClass
      */
     void touch_setup( void );
 

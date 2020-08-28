@@ -75,6 +75,8 @@
      * @brief check if networkname known
      * 
      * @param   networkname network name to check
+     * 
+     * @return  bool    true means network is known, false means network is unlknown
      */
     bool wifictl_is_known( const char* networkname );
     /*
@@ -83,7 +85,7 @@
      * @param ssid      pointer to an network name
      * @param password  pointer to the password
      * 
-     * @return  true if was success or false if fail
+     * @return  bool    true if was success or false if fail
      */
     bool wifictl_insert_network( const char *ssid, const char *password );
     /*
@@ -102,17 +104,60 @@
      * @brief switch off wifi
      */
     void wifictl_off( void );
-    void wifictl_set_event( EventBits_t bits );
-    bool wifictl_get_event( EventBits_t bits );
-    void wifictl_clear_event( EventBits_t bits );
-    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC blectl_event_cb );
-    void wifictl_send_event_cb( EventBits_t event, char *msg );
+    /*
+     * @brief set wifi in standby
+     */
     void wifictl_standby( void );
+    /*
+     * @brief wakeup wifi
+     */
     void wifictl_wakeup( void );
+    /*
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event  possible values: WIFICTL_CONNECT,
+     *                                      WIFICTL_CONNECT_IP,
+     *                                      WIFICTL_DISCONNECT,
+     *                                      WIFICTL_ON,
+     *                                      WIFICTL_OFF,       
+     *                                      WIFICTL_ACTIVE,    
+     *                                      WIFICTL_ON_REQUEST,
+     *                                      WIFICTL_OFF_REQUEST,
+     *                                      WIFICTL_WPS_REQUEST,
+     *                                      WIFICTL_WPS_SUCCESS,
+     *                                      WIFICTL_WPS_FAILED,
+     *                                      WIFICTL_SCAN,      
+     *                                      WIFICTL_FIRST_RUN
+     * @param   wifictl_event_cb   pointer to the callback function 
+     */
+    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb );
+    /*
+     * @brief get the current wifi auto on configuration
+     * 
+     * @return  true: wifi auto on enable, false: wifi auto on disable
+     */
     bool wifictl_get_autoon( void );
+    /*
+     * @brief set the wifi auto on configuration
+     * 
+     * @param   autoon  true means auto on anable, false means auto on disable
+     */
     void wifictl_set_autoon( bool autoon );
+    /*
+     * @brief   start an wifi wps peering
+     */
     void wifictl_start_wps( void );
+    /*
+     * @brief   get the current webserver configuration
+     * 
+     * @return  true means webserver is enable, false webserver is disable
+     */
     bool wifictl_get_webserver( void );
+    /*
+     * @brief   set the current werbserver configuration
+     * 
+     * @param   webserver   true means webserver enable, false means webserver disable
+     */
     void wifictl_set_webserver( bool webserver );
 
 #endif // _WIFICTL_H

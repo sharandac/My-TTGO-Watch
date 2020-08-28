@@ -56,7 +56,7 @@
      * 
      * @param   appname     app name
      * 
-     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn
+     * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn
      */
     lv_obj_t *app_tile_register_app( const char* appname );
     /*

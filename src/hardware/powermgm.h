@@ -35,14 +35,10 @@
 
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
-     * 
-     * @param   ttgo    pointer to an TTGOClass
      */
     void powermgm_setup( void );
     /*
      * @brief power managment loop routine, call from loop. not for user use
-     * 
-     * @param   ttgo    pointer to an TTGOClass
      */
     void powermgm_loop( void );
     /*
@@ -61,6 +57,8 @@
      * @brief get a power managemt event state
      * 
      * @param   bits    event state, example: POWERMGM_STANDBY to evaluate if the system in standby
+     * 
+     * @return  EventBits_t    event state
      */
     EventBits_t powermgm_get_event( EventBits_t bits );
 

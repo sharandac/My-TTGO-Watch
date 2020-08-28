@@ -37,11 +37,11 @@
 
     /*
      * @brief mainbar setup funktion
-     * @param none
      */
     void mainbar_setup( void );
     /*
      * @brief jump to the given tile
+     * 
      * @param   tile    tile number
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
@@ -53,6 +53,7 @@
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
     /*
      * @brief add a tile at a specific position
+     * 
      * @param   x   x position
      * @param   y   y position
      * 
@@ -98,7 +99,7 @@
      * @param   tile_number     tile number
      * @param   hibernate_cb    pointer to the hibernate callback function
      * 
-     * @return  true or false   true means registration was success
+     * @return  true or false, true means registration was success
      */
     bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC hibernate_cb );
     /*
@@ -107,31 +108,31 @@
      * @param   tile_number     tile number
      * @param   activate_cb     pointer to the activate callback function
      * 
-     * @return  true or false   true means registration was success
+     * @return  true or false, true means registration was success
      */
     bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb );
     /*
      * @brief get main tile style
      * 
-     * @return  lv_style_t
+     * @return  pointer to the v_style_t object
      */
     lv_style_t *mainbar_get_style( void );
     /*
      * @brief get main tile switch style
      * 
-     * @return  lv_style_t
+     * @return  pointer to the v_style_t object
      */
     lv_style_t *mainbar_get_switch_style( void );
     /*
      * @brief get main tile slider style
      * 
-     * @return  lv_style_t
+     * @return  pointer to the v_style_t object
      */
     lv_style_t *mainbar_get_slider_style( void );
     /*
      * @brief
      */
-    lv_obj_t * mainbar_obj_create(lv_obj_t *parent);
+    lv_obj_t *mainbar_obj_create(lv_obj_t *parent);
     /*
      * @brief
      */

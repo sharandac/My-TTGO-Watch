@@ -35,7 +35,7 @@
      */
     void screenshot_take( void );
     /*
-     * @brief store a screenshoot to spiffs
+     * @brief store a screenshoot from psram to spiffs
      */
     void screenshot_save( void );
 

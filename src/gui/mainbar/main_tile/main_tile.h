@@ -43,7 +43,7 @@
     /*
      * @brief register an widget icon an the main tile
      * 
-     * @return  lv_obj_t    icon container, here you can set your own icon with imgbtn or NULL if failed
+     * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn or NULL if failed
      */
     lv_obj_t *main_tile_register_widget( void );
     /*

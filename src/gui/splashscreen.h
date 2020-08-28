@@ -24,8 +24,6 @@
 
     /*
      * @brief start splashscreen
-     * 
-     * @param ttgo  pointer to TTGOClass
      */
     void splash_screen_stage_one( void );
     /*
@@ -37,8 +35,6 @@
     void splash_screen_stage_update( const char* msg, int value );
     /*
      * @brief finish splashscreen
-     * 
-     * @param   ttgo    pointer to TTGOClass
      */
     void splash_screen_stage_finish( void );
 

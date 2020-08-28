@@ -22,12 +22,10 @@
 #include "config.h"
 #include <TTGO.h>
 #include <soc/rtc.h>
-#include <WiFi.h>
 #include <esp_wifi.h>
 #include <time.h>
 #include "driver/adc.h"
 #include "esp_pm.h"
-
 
 #include "pmu.h"
 #include "bma.h"
@@ -38,7 +36,6 @@
 #include "motor.h"
 #include "touch.h"
 #include "display.h"
-#include "sound.h"
 
 #include "gui/mainbar/mainbar.h"
 
@@ -58,7 +55,6 @@ void powermgm_setup( void ) {
     blectl_read_config();
     timesync_setup();
     touch_setup();
-//    sound_setup();
 }
 
 /*

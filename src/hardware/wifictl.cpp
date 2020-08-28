@@ -51,6 +51,10 @@ wifictl_config_t wifictl_config;
 
 static esp_wps_config_t esp_wps_config;
 
+void wifictl_send_event_cb( EventBits_t event, char *msg );
+void wifictl_set_event( EventBits_t bits );
+bool wifictl_get_event( EventBits_t bits );
+void wifictl_clear_event( EventBits_t bits );
 void wifictl_save_network( void );
 void wifictl_load_network( void );
 void wifictl_save_config( void );
@@ -171,10 +175,6 @@ void wifictl_setup( void ) {
     vTaskSuspend( _wifictl_Task );
 }
 
-
-/*
- *
- */
 void wifictl_save_config( void ) {
     if ( SPIFFS.exists( WIFICTL_CONFIG_FILE ) ) {
         SPIFFS.remove( WIFICTL_CONFIG_FILE );
@@ -208,9 +208,6 @@ void wifictl_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void wifictl_load_config( void ) {
     if ( SPIFFS.exists( WIFICTL_JSON_CONFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_READ );

@@ -89,8 +89,10 @@
     #define BLECTL_PAIRING_SUCCESS       _BV(9)
     #define BLECTL_PAIRING_ABORT         _BV(10)
 
+    /*
+     * @brief ble setup function
+     */
     void blectl_setup( void );
-
     /*
      * @brief trigger a blectl managemt event
      * 
