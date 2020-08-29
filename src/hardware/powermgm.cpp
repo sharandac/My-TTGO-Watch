@@ -65,14 +65,16 @@ void powermgm_loop( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     // check if a button or doubleclick was release
-    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
+    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
         else {
-            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+            if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
+                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+            }
         }
-        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK );
+        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT );
     }
 
     if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {

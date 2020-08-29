@@ -25,6 +25,7 @@
 #include "display.h"
 #include "powermgm.h"
 #include "motor.h"
+#include "bma.h"
 
 #include "json_psram_allocator.h"
 
@@ -43,6 +44,7 @@ void display_setup( void ) {
     ttgo->openBL();
     ttgo->bl->adjust( 0 );
     ttgo->tft->setRotation( display_config.rotation / 90 );
+    bma_set_rotate_tilt( display_config.rotation );
 }
 
 /*

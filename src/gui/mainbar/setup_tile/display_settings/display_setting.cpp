@@ -27,6 +27,7 @@
 #include "gui/statusbar.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
+#include "hardware/bma.h"
 
 lv_obj_t *display_settings_tile_1 = NULL;
 lv_obj_t *display_settings_tile_2 = NULL;
@@ -310,5 +311,6 @@ static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void display_rotation_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     display_set_rotation( lv_dropdown_get_selected( obj ) * 90 );
+                                            bma_set_rotate_tilt( lv_dropdown_get_selected( obj ) * 90 );
     }
 }

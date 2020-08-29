@@ -34,6 +34,7 @@
     enum {  
         BMA_STEPCOUNTER,
         BMA_DOUBLECLICK,
+        BMA_TILT,
         BMA_CONFIG_NUM
     };
 
@@ -78,5 +79,6 @@
      * @param   bool    true or false
      */
     void bma_set_config( int config, bool enable );
+    void bma_set_rotate_tilt( uint32_t rotation );
 
 #endif // _BMA_H

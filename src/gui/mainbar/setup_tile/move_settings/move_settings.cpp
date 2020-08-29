@@ -34,6 +34,7 @@ uint32_t move_tile_num;
 
 lv_obj_t *stepcounter_onoff=NULL;
 lv_obj_t *doubleclick_onoff=NULL;
+lv_obj_t *tilt_onoff=NULL;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(move_64px);
@@ -42,6 +43,7 @@ static void enter_move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void doubleclick_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void tilt_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void move_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -108,6 +110,21 @@ void move_settings_tile_setup( void ) {
     lv_label_set_text( doubleclick_label, "double click");
     lv_obj_align( doubleclick_label, doubleclick_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *tilt_cont = lv_obj_create( move_settings_tile, NULL );
+    lv_obj_set_size(tilt_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( tilt_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
+    lv_obj_align( tilt_cont, doubleclick_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    tilt_onoff = lv_switch_create( tilt_cont, NULL );
+    lv_obj_add_protect( tilt_onoff, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( tilt_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( tilt_onoff, LV_ANIM_ON );
+    lv_obj_align( tilt_onoff, tilt_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( tilt_onoff, tilt_onoff_event_handler );
+    lv_obj_t *tilt_label = lv_label_create( tilt_cont, NULL);
+    lv_obj_add_style( tilt_label, LV_OBJ_PART_MAIN, &move_settings_style  );
+    lv_label_set_text( tilt_label, "tilt");
+    lv_obj_align( tilt_label, tilt_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     if ( bma_get_config( BMA_DOUBLECLICK ) )
         lv_switch_on( doubleclick_onoff, LV_ANIM_OFF );
     else
@@ -117,6 +134,11 @@ void move_settings_tile_setup( void ) {
         lv_switch_on( stepcounter_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( stepcounter_onoff, LV_ANIM_OFF );
+
+    if ( bma_get_config( BMA_TILT ) )
+        lv_switch_on( tilt_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( tilt_onoff, LV_ANIM_OFF );
 }
 
 
@@ -143,5 +165,11 @@ static void stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 static void doubleclick_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED):  bma_set_config( BMA_DOUBLECLICK, lv_switch_get_state( obj ) );
+    }
+}
+
+static void tilt_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED):  bma_set_config( BMA_TILT, lv_switch_get_state( obj ) );
     }
 }

@@ -32,6 +32,7 @@
     #define POWERMGM_WAKEUP_REQUEST             _BV(5)
     #define POWERMGM_PMU_BUTTON                 _BV(6)
     #define POWERMGM_BMA_DOUBLECLICK            _BV(9)
+    #define POWERMGM_BMA_TILT                   _BV(10)
 
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
