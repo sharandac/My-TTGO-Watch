@@ -35,7 +35,7 @@ bool wifi_init = false;
 EventGroupHandle_t wifictl_status = NULL;
 portMUX_TYPE wifictlMux = portMUX_INITIALIZER_UNLOCKED;
 
-wifictl_event_t *wifictl_event_cb_table = NULL;
+wifictl_event_cb_t *wifictl_event_cb_table = NULL;
 uint32_t wifictl_event_cb_entrys = 0;
 void wifictl_send_event_cb( EventBits_t event, char *msg );
 
@@ -313,16 +313,16 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
     wifictl_event_cb_entrys++;
 
     if ( wifictl_event_cb_table == NULL ) {
-        wifictl_event_cb_table = ( wifictl_event_t * )ps_malloc( sizeof( wifictl_event_t ) * wifictl_event_cb_entrys );
+        wifictl_event_cb_table = ( wifictl_event_cb_t * )ps_malloc( sizeof( wifictl_event_cb_t ) * wifictl_event_cb_entrys );
         if ( wifictl_event_cb_table == NULL ) {
             log_e("wifictl_event_cb_table malloc faild");
             while(true);
         }
     }
     else {
-        wifictl_event_t *new_wifictl_event_cb_table = NULL;
+        wifictl_event_cb_t *new_wifictl_event_cb_table = NULL;
 
-        new_wifictl_event_cb_table = ( wifictl_event_t * )ps_realloc( wifictl_event_cb_table, sizeof( wifictl_event_t ) * wifictl_event_cb_entrys );
+        new_wifictl_event_cb_table = ( wifictl_event_cb_t * )ps_realloc( wifictl_event_cb_table, sizeof( wifictl_event_cb_t ) * wifictl_event_cb_entrys );
         if ( new_wifictl_event_cb_table == NULL ) {
             log_e("wifictl_event_cb_table realloc faild");
             while(true);

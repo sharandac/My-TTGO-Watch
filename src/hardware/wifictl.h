@@ -51,21 +51,23 @@
     typedef struct {
         EventBits_t event;
         WIFICTL_CALLBACK_FUNC event_cb;
-    } wifictl_event_t;
+    } wifictl_event_cb_t;
 
-    #define WIFICTL_CONNECT                 _BV(0)
-    #define WIFICTL_CONNECT_IP              _BV(1)
-    #define WIFICTL_DISCONNECT              _BV(2)
-    #define WIFICTL_ON                      _BV(3)
-    #define WIFICTL_OFF                     _BV(4)
-    #define WIFICTL_ACTIVE                  _BV(5)
-    #define WIFICTL_ON_REQUEST              _BV(6)
-    #define WIFICTL_OFF_REQUEST             _BV(7)
-    #define WIFICTL_WPS_REQUEST             _BV(8)
-    #define WIFICTL_WPS_SUCCESS             _BV(9)
-    #define WIFICTL_WPS_FAILED              _BV(10)
-    #define WIFICTL_SCAN                    _BV(11)
-    #define WIFICTL_FIRST_RUN               _BV(12)
+    enum wifictl_event_t {
+        WIFICTL_CONNECT                = _BV(0),
+        WIFICTL_CONNECT_IP             = _BV(1),
+        WIFICTL_DISCONNECT             = _BV(2),
+        WIFICTL_ON                     = _BV(3),
+        WIFICTL_OFF                    = _BV(4),
+        WIFICTL_ACTIVE                 = _BV(5),
+        WIFICTL_ON_REQUEST             = _BV(6),
+        WIFICTL_OFF_REQUEST            = _BV(7),
+        WIFICTL_WPS_REQUEST            = _BV(8),
+        WIFICTL_WPS_SUCCESS            = _BV(9),
+        WIFICTL_WPS_FAILED             = _BV(10),
+        WIFICTL_SCAN                   = _BV(11),
+        WIFICTL_FIRST_RUN              = _BV(12)
+    };
 
     /*
      * @brief setup wifi controller routine
