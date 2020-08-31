@@ -76,5 +76,11 @@
      * @return  true if equal, otherwise false
      */
     bool rtcctl_is_time( uint8_t hour, uint8_t minute );
+    /*
+     * @brief   get the current alarm state
+     * 
+     * @return  true if enable, false is disable
+     */
+    bool rtcctl_get_alarmstate( void );
 
 #endif // _RTCCTL_H

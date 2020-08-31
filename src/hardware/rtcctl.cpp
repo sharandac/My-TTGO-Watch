@@ -19,14 +19,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "TTGO.h"
+#include <TTGO.h>
 
 #include "rtcctl.h"
-#include <stdbool.h>
-#include <hardware/powermgm.h>
+#include "hardware/powermgm.h"
 
 EventGroupHandle_t rtcctl_status = NULL;
 portMUX_TYPE rtcctlMux = portMUX_INITIALIZER_UNLOCKED;
+
+static bool alarm_enable = false;
 
 static void IRAM_ATTR rtcctl_irq( void );
 void rtcctl_send_event_cb( EventBits_t event );
@@ -39,11 +40,12 @@ rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
 
 void rtcctl_setup( void ){
-
+    TTGOClass *ttgo = TTGOClass::getWatch();
     rtcctl_status = xEventGroupCreate();
 
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
+    rtcctl_disable_alarm();
 }
 
 void rtcctl_loop( void ) {
@@ -139,13 +141,19 @@ void rtcctl_set_alarm( uint8_t hour, uint8_t minute ){
 void rtcctl_enable_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     ttgo->rtc->enableAlarm();
+    alarm_enable = true;
     rtcctl_send_event_cb( RTCCTL_ALARM_ENABLE );
 }
 
 void rtcctl_disable_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     ttgo->rtc->disableAlarm();
+    alarm_enable = false;
     rtcctl_send_event_cb( RTCCTL_ALARM_DISABLE );
+}
+
+bool rtcctl_get_alarmstate( void ) {
+    return( alarm_enable );
 }
 
 bool rtcctl_is_time( uint8_t hour, uint8_t minute ){
