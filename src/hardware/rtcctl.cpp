@@ -40,7 +40,6 @@ rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
 
 void rtcctl_setup( void ){
-    TTGOClass *ttgo = TTGOClass::getWatch();
     rtcctl_status = xEventGroupCreate();
 
     pinMode( RTC_INT, INPUT_PULLUP);
