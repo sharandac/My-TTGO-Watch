@@ -42,6 +42,7 @@
         STATUSBAR_WIFI,
         STATUSBAR_BELL,
         STATUSBAR_WARNING,
+        STATUSBAR_ALARM,
         STATUSBAR_NUM
     } statusbar_icon_t;
     
