@@ -36,6 +36,7 @@
 #include "motor.h"
 #include "touch.h"
 #include "display.h"
+#include "rtcctl.h"
 
 #include "gui/mainbar/mainbar.h"
 
@@ -55,6 +56,7 @@ void powermgm_setup( void ) {
     blectl_read_config();
     timesync_setup();
     touch_setup();
+    rtcctl_setup();
 }
 
 /*
@@ -65,7 +67,7 @@ void powermgm_loop( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     // check if a button or doubleclick was release
-    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT ) ) {
+    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
@@ -74,7 +76,7 @@ void powermgm_loop( void ) {
                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
             }
         }
-        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT );
+        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM );
     }
 
     if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {
@@ -146,6 +148,7 @@ void powermgm_loop( void ) {
             setCpuFrequencyMhz( 10 );
             gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
             gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            gpio_wakeup_enable ( (gpio_num_t)RTC_INT, GPIO_INTR_LOW_LEVEL );
             esp_sleep_enable_gpio_wakeup ();
             esp_light_sleep_start();
             // from here, the consumption is round about 2.5mA
@@ -169,6 +172,7 @@ void powermgm_loop( void ) {
         pmu_loop();
         bma_loop();
         display_loop();
+        rtcctl_loop();
     }
 }
 
