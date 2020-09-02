@@ -109,10 +109,10 @@ void timesync_read_config( void ) {
                 log_e("update check deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                timesync_config.daylightsave = doc["daylightsave"].as<bool>();
-                timesync_config.timesync = doc["timesync"].as<bool>();
-                timesync_config.timezone = doc["timezone"].as<int32_t>();
-                timesync_config.use_24hr_clock = doc["use_24hr_clock"].as<bool>();
+                timesync_config.daylightsave = doc["daylightsave"] | false;
+                timesync_config.timesync = doc["timesync"] | true;
+                timesync_config.timezone = doc["timezone"] | 0;
+                timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
             }        
             doc.clear();
         }
