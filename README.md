@@ -61,3 +61,24 @@ wget x.x.x.x/shot ; wget x.x.x.x/screen.565
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen9.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen10.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen11.png)
+
+# Contributors
+
+Special thanks to the following people for their help:
+
+[5tormChild](https://github.com/5tormChild)<br>
+[bwagstaff](https://github.com/bwagstaff)<br>
+[chrismcna](https://github.com/chrismcna)<br>
+[datacute](https://github.com/datacute)<br>
+[joshvito](https://github.com/joshvito)<br>
+[JoanMCD](https://github.com/JoanMCD)<br>
+
+and the following projects:
+
+[ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br>
+[AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br>
+[ESP32SSDP](https://github.com/luc-github/ESP32SSDP)<br>
+[ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br>
+[LVGL](https://github.com/lvgl)<br>
+[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
+[TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
