@@ -84,6 +84,7 @@ void timesync_save_config( void ) {
         doc["daylightsave"] = timesync_config.daylightsave;
         doc["timesync"] = timesync_config.timesync;
         doc["timezone"] = timesync_config.timezone;
+        doc["use_24hr_clock"] = timesync_config.use_24hr_clock;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -111,6 +112,7 @@ void timesync_read_config( void ) {
                 timesync_config.daylightsave = doc["daylightsave"].as<bool>();
                 timesync_config.timesync = doc["timesync"].as<bool>();
                 timesync_config.timezone = doc["timezone"].as<int32_t>();
+                timesync_config.use_24hr_clock = doc["use_24hr_clock"].as<bool>();
             }        
             doc.clear();
         }
@@ -165,6 +167,16 @@ void timesync_set_timezone( int32_t timezone ) {
     timesync_config.timezone = timezone;
     timesync_save_config();
 }
+
+void timesync_set_24hr( bool use24 ) {
+    timesync_config.use_24hr_clock = use24;
+    timesync_save_config();
+}
+
+bool timesync_get_24hr(void) {
+    return (timesync_config.use_24hr_clock);
+}
+
 
 void timesyncToSystem( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();

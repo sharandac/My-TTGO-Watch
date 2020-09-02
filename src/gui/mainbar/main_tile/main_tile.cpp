@@ -26,6 +26,8 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
 #include "main_tile.h"
+#include "gui/statusbar.h"
+#include "hardware/timesync.h"
 
 static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
@@ -138,11 +140,12 @@ uint32_t main_tile_get_tile_num( void ) {
     return( main_tile_num );
 }
 
-void main_tile_update_task( lv_task_t * task ) {
+void main_tile_update_task( lv_task_t * task) {
     time_t now;
     struct tm  info;
     char time_str[64]="";
     static char *old_time_str = NULL;
+    const char * time_fmt = timesync_get_24hr() ? "%H:%M" : "%I:%M";
 
     // on first run, alloc psram
     if ( old_time_str == NULL ) {
@@ -155,8 +158,7 @@ void main_tile_update_task( lv_task_t * task ) {
 
     time( &now );
     localtime_r( &now, &info );
-
-    strftime( time_str, sizeof(time_str), "%H:%M", &info );
+    strftime( time_str, sizeof(time_str), time_fmt, &info );
 
     // only update while time_str changes
     if ( strcmp( time_str, old_time_str ) ) {

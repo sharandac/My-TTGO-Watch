@@ -33,6 +33,7 @@
         bool timesync = true;
         bool daylightsave = false;
         int32_t timezone = 0;
+        bool use_24hr_clock = true;
     } timesync_config_t;
 
     /*
@@ -83,6 +84,19 @@
      * @param timezone  timezone from UTC-12 to UTC+12
      */
     void timesync_set_timezone( int32_t timezone );
+
+    /*
+     * @brief get the 24hr clock setting
+     * 
+     * @return  true if 24 clock enabled
+     */
+    bool timesync_get_24hr(void);
+    /*
+     * @brief enable/disable 24 hour clock format
+     * 
+     * @param use24  true or false
+     */
+    void timesync_set_24hr( bool use24 );
     /*
      * @brief wrapper function to sync the system with rtc
      */
