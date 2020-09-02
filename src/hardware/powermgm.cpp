@@ -3,7 +3,7 @@
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
- 
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ void powermgm_loop( void ) {
         lv_disp_trig_activity( NULL );
         powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
     }
-  
+
     // drive into
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
@@ -98,7 +98,7 @@ void powermgm_loop( void ) {
 
         timesyncToSystem();
 
-        wifictl_wakeup();
+        // wifictl_wakeup();
         blectl_wakeup();
 
         log_i("Free heap: %d", ESP.getFreeHeap());
@@ -114,7 +114,7 @@ void powermgm_loop( void ) {
         else {
             powermgm_set_event( POWERMGM_WAKEUP );
         }
-    }        
+    }
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 

@@ -3,7 +3,7 @@
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
- 
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,13 +43,13 @@
 
     /*
      * @brief setup display
-     * 
+     *
      * @param   ttgo    pointer to an TTGOClass
      */
     void display_setup( void );
     /*
      * @brief display loop
-     * 
+     *
      * @param   ttgo    pointer to an TTGOClass
      */
     void display_loop( void );
@@ -63,49 +63,49 @@
     void display_read_config( void );
     /*
      * @brief read the timeout from config
-     * 
+     *
      * @return  timeout in seconds
      */
     uint32_t display_get_timeout( void );
     /*
      * @brief set timeout for the display
-     * 
+     *
      * @param timeout in seconds
      */
     void display_set_timeout( uint32_t timeout );
     /*
      * @brief read the brightness from config
-     * 
+     *
      * @return  brightness from 0-255
      */
     uint32_t display_get_brightness( void );
     /*
      * @brief set brightness for the display
-     * 
+     *
      * @param brightness brightness from 0-255
      */
     void display_set_brightness( uint32_t brightness );
     /*
      * @brief read the rotate from the display
-     * 
+     *
      * @return  rotation from 0-270 degree in 90 degree steps
      */
     uint32_t display_get_rotation( void );
     /*
      * @brief set the rotate for the display
-     * 
+     *
      * @param rotation from 0-270 in 90 degree steps
      */
     void display_set_rotation( uint32_t rotation );
     /*
      * @brief read the block_return_maintile while wakeup
-     * 
+     *
      * @param rotation from 0-270 in 90 degree steps
      */
     bool display_get_block_return_maintile( void );
     /*
      * @brief set the block_return_maintile while wakeup
-     * 
+     *
      * @param block_return_maintile true or false, true means no autoreturn zu maintile
      */
     void display_set_block_return_maintile( bool block_return_maintile );
@@ -118,5 +118,9 @@
      */
     void display_wakeup( bool silence );
 
+    /*
+     * @brief display LE mode on min inactive time
+     */
+    void display_powersave();
 
 #endif // _DISPLAY_H

@@ -3,7 +3,7 @@
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
- 
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@
 
 #include "json_psram_allocator.h"
 
+#include "hardware/pmu.h"
+
 display_config_t display_config;
 
 static uint8_t dest_brightness = 0;
@@ -51,27 +53,20 @@ void display_setup( void ) {
  * loop routine for handling IRQ in main loop
  */
 void display_loop( void ) {
+  if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP )) {
+    return;
+  }
+
   TTGOClass *ttgo = TTGOClass::getWatch();
 
-  if ( !powermgm_get_event( POWERMGM_STANDBY ) && !powermgm_get_event( POWERMGM_SILENCE_WAKEUP )) {
-    if ( dest_brightness != brightness ) {
-      if ( brightness < dest_brightness ) {
-        brightness++;
-        ttgo->bl->adjust( brightness );
-      }
-      else {
-        brightness--;
-        ttgo->bl->adjust( brightness );
-      }
-    }
-    if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
-      if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-          dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
-      }
-      else {
-          dest_brightness = display_get_brightness();
-      }
-    }
+  if ( dest_brightness != brightness ) {
+    ttgo->bl->adjust( brightness < dest_brightness ? ++brightness : --brightness );
+  }
+  if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT &&
+    ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) )) {
+    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+  } else {
+     display_powersave();
   }
 }
 
@@ -143,7 +138,7 @@ void display_save_config( void ) {
  *
  */
 void display_read_config( void ) {
-    if ( SPIFFS.exists( DISPLAY_JSON_CONFIG_FILE ) ) {        
+    if ( SPIFFS.exists( DISPLAY_JSON_CONFIG_FILE ) ) {
         fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );
         if (!file) {
             log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
@@ -161,7 +156,7 @@ void display_read_config( void ) {
                 display_config.rotation = doc["rotation"].as<uint32_t>();
                 display_config.timeout = doc["timeout"].as<uint32_t>();
                 display_config.block_return_maintile = doc["block_return_maintile"].as<bool>();
-            }        
+            }
             doc.clear();
         }
         file.close();
@@ -182,7 +177,7 @@ void display_read_config( void ) {
                 file.read( (uint8_t *)&display_config, filesize );
                 file.close();
                 display_save_config();
-                return; 
+                return;
             }
         file.close();
         }
@@ -190,7 +185,7 @@ void display_read_config( void ) {
 }
 
 uint32_t display_get_timeout( void ) {
-    return( display_config.timeout );
+    return display_config.timeout;
 }
 
 void display_set_timeout( uint32_t timeout ) {
@@ -198,7 +193,7 @@ void display_set_timeout( uint32_t timeout ) {
 }
 
 uint32_t display_get_brightness( void ) {
-    return( display_config.brightness );
+    return display_config.brightness;
 }
 
 void display_set_brightness( uint32_t brightness ) {
@@ -207,11 +202,11 @@ void display_set_brightness( uint32_t brightness ) {
 }
 
 uint32_t display_get_rotation( void ) {
-  return( display_config.rotation );
+  return display_config.rotation;
 }
 
 bool display_get_block_return_maintile( void ) {
-  return( display_config.block_return_maintile );
+  return display_config.block_return_maintile;
 }
 
 void display_set_block_return_maintile( bool block_return_maintile ) {
@@ -223,4 +218,13 @@ void display_set_rotation( uint32_t rotation ) {
   display_config.rotation = rotation;
   ttgo->tft->setRotation( rotation / 90 );
   lv_obj_invalidate( lv_scr_act() );
+}
+
+void display_powersave() {
+    if (!pmu_is_charging() && !pmu_is_vbus_plug() &&
+      lv_disp_get_inactive_time(NULL) > (DISPLAY_MIN_TIMEOUT * 1000)) {
+      dest_brightness = DISPLAY_MIN_BRIGHTNESS;
+    } else {
+      dest_brightness = display_get_brightness();
+    }
 }
