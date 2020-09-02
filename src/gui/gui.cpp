@@ -47,9 +47,6 @@
 
 LV_IMG_DECLARE(bg2)
 
-/**
- * Create a demo application
- */
 void gui_setup(void)
 {
     //Create wallpaper
@@ -83,9 +80,6 @@ void gui_setup(void)
     return;
 }
 
-/*
- *
- */
 void gui_loop( void ) {
     // if we run in silence mode    
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {

@@ -33,9 +33,7 @@ display_config_t display_config;
 
 static uint8_t dest_brightness = 0;
 static uint8_t brightness = 0;
-/*
- *
- */
+
 void display_setup( void ) {
     display_read_config();
 
@@ -47,9 +45,6 @@ void display_setup( void ) {
     bma_set_rotate_tilt( display_config.rotation );
 }
 
-/*
- * loop routine for handling IRQ in main loop
- */
 void display_loop( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -109,9 +104,6 @@ void display_wakeup( bool silence ) {
   }
 }
 
-/*
- *
- */
 void display_save_config( void ) {
     if ( SPIFFS.exists( DISPLAY_CONFIG_FILE ) ) {
         SPIFFS.remove( DISPLAY_CONFIG_FILE );
@@ -139,9 +131,6 @@ void display_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void display_read_config( void ) {
     if ( SPIFFS.exists( DISPLAY_JSON_CONFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );

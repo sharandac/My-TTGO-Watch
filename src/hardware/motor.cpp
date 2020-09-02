@@ -34,9 +34,6 @@ bool motor_init = false;
 
 motor_config_t motor_config;
 
-/*
- *
- */
 void IRAM_ATTR onTimer() {
     portENTER_CRITICAL_ISR(&timerMux);
     if ( motor_run_time_counter >0 ) {
@@ -49,9 +46,6 @@ void IRAM_ATTR onTimer() {
     portEXIT_CRITICAL_ISR(&timerMux);
 }
 
-/*
- *
- */
 void motor_setup( void ) {
     if ( motor_init == true )
         return;
@@ -68,9 +62,6 @@ void motor_setup( void ) {
     motor_vibe( 10 );
 }
 
-/*
- *
- */
 void motor_vibe( int time ) {
     if ( motor_init == false )
         return;
@@ -91,9 +82,6 @@ void motor_set_vibe_config( bool enable ) {
     motor_save_config();
 }
 
-/*
- *
- */
 void motor_save_config( void ) {
     if ( SPIFFS.exists( MOTOR_CONFIG_FILE ) ) {
         SPIFFS.remove( MOTOR_CONFIG_FILE );
@@ -118,9 +106,6 @@ void motor_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void motor_read_config( void ) {
     if ( SPIFFS.exists( MOTOR_JSON_CONFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_READ );

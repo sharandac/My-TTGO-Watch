@@ -61,9 +61,6 @@ void wifictl_save_config( void );
 void wifictl_load_config( void );
 void wifictl_Task( void * pvParameters );
 
-/*
- *
- */
 void wifictl_setup( void ) {
     if ( wifi_init == true )
         return;
@@ -278,27 +275,18 @@ void wifictl_set_webserver( bool webserver ) {
   wifictl_save_config();
 }
 
-/*
- *
- */
 void wifictl_set_event( EventBits_t bits ) {
     portENTER_CRITICAL(&wifictlMux);
     xEventGroupSetBits( wifictl_status, bits );
     portEXIT_CRITICAL(&wifictlMux);
 }
 
-/*
- *
- */
 void wifictl_clear_event( EventBits_t bits ) {
     portENTER_CRITICAL(&wifictlMux);
     xEventGroupClearBits( wifictl_status, bits );
     portEXIT_CRITICAL(&wifictlMux);
 }
 
-/*
- *
- */
 bool wifictl_get_event( EventBits_t bits ) {
     portENTER_CRITICAL(&wifictlMux);
     EventBits_t temp = xEventGroupGetBits( wifictl_status ) & bits;
@@ -334,9 +322,7 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb = wifictl_event_cb;
     log_i("register wifictl_event_cb success (%p)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb );
 }
-/*
- *
- */
+
 void wifictl_send_event_cb( EventBits_t event, char *msg ) {
     if ( wifictl_event_cb_entrys == 0 ) {
       return;
@@ -351,9 +337,6 @@ void wifictl_send_event_cb( EventBits_t event, char *msg ) {
     }
 }
 
-/*
- *
- */
 void wifictl_load_network( void ) {
   fs::File file = SPIFFS.open( WIFICTL_LIST_FILE, FILE_READ );
 
@@ -372,9 +355,6 @@ void wifictl_load_network( void ) {
   }
 }
 
-/*
- *
- */
 bool wifictl_is_known( const char* networkname ) {
   if ( wifi_init == false )
     return( false );
@@ -387,9 +367,6 @@ bool wifictl_is_known( const char* networkname ) {
   return( false );
 }
 
-/*
- *
- */
 bool wifictl_delete_network( const char *ssid ) {
   if ( wifi_init == false )
     return( false );
@@ -405,9 +382,6 @@ bool wifictl_delete_network( const char *ssid ) {
   return( false );
 }
 
-/*
- *
- */
 bool wifictl_insert_network( const char *ssid, const char *password ) {
   if ( wifi_init == false )
     return( false );
@@ -436,9 +410,6 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
   return( false ); 
 }
 
-/*
- *
- */
 void wifictl_on( void ) {
   if ( wifi_init == false )
     return;
@@ -451,9 +422,6 @@ void wifictl_on( void ) {
   vTaskResume( _wifictl_Task );
 }
 
-/*
- *
- */
 void wifictl_off( void ) {
   if ( wifi_init == false )
     return;
@@ -514,9 +482,6 @@ void wifictl_start_wps( void ) {
   ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
 }
 
-/*
- * 
- */
 void wifictl_Task( void * pvParameters ) {
   if ( wifi_init == false )
     return;

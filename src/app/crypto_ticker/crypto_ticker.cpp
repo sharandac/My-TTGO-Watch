@@ -26,32 +26,24 @@
 #include "crypto_ticker_fetch.h"
 #include "crypto_ticker_main.h"
 #include "crypto_ticker_setup.h"
-
 #ifdef CRYPTO_TICKER_WIDGET
-
-#include "crypto_ticker_widget.h"
-
+    #include "crypto_ticker_widget.h"
 #endif // CRYPTO_TICKER_WIDGET
 
-#include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/app.h"
 
 #include "hardware/json_psram_allocator.h"
 
-
-
-
 crypto_ticker_config_t crypto_ticker_config;
-
 
 uint32_t crypto_ticker_main_tile_num;
 uint32_t crypto_ticker_setup_tile_num;
 
 // app icon container
-lv_obj_t *crypto_ticker_icon_cont = NULL;
-lv_obj_t *crypto_ticker_icon = NULL;
+app_icon_t *crypto_ticker_app = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(bitcoin_64px);
@@ -72,34 +64,16 @@ void crypto_ticker_setup( void ) {
     crypto_ticker_main_tile_num = mainbar_add_app_tile( 1, 2 );
     crypto_ticker_setup_tile_num = crypto_ticker_main_tile_num + 1;
 
-    // create an app icon, label it and get the lv_obj_t icon container
-    crypto_ticker_icon_cont = app_tile_register_app( "crypto\nticker");
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/
-    crypto_ticker_icon = lv_imgbtn_create( crypto_ticker_icon_cont, NULL );
-    lv_imgbtn_set_src( crypto_ticker_icon, LV_BTN_STATE_RELEASED, &bitcoin_64px);
-    lv_imgbtn_set_src( crypto_ticker_icon, LV_BTN_STATE_PRESSED, &bitcoin_64px);
-    lv_imgbtn_set_src( crypto_ticker_icon, LV_BTN_STATE_CHECKED_RELEASED, &bitcoin_64px);
-    lv_imgbtn_set_src( crypto_ticker_icon, LV_BTN_STATE_CHECKED_PRESSED, &bitcoin_64px);
-    lv_obj_reset_style_list( crypto_ticker_icon, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_icon , crypto_ticker_icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
-    lv_obj_set_event_cb( crypto_ticker_icon, enter_crypto_ticker_event_cb );
-
-    // make app icon drag scroll the mainbar
-    mainbar_add_slide_element(crypto_ticker_icon);
+    // register app and widget icon
+    crypto_ticker_app = app_register( "crypto\nticker", &bitcoin_64px, enter_crypto_ticker_event_cb );
+#ifdef CRYPTO_TICKER_WIDGET
+    crypto_ticker_widget_setup();
+#endif // CRYPTO_TICKER_WIDGET
 
     // init main and setup tile, see crypto_ticker_main.cpp and crypto_ticker_setup.cpp
     crypto_ticker_main_setup( crypto_ticker_main_tile_num );
     crypto_ticker_setup_setup( crypto_ticker_setup_tile_num );
 
-
-    #ifdef CRYPTO_TICKER_WIDGET
-
-    crypto_ticker_widget_setup();
-
-    #endif // CRYPTO_TICKER_WIDGET
 }
 
 uint32_t crypto_ticker_get_app_main_tile_num( void ) {

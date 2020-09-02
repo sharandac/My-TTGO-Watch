@@ -27,8 +27,6 @@
 //    #define EXAMPLE_WIDGET    // uncomment if an widget need
 
     void example_app_setup( void );
-    void example_app_hide_app_icon_info( bool show );
-    void example_app_hide_widget_icon_info( bool show );
     uint32_t example_app_get_app_setup_tile_num( void );
     uint32_t example_app_get_app_main_tile_num( void );
 

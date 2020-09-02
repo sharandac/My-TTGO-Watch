@@ -9,16 +9,12 @@
 #include "motor.h"
 #include "blectl.h"
 
-
 #include "gui/statusbar.h"
 
 EventGroupHandle_t pmu_event_handle = NULL;
 void IRAM_ATTR pmu_irq( void );
 pmu_config_t pmu_config;
 
-/*
- * init the pmu: AXP202 
- */
 void pmu_setup( void ) {
     pmu_event_handle = xEventGroupCreate();
 
@@ -62,9 +58,6 @@ void pmu_setup( void ) {
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
 }
 
-/*
- * IRQ routine AXP202
- */
 void IRAM_ATTR  pmu_irq( void ) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     /*
@@ -121,9 +114,7 @@ void pmu_wakeup( void ) {
     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
 }
-/*
- *
- */
+
 void pmu_save_config( void ) {
     if ( SPIFFS.exists( PMU_CONFIG_FILE ) ) {
         SPIFFS.remove( PMU_CONFIG_FILE );
@@ -158,9 +149,6 @@ void pmu_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void pmu_read_config( void ) {
     if ( SPIFFS.exists( PMU_JSON_CONFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_READ );
@@ -246,9 +234,6 @@ void pmu_set_experimental_power_save( bool value ) {
     pmu_save_config();
 }
 
-/*
- * loop routine for handling IRQ in main loop
- */
 void pmu_loop( void ) {
     static uint64_t nextmillis = 0;
     bool updatetrigger = false;

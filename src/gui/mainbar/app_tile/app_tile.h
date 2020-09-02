@@ -40,12 +40,15 @@
     #define APP_FIRST_Y_POS         ( 240 - ( APP_ICON_Y_SIZE * MAX_APPS_ICON_VERT + APP_ICON_Y_CLEARENCE * ( MAX_APPS_ICON_VERT - 1 ) ) ) / 2
 
     typedef struct {
-        lv_obj_t *app;
+        lv_obj_t *app_icon_cont;
+        lv_obj_t *app_icon_img;
+        lv_obj_t *app_icon_indicator;
         lv_obj_t *label;
+        lv_event_cb_t *app_icon_event_cb;
         lv_coord_t x;
         lv_coord_t y;
         bool active;
-    } lv_app_icon_t;
+    } app_icon_t;
 
     /*
      * @brief setup the app tile
@@ -59,6 +62,12 @@
      * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn
      */
     lv_obj_t *app_tile_register_app( const char* appname );
+    /*
+     * @brief   get the an free app icon stucture
+     * 
+     * @return  pointer to the free lv_app_icon_t structure
+     */
+    app_icon_t *app_tile_get_free_app_icon( void );
     /*
      * @brief get the tile number for the app tile
      * 

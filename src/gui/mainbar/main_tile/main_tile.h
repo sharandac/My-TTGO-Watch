@@ -27,14 +27,20 @@
     #define MAX_WIDGET_NUM      3
     #define WIDGET_X_SIZE       64
     #define WIDGET_Y_SIZE       80
+    #define WIDGET_LABEL_Y_SIZE 16
     #define WIDGET_X_CLEARENCE  16
 
     typedef struct {
-        lv_obj_t *widget;
+        lv_obj_t *icon_cont;
+        lv_obj_t *icon_img;
+        lv_obj_t *icon_indicator;
+        lv_obj_t *label;
+        lv_obj_t *ext_label;
+        lv_event_cb_t *icon_event_cb;
         lv_coord_t x;
         lv_coord_t y;
         bool active;
-    } lv_widget_entry_t;
+    } widget_icon_t;
 
     /*
      * @brief setup the app tile
@@ -46,6 +52,8 @@
      * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn or NULL if failed
      */
     lv_obj_t *main_tile_register_widget( void );
+    void main_tile_align_widgets( void );
+    widget_icon_t *main_tile_get_free_widget_icon( void );
     /*
      * @brief get the tile number for the main tile
      * 

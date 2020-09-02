@@ -38,7 +38,7 @@ static lv_style_t *style;
 static lv_style_t timestyle;
 static lv_style_t datestyle;
 
-lv_widget_entry_t widget_entry[ MAX_WIDGET_NUM ];
+widget_icon_t widget_entry[ MAX_WIDGET_NUM ];
 
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -90,12 +90,31 @@ void main_tile_setup( void ) {
     lv_obj_align( datelabel, timelabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
     for ( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
-        widget_entry[ widget ].widget = mainbar_obj_create( main_cont );
         widget_entry[ widget ].active = false;
-        lv_obj_reset_style_list( widget_entry[ widget ].widget, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( widget_entry[ widget ].widget, LV_OBJ_PART_MAIN, style );
-        lv_obj_set_size( widget_entry[ widget ].widget, 64, 80 );
-        lv_obj_set_hidden( widget_entry[ widget ].widget, true );
+
+        widget_entry[ widget ].icon_cont = mainbar_obj_create( main_cont );
+        lv_obj_reset_style_list( widget_entry[ widget ].icon_cont, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( widget_entry[ widget ].icon_cont, LV_OBJ_PART_MAIN, style );
+        lv_obj_set_size( widget_entry[ widget ].icon_cont, WIDGET_X_SIZE, WIDGET_Y_SIZE );
+        lv_obj_set_hidden( widget_entry[ widget ].icon_cont, true );
+        // create app label
+        widget_entry[ widget ].label = lv_label_create( widget_entry[ widget ].icon_cont , NULL );
+        mainbar_add_slide_element( widget_entry[ widget ].label);
+        lv_obj_reset_style_list( widget_entry[ widget ].label, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( widget_entry[ widget ].label, LV_OBJ_PART_MAIN, style );
+        lv_obj_set_size( widget_entry[ widget ].label, WIDGET_X_SIZE, WIDGET_LABEL_Y_SIZE );
+        lv_obj_align( widget_entry[ widget ].label , widget_entry[ widget ].icon_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+        // create app label
+        widget_entry[ widget ].ext_label = lv_label_create( widget_entry[ widget ].icon_cont , NULL );
+        mainbar_add_slide_element( widget_entry[ widget ].ext_label);
+        lv_obj_reset_style_list( widget_entry[ widget ].ext_label, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( widget_entry[ widget ].ext_label, LV_OBJ_PART_MAIN, style );
+        lv_obj_set_size( widget_entry[ widget ].ext_label, WIDGET_X_SIZE, WIDGET_LABEL_Y_SIZE );
+        lv_obj_align( widget_entry[ widget ].ext_label , widget_entry[ widget ].label, LV_ALIGN_OUT_TOP_MID, 0, 0 );
+
+        lv_obj_set_hidden( widget_entry[ widget ].icon_cont, true );
+        lv_obj_set_hidden( widget_entry[ widget ].label, true );
+        lv_obj_set_hidden( widget_entry[ widget ].ext_label, true );
     }
 
     main_tile_task = lv_task_create( main_tile_update_task, 500, LV_TASK_PRIO_MID, NULL );
@@ -105,9 +124,20 @@ lv_obj_t *main_tile_register_widget( void ) {
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             widget_entry[ widget ].active = true;
-            lv_obj_set_hidden( widget_entry[ widget ].widget, false );
+            lv_obj_set_hidden( widget_entry[ widget ].icon_cont, false );
             main_tile_align_widgets();
-            return( widget_entry[ widget ].widget );
+            return( widget_entry[ widget ].icon_cont );
+        }
+    }
+    log_e("no more space for a widget");
+    return( NULL );
+}
+
+widget_icon_t *main_tile_get_free_widget_icon( void ) {
+    for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
+        if ( widget_entry[ widget ].active == false ) {
+            lv_obj_set_hidden( widget_entry[ widget ].icon_cont, false );
+            return( &widget_entry[ widget ] );
         }
     }
     log_e("no more space for a widget");
@@ -130,7 +160,7 @@ void main_tile_align_widgets( void ) {
     xpos = 0 - ( ( WIDGET_X_SIZE * active_widgets ) + ( ( active_widgets - 1 ) * WIDGET_X_CLEARENCE ) ) / 2;
 
     for ( int widget = 0 ; widget < active_widgets ; widget++ ) {
-        lv_obj_align( widget_entry[ widget ].widget , main_cont, LV_ALIGN_IN_BOTTOM_MID, xpos + ( WIDGET_X_SIZE * widget ) + ( widget * WIDGET_X_CLEARENCE ) + 32 , -32 );
+        lv_obj_align( widget_entry[ widget ].icon_cont , main_cont, LV_ALIGN_IN_BOTTOM_MID, xpos + ( WIDGET_X_SIZE * widget ) + ( widget * WIDGET_X_CLEARENCE ) + 32 , -32 );
     }
 
 }

@@ -24,11 +24,9 @@
 
     #include <TTGO.h>
 
-    //#define CRYPTO_TICKER_WIDGET    // uncomment if an widget need, comment to hide
+//    #define CRYPTO_TICKER_WIDGET    // uncomment if an widget need, comment to hide
 
     #define crypto_ticker_JSON_CONFIG_FILE        "/crypto-ticker.json"
-
-    
 
     typedef struct {
             char symbol[10] = "";

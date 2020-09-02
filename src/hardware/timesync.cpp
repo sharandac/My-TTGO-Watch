@@ -177,7 +177,6 @@ bool timesync_get_24hr(void) {
     return (timesync_config.use_24hr_clock);
 }
 
-
 void timesyncToSystem( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
   ttgo->rtc->syncToSystem();

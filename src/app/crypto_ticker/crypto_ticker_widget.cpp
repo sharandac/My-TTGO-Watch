@@ -29,6 +29,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget.h"
 
 #include "hardware/json_psram_allocator.h"
 #include "hardware/wifictl.h"
@@ -39,79 +40,32 @@ void crypto_ticker_widget_sync_Task( void * pvParameters );
 
 crypto_ticker_widget_data_t crypto_ticker_widget_data;
 
-// widget icon container
-lv_obj_t *crypto_ticker_widget_cont = NULL;
-lv_obj_t *crypto_ticker_widget_icon = NULL;
-lv_obj_t *crypto_ticker_widget_icon_info = NULL;
-lv_obj_t *crypto_ticker_widget_label = NULL;
+// widget icon
+widget_icon_t *crypto_ticker_widget = NULL;
 
 static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg );
 
-// declare you images or fonts you need
-LV_IMG_DECLARE(info_ok_16px);
-LV_IMG_DECLARE(info_fail_16px);
-
 LV_IMG_DECLARE(bitcoin_64px);
 LV_IMG_DECLARE(bitcoin_48px);
 
-
-
 void crypto_ticker_widget_setup( void ) {
     
-
-    // get an widget container from main_tile
-    // remember, an widget icon must have an size of 64x64 pixel
-    // total size of the container is 64x80 pixel, the bottom 16 pixel is for your label
-    crypto_ticker_widget_cont = main_tile_register_widget();
-    crypto_ticker_widget_icon = lv_imgbtn_create( crypto_ticker_widget_cont, NULL );
-    lv_imgbtn_set_src( crypto_ticker_widget_icon, LV_BTN_STATE_RELEASED, &bitcoin_48px);
-    lv_imgbtn_set_src( crypto_ticker_widget_icon, LV_BTN_STATE_PRESSED, &bitcoin_48px);
-    lv_imgbtn_set_src( crypto_ticker_widget_icon, LV_BTN_STATE_CHECKED_RELEASED, &bitcoin_48px);
-    lv_imgbtn_set_src( crypto_ticker_widget_icon, LV_BTN_STATE_CHECKED_PRESSED, &bitcoin_48px);
-    lv_obj_reset_style_list( crypto_ticker_widget_icon, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_widget_icon , crypto_ticker_widget_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
-    lv_obj_set_event_cb( crypto_ticker_widget_icon, enter_crypto_ticker_widget_event_cb );
-
-    // make widget icon drag scroll the mainbar
-    mainbar_add_slide_element(crypto_ticker_widget_icon);
-
-    // set an small info icon at your widget icon to inform the user about the state or news
-    crypto_ticker_widget_icon_info = lv_img_create( crypto_ticker_widget_cont, NULL );
-    lv_img_set_src( crypto_ticker_widget_icon_info, &info_ok_16px );
-    lv_obj_align( crypto_ticker_widget_icon_info, crypto_ticker_widget_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
-    lv_obj_set_hidden( crypto_ticker_widget_icon_info, true );
-
-    // label your widget
-    crypto_ticker_widget_label = lv_label_create( crypto_ticker_widget_cont , NULL);
-    lv_label_set_text( crypto_ticker_widget_label, "BTC");
-    lv_obj_reset_style_list( crypto_ticker_widget_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( crypto_ticker_widget_label, crypto_ticker_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-
+    crypto_ticker_widget = widget_register( "BTC", &bitcoin_48px, enter_crypto_ticker_widget_event_cb );
 
     crypto_ticker_widget_event_handle = xEventGroupCreate();
 
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_widget_wifictl_event_cb );
-
 }
 
-
-
-
-
-/*
- *
- */
 void crypto_ticker_hide_widget_icon_info( bool show ) {
-    if ( crypto_ticker_widget_icon_info == NULL )
-        return;
-
-    lv_obj_set_hidden( crypto_ticker_widget_icon_info, show );
-    lv_obj_invalidate( lv_scr_act() );
+    if ( !show ) {
+        widget_set_indicator( crypto_ticker_widget, WIDGET_ICON_INDICATOR_1 );
+    }
+    else {
+        widget_hide_indicator( crypto_ticker_widget );
+    }
 }
-
-
-
 
 void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
     log_i("crypto_ticker widget wifictl event: %04x", event );
@@ -122,13 +76,12 @@ void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     }
                                     break;
 
-        case WIFICTL_OFF:           lv_obj_set_hidden( crypto_ticker_widget_icon_info, true );
+        case WIFICTL_OFF:           widget_hide_indicator( crypto_ticker_widget );
                                     break;
 
 
     }
 }
-
 
 static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
@@ -138,15 +91,13 @@ static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t even
     }    
 }
 
-
-
 void crypto_ticker_widget_sync_request( void ) {
     if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & CRYPTO_TICKER_WIDGET_SYNC_REQUEST ) {
         return;
     }
     else {
         xEventGroupSetBits( crypto_ticker_widget_event_handle, CRYPTO_TICKER_WIDGET_SYNC_REQUEST );
-        lv_obj_set_hidden( crypto_ticker_widget_icon_info, true );
+        widget_hide_indicator( crypto_ticker_widget );
         xTaskCreate(    crypto_ticker_widget_sync_Task,       /* Function to implement the task */
                         "crypto_ticker widget sync Task",     /* Name of the task */
                         5000,                           /* Stack size in words */
@@ -156,9 +107,6 @@ void crypto_ticker_widget_sync_request( void ) {
     }
 }
 
-
-
-
 void crypto_ticker_widget_sync_Task( void * pvParameters ) {
     log_i("start crypto_ticker widget task");
 
@@ -167,17 +115,12 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
     if ( xEventGroupGetBits( crypto_ticker_widget_event_handle ) & CRYPTO_TICKER_WIDGET_SYNC_REQUEST ) {       
         uint32_t retval = crypto_ticker_fetch_price(crypto_ticker_get_config() , &crypto_ticker_widget_data );
         if ( retval == 200 ) {
-           
-            lv_img_set_src( crypto_ticker_widget_icon_info, &info_ok_16px );
-            lv_obj_set_hidden( crypto_ticker_widget_icon_info, false );
-            lv_label_set_text( crypto_ticker_widget_label, crypto_ticker_widget_data.price);
-            lv_obj_align( crypto_ticker_widget_label, crypto_ticker_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+            widget_set_indicator( crypto_ticker_widget, WIDGET_ICON_INDICATOR_OK );
+            widget_set_label( crypto_ticker_widget, crypto_ticker_widget_data.price );
         }
         else {
-            lv_img_set_src( crypto_ticker_widget_icon_info, &info_fail_16px );
-            lv_obj_set_hidden( crypto_ticker_widget_icon_info, false );
+            widget_set_indicator( crypto_ticker_widget, WIDGET_ICON_INDICATOR_FAIL );
         }
-        lv_obj_invalidate( lv_scr_act() );
     }
     xEventGroupClearBits( crypto_ticker_widget_event_handle, CRYPTO_TICKER_WIDGET_SYNC_REQUEST );
     vTaskDelete( NULL );

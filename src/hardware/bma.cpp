@@ -38,9 +38,6 @@ __NOINIT_ATTR uint32_t stepcounter;
 
 void IRAM_ATTR bma_irq( void );
 
-/*
- *
- */
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -93,9 +90,6 @@ void bma_wakeup( void ) {
   statusbar_update_stepcounter( stepcounter + ttgo->bma->getCounter() );
 }
 
-/*
- *
- */
 void bma_reload_settings( void ) {
 
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -105,9 +99,6 @@ void bma_reload_settings( void ) {
     ttgo->bma->enableTiltInterrupt( bma_config[ BMA_TILT ].enable );
 }
 
-/*
- *
- */
 void IRAM_ATTR  bma_irq( void ) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
@@ -119,9 +110,6 @@ void IRAM_ATTR  bma_irq( void ) {
     }
 }
 
-/*
- * loop routine for handling IRQ in main loop
- */
 void bma_loop( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     /*
@@ -148,9 +136,6 @@ void bma_loop( void ) {
     }
 }
 
-/*
- *
- */
 void bma_save_config( void ) {
     if ( SPIFFS.exists( BMA_COFIG_FILE ) ) {
         SPIFFS.remove( BMA_COFIG_FILE );
@@ -177,9 +162,6 @@ void bma_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void bma_read_config( void ) {
     if ( SPIFFS.exists( BMA_JSON_COFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_READ );
@@ -226,9 +208,6 @@ void bma_read_config( void ) {
     }
 }
 
-/*
- *
- */
 bool bma_get_config( int config ) {
     if ( config < BMA_CONFIG_NUM ) {
         return( bma_config[ config ].enable );
@@ -236,9 +215,6 @@ bool bma_get_config( int config ) {
     return false;
 }
 
-/*
- *
- */
 void bma_set_config( int config, bool enable ) {
     if ( config < BMA_CONFIG_NUM ) {
         bma_config[ config ].enable = enable;

@@ -43,9 +43,6 @@
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
-/*
- *
- */
 void powermgm_setup( void ) {
 
     powermgm_status = xEventGroupCreate();
@@ -59,9 +56,6 @@ void powermgm_setup( void ) {
     rtcctl_setup();
 }
 
-/*
- *
- */
 void powermgm_loop( void ) {
 
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -176,27 +170,18 @@ void powermgm_loop( void ) {
     }
 }
 
-/*
- *
- */
 void powermgm_set_event( EventBits_t bits ) {
     portENTER_CRITICAL(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );
     portEXIT_CRITICAL(&powermgmMux);
 }
 
-/*
- *
- */
 void powermgm_clear_event( EventBits_t bits ) {
     portENTER_CRITICAL(&powermgmMux);
     xEventGroupClearBits( powermgm_status, bits );
     portEXIT_CRITICAL(&powermgmMux);
 }
 
-/*
- *
- */
 EventBits_t powermgm_get_event( EventBits_t bits ) {
     portENTER_CRITICAL(&powermgmMux);
     EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
