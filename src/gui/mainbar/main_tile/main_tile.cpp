@@ -26,7 +26,6 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
 #include "main_tile.h"
-#include "gui/statusbar.h"
 #include "hardware/timesync.h"
 
 static lv_obj_t *main_cont = NULL;
@@ -140,7 +139,7 @@ uint32_t main_tile_get_tile_num( void ) {
     return( main_tile_num );
 }
 
-void main_tile_update_task( lv_task_t * task) {
+void main_tile_update_task( lv_task_t * task ) {
     time_t now;
     struct tm  info;
     char time_str[64]="";
