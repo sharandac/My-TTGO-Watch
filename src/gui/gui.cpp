@@ -32,7 +32,7 @@
 #include "mainbar/main_tile/main_tile.h"
 #include "mainbar/app_tile/app_tile.h"
 #include "mainbar/note_tile/note_tile.h"
-#include "mainbar/setup_tile/setup.h"
+#include "mainbar/setup_tile/setup_tile.h"
 
 #include "mainbar/setup_tile/battery_settings/battery_settings.h"
 #include "mainbar/setup_tile/display_settings/display_settings.h"

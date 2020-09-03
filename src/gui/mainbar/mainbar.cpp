@@ -24,7 +24,7 @@
 
 #include "mainbar.h"
 #include "main_tile/main_tile.h"
-#include "setup_tile/setup.h"
+#include "setup_tile/setup_tile.h"
 #include "note_tile/note_tile.h"
 #include "app_tile/app_tile.h"
 #include "gui/keyboard.h"

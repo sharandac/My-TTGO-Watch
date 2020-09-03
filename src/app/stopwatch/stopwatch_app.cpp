@@ -33,8 +33,8 @@
 uint32_t stopwatch_app_main_tile_num;
 
 // app and widget icon
-app_icon_t *stopwatch_app = NULL;
-widget_icon_t *stopwatch_widget = NULL;
+icon_t *stopwatch_app = NULL;
+icon_t *stopwatch_widget = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(stopwatch_app_64px);
@@ -80,7 +80,7 @@ static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
  */
 void stopwatch_app_hide_app_icon_info( bool show ) {
     if ( !show ) {
-        app_set_indicator( stopwatch_app, APP_ICON_INDICATOR_1 );
+        app_set_indicator( stopwatch_app, ICON_INDICATOR_1 );
     }
     else {
         app_hide_indicator( stopwatch_app );
@@ -92,7 +92,7 @@ void stopwatch_app_hide_app_icon_info( bool show ) {
  */
 void stopwatch_app_hide_widget_icon_info( bool show ) {
     if ( !show ) {
-        widget_set_indicator( stopwatch_widget, WIDGET_ICON_INDICATOR_1 );
+        widget_set_indicator( stopwatch_widget, ICON_INDICATOR_1 );
     }
     else {
         widget_hide_indicator( stopwatch_widget );

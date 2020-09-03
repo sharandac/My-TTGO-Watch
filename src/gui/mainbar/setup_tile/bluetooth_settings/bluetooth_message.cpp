@@ -23,7 +23,7 @@
 #include "bluetooth_message.h"
 
 #include "gui/mainbar/mainbar.h"
-#include "gui/mainbar/setup_tile/setup.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"

@@ -24,7 +24,7 @@
 #include "battery_settings.h"
 
 #include "gui/mainbar/mainbar.h"
-#include "gui/mainbar/setup_tile/setup.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "hardware/pmu.h"
 #include "hardware/motor.h"

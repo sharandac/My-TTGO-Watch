@@ -19,35 +19,39 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MAIL_TILE_H
-    #define _MAIL_TILE_H
+#ifndef _ICON_H
+    #define _ICON_H
 
     #include <TTGO.h>
-    #include "gui/icon.h"
 
-    #define MAX_WIDGET_NUM      3
-    #define WIDGET_X_SIZE       64
-    #define WIDGET_Y_SIZE       80
-    #define WIDGET_LABEL_Y_SIZE 16
-    #define WIDGET_X_CLEARENCE  16
+    LV_IMG_DECLARE(info_ok_16px);
+    LV_IMG_DECLARE(info_fail_16px);
+    LV_IMG_DECLARE(info_update_16px);
+    LV_IMG_DECLARE(info_1_16px);
+    LV_IMG_DECLARE(info_2_16px);
+    LV_IMG_DECLARE(info_3_16px);
+    LV_IMG_DECLARE(info_n_16px);
 
-    /*
-     * @brief setup the app tile
-     */
-    void main_tile_setup( void );
-    /*
-     * @brief register an widget icon an the main tile
-     * 
-     * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn or NULL if failed
-     */
-    lv_obj_t *main_tile_register_widget( void );
-    void main_tile_align_widgets( void );
-    icon_t *main_tile_get_free_widget_icon( void );
-    /*
-     * @brief get the tile number for the main tile
-     * 
-     * @return  tile number
-     */
-    uint32_t main_tile_get_tile_num( void );
+    typedef enum {
+        ICON_INDICATOR_OK = 0,
+        ICON_INDICATOR_FAIL,
+        ICON_INDICATOR_UPDATE,
+        ICON_INDICATOR_1,
+        ICON_INDICATOR_2,
+        ICON_INDICATOR_3,
+        ICON_INDICATOR_N
+    } icon_indicator_t;
 
-#endif // _MAIL_TILE_H
+    typedef struct {
+        lv_obj_t *icon_cont;
+        lv_obj_t *icon_img;
+        lv_obj_t *icon_indicator;
+        lv_obj_t *label;
+        lv_obj_t *ext_label;
+        lv_event_cb_t *icon_event_cb;
+        lv_coord_t x;
+        lv_coord_t y;
+        bool active;
+    } icon_t;
+
+#endif // _ICON_H

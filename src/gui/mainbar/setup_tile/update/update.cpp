@@ -29,8 +29,10 @@
 #include "update_check_version.h"
 
 #include "gui/mainbar/mainbar.h"
-#include "gui/mainbar/setup_tile/setup.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/setup.h"
+
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
@@ -39,14 +41,14 @@ EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
 void update_Task( void * pvParameters );
 
+icon_t *update_setup_icon = NULL;
+
 lv_obj_t *update_settings_tile=NULL;
 lv_style_t update_settings_style;
 uint32_t update_tile_num;
 
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
-lv_obj_t *update_setup_icon_cont = NULL;
-lv_obj_t *update_info_img = NULL;
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -73,22 +75,8 @@ void update_tile_setup( void ) {
     lv_style_set_border_width( &update_settings_style, LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, &update_settings_style );
 
-    // register an setup icon an set an callback
-    update_setup_icon_cont = setup_tile_register_setup();
-    lv_obj_t *update_setup = lv_imgbtn_create ( update_setup_icon_cont, NULL);
-    mainbar_add_slide_element(update_setup);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_RELEASED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_PRESSED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_RELEASED, &update_64px);
-    lv_imgbtn_set_src( update_setup, LV_BTN_STATE_CHECKED_PRESSED, &update_64px);
-    lv_obj_add_style( update_setup, LV_IMGBTN_PART_MAIN, mainbar_get_style() );
-    lv_obj_align( update_setup, update_setup_icon_cont, LV_ALIGN_CENTER, 0, 0 );
-    lv_obj_set_event_cb( update_setup, enter_update_setup_event_cb );
-
-    update_info_img = lv_img_create( update_setup_icon_cont, NULL );
-    lv_img_set_src( update_info_img, &info_1_16px );
-    lv_obj_align( update_info_img, update_setup_icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
-    lv_obj_set_hidden( update_info_img, true );
+    update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );
+    setup_hide_indicator( update_setup_icon );
 
     lv_obj_t *setup_btn = lv_imgbtn_create( update_settings_tile, NULL);
     lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
@@ -215,17 +203,17 @@ void update_Task( void * pvParameters ) {
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
             lv_label_set_text( update_status_label, (const char*)version_msg );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
-            lv_obj_set_hidden( update_info_img, false );
+            setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
         }
         else if ( firmware_version == atol( __FIRMWARE__ ) ) {
             lv_label_set_text( update_status_label, "yeah! up to date ..." );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-            lv_obj_set_hidden( update_info_img, true );
+            setup_hide_indicator( update_setup_icon );
         }
         else {
             lv_label_set_text( update_status_label, "get update info failed" );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-            lv_obj_set_hidden( update_info_img, true );
+            setup_hide_indicator( update_setup_icon );
         }
         lv_obj_invalidate( lv_scr_act() );
     }

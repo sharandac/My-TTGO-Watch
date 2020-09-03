@@ -35,10 +35,10 @@ uint32_t example_app_main_tile_num;
 uint32_t example_app_setup_tile_num;
 
 // app icon
-app_icon_t *example_app = NULL;
+icon_t *example_app = NULL;
 
-// widget icon container
-widget_icon_t *example_widget = NULL;
+// widget icon
+icon_t *example_widget = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(example_app_64px);
@@ -63,7 +63,7 @@ void example_app_setup( void ) {
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
     example_app = app_register( "myapp", &example_app_64px, enter_example_app_event_cb );
-    app_set_indicator( example_app, APP_ICON_INDICATOR_OK );
+    app_set_indicator( example_app, ICON_INDICATOR_OK );
 
 #ifdef EXAMPLE_WIDGET
     // register widget icon on the main tile

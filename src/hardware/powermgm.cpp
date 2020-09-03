@@ -139,7 +139,7 @@ void powermgm_loop( void ) {
             motor_vibe(3);
             delay(50);
             log_i("go standby");
-            setCpuFrequencyMhz( 10 );
+            setCpuFrequencyMhz( 80 );
             gpio_wakeup_enable ( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
             gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
             gpio_wakeup_enable ( (gpio_num_t)RTC_INT, GPIO_INTR_LOW_LEVEL );

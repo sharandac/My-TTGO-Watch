@@ -24,18 +24,19 @@
 #include "battery_view.h"
 
 #include "gui/mainbar/mainbar.h"
-#include "gui/mainbar/setup_tile/setup.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/setup.h"
+
 #include "hardware/display.h"
 #include "hardware/motor.h"
 #include "hardware/pmu.h"
 
+icon_t *battery_setup_icon = NULL;
+
 lv_obj_t *battery_settings_tile=NULL;
 lv_style_t battery_settings_style;
 uint32_t battery_settings_tile_num;
-
-lv_obj_t *battery_setup_icon_cont = NULL;
-lv_obj_t *battery_setup_info_img = NULL;
 
 lv_obj_t *battery_silence_wakeup_switch = NULL;
 lv_obj_t *battery_percent_switch = NULL;
@@ -65,22 +66,8 @@ void battery_settings_tile_setup( void ) {
     lv_style_set_border_width( &battery_settings_style, LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( battery_settings_tile, LV_OBJ_PART_MAIN, &battery_settings_style );
 
-    // register an setup icon an set an callback
-    battery_setup_icon_cont = setup_tile_register_setup();
-    lv_obj_t *battery_setup = lv_imgbtn_create ( battery_setup_icon_cont, NULL);
-    mainbar_add_slide_element(battery_setup);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_RELEASED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_PRESSED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_RELEASED, &battery_icon_64px);
-    lv_imgbtn_set_src( battery_setup, LV_BTN_STATE_CHECKED_PRESSED, &battery_icon_64px);
-    lv_obj_add_style( battery_setup, LV_IMGBTN_PART_MAIN,  mainbar_get_style() );
-    lv_obj_align( battery_setup, NULL, LV_ALIGN_CENTER, 0, 0 );
-    lv_obj_set_event_cb( battery_setup, enter_battery_setup_event_cb );
-
-    battery_setup_info_img = lv_img_create( battery_setup_icon_cont, NULL );
-    lv_img_set_src( battery_setup_info_img, &info_update_16px );
-    lv_obj_align( battery_setup_info_img, battery_setup_icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
-    lv_obj_set_hidden( battery_setup_info_img, true );
+    battery_setup_icon = setup_register( "battery", &battery_icon_64px, enter_battery_setup_event_cb );
+    setup_hide_indicator( battery_setup_icon );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( battery_settings_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -172,10 +159,10 @@ void battery_settings_tile_setup( void ) {
 
 void battery_set_experimental_indicator( void ) {
     if ( pmu_get_experimental_power_save() || pmu_get_calculated_percent() ) {
-        lv_obj_set_hidden( battery_setup_info_img, false );
+        setup_set_indicator( battery_setup_icon, ICON_INDICATOR_N );
     }
     else {
-        lv_obj_set_hidden( battery_setup_info_img, true );
+        setup_hide_indicator( battery_setup_icon );
     }
 }
 

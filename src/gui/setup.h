@@ -19,52 +19,38 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _WIDGET_H
-    #define _WIDGET_H
+#ifndef _SETUP_H
+    #define _SETUP_H
     
     #include "gui/icon.h"
 
     /*
-     * @brief register an widget icon
+     * @brief register an setup icon
      * 
-     * @param   widgetname  widget name
+     * @param   setupname   setup name
      * @param   icon        pointer to an 48x48px icon
      * @param   event_cb    pointer to an callback function
      */
-    icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
+    icon_t *setup_register( const char* setupname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
     /*
      * @brief   set the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
-     * @param   indicator   possible values are:    WIDGET_ICON_INDICATOR_OK, WIDGET_ICON_INDICATOR_FAIL, WIDGET_ICON_INDICATOR_UPDATE ....
+     * @param   indicator   possible values are:    SETUP_ICON_INDICATOR_OK, SETUP_ICON_INDICATOR_FAIL, SETUP_ICON_INDICATOR_UPDATE ....
      */
-    void widget_set_indicator( icon_t *widget, icon_indicator_t indicator );
+    void setup_set_indicator( icon_t *setup, icon_indicator_t indicator );
     /*
      * @brief   hide the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
      */
-    void widget_hide_indicator( icon_t *widget );
+    void setup_hide_indicator( icon_t *setup );
     /*
-     * @brief   set the widget icon
+     * @brief   set the setup icon
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   icon        pointer to an 48x48px icon
      */
-    void widget_set_icon( icon_t *widget, lv_obj_t *icon );
-    /*
-     * @brief   set the widget label
-     * 
-     * @param   widget      pointer to an widget_icon_t structure
-     * @param   text        text for the label
-     */
-    void widget_set_label( icon_t *widget, const char* text );
-    /*
-     * @brief   set the widget extended label
-     * 
-     * @param   widget      pointer to an widget_icon_t structure
-     * @param   text        text for the extended label
-     */
-    void widget_set_extended_label( icon_t *widget, const char* text );
+    void setup_set_icon( icon_t *setup, lv_obj_t *icon );
 
-#endif // _WIDGET_H
+#endif // _SETUP_H

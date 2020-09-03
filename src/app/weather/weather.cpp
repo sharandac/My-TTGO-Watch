@@ -48,8 +48,8 @@ weather_forcast_t weather_today;
 uint32_t weather_app_tile_num;
 uint32_t weather_app_setup_tile_num;
 
-app_icon_t *weather_app = NULL;
-widget_icon_t * weather_widget = NULL;
+icon_t *weather_app = NULL;
+icon_t * weather_widget = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 void weather_widget_wifictl_event_cb( EventBits_t event, char* msg );
@@ -145,7 +145,7 @@ void weather_widget_sync_Task( void * pvParameters ) {
         if ( retval == 200 ) {
             widget_set_label( weather_widget, weather_today.temp );
             widget_set_icon( weather_widget, (lv_obj_t*)resolve_owm_icon( weather_today.icon ) );
-            widget_set_indicator( weather_widget, WIDGET_ICON_INDICATOR_OK );
+            widget_set_indicator( weather_widget, ICON_INDICATOR_OK );
 
             if ( weather_config.showWind ) {
                 widget_set_extended_label( weather_widget, weather_today.wind );
@@ -155,7 +155,7 @@ void weather_widget_sync_Task( void * pvParameters ) {
             }
         }
         else {
-            widget_set_indicator( weather_widget, WIDGET_ICON_INDICATOR_FAIL );
+            widget_set_indicator( weather_widget, ICON_INDICATOR_FAIL );
         }
         lv_obj_invalidate( lv_scr_act() );
     }

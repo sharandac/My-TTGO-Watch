@@ -38,7 +38,7 @@ static lv_style_t *style;
 static lv_style_t timestyle;
 static lv_style_t datestyle;
 
-widget_icon_t widget_entry[ MAX_WIDGET_NUM ];
+icon_t widget_entry[ MAX_WIDGET_NUM ];
 
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -130,7 +130,7 @@ lv_obj_t *main_tile_register_widget( void ) {
     return( NULL );
 }
 
-widget_icon_t *main_tile_get_free_widget_icon( void ) {
+icon_t *main_tile_get_free_widget_icon( void ) {
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             lv_obj_set_hidden( widget_entry[ widget ].icon_cont, false );
@@ -197,15 +197,18 @@ void main_tile_update_task( lv_task_t * task ) {
 
 void main_tile_format_time( char * buf, size_t buf_len, struct tm * info ) {
     time_t now;
-    const char * time_fmt = "%2d:%02d";
 
     time( &now );
     localtime_r( &now, info );
     int h = info->tm_hour;
     int m = info->tm_min;
-    if (!timesync_get_24hr()) {
+
+    if ( timesync_get_24hr() ) {
+        snprintf( buf, buf_len, "%02d:%02d", h, m );
+    }
+    else {
         if (h == 0) h = 12;
         if (h > 12) h -= 12;
+        snprintf( buf, buf_len, "%d:%02d", h, m );
     }
-    snprintf( buf, buf_len, time_fmt, h, m );
 }

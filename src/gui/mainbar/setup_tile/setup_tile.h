@@ -19,10 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _SETUP_H
-    #define _SETUP_H
+#ifndef _SETUP_TILE_H
+    #define _SETUP_TILE_H
 
     #include <TTGO.h>
+    #include "gui/icon.h"
 
     #define MAX_SETUP_ICON_HORZ       3
     #define MAX_SETUP_ICON_VERT       2
@@ -38,14 +39,6 @@
 
     #define SETUP_FIRST_X_POS         ( 240 - ( SETUP_ICON_X_SIZE * MAX_SETUP_ICON_HORZ + SETUP_ICON_X_CLEARENCE * ( MAX_SETUP_ICON_HORZ - 1 ) ) ) / 2
     #define SETUP_FIRST_Y_POS         ( 240 - ( SETUP_ICON_Y_SIZE * MAX_SETUP_ICON_VERT + SETUP_ICON_Y_CLEARENCE * ( MAX_SETUP_ICON_VERT - 1 ) ) ) / 2
-
-    typedef struct {
-        lv_obj_t *setup;
-        lv_obj_t *label;
-        lv_coord_t x;
-        lv_coord_t y;
-        bool active;
-    } lv_setup_entry_t;
 
     /*
      * @brief setup the setup tile
@@ -63,5 +56,12 @@
      * @return  tile number
      */
     uint32_t setup_get_tile_num( void );
+    /*
+     * @brief   get the an free setup icon stucture
+     * 
+     * @return  pointer to the free setup_icon_t structure
+     */
 
-#endif // _SETUP_H
+    icon_t *setup_tile_get_free_setup_icon( void );
+
+#endif // _SETUP_TILE_H

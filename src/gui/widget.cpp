@@ -27,19 +27,9 @@
 
 #include "widget.h"
 
-LV_FONT_DECLARE(Ubuntu_72px);
-LV_FONT_DECLARE(Ubuntu_16px);
-LV_IMG_DECLARE(info_ok_16px);
-LV_IMG_DECLARE(info_fail_16px);
-LV_IMG_DECLARE(info_update_16px);
-LV_IMG_DECLARE(info_1_16px);
-LV_IMG_DECLARE(info_2_16px);
-LV_IMG_DECLARE(info_3_16px);
-LV_IMG_DECLARE(info_n_16px);
+icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
 
-widget_icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
-
-    widget_icon_t *widget = main_tile_get_free_widget_icon();
+    icon_t *widget = main_tile_get_free_widget_icon();
 
     if ( widget == NULL ) {
         log_e("no free widget icon");
@@ -77,33 +67,33 @@ widget_icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon
     return( widget );
 }
 
-void widget_set_indicator( widget_icon_t *widget, widget_icon_indicator_t indicator ) {
+void widget_set_indicator( icon_t *widget, icon_indicator_t indicator ) {
     if ( widget->active == false || widget == NULL ) {
         return;
     }
 
     switch( indicator ) {
-        case WIDGET_ICON_INDICATOR_OK:      lv_img_set_src( widget->icon_indicator, &info_ok_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_FAIL:    lv_img_set_src( widget->icon_indicator, &info_fail_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_UPDATE:  lv_img_set_src( widget->icon_indicator, &info_update_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_1:       lv_img_set_src( widget->icon_indicator, &info_1_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_2:       lv_img_set_src( widget->icon_indicator, &info_2_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_3:       lv_img_set_src( widget->icon_indicator, &info_3_16px );
-                                            break;
-        case WIDGET_ICON_INDICATOR_N:       lv_img_set_src( widget->icon_indicator, &info_n_16px );
-                                            break;
+        case ICON_INDICATOR_OK:      lv_img_set_src( widget->icon_indicator, &info_ok_16px );
+                                     break;
+        case ICON_INDICATOR_FAIL:    lv_img_set_src( widget->icon_indicator, &info_fail_16px );
+                                     break;
+        case ICON_INDICATOR_UPDATE:  lv_img_set_src( widget->icon_indicator, &info_update_16px );
+                                     break;
+        case ICON_INDICATOR_1:       lv_img_set_src( widget->icon_indicator, &info_1_16px );
+                                     break;
+        case ICON_INDICATOR_2:       lv_img_set_src( widget->icon_indicator, &info_2_16px );
+                                     break;
+        case ICON_INDICATOR_3:       lv_img_set_src( widget->icon_indicator, &info_3_16px );
+                                     break;
+        case ICON_INDICATOR_N:       lv_img_set_src( widget->icon_indicator, &info_n_16px );
+                                     break;
     }
     lv_obj_align( widget->icon_indicator, widget->icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
     lv_obj_set_hidden( widget->icon_indicator, false );
     lv_obj_invalidate( lv_scr_act() );
 }
 
-void widget_hide_indicator( widget_icon_t *widget ) {
+void widget_hide_indicator( icon_t *widget ) {
     if ( widget->active == false  || widget == NULL ) {
         return;
     }
@@ -112,7 +102,7 @@ void widget_hide_indicator( widget_icon_t *widget ) {
     lv_obj_invalidate( lv_scr_act() );
 }
 
-void widget_set_icon( widget_icon_t *widget, lv_obj_t *icon ) {
+void widget_set_icon( icon_t *widget, lv_obj_t *icon ) {
     if ( widget->active == false  || widget == NULL ) {
         return;
     }
@@ -126,7 +116,7 @@ void widget_set_icon( widget_icon_t *widget, lv_obj_t *icon ) {
     lv_obj_invalidate( lv_scr_act() );
 }
 
-void widget_set_label( widget_icon_t *widget, const char* text ) {
+void widget_set_label( icon_t *widget, const char* text ) {
     if ( widget->active == false  || widget == NULL ) {
         return;
     }
@@ -136,7 +126,7 @@ void widget_set_label( widget_icon_t *widget, const char* text ) {
     lv_obj_invalidate( lv_scr_act() );
 }
 
-void widget_set_extended_label( widget_icon_t *widget, const char* text ) {
+void widget_set_extended_label( icon_t *widget, const char* text ) {
     if ( widget->active == false  || widget == NULL ) {
         return;
     }

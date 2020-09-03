@@ -43,7 +43,7 @@ uint32_t crypto_ticker_main_tile_num;
 uint32_t crypto_ticker_setup_tile_num;
 
 // app icon container
-app_icon_t *crypto_ticker_app = NULL;
+icon_t *crypto_ticker_app = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(bitcoin_64px);

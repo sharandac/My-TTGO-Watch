@@ -33,7 +33,7 @@ uint32_t osmand_app_main_tile_num;
 uint32_t osmand_app_setup_tile_num;
 
 // app icon
-app_icon_t *osmand_app = NULL;
+icon_t *osmand_app = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(osmand_64px);
