@@ -50,7 +50,6 @@ void powermgm_setup( void ) {
     pmu_setup();
     bma_setup();
     wifictl_setup();
-    blectl_read_config();
     timesync_setup();
     touch_setup();
     rtcctl_setup();

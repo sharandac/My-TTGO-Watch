@@ -269,9 +269,7 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     break;
     }
 }
-/*
- *
- */
+
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     if ( event == LV_EVENT_VALUE_CHANGED ) {
         switch ( lv_imgbtn_get_state( wifi ) ) {
@@ -283,9 +281,6 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     }
 }
 
-/*
- *
- */
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     if ( event == LV_EVENT_VALUE_CHANGED ) {
         switch ( lv_imgbtn_get_state( wifi ) ) {
@@ -296,9 +291,6 @@ void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     }
 }
 
-/*
- *
- */
 void statusbar_wifi_set_state( bool state, const char *wifiname ) {
     if( state ) {
         lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_RELEASED );
@@ -312,17 +304,11 @@ void statusbar_wifi_set_state( bool state, const char *wifiname ) {
     lv_obj_align( statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
 }
 
-/*
- *
- */
 void statusbar_wifi_set_ip_state( bool state, const char *ip ) {
     lv_label_set_text( statusbar_wifiiplabel, ip );
     lv_obj_align( statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
 }
 
-/*
- *
- */
 void statusbar_bluetooth_set_state( bool state ) {
     if ( state ) {
         lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_RELEASED );
@@ -332,33 +318,22 @@ void statusbar_bluetooth_set_state( bool state ) {
     }
 }
 
-/*
- *
- */
 void statusbar_hide_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
     lv_obj_set_hidden( statusicon[ icon ].icon, true );
 }
 
-/*
- *
- */
 void statusbar_show_icon( statusbar_icon_t icon ) {
     if ( icon >= STATUSBAR_NUM ) return;
 
     lv_obj_set_hidden( statusicon[ icon ].icon, false );
 }
 
-/*
- *
- */
 void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
     if ( icon >= STATUSBAR_NUM || style >= STATUSBAR_STYLE_NUM ) return;
     statusicon[ icon ].style = &statusbarstyle[ style ];
 }
-/*
- *
- */
+
 void statusbar_refresh( void ) {
     for ( int i = 0 ; i < STATUSBAR_NUM ; i++ ) {
         if ( !lv_obj_get_hidden( statusicon[ i ].icon ) ) {
@@ -373,9 +348,6 @@ void statusbar_refresh( void ) {
     }
 }
 
-/*
- *
- */
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     if ( event == LV_EVENT_PRESSED ) {
         lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
@@ -391,18 +363,12 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
-
-/*
- *
- */
 void statusbar_update_stepcounter( int step ) {
     char stepcounter[12]="";
     snprintf( stepcounter, sizeof( stepcounter ), "%d", step );    
     lv_label_set_text( statusbar_stepcounterlabel, (const char *)stepcounter );
 }
-/*
- *
- */
+
 void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
     char level[8]="";
     if ( percent >= 0 ) {

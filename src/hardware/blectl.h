@@ -68,6 +68,7 @@
     typedef struct {
         bool advertising = true;
         bool enable_on_standby = false;
+        int32_t txpower = 1;
     } blectl_config_t;
 
     typedef void ( * BLECTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
@@ -111,7 +112,22 @@
      * @param   bits    event state, example: POWERMGM_STANDBY to evaluate if the system in standby
      */
     bool blectl_get_event( EventBits_t bits );
-
+    /*
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event  possible values:     BLECTL_CONNECT,
+     *                                      BLECTL_DISCONNECT,
+     *                                      BLECTL_STANDBY,
+     *                                      BLECTL_ON,
+     *                                      BLECTL_OFF,       
+     *                                      BLECTL_ACTIVE,    
+     *                                      BLECTL_MSG,
+     *                                      BLECTL_PIN_AUTH,
+     *                                      BLECTL_PAIRING,
+     *                                      BLECTL_PAIRING_SUCCESS,
+     *                                      BLECTL_PAIRING_ABORT
+     * @param   blectl_event_cb   pointer to the callback function 
+     */
     void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb );
     void blectl_standby( void );
     void blectl_wakeup( void );
@@ -121,7 +137,6 @@
     bool blectl_get_advertising( void );
     void blectl_save_config( void );
     void blectl_read_config( void );
-    
     void blectl_update_battery( int32_t percent, bool charging, bool plug );
 
 #endif // _BLECTL_H

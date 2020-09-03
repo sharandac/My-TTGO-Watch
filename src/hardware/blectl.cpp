@@ -213,13 +213,28 @@ void blectl_setup( void ) {
     esp_bt_controller_mem_release( ESP_BT_MODE_IDLE );
     esp_bt_mem_release( ESP_BT_MODE_IDLE );
 
+    blectl_read_config();
+
     // Create the BLE Device
     // Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
     // This is too long I think:
     // BLEDevice::init("Espruino Gadgetbridge Compatible Device");
     BLEDevice::init("Espruino (T-Watch2020)");
     // The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
-    BLEDevice::setPower( ESP_PWR_LVL_N9 );
+    switch( blectl_config.txpower ) {
+        case 0:             BLEDevice::setPower( ESP_PWR_LVL_N12 );
+                            break;
+        case 1:             BLEDevice::setPower( ESP_PWR_LVL_N9 );
+                            break;
+        case 2:             BLEDevice::setPower( ESP_PWR_LVL_N6 );
+                            break;
+        case 3:             BLEDevice::setPower( ESP_PWR_LVL_N3 );
+                            break;
+        case 4:             BLEDevice::setPower( ESP_PWR_LVL_N0 );
+                            break;
+        default:            BLEDevice::setPower( ESP_PWR_LVL_N9 );
+                            break;
+    }
 
     // Enable encryption
     BLEServer* pServer = BLEDevice::createServer();
@@ -410,6 +425,7 @@ void blectl_save_config( void ) {
 
         doc["advertising"] = blectl_config.advertising;
         doc["enable_on_standby"] = blectl_config.enable_on_standby;
+        doc["tx_power"] = blectl_config.txpower;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -436,6 +452,7 @@ void blectl_read_config( void ) {
             else {                
                 blectl_config.advertising = doc["advertising"] | true;
                 blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
+                blectl_config.txpower = doc["tx_power"] | 1;
             }        
             doc.clear();
         }

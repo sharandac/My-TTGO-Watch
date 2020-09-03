@@ -47,7 +47,7 @@
 
 LV_IMG_DECLARE(bg2)
 
-void gui_setup(void)
+void gui_setup( void )
 {
     //Create wallpaper
     lv_obj_t *img_bin = lv_img_create( lv_scr_act() , NULL );
