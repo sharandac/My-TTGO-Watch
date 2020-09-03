@@ -1,3 +1,11 @@
+<p align="center">
+<img src="https://img.shields.io/github/last-commit/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
+&nbsp;
+<img src="https://img.shields.io/github/license/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
+</p>
+
+<hr/>
+
 # My-TTGO-Watch
 
 A smartwatch based on ESP32 from LlyGo. Currently under development.
