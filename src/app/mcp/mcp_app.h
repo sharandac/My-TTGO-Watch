@@ -1,9 +1,7 @@
 /****************************************************************************
-              config.h
-
-    Tu May 22 21:23:51 2020
-    Copyright  2020  Dirk Brosswick
- *  Email: dirk.brosswick@googlemail.com
+ *   Sep 3 23:05:42 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -21,17 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CONFIG_H 
-    #define _CONFIG_H 
+#ifndef _MCP_APP_H
+    #define _MCP_APP_H
 
-    #define LILYGO_WATCH_2020_V1             //To use T-Watch2020, please uncomment this line
-    #define LILYGO_WATCH_LVGL                   //To use LVGL, you need to enable the macro LVGL
-    #define TWATCH_USE_PSRAM_ALLOC_LVGL
-    #include <LilyGoWatch.h>
+    #define MCP_WIDGET    // uncomment if an widget need
 
-    /*
-    * firmeware version string
-    */
-    #define __FIRMWARE__            "2020090401"
+    void mcp_app_setup( void );
+    uint32_t mcp_app_get_app_main_tile_num( void );
 
-#endif // _CONFIG_H
+#endif // _MCP_APP_H

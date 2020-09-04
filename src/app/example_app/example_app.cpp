@@ -72,7 +72,7 @@ void example_app_setup( void ) {
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
     example_widget = widget_register( "myapp", &example_app_48px, enter_example_widget_event_cb );
-    widget_set_indicator( example_widget, WIDGET_ICON_INDICATOR_UPDATE );
+    widget_set_indicator( example_widget, ICON_INDICATOR_UPDATE );
 #endif // EXAMPLE_WIDGET
 
     // init main and setup tile, see example_app_main.cpp and example_app_setup.cpp

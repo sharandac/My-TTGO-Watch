@@ -67,6 +67,14 @@ void setup()
     if ( !SPIFFS.begin() ) {        
         splash_screen_stage_update( "format spiff", 30 );
         SPIFFS.format();
+        splash_screen_stage_update( "format spiff done", 40 );
+        delay(500);
+        bool remount_attempt = SPIFFS.begin();
+        if (!remount_attempt){
+            splash_screen_stage_update( "Err: SPIFF Failed", 0 );
+            delay(3000);
+            ESP.restart();
+        }
     }
 
     splash_screen_stage_update( "init rtc", 50 );

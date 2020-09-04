@@ -177,9 +177,9 @@ void bma_read_config( void ) {
                 log_e("update check deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"].as<bool>() | true;
-                bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"].as<bool>() | true;
-                bma_config[ BMA_TILT ].enable = doc["tilt"].as<bool>() | false;
+                bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"] | true;
+                bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"] | true;
+                bma_config[ BMA_TILT ].enable = doc["tilt"] | false;
             }        
             doc.clear();
         }
