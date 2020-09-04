@@ -165,8 +165,8 @@ void pmu_read_config( void ) {
             }
             else {
                 pmu_config.silence_wakeup = doc["silence_wakeup"] | false;
-                pmu_config.silence_wakeup_time = doc["compute_percent"] | 60;
-                pmu_config.silence_wakeup_time_vbplug = doc["compute_percent"] | 3;
+                pmu_config.silence_wakeup_time = doc["silence_wakeup_time"] | 60;
+                pmu_config.silence_wakeup_time_vbplug = doc["silence_wakeup_time_vbplug"] | 3;
                 pmu_config.experimental_power_save = doc["experimental_power_save"] | false;
                 pmu_config.compute_percent = doc["compute_percent"] | false;
                 pmu_config.high_charging_target_voltage = doc["high_charging_target_voltage"] | false;
