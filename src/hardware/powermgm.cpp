@@ -84,7 +84,12 @@ void powermgm_loop( void ) {
 
         log_i("go wakeup");
 
-        setCpuFrequencyMhz(240);
+        //Network transfer times are likely a greater time consumer than actual computational time
+        if (powermgm_get_event(POWERMGM_SILENCE_WAKEUP_REQUEST)){
+            setCpuFrequencyMhz(80);
+        }else{
+            setCpuFrequencyMhz(240);
+        }
 
         pmu_wakeup();
         bma_wakeup();
@@ -110,6 +115,10 @@ void powermgm_loop( void ) {
         }
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
+        
+        //Save info to avoid buzz when standby after silent wake
+        bool noBuzz = powermgm_get_event(POWERMGM_SILENCE_WAKEUP |POWERMGM_SILENCE_WAKEUP_REQUEST);
+        
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
         if ( !display_get_block_return_maintile() ) {
@@ -136,7 +145,7 @@ void powermgm_loop( void ) {
         powermgm_set_event( POWERMGM_STANDBY );
 
         if ( !blectl_get_enable_on_standby() ) {
-            motor_vibe(3);
+            if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
             delay(50);
             log_i("go standby");
             setCpuFrequencyMhz( 80 );
