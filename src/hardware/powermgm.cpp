@@ -53,6 +53,7 @@ void powermgm_setup( void ) {
     timesync_setup();
     touch_setup();
     rtcctl_setup();
+    blectl_read_config();
 }
 
 void powermgm_loop( void ) {

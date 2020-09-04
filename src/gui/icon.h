@@ -42,6 +42,12 @@
         ICON_INDICATOR_N
     } icon_indicator_t;
 
+    typedef enum {
+        ICON_BTN_SETUP = 0,
+        ICON_BTN_REFRESH,
+        ICON_BTN_EXIT
+    } icon_btn_t;
+    
     typedef struct {
         lv_obj_t *icon_cont;
         lv_obj_t *icon_img;
