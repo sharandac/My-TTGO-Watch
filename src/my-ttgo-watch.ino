@@ -93,7 +93,7 @@ void setup()
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
-	IRController_setup();
+    IRController_setup();
     /*
      *
      */
