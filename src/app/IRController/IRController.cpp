@@ -62,7 +62,7 @@ void IRController_setup( void ) {
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    IRController = app_register( "IrController", &IRController_64px, enter_IRController_event_cb );
+    IRController = app_register( "   IR\nRemote", &IRController_64px, enter_IRController_event_cb );
     //app_set_indicator( IRController, ICON_INDICATOR_OK );
 
 #ifdef IRCONTROLLER_WIDGET
@@ -71,7 +71,7 @@ void IRController_setup( void ) {
     // remember, an widget icon must have an max size of 64x64 pixel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    ircontroller_widget = widget_register( "IrController", &IRController_48px, enter_ircontroller_widget_event_cb );
+    ircontroller_widget = widget_register( "   IR\nRemote", &IRController_48px, enter_ircontroller_widget_event_cb );
     widget_set_indicator( ircontroller_widget, ICON_INDICATOR_UPDATE );
 #endif // EXAMPLE_WIDGET
 

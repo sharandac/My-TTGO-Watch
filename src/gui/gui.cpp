@@ -42,6 +42,8 @@
 #include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 
+#include "mainbar/setup_tile/utilities/utilities.h"//rename all this to just utilities imo
+
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 
@@ -71,7 +73,7 @@ void gui_setup( void )
     bluetooth_settings_tile_setup();
     time_settings_tile_setup();
     update_tile_setup();
-
+    utilities_tile_setup();
     statusbar_setup();
     lv_disp_trig_activity( NULL );
 
