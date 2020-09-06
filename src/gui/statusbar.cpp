@@ -72,7 +72,7 @@ void statusbar_rtcctl_event_cb( EventBits_t event );
 
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
-    
+
 /**
  * Create a demo application
  */
@@ -335,15 +335,17 @@ void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
 }
 
 void statusbar_refresh( void ) {
+    lv_obj_t *last_visible = NULL;
     for ( int i = 0 ; i < STATUSBAR_NUM ; i++ ) {
         if ( !lv_obj_get_hidden( statusicon[ i ].icon ) ) {
-            if ( i == 0 ) {
+            if ( last_visible == NULL ) {
                 lv_obj_align( statusicon[ i ].icon, NULL, statusicon[ i ].align, -5, 4);
             } else {
-                lv_obj_align( statusicon[ i ].icon, statusicon[ i - 1 ].icon, statusicon[ i ].align, -5, 0);
+                lv_obj_align( statusicon[ i ].icon, last_visible, statusicon[ i ].align, -5, 0);
             }
             lv_obj_reset_style_list( statusicon[ i ].icon, LV_OBJ_PART_MAIN );
             lv_obj_add_style( statusicon[ i ].icon, LV_OBJ_PART_MAIN, statusicon[i].style );
+            last_visible = statusicon[ i ].icon;
         }
     }
 }
