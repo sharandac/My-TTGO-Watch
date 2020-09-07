@@ -40,6 +40,7 @@ icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb
     // setup label
     lv_label_set_text( app->label, appname );
     lv_obj_align( app->label , app->icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_label_set_align( app->label, LV_LABEL_ALIGN_CENTER );
     lv_obj_set_hidden( app->icon_cont, false );
     lv_obj_set_hidden( app->label, false );
     // setup icon and set event callback

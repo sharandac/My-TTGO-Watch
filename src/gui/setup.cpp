@@ -40,6 +40,7 @@ icon_t *setup_register( const char* setupname, const lv_img_dsc_t *icon, lv_even
     // setup label
     lv_label_set_text( setup->label, setupname );
     lv_obj_align( setup->label , setup->icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_label_set_align( setup->label, LV_LABEL_ALIGN_CENTER );
     lv_obj_set_hidden( setup->icon_cont, false );
     lv_obj_set_hidden( setup->label, false );
     // setup icon and set event callback
