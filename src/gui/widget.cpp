@@ -123,6 +123,7 @@ void widget_set_label( icon_t *widget, const char* text ) {
 
     lv_label_set_text( widget->label, text );
     lv_obj_align( widget->label , widget->icon_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_label_set_align( widget->label, LV_LABEL_ALIGN_CENTER );
     lv_obj_invalidate( lv_scr_act() );
 }
 
@@ -133,5 +134,6 @@ void widget_set_extended_label( icon_t *widget, const char* text ) {
 
     lv_label_set_text( widget->ext_label, text );
     lv_obj_align( widget->ext_label , widget->label, LV_ALIGN_OUT_TOP_MID, 0, 0 );
+    lv_label_set_align( widget->ext_label, LV_LABEL_ALIGN_CENTER );
     lv_obj_invalidate( lv_scr_act() );
 }
