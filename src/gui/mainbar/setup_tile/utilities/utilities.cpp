@@ -1,10 +1,12 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
- ****************************************************************************/
+ *  utilities.cpp
+ *  Copyright  2020  David Stewart
+ *  Email: genericsoftwaredeveloper@gmail.com
+ *
+ *
+ *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch
  
-/*
+ /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
