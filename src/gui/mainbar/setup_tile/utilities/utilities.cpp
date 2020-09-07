@@ -43,6 +43,9 @@ lv_obj_t *poweroff_btn = NULL;
 
 lv_obj_t *format_spiffs_btn = NULL;
 
+lv_obj_t *SpiffsWarningBox = NULL;
+
+static lv_style_t style_modal;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(utilities_64px);
@@ -52,6 +55,7 @@ static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event );
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
+static void format_SPIFFS(void);
 
 static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 static void poweroff_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -95,15 +99,7 @@ void utilities_tile_setup( void ) {
     lv_obj_align( format_spiffs_btn, NULL, LV_ALIGN_CENTER, 0, -25);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format SPIFFS");
-    
-    static const char * btns[] ={"Apply", "Cancel", ""};
-    
-    lv_obj_t *SpiffsWarningBox = lv_msgbox_create(utilities_tile, NULL);
-    lv_msgbox_set_text(SpiffsWarningBox, "Confirm reformat spiffs partition and reset settings?");
-    lv_msgbox_add_btns(SpiffsWarningBox, btns);
-    lv_obj_set_width(SpiffsWarningBox, 200);
-    lv_obj_set_event_cb(SpiffsWarningBox, SpiffsWarningBox_event_handler);
-    lv_obj_align(SpiffsWarningBox, NULL, LV_ALIGN_CENTER, 0 ,0);
+
     
     
     
@@ -193,31 +189,61 @@ static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 //********************************SPIFFS stuff
 
-static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event ){}
+static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event ){
+    if(event == LV_EVENT_DELETE && obj == SpiffsWarningBox) {
+        /* Delete the parent modal background */
+        lv_obj_del_async(lv_obj_get_parent(SpiffsWarningBox));
+        SpiffsWarningBox = NULL; /* happens before object is actually deleted! */
+    } else if(event == LV_EVENT_VALUE_CHANGED) {
+        if (lv_msgbox_get_active_btn_text(obj) == "Apply") format_SPIFFS();
+        if (lv_msgbox_get_active_btn_text(obj) == "Cancel") motor_vibe(25);
+        
+        lv_msgbox_start_auto_close(SpiffsWarningBox, 0);
+    }
+    
+}
 
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       
-                                        log_i("SPIFFS Format by User");
-                                        motor_vibe(20);
-                                        delay(20);
-                                        
-                                        TTGOClass *ttgo = TTGOClass::getWatch();
-                                        ttgo->stopLvglTick();
-                                        SPIFFS.end();
-                                        log_i("SPIFFS unmounted!");
-                                        delay(100);
-                                        SPIFFS.format();
-                                        log_i("SPIFFS format complete!");
-                                        ttgo->startLvglTick();
-                                        motor_vibe(20);
-                                        delay(100);
-                                        bool newmount_attempt = SPIFFS.begin();
-                                            if (!newmount_attempt){
-                                                log_e("SPIFFS New Mount failed, rebooting");
-                                                delay(1000);
-                                                ESP.restart();
-                                            }
+        case( LV_EVENT_CLICKED ):           
+                                    static const char * btns[] ={"Apply", "Cancel", ""};
+    
+                                    //The click absorbing screen behind the msgbox
+                                    lv_obj_t *obj = lv_obj_create(lv_scr_act(), NULL);
+                                    lv_obj_reset_style_list(obj, LV_OBJ_PART_MAIN);
+                                    lv_obj_add_style(obj, LV_OBJ_PART_MAIN, &style_modal);
+                                    lv_obj_set_pos(obj, 0, 0);
+                                    lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
+
+                                    SpiffsWarningBox = lv_msgbox_create(obj, NULL);
+                                    lv_msgbox_set_text(SpiffsWarningBox, "Confirm reformat spiffs partition and reset settings?");
+                                    lv_msgbox_add_btns(SpiffsWarningBox, btns);
+                                    lv_obj_set_width(SpiffsWarningBox, 240);
+                                    lv_obj_set_event_cb(SpiffsWarningBox, SpiffsWarningBox_event_handler);
+                                    lv_obj_align(SpiffsWarningBox, NULL, LV_ALIGN_CENTER, 0 ,0);
+                                    break;
+    }
+}
+
+static void format_SPIFFS(void){
+    log_i("SPIFFS Format by User");
+    motor_vibe(20);
+    delay(20);
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    ttgo->stopLvglTick();
+    SPIFFS.end();
+    log_i("SPIFFS unmounted!");
+    delay(100);
+    SPIFFS.format();
+    log_i("SPIFFS format complete!");
+    ttgo->startLvglTick();
+    motor_vibe(20);
+    delay(100);
+    bool newmount_attempt = SPIFFS.begin();
+    if (!newmount_attempt){
+        log_e("SPIFFS New Mount failed, rebooting");
+        delay(1000);
+        ESP.restart();
     }
 }
 //********************************Power stuff
