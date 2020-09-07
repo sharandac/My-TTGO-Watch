@@ -35,6 +35,13 @@
     #define POWERMGM_BMA_TILT                   _BV(10)
     #define POWERMGM_RTC_ALARM                  _BV(11)
 
+    typedef void ( * POWERMGM_CALLBACK_FUNC ) ( EventBits_t event );
+
+    typedef struct {
+        EventBits_t event;
+        POWERMGM_CALLBACK_FUNC event_cb;
+    } powermgm_event_cb_t;
+
     /*
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
      */
@@ -63,5 +70,12 @@
      * @return  EventBits_t    event state
      */
     EventBits_t powermgm_get_event( EventBits_t bits );
+        /*
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP and POWERMGM_RTC_ALARM
+     * @param   powermgm_event_cb   pointer to the callback function 
+     */
+    void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_event_cb );
 
 #endif // _POWERMGM_H

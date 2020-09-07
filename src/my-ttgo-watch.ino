@@ -43,6 +43,7 @@
 #include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
 #include "app/osmand/osmand_app.h"
+#include "app/IRController/IRController.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -68,6 +69,14 @@ void setup()
     if ( !SPIFFS.begin() ) {        
         splash_screen_stage_update( "format spiff", 30 );
         SPIFFS.format();
+        splash_screen_stage_update( "format spiff done", 40 );
+        delay(500);
+        bool remount_attempt = SPIFFS.begin();
+        if (!remount_attempt){
+            splash_screen_stage_update( "Err: SPIFF Failed", 0 );
+            delay(3000);
+            ESP.restart();
+        }
     }
 
     splash_screen_stage_update( "init rtc", 50 );
@@ -85,6 +94,7 @@ void setup()
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
+    IRController_setup();
     /*
      *
      */

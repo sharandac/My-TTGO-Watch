@@ -81,6 +81,7 @@ Special thanks to the following people for their help:
 [datacute](https://github.com/datacute)<br>
 [joshvito](https://github.com/joshvito)<br>
 [JoanMCD](https://github.com/JoanMCD)<br>
+[NorthernDIY](https://github.com/NorthernDIY)<br>
 
 and the following projects:
 
