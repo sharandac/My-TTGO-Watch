@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include "utilities.h"
+#include "esp_system.h"
 #include <Arduino.h>
 
 #include "gui/mainbar/mainbar.h"
@@ -49,6 +50,7 @@ LV_IMG_DECLARE(utilities_64px);
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
+static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event );
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -90,28 +92,90 @@ void utilities_tile_setup( void ) {
     //Add button for SPIFFS format
     format_spiffs_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_event_cb( format_spiffs_btn, format_SPIFFS_utilities_event_cb );
-    lv_obj_align( format_spiffs_btn, NULL, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_align( format_spiffs_btn, NULL, LV_ALIGN_CENTER, 0, -25);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format SPIFFS");
+    
+    static const char * btns[] ={"Apply", "Cancel", ""};
+    
+    lv_obj_t *SpiffsWarningBox = lv_msgbox_create(utilities_tile, NULL);
+    lv_msgbox_set_text(SpiffsWarningBox, "Confirm reformat spiffs partition and reset settings?");
+    lv_msgbox_add_btns(SpiffsWarningBox, btns);
+    lv_obj_set_width(SpiffsWarningBox, 200);
+    lv_obj_set_event_cb(SpiffsWarningBox, SpiffsWarningBox_event_handler);
+    lv_obj_align(SpiffsWarningBox, NULL, LV_ALIGN_CENTER, 0 ,0);
+    
     
     
     //Add button for reboot
     reboot_btn = lv_btn_create( utilities_tile, NULL);
+    lv_obj_set_size(reboot_btn, 80, 40);
     lv_obj_set_event_cb( reboot_btn, reboot_utilities_event_cb );
-    lv_obj_align( reboot_btn, NULL, LV_ALIGN_CENTER, 0, 40);
+    lv_obj_align( reboot_btn, NULL, LV_ALIGN_CENTER, -80, 100);
     lv_obj_t *reboot_btn_label = lv_label_create( reboot_btn, NULL );
     lv_label_set_text( reboot_btn_label, "Reboot");
 
     // Add button for poweroff, Equivalent to holding the power button till the hard poweroff state,
     // 300uA power consumption!
     poweroff_btn = lv_btn_create( utilities_tile, NULL);
+    lv_obj_set_size(poweroff_btn, 80, 40);
     lv_obj_set_event_cb( poweroff_btn, poweroff_utilities_event_cb );
     lv_obj_align( poweroff_btn, NULL, LV_ALIGN_CENTER, 0, 100);
     lv_obj_t *poweroff_btn_label = lv_label_create( poweroff_btn, NULL );
     lv_label_set_text( poweroff_btn_label, "Poweroff");
     
+    lv_obj_t *last_reboot_label = lv_label_create( utilities_tile, NULL);
+    lv_obj_add_style( last_reboot_label, LV_OBJ_PART_MAIN, &utilities_style  );
+    lv_label_set_text( last_reboot_label, "Last Reboot Reason:");
+    lv_obj_align( last_reboot_label, NULL, LV_ALIGN_IN_LEFT_MID, 0, 45 );
+    
+    lv_obj_t *last_reason_label = lv_label_create( utilities_tile, NULL);
+    lv_obj_add_style( last_reason_label, LV_OBJ_PART_MAIN, &utilities_style  );
+    lv_label_set_text( last_reason_label, "");
+   
+    
+    esp_reset_reason_t why = esp_reset_reason();
+    
+    switch (why){
+      case (ESP_RST_UNKNOWN):
+                                        lv_label_set_text( last_reason_label, "Unknown");
+                                        break;
+      case (ESP_RST_POWERON):
+                                        lv_label_set_text( last_reason_label, "Power On");
+                                        break;
+      case (ESP_RST_EXT):
+                                        lv_label_set_text( last_reason_label, "External Pin");
+                                        break;
+      case (ESP_RST_SW):
+                                        lv_label_set_text( last_reason_label, "Software Reset");
+                                        break;
+      case (ESP_RST_PANIC):
+                                        lv_label_set_text( last_reason_label, "Exception/Panic");
+                                        break;
+      case (ESP_RST_INT_WDT):
+                                        lv_label_set_text( last_reason_label, "Interrupt Watchdog");
+                                        break;
+      case (ESP_RST_TASK_WDT):
+                                        lv_label_set_text( last_reason_label, "Task Watchdog");
+                                        break;
+      case (ESP_RST_WDT):
+                                        lv_label_set_text( last_reason_label, "Other Watchdogs");
+                                        break;
+      case (ESP_RST_DEEPSLEEP):
+                                        lv_label_set_text( last_reason_label, "Exit Deep Sleep");
+                                        break;
+      case (ESP_RST_BROWNOUT):
+                                        lv_label_set_text( last_reason_label, "Brownout");
+                                        break;
+      case (ESP_RST_SDIO):
+                                        lv_label_set_text( last_reason_label, "Reset Over SDIO");
+                                        break;
+      default:
+                                        lv_label_set_text( last_reason_label, "No Reason Returned");
+                                        break;
+    }
+    lv_obj_align( last_reason_label, NULL, LV_ALIGN_IN_LEFT_MID, 0, 60 );
 }
-
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
@@ -128,6 +192,9 @@ static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 //********************************SPIFFS stuff
+
+static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event ){}
+
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       

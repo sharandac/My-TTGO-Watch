@@ -42,7 +42,7 @@
 #include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 
-#include "mainbar/setup_tile/utilities/utilities.h"//rename all this to just utilities imo
+#include "mainbar/setup_tile/utilities/utilities.h"
 
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
