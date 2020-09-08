@@ -47,7 +47,7 @@
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 
-LV_IMG_DECLARE(bg2)
+LV_IMG_DECLARE(bg2);
 
 void gui_setup( void )
 {
