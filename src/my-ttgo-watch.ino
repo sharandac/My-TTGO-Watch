@@ -25,6 +25,7 @@
 #include <Arduino.h>
 #include "esp_bt.h"
 #include "esp_task_wdt.h"
+#include <TTGO.h>
 
 #include "gui/gui.h"
 #include "gui/splashscreen.h"

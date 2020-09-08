@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A smartwatch based on ESP32 from LlyGo. Currently under development.
+A smartwatch based on ESP32 from LilyGo. Currently under development.
 
 # Install
 

@@ -47,7 +47,6 @@ icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_ev
     lv_obj_set_hidden( widget->ext_label, false );
     // setup icon and set event callback
     widget->icon_img = lv_imgbtn_create( widget->icon_cont , NULL );
-    mainbar_add_slide_element( widget->icon_img );
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_RELEASED, icon);
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_PRESSED, icon);
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_CHECKED_RELEASED, icon);
@@ -60,11 +59,30 @@ icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_ev
     lv_img_set_src( widget->icon_indicator, &info_ok_16px );
     lv_obj_align( widget->icon_indicator, widget->icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
     lv_obj_set_hidden( widget->icon_indicator, true );
-    main_tile_align_widgets();
 
+    mainbar_add_slide_element( widget->icon_cont );
+    main_tile_align_widgets();
     lv_obj_invalidate( lv_scr_act() );
 
     return( widget );
+}
+
+bool widget_remove( icon_t *widget ) {
+
+    if ( widget == NULL ) {
+        log_e("no widget icon selected");
+        return( false );
+    }
+
+    widget->active = false;
+    lv_obj_del( widget->icon_img );
+    lv_obj_del( widget->icon_indicator );
+    lv_obj_set_hidden( widget->icon_cont, true );
+    lv_obj_set_hidden( widget->label, true );
+    lv_obj_set_hidden( widget->ext_label, true );
+    main_tile_align_widgets();
+    lv_obj_invalidate( lv_scr_act() );
+    return( true );
 }
 
 void widget_set_indicator( icon_t *widget, icon_indicator_t indicator ) {
