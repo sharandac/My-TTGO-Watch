@@ -19,12 +19,29 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MCP_APP_H
-    #define _MCP_APP_H
+#ifndef _POWERMETER_APP_H
+    #define _POWERMETER_APP_H
 
-    #define MCP_WIDGET    // uncomment if an widget need
+    #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
 
-    void mcp_app_setup( void );
-    uint32_t mcp_app_get_app_main_tile_num( void );
+    typedef struct {
+        char server[64] = "";
+        int32_t port = 1883;
+        bool ssl = false;
+        char user[32] = "";
+        char password[32] = "";
+        char topic[64] = "";
+        bool autoconnect = false;
+        bool widget = false;
+    } powermeter_config_t;
 
-#endif // _MCP_APP_H
+    void powermeter_app_setup( void );
+    uint32_t powermeter_get_app_main_tile_num( void );
+    uint32_t powermeter_get_app_setup_tile_num( void );
+    powermeter_config_t *powermeter_get_config( void );
+    void powermeter_save_config( void );
+    void powermeter_load_config( void );
+    bool powermeter_add_widget( void );
+    bool powermeter_remove_widget( void );
+
+#endif // _POWERMETER_APP_H
