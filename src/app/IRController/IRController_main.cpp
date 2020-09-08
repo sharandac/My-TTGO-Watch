@@ -88,12 +88,12 @@ void IRController_main_setup( uint32_t tile_num ) {
     lv_style_copy( &IRController_main_style, mainbar_get_style() );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( IRController_main_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &IRController_main_style );
-    lv_obj_align(exit_btn, IRController_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px );
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px );
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px );
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px );
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &IRController_main_style );
+    lv_obj_align( exit_btn, IRController_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
     lv_obj_set_event_cb( exit_btn, exit_IRController_main_event_cb );
 
     /*//No use for this just yet
@@ -109,62 +109,67 @@ void IRController_main_setup( uint32_t tile_num ) {
     
     //Top Left, power button
     lv_obj_t *IRController_main_pwr_btn = NULL;
-    IRController_main_pwr_btn = lv_btn_create(IRController_main_tile, NULL);  
-    lv_obj_set_size(IRController_main_pwr_btn, 70, 40);
+    IRController_main_pwr_btn = lv_btn_create( IRController_main_tile, NULL);  
+    lv_obj_set_size( IRController_main_pwr_btn, 70, 40);
     lv_obj_set_event_cb( IRController_main_pwr_btn, pwr_IRController_main_event_cb );
-    lv_obj_align(IRController_main_pwr_btn, NULL, LV_ALIGN_CENTER, -80, -90 );
-    lv_obj_t *IRController_main_pwr_label = lv_label_create(IRController_main_pwr_btn, NULL);
-    lv_label_set_text(IRController_main_pwr_label, "Power");
+    lv_obj_add_style( IRController_main_pwr_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( IRController_main_pwr_btn, NULL, LV_ALIGN_CENTER, -80, -90 );
+    lv_obj_t *IRController_main_pwr_label = lv_label_create( IRController_main_pwr_btn, NULL);
+    lv_label_set_text( IRController_main_pwr_label, "Power");
     
     //Middle Left, mute button
     lv_obj_t *IRController_main_mute_btn = NULL;
-    IRController_main_mute_btn = lv_btn_create(IRController_main_tile, NULL);  
+    IRController_main_mute_btn = lv_btn_create( IRController_main_tile, NULL);  
     lv_obj_set_event_cb( IRController_main_mute_btn, mute_IRController_main_event_cb );
-    lv_obj_set_size(IRController_main_mute_btn, 70, 40);
-    lv_obj_align(IRController_main_mute_btn, NULL, LV_ALIGN_CENTER, -80, -30 );
-    lv_obj_t *IRController_main_mute_label = lv_label_create(IRController_main_mute_btn, NULL);
-    lv_label_set_text(IRController_main_mute_label, "Mute");
+    lv_obj_set_size( IRController_main_mute_btn, 70, 40);
+    lv_obj_add_style( IRController_main_mute_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( IRController_main_mute_btn, NULL, LV_ALIGN_CENTER, -80, -30 );
+    lv_obj_t *IRController_main_mute_label = lv_label_create( IRController_main_mute_btn, NULL);
+    lv_label_set_text( IRController_main_mute_label, "Mute");
     
     //Bottom Left, Source button
     lv_obj_t *IRController_main_source_btn = NULL;
-    IRController_main_source_btn = lv_btn_create(IRController_main_tile, NULL);  
+    IRController_main_source_btn = lv_btn_create( IRController_main_tile, NULL);  
     lv_obj_set_event_cb( IRController_main_source_btn, source_IRController_main_event_cb );
-    lv_obj_set_size(IRController_main_source_btn, 70, 40);
-    lv_obj_align(IRController_main_source_btn, NULL, LV_ALIGN_CENTER, -80, 30 );
-    lv_obj_t *IRController_main_source_label = lv_label_create(IRController_main_source_btn, NULL);
-    lv_label_set_text(IRController_main_source_label, "Source");
+    lv_obj_set_size( IRController_main_source_btn, 70, 40);
+    lv_obj_add_style( IRController_main_source_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( IRController_main_source_btn, NULL, LV_ALIGN_CENTER, -80, 30 );
+    lv_obj_t *IRController_main_source_label = lv_label_create( IRController_main_source_btn, NULL);
+    lv_label_set_text( IRController_main_source_label, "Source");
     
     //Top Right, Volume + button
     lv_obj_t *IRController_main_volup_btn = NULL;
-    IRController_main_volup_btn = lv_btn_create(IRController_main_tile, NULL);  
+    IRController_main_volup_btn = lv_btn_create( IRController_main_tile, NULL);  
     lv_obj_set_event_cb( IRController_main_volup_btn, volup_IRController_main_event_cb );
-    lv_obj_set_size(IRController_main_volup_btn, 70, 40);
-    lv_obj_align(IRController_main_volup_btn, NULL, LV_ALIGN_CENTER, 10, -90 );
+    lv_obj_set_size( IRController_main_volup_btn, 70, 40);
+    lv_obj_add_style( IRController_main_volup_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( IRController_main_volup_btn, NULL, LV_ALIGN_CENTER, 10, -90 );
     lv_obj_t *IRController_main_volup_label = lv_label_create(IRController_main_volup_btn, NULL);
-    lv_label_set_text(IRController_main_volup_label, "Vol +");
+    lv_label_set_text( IRController_main_volup_label, "Vol +");
     
     //Middle Right, Volume - button
     lv_obj_t *IRController_main_voldn_btn = NULL;
-    IRController_main_voldn_btn = lv_btn_create(IRController_main_tile, NULL);  
+    IRController_main_voldn_btn = lv_btn_create( IRController_main_tile, NULL);  
     lv_obj_set_event_cb( IRController_main_voldn_btn, voldn_IRController_main_event_cb );
-    lv_obj_set_size(IRController_main_voldn_btn, 70, 40);
-    lv_obj_align(IRController_main_voldn_btn, NULL, LV_ALIGN_CENTER, 10, -30 );
-    lv_obj_t *IRController_main_voldn_label = lv_label_create(IRController_main_voldn_btn, NULL);
-    lv_label_set_text(IRController_main_voldn_label, "Vol -");
+    lv_obj_set_size( IRController_main_voldn_btn, 70, 40);
+    lv_obj_add_style( IRController_main_voldn_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( IRController_main_voldn_btn, NULL, LV_ALIGN_CENTER, 10, -30 );
+    lv_obj_t *IRController_main_voldn_label = lv_label_create( IRController_main_voldn_btn, NULL);
+    lv_label_set_text( IRController_main_voldn_label, "Vol -");
 
     //Bottom Right, Exit menu button (This is exit for the TV, not the app)
     lv_obj_t *IRController_main_rExit_btn = NULL;
-    IRController_main_rExit_btn = lv_btn_create(IRController_main_tile, NULL);  
+    IRController_main_rExit_btn = lv_btn_create( IRController_main_tile, NULL);  
     lv_obj_set_event_cb( IRController_main_rExit_btn, rExit_IRController_main_event_cb );
-    lv_obj_set_size(IRController_main_rExit_btn, 70, 40);
+    lv_obj_set_size( IRController_main_rExit_btn, 70, 40);
+    lv_obj_add_style( IRController_main_rExit_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
     lv_obj_align(IRController_main_rExit_btn, NULL, LV_ALIGN_CENTER, 10, 30 );
-    lv_obj_t *IRController_main_rExit_label = lv_label_create(IRController_main_rExit_btn, NULL);
-    lv_label_set_text(IRController_main_rExit_label, "Exit");    
+    lv_obj_t *IRController_main_rExit_label = lv_label_create( IRController_main_rExit_btn, NULL);
+    lv_label_set_text( IRController_main_rExit_label, "Exit");    
 
     pinMode(13, OUTPUT);
     digitalWrite(13, LOW); //No Current Limiting so keep it off
 
-    
     lv_style_set_text_opa( &IRController_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
     lv_style_set_text_font( &IRController_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_t *app_label = lv_label_create( IRController_main_tile, NULL);

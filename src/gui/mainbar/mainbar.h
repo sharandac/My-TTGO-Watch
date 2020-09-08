@@ -130,12 +130,18 @@
      */
     lv_style_t *mainbar_get_slider_style( void );
     /*
-     * @brief
+     * @brief get main tile button style
+     * 
+     * @return  pointer to the v_style_t object
      */
-    lv_obj_t *mainbar_obj_create(lv_obj_t *parent);
+    lv_style_t *mainbar_get_button_style( void );
     /*
      * @brief
      */
-    void mainbar_add_slide_element(lv_obj_t *element);
+    lv_obj_t *mainbar_obj_create( lv_obj_t *parent );
+    /*
+     * @brief
+     */
+    void mainbar_add_slide_element( lv_obj_t *element );
 
 #endif // _MAINBAR_H

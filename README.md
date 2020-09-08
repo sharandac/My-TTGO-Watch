@@ -79,9 +79,12 @@ Special thanks to the following people for their help:
 [bwagstaff](https://github.com/bwagstaff)<br>
 [chrismcna](https://github.com/chrismcna)<br>
 [datacute](https://github.com/datacute)<br>
+[jakub-vesely](https://github.com/jakub-vesely)<br>
 [joshvito](https://github.com/joshvito)<br>
 [JoanMCD](https://github.com/JoanMCD)<br>
 [NorthernDIY](https://github.com/NorthernDIY)<br>
+[rnisthal](https://github.com/rnisthal)<br>
+[paulstueber](https://github.com/paulstueber)<br>
 
 and the following projects:
 
@@ -92,6 +95,7 @@ and the following projects:
 [LVGL](https://github.com/lvgl)<br>
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
+[ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>

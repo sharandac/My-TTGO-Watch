@@ -3,10 +3,8 @@
  *  Copyright  2020  David Stewart
  *  Email: genericsoftwaredeveloper@gmail.com
  *
- *
  *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch
- 
- /*
+ * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -99,17 +97,18 @@ void utilities_tile_setup( void ) {
     //Add button for SPIFFS format
     format_spiffs_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_event_cb( format_spiffs_btn, format_SPIFFS_utilities_event_cb );
-    lv_obj_set_size(format_spiffs_btn, 80, 60);
-    lv_obj_align( format_spiffs_btn, NULL, LV_ALIGN_CENTER, 80, -25);
+    lv_obj_set_size( format_spiffs_btn, 80, 60);
+    lv_obj_add_style( format_spiffs_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_CENTER, 0, -15);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format\nSPIFFS");
-    
     
     //Add button for reboot
     reboot_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_size(reboot_btn, 70, 40);
     lv_obj_set_event_cb( reboot_btn, reboot_utilities_event_cb );
-    lv_obj_align( reboot_btn, NULL, LV_ALIGN_CENTER, -85, 100);
+    lv_obj_add_style( reboot_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
     lv_obj_t *reboot_btn_label = lv_label_create( reboot_btn, NULL );
     lv_label_set_text( reboot_btn_label, "Reboot");
 
@@ -118,19 +117,19 @@ void utilities_tile_setup( void ) {
     poweroff_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_size(poweroff_btn, 80, 40);
     lv_obj_set_event_cb( poweroff_btn, poweroff_utilities_event_cb );
-    lv_obj_align( poweroff_btn, NULL, LV_ALIGN_CENTER, 80, 100);
+    lv_obj_add_style( poweroff_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
     lv_obj_t *poweroff_btn_label = lv_label_create( poweroff_btn, NULL );
     lv_label_set_text( poweroff_btn_label, "Poweroff");
     
     lv_obj_t *last_reboot_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reboot_label, LV_OBJ_PART_MAIN, &utilities_style  );
     lv_label_set_text( last_reboot_label, "Last Reboot Reason:");
-    lv_obj_align( last_reboot_label, NULL, LV_ALIGN_CENTER, 0, 70 );
+    lv_obj_align( last_reboot_label, format_spiffs_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     
     lv_obj_t *last_reason_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reason_label, LV_OBJ_PART_MAIN, &utilities_style  );
-    lv_label_set_text( last_reason_label, "");
-  
+    lv_label_set_text( last_reason_label, "");  
     
     //Get the reason for the last reset, this could be moved into a dedicated function....
     esp_reset_reason_t why = esp_reset_reason();
@@ -172,7 +171,8 @@ void utilities_tile_setup( void ) {
                                         lv_label_set_text( last_reason_label, "No Reason\nReturned");
                                         break;
     }
-    lv_obj_align( last_reason_label, NULL, LV_ALIGN_CENTER, -5, 90 );//Now that the text has changed, align it.
+    lv_label_set_align( last_reason_label, LV_LABEL_ALIGN_CENTER );
+    lv_obj_align( last_reason_label, last_reboot_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );//Now that the text has changed, align it.
 }
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -192,32 +192,34 @@ static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
 //********************************SPIFFS stuff
 
 static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event ){
-    if(event == LV_EVENT_DELETE && obj == SpiffsWarningBox) {
+    if( event == LV_EVENT_DELETE && obj == SpiffsWarningBox ) {
         /* Delete the parent modal background */
-        lv_obj_del_async(lv_obj_get_parent(SpiffsWarningBox));
+        lv_obj_del_async( lv_obj_get_parent( SpiffsWarningBox ) );
         SpiffsWarningBox = NULL; /* happens before object is actually deleted! */
-    } else if(event == LV_EVENT_VALUE_CHANGED) {
-        if (lv_msgbox_get_active_btn_text(obj) == "Apply") format_SPIFFS();
-        lv_msgbox_start_auto_close(SpiffsWarningBox, 0);
     }
-    
+    else if( event == LV_EVENT_VALUE_CHANGED ) {
+        if ( !strcmp( lv_msgbox_get_active_btn_text(obj), "Apply" ) ){
+            format_SPIFFS();
+        }
+        lv_msgbox_start_auto_close( SpiffsWarningBox, 0 );
+    }
 }
 
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):           
-                                    static const char * btns[] ={"Apply", "Cancel", ""};
+                                    static const char * btns[] = {"Apply", "Cancel", ""};
     
                                     //Setup shading of background
-                                    lv_style_set_bg_color(&style_modal, LV_STATE_DEFAULT, LV_COLOR_MAKE(0x20,0x20,0x20));
-                                    lv_style_set_bg_opa(&style_modal, LV_STATE_DEFAULT, LV_OPA_80);
+                                    lv_style_set_bg_color( &style_modal, LV_STATE_DEFAULT, LV_COLOR_MAKE(0x20,0x20,0x20));
+                                    lv_style_set_bg_opa( &style_modal, LV_STATE_DEFAULT, LV_OPA_80);
             
                                     //The click absorbing screen behind the msgbox
                                     lv_obj_t *obj = lv_obj_create(lv_scr_act(), NULL);
-                                    lv_obj_reset_style_list(obj, LV_OBJ_PART_MAIN);
-                                    lv_obj_add_style(obj, LV_OBJ_PART_MAIN, &style_modal);
-                                    lv_obj_set_pos(obj, 0, 0);
-                                    lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
+                                    lv_obj_reset_style_list( obj, LV_OBJ_PART_MAIN);
+                                    lv_obj_add_style( obj, LV_OBJ_PART_MAIN, &style_modal );
+                                    lv_obj_set_pos( obj, 0, 0);
+                                    lv_obj_set_size( obj, LV_HOR_RES, LV_VER_RES);
                                     
             
                                     //If you change the message below you need to recalculate the character buffer size!

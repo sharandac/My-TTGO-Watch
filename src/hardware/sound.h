@@ -24,7 +24,6 @@
 
     #include "TTGO.h"
 
-    #define SOUND_CONFIG_FILE         "/sound.cfg"
     #define SOUND_JSON_CONFIG_FILE    "/sound.json"
 
     typedef struct {
