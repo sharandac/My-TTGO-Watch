@@ -49,6 +49,9 @@ uint32_t update_tile_num;
 
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
+lv_obj_t *update_btn_label = NULL;
+
+static bool reset = false;
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -118,7 +121,7 @@ void update_tile_setup( void ) {
     lv_obj_set_event_cb( update_btn, update_event_handler );
     lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
     lv_obj_align( update_btn, NULL, LV_ALIGN_CENTER, 0, 40);
-    lv_obj_t *update_btn_label = lv_label_create( update_btn, NULL );
+    update_btn_label = lv_label_create( update_btn, NULL );
     lv_label_set_text( update_btn_label, "update");
 
     update_status_label = lv_label_create( update_settings_tile, NULL);
@@ -163,8 +166,11 @@ static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
-    if(event == LV_EVENT_CLICKED) {
-        if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
+    if( event == LV_EVENT_CLICKED ) {
+        if ( reset ) {
+            ESP.restart();
+        }
+        else if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
             return;
         }
         else {
@@ -246,7 +252,9 @@ void update_Task( void * pvParameters ) {
 
                 case HTTP_UPDATE_OK:
                     lv_label_set_text( update_status_label, "update ok, turn off and on!" );
-                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+                    reset = true;
+                    lv_label_set_text( update_btn_label, "restart");
                     break;
             }
             display_set_timeout( display_timeout );
