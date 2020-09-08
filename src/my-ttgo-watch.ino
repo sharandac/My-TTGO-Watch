@@ -38,6 +38,7 @@
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
+#include "hardware/sound.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
@@ -109,6 +110,8 @@ void setup()
 
     display_set_brightness( display_get_brightness() );
 
+    sound_setup();
+
     delay(500);
 
     Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
@@ -123,5 +126,6 @@ void loop()
 {
     delay(5);
     gui_loop();
+    sound_loop();
     powermgm_loop();
 }
