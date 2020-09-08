@@ -29,14 +29,22 @@
     #define PMU_CONFIG_FILE         "/pmu.cfg"
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 
+	//Some default values, used below as well as in pmu.cpp during json reads
+    #define SILENCEWAKEUPTIME                 45
+	#define SILENCEWAKEUPTIME_PLUG			   3
+    #define NORMALVOLTAGE                   3300
+    #define NORMALPOWERSAVEVOLTAGE          3000
+    #define EXPERIMENTALNORMALVOLTAGE       3000
+    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700
+
     typedef struct {
         int32_t designed_battery_cap = 300;
-        int32_t silence_wakeup_time = 60;
-        int32_t silence_wakeup_time_vbplug = 3;
-        int32_t normal_voltage = 3300;
-        int32_t normal_power_save_voltage = 3000;
-        int32_t experimental_normal_voltage = 3000;
-        int32_t experimental_power_save_voltage = 2700;
+        int32_t silence_wakeup_time = SILENCEWAKEUPTIME;
+        int32_t silence_wakeup_time_vbplug = SILENCEWAKEUPTIME_PLUG;
+        int32_t normal_voltage = NORMALVOLTAGE;
+        int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
+        int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
+        int32_t experimental_power_save_voltage = EXPERIMENTALPOWERSAVEVOLTAGE;
         bool high_charging_target_voltage = true;
         bool compute_percent = false;
         bool experimental_power_save = false;

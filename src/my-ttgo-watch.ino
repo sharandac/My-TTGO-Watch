@@ -24,6 +24,7 @@
 #include "config.h"
 #include <Arduino.h>
 #include "esp_bt.h"
+#include <TTGO.h>
 
 #include "gui/gui.h"
 #include "gui/splashscreen.h"
