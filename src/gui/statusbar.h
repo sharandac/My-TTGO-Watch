@@ -85,12 +85,6 @@
      */
     void statusbar_refresh( void );
     /*
-     * @brief update stepcounter from statusbar
-     * 
-     * @param   step    stepcounter value
-     */
-    void statusbar_update_stepcounter( int step );
-    /*
      * @brief update battery icon and ther state
      * 
      * @param   percent     displayed value in percent

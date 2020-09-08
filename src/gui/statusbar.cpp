@@ -38,6 +38,7 @@
 #include "hardware/wifictl.h"
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
+#include "hardware/bma.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -69,6 +70,7 @@ void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_blectl_event_cb( EventBits_t event, char* msg );
 void statusbar_wifictl_event_cb( EventBits_t event, char* msg );
 void statusbar_rtcctl_event_cb( EventBits_t event );
+void statusbar_bma_event_cb( EventBits_t event, const char *msg );
 
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
@@ -203,6 +205,7 @@ void statusbar_setup( void )
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLE | RTCCTL_ALARM_DISABLE, statusbar_rtcctl_event_cb );
+    bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb );
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -365,10 +368,12 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
-void statusbar_update_stepcounter( int step ) {
-    char stepcounter[12]="";
-    snprintf( stepcounter, sizeof( stepcounter ), "%d", step );    
-    lv_label_set_text( statusbar_stepcounterlabel, (const char *)stepcounter );
+void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
+    log_i("statusbar bma event %04x, msg: %s", event, msg );
+    switch( event ) {
+        case BMA_STEPCOUNTER:   lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
+                                break;
+    }
 }
 
 void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {

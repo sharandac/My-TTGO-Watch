@@ -21,8 +21,20 @@
  */
 #ifndef _BMA_H
     #define _BMA_H
+
+    #include "TTGO.h"
     
-    #define     BMA_EVENT_INT       _BV(0)
+    #define BMACTL_EVENT_INT           _BV(0)
+    #define BMACTL_DOUBLECLICK         _BV(1)
+    #define BMACTL_STEPCOUNTER         _BV(2)
+    #define BMACTL_TILT                _BV(3)
+
+    typedef void ( * BMA_CALLBACK_FUNC ) ( EventBits_t event, const char *msg );
+
+    typedef struct {
+        EventBits_t event;
+        BMA_CALLBACK_FUNC event_cb;
+    } bma_event_cb_t;
 
     #define BMA_COFIG_FILE          "/bma.cfg"
     #define BMA_JSON_COFIG_FILE     "/bma.json"
@@ -79,6 +91,18 @@
      * @param   bool    true or false
      */
     void bma_set_config( int config, bool enable );
+    /*
+     * @brief   rotate bma axis
+     * 
+     * @param   rotation on degree
+     */
     void bma_set_rotate_tilt( uint32_t rotation );
+    /*
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event   possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT
+     * @param   rtc_event_cb   pointer to the callback function 
+     */
+    void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb );
 
 #endif // _BMA_H

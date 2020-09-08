@@ -36,7 +36,11 @@ __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
+bma_event_cb_t *bma_event_cb_table = NULL;
+uint32_t bma_event_cb_entrys = 0;
+
 void IRAM_ATTR bma_irq( void );
+void bma_send_event_cb( EventBits_t event, const char *msg );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -79,15 +83,17 @@ void bma_standby( void ) {
 }
 
 void bma_wakeup( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
+    TTGOClass *ttgo = TTGOClass::getWatch();
 
-  log_i("go wakeup");
+    log_i("go wakeup");
 
-  if ( bma_get_config( BMA_STEPCOUNTER ) )
-    ttgo->bma->enableStepCountInterrupt( true );
+    if ( bma_get_config( BMA_STEPCOUNTER ) )
+        ttgo->bma->enableStepCountInterrupt( true );
 
-  stepcounter_before_reset = ttgo->bma->getCounter();
-  statusbar_update_stepcounter( stepcounter + ttgo->bma->getCounter() );
+    stepcounter_before_reset = ttgo->bma->getCounter();
+    char msg[16]="";
+    snprintf( msg, sizeof( msg ),"%d", stepcounter + ttgo->bma->getCounter() );
+    bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
 }
 
 void bma_reload_settings( void ) {
@@ -99,10 +105,10 @@ void bma_reload_settings( void ) {
     ttgo->bma->enableTiltInterrupt( bma_config[ BMA_TILT ].enable );
 }
 
-void IRAM_ATTR  bma_irq( void ) {
+void IRAM_ATTR bma_irq( void ) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    xEventGroupSetBitsFromISR( bma_event_handle, BMA_EVENT_INT, &xHigherPriorityTaskWoken );
+    xEventGroupSetBitsFromISR( bma_event_handle, BMACTL_EVENT_INT, &xHigherPriorityTaskWoken );
 
     if ( xHigherPriorityTaskWoken )
     {
@@ -115,24 +121,67 @@ void bma_loop( void ) {
     /*
      * handle IRQ event
      */
-    if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {                
+    if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMACTL_EVENT_INT ) {                
       while( !ttgo->bma->readInterrupt() );
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
-            xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
+            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
+            bma_send_event_cb( BMACTL_DOUBLECLICK, "" );
             return;
         }
         if ( ttgo->bma->isTilt() ) {
             powermgm_set_event( POWERMGM_BMA_TILT );
-            xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
+            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
+            bma_send_event_cb( BMACTL_TILT, "" );
             return;
         }
+        if ( ttgo->bma->isStepCounter() ) {
+            stepcounter_before_reset = ttgo->bma->getCounter();
+            char msg[16]="";
+            snprintf( msg, sizeof( msg ),"%d", stepcounter + ttgo->bma->getCounter() );
+            bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
+        }
+    }
+}
+
+void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb ) {
+    bma_event_cb_entrys++;
+
+    if ( bma_event_cb_table == NULL ) {
+        bma_event_cb_table = ( bma_event_cb_t * )ps_malloc( sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
+        if ( bma_event_cb_table == NULL ) {
+            log_e("rtc_event_cb_table malloc faild");
+            while(true);
+        }
+    }
+    else {
+        bma_event_cb_t *new_bma_event_cb_table = NULL;
+
+        new_bma_event_cb_table = ( bma_event_cb_t * )ps_realloc( bma_event_cb_table, sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
+        if ( new_bma_event_cb_table == NULL ) {
+            log_e("rtc_event_cb_table realloc faild");
+            while(true);
+        }
+        bma_event_cb_table = new_bma_event_cb_table;
     }
 
-    if ( !powermgm_get_event( POWERMGM_STANDBY ) && xEventGroupGetBitsFromISR( bma_event_handle ) & BMA_EVENT_INT ) {
-        stepcounter_before_reset = ttgo->bma->getCounter();
-        statusbar_update_stepcounter( stepcounter + ttgo->bma->getCounter() );
-        xEventGroupClearBitsFromISR( bma_event_handle, BMA_EVENT_INT );
+    bma_event_cb_table[ bma_event_cb_entrys - 1 ].event = event;
+    bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb = bma_event_cb;
+    log_i("register rtc_event_cb success (%p)", bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb );
+}
+
+void bma_send_event_cb( EventBits_t event, const char *msg ) {
+    if ( bma_event_cb_entrys == 0 ) {
+      return;
+    }
+      
+    for ( int entry = 0 ; entry < bma_event_cb_entrys ; entry++ ) {
+        yield();
+        if ( event & bma_event_cb_table[ entry ].event ) {
+            log_i("call bma_event_cb (%p)", bma_event_cb_table[ entry ].event_cb );
+            bma_event_cb_table[ entry ].event_cb( event, msg );
+        }
     }
 }
 
