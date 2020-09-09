@@ -56,9 +56,9 @@ void sound_setup( void ) {
     if ( sound_init == true )
         return;
 
-    sound_read_config();
-
     TTGOClass *ttgo = TTGOClass::getWatch();
+    
+    sound_read_config();
 
     //!Turn on the audio power
     ttgo->enableLDO3();
@@ -66,6 +66,8 @@ void sound_setup( void ) {
     //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out = new AudioOutputI2S();
     out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
+    // limiting max gain to 3.5 (max gain is 4.0)
+    out->SetGain(3.5f * (sound_config.volume / 100.0f));
     mp3 = new AudioGeneratorMP3();
     wav = new AudioGeneratorWAV();
 
@@ -85,6 +87,8 @@ void sound_play_spiffs_mp3( const char *filename ) {
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
         mp3->begin(id3, out);
+    } else {
+        log_i("Cannot play mp3, sound is disabled");
     }
 }
 
@@ -93,12 +97,14 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
+    } else {
+        log_i("Cannot play wav, sound is disabled");
     }
 }
 
 void sound_save_config( void ) {
     fs::File file = SPIFFS.open( SOUND_JSON_CONFIG_FILE, FILE_WRITE );
-
+    out->SetGain(4.0 / sound_config.volume);
     if (!file) {
         log_e("Can't open file: %s!", SOUND_JSON_CONFIG_FILE );
     }
@@ -106,6 +112,7 @@ void sound_save_config( void ) {
         SpiRamJsonDocument doc( 1000 );
 
         doc["enable"] = sound_config.enable;
+        doc["volume"] = sound_config.volume;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -129,9 +136,29 @@ void sound_read_config( void ) {
             log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            sound_config.enable = doc["enable"] | true;
+            sound_config.enable = doc["enable"].as<bool>();
+            sound_config.volume = doc["volume"].as<uint8_t>();;
+            log_i("volume: %d", sound_config.volume);
         }        
         doc.clear();
     }
     file.close();
+}
+
+bool sound_get_enabled_config( void ) {
+    return sound_config.enable;
+}
+
+void sound_set_enabled_config( bool enable ) {
+    sound_config.enable = enable;
+    sound_save_config();
+}
+
+uint8_t sound_get_volume_config( void ) {
+    return( sound_config.volume );
+}
+
+void sound_set_volume_config( uint8_t volume ) {
+    log_i("Setting sound volume to: %d", volume);
+    sound_config.volume = volume;
 }
