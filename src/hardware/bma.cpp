@@ -39,6 +39,8 @@ __NOINIT_ATTR uint32_t stepcounter;
 bma_event_cb_t *bma_event_cb_table = NULL;
 uint32_t bma_event_cb_entrys = 0;
 
+bool first_loop_run = true;
+
 void IRAM_ATTR bma_irq( void );
 void bma_send_event_cb( EventBits_t event, const char *msg );
 
@@ -138,10 +140,19 @@ void bma_loop( void ) {
         if ( ttgo->bma->isStepCounter() ) {
             stepcounter_before_reset = ttgo->bma->getCounter();
             char msg[16]="";
-            snprintf( msg, sizeof( msg ),"%d", stepcounter + ttgo->bma->getCounter() );
+            snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
             bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
             xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
         }
+    }
+
+    // force update statusbar after restart/boot
+    if ( first_loop_run ) {
+        first_loop_run = false;
+        stepcounter_before_reset = ttgo->bma->getCounter();
+        char msg[16]="";
+        snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
+        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
     }
 }
 
