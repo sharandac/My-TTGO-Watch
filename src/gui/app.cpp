@@ -65,7 +65,11 @@ icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb
 }
 
 void app_set_indicator( icon_t *app, icon_indicator_t indicator ) {
-    if ( app->active == false || app == NULL ) {
+    if ( app == NULL ) {
+        return;
+    }
+
+    if ( app->active == false ) {
         return;
     }
 
@@ -91,7 +95,11 @@ void app_set_indicator( icon_t *app, icon_indicator_t indicator ) {
 }
 
 void app_hide_indicator( icon_t *app ) {
-    if ( app->active == false || app == NULL ) {
+    if ( app == NULL ) {
+        return;
+    }
+
+    if ( app->active == false ) {
         return;
     }
 
@@ -100,7 +108,11 @@ void app_hide_indicator( icon_t *app ) {
 }
 
 void app_set_icon( icon_t *app, lv_obj_t *icon ) {
-    if ( app->active == false || app == NULL ) {
+    if ( app == NULL ) {
+        return;
+    }
+
+    if ( app->active == false ) {
         return;
     }
 

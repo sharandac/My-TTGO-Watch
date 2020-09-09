@@ -38,7 +38,7 @@ icon_t *stopwatch_widget = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(stopwatch_app_64px);
-LV_IMG_DECLARE(stopwatch_app_48px);
+
 // declare callback functions
 static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -49,7 +49,7 @@ void stopwatch_app_setup( void ) {
 
     stopwatch_app = app_register( "stop\nwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
 #ifdef stopwatch_WIDGET
-    stopwatch_widget = widget_register( "stopwatch", &stopwatch_app_48px, enter_stopwatch_app_event_cb );
+    stopwatch_widget = widget_register( "stopwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
 #endif // stopwatch_WIDGET
 
     // init main and setup tile, see stopwatch_app_main.cpp and stopwatch_app_setup.cpp

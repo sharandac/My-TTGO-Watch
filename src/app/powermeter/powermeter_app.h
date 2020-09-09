@@ -22,6 +22,8 @@
 #ifndef _POWERMETER_APP_H
     #define _POWERMETER_APP_H
 
+    #include "gui/icon.h"
+
     #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
 
     typedef struct {
@@ -43,5 +45,7 @@
     void powermeter_load_config( void );
     bool powermeter_add_widget( void );
     bool powermeter_remove_widget( void );
+    icon_t *powermeter_get_app_icon( void );
+    icon_t *powermeter_get_widget_icon( void );
 
 #endif // _POWERMETER_APP_H

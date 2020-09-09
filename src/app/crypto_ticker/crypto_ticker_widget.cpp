@@ -47,11 +47,10 @@ static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t even
 void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg );
 
 LV_IMG_DECLARE(bitcoin_64px);
-LV_IMG_DECLARE(bitcoin_48px);
 
 void crypto_ticker_widget_setup( void ) {
     
-    crypto_ticker_widget = widget_register( "BTC", &bitcoin_48px, enter_crypto_ticker_widget_event_cb );
+    crypto_ticker_widget = widget_register( "BTC", &bitcoin_64px, enter_crypto_ticker_widget_event_cb );
 
     crypto_ticker_widget_event_handle = xEventGroupCreate();
 

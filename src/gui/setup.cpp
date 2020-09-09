@@ -65,7 +65,11 @@ icon_t *setup_register( const char* setupname, const lv_img_dsc_t *icon, lv_even
 }
 
 void setup_set_indicator( icon_t *setup, icon_indicator_t indicator ) {
-    if ( setup->active == false || setup == NULL ) {
+    if ( setup == NULL ) {
+        return;
+    }
+
+    if ( setup->active == false ) {
         return;
     }
 
@@ -91,7 +95,11 @@ void setup_set_indicator( icon_t *setup, icon_indicator_t indicator ) {
 }
 
 void setup_hide_indicator( icon_t *setup ) {
-    if ( setup->active == false || setup == NULL ) {
+    if ( setup == NULL ) {
+        return;
+    }
+
+    if ( setup->active == false ) {
         return;
     }
 
@@ -100,7 +108,11 @@ void setup_hide_indicator( icon_t *setup ) {
 }
 
 void setup_set_icon( icon_t *setup, lv_obj_t *icon ) {
-    if ( setup->active == false || setup == NULL ) {
+    if ( setup == NULL ) {
+        return;
+    }
+
+    if ( setup->active == false ) {
         return;
     }
 

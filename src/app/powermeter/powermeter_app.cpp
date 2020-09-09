@@ -75,6 +75,14 @@ uint32_t powermeter_get_app_setup_tile_num( void ) {
     return( powermeter_app_setup_tile_num );
 }
 
+icon_t *powermeter_get_app_icon( void ) {
+    return( powermeter_app );
+}
+
+icon_t *powermeter_get_widget_icon( void ) {
+    return( powermeter_widget );
+}
+
 static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       statusbar_hide( true );
@@ -146,7 +154,7 @@ void powermeter_save_config( void ) {
 bool powermeter_add_widget( void ) {
     if ( powermeter_widget == NULL ) {
         powermeter_widget = widget_register( "n/a", &powermeter_64px, enter_powermeter_app_event_cb );
-        widget_set_indicator( powermeter_widget, ICON_INDICATOR_UPDATE );
+        widget_hide_indicator( powermeter_widget );
         if ( powermeter_widget != NULL ) {
             return( true );
         }

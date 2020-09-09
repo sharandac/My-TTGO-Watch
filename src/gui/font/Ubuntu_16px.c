@@ -980,15 +980,7 @@ static LV_ATTRIBUTE_LARGE_CONST const uint8_t gylph_bitmap[] = {
     0x6, 0x9a, 0x1f, 0xf6, 0x9a, 0x1f, 0xd6, 0x1b,
     0xb0, 0xf6, 0x90, 0x11, 0x14, 0xd, 0x6, 0x13,
     0x81, 0x24, 0x42, 0x9c, 0x39, 0x18, 0x39, 0x10,
-    0xf2, 0x12, 0xa6, 0xa, 0x8e, 0x18,
-
-    /* U+200 "Ȁ" */
-    0xf, 0xfe, 0xc, 0x90, 0x7e, 0x86, 0xf, 0x4d,
-    0xa1, 0xf5, 0xc, 0x3f, 0x58, 0x7f, 0x24, 0x1f,
-    0x22, 0x83, 0xe9, 0x84, 0x3e, 0xc1, 0x7, 0x42,
-    0x41, 0xe5, 0x1, 0x20, 0x93, 0xc, 0x85, 0x97,
-    0xc0, 0x40, 0xaa, 0xe3, 0x13, 0x5e, 0x13, 0x10,
-    0xe8, 0x40
+    0xf2, 0x12, 0xa6, 0xa, 0x8e, 0x18
 };
 
 
@@ -1188,8 +1180,7 @@ static const lv_font_fmt_txt_glyph_dsc_t glyph_dsc[] = {
     {.bitmap_index = 3867, .adv_w = 147, .box_w = 7, .box_h = 13, .ofs_x = 1, .ofs_y = 0},
     {.bitmap_index = 3883, .adv_w = 127, .box_w = 8, .box_h = 17, .ofs_x = 0, .ofs_y = -3},
     {.bitmap_index = 3916, .adv_w = 151, .box_w = 8, .box_h = 17, .ofs_x = 1, .ofs_y = -3},
-    {.bitmap_index = 3942, .adv_w = 127, .box_w = 8, .box_h = 16, .ofs_x = 0, .ofs_y = -3},
-    {.bitmap_index = 3972, .adv_w = 170, .box_w = 11, .box_h = 17, .ofs_x = 0, .ofs_y = 0}
+    {.bitmap_index = 3942, .adv_w = 127, .box_w = 8, .box_h = 16, .ofs_x = 0, .ofs_y = -3}
 };
 
 /*---------------------
@@ -1207,10 +1198,6 @@ static const lv_font_fmt_txt_cmap_t cmaps[] =
     },
     {
         .range_start = 160, .range_length = 96, .glyph_id_start = 96,
-        .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
-    },
-    {
-        .range_start = 512, .range_length = 1, .glyph_id_start = 192,
         .unicode_list = NULL, .glyph_id_ofs_list = NULL, .list_length = 0, .type = LV_FONT_FMT_TXT_CMAP_FORMAT0_TINY
     }
 };
@@ -1246,8 +1233,7 @@ static const uint8_t kern_left_class_mapping[] =
     34, 34, 34, 34, 34, 34, 0, 36,
     0, 0, 0, 0, 0, 0, 0, 0,
     59, 41, 42, 42, 42, 42, 42, 0,
-    42, 0, 0, 0, 0, 0, 60, 0,
-    10
+    42, 0, 0, 0, 0, 0, 60, 0
 };
 
 /*Map glyph_ids to kern right classes*/
@@ -1276,8 +1262,7 @@ static const uint8_t kern_right_class_mapping[] =
     28, 28, 28, 28, 28, 28, 28, 29,
     31, 31, 31, 31, 51, 0, 52, 53,
     54, 35, 36, 36, 36, 36, 36, 0,
-    36, 40, 40, 40, 40, 44, 0, 44,
-    12
+    36, 40, 40, 40, 40, 44, 0, 44
 };
 
 /*Kern values between classes*/
@@ -1712,7 +1697,7 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
     .cmaps = cmaps,
     .kern_dsc = &kern_classes,
     .kern_scale = 16,
-    .cmap_num = 3,
+    .cmap_num = 2,
     .bpp = 2,
     .kern_classes = 1,
     .bitmap_format = 1

@@ -86,7 +86,7 @@ bool widget_remove( icon_t *widget ) {
 }
 
 void widget_set_indicator( icon_t *widget, icon_indicator_t indicator ) {
-    if ( widget->active == false || widget == NULL ) {
+    if ( widget == NULL ) {
         return;
     }
 
@@ -112,7 +112,11 @@ void widget_set_indicator( icon_t *widget, icon_indicator_t indicator ) {
 }
 
 void widget_hide_indicator( icon_t *widget ) {
-    if ( widget->active == false  || widget == NULL ) {
+    if ( widget == NULL ) {
+        return;
+    }
+
+    if ( widget->active == false ) {
         return;
     }
 
@@ -121,7 +125,11 @@ void widget_hide_indicator( icon_t *widget ) {
 }
 
 void widget_set_icon( icon_t *widget, lv_obj_t *icon ) {
-    if ( widget->active == false  || widget == NULL ) {
+    if ( widget == NULL ) {
+        return;
+    }
+
+    if ( widget->active == false ) {
         return;
     }
 
@@ -135,7 +143,11 @@ void widget_set_icon( icon_t *widget, lv_obj_t *icon ) {
 }
 
 void widget_set_label( icon_t *widget, const char* text ) {
-    if ( widget->active == false  || widget == NULL ) {
+    if ( widget == NULL ) {
+        return;
+    }
+
+    if ( widget->active == false ) {
         return;
     }
 
@@ -146,7 +158,11 @@ void widget_set_label( icon_t *widget, const char* text ) {
 }
 
 void widget_set_extended_label( icon_t *widget, const char* text ) {
-    if ( widget->active == false  || widget == NULL ) {
+    if ( widget == NULL ) {
+        return;
+    }
+
+    if ( widget->active == false ) {
         return;
     }
 
