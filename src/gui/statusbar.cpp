@@ -371,8 +371,9 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
 void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
     log_i("statusbar bma event %04x, msg: %s", event, msg );
     switch( event ) {
-        case BMA_STEPCOUNTER:   lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
-                                break;
+        case BMACTL_STEPCOUNTER:    log_i("update stepcounter");
+                                    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
+                                    break;
     }
 }
 
