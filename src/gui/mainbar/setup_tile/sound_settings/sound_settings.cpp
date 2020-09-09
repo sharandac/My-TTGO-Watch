@@ -153,8 +153,7 @@ static void exit_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void sound_enable_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_RELEASED ):     
-                                            log_i("Released")
+        case( LV_EVENT_VALUE_CHANGED ):     
                                             sound_set_enabled_config( lv_switch_get_state( obj ) );
                                             if (sound_get_enabled_config()) {
                                                 lv_img_set_src( sound_icon, &sound_32px );
