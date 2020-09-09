@@ -51,6 +51,24 @@ to move your json into PSRAM, here is enough RAM for all the crazy stuff you wil
 as often as possible.
 And one very important thing: Do not talk directly to the hardware!
 
+## Sound
+To play sounds from the inbuild speakers use `hardware/sound.h`:
+
+```
+#include "hardware/sound.h"
+[...]
+// MP3 from SPIFFS:
+// void sound_play_spiffs_mp3( const char *filename );
+// example:
+sound_play_spiffs_mp3( "/sound.mp3" )
+
+// or WAV from PROGMEM via
+//void sound_play_progmem_wav( const void *data, uint32_t len );
+
+```
+
+There is a configuration tile to enable/disable all sound output and set the global volume.
+
 # how to make a screenshot
 The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
 ```bash
@@ -70,6 +88,7 @@ wget x.x.x.x/shot ; wget x.x.x.x/screen.565
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen9.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen10.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen11.png)
+
 
 # Contributors
 
