@@ -11,12 +11,12 @@
 
 #include "gui/statusbar.h"
 
-EventGroupHandle_t pmu_event_handle = NULL;
+volatile bool DRAM_ATTR pmu_irq_flag = false;
 void IRAM_ATTR pmu_irq( void );
+
 pmu_config_t pmu_config;
 
 void pmu_setup( void ) {
-    pmu_event_handle = xEventGroupCreate();
 
     pmu_read_config();
 
@@ -59,14 +59,7 @@ void pmu_setup( void ) {
 }
 
 void IRAM_ATTR  pmu_irq( void ) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    /*
-     * setup an PMU event
-     */
-    xEventGroupSetBitsFromISR( pmu_event_handle, PMU_EVENT_AXP_INT, &xHigherPriorityTaskWoken );
-    if ( xHigherPriorityTaskWoken ) {
-        portYIELD_FROM_ISR();
-    }
+    pmu_irq_flag = true;
 }
 
 void pmu_standby( void ) {
@@ -239,11 +232,10 @@ void pmu_loop( void ) {
     bool updatetrigger = false;
 
     TTGOClass *ttgo = TTGOClass::getWatch();
-
     /*
      * handle IRQ event
      */
-    if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {        
+    if ( pmu_irq_flag ) {        
         ttgo->power->readIRQ();
         if (ttgo->power->isVbusPlugInIRQ()) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
@@ -275,7 +267,7 @@ void pmu_loop( void ) {
             return;
         }
         ttgo->power->clearIRQ();
-        xEventGroupClearBits( pmu_event_handle, PMU_EVENT_AXP_INT );
+        pmu_irq_flag = false;
     }
 
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {

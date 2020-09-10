@@ -39,9 +39,12 @@
 
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;
+lv_style_t powermeter_id_style;
 
 lv_task_t * _powermeter_main_task;
 
+lv_obj_t *id_cont = NULL;
+lv_obj_t *id_label = NULL;
 lv_obj_t *voltage_cont = NULL;
 lv_obj_t *voltage_label = NULL;
 lv_obj_t *current_cont = NULL;
@@ -55,6 +58,7 @@ PubSubClient powermeter_mqtt_client( espClient );
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
+LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
 static void powermeter_wifictl_event_cb( EventBits_t event, char *msg );
@@ -78,6 +82,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
         log_e("powermeter message deserializeJson() failed: %s", error.c_str() );
     }
     else  {
+        if ( doc["id"] ) {
+            lv_label_set_text( id_label, doc["id"] );
+        }
         if ( doc["all"]["power"] ) {
             char temp[16] = "";
             snprintf( temp, sizeof( temp ), "%0.2fkW", atof( doc["all"]["power"] ) );
@@ -98,6 +105,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
             snprintf( temp, sizeof( temp ), "%0.1fA", atof( doc["channel0"]["current"] ) );
             lv_label_set_text( current_label, temp );
         }
+        lv_obj_align( id_label, id_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
         lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
         lv_obj_align( voltage_label, voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
         lv_obj_align( current_label, current_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
@@ -109,15 +117,19 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void powermeter_main_tile_setup( uint32_t tile_num ) {
 
     powermeter_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &powermeter_main_style, mainbar_get_style() );
 
     lv_style_copy( &powermeter_main_style, mainbar_get_style() );
-
     lv_style_set_bg_color( &powermeter_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &powermeter_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &powermeter_main_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font( &powermeter_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_obj_add_style( powermeter_main_tile, LV_OBJ_PART_MAIN, &powermeter_main_style );
+
+    lv_style_copy( &powermeter_id_style, mainbar_get_style() );
+    lv_style_set_bg_color( &powermeter_id_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &powermeter_id_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &powermeter_id_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
 
     lv_obj_t * exit_btn = lv_imgbtn_create( powermeter_main_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -137,10 +149,23 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, enter_powermeter_setup_event_cb );
 
+    id_cont = lv_obj_create( powermeter_main_tile, NULL );
+    lv_obj_set_size( id_cont, lv_disp_get_hor_res( NULL ), 20 );
+    lv_obj_add_style( id_cont, LV_OBJ_PART_MAIN, &powermeter_id_style );
+    lv_obj_align( id_cont, powermeter_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_t * id_info_label = lv_label_create( id_cont, NULL );
+    lv_obj_add_style( id_info_label, LV_OBJ_PART_MAIN, &powermeter_id_style );
+    lv_label_set_text( id_info_label, "ID:" );
+    lv_obj_align( id_info_label, id_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    id_label = lv_label_create( id_cont, NULL );
+    lv_obj_add_style( id_label, LV_OBJ_PART_MAIN, &powermeter_id_style );
+    lv_label_set_text( id_label, "n/a" );
+    lv_obj_align( id_label, id_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
     voltage_cont = lv_obj_create( powermeter_main_tile, NULL );
     lv_obj_set_size( voltage_cont, lv_disp_get_hor_res( NULL ), 56 );
     lv_obj_add_style( voltage_cont, LV_OBJ_PART_MAIN, &powermeter_main_style );
-    lv_obj_align( voltage_cont, powermeter_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_align( voltage_cont, id_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t * voltage_info_label = lv_label_create( voltage_cont, NULL );
     lv_obj_add_style( voltage_info_label, LV_OBJ_PART_MAIN, &powermeter_main_style );
     lv_label_set_text( voltage_info_label, "U =" );
