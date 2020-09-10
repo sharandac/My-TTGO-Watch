@@ -31,33 +31,33 @@
         bool vibe = true;
     } motor_config_t;
 
-    /*
+    /**
      * @brief setup motor I/O
      */
     void motor_setup( void );
-    /*
+    /**
      * @brief let vibe motor for n * 10ms
      * 
      * @param   time    time in 10ms
      */
     void motor_vibe( int time );
-    /*
+    /**
      * @brief   get the current vibe configuration
      * 
      * @return  bool    true means vibe enable, false means disable
      */
     bool motor_get_vibe_config( void );
-    /*
+    /**
      * @brief   set the current vibe configuration
      * 
      * @param   enable    true means vibe enable, false means disable
      */
     void motor_set_vibe_config( bool enable );
-    /*
+    /**
      * @brief  store the current configuration to SPIFFS
      */
     void motor_save_config( void );
-    /*
+    /**
      * @brief   read the configuration from SPIFFS
      */
     void motor_read_config( void );

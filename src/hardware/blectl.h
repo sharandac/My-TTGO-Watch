@@ -91,29 +91,29 @@
     #define BLECTL_PAIRING_SUCCESS       _BV(9)
     #define BLECTL_PAIRING_ABORT         _BV(10)
 
-    /*
+    /**
      * @brief ble setup function
      */
     void blectl_setup( void );
-    /*
+    /**
      * @brief trigger a blectl managemt event
      * 
      * @param   bits    event to trigger
      */
     void blectl_set_event( EventBits_t bits );
-    /*
+    /**
      * @brief clear a blectl managemt event
      * 
      * @param   bits    event to clear
      */
     void blectl_clear_event( EventBits_t bits );
-    /*
+    /**
      * @brief get a blectl managemt event state
      * 
      * @param   bits    event state, example: POWERMGM_STANDBY to evaluate if the system in standby
      */
     bool blectl_get_event( EventBits_t bits );
-    /*
+    /**
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event  possible values:     BLECTL_CONNECT,

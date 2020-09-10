@@ -38,7 +38,6 @@
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
-#include "hardware/sound.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
@@ -90,7 +89,6 @@ void setup()
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
     
-    sound_setup();
     gui_setup(); 
 
     /*
@@ -110,7 +108,7 @@ void setup()
         wifictl_on();
 
     // enable to store data in normal heap
-//    heap_caps_malloc_extmem_enable( 16*1024 );
+    heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
 
     display_set_brightness( display_get_brightness() );
@@ -127,8 +125,6 @@ void setup()
 
 void loop()
 {
-    delay(5);
     gui_loop();
-    sound_loop();
     powermgm_loop();
 }

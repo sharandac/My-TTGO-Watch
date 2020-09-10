@@ -24,7 +24,7 @@
     #define _TOUCH_H
 
     #include "TTGO.h"
-    /*
+    /**
      * @brief setup touch
      */
     void touch_setup( void );

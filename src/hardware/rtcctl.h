@@ -37,15 +37,15 @@
         const char *id;
     } rtcctl_event_cb_t;
 
-    /*
+    /**
      * @brief setup rtc controller routine
      */
     void rtcctl_setup( void );
-    /*
+    /**
      * @brief rtc controller loop routine
      */
     void rtcctl_loop( void );
-    /*
+    /**
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event   possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
@@ -53,7 +53,7 @@
      * @param   id      programm id
      */
     void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb, const char *id );
-    /*
+    /**
      * @brief set an alarm time
      * 
      * @param   hour    hour to set
@@ -61,15 +61,15 @@
      * 
      */
     void rtcctl_set_alarm( uint8_t hour, uint8_t minute );
-    /*
+    /**
      * @brief   enable alarm
      */
     void rtcctl_enable_alarm( void );
-    /*
+    /**
      * @brief   disable alarm
      */
     void rtcctl_disable_alarm( void );
-    /*
+    /**
      * @brief   check rtc time
      * 
      * @param   hour to check
@@ -78,7 +78,7 @@
      * @return  true if equal, otherwise false
      */
     bool rtcctl_is_time( uint8_t hour, uint8_t minute );
-    /*
+    /**
      * @brief   get the current alarm state
      * 
      * @return  true if enable, false is disable

@@ -50,54 +50,54 @@
         BMA_CONFIG_NUM
     };
 
-    /*
+    /**
      * @brief setup bma activity measurement
      */
     void bma_setup( void );
-    /*
+    /**
      * @brief loop function for activity measurement
      */
     void bma_loop( void );
-    /*
+    /**
      * @brief put bma into standby, depending on ther config
      */
     void bma_standby( void );
-    /*
+    /**
      * @brief wakeup activity measurement
      */
     void bma_wakeup( void );
-    /*
+    /**
      * @brief reload config
      */
     void bma_reload_settings( void );
-    /*
+    /**
      * @brief save the config structure to SPIFFS
      */
     void bma_save_config( void );
-    /*
+    /**
      * @brief read the config structure from SPIFFS
      */
     void bma_read_config( void );
-    /*
+    /**
      * @brief get config
      * 
      * @param   config     configitem: BMA_STEPCOUNTER, BMA_DOUBLECLICK or BMA_CONFIG_NUM
      */
     bool bma_get_config( int config );
-    /*
+    /**
      * @brief set config
      * 
      * @param   config     configitem: BMA_STEPCOUNTER, BMA_DOUBLECLICK or BMA_CONFIG_NUM
      * @param   bool    true or false
      */
     void bma_set_config( int config, bool enable );
-    /*
+    /**
      * @brief   rotate bma axis
      * 
      * @param   rotation on degree
      */
     void bma_set_rotate_tilt( uint32_t rotation );
-    /*
+    /**
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event   possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT

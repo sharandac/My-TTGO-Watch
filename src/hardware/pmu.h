@@ -49,65 +49,65 @@
         bool silence_wakeup = true;
     } pmu_config_t;
 
-    /*
+    /**
      * @brief setup pmu: axp202
      */
     void pmu_setup( void );
-    /*
+    /**
      * @brief pmu loop routine, call from powermgm. not for user use
      */
     void pmu_loop( void );
-    /*
+    /**
      * @brief get the charge of battery in percent
      * 
      * @return  charge in percent or -1 if unknown
      */
     int32_t pmu_get_battery_percent( void );
-    /*
+    /**
      * @brief set the axp202 in standby
      */
     void pmu_standby( void );
-    /*
+    /**
      * @brief wakeup to axp202
      */
     void pmu_wakeup( void );
-    /*
+    /**
      * @brief save the config structure to SPIFFS
      */
     void pmu_save_config( void );
-    /*
+    /**
      * @brief read the config structure from SPIFFS
      */
     void pmu_read_config( void );
-    /*
+    /**
      * @brief read the config for calculated mAh based on the axp202 coloumb counter
      */
     bool pmu_get_calculated_percent( void );
-    /*
+    /**
      * @brief read the config for experimental power save
      * 
      * @return  true means enable, false means disable
      */
     bool pmu_get_experimental_power_save( void );
-    /*
+    /**
      * @brief set the config to use calculated mAh
      * 
      * @param   value   true enable calculated percent, false use AXP202 percent
      */
     void pmu_set_calculated_percent( bool value );
-    /*
+    /**
      * @brief set experimental power save
      * 
      * @param   value   true enable experiemental power save settings
      */
     void pmu_set_experimental_power_save( bool value );
-    /*
+    /**
      * @brief get the designed battery capacity in mAh
      * 
      * @return  capacity in mAh
      */
     int32_t pmu_get_designed_battery_cap( void );
-    /*
+    /**
      * @brief   get the current silence wakeup configuration,
      *          the time can configure in pmu.json
      * 
@@ -115,49 +115,49 @@
      * 
      */
     bool pmu_get_silence_wakeup( void );
-    /*
+    /**
      * @brief set the current silence wakeup configureation
      * 
      * @param   value   true means enable, false means disable
      */
     void pmu_set_silence_wakeup( bool value );
-    /*
-     * @breif get the current battery voltage in mV
+    /**
+     * @brief get the current battery voltage in mV
      * 
      * @return  voltage in mV
      */ 
     float pmu_get_battery_voltage( void );
-    /*
+    /**
      * @brief   get the batterty charging current in mA
      * 
      * @return  current in mA
      */
     float pmu_get_battery_charge_current( void );
-    /*
+    /**
      * @brief   get the battery discharging current in mA
      * 
      * @return  discharging current in mA
      */
     float pmu_get_battery_discharge_current( void );
-    /*
+    /**
      * @brief   get the VBUS voltage in mV
      * 
      * @return  VBUS voltage in mV
      */
     float pmu_get_vbus_voltage( void );
-    /*
+    /**
      * @brief   get battery capacity in mAh
      * 
      * @return  capacity in mAh
      */
     float pmu_get_coulumb_data( void );
-    /*
+    /**
      * @brief   get the charging state
      * 
      * @return  true means charging, false means no charging
      */
     bool pmu_is_charging( void );
-    /*
+    /**
      * @brief   get the vbus plug state
      * 
      * @return  true means plugged, false means not plugged

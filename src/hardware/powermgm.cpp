@@ -37,6 +37,8 @@
 #include "touch.h"
 #include "display.h"
 #include "rtcctl.h"
+#include "sound.h"
+
 
 #include "gui/mainbar/mainbar.h"
 
@@ -59,6 +61,7 @@ void powermgm_setup( void ) {
     touch_setup();
     rtcctl_setup();
     blectl_read_config();
+    sound_setup();
 }
 
 void powermgm_loop( void ) {
@@ -171,6 +174,7 @@ void powermgm_loop( void ) {
         bma_loop();
         display_loop();
         rtcctl_loop();
+        sound_loop();
     }
 }
 

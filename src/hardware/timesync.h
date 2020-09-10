@@ -36,72 +36,71 @@
         bool use_24hr_clock = true;
     } timesync_config_t;
 
-    /*
+    /**
      * @brief setup display
      */
     void timesync_setup( void );
-    /*
+    /**
      * @brief save config for timesync to spiffs
      */
     void timesync_save_config( void );
-    /*
+    /**
      * @brief read config for timesync from spiffs
      */
     void timesync_read_config( void );
-    /*
+    /**
      * @brief get the status if timesync enable/disable
      * 
      * @return true or false
      */
     bool timesync_get_timesync( void );
-    /*
+    /**
      * @brief enable/disable automatic timesync when wifi is connected
      * 
      * @param timesync  true or false
      */
     void timesync_set_timesync( bool timesync );
-    /*
+    /**
      * @brief get the status if daylightsave enable/disable
      * 
      * @return true or false
      */
     bool timesync_get_daylightsave( void );
-    /*
+    /**
      * @brief enable/disable daylight saving
      * 
      * @param daylightsave  true means daylight save enable, false means disable
      */
     void timesync_set_daylightsave( bool daylightsave );
-    /*
+    /**
      * @brief get the current timezone
      * 
      * @return  timezone from UTC-12 to UTC+12
      */
     int32_t timesync_get_timezone( void );
-    /*
+    /**
      * @brief set the current timezone
      * 
      * @param timezone  timezone from UTC-12 to UTC+12
      */
     void timesync_set_timezone( int32_t timezone );
-
-    /*
+    /**
      * @brief get the 24hr clock setting
      * 
      * @return  true if 24 clock enabled
      */
     bool timesync_get_24hr(void);
-    /*
+    /**
      * @brief enable/disable 24 hour clock format
      * 
      * @param use24  true or false
      */
     void timesync_set_24hr( bool use24 );
-    /*
+    /**
      * @brief wrapper function to sync the system with rtc
      */
     void timesyncToSystem( void );
-    /*
+    /**
      * @brief wrapper function to sync the rtc with system
      */
     void timesyncToRTC( void );
