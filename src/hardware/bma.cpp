@@ -89,10 +89,7 @@ void bma_wakeup( void ) {
     if ( bma_get_config( BMA_STEPCOUNTER ) )
         ttgo->bma->enableStepCountInterrupt( true );
 
-    stepcounter_before_reset = ttgo->bma->getCounter();
-    char msg[16]="";
-    snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-    bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+    first_loop_run = true;
 }
 
 void bma_reload_settings( void ) {
