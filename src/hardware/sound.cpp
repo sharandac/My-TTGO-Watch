@@ -57,10 +57,7 @@ void sound_setup( void ) {
         return;
 
     sound_read_config();
-
-    //!Turn on the audio power
-    sound_set_enabled(true);
-
+    
     //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out = new AudioOutputI2S();
     out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
@@ -76,7 +73,9 @@ void sound_standby( void ) {
 }
 
 void sound_wakeup( void ) {
-    sound_set_enabled(true);
+    // to avoid additional power consumtion when waking up, audio is only enabled when 
+    // a 'play sound' method is called
+    // this would be the place to play a wakeup sound
 }
 
 /**
@@ -178,8 +177,9 @@ bool sound_get_enabled_config( void ) {
 
 void sound_set_enabled_config( bool enable ) {
     sound_config.enable = enable;
-
-    sound_set_enabled(enable);
+    if ( ! sound_config.enable) {
+        sound_set_enabled( false );
+    }
     sound_save_config();
 }
 
