@@ -24,8 +24,6 @@
 
     #include "TTGO.h"
 
-    #define PMU_EVENT_AXP_INT       _BV(0)
-
     #define PMU_CONFIG_FILE         "/pmu.cfg"
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 

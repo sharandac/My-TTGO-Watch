@@ -24,49 +24,42 @@
 #include "rtcctl.h"
 #include "hardware/powermgm.h"
 
-EventGroupHandle_t rtcctl_status = NULL;
-portMUX_TYPE rtcctlMux = portMUX_INITIALIZER_UNLOCKED;
+volatile bool DRAM_ATTR rtc_irq_flag = false;
+portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
 static bool alarm_enable = false;
 
-static void IRAM_ATTR rtcctl_irq( void );
 void rtcctl_send_event_cb( EventBits_t event );
-void rtcctl_test_cb( EventBits_t event );
-void rtcctl_set_event( EventBits_t bits );
-void rtcctl_clear_event( EventBits_t bits );
-bool rtcctl_get_event( EventBits_t bits );
 
 rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
 
-void rtcctl_setup( void ){
-    rtcctl_status = xEventGroupCreate();
+static void IRAM_ATTR rtcctl_irq( void );
 
+void rtcctl_setup( void ) {
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
     rtcctl_disable_alarm();
 }
 
+static void IRAM_ATTR rtcctl_irq( void ) {
+    portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+    rtc_irq_flag = true;
+    portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+    powermgm_set_event( POWERMGM_RTC_ALARM );
+}
+
 void rtcctl_loop( void ) {
     // fire callback
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( rtcctl_get_event( RTCCTL_ALARM ) ) {
+        portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+        bool temp_rtc_irq_flag = rtc_irq_flag;
+        rtc_irq_flag = false;
+        portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+        if ( temp_rtc_irq_flag ) {
             rtcctl_send_event_cb( RTCCTL_ALARM );
-            rtcctl_clear_event( RTCCTL_ALARM );
         }
     }
-}
-
-static void IRAM_ATTR rtcctl_irq( void ) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    /*
-     * setup an RTC event
-     */
-    xEventGroupSetBitsFromISR( rtcctl_status, RTCCTL_ALARM, &xHigherPriorityTaskWoken );
-    if ( xHigherPriorityTaskWoken ) {
-        portYIELD_FROM_ISR();
-    }
-    powermgm_set_event( POWERMGM_RTC_ALARM );
 }
 
 void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb ) {
@@ -107,28 +100,6 @@ void rtcctl_send_event_cb( EventBits_t event ) {
             rtcctl_event_cb_table[ entry ].event_cb( event );
         }
     }
-}
-
-void rtcctl_set_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&rtcctlMux);
-    xEventGroupSetBits( rtcctl_status, bits );
-    portEXIT_CRITICAL(&rtcctlMux);
-}
-
-void rtcctl_clear_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&rtcctlMux);
-    xEventGroupClearBits( rtcctl_status, bits );
-    portEXIT_CRITICAL(&rtcctlMux);
-}
-
-bool rtcctl_get_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&rtcctlMux);
-    EventBits_t temp = xEventGroupGetBits( rtcctl_status ) & bits;
-    portEXIT_CRITICAL(&rtcctlMux);
-    if ( temp )
-        return( true );
-
-    return( false );
 }
 
 void rtcctl_set_alarm( uint8_t hour, uint8_t minute ){

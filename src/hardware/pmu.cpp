@@ -11,12 +11,14 @@
 
 #include "gui/statusbar.h"
 
-EventGroupHandle_t pmu_event_handle = NULL;
-void IRAM_ATTR pmu_irq( void );
+volatile bool DRAM_ATTR pmu_irq_flag = false;
+portMUX_TYPE PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+
 pmu_config_t pmu_config;
 
+void IRAM_ATTR pmu_irq( void );
+
 void pmu_setup( void ) {
-    pmu_event_handle = xEventGroupCreate();
 
     pmu_read_config();
 
@@ -59,13 +61,63 @@ void pmu_setup( void ) {
 }
 
 void IRAM_ATTR  pmu_irq( void ) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    portENTER_CRITICAL_ISR(&PMU_IRQ_Mux);
+    pmu_irq_flag = true;
+    portEXIT_CRITICAL_ISR(&PMU_IRQ_Mux);
+}
+
+void pmu_loop( void ) {
+    static uint64_t nextmillis = 0;
+    bool updatetrigger = false;
+    TTGOClass *ttgo = TTGOClass::getWatch();
     /*
-     * setup an PMU event
+     * handle IRQ event
      */
-    xEventGroupSetBitsFromISR( pmu_event_handle, PMU_EVENT_AXP_INT, &xHigherPriorityTaskWoken );
-    if ( xHigherPriorityTaskWoken ) {
-        portYIELD_FROM_ISR();
+    portENTER_CRITICAL_ISR(&PMU_IRQ_Mux);
+    bool temp_pmu_irq_flag = pmu_irq_flag;
+    pmu_irq_flag = false;
+    portEXIT_CRITICAL_ISR(&PMU_IRQ_Mux);
+
+    if ( temp_pmu_irq_flag ) {        
+        ttgo->power->readIRQ();
+        if ( ttgo->power->isVbusPlugInIRQ()) {
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            motor_vibe( 1 );
+            updatetrigger = true;
+        }
+        if ( ttgo->power->isVbusRemoveIRQ()) {
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            motor_vibe( 1 );
+            updatetrigger = true;
+        }
+        if ( ttgo->power->isChargingDoneIRQ()) {
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            motor_vibe( 1 );
+            updatetrigger = true;
+        }
+        if ( ttgo->power->isPEKShortPressIRQ()) {
+            updatetrigger = true;
+            powermgm_set_event( POWERMGM_PMU_BUTTON );
+            ttgo->power->clearIRQ();
+            return;
+        }
+        if ( ttgo->power->isTimerTimeoutIRQ() ) {
+            updatetrigger = true;
+            powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+            ttgo->power->clearTimerStatus();
+            ttgo->power->offTimer();
+            ttgo->power->clearIRQ();
+            return;
+        }
+        ttgo->power->clearIRQ();
+    }
+
+    if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
+        if ( nextmillis < millis() || updatetrigger == true ) {
+            nextmillis = millis() + 1000;
+            statusbar_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+            blectl_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+        }
     }
 }
 
@@ -232,59 +284,6 @@ void pmu_set_calculated_percent( bool value ) {
 void pmu_set_experimental_power_save( bool value ) {
     pmu_config.experimental_power_save = value;
     pmu_save_config();
-}
-
-void pmu_loop( void ) {
-    static uint64_t nextmillis = 0;
-    bool updatetrigger = false;
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-    /*
-     * handle IRQ event
-     */
-    if ( xEventGroupGetBitsFromISR( pmu_event_handle ) & PMU_EVENT_AXP_INT ) {        
-        ttgo->power->readIRQ();
-        if (ttgo->power->isVbusPlugInIRQ()) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
-        }
-        if (ttgo->power->isVbusRemoveIRQ()) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
-        }
-        if (ttgo->power->isChargingDoneIRQ()) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
-        }
-        if (ttgo->power->isPEKShortPressIRQ()) {
-            updatetrigger = true;
-            powermgm_set_event( POWERMGM_PMU_BUTTON );
-            ttgo->power->clearIRQ();
-            return;
-        }
-        if ( ttgo->power->isTimerTimeoutIRQ() ) {
-            updatetrigger = true;
-            powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
-            ttgo->power->clearTimerStatus();
-            ttgo->power->offTimer();
-            ttgo->power->clearIRQ();
-            return;
-        }
-        ttgo->power->clearIRQ();
-        xEventGroupClearBits( pmu_event_handle, PMU_EVENT_AXP_INT );
-    }
-
-    if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( nextmillis < millis() || updatetrigger == true ) {
-            nextmillis = millis() + 1000;
-            statusbar_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
-            blectl_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
-        }
-    }
 }
 
 int32_t pmu_get_battery_percent( void ) {

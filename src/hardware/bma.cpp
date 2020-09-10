@@ -29,13 +29,13 @@
 
 #include "gui/statusbar.h"
 
-EventGroupHandle_t bma_event_handle = NULL;
-bma_config_t bma_config[ BMA_CONFIG_NUM ];
-
+volatile bool DRAM_ATTR bma_irq_flag = false;
+portMUX_TYPE BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
+bma_config_t bma_config[ BMA_CONFIG_NUM ];
 bma_event_cb_t *bma_event_cb_table = NULL;
 uint32_t bma_event_cb_entrys = 0;
 
@@ -46,8 +46,6 @@ void bma_send_event_cb( EventBits_t event, const char *msg );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-
-    bma_event_handle = xEventGroupCreate();
 
     for ( int i = 0 ; i < BMA_CONFIG_NUM ; i++ ) {
         bma_config[ i ].enable = true;
@@ -92,10 +90,7 @@ void bma_wakeup( void ) {
     if ( bma_get_config( BMA_STEPCOUNTER ) )
         ttgo->bma->enableStepCountInterrupt( true );
 
-    stepcounter_before_reset = ttgo->bma->getCounter();
-    char msg[16]="";
-    snprintf( msg, sizeof( msg ),"%d", stepcounter + ttgo->bma->getCounter() );
-    bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+    first_loop_run = true;
 }
 
 void bma_reload_settings( void ) {
@@ -108,14 +103,9 @@ void bma_reload_settings( void ) {
 }
 
 void IRAM_ATTR bma_irq( void ) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    xEventGroupSetBitsFromISR( bma_event_handle, BMACTL_EVENT_INT, &xHigherPriorityTaskWoken );
-
-    if ( xHigherPriorityTaskWoken )
-    {
-        portYIELD_FROM_ISR ();
-    }
+    portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
+    bma_irq_flag = true;
+    portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
 }
 
 void bma_loop( void ) {
@@ -123,26 +113,27 @@ void bma_loop( void ) {
     /*
      * handle IRQ event
      */
-    if ( xEventGroupGetBitsFromISR( bma_event_handle ) & BMACTL_EVENT_INT ) {                
-      while( !ttgo->bma->readInterrupt() );
+    portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
+    bool temp_bma_irq_flag = bma_irq_flag;
+    bma_irq_flag = false;
+    portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
+
+    if ( temp_bma_irq_flag ) {                
+        while( !ttgo->bma->readInterrupt() );
+
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
-            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
             bma_send_event_cb( BMACTL_DOUBLECLICK, "" );
-            return;
         }
         if ( ttgo->bma->isTilt() ) {
             powermgm_set_event( POWERMGM_BMA_TILT );
-            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
             bma_send_event_cb( BMACTL_TILT, "" );
-            return;
         }
         if ( ttgo->bma->isStepCounter() ) {
             stepcounter_before_reset = ttgo->bma->getCounter();
             char msg[16]="";
             snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
             bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
-            xEventGroupClearBitsFromISR( bma_event_handle, BMACTL_EVENT_INT );
         }
     }
 
