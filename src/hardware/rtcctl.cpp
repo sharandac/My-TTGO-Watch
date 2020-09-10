@@ -25,7 +25,7 @@
 #include "powermgm.h"
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
-portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
 static bool alarm_enable = false;
 

@@ -41,7 +41,7 @@
 #include "gui/mainbar/mainbar.h"
 
 EventGroupHandle_t powermgm_status = NULL;
-portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
 powermgm_event_cb_t *powermgm_event_cb_table = NULL;
 uint32_t powermgm_event_cb_entrys = 0;

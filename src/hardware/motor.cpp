@@ -28,7 +28,7 @@
 
 volatile int DRAM_ATTR motor_run_time_counter=0;
 hw_timer_t * timer = NULL;
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR timerMux = portMUX_INITIALIZER_UNLOCKED;
 
 bool motor_init = false;
 

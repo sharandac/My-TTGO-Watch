@@ -34,7 +34,7 @@
 
 bool wifi_init = false;
 EventGroupHandle_t wifictl_status = NULL;
-portMUX_TYPE wifictlMux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR wifictlMux = portMUX_INITIALIZER_UNLOCKED;
 
 wifictl_event_cb_t *wifictl_event_cb_table = NULL;
 uint32_t wifictl_event_cb_entrys = 0;

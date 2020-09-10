@@ -39,7 +39,7 @@
 #include "gui/statusbar.h"
 
 EventGroupHandle_t blectl_status = NULL;
-portMUX_TYPE blectlMux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
 blectl_config_t blectl_config;
 

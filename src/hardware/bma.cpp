@@ -30,7 +30,7 @@
 #include "gui/statusbar.h"
 
 volatile bool DRAM_ATTR bma_irq_flag = false;
-portMUX_TYPE BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;

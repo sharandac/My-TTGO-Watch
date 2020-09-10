@@ -12,7 +12,7 @@
 #include "gui/statusbar.h"
 
 volatile bool DRAM_ATTR pmu_irq_flag = false;
-portMUX_TYPE PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE DRAM_ATTR PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
 pmu_config_t pmu_config;
 
