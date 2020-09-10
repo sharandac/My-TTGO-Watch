@@ -54,7 +54,7 @@ void crypto_ticker_widget_setup( void ) {
 
     crypto_ticker_widget_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_widget_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_widget_wifictl_event_cb, "crypto ticker widget" );
 }
 
 void crypto_ticker_hide_widget_icon_info( bool show ) {

@@ -76,7 +76,7 @@ void bluetooth_call_tile_setup( void ) {
     lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
     lv_obj_set_event_cb( exit_btn, exit_bluetooth_call_event_cb );
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_call_event_cb );
+    blectl_register_cb( BLECTL_MSG, bluetooth_call_event_cb, "bluetooth_call" );
 }
 
 static void bluetooth_call_event_cb( EventBits_t event, char* msg ) {

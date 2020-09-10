@@ -148,7 +148,7 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
 
     crypto_ticker_main_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_main_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_main_wifictl_event_cb, "crypto ticker main" );
 }
 
 void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg ) {    

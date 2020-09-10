@@ -211,7 +211,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     else
         lv_switch_off( weather_imperial_onoff, LV_ANIM_OFF );
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb );
+    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "weather setup" );
 }
 
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {

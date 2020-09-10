@@ -124,7 +124,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_obj_align( exit_btn, bluetooth_message_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
     lv_obj_set_event_cb( exit_btn, exit_bluetooth_message_event_cb );
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb );
+    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "bluetooth_message" );
 }
 
 static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {

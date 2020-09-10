@@ -28,11 +28,21 @@ lv_indev_t *touch_indev = NULL;
 
 static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data);
 static bool touch_getXY( int16_t &x, int16_t &y );
+void touch_powermgm_event_cb( EventBits_t event );
 
 void touch_setup( void ) {
     touch_indev = lv_indev_get_next( NULL );
-
     touch_indev->driver.read_cb = touch_read;
+
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, touch_powermgm_event_cb, "touch" );
+}
+
+void touch_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          break;
+        case POWERMGM_WAKEUP:           break;
+        case POWERMGM_SILENCE_WAKEUP:   break;
+    }
 }
 
 static bool touch_getXY( int16_t &x, int16_t &y ) {

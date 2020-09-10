@@ -22,7 +22,7 @@
 #include <TTGO.h>
 
 #include "rtcctl.h"
-#include "hardware/powermgm.h"
+#include "powermgm.h"
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -30,6 +30,7 @@ portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 static bool alarm_enable = false;
 
 void rtcctl_send_event_cb( EventBits_t event );
+void rtcctl_powermgm_event_cb( EventBits_t event );
 
 rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
@@ -40,6 +41,15 @@ void rtcctl_setup( void ) {
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
     rtcctl_disable_alarm();
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_event_cb, "rtcctl" );
+}
+
+void rtcctl_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          break;
+        case POWERMGM_WAKEUP:           break;
+        case POWERMGM_SILENCE_WAKEUP:   break;
+    }
 }
 
 static void IRAM_ATTR rtcctl_irq( void ) {
@@ -62,7 +72,7 @@ void rtcctl_loop( void ) {
     }
 }
 
-void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb ) {
+void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb, const char *id ) {
     rtcctl_event_cb_entrys++;
 
     if ( rtcctl_event_cb_table == NULL ) {
@@ -85,7 +95,8 @@ void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb
 
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event = event;
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb = rtcctl_event_cb;
-    log_i("register rtc_event_cb success (%p)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb );
+    rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id = id;
+    log_i("register rtc_event_cb success (%p:%s)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb, rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id );
 }
 
 void rtcctl_send_event_cb( EventBits_t event ) {
@@ -96,7 +107,7 @@ void rtcctl_send_event_cb( EventBits_t event ) {
     for ( int entry = 0 ; entry < rtcctl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & rtcctl_event_cb_table[ entry ].event ) {
-            log_i("call rtc_event_cb (%p)", rtcctl_event_cb_table[ entry ].event_cb );
+            log_i("call rtc_event_cb (%p:04x:%s)", rtcctl_event_cb_table[ entry ].event_cb, event, rtcctl_event_cb_table[ entry ].id );
             rtcctl_event_cb_table[ entry ].event_cb( event );
         }
     }

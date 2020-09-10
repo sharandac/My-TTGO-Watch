@@ -129,14 +129,13 @@ void update_tile_setup( void ) {
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-    wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb, "update" );
 
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
 }
 
 void update_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("update wifictl event: %04x", event );
     switch( event ) {
         case WIFICTL_CONNECT:       if ( update_setup_get_autosync() ) {
                                     update_check_version();

@@ -144,12 +144,10 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     weather_forecast_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_forecast_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_forecast_wifictl_event_cb, "weather forcecast" );
 }
 
 void weather_forecast_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("weather forecast wifictl event: %04x", event );
-    
     switch( event ) {
         case WIFICTL_CONNECT:       weather_config_t *tmp_weather_config = weather_get_config();
                                     if ( tmp_weather_config->autosync ) {

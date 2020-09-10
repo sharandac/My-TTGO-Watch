@@ -34,6 +34,8 @@ display_config_t display_config;
 static uint8_t dest_brightness = 0;
 static uint8_t brightness = 0;
 
+void display_powermgm_event_cb( EventBits_t event );
+
 void display_setup( void ) {
     display_read_config();
 
@@ -43,6 +45,19 @@ void display_setup( void ) {
     ttgo->bl->adjust( 0 );
     ttgo->tft->setRotation( display_config.rotation / 90 );
     bma_set_rotate_tilt( display_config.rotation );
+
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "display" );
+}
+
+void display_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          display_standby();
+                                        break;
+        case POWERMGM_WAKEUP:           display_wakeup( false );
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   display_wakeup( true );
+                                        break;
+    }
 }
 
 void display_loop( void ) {

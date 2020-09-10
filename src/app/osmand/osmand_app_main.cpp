@@ -146,7 +146,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_activate_cb( tile_num, osmand_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmand_hibernate_cb );
 
-    blectl_register_cb( BLECTL_MSG, osmand_bluetooth_message_event_cb );
+    blectl_register_cb( BLECTL_MSG, osmand_bluetooth_message_event_cb, "OsmAnd main" );
 }
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {

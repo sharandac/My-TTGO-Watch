@@ -34,6 +34,7 @@
     typedef struct {
         EventBits_t event;
         RTCCTL_CALLBACK_FUNC event_cb;
+        const char *id;
     } rtcctl_event_cb_t;
 
     /*
@@ -49,8 +50,9 @@
      * 
      * @param   event   possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
      * @param   rtc_event_cb   pointer to the callback function 
+     * @param   id      programm id
      */
-    void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb );
+    void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb, const char *id );
     /*
      * @brief set an alarm time
      * 

@@ -33,6 +33,7 @@
     typedef struct {
         EventBits_t event;
         BMA_CALLBACK_FUNC event_cb;
+        const char *id;
     } bma_event_cb_t;
 
     #define BMA_COFIG_FILE          "/bma.cfg"
@@ -100,8 +101,9 @@
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event   possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT
-     * @param   rtc_event_cb   pointer to the callback function 
+     * @param   rtc_event_cb   pointer to the callback function
+     * @param   id      program id
      */
-    void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb );
+    void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb, const char *id );
 
 #endif // _BMA_H

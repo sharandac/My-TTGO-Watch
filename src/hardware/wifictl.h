@@ -51,6 +51,7 @@
     typedef struct {
         EventBits_t event;
         WIFICTL_CALLBACK_FUNC event_cb;
+        const char *id;
     } wifictl_event_cb_t;
 
     enum wifictl_event_t {
@@ -131,8 +132,9 @@
      *                                      WIFICTL_SCAN,      
      *                                      WIFICTL_FIRST_RUN
      * @param   wifictl_event_cb   pointer to the callback function 
+     * @param   id      program id
      */
-    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb );
+    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb, const char *id );
     /*
      * @brief get the current wifi auto on configuration
      * 

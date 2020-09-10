@@ -204,7 +204,7 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     powermeter_mqtt_client.setCallback( callback );
     powermeter_mqtt_client.setBufferSize( 512 );
 
-    wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb, "powermeter" );
     // create an task that runs every secound
     _powermeter_main_task = lv_task_create( powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL );
 }

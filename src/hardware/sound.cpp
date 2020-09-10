@@ -52,6 +52,8 @@ bool sound_init = false;
 
 sound_config_t sound_config;
 
+void sound_powermgm_event_cb( EventBits_t event );
+
 void sound_setup( void ) {
     if ( sound_init == true )
         return;
@@ -71,7 +73,17 @@ void sound_setup( void ) {
     mp3 = new AudioGeneratorMP3();
     wav = new AudioGeneratorWAV();
 
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
+
     sound_init = true;
+}
+
+void sound_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          break;
+        case POWERMGM_WAKEUP:           break;
+        case POWERMGM_SILENCE_WAKEUP:   break;
+    }
 }
 
 void sound_loop( void ) {

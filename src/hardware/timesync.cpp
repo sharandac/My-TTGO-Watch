@@ -31,10 +31,10 @@
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
-void timesync_Task( void * pvParameters );
-
 timesync_config_t timesync_config;
 
+void timesync_Task( void * pvParameters );
+void timesync_powermgm_event_cb( EventBits_t event );
 void timesync_wifictl_event_cb( EventBits_t event, char* msg );
 
 void timesync_setup( void ) {
@@ -42,7 +42,19 @@ void timesync_setup( void ) {
     timesync_read_config();
     time_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "timesync" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
+}
+
+void timesync_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          timesyncToRTC();
+                                        break;
+        case POWERMGM_WAKEUP:           timesyncToSystem();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   timesyncToSystem();
+                                        break;
+    }
 }
 
 void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {

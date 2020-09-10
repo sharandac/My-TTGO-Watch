@@ -33,6 +33,7 @@
 #include <BLE2902.h>
 
 #include "blectl.h"
+#include "powermgm.h"
 #include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
@@ -45,6 +46,7 @@ blectl_config_t blectl_config;
 blectl_event_t *blectl_event_cb_table = NULL;
 uint32_t blectl_event_cb_entrys = 0;
 void blectl_send_event_cb( EventBits_t event, char *msg );
+void blectl_powermgm_event_cb( EventBits_t event );
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -309,6 +311,18 @@ void blectl_setup( void ) {
         pServer->getAdvertising()->start();
         log_i("BLE advertising...");
     }
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "blectl" );
+}
+
+void blectl_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          blectl_standby();
+                                        break;
+        case POWERMGM_WAKEUP:           blectl_wakeup();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   blectl_wakeup();
+                                        break;
+    }
 }
 
 void blectl_set_event( EventBits_t bits ) {
@@ -333,7 +347,7 @@ bool blectl_get_event( EventBits_t bits ) {
     return( false );
 }
 
-void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb ) {
+void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id ) {
     blectl_event_cb_entrys++;
 
     if ( blectl_event_cb_table == NULL ) {
@@ -356,7 +370,8 @@ void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb
 
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event = event;
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb = blectl_event_cb;
-    log_i("register blectl_event_cb success (%p)", blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb );
+    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id = id;
+    log_i("register blectl_event_cb success (%p:%s)", blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb, blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id );
 }
 
 void blectl_send_event_cb( EventBits_t event, char *msg ) {
@@ -366,7 +381,7 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
             char * tmp_msg = (char *)ps_malloc( strlen( msg ) + 1 );
             if ( tmp_msg != NULL ) {
                 strcpy( tmp_msg, msg );
-                log_i("call blectl_event_cb (%p)", blectl_event_cb_table[ entry ].event_cb );
+                log_i("call blectl_event_cb (%p:%04x)", blectl_event_cb_table[ entry ].event_cb, event );
                 blectl_event_cb_table[ entry ].event_cb( event, tmp_msg );
                 free( tmp_msg );
             }

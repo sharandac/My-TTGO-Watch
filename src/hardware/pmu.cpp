@@ -17,6 +17,7 @@ portMUX_TYPE PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 pmu_config_t pmu_config;
 
 void IRAM_ATTR pmu_irq( void );
+void pmu_powermgm_event_cb( EventBits_t event );
 
 void pmu_setup( void ) {
 
@@ -58,6 +59,20 @@ void pmu_setup( void ) {
 
     pinMode( AXP202_INT, INPUT );
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
+
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, pmu_powermgm_event_cb, "pmu" );
+
+}
+
+void pmu_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          pmu_standby();
+                                        break;
+        case POWERMGM_WAKEUP:           pmu_wakeup();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
+                                        break;
+    }
 }
 
 void IRAM_ATTR  pmu_irq( void ) {

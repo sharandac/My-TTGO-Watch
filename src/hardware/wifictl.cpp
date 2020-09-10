@@ -26,6 +26,7 @@
 #include <esp_wps.h>
 
 #include "wifictl.h"
+#include "powermgm.h"
 #include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
@@ -38,6 +39,7 @@ portMUX_TYPE wifictlMux = portMUX_INITIALIZER_UNLOCKED;
 wifictl_event_cb_t *wifictl_event_cb_table = NULL;
 uint32_t wifictl_event_cb_entrys = 0;
 void wifictl_send_event_cb( EventBits_t event, char *msg );
+void wifictl_powermgm_event_cb( EventBits_t event );
 
 void wifictl_StartTask( void );
 void wifictl_Task( void * pvParameters );
@@ -170,6 +172,19 @@ void wifictl_setup( void ) {
                   1,                      /* Priority of the task */
                   &_wifictl_Task );       /* Task handle. */
     vTaskSuspend( _wifictl_Task );
+
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "wifictl" );
+}
+
+void wifictl_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          wifictl_standby();
+                                        break;
+        case POWERMGM_WAKEUP:           wifictl_wakeup();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   wifictl_wakeup();
+                                        break;
+    }
 }
 
 void wifictl_save_config( void ) {
@@ -297,7 +312,7 @@ bool wifictl_get_event( EventBits_t bits ) {
     return( false );
 }
 
-void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb ) {
+void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb, const char *id ) {
     wifictl_event_cb_entrys++;
 
     if ( wifictl_event_cb_table == NULL ) {
@@ -320,7 +335,8 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
 
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event = event;
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb = wifictl_event_cb;
-    log_i("register wifictl_event_cb success (%p)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb );
+    wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id = id;
+    log_i("register wifictl_event_cb success (%p:%s)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb, wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id );
 }
 
 void wifictl_send_event_cb( EventBits_t event, char *msg ) {
@@ -331,7 +347,7 @@ void wifictl_send_event_cb( EventBits_t event, char *msg ) {
     for ( int entry = 0 ; entry < wifictl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & wifictl_event_cb_table[ entry ].event ) {
-            log_i("call wifictl_event_cb (%p)", wifictl_event_cb_table[ entry ].event_cb );
+            log_i("call wifictl_event_cb (%p:%04x:%s)", wifictl_event_cb_table[ entry ].event_cb, event, wifictl_event_cb_table[ entry ].id );
             wifictl_event_cb_table[ entry ].event_cb( event, msg );
         }
     }

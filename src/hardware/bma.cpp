@@ -43,6 +43,7 @@ bool first_loop_run = true;
 
 void IRAM_ATTR bma_irq( void );
 void bma_send_event_cb( EventBits_t event, const char *msg );
+void bma_powermgm_event_cb( EventBits_t event );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -70,6 +71,19 @@ void bma_setup( void ) {
     attachInterrupt( BMA423_INT1, bma_irq, RISING );
 
     bma_reload_settings();
+
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_event_cb, "bma" );
+}
+
+void bma_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          bma_standby();
+                                        break;
+        case POWERMGM_WAKEUP:           bma_wakeup();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   bma_wakeup();
+                                        break;
+    }
 }
 
 void bma_standby( void ) {
@@ -147,13 +161,13 @@ void bma_loop( void ) {
     }
 }
 
-void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb ) {
+void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb, const char *id ) {
     bma_event_cb_entrys++;
 
     if ( bma_event_cb_table == NULL ) {
         bma_event_cb_table = ( bma_event_cb_t * )ps_malloc( sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
         if ( bma_event_cb_table == NULL ) {
-            log_e("rtc_event_cb_table malloc faild");
+            log_e("bma_event_cb_table malloc faild");
             while(true);
         }
     }
@@ -162,7 +176,7 @@ void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb ) {
 
         new_bma_event_cb_table = ( bma_event_cb_t * )ps_realloc( bma_event_cb_table, sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
         if ( new_bma_event_cb_table == NULL ) {
-            log_e("rtc_event_cb_table realloc faild");
+            log_e("bma_event_cb_table realloc faild");
             while(true);
         }
         bma_event_cb_table = new_bma_event_cb_table;
@@ -170,7 +184,8 @@ void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb ) {
 
     bma_event_cb_table[ bma_event_cb_entrys - 1 ].event = event;
     bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb = bma_event_cb;
-    log_i("register rtc_event_cb success (%p)", bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb );
+    bma_event_cb_table[ bma_event_cb_entrys - 1 ].id = id;
+    log_i("register bma_event_cb success (%p:%s)", bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb, bma_event_cb_table[ bma_event_cb_entrys - 1 ].id );
 }
 
 void bma_send_event_cb( EventBits_t event, const char *msg ) {
@@ -181,7 +196,7 @@ void bma_send_event_cb( EventBits_t event, const char *msg ) {
     for ( int entry = 0 ; entry < bma_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & bma_event_cb_table[ entry ].event ) {
-            log_i("call bma_event_cb (%p)", bma_event_cb_table[ entry ].event_cb );
+            log_i("call bma_event_cb (%p:%04x:%s)", bma_event_cb_table[ entry ].event_cb, event, bma_event_cb_table[ entry ].id );
             bma_event_cb_table[ entry ].event_cb( event, msg );
         }
     }

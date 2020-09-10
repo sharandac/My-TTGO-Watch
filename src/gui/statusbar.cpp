@@ -202,10 +202,10 @@ void statusbar_setup( void )
     statusbar_hide_icon( STATUSBAR_ALARM );
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 
-    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb );
-    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb );
-    rtcctl_register_cb( RTCCTL_ALARM_ENABLE | RTCCTL_ALARM_DISABLE, statusbar_rtcctl_event_cb );
-    bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb );
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb, "statusbar" );
+    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar" );
+    rtcctl_register_cb( RTCCTL_ALARM_ENABLE | RTCCTL_ALARM_DISABLE, statusbar_rtcctl_event_cb, "statusbar" );
+    bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb, "statusbar" );
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -215,7 +215,6 @@ void statusbar_update_task( lv_task_t * task ) {
 }
 
 void statusbar_rtcctl_event_cb( EventBits_t event ) {
-    log_i("statusbar rtcctl event %04x", event );
     switch( event ) {
         case RTCCTL_ALARM_ENABLE:   statusbar_show_icon( STATUSBAR_ALARM );
                                     break;
@@ -225,7 +224,6 @@ void statusbar_rtcctl_event_cb( EventBits_t event ) {
 }
 
 void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
-    log_i("statusbar blectl event %04x, msg: %s", event, msg );
     switch( event ) {
         case BLECTL_CONNECT:        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
                                     break;
@@ -235,8 +233,6 @@ void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
 }
 
 void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("statusbar wifictl event %04x, msg: %s", event, msg );
-
     switch( event ) {
         case WIFICTL_CONNECT:       statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
                                     statusbar_wifi_set_state( true, msg );
@@ -369,10 +365,8 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
 }
 
 void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
-    log_i("statusbar bma event %04x, msg: %s", event, msg );
     switch( event ) {
-        case BMACTL_STEPCOUNTER:    log_i("update stepcounter");
-                                    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
+        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
                                     break;
     }
 }

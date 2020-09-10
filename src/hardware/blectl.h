@@ -76,6 +76,7 @@
     typedef struct {
         EventBits_t event;
         BLECTL_CALLBACK_FUNC event_cb;
+        const char *id;
     } blectl_event_t;
 
     #define BLECTL_CONNECT               _BV(0)
@@ -128,7 +129,7 @@
      *                                      BLECTL_PAIRING_ABORT
      * @param   blectl_event_cb   pointer to the callback function 
      */
-    void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb );
+    void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id );
     void blectl_standby( void );
     void blectl_wakeup( void );
     void blectl_set_enable_on_standby( bool enable_on_standby );

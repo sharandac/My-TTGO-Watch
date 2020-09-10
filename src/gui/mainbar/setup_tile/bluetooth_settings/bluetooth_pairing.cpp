@@ -73,7 +73,7 @@ void bluetooth_pairing_tile_setup( void ) {
     lv_label_set_text( bluetooth_pairing_info_label, "");
     lv_obj_align( bluetooth_pairing_info_label, bluetooth_pairing_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-    blectl_register_cb( BLECTL_PIN_AUTH | BLECTL_PAIRING_SUCCESS | BLECTL_PAIRING_ABORT, bluetooth_pairing_event_cb );
+    blectl_register_cb( BLECTL_PIN_AUTH | BLECTL_PAIRING_SUCCESS | BLECTL_PAIRING_ABORT, bluetooth_pairing_event_cb, "bluetooth pairing" );
 }
 
 static void bluetooth_pairing_event_cb( EventBits_t event, char* msg ) {

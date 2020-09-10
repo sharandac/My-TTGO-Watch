@@ -81,12 +81,10 @@ void weather_app_setup( void ) {
 
     weather_widget_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb, "weather" );
 }
 
 void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("weather widget wifictl event: %04x", event );
-
     switch( event ) {
         case WIFICTL_CONNECT:       if ( weather_config.autosync ) {
                                         weather_widget_sync_request();

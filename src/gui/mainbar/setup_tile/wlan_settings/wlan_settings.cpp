@@ -368,7 +368,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     else
         lv_switch_off( wifi_webserver_onoff, LV_ANIM_OFF);
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb );
+    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "wlan settings" );
 }
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
