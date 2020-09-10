@@ -32,6 +32,23 @@
     } sound_config_t;
 
     /*
+    * @brief put sound output to standby (disable)
+    */
+    void sound_standby( void );
+
+    /*
+    * @brief wakeup sound output
+    */
+    void sound_wakeup( void );
+    
+    /**
+     * @brief enable or disable the power output for AXP202_LDO3
+     * 
+     * @param enable = true sets the AXP202_LDO3 power output to high false to low
+     */
+    void sound_set_enabled( bool enabled = true );
+
+    /*
      * @brief play mp3 file from SPIFFS by path/filename
      * 
      * @param   filename    the SPIFFS path to the file to be played
