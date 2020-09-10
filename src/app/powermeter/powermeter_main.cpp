@@ -202,6 +202,7 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     powermeter_mqtt_client.setCallback( callback );
+    powermeter_mqtt_client.setBufferSize( 512 );
 
     wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb );
     // create an task that runs every secound
