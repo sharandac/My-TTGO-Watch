@@ -53,25 +53,44 @@ bool sound_init = false;
 sound_config_t sound_config;
 
 void sound_setup( void ) {
-    if ( sound_init == true )
+    if ( sound_init )
         return;
 
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    
     sound_read_config();
 
     //!Turn on the audio power
-    ttgo->enableLDO3();
+    sound_set_enabled(true);
 
     //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out = new AudioOutputI2S();
     out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
-    // limiting max gain to 3.5 (max gain is 4.0)
-    out->SetGain(3.5f * (sound_config.volume / 100.0f));
+    sound_set_volume_config( sound_config.volume );
     mp3 = new AudioGeneratorMP3();
     wav = new AudioGeneratorWAV();
 
     sound_init = true;
+}
+
+void sound_standby( void ) {
+    sound_set_enabled(false);
+}
+
+void sound_wakeup( void ) {
+    sound_set_enabled(true);
+}
+
+/**
+ * @brief enable or disable the power output for AXP202_LDO3
+ * depending on the current value of: sound_config.enable
+ */
+void sound_set_enabled( bool enabled ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    if ( enabled ) {
+        ttgo->enableLDO3(1);
+    } else {
+        sound_stop();
+        ttgo->enableLDO3(0);
+    }
 }
 
 void sound_loop( void ) {
@@ -79,6 +98,14 @@ void sound_loop( void ) {
         if ( mp3->isRunning() && !mp3->loop() ) mp3->stop();
         if ( wav->isRunning() && !wav->loop() ) wav->stop();
     }
+}
+
+void sound_stop( void ) {
+    if ( !sound_init )
+        return;
+
+    if ( mp3->isRunning() ) mp3->stop();
+    if ( wav->isRunning() ) wav->stop();
 }
 
 void sound_play_spiffs_mp3( const char *filename ) {
@@ -104,7 +131,7 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
 
 void sound_save_config( void ) {
     fs::File file = SPIFFS.open( SOUND_JSON_CONFIG_FILE, FILE_WRITE );
-    out->SetGain(4.0 / sound_config.volume);
+    sound_set_volume_config(sound_config.volume);
     if (!file) {
         log_e("Can't open file: %s!", SOUND_JSON_CONFIG_FILE );
     }
@@ -151,6 +178,8 @@ bool sound_get_enabled_config( void ) {
 
 void sound_set_enabled_config( bool enable ) {
     sound_config.enable = enable;
+
+    sound_set_enabled(enable);
     sound_save_config();
 }
 
@@ -161,4 +190,6 @@ uint8_t sound_get_volume_config( void ) {
 void sound_set_volume_config( uint8_t volume ) {
     log_i("Setting sound volume to: %d", volume);
     sound_config.volume = volume;
+    // limiting max gain to 3.5 (max gain is 4.0)
+    out->SetGain(3.5f * (sound_config.volume / 100.0f));
 }
