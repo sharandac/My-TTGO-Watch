@@ -38,10 +38,14 @@ void touch_setup( void ) {
 }
 
 void touch_powermgm_event_cb( EventBits_t event ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
     switch( event ) {
-        case POWERMGM_STANDBY:          break;
-        case POWERMGM_WAKEUP:           break;
-        case POWERMGM_SILENCE_WAKEUP:   break;
+        case POWERMGM_STANDBY:          ttgo->touch->enterSleepMode();
+                                        break;
+        case POWERMGM_WAKEUP:           ttgo->touch->enterMonitorMode();
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   ttgo->touch->enterSleepMode();
+                                        break;
     }
 }
 

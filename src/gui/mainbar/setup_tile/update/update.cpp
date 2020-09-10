@@ -36,6 +36,7 @@
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
+#include "hardware/motor.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -167,6 +168,15 @@ static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if( event == LV_EVENT_CLICKED ) {
         if ( reset ) {
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            log_i("System reboot by user");
+            motor_vibe(20);
+            delay(20);
+            display_standby();
+            ttgo->stopLvglTick();
+            SPIFFS.end();
+            log_i("SPIFFS unmounted!");
+            delay(500);
             ESP.restart();
         }
         else if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
