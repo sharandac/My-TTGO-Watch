@@ -88,29 +88,28 @@ void sound_set_enabled( bool enabled ) {
     if ( enabled ) {
         ttgo->enableLDO3(1);
     } else {
-        sound_stop();
+        
+        if ( sound_init ) {
+            if ( mp3->isRunning() ) mp3->stop();
+            if ( wav->isRunning() ) wav->stop();
+        }
+        
         ttgo->enableLDO3(0);
     }
 }
 
 void sound_loop( void ) {
     if ( sound_config.enable ) {
-        if ( mp3->isRunning() && !mp3->loop() ) mp3->stop();
-        if ( wav->isRunning() && !wav->loop() ) wav->stop();
+        // we call sound_set_enabled(false) to ensure the PMU stops all power
+        if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
+        if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
     }
-}
-
-void sound_stop( void ) {
-    if ( !sound_init )
-        return;
-
-    if ( mp3->isRunning() ) mp3->stop();
-    if ( wav->isRunning() ) wav->stop();
 }
 
 void sound_play_spiffs_mp3( const char *filename ) {
     if ( sound_config.enable ) {
         log_i("playing file %s from SPIFFS", filename);
+        sound_set_enabled(true);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
         mp3->begin(id3, out);
@@ -122,6 +121,7 @@ void sound_play_spiffs_mp3( const char *filename ) {
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
     if ( sound_config.enable ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
+        sound_set_enabled(true);
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
     } else {

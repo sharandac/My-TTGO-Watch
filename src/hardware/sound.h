@@ -77,11 +77,6 @@
      */
     void sound_loop( void );
     /*
-     * @brief stop all sounds currently playing
-     * 
-     */
-    void sound_stop( void );
-    /*
      * @brief save config for sound to spiffs
      */
     void sound_save_config( void );
