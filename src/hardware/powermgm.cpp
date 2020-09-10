@@ -37,6 +37,7 @@
 #include "touch.h"
 #include "display.h"
 #include "rtcctl.h"
+#include "sound.h"
 
 #include "gui/mainbar/mainbar.h"
 
@@ -103,6 +104,7 @@ void powermgm_loop( void ) {
 
         pmu_wakeup();
         bma_wakeup();
+        sound_wakeup();
         display_wakeup( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST )?true:false );
 
         timesyncToSystem();
@@ -148,6 +150,7 @@ void powermgm_loop( void ) {
 
         bma_standby();
         pmu_standby();
+        sound_standby();
         wifictl_standby();
         blectl_standby();
 
