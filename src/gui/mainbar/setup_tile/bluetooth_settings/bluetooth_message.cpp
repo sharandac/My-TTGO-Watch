@@ -76,7 +76,7 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name );
 
 void bluetooth_message_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    bluetooth_message_tile_num = mainbar_add_app_tile( 1, 1 );
+    bluetooth_message_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth message" );
     bluetooth_message_tile = mainbar_get_tile_obj( bluetooth_message_tile_num );
 
     lv_style_copy( &bluetooth_message_style, mainbar_get_style() );

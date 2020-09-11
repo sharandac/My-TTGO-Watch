@@ -68,7 +68,7 @@ void update_wifictl_event_cb( EventBits_t event, char* msg );
 
 void update_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    update_tile_num = mainbar_add_app_tile( 1, 2 );
+    update_tile_num = mainbar_add_app_tile( 1, 2, "update setup" );
     update_settings_tile = mainbar_get_tile_obj( update_tile_num );
 
     update_setup_tile_setup( update_tile_num + 1 );

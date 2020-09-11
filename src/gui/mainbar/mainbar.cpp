@@ -78,7 +78,7 @@ void mainbar_setup( void ) {
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
 }
 
-uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
+uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     
     tile_entrys++;
 
@@ -120,13 +120,16 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y ) {
     tile[ tile_entrys - 1 ].tile = my_tile;
     tile[ tile_entrys - 1 ].activate_cb = NULL;
     tile[ tile_entrys - 1 ].hibernate_cb = NULL;
+    tile[ tile_entrys - 1 ].x = x;
+    tile[ tile_entrys - 1 ].y = y;
+    tile[ tile_entrys - 1 ].id = id;
     lv_obj_set_size( tile[ tile_entrys - 1 ].tile, lv_disp_get_hor_res( NULL ), LV_VER_RES);
     //lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
     lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, &mainbar_style );
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
-    log_i("add tile: x=%d, y=%d", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y );
+    log_i("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
 
     return( tile_entrys - 1 );
 }
@@ -169,16 +172,16 @@ bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC a
     }
 }
 
-uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y ) {
+uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
     uint32_t retval = -1;
 
     for ( int hor = 0 ; hor < x ; hor++ ) {
         for ( int ver = 0 ; ver < y ; ver++ ) {
             if ( retval == -1 ) {
-                retval = mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START );
+                retval = mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START, id );
             }
             else {
-                mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START );
+                mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START, id );
             }
         }
     }

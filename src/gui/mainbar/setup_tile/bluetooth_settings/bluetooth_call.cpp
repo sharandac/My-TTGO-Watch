@@ -48,7 +48,7 @@ static void bluetooth_call_msg_pharse( char* msg );
 
 void bluetooth_call_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    bluetooth_call_tile_num = mainbar_add_app_tile( 1, 1 );
+    bluetooth_call_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth call" );
     bluetooth_call_tile = mainbar_get_tile_obj( bluetooth_call_tile_num );
 
     lv_style_copy( &bluetooth_call_style, mainbar_get_style() );

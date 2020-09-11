@@ -64,7 +64,7 @@ void weather_app_setup( void ) {
     weather_load_config();
 
     // get an app tile and copy mainstyle
-    weather_app_tile_num = mainbar_add_app_tile( 1, 2 );
+    weather_app_tile_num = mainbar_add_app_tile( 1, 2, "Weather App" );
     weather_app_setup_tile_num = weather_app_tile_num + 1;
 
     // init forecast and setup tile

@@ -49,7 +49,7 @@ static void tilt_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void move_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    move_tile_num = mainbar_add_app_tile( 1, 1 );
+    move_tile_num = mainbar_add_app_tile( 1, 1, "move settings" );
     move_settings_tile = mainbar_get_tile_obj( move_tile_num );
     lv_style_copy( &move_settings_style, mainbar_get_style() );
     lv_style_set_bg_color( &move_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);

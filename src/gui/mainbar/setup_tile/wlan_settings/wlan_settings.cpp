@@ -77,7 +77,7 @@ LV_IMG_DECLARE(setup_32px);
 
 void wlan_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    wifi_settings_tile_num = mainbar_add_app_tile( 2, 2 );
+    wifi_settings_tile_num = mainbar_add_app_tile( 2, 2, "wifi setup" );
     wifi_password_tile_num = wifi_settings_tile_num + 1;
     wifi_setup_tile_num = wifi_settings_tile_num + 2;
 

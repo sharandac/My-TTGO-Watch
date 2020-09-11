@@ -53,7 +53,7 @@ static void sound_enable_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void sound_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    sound_tile_num = mainbar_add_app_tile( 1, 2 );
+    sound_tile_num = mainbar_add_app_tile( 1, 2, "sound setup" );
     sound_settings_tile = mainbar_get_tile_obj( sound_tile_num );
 
     lv_style_copy( &sound_settings_style, mainbar_get_style() );

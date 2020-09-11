@@ -50,7 +50,7 @@ void main_tile_align_widgets( void );
 void main_tile_format_time( char *, size_t, struct tm * );
 
 void main_tile_setup( void ) {
-    main_tile_num = mainbar_add_tile( 0, 0 );
+    main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
     main_cont = mainbar_get_tile_obj( main_tile_num );
     style = mainbar_get_style();
 

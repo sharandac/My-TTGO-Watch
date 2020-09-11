@@ -52,7 +52,7 @@ static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t
 
 void bluetooth_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    bluetooth_tile_num = mainbar_add_app_tile( 1, 1 );
+    bluetooth_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth setup" );
     bluetooth_settings_tile = mainbar_get_tile_obj( bluetooth_tile_num );
 
     lv_style_copy( &bluetooth_settings_style, mainbar_get_style() );

@@ -67,7 +67,7 @@ static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_eve
 
 void display_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    display_tile_num_1 = mainbar_add_app_tile( 1, 2 );
+    display_tile_num_1 = mainbar_add_app_tile( 1, 2, "display settings" );
     display_tile_num_2 = display_tile_num_1 + 1;
     display_settings_tile_1 = mainbar_get_tile_obj( display_tile_num_1 );
     display_settings_tile_2 = mainbar_get_tile_obj( display_tile_num_2 );

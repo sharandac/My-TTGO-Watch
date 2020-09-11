@@ -45,7 +45,7 @@ static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event );
 // setup routine for stopwatch app
 void stopwatch_app_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    stopwatch_app_main_tile_num = mainbar_add_app_tile( 1, 1 );
+    stopwatch_app_main_tile_num = mainbar_add_app_tile( 1, 1, "Stopwatch App" );
 
     stopwatch_app = app_register( "stop\nwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
 #ifdef stopwatch_WIDGET

@@ -61,7 +61,7 @@ void crypto_ticker_setup( void ) {
     crypto_ticker_load_config();
 
     // register 2 vertical tiles and get the first tile number and save it for later use
-    crypto_ticker_main_tile_num = mainbar_add_app_tile( 1, 2 );
+    crypto_ticker_main_tile_num = mainbar_add_app_tile( 1, 2, "crypto ticker" );
     crypto_ticker_setup_tile_num = crypto_ticker_main_tile_num + 1;
 
     // register app and widget icon

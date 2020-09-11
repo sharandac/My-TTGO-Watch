@@ -64,7 +64,7 @@ static void poweroff_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void utilities_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    utilities_tile_num = mainbar_add_app_tile( 1, 1 );
+    utilities_tile_num = mainbar_add_app_tile( 1, 1, "Utilities setup" );
     utilities_tile = mainbar_get_tile_obj( utilities_tile_num );
     lv_style_copy( &utilities_style, mainbar_get_style() );
     lv_style_set_bg_color( &utilities_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);

@@ -24,6 +24,7 @@ or simple press "build and upload" in platformIO.
 # known issues
 
 * the webserver crashes the ESP32 really often
+* sound and webserver will not work at the same time ( cause cache crashes )
 * the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
 * from time to time the esp32 crashes accidentally
 * and some other small things
@@ -115,6 +116,7 @@ and the following projects:
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
+[pubsubclient](https://github.com/knolleary/pubsubclient)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>

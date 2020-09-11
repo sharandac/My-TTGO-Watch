@@ -35,7 +35,7 @@ lv_style_t setup_style;
 void setup_tile_setup( void ) {
 
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {
-        setup_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 1 );
+        setup_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 1, "setup tile" );
         setup_cont[ tiles ] = mainbar_get_tile_obj( setup_tile_num[ tiles ] );
     }
 
