@@ -222,8 +222,6 @@ void blectl_setup( void ) {
     blectl_msg.msglen = 0;
     blectl_msg.msgpos = 0;
 
-    blectl_read_config();
-
     // Create the BLE Device
     // Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
     // This is too long I think:
@@ -433,7 +431,7 @@ bool blectl_get_enable_on_standby( void ) {
 }
 
 bool blectl_get_advertising( void ) {
-    return( blectl_config.enable_on_standby );
+    return( blectl_config.advertising );
 }
 
 void blectl_save_config( void ) {
