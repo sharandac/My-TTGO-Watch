@@ -24,6 +24,7 @@ or simple press "build and upload" in platformIO.
 # known issues
 
 * the webserver crashes the ESP32 really often
+* sound and webserver will not work at the same time ( cause cache crashes )
 * the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
 * from time to time the esp32 crashes accidentally
 * and some other small things

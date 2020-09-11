@@ -23,6 +23,7 @@
 #include <TTGO.h>
 
 #include "powermgm.h"
+#include "wifictl.h"
 
 #include "sound.h"
 
@@ -57,6 +58,13 @@ void sound_setup( void ) {
         return;
 
     sound_read_config();
+
+    // disable sound when webserver is enabled
+    if ( wifictl_get_webserver() ) {
+        log_i("disable sound while webserver is enabled, issue #104");
+        sound_set_enabled_config( false );
+        return;
+    }
     
     //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out = new AudioOutputI2S();
@@ -98,7 +106,7 @@ void sound_set_enabled( bool enabled ) {
 }
 
 void sound_loop( void ) {
-    if ( sound_config.enable ) {
+    if ( sound_config.enable && sound_init ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
         if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
         if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
@@ -106,7 +114,7 @@ void sound_loop( void ) {
 }
 
 void sound_play_spiffs_mp3( const char *filename ) {
-    if ( sound_config.enable ) {
+    if ( sound_config.enable && sound_init ) {
         log_i("playing file %s from SPIFFS", filename);
         sound_set_enabled(true);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
@@ -118,7 +126,7 @@ void sound_play_spiffs_mp3( const char *filename ) {
 }
 
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
-    if ( sound_config.enable ) {
+    if ( sound_config.enable && sound_init ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
         sound_set_enabled(true);
         progmem_file = new AudioFileSourcePROGMEM( data, len );
@@ -162,8 +170,8 @@ void sound_read_config( void ) {
             log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            sound_config.enable = doc["enable"].as<bool>();
-            sound_config.volume = doc["volume"].as<uint8_t>();;
+            sound_config.enable = doc["enable"];
+            sound_config.volume = doc["volume"];
             log_i("volume: %d", sound_config.volume);
         }        
         doc.clear();
@@ -188,8 +196,10 @@ uint8_t sound_get_volume_config( void ) {
 }
 
 void sound_set_volume_config( uint8_t volume ) {
-    log_i("Setting sound volume to: %d", volume);
-    sound_config.volume = volume;
-    // limiting max gain to 3.5 (max gain is 4.0)
-    out->SetGain(3.5f * (sound_config.volume / 100.0f));
+    if ( sound_config.enable && sound_init ) {
+        log_i("Setting sound volume to: %d", volume);
+        sound_config.volume = volume;
+        // limiting max gain to 3.5 (max gain is 4.0)
+        out->SetGain(3.5f * (sound_config.volume / 100.0f));
+    }
 }
