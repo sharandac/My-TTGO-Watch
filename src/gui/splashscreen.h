@@ -22,18 +22,18 @@
 #ifndef _SPLASHSCREEN_H
     #define _SPLASHSCREEN_H
 
-    /*
+    /**
      * @brief start splashscreen
      */
     void splash_screen_stage_one( void );
-    /*
+    /**
      * @brief update spash screen text and bar
      * 
      * @param   msg   splash screen text
      * @param   value splash screen bar value (0-100)
      */
     void splash_screen_stage_update( const char* msg, int value );
-    /*
+    /**
      * @brief finish splashscreen
      */
     void splash_screen_stage_finish( void );

@@ -24,7 +24,7 @@
     
     #include "gui/icon.h"
 
-    /*
+    /**
      * @brief register an setup icon
      * 
      * @param   setupname   setup name
@@ -32,20 +32,20 @@
      * @param   event_cb    pointer to an callback function
      */
     icon_t *setup_register( const char* setupname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
-    /*
+    /**
      * @brief   set the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   indicator   possible values are:    SETUP_ICON_INDICATOR_OK, SETUP_ICON_INDICATOR_FAIL, SETUP_ICON_INDICATOR_UPDATE ....
      */
     void setup_set_indicator( icon_t *setup, icon_indicator_t indicator );
-    /*
+    /**
      * @brief   hide the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
      */
     void setup_hide_indicator( icon_t *setup );
-    /*
+    /**
      * @brief   set the setup icon
      * 
      * @param   widget      pointer to an widget_icon_t structure

@@ -57,34 +57,34 @@
         STATUSBAR_STYLE_NUM
     } statusbar_style_t;
 
-    /*
+    /**
      * @brief setup statusbar
      */
     void statusbar_setup( void );
-    /*
+    /**
      * @brief hide an icon from statusbar
      * 
      * @param icon  icon name
      */
     void statusbar_hide_icon( statusbar_icon_t icon );
-    /*
+    /**
      * @brief show an icon from statusbar
      * 
      * @param icon  icon name
      */
     void statusbar_show_icon( statusbar_icon_t icon );
-    /*
+    /**
      * @brief hide an icon from statusbar
      * 
      * @param icon  icon name
      * @param style style name
      */
     void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style );
-    /*
+    /**
      * @brief refresh/redraw statusbar
      */
     void statusbar_refresh( void );
-    /*
+    /**
      * @brief update battery icon and ther state
      * 
      * @param   percent     displayed value in percent
@@ -92,7 +92,7 @@
      * @param   plug        true or false, true means pluged
      */
     void statusbar_update_battery( int32_t percent, bool charging, bool plug );
-    /*
+    /**
      * @brief   set wifistate and label
      * 
      * @param   state       true or false, true means active
@@ -101,7 +101,7 @@
     void statusbar_wifi_set_state( bool state, const char *wifiname );
     void statusbar_wifi_set_ip_state( bool state, const char *ip );
     void statusbar_bluetooth_set_state( bool state );
-    /*
+    /**
      * @brief hide the statusbar
      * 
      * @param   hide    true or false, ture means statusbar is hide

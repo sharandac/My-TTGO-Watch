@@ -60,7 +60,7 @@ void app_tile_setup( void ) {
         lv_obj_set_hidden( app_entry[ app ].icon_cont, true );
         lv_obj_set_hidden( app_entry[ app ].label, true );
 
-        log_i("icon screen/x/y: %d/%d/%d", app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ), app_entry[ app ].x, app_entry[ app ].y );
+        log_d("icon screen/x/y: %d/%d/%d", app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ), app_entry[ app ].x, app_entry[ app ].y );
     }
 }
 

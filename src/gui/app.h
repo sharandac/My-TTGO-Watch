@@ -24,7 +24,7 @@
     
     #include "gui/icon.h"
 
-    /*
+    /**
      * @brief register an application icon
      * 
      * @param   appname     application name
@@ -32,20 +32,20 @@
      * @param   event_cb    pointer to an callback function
      */
     icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
-    /*
+    /**
      * @brief   set the icon indicator
      * 
      * @param   app         pointer to an app_icon_t structure
      * @param   indicator   possible values are:    APP_ICON_INDICATOR_OK, APP_ICON_INDICATOR_FAIL, APP_ICON_INDICATOR_UPDATE ....
      */
     void app_set_indicator( icon_t *app, icon_indicator_t indicator );
-    /*
+    /**
      * @brief   hide the icon indicator
      * 
      * @param   app         pointer to an app_icon_t structure
      */
     void app_hide_indicator( icon_t *app );
-    /*
+    /**
      * @brief   set the application icon
      * 
      * @param   app         pointer to an app_icon_t structure

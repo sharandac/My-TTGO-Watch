@@ -24,7 +24,7 @@
     
     #include "gui/icon.h"
 
-    /*
+    /**
      * @brief register an widget icon
      * 
      * @param   widgetname  widget name
@@ -32,41 +32,41 @@
      * @param   event_cb    pointer to an callback function
      */
     icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
-    /*
+    /**
      * @brief   set the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   indicator   possible values are:    WIDGET_ICON_INDICATOR_OK, WIDGET_ICON_INDICATOR_FAIL, WIDGET_ICON_INDICATOR_UPDATE ....
      */
     void widget_set_indicator( icon_t *widget, icon_indicator_t indicator );
-    /*
+    /**
      * @brief   hide the icon indicator
      * 
      * @param   widget      pointer to an widget_icon_t structure
      */
     void widget_hide_indicator( icon_t *widget );
-    /*
+    /**
      * @brief   set the widget icon
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   icon        pointer to an 48x48px icon
      */
     void widget_set_icon( icon_t *widget, lv_obj_t *icon );
-    /*
+    /**
      * @brief   set the widget label
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   text        text for the label
      */
     void widget_set_label( icon_t *widget, const char* text );
-    /*
+    /**
      * @brief   set the widget extended label
      * 
      * @param   widget      pointer to an widget_icon_t structure
      * @param   text        text for the extended label
      */
     void widget_set_extended_label( icon_t *widget, const char* text );
-    /*
+    /**
      * @brief   remove widget from main tile
      * 
      * @param   widget      pointer to an widget_icon_t structure

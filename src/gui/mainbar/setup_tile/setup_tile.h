@@ -40,23 +40,23 @@
     #define SETUP_FIRST_X_POS         ( 240 - ( SETUP_ICON_X_SIZE * MAX_SETUP_ICON_HORZ + SETUP_ICON_X_CLEARENCE * ( MAX_SETUP_ICON_HORZ - 1 ) ) ) / 2
     #define SETUP_FIRST_Y_POS         ( 240 - ( SETUP_ICON_Y_SIZE * MAX_SETUP_ICON_VERT + SETUP_ICON_Y_CLEARENCE * ( MAX_SETUP_ICON_VERT - 1 ) ) ) / 2
 
-    /*
+    /**
      * @brief setup the setup tile
      */
     void setup_tile_setup( void );
-    /*
+    /**
      * @brief register an setup icon an the setup tile
      * 
      * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn
      */
     lv_obj_t *setup_tile_register_setup( void );
-    /*
+    /**
      * @brief get the tile number for the setup tile
      * 
      * @return  tile number
      */
     uint32_t setup_get_tile_num( void );
-    /*
+    /**
      * @brief   get the an free setup icon stucture
      * 
      * @return  pointer to the free setup_icon_t structure

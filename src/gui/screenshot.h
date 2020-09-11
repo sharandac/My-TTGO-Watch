@@ -26,15 +26,15 @@
 
     #define SCREENSHOT_FILE_NAME    "/screen.data"
 
-    /*
+    /**
      * @brief setup screenshot
      */
     void screenshot_setup( void );
-    /*
+    /**
      * @brief take a screenshoot an store it in psram
      */
     void screenshot_take( void );
-    /*
+    /**
      * @brief store a screenshoot from psram to spiffs
      */
     void screenshot_save( void );
