@@ -165,12 +165,13 @@ void wifictl_setup( void ) {
       wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (char *)"wps timeout" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
 
-    xTaskCreate(  wifictl_Task,    /* Function to implement the task */
-                  "wifictl Task",       /* Name of the task */
-                  3000,                  /* Stack size in words */
-                  NULL,                   /* Task input parameter */
-                  1,                      /* Priority of the task */
-                  &_wifictl_Task );       /* Task handle. */
+    xTaskCreatePinnedToCore(  wifictl_Task,     /* Function to implement the task */
+                              "wifictl Task",   /* Name of the task */
+                              3000,             /* Stack size in words */
+                              NULL,             /* Task input parameter */
+                              1,                /* Priority of the task */
+                              &_wifictl_Task,   /* Task handle. */
+                              0 );
     vTaskSuspend( _wifictl_Task );
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "wifictl" );

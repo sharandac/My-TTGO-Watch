@@ -168,6 +168,7 @@ void powermgm_loop( void ) {
         vTaskDelay( 100 );
         pmu_loop();
         bma_loop();
+        blectl_loop();
     }
     else {
         pmu_loop();
@@ -175,6 +176,7 @@ void powermgm_loop( void ) {
         display_loop();
         rtcctl_loop();
         sound_loop();
+        blectl_loop();
     }
 }
 

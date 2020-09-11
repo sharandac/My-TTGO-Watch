@@ -42,6 +42,7 @@ EventGroupHandle_t blectl_status = NULL;
 portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
 blectl_config_t blectl_config;
+blectl_msg_t blectl_msg;
 
 blectl_event_t *blectl_event_cb_table = NULL;
 uint32_t blectl_event_cb_entrys = 0;
@@ -64,6 +65,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (char*)"connected" );
+        blectl_send_msg( (char*)"\x03\x0a" );
         pServer->updateConnParams( param->connect.remote_bda, 500, 1000, 750, 10000 );
         log_i("BLE connected");
     };
@@ -214,6 +216,11 @@ void blectl_setup( void ) {
     esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
     esp_bt_controller_mem_release( ESP_BT_MODE_IDLE );
     esp_bt_mem_release( ESP_BT_MODE_IDLE );
+
+    blectl_msg.active = false;
+    blectl_msg.msg = NULL;
+    blectl_msg.msglen = 0;
+    blectl_msg.msgpos = 0;
 
     blectl_read_config();
 
@@ -381,7 +388,7 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
             char * tmp_msg = (char *)ps_malloc( strlen( msg ) + 1 );
             if ( tmp_msg != NULL ) {
                 strcpy( tmp_msg, msg );
-                log_i("call blectl_event_cb (%p:%04x)", blectl_event_cb_table[ entry ].event_cb, event );
+                log_i("call blectl_event_cb (%p:%04x:%s)", blectl_event_cb_table[ entry ].event_cb, event, blectl_event_cb_table[ entry ].id );
                 blectl_event_cb_table[ entry ].event_cb( event, tmp_msg );
                 free( tmp_msg );
             }
@@ -475,8 +482,7 @@ void blectl_read_config( void ) {
     }
 }
 
-void blectl_update_battery( int32_t percent, bool charging, bool plug )
-{
+void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
 
@@ -489,4 +495,74 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug )
         (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
     pBatteryPowerStateCharacteristic->setValue(&batteryPowerState, 1);
     pBatteryPowerStateCharacteristic->notify();
+}
+
+void blectl_send_msg( char *msg ) {
+    if ( !blectl_msg.active && blectl_get_event( BLECTL_CONNECT ) ) {
+        blectl_msg.msg = (char *)ps_calloc( strlen( (const char*)msg + 1 ), 1 );
+        if ( blectl_msg.msg ) {
+            memcpy( blectl_msg.msg, msg, strlen( (const char*)msg + 1 ) );
+        }
+        else {
+            log_e("ps_calloc failed");
+            blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, ps_calloc failed" );
+            return;
+        }
+        blectl_msg.active = true;
+        blectl_msg.msglen = strlen( (const char*)msg );
+        blectl_msg.msgpos = 0;
+    }
+    else {
+        log_e("blectl is send another msg or not connected");
+        blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, blectl is send another msg or not connected" );
+        return;
+    }
+}
+
+void blectl_loop ( void ) {
+    static uint64_t NextMillis = millis();
+
+    if ( millis() - NextMillis > BLECTL_CHUNKDELAY ) {
+        NextMillis += BLECTL_CHUNKDELAY;
+        if ( blectl_msg.active ) {
+            if ( blectl_msg.msgpos < blectl_msg.msglen ) {
+                if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
+                    pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], BLECTL_CHUNKSIZE );
+                    pTxCharacteristic->notify();
+                    log_i("send %dbyte [ %c%c%c ... ] chunk", BLECTL_CHUNKSIZE, blectl_msg.msg[ blectl_msg.msgpos ], blectl_msg.msg[ blectl_msg.msgpos + 1 ], blectl_msg.msg[ blectl_msg.msgpos + 2 ] );
+                    blectl_msg.msgpos += BLECTL_CHUNKSIZE;
+                }
+                else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
+                    pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], blectl_msg.msglen - blectl_msg.msgpos );
+                    pTxCharacteristic->notify();
+                    log_i("send last %dbyte chunk", blectl_msg.msglen - blectl_msg.msgpos );
+                    blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
+                    free( blectl_msg.msg );
+                    blectl_msg.active = false;
+                    blectl_msg.msg = NULL;
+                    blectl_msg.msglen = 0;
+                    blectl_msg.msgpos = 0;
+                }
+                else {
+                    log_e("malformed chunksize");
+                    blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, malformed chunksize" );
+                    free( blectl_msg.msg );
+                    blectl_msg.active = false;
+                    blectl_msg.msg = NULL;
+                    blectl_msg.msglen = 0;
+                    blectl_msg.msgpos = 0;
+                }
+            }
+            else {
+                log_e("unkown msg state");
+                blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, unkown msg state" );
+                if ( blectl_msg.msg )
+                    free( blectl_msg.msg );
+                blectl_msg.active = false;
+                blectl_msg.msg = NULL;
+                blectl_msg.msglen = 0;
+                blectl_msg.msgpos = 0;
+            }
+        }
+    }
 }

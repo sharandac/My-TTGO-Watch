@@ -65,11 +65,22 @@
     #define LineFeed                0x0a
     #define DataLinkEscape          0x10
 
+    #define BLECTL_CHUNKSIZE        20
+    #define BLECTL_CHUNKDELAY       50
+
     typedef struct {
         bool advertising = true;
         bool enable_on_standby = false;
         int32_t txpower = 1;
     } blectl_config_t;
+
+    typedef struct {
+        bool active;
+        char *msg;
+        int32_t msglen;
+        int32_t msgpos;
+        int32_t msgchunk;
+    } blectl_msg_t;
 
     typedef void ( * BLECTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
 
@@ -90,6 +101,8 @@
     #define BLECTL_PAIRING               _BV(8)
     #define BLECTL_PAIRING_SUCCESS       _BV(9)
     #define BLECTL_PAIRING_ABORT         _BV(10)
+    #define BLECTL_MSG_SEND_SUCCESS      _BV(11)
+    #define BLECTL_MSG_SEND_ABORT        _BV(12)
 
     /**
      * @brief ble setup function
@@ -139,5 +152,7 @@
     void blectl_save_config( void );
     void blectl_read_config( void );
     void blectl_update_battery( int32_t percent, bool charging, bool plug );
+    void blectl_send_msg( char *msg );
+    void blectl_loop ( void );
 
 #endif // _BLECTL_H
