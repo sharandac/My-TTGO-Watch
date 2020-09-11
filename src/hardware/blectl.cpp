@@ -411,7 +411,7 @@ bool blectl_get_enable_on_standby( void ) {
 }
 
 bool blectl_get_advertising( void ) {
-    return( blectl_config.enable_on_standby );
+    return( blectl_config.advertising );
 }
 
 void blectl_save_config( void ) {
