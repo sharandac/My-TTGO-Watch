@@ -24,9 +24,10 @@
 
     #include "TTGO.h"
     
-    #define BMACTL_DOUBLECLICK         _BV(0)
-    #define BMACTL_STEPCOUNTER         _BV(1)
-    #define BMACTL_TILT                _BV(2)
+    #define BMACTL_EVENT_INT            _BV(0)
+    #define BMACTL_DOUBLECLICK          _BV(1)
+    #define BMACTL_STEPCOUNTER          _BV(2)
+    #define BMACTL_TILT                 _BV(3)
 
     typedef void ( * BMA_CALLBACK_FUNC ) ( EventBits_t event, const char *msg );
 

@@ -88,10 +88,10 @@ void pmu_loop( void ) {
     /*
      * handle IRQ event
      */
-    portENTER_CRITICAL_ISR(&PMU_IRQ_Mux);
+    portENTER_CRITICAL(&PMU_IRQ_Mux);
     bool temp_pmu_irq_flag = pmu_irq_flag;
     pmu_irq_flag = false;
-    portEXIT_CRITICAL_ISR(&PMU_IRQ_Mux);
+    portEXIT_CRITICAL(&PMU_IRQ_Mux);
 
     if ( temp_pmu_irq_flag ) {        
         ttgo->power->readIRQ();

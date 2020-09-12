@@ -31,6 +31,7 @@
 
 volatile bool DRAM_ATTR bma_irq_flag = false;
 portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+
 __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
@@ -127,11 +128,11 @@ void bma_loop( void ) {
     /*
      * handle IRQ event
      */
-    portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
+    portENTER_CRITICAL(&BMA_IRQ_Mux);
     bool temp_bma_irq_flag = bma_irq_flag;
     bma_irq_flag = false;
-    portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
-
+    portEXIT_CRITICAL(&BMA_IRQ_Mux);
+    
     if ( temp_bma_irq_flag ) {                
         while( !ttgo->bma->readInterrupt() );
 

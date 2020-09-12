@@ -26,6 +26,7 @@
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+static void IRAM_ATTR rtcctl_irq( void );
 
 static bool alarm_enabled = false;
 static int alarm_hour = 0;
@@ -37,9 +38,8 @@ void rtcctl_powermgm_event_cb( EventBits_t event );
 rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
 
-static void IRAM_ATTR rtcctl_irq( void );
-
 void rtcctl_setup( void ) {
+
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
 
@@ -73,10 +73,10 @@ static void IRAM_ATTR rtcctl_irq( void ) {
 void rtcctl_loop( void ) {
     // fire callback
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+        portENTER_CRITICAL( &RTC_IRQ_Mux );
         bool temp_rtc_irq_flag = rtc_irq_flag;
         rtc_irq_flag = false;
-        portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+        portEXIT_CRITICAL( &RTC_IRQ_Mux );
         if ( temp_rtc_irq_flag ) {
             rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
         }
