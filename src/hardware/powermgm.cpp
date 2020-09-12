@@ -67,7 +67,6 @@ void powermgm_setup( void ) {
     touch_setup();
     rtcctl_setup();
     blectl_read_config();
-    sound_setup();
 
     powermgm_set_event( POWERMGM_WAKEUP );
 }
