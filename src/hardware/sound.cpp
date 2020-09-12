@@ -38,6 +38,7 @@
 #include <AudioGeneratorMIDI.h>
 
 #include "AudioOutputI2S.h"
+#include <ESP8266SAM.h>
 
 AudioFileSourceSPIFFS *spliffs_file;
 AudioOutputI2S *out;
@@ -47,9 +48,12 @@ AudioGeneratorMP3 *mp3;
 AudioGeneratorWAV *wav;
 AudioFileSourcePROGMEM *progmem_file;
 
+ESP8266SAM *sam;
+
 #include "json_psram_allocator.h"
 
 bool sound_init = false;
+bool is_speaking = false;
 
 sound_config_t sound_config;
 
@@ -72,7 +76,8 @@ void sound_setup( void ) {
     sound_set_volume_config( sound_config.volume );
     mp3 = new AudioGeneratorMP3();
     wav = new AudioGeneratorWAV();
-
+    sam = new ESP8266SAM;
+    sam->SetVoice(sam->VOICE_SAM);
     sound_init = true;
 }
 
@@ -110,6 +115,7 @@ void sound_loop( void ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
         if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
         if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
+        if ( !is_speaking ) sound_set_enabled(false);
     }
 }
 
@@ -133,6 +139,20 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
         wav->begin(progmem_file, out);
     } else {
         log_i("Cannot play wav, sound is disabled");
+    }
+}
+
+void sound_speak(const char *str)
+{
+    if ( sound_config.enable ) {
+        log_i("Speaking text", str);
+        is_speaking = true;
+        sound_set_enabled(true);
+        sam->Say(out, str);
+        is_speaking = false;
+    }
+    else {
+        log_i("Cannot speak, sound is disabled");
     }
 }
 

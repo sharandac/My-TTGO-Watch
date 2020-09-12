@@ -71,6 +71,15 @@
      * 
      */
     void sound_setup( void );
+
+    /*
+     * @brief speak
+     *  
+     * @param   str    the text to be spoken
+     * 
+     */
+    void sound_speak( const char *str );
+
     /*
      * @brief sound loop
      * 
