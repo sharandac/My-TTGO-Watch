@@ -5,7 +5,7 @@
     Copyright  2020  Dirk Brosswick
  *  Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
- 
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,9 +38,11 @@
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
+#include "hardware/sound.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
+#include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
 #include "app/osmand/osmand_app.h"
@@ -54,10 +56,10 @@ void setup()
     Serial.begin(115200);
     Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
     Serial.printf("Configure watchdog to 30s: %d\r\n", esp_task_wdt_init( 30, true ) );
-    
+
     ttgo->begin();
     ttgo->lvgl_begin();
- 
+
     SPIFFS.begin();
     motor_setup();
 
@@ -69,7 +71,7 @@ void setup()
     splash_screen_stage_update( "init serial", 10 );
 
     splash_screen_stage_update( "init spiff", 20 );
-    if ( !SPIFFS.begin() ) {        
+    if ( !SPIFFS.begin() ) {
         splash_screen_stage_update( "format spiff", 30 );
         SPIFFS.format();
         splash_screen_stage_update( "format spiff done", 40 );
@@ -89,13 +91,15 @@ void setup()
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
     
-    gui_setup(); 
+    sound_setup();
+    gui_setup();
 
     /*
      * add apps and widgets here!!!
      */
     weather_app_setup();
     stopwatch_app_setup();
+    alarm_clock_setup();
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
@@ -126,5 +130,6 @@ void setup()
 void loop()
 {
     gui_loop();
+    sound_loop();
     powermgm_loop();
 }

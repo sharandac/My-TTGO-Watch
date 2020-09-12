@@ -96,7 +96,7 @@ static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
 void bluetooth_call_msg_pharse( char* msg ) {
     static bool standby = false;
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+    SpiRamJsonDocument doc( strlen( msg ) * 4 );
 
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {

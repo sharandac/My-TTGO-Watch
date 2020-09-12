@@ -27,7 +27,9 @@
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
-static bool alarm_enable = false;
+static bool alarm_enabled = false;
+static int alarm_hour = 0;
+static int alarm_minute = 0;
 
 void rtcctl_send_event_cb( EventBits_t event );
 void rtcctl_powermgm_event_cb( EventBits_t event );
@@ -40,7 +42,16 @@ static void IRAM_ATTR rtcctl_irq( void );
 void rtcctl_setup( void ) {
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
-    rtcctl_disable_alarm();
+
+    //set values to be aligned with default variable values
+    if (alarm_enabled){
+        rtcctl_enable_alarm();
+    }
+    else{
+        rtcctl_disable_alarm();
+    }
+    rtcctl_set_alarm_term( alarm_hour, alarm_minute );
+
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_event_cb, "rtcctl" );
 }
 
@@ -67,7 +78,7 @@ void rtcctl_loop( void ) {
         rtc_irq_flag = false;
         portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
         if ( temp_rtc_irq_flag ) {
-            rtcctl_send_event_cb( RTCCTL_ALARM );
+            rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
         }
     }
 }
@@ -96,49 +107,65 @@ void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event = event;
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb = rtcctl_event_cb;
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id = id;
-    log_i("register rtc_event_cb success (%p:%s)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb, rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id );
+    log_i("register rtc_event_cb success (%p:%04x:%s)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb, event, rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id );
 }
 
 void rtcctl_send_event_cb( EventBits_t event ) {
     if ( rtcctl_event_cb_entrys == 0 ) {
       return;
     }
-      
+
     for ( int entry = 0 ; entry < rtcctl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & rtcctl_event_cb_table[ entry ].event ) {
-            log_i("call rtc_event_cb (%p:04x:%s)", rtcctl_event_cb_table[ entry ].event_cb, event, rtcctl_event_cb_table[ entry ].id );
+            log_i("call rtc_event_cb (%p:%04x:%s)", rtcctl_event_cb_table[ entry ].event_cb, event, rtcctl_event_cb_table[ entry ].id );
             rtcctl_event_cb_table[ entry ].event_cb( event );
         }
     }
 }
 
-void rtcctl_set_alarm( uint8_t hour, uint8_t minute ){
+void rtcctl_set_alarm_term( uint8_t hour, uint8_t minute ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
+    if (alarm_enabled){
+        ttgo->rtc->disableAlarm();
+    }
+    alarm_hour = hour;
+    alarm_minute = minute;
     ttgo->rtc->setAlarm( hour, minute, PCF8563_NO_ALARM, PCF8563_NO_ALARM );
-    rtcctl_send_event_cb( RTCCTL_ALARM_SET );
+    if (alarm_enabled){
+        ttgo->rtc->enableAlarm();
+    }
+    rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
 }
 
 void rtcctl_enable_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     ttgo->rtc->enableAlarm();
-    alarm_enable = true;
-    rtcctl_send_event_cb( RTCCTL_ALARM_ENABLE );
+    alarm_enabled = true;
+    rtcctl_send_event_cb( RTCCTL_ALARM_ENABLED );
 }
 
 void rtcctl_disable_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     ttgo->rtc->disableAlarm();
-    alarm_enable = false;
-    rtcctl_send_event_cb( RTCCTL_ALARM_DISABLE );
+    alarm_enabled = false;
+    rtcctl_send_event_cb( RTCCTL_ALARM_DISABLED );
 }
 
-bool rtcctl_get_alarmstate( void ) {
-    return( alarm_enable );
+bool rtcctl_is_alarm_enabled( void ) {
+    return alarm_enabled;
 }
 
-bool rtcctl_is_time( uint8_t hour, uint8_t minute ){
+bool rtcctl_is_alarm_time(){
     TTGOClass *ttgo = TTGOClass::getWatch();
     RTC_Date date_time = ttgo->rtc->getDateTime();
-    return hour == date_time.hour && minute == date_time.minute;
+    return alarm_hour == date_time.hour && alarm_minute == date_time.minute;
+}
+
+uint8_t rtcctl_get_alarm_hour(){
+    return alarm_hour;
+}
+
+uint8_t rtcctl_get_alarm_minute(){
+    return alarm_minute;
 }

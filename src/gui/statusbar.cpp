@@ -204,7 +204,7 @@ void statusbar_setup( void )
 
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb, "statusbar bluetooth" );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
-    rtcctl_register_cb( RTCCTL_ALARM_ENABLE | RTCCTL_ALARM_DISABLE, statusbar_rtcctl_event_cb, "statusbar rtc" );
+    rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb, "statusbar stepcounter" );
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
@@ -216,9 +216,9 @@ void statusbar_update_task( lv_task_t * task ) {
 
 void statusbar_rtcctl_event_cb( EventBits_t event ) {
     switch( event ) {
-        case RTCCTL_ALARM_ENABLE:   statusbar_show_icon( STATUSBAR_ALARM );
+        case RTCCTL_ALARM_ENABLED:   statusbar_show_icon( STATUSBAR_ALARM );
                                     break;
-        case RTCCTL_ALARM_DISABLE:  statusbar_hide_icon( STATUSBAR_ALARM );
+        case RTCCTL_ALARM_DISABLED:  statusbar_hide_icon( STATUSBAR_ALARM );
                                     break;
     }
 }

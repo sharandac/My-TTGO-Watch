@@ -24,10 +24,10 @@
 
     #include "TTGO.h"
 
-    #define RTCCTL_ALARM            _BV(0)
-    #define RTCCTL_ALARM_SET        _BV(1)
-    #define RTCCTL_ALARM_DISABLE    _BV(2)
-    #define RTCCTL_ALARM_ENABLE     _BV(3)
+    #define RTCCTL_ALARM_OCCURRED    _BV(0)
+    #define RTCCTL_ALARM_TERM_SET    _BV(1)
+    #define RTCCTL_ALARM_DISABLED    _BV(2)
+    #define RTCCTL_ALARM_ENABLED     _BV(3)
 
     typedef void ( * RTCCTL_CALLBACK_FUNC ) ( EventBits_t event );
 
@@ -55,12 +55,12 @@
     void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb, const char *id );
     /**
      * @brief set an alarm time
-     * 
+     *
      * @param   hour    hour to set
      * @param   minute  minute to set
-     * 
+     *
      */
-    void rtcctl_set_alarm( uint8_t hour, uint8_t minute );
+    void rtcctl_set_alarm_term( uint8_t hour, uint8_t minute );
     /**
      * @brief   enable alarm
      */
@@ -71,18 +71,25 @@
     void rtcctl_disable_alarm( void );
     /**
      * @brief   check rtc time
-     * 
-     * @param   hour to check
-     * @param   minute to check
-     * 
+     *
      * @return  true if equal, otherwise false
      */
-    bool rtcctl_is_time( uint8_t hour, uint8_t minute );
+    bool rtcctl_is_alarm_time();
     /**
      * @brief   get the current alarm state
      * 
      * @return  true if enable, false is disable
      */
-    bool rtcctl_get_alarmstate( void );
+    bool rtcctl_is_alarm_enabled( void );
+
+    /*
+     * @brief   returns currently set alarm hour - a value can be set when alarm is currently disabled as well
+     */
+    uint8_t rtcctl_get_alarm_hour();
+
+    /*
+     * @brief   returns currently set alarm minute - a value can be set when alarm is currently disabled as well
+     */
+    uint8_t rtcctl_get_alarm_minute();
 
 #endif // _RTCCTL_H

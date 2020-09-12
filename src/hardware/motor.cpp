@@ -3,7 +3,7 @@
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
- 
+
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,11 +62,11 @@ void motor_setup( void ) {
     motor_vibe( 10 );
 }
 
-void motor_vibe( int time ) {
+void motor_vibe( int time, bool enforced ) {
     if ( motor_init == false )
         return;
 
-    if ( motor_get_vibe_config() ) {
+    if ( motor_get_vibe_config() || enforced) {
         portENTER_CRITICAL(&timerMux);
         motor_run_time_counter = time;
         portEXIT_CRITICAL(&timerMux);

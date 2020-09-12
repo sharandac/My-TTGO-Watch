@@ -169,7 +169,7 @@ void bluetooth_message_msg_pharse( char* msg ) {
 
     log_i("msg: %s", msg );
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+    SpiRamJsonDocument doc( strlen( msg ) * 4 );
 
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {

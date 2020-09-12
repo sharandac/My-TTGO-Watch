@@ -257,7 +257,6 @@ void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     lv_obj_set_event_cb( delete_btn, delete_wifi_password_event_cb );
 }
 
-
 static void apply_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       wifictl_insert_network( lv_label_get_text( wifi_password_name_label ), lv_textarea_get_text( wifi_password_pass_textfield ) );
@@ -412,8 +411,6 @@ static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event
     }
 }
 
-
-
 static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
     switch( event ) {
         case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
@@ -423,7 +420,7 @@ static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
 
 void bluetooth_message_msg_pharse( char* msg ) {
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+    SpiRamJsonDocument doc( strlen( msg ) * 4 );
 
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {
