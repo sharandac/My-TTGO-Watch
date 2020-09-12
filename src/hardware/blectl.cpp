@@ -47,7 +47,8 @@ blectl_msg_t blectl_msg;
 blectl_event_t *blectl_event_cb_table = NULL;
 uint32_t blectl_event_cb_entrys = 0;
 void blectl_send_event_cb( EventBits_t event, char *msg );
-void blectl_powermgm_event_cb( EventBits_t event );
+bool blectl_powermgm_event_cb( EventBits_t event );
+void blectl_powermgm_loop_cb( EventBits_t event );
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -317,17 +318,25 @@ void blectl_setup( void ) {
         log_i("BLE advertising...");
     }
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "blectl" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "blectl loop" );
 }
 
-void blectl_powermgm_event_cb( EventBits_t event ) {
+bool blectl_powermgm_event_cb( EventBits_t event ) {
+    bool retval = false;
+
     switch( event ) {
-        case POWERMGM_STANDBY:          blectl_standby();
+        case POWERMGM_STANDBY:          retval = blectl_get_enable_on_standby();
+                                        if ( retval )
+                                            log_w("standby blocked by \"enable_on_standby\" option");
                                         break;
-        case POWERMGM_WAKEUP:           blectl_wakeup();
-                                        break;
-        case POWERMGM_SILENCE_WAKEUP:   blectl_wakeup();
-                                        break;
+        case POWERMGM_WAKEUP:           break;
+        case POWERMGM_SILENCE_WAKEUP:   break;
     }
+    return( retval );
+}
+
+void blectl_powermgm_loop_cb( EventBits_t event ) {
+    blectl_loop();
 }
 
 void blectl_set_event( EventBits_t bits ) {
@@ -395,16 +404,6 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
             }
         }
     }
-}
-
-void blectl_standby( void ) {
-/*
-*/
-}
-
-void blectl_wakeup( void ) {
-/*
-*/
 }
 
 void blectl_set_enable_on_standby( bool enable_on_standby ) {        

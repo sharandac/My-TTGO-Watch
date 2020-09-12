@@ -44,7 +44,8 @@ bool first_loop_run = true;
 
 void IRAM_ATTR bma_irq( void );
 void bma_send_event_cb( EventBits_t event, const char *msg );
-void bma_powermgm_event_cb( EventBits_t event );
+bool bma_powermgm_event_cb( EventBits_t event );
+void bma_powermgm_loop_cb( EventBits_t event );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -74,9 +75,10 @@ void bma_setup( void ) {
     bma_reload_settings();
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_event_cb, "bma" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "bma loop" );
 }
 
-void bma_powermgm_event_cb( EventBits_t event ) {
+bool bma_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          bma_standby();
                                         break;
@@ -85,16 +87,23 @@ void bma_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   bma_wakeup();
                                         break;
     }
+    return( false );
+}
+
+void bma_powermgm_loop_cb( EventBits_t event ) {
+    bma_loop();
 }
 
 void bma_standby( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
+    TTGOClass *ttgo = TTGOClass::getWatch();
 
-  log_i("go standby");
+    log_i("go standby");
 
-  if ( bma_get_config( BMA_STEPCOUNTER ) )
-      ttgo->bma->enableStepCountInterrupt( false );
+    if ( bma_get_config( BMA_STEPCOUNTER ) )
+        ttgo->bma->enableStepCountInterrupt( false );
 
+    gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+    esp_sleep_enable_gpio_wakeup ();
 }
 
 void bma_wakeup( void ) {
@@ -132,7 +141,7 @@ void bma_loop( void ) {
     bool temp_bma_irq_flag = bma_irq_flag;
     bma_irq_flag = false;
     portEXIT_CRITICAL(&BMA_IRQ_Mux);
-    
+
     if ( temp_bma_irq_flag ) {                
         while( !ttgo->bma->readInterrupt() );
 

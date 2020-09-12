@@ -143,8 +143,6 @@
      * @param   blectl_event_cb   pointer to the callback function 
      */
     void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id );
-    void blectl_standby( void );
-    void blectl_wakeup( void );
     void blectl_set_enable_on_standby( bool enable_on_standby );
     void blectl_set_advertising( bool advertising );
     bool blectl_get_enable_on_standby( void );

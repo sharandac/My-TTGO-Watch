@@ -39,7 +39,7 @@ portMUX_TYPE DRAM_ATTR wifictlMux = portMUX_INITIALIZER_UNLOCKED;
 wifictl_event_cb_t *wifictl_event_cb_table = NULL;
 uint32_t wifictl_event_cb_entrys = 0;
 void wifictl_send_event_cb( EventBits_t event, char *msg );
-void wifictl_powermgm_event_cb( EventBits_t event );
+bool wifictl_powermgm_event_cb( EventBits_t event );
 
 void wifictl_StartTask( void );
 void wifictl_Task( void * pvParameters );
@@ -177,7 +177,7 @@ void wifictl_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "wifictl" );
 }
 
-void wifictl_powermgm_event_cb( EventBits_t event ) {
+bool wifictl_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          wifictl_standby();
                                         break;
@@ -186,6 +186,7 @@ void wifictl_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   wifictl_wakeup();
                                         break;
     }
+    return( false );
 }
 
 void wifictl_save_config( void ) {

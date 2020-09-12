@@ -129,12 +129,13 @@ static void  alarm_occurred_event_event_callback ( EventBits_t event ){
     }
 }
 
-void powermgmt_callback( EventBits_t event ){
+bool powermgmt_callback( EventBits_t event ){
     switch( event ) {
         case( POWERMGM_STANDBY ):
             in_progress = false;
             break;
     }
+    return( false );
 }
 
 void alarm_in_progress_tile_setup( void ) {

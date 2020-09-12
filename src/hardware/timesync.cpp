@@ -34,7 +34,7 @@ TaskHandle_t _timesync_Task;
 timesync_config_t timesync_config;
 
 void timesync_Task( void * pvParameters );
-void timesync_powermgm_event_cb( EventBits_t event );
+bool timesync_powermgm_event_cb( EventBits_t event );
 void timesync_wifictl_event_cb( EventBits_t event, char* msg );
 
 void timesync_setup( void ) {
@@ -46,15 +46,19 @@ void timesync_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
 }
 
-void timesync_powermgm_event_cb( EventBits_t event ) {
+bool timesync_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          timesyncToRTC();
+        case POWERMGM_STANDBY:          log_i("go standby");
+                                        timesyncToRTC();
                                         break;
-        case POWERMGM_WAKEUP:           timesyncToSystem();
+        case POWERMGM_WAKEUP:           log_i("go wkaeup");
+                                        timesyncToSystem();
                                         break;
-        case POWERMGM_SILENCE_WAKEUP:   timesyncToSystem();
+        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                        timesyncToSystem();
                                         break;
     }
+    return( false );
 }
 
 void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {

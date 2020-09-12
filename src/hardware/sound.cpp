@@ -53,7 +53,8 @@ bool sound_init = false;
 
 sound_config_t sound_config;
 
-void sound_powermgm_event_cb( EventBits_t event );
+bool sound_powermgm_event_cb( EventBits_t event );
+void sound_powermgm_loop_cb( EventBits_t event );
 
 void sound_setup( void ) {
     if ( sound_init )
@@ -76,26 +77,36 @@ void sound_setup( void ) {
     wav = new AudioGeneratorWAV();
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
 
     sound_init = true;
 }
 
-void sound_powermgm_event_cb( EventBits_t event ) {
+bool sound_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          sound_standby();
+                                        return( false );
                                         break;
         case POWERMGM_WAKEUP:           sound_wakeup();
+                                        return( false );
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   sound_wakeup();
+                                        return( false );
                                         break;
     }
 }
 
+void sound_powermgm_loop_cb( EventBits_t event ) {
+    sound_loop();
+}
+
 void sound_standby( void ) {
+    log_i("go standby");
     sound_set_enabled(false);
 }
 
 void sound_wakeup( void ) {
+    log_i("go wakeup");
     // to avoid additional power consumtion when waking up, audio is only enabled when 
     // a 'play sound' method is called
     // this would be the place to play a wakeup sound
@@ -178,11 +189,11 @@ void sound_read_config( void ) {
     }
     else {
         int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
+        SpiRamJsonDocument doc( filesize * 4 );
 
         DeserializationError error = deserializeJson( doc, file );
         if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
+            log_e("sound config deserializeJson() failed: %s", error.c_str() );
         }
         else {
             sound_config.enable = doc["enable"];

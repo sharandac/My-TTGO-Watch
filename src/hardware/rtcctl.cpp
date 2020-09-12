@@ -33,7 +33,8 @@ static int alarm_hour = 0;
 static int alarm_minute = 0;
 
 void rtcctl_send_event_cb( EventBits_t event );
-void rtcctl_powermgm_event_cb( EventBits_t event );
+bool rtcctl_powermgm_event_cb( EventBits_t event );
+void rtcctl_powermgm_loop_cb( EventBits_t event );
 
 rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
 uint32_t rtcctl_event_cb_entrys = 0;
@@ -53,14 +54,25 @@ void rtcctl_setup( void ) {
     rtcctl_set_alarm_term( alarm_hour, alarm_minute );
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_event_cb, "rtcctl" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "rtcctl loop" );
 }
 
-void rtcctl_powermgm_event_cb( EventBits_t event ) {
+bool rtcctl_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          break;
-        case POWERMGM_WAKEUP:           break;
-        case POWERMGM_SILENCE_WAKEUP:   break;
+        case POWERMGM_STANDBY:          log_i("go standby");
+                                        gpio_wakeup_enable( (gpio_num_t)RTC_INT, GPIO_INTR_LOW_LEVEL );
+                                        esp_sleep_enable_gpio_wakeup ();
+                                        break;
+        case POWERMGM_WAKEUP:           log_i("go wakeup");
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                        break;
     }
+    return( false );
+}
+
+void rtcctl_powermgm_loop_cb( EventBits_t event ) {
+    rtcctl_loop();
 }
 
 static void IRAM_ATTR rtcctl_irq( void ) {

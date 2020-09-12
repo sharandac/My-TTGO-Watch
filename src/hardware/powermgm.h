@@ -35,7 +35,15 @@
     #define POWERMGM_BMA_TILT                   _BV(10)
     #define POWERMGM_RTC_ALARM                  _BV(11)
 
-    typedef void ( * POWERMGM_CALLBACK_FUNC ) ( EventBits_t event );
+    typedef void ( * POWERMGM_LOOP_CALLBACK_FUNC ) ( EventBits_t event );
+
+    typedef struct {
+        EventBits_t event;
+        POWERMGM_LOOP_CALLBACK_FUNC event_cb;
+        const char *id;
+    } powermgm_loop_event_cb_t;
+    
+    typedef bool ( * POWERMGM_CALLBACK_FUNC ) ( EventBits_t event );
 
     typedef struct {
         EventBits_t event;
@@ -78,5 +86,12 @@
      * @param   powermgm_event_cb   pointer to the callback function 
      */
     void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_event_cb, const char *id );
+    /**
+     * @brief registers a callback function which is called on a corresponding loop event
+     * 
+     * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP
+     * @param   powermgm_loop_cb    pointer to the callback function 
+     */
+    void powermgm_register_loop_cb( EventBits_t event, POWERMGM_LOOP_CALLBACK_FUNC powermgm_loop_cb, const char *id );
 
 #endif // _POWERMGM_H

@@ -17,7 +17,8 @@ portMUX_TYPE DRAM_ATTR PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 pmu_config_t pmu_config;
 
 void IRAM_ATTR pmu_irq( void );
-void pmu_powermgm_event_cb( EventBits_t event );
+bool pmu_powermgm_event_cb( EventBits_t event );
+void pmu_powermgm_loop_cb( EventBits_t event );
 
 void pmu_setup( void ) {
 
@@ -61,10 +62,15 @@ void pmu_setup( void ) {
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, pmu_powermgm_event_cb, "pmu" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
 
 }
 
-void pmu_powermgm_event_cb( EventBits_t event ) {
+void pmu_powermgm_loop_cb( EventBits_t event ) {
+    pmu_loop();
+}
+
+bool pmu_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          pmu_standby();
                                         break;
@@ -73,6 +79,7 @@ void pmu_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
                                         break;
     }
+    return( false );
 }
 
 void IRAM_ATTR  pmu_irq( void ) {
@@ -161,6 +168,9 @@ void pmu_standby( void ) {
     }
     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
+
+    gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
+    esp_sleep_enable_gpio_wakeup ();
 }
 
 void pmu_wakeup( void ) {

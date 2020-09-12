@@ -34,7 +34,8 @@ display_config_t display_config;
 static uint8_t dest_brightness = 0;
 static uint8_t brightness = 0;
 
-void display_powermgm_event_cb( EventBits_t event );
+bool display_powermgm_event_cb( EventBits_t event );
+void display_powermgm_loop_cb( EventBits_t event );
 
 void display_setup( void ) {
     display_read_config();
@@ -47,9 +48,10 @@ void display_setup( void ) {
     bma_set_rotate_tilt( display_config.rotation );
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "display" );
+    powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "display loop" );
 }
 
-void display_powermgm_event_cb( EventBits_t event ) {
+bool display_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          display_standby();
                                         break;
@@ -58,29 +60,32 @@ void display_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   display_wakeup( true );
                                         break;
     }
+    return( false );
+}
+
+void display_powermgm_loop_cb( EventBits_t event ) {
+    display_loop();
 }
 
 void display_loop( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
 
-  if ( !powermgm_get_event( POWERMGM_STANDBY ) && !powermgm_get_event( POWERMGM_SILENCE_WAKEUP )) {
-    if ( dest_brightness != brightness ) {
-      if ( brightness < dest_brightness ) {
-        brightness++;
-        ttgo->bl->adjust( brightness );
-      }
-      else {
-        brightness--;
-        ttgo->bl->adjust( brightness );
-      }
+  if ( dest_brightness != brightness ) {
+    if ( brightness < dest_brightness ) {
+      brightness++;
+      ttgo->bl->adjust( brightness );
     }
-    if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
-      if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-          dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
-      }
-      else {
-          dest_brightness = display_get_brightness();
-      }
+    else {
+      brightness--;
+      ttgo->bl->adjust( brightness );
+    }
+  }
+  if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+    if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+        dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+    }
+    else {
+        dest_brightness = display_get_brightness();
     }
   }
 }

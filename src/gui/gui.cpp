@@ -50,6 +50,8 @@
 
 LV_IMG_DECLARE(bg2);
 
+bool gui_powermgm_event_cb( EventBits_t event );
+
 void gui_setup( void )
 {
     //Create wallpaper
@@ -82,7 +84,31 @@ void gui_setup( void )
 
     keyboard_setup();
 
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
+
     return;
+}
+
+bool gui_powermgm_event_cb( EventBits_t event ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
+    switch ( event ) {
+        case POWERMGM_STANDBY:          log_i("go standby");
+                                        if ( !display_get_block_return_maintile() ) {
+                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        }                               
+                                        ttgo->stopLvglTick();
+                                        break;
+        case POWERMGM_WAKEUP:           log_i("go wakeup");
+                                        ttgo->startLvglTick();
+                                        lv_disp_trig_activity( NULL );
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                        ttgo->startLvglTick();
+                                        lv_disp_trig_activity( NULL );
+                                        break;
+    }
+    return( false );
 }
 
 void gui_loop( void ) {
