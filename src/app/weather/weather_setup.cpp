@@ -259,7 +259,6 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
     }
 }
 
-
 static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
     switch( event ) {
         case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
@@ -269,7 +268,7 @@ static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
 
 void bluetooth_message_msg_pharse( char* msg ) {
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+    SpiRamJsonDocument doc( strlen( msg ) * 4 );
 
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {
