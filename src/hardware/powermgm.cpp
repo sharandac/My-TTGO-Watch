@@ -40,6 +40,7 @@
 #include "sound.h"
 
 #include "gui/mainbar/mainbar.h"
+#include <app/alarm_clock/alarm_in_progress.h>
 
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE powermgmMux = portMUX_INITIALIZER_UNLOCKED;
@@ -75,9 +76,6 @@ void powermgm_loop( void ) {
             if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
             }
-        }
-        if ( powermgm_get_event( POWERMGM_RTC_ALARM ) ) {
-            powermgm_send_event_cb( POWERMGM_RTC_ALARM );
         }
         powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM );
     }
