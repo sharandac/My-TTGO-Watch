@@ -62,10 +62,10 @@ int alarm_clock_main_get_am_pm_hour(int hour24){
 
 char* alarm_clock_main_get_am_pm_value(int hour24){
     if (hour24 < 12){
-        return AM;
+        return (char*)AM;
     }
 
-    return PM;
+    return (char*)PM;
 }
 
 static char* get_roller_content(int count, bool zeros, bool am_pm_roller){

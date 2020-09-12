@@ -39,6 +39,7 @@
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
 #include "hardware/sound.h"
+#include "hardware/framebuffer.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
@@ -59,6 +60,7 @@ void setup()
 
     ttgo->begin();
     ttgo->lvgl_begin();
+    framebuffer_setup();
 
     SPIFFS.begin();
     motor_setup();
@@ -114,7 +116,7 @@ void setup()
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
     sound_setup();
-    
+
     display_set_brightness( display_get_brightness() );
 
     delay(500);

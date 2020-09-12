@@ -123,11 +123,11 @@ void powermgm_loop( void ) {
 
         if ( !powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
             if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
-            delay(50);
             log_i("Free heap: %d", ESP.getFreeHeap());
             log_i("Free PSRAM heap: %d", ESP.getFreePsram());
             log_i("uptime: %d", millis() / 1000 );
             log_i("go standby");
+            delay(100);
             setCpuFrequencyMhz( 80 );
             esp_light_sleep_start();
             // from here, the consumption is round about 2.5mA

@@ -85,15 +85,13 @@ void sound_setup( void ) {
 bool sound_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
         case POWERMGM_STANDBY:          sound_standby();
-                                        return( false );
                                         break;
         case POWERMGM_WAKEUP:           sound_wakeup();
-                                        return( false );
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   sound_wakeup();
-                                        return( false );
                                         break;
     }
+    return( false );
 }
 
 void sound_powermgm_loop_cb( EventBits_t event ) {
