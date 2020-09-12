@@ -91,7 +91,6 @@ void setup()
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
     
-    sound_setup();
     gui_setup();
 
     /*
@@ -114,6 +113,7 @@ void setup()
     // enable to store data in normal heap
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
+    sound_setup();
 
     display_set_brightness( display_get_brightness() );
 
