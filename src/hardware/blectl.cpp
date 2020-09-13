@@ -328,9 +328,13 @@ bool blectl_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_STANDBY:          retval = blectl_get_enable_on_standby();
                                         if ( retval )
                                             log_w("standby blocked by \"enable_on_standby\" option");
+                                        else
+                                            log_i("go standby");
                                         break;
-        case POWERMGM_WAKEUP:           break;
-        case POWERMGM_SILENCE_WAKEUP:   break;
+        case POWERMGM_WAKEUP:           log_i("go wakeup");
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                        break;
     }
     return( retval );
 }

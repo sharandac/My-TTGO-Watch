@@ -21,30 +21,38 @@
  */
 #include "config.h"
 #include <TTGO.h>
+#include <esp_ipc.h>
 
 #include "framebuffer.h"
+#include "powermgm.h"
 
 lv_color_t *framebuffer;
 
 static lv_disp_buf_t disp_buf;
+
 lv_disp_drv_t *framebuffer_disp_drv = NULL;
 const lv_area_t *framebuffer_area = NULL;
 lv_color_t *framebuffer_color_p = NULL;
 
 volatile bool DRAM_ATTR framebuffer_flag = false;
 portMUX_TYPE DRAM_ATTR FRAMEBUFFER_Mux = portMUX_INITIALIZER_UNLOCKED;
-TaskHandle_t _framebuffer_Task;
 
-void framebuffer_Task( void * pvParameters );
+static int32_t frame = 0;
+static int32_t framerate = 0;
+
+bool framebuffer_powermgm_event_cb( EventBits_t event );
+void framebuffer_ipc_call( void * arg );
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
 
 void framebuffer_setup( void ) {
     framebuffer = (lv_color_t*)ps_malloc( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
     if ( framebuffer == NULL ) {
         log_e("framebuffer 1 malloc failed");
-        while(1);
+        return;
     }
     lv_disp_buf_init( &disp_buf, framebuffer, NULL, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) );
+
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, framebuffer_powermgm_event_cb, "framebuffer" );
 
     lv_disp_t *system_disp;
     system_disp = lv_disp_get_default();
@@ -53,50 +61,52 @@ void framebuffer_setup( void ) {
     system_disp->driver.ver_res = lv_disp_get_ver_res( NULL );
     system_disp->driver.buffer = &disp_buf;
 
-    xTaskCreatePinnedToCore(  framebuffer_Task,     /* Function to implement the task */
-                              "framebuffer Task",   /* Name of the task */
-                              3000,             /* Stack size in words */
-                              NULL,             /* Task input parameter */
-                              1,                /* Priority of the task */
-                              &_framebuffer_Task,   /* Task handle. */
-                              0 );
-
     log_i("framebuffer enable");
 }
 
+bool framebuffer_powermgm_event_cb( EventBits_t event ) {
+    switch( event ) {
+        case    POWERMGM_STANDBY:           log_i("go standby");
+                                            break;
+        case    POWERMGM_SILENCE_WAKEUP:    log_i("go silence wakeup");
+                                            break;
+        case    POWERMGM_WAKEUP:            log_i("go wakeup");
+                                            break;
+    }
+    return( false );
+}
+
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-    while( framebuffer_flag );
+    static uint64_t nextmillis = 0;
+
+    if ( framebuffer_flag )
+        return;
 
     portENTER_CRITICAL(&FRAMEBUFFER_Mux);
-    framebuffer_flag = true;
     framebuffer_disp_drv = disp_drv;
     framebuffer_area = area;
     framebuffer_color_p = color_p;
+    framebuffer_flag = true;
+
+    if ( nextmillis < millis() ) {
+        nextmillis = millis() + 1000;
+        framerate = frame;
+        frame = 0;
+    }
     portEXIT_CRITICAL(&FRAMEBUFFER_Mux);
+
+    esp_ipc_call( 0, framebuffer_ipc_call, NULL );
 }
 
-void framebuffer_Task( void * pvParameters ) {
-    static uint64_t nextmillis = 0;
-    static int32_t frame = 0;
+void framebuffer_ipc_call( void * arg ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    log_i("start framebuffer refresh task");
-
-    while ( true ) {
-        if ( nextmillis < millis() ) {
-            nextmillis = millis() + 1000;
-            log_i("framerate: %d", frame );
-            frame = 0;
-        }
-        if ( framebuffer_flag ) {
-            uint32_t size = (framebuffer_area->x2 - framebuffer_area->x1 + 1) * (framebuffer_area->y2 - framebuffer_area->y1 + 1) ;
-            ttgo->tft->setAddrWindow(framebuffer_area->x1, framebuffer_area->y1, (framebuffer_area->x2 - framebuffer_area->x1 + 1), (framebuffer_area->y2 - framebuffer_area->y1 + 1)); /* set the working window */
-            ttgo->tft->pushColors(( uint16_t *)framebuffer_color_p, size, false);
-            portENTER_CRITICAL(&FRAMEBUFFER_Mux);
-            framebuffer_flag = false;
-            portEXIT_CRITICAL(&FRAMEBUFFER_Mux);
-            lv_disp_flush_ready(framebuffer_disp_drv);
-            frame++;
-       }
-    }
+    uint32_t size = (framebuffer_area->x2 - framebuffer_area->x1 + 1) * (framebuffer_area->y2 - framebuffer_area->y1 + 1) ;
+    ttgo->tft->setAddrWindow(framebuffer_area->x1, framebuffer_area->y1, (framebuffer_area->x2 - framebuffer_area->x1 + 1), (framebuffer_area->y2 - framebuffer_area->y1 + 1)); /* set the working window */
+    ttgo->tft->pushColors(( uint16_t *)framebuffer_color_p, size, false);
+    portENTER_CRITICAL(&FRAMEBUFFER_Mux);
+    frame++;
+    framebuffer_flag = false;
+    portEXIT_CRITICAL(&FRAMEBUFFER_Mux);
+    lv_disp_flush_ready(framebuffer_disp_drv);
 }

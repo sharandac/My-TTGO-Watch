@@ -275,6 +275,7 @@ void update_Task( void * pvParameters ) {
     }
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
     lv_disp_trig_activity(NULL);
+    lv_obj_invalidate( lv_scr_act() );
     log_i("finish update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

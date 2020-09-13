@@ -44,6 +44,7 @@ LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
+static void update_reset_url_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 void update_read_config( void );
@@ -115,6 +116,13 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_align( update_check_url_textfield, update_check_url_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_set_event_cb( update_check_url_textfield, update_check_url_textarea_event_cb );
 
+    lv_obj_t *update_reset_url_btn = lv_btn_create( update_setup_tile, NULL);
+    lv_obj_set_event_cb( update_reset_url_btn, update_reset_url_event_cb );
+    lv_obj_add_style( update_reset_url_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_align( update_reset_url_btn, update_check_url_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+    lv_obj_t *update_reset_url_label = lv_label_create( update_reset_url_btn, NULL );
+    lv_label_set_text( update_reset_url_label, "set default url");
+
     if ( update_config->autosync )
         lv_switch_on( update_check_autosync_onoff, LV_ANIM_OFF);
     else
@@ -125,6 +133,12 @@ void update_setup_tile_setup( uint32_t tile_num ) {
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         keyboard_set_textarea( obj );
+    }
+}
+
+static void update_reset_url_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    if( event == LV_EVENT_CLICKED ) {
+        lv_textarea_set_text( update_check_url_textfield, FIRMWARE_UPDATE_URL );
     }
 }
 

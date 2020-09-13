@@ -118,6 +118,7 @@ void powermgm_loop( void ) {
         //Save info to avoid buzz when standby after silent wake
         bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
         
+        // send standby event
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
 
@@ -127,7 +128,7 @@ void powermgm_loop( void ) {
             log_i("Free PSRAM heap: %d", ESP.getFreePsram());
             log_i("uptime: %d", millis() / 1000 );
             log_i("go standby");
-            delay(100);
+            delay( 100 );
             setCpuFrequencyMhz( 80 );
             esp_light_sleep_start();
             // from here, the consumption is round about 2.5mA
@@ -145,6 +146,7 @@ void powermgm_loop( void ) {
     }
     powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
 
+    // send loop event depending on powermem state
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
         vTaskDelay( 100 );
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );

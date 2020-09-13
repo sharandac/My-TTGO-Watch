@@ -55,12 +55,11 @@ TTGOClass *ttgo = TTGOClass::getWatch();
 void setup()
 {
     Serial.begin(115200);
-    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
+    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ " core: %d\r\n", xPortGetCoreID() );
     Serial.printf("Configure watchdog to 30s: %d\r\n", esp_task_wdt_init( 30, true ) );
 
     ttgo->begin();
     ttgo->lvgl_begin();
-    framebuffer_setup();
 
     SPIFFS.begin();
     motor_setup();
@@ -71,6 +70,7 @@ void setup()
     screenshot_setup();
     splash_screen_stage_one();
     splash_screen_stage_update( "init serial", 10 );
+    framebuffer_setup();
 
     splash_screen_stage_update( "init spiff", 20 );
     if ( !SPIFFS.begin() ) {
@@ -129,9 +129,7 @@ void setup()
     disableCore0WDT();
 }
 
-void loop()
-{
+void loop() {
     gui_loop();
-    sound_loop();
     powermgm_loop();
 }
