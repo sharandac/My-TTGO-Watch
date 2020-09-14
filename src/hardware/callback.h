@@ -41,12 +41,11 @@
     /**
      * @brief init the callback structure
      * 
-     * @param   callback    pointer to a callback_t structure
      * @param   name        pointer to an string thats contains the name for the callback table
      * 
-     * @return  true if success, false if failed
+     * @return  pointer to a callback_t structure if success, NULL if failed
      */
-    bool callback_init( callback_t *callback, const char *name );
+    callback_t *callback_init( const char *name );
     /**
      * @brief   register an callback function
      * 

@@ -22,22 +22,20 @@
 
 #include "callback.h"
 
-bool callback_init( callback_t *callback, const char *name ) {
-    bool retval = false;
+callback_t *callback_init( const char *name ) {
+    callback_t *callback = NULL;
     
+    callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
     if ( callback == NULL ) {
-        callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
-        if ( callback == NULL ) {
-            log_e("callback_t structure calloc faild");
-        }
-        else {
-            callback->entrys = 0;
-            callback->table = NULL;
-            callback->name = name;
-            retval = true;
-        }
+        log_e("callback_t structure calloc faild for: %s", name );
     }
-    return( retval );
+    else {
+        callback->entrys = 0;
+        callback->table = NULL;
+        callback->name = name;
+        log_i("init callback_t structure success for: %s", name );
+    }
+    return( callback );
 }
 
 bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
@@ -98,7 +96,6 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
             callback->table[ entry ].counter++;
             if ( callback->table[ entry ].callback_func( event, arg ) ) {
                 retval = true;
-                log_w("standby blocked by: %s", callback->table[ entry ].id );
             }
         }
     }

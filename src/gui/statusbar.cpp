@@ -39,6 +39,7 @@
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
 #include "hardware/bma.h"
+#include "hardware/pmu.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -71,6 +72,10 @@ void statusbar_blectl_event_cb( EventBits_t event, char* msg );
 void statusbar_wifictl_event_cb( EventBits_t event, char* msg );
 void statusbar_rtcctl_event_cb( EventBits_t event );
 void statusbar_bma_event_cb( EventBits_t event, const char *msg );
+bool statusbar_pmu_event_cb( EventBits_t event, void *arg );
+void statusbar_wifi_set_state( bool state, const char *wifiname );
+void statusbar_wifi_set_ip_state( bool state, const char *ip );
+void statusbar_bluetooth_set_state( bool state );
 
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
@@ -206,12 +211,56 @@ void statusbar_setup( void )
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb, "statusbar stepcounter" );
+    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, statusbar_pmu_event_cb, "statusbar pmu");
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
 
 void statusbar_update_task( lv_task_t * task ) {
     statusbar_refresh();
+}
+
+bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
+    char level[8]="";
+    static int32_t percent = 0;
+
+    switch( event ) {
+        case PMUCTL_BATTERY_PERCENT:    if ( *(int32_t*)arg >= 0 ) {
+                                            snprintf( level, sizeof( level ), "%d%%", *(int32_t*)arg );
+                                        }
+                                        else {
+                                            snprintf( level, sizeof( level ), "?" );
+                                        }
+                                        lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );
+                                        percent = *(int32_t*)arg;
+                                        break;
+
+        case PMUCTL_CHARGING:           if ( *(bool*)arg ) {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
+                                        }
+                                        else {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                        }
+                                        break;
+        case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {
+                                            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
+                                        }
+                                        else {
+                                            if ( percent >= 75 ) { 
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_FULL );
+                                            } else if( percent >=50 && percent < 74) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_3 );
+                                            } else if( percent >=35 && percent < 49) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_2 );
+                                            } else if( percent >=15 && percent < 34) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_1 );
+                                            } else if( percent >=0 && percent < 14) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_EMPTY );
+                                            }
+                                        }
+                                        break;
+    }
+    return( true );
 }
 
 void statusbar_rtcctl_event_cb( EventBits_t event ) {
@@ -368,49 +417,6 @@ void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
     switch( event ) {
         case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
                                     break;
-    }
-}
-
-void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
-    char level[8]="";
-    if ( percent >= 0 ) {
-        snprintf( level, sizeof( level ), "%d%%", percent );
-    }
-    else {
-        snprintf( level, sizeof( level ), "?" );
-    }
-    lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );   
-
-    if ( charging && plug ) {
-        lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
-        statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-    }
-    else { 
-        if ( percent >= 75 ) { 
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_FULL );
-        } else if( percent >=50 && percent < 74) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_3 );
-        } else if( percent >=35 && percent < 49) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_2 );
-        } else if( percent >=15 && percent < 34) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_1 );
-        } else if( percent >=0 && percent < 14) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_EMPTY );
-        }
-
-        if ( percent >= 25 ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_WHITE );
-        }
-        else if ( percent >= 15 ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_YELLOW );
-        }
-        else {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-        }
-
-        if ( plug ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
-        }
     }
 }
 

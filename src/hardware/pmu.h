@@ -23,6 +23,11 @@
     #define _PMU_H
 
     #include "TTGO.h"
+    #include "callback.h"
+
+    #define PMUCTL_BATTERY_PERCENT      1
+    #define PMUCTL_VBUS_PLUG            2
+    #define PMUCTL_CHARGING             4
 
     #define PMU_CONFIG_FILE         "/pmu.cfg"
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"
@@ -163,5 +168,10 @@
      * @return  true means plugged, false means not plugged
      */
     bool pmu_is_vbus_plug( void );
+    /**
+     * 
+     * 
+     */
+    bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
 #endif // _PMU_H
