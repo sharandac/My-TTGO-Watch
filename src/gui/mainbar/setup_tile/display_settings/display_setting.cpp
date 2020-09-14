@@ -44,8 +44,10 @@ lv_obj_t *display_brightness_slider = NULL;
 lv_obj_t *display_timeout_slider = NULL;
 lv_obj_t *display_timeout_slider_label = NULL;
 lv_obj_t *display_rotation_list = NULL;
+lv_obj_t *display_bg_img_list = NULL;
 lv_obj_t *display_vibe_onoff = NULL;
 lv_obj_t *display_block_return_maintile_onoff = NULL;
+lv_obj_t *display_background_image = NULL;
 
 LV_IMG_DECLARE(brightness_64px);
 LV_IMG_DECLARE(exit_32px);
@@ -64,6 +66,7 @@ static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_rotation_event_handler(lv_obj_t * obj, lv_event_t event);
 static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void display_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -194,6 +197,21 @@ void display_settings_tile_setup( void ) {
     lv_label_set_text( display_block_return_maintile_label, "block return maintile" );
     lv_obj_align( display_block_return_maintile_label, block_return_maintile_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *display_background_image_cont = lv_obj_create( display_settings_tile_2, NULL );
+    lv_obj_set_size(display_background_image_cont, lv_disp_get_hor_res( NULL ) , 40 );
+    lv_obj_add_style( display_background_image_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
+    lv_obj_align( display_background_image_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *display_background_image_label = lv_label_create( display_background_image_cont, NULL );
+    lv_obj_add_style( display_background_image_label, LV_OBJ_PART_MAIN, &display_settings_style  );
+    lv_label_set_text( display_background_image_label, "Bg image" );
+    lv_obj_align( display_background_image_label, display_background_image_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    display_bg_img_list = lv_dropdown_create( display_background_image_cont, NULL );
+    lv_dropdown_set_options( display_bg_img_list, "bg\nbg1\nbg2\nbg3" );
+    lv_obj_set_size( display_bg_img_list, 70, 40 );
+    lv_obj_align( display_bg_img_list, display_background_image_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb(display_bg_img_list, display_background_image_setup_event_cb);
+
+
     lv_slider_set_value( display_brightness_slider, display_get_brightness(), LV_ANIM_OFF );
     lv_slider_set_value( display_timeout_slider, display_get_timeout(), LV_ANIM_OFF );
     char temp[16]="";
@@ -207,6 +225,7 @@ void display_settings_tile_setup( void ) {
     lv_label_set_text( display_timeout_slider_label, temp );
     lv_obj_align( display_timeout_slider_label, display_timeout_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
     lv_dropdown_set_selected( display_rotation_list, display_get_rotation() / 90 );
+    lv_dropdown_set_selected( display_bg_img_list, display_get_background_image() );
 
     if ( motor_get_vibe_config() )
         lv_switch_on( display_vibe_onoff, LV_ANIM_OFF );
@@ -223,6 +242,7 @@ void display_settings_tile_setup( void ) {
     lv_tileview_add_element( display_settings_tile_1, rotation_cont );
     lv_tileview_add_element( display_settings_tile_2, vibe_cont );
     lv_tileview_add_element( display_settings_tile_2, block_return_maintile_cont );
+    lv_tileview_add_element( display_settings_tile_2, display_background_image_cont );
 }
 
 static void enter_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -302,3 +322,11 @@ static void display_rotation_event_handler( lv_obj_t * obj, lv_event_t event ) {
                                             bma_set_rotate_tilt( lv_dropdown_get_selected( obj ) * 90 );
     }
 }
+
+static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ):     
+                                            display_set_background_image( lv_dropdown_get_selected( obj ) );
+    }
+}
+

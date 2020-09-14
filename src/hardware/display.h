@@ -36,6 +36,7 @@
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;
         uint32_t rotation = 0;
         bool block_return_maintile = false;
+        uint32_t background_image = 0;
     } display_config_t;
 
     #define DISPLAY_CONFIG_FILE         "/display.cfg"
@@ -112,6 +113,19 @@
     /*
      * @brief set display into standby
      */
+    uint32_t display_get_background_image( void );
+    /*
+     * @brief set the background for the display
+     * 
+     * @param image number
+     */
+    void display_set_background_image( uint32_t background_image );
+    /*
+     * @brief read the block_return_maintile while wakeup
+     * 
+     * @param image number
+     */
+
     void display_standby( void );
     /*
      * @brief set display into normal mode or leave it in standby if a silence wakeup occur
