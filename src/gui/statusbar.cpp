@@ -223,6 +223,8 @@ void statusbar_update_task( lv_task_t * task ) {
 bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
     char level[8]="";
     static int32_t percent = 0;
+    static bool plug = false;
+    static bool charging = false;
 
     switch( event ) {
         case PMUCTL_BATTERY_PERCENT:    if ( *(int32_t*)arg >= 0 ) {
@@ -233,19 +235,7 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
                                         }
                                         lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );
                                         percent = *(int32_t*)arg;
-                                        break;
-
-        case PMUCTL_CHARGING:           if ( *(bool*)arg ) {
-                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-                                        }
-                                        else {
-                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
-                                        }
-                                        break;
-        case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {
-                                            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
-                                        }
-                                        else {
+                                        if ( !plug ) {
                                             if ( percent >= 75 ) { 
                                                 lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_FULL );
                                             } else if( percent >=50 && percent < 74) {
@@ -257,6 +247,33 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
                                             } else if( percent >=0 && percent < 14) {
                                                 lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_EMPTY );
                                             }
+
+                                            if ( percent >= 25 ) {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_WHITE );
+                                            } else if ( percent >= 15 ) {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_YELLOW );
+                                            } else {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
+                                            }       
+                                        }
+                                        break;
+
+        case PMUCTL_CHARGING:           if ( *(bool*)arg ) {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
+                                            charging = true;
+                                        }
+                                        else {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                            charging = false;
+                                        }
+                                        break;
+        case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {
+                                            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                            plug = true;
+                                        }
+                                        else {
+                                            plug = false;
                                         }
                                         break;
     }

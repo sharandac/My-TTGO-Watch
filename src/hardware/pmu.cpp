@@ -12,6 +12,7 @@
 
 #include "gui/statusbar.h"
 
+static bool firstlooprun = true;
 volatile bool DRAM_ATTR pmu_irq_flag = false;
 portMUX_TYPE DRAM_ATTR PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -79,6 +80,7 @@ bool pmu_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_STANDBY:          pmu_standby();
                                         break;
         case POWERMGM_WAKEUP:           pmu_wakeup();
+                                        firstlooprun = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
                                         break;
@@ -145,12 +147,14 @@ void pmu_loop( void ) {
         }
     }
 
-    if ( firstrun ) {
+    if ( firstlooprun ) {
+        int32_t percent = pmu_get_battery_percent();
         bool plug = ttgo->power->isVBUSPlug();
         bool charging = ttgo->power->isChargeing();
+        pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
         pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
-        firstrun = false;
+        firstlooprun = false;
     }
 }
 
