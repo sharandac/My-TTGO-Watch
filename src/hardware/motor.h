@@ -42,7 +42,7 @@
      * @enforce motor will vibrate even if "vibe feedback" option is deactivated
      *  It is usefull for alrm or notifications which can be set independently
      */
-    void motor_vibe(int time, bool enforced = false);
+    void motor_vibe( int time, bool enforced = false );
     /*
      * @brief   get the current vibe configuration
      * 

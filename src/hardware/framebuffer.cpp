@@ -66,11 +66,14 @@ void framebuffer_setup( void ) {
 
 bool framebuffer_powermgm_event_cb( EventBits_t event ) {
     switch( event ) {
-        case    POWERMGM_STANDBY:           log_i("go standby");
+        case    POWERMGM_STANDBY:           framebuffer_flag = true;
+                                            log_i("go standby");
                                             break;
-        case    POWERMGM_SILENCE_WAKEUP:    log_i("go silence wakeup");
+        case    POWERMGM_SILENCE_WAKEUP:    framebuffer_flag = false;
+                                            log_i("go silence wakeup");
                                             break;
-        case    POWERMGM_WAKEUP:            log_i("go wakeup");
+        case    POWERMGM_WAKEUP:            framebuffer_flag = false;
+                                            log_i("go wakeup");
                                             break;
     }
     return( false );

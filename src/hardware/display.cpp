@@ -120,7 +120,6 @@ void display_wakeup( bool silence ) {
     ttgo->bl->adjust( 0 );
     brightness = 0;
     dest_brightness = display_get_brightness();
-    motor_vibe( 1 );
   }
 }
 

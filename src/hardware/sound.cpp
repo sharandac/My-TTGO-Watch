@@ -105,7 +105,7 @@ void sound_powermgm_loop_cb( EventBits_t event ) {
 
 void sound_standby( void ) {
     log_i("go standby");
-    sound_set_enabled(false);
+    sound_set_enabled( false );
 }
 
 void sound_wakeup( void ) {
@@ -121,16 +121,16 @@ void sound_wakeup( void ) {
  */
 void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
+    
     if ( enabled ) {
-        ttgo->enableLDO3(1);
-    } else {
-        
+        ttgo->enableLDO3( AXP202_ON );
+    }
+    else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-        
-        ttgo->enableLDO3(0);
+        ttgo->enableLDO3( AXP202_OFF );
     }
 }
 

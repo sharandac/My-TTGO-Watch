@@ -41,6 +41,7 @@
         EventBits_t event;
         POWERMGM_LOOP_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } powermgm_loop_event_cb_t;
     
     typedef bool ( * POWERMGM_CALLBACK_FUNC ) ( EventBits_t event );
@@ -49,6 +50,7 @@
         EventBits_t event;
         POWERMGM_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } powermgm_event_cb_t;
 
     /**
@@ -84,6 +86,7 @@
      * 
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP and POWERMGM_RTC_ALARM
      * @param   powermgm_event_cb   pointer to the callback function 
+     * @param   id                  pointer to an string
      */
     void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_event_cb, const char *id );
     /**
@@ -91,6 +94,7 @@
      * 
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP
      * @param   powermgm_loop_cb    pointer to the callback function 
+     * @param   id                  pointer to an string
      */
     void powermgm_register_loop_cb( EventBits_t event, POWERMGM_LOOP_CALLBACK_FUNC powermgm_loop_cb, const char *id );
 

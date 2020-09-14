@@ -88,6 +88,7 @@
         EventBits_t event;
         BLECTL_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } blectl_event_t;
 
     #define BLECTL_CONNECT               _BV(0)
@@ -140,17 +141,55 @@
      *                                      BLECTL_PAIRING,
      *                                      BLECTL_PAIRING_SUCCESS,
      *                                      BLECTL_PAIRING_ABORT
-     * @param   blectl_event_cb   pointer to the callback function 
+     * @param   blectl_event_cb     pointer to the callback function
+     * @param   id                  pointer to an string
      */
     void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id );
+    /**
+     * @brief enable blueetooth on standby
+     * 
+     * @param   enable_on_standby   true means enabled, false means disabled 
+     */
     void blectl_set_enable_on_standby( bool enable_on_standby );
+    /**
+     * @brief enable advertising
+     * 
+     * @param   advertising true means enabled, false means disabled
+     */
     void blectl_set_advertising( bool advertising );
+    /**
+     * @brief get the current enable_on_standby config
+     * 
+     * @return  true means enabled, false means disabled
+     */
     bool blectl_get_enable_on_standby( void );
+    /**
+     * @brief get the current advertising config
+     * 
+     * @return  true means enabled, false means disabled
+     */
     bool blectl_get_advertising( void );
+    /**
+     * @brief store the current configuration to SPIFFS
+     */
     void blectl_save_config( void );
+    /**
+     * @brief read the configuration from SPIFFS
+     */
     void blectl_read_config( void );
+    /**
+     * @brief send an battery update over bluetooth to gadgetbridge
+     * 
+     * @param   percent     battery percent
+     * @param   charging    charging state
+     * @param   plug        powerplug state
+     */
     void blectl_update_battery( int32_t percent, bool charging, bool plug );
+    /**
+     * @brief send an message over bluettoth to gadgetbridge
+     * 
+     * @param   msg     pointer to a string
+     */
     void blectl_send_msg( char *msg );
-    void blectl_loop ( void );
 
 #endif // _BLECTL_H

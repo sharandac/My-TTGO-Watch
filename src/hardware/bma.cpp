@@ -195,6 +195,7 @@ void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb, const c
     bma_event_cb_table[ bma_event_cb_entrys - 1 ].event = event;
     bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb = bma_event_cb;
     bma_event_cb_table[ bma_event_cb_entrys - 1 ].id = id;
+    bma_event_cb_table[ bma_event_cb_entrys - 1 ].counter = 0;
     log_i("register bma_event_cb success (%p:%s)", bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb, bma_event_cb_table[ bma_event_cb_entrys - 1 ].id );
 }
 
@@ -206,6 +207,7 @@ void bma_send_event_cb( EventBits_t event, const char *msg ) {
     for ( int entry = 0 ; entry < bma_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & bma_event_cb_table[ entry ].event ) {
+            bma_event_cb_table[ entry ].counter++;
             log_i("call bma_event_cb (%p:%04x:%s)", bma_event_cb_table[ entry ].event_cb, event, bma_event_cb_table[ entry ].id );
             bma_event_cb_table[ entry ].event_cb( event, msg );
         }

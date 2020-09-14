@@ -166,7 +166,6 @@ void pmu_standby( void ) {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
         log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
     }
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
 
     gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
@@ -188,7 +187,6 @@ void pmu_wakeup( void ) {
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
 
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
 }
 

@@ -68,9 +68,9 @@ void setup()
     heap_caps_malloc_extmem_enable( 1 );
     display_setup();
     screenshot_setup();
+
     splash_screen_stage_one();
     splash_screen_stage_update( "init serial", 10 );
-    framebuffer_setup();
 
     splash_screen_stage_update( "init spiff", 20 );
     if ( !SPIFFS.begin() ) {
@@ -130,6 +130,5 @@ void setup()
 }
 
 void loop() {
-    gui_loop();
     powermgm_loop();
 }

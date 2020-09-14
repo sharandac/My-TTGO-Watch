@@ -49,6 +49,7 @@ uint32_t blectl_event_cb_entrys = 0;
 void blectl_send_event_cb( EventBits_t event, char *msg );
 bool blectl_powermgm_event_cb( EventBits_t event );
 void blectl_powermgm_loop_cb( EventBits_t event );
+void blectl_loop( void );
 
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -66,7 +67,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (char*)"connected" );
-        blectl_send_msg( (char*)"\x03\x0a" );
+        blectl_send_msg( (char*)"\x03\x10" );
         pServer->updateConnParams( param->connect.remote_bda, 500, 1000, 750, 10000 );
         log_i("BLE connected");
     };
@@ -389,6 +390,7 @@ void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event = event;
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb = blectl_event_cb;
     blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id = id;
+    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].counter = 0;
     log_i("register blectl_event_cb success (%p:%s)", blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb, blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id );
 }
 
@@ -400,6 +402,7 @@ void blectl_send_event_cb( EventBits_t event, char *msg ) {
             if ( tmp_msg != NULL ) {
                 strcpy( tmp_msg, msg );
                 log_i("call blectl_event_cb (%p:%04x:%s)", blectl_event_cb_table[ entry ].event_cb, event, blectl_event_cb_table[ entry ].id );
+                blectl_event_cb_table[ entry ].counter++;
                 blectl_event_cb_table[ entry ].event_cb( event, tmp_msg );
                 free( tmp_msg );
             }

@@ -338,6 +338,7 @@ void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event = event;
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb = wifictl_event_cb;
     wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id = id;
+    wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].counter = 0;
     log_i("register wifictl_event_cb success (%p:%s)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb, wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id );
 }
 
@@ -349,6 +350,7 @@ void wifictl_send_event_cb( EventBits_t event, char *msg ) {
     for ( int entry = 0 ; entry < wifictl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & wifictl_event_cb_table[ entry ].event ) {
+            wifictl_event_cb_table[ entry ].counter++;
             log_i("call wifictl_event_cb (%p:%04x:%s)", wifictl_event_cb_table[ entry ].event_cb, event, wifictl_event_cb_table[ entry ].id );
             wifictl_event_cb_table[ entry ].event_cb( event, msg );
         }

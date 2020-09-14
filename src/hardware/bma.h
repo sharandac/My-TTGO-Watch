@@ -35,6 +35,7 @@
         EventBits_t event;
         BMA_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } bma_event_cb_t;
 
     #define BMA_COFIG_FILE          "/bma.cfg"

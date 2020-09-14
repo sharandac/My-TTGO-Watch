@@ -58,8 +58,6 @@ void powermgm_setup( void ) {
 
     powermgm_status = xEventGroupCreate();
 
-    adc_power_off();
-
     pmu_setup();
     bma_setup();
     wifictl_setup();
@@ -94,18 +92,19 @@ void powermgm_loop( void ) {
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
-        log_i("go wakeup");
-
         //Network transfer times are likely a greater time consumer than actual computational time
         if (powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+            log_i("go silence wakeup");
             setCpuFrequencyMhz(80);
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
         }
         else {
+            log_i("go wakeup");
             setCpuFrequencyMhz(240);
             powermgm_set_event( POWERMGM_WAKEUP );
             powermgm_send_event_cb( POWERMGM_WAKEUP );
+            motor_vibe(3);
         }
 
         log_i("Free heap: %d", ESP.getFreeHeap());
@@ -121,6 +120,8 @@ void powermgm_loop( void ) {
         // send standby event
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
+
+        adc_power_off();
 
         if ( !powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
             if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
@@ -202,6 +203,7 @@ void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_ev
     powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event = event;
     powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event_cb = powermgm_event_cb;
     powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].id = id;
+    powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].counter = 0;
     log_i("register powermgm_event_cb success (%p:%s)", powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event_cb, powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].id );
 }
 
@@ -229,6 +231,7 @@ void powermgm_register_loop_cb( EventBits_t event, POWERMGM_LOOP_CALLBACK_FUNC p
     powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event = event;
     powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event_cb = powermgm_loop_cb;
     powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].id = id;
+    powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].counter = 0;
     log_i("register powermgm_event_cb success (%p:%s)", powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event_cb, powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].id );
 }
 
@@ -243,6 +246,7 @@ bool powermgm_send_event_cb( EventBits_t event ) {
         yield();
         if ( event & powermgm_event_cb_table[ entry ].event ) {
             log_i("call powermgm_event_cb (%p:%04x:%s)", powermgm_event_cb_table[ entry ].event_cb, event, powermgm_event_cb_table[ entry ].id );
+            powermgm_event_cb_table[ entry ].counter++;
             if ( powermgm_event_cb_table[ entry ].event_cb( event ) ) {
                 retval = true;
                 log_w("standby blocked by: %s", powermgm_event_cb_table[ entry ].id );
@@ -261,6 +265,7 @@ void powermgm_send_loop_event_cb( EventBits_t event ) {
         yield();
         if ( event & powermgm_loop_cb_table[ entry ].event ) {
 //            log_i("call powermgm_loop_event_cb (%p:%04x:%s)", powermgm_loop_cb_table[ entry ].event_cb, event, powermgm_loop_cb_table[ entry ].id );
+            powermgm_loop_cb_table[ entry ].counter++;
             powermgm_loop_cb_table[ entry ].event_cb( event );
         }
     }

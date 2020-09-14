@@ -35,6 +35,7 @@
         EventBits_t event;
         RTCCTL_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } rtcctl_event_cb_t;
 
     /**
@@ -48,9 +49,9 @@
     /**
      * @brief registers a callback function which is called on a corresponding event
      * 
-     * @param   event   possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
-     * @param   rtc_event_cb   pointer to the callback function 
-     * @param   id      programm id
+     * @param   event           possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
+     * @param   rtc_event_cb    pointer to the callback function 
+     * @param   id              programm id
      */
     void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb, const char *id );
     /**
@@ -58,7 +59,6 @@
      *
      * @param   hour    hour to set
      * @param   minute  minute to set
-     *
      */
     void rtcctl_set_alarm_term( uint8_t hour, uint8_t minute );
     /**

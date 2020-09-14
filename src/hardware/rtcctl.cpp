@@ -119,6 +119,7 @@ void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event = event;
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb = rtcctl_event_cb;
     rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id = id;
+    rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].counter = 0;
     log_i("register rtc_event_cb success (%p:%04x:%s)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb, event, rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id );
 }
 
@@ -130,6 +131,7 @@ void rtcctl_send_event_cb( EventBits_t event ) {
     for ( int entry = 0 ; entry < rtcctl_event_cb_entrys ; entry++ ) {
         yield();
         if ( event & rtcctl_event_cb_table[ entry ].event ) {
+            rtcctl_event_cb_table[ entry ].counter++;
             log_i("call rtc_event_cb (%p:%04x:%s)", rtcctl_event_cb_table[ entry ].event_cb, event, rtcctl_event_cb_table[ entry ].id );
             rtcctl_event_cb_table[ entry ].event_cb( event );
         }

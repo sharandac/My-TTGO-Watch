@@ -52,6 +52,7 @@
         EventBits_t event;
         WIFICTL_CALLBACK_FUNC event_cb;
         const char *id;
+        uint64_t counter;
     } wifictl_event_cb_t;
 
     enum wifictl_event_t {

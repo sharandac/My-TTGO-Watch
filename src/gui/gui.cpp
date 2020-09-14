@@ -51,6 +51,7 @@
 LV_IMG_DECLARE(bg2);
 
 bool gui_powermgm_event_cb( EventBits_t event );
+void gui_powermgm_loop_event_cb( EventBits_t event );
 
 void gui_setup( void )
 {
@@ -85,6 +86,7 @@ void gui_setup( void )
     keyboard_setup();
 
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
+    powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
 
     return;
 }
@@ -111,23 +113,26 @@ bool gui_powermgm_event_cb( EventBits_t event ) {
     return( false );
 }
 
-void gui_loop( void ) {
-    // if we run in silence mode    
-    if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
-        if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 ) {
-            lv_task_handler();
-        }
-        else {
-            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-        }
-    }
-    // if we run on normal mode
-    else if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( lv_disp_get_inactive_time(NULL) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
-            lv_task_handler();
-        }
-        else {
-            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+void gui_powermgm_loop_event_cb( EventBits_t event ) {
+    static uint64_t nextmillis = 0;
+
+    if ( nextmillis < millis() ) {
+        nextmillis = millis() + 25;
+        switch ( event ) {
+            case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+                                                lv_task_handler();
+                                            }
+                                            else {
+                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                            }
+                                            break;
+            case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
+                                                lv_task_handler();
+                                            }
+                                            else {
+                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                            }
+                                            break;
         }
     }
 }
