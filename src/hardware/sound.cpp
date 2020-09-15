@@ -82,7 +82,9 @@ void sound_setup( void ) {
     sam->SetVoice(sam->VOICE_SAM);
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
-    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
+    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
+
+    sound_set_enabled( sound_config.enable );
 
     sound_init = true;
 }
@@ -111,6 +113,7 @@ void sound_standby( void ) {
 
 void sound_wakeup( void ) {
     log_i("go wakeup");
+    sound_set_enabled( sound_config.enable );
     // to avoid additional power consumtion when waking up, audio is only enabled when 
     // a 'play sound' method is called
     // this would be the place to play a wakeup sound
@@ -122,7 +125,7 @@ void sound_wakeup( void ) {
  */
 void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-    
+
     if ( enabled ) {
         ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
         ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
@@ -142,11 +145,9 @@ void sound_loop( void ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
         if ( mp3->isRunning() && !mp3->loop() ) {
             log_i("stop playing mp3 sound");
-            sound_set_enabled(false);
         }
         if ( wav->isRunning() && !wav->loop() ) {
             log_i("stop playing wav sound");
-            sound_set_enabled(false);
         }
     }
 }
@@ -154,7 +155,6 @@ void sound_loop( void ) {
 void sound_play_spiffs_mp3( const char *filename ) {
     if ( sound_config.enable && sound_init ) {
         log_i("playing file %s from SPIFFS", filename);
-        sound_set_enabled(true);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
         mp3->begin(id3, out);
@@ -166,7 +166,6 @@ void sound_play_spiffs_mp3( const char *filename ) {
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
     if ( sound_config.enable && sound_init ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
-        sound_set_enabled(true);
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
     } else {
@@ -179,7 +178,6 @@ void sound_speak( const char *str )
     if ( sound_config.enable ) {
         log_i("Speaking text", str);
         is_speaking = true;
-        sound_set_enabled(true);
         sam->Say(out, str);
         is_speaking = false;
     }
@@ -237,7 +235,10 @@ bool sound_get_enabled_config( void ) {
 
 void sound_set_enabled_config( bool enable ) {
     sound_config.enable = enable;
-    if ( ! sound_config.enable) {
+    if ( sound_config.enable) {
+        sound_set_enabled( true );
+    }
+    else {
         sound_set_enabled( false );
     }
     sound_save_config();

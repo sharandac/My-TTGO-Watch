@@ -24,8 +24,6 @@
 
     #include <TTGO.h>
 
-//    #define EXAMPLE_WIDGET    // uncomment if an widget need
-
     void osmand_app_setup( void );
     void osmand_app_hide_app_icon_info( bool show );
     void osmand_app_hide_widget_icon_info( bool show );

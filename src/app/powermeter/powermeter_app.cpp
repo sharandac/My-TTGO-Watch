@@ -166,14 +166,6 @@ bool powermeter_add_widget( void ) {
 }
 
 bool powermeter_remove_widget( void ) {
-    if ( powermeter_widget != NULL ) {
-        if ( widget_remove( powermeter_widget ) ) {
-            powermeter_widget = NULL;
-            return( true );
-        }
-        else {
-            return( false );
-        }
-    }
+    powermeter_widget = widget_remove( powermeter_widget );
     return( true );
 }

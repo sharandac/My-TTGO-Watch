@@ -70,7 +70,9 @@
      * @brief   remove widget from main tile
      * 
      * @param   widget      pointer to an widget_icon_t structure
+     * 
+     * @return  destructive pointer for widget_icon_t structure
      */
-    bool widget_remove( icon_t *widget );
+    icon_t *widget_remove( icon_t *widget );
 
 #endif // _WIDGET_H

@@ -42,11 +42,7 @@ icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_ev
     lv_obj_align( widget->label , widget->icon_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_label_set_text( widget->ext_label, "" );
     lv_obj_align( widget->ext_label , widget->label, LV_ALIGN_OUT_TOP_MID, 0, 0 );
-    lv_obj_set_hidden( widget->icon_cont, false );
-    lv_obj_set_hidden( widget->label, false );
-    lv_obj_set_hidden( widget->ext_label, false );
     // setup icon and set event callback
-    widget->icon_img = lv_imgbtn_create( widget->icon_cont , NULL );
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_RELEASED, icon);
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_PRESSED, icon);
     lv_imgbtn_set_src( widget->icon_img, LV_BTN_STATE_CHECKED_RELEASED, icon);
@@ -55,34 +51,39 @@ icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_ev
     lv_obj_align( widget->icon_img , widget->icon_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
     lv_obj_set_event_cb( widget->icon_img, event_cb );
     // setup icon indicator
-    widget->icon_indicator = lv_img_create( widget->icon_cont, NULL );
     lv_img_set_src( widget->icon_indicator, &info_ok_16px );
     lv_obj_align( widget->icon_indicator, widget->icon_cont, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
-    lv_obj_set_hidden( widget->icon_indicator, true );
+
+    lv_obj_set_hidden( widget->icon_cont, false );
+    lv_obj_set_hidden( widget->label, false );
+    lv_obj_set_hidden( widget->ext_label, false );
+    lv_obj_set_hidden( widget->icon_img, false );
+    lv_obj_set_hidden( widget->icon_indicator, false );
 
     mainbar_add_slide_element( widget->icon_cont );
+    mainbar_add_slide_element( widget->icon_img );
     main_tile_align_widgets();
     lv_obj_invalidate( lv_scr_act() );
 
     return( widget );
 }
 
-bool widget_remove( icon_t *widget ) {
+icon_t *widget_remove( icon_t *widget ) {
 
     if ( widget == NULL ) {
         log_e("no widget icon selected");
-        return( false );
+        return( NULL );
     }
 
     widget->active = false;
-    lv_obj_del( widget->icon_img );
-    lv_obj_del( widget->icon_indicator );
     lv_obj_set_hidden( widget->icon_cont, true );
+    lv_obj_set_hidden( widget->icon_img, true );
+    lv_obj_set_hidden( widget->icon_indicator, true );
     lv_obj_set_hidden( widget->label, true );
     lv_obj_set_hidden( widget->ext_label, true );
     main_tile_align_widgets();
     lv_obj_invalidate( lv_scr_act() );
-    return( true );
+    return( NULL );
 }
 
 void widget_set_indicator( icon_t *widget, icon_indicator_t indicator ) {
