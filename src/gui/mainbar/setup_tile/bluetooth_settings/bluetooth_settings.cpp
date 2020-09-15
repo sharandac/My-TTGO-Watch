@@ -40,6 +40,7 @@ uint32_t bluetooth_tile_num;
 
 lv_obj_t *bluetooth_standby_onoff = NULL;
 lv_obj_t *bluetooth_advertising_onoff = NULL;
+lv_obj_t *txpower_list = NULL;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(bluetooth_64px);
@@ -49,6 +50,7 @@ static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void bluetooth_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -117,6 +119,20 @@ void bluetooth_settings_tile_setup( void ) {
     lv_label_set_text( bluetooth_standby_label, "always on");
     lv_obj_align( bluetooth_standby_label, bluetooth_standby_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *txpower_cont = lv_obj_create( bluetooth_settings_tile, NULL );
+    lv_obj_set_size( txpower_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( txpower_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
+    lv_obj_align( txpower_cont, bluetooth_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
+    lv_obj_t *txpower_label = lv_label_create( txpower_cont, NULL);
+    lv_obj_add_style( txpower_label, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
+    lv_label_set_text( txpower_label, "tx power");
+    lv_obj_align( txpower_label, txpower_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    txpower_list = lv_dropdown_create( txpower_cont, NULL);
+    lv_dropdown_set_options( txpower_list, "-12db\n-9db\n-6db\n-3db\n0db" );
+    lv_obj_set_size( txpower_list, 70, 40 );
+    lv_obj_align( txpower_list, txpower_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_set_event_cb( txpower_list, bluetooth_txpower_event_handler );
+
     if ( blectl_get_advertising() ) {
         lv_switch_on( bluetooth_advertising_onoff, LV_ANIM_OFF );
     }
@@ -131,6 +147,8 @@ void bluetooth_settings_tile_setup( void ) {
     else {
         lv_switch_off( bluetooth_standby_onoff, LV_ANIM_OFF );
     }
+
+    lv_dropdown_set_selected( txpower_list, blectl_get_txpower() );
 
     bluetooth_pairing_tile_setup();
     bluetooth_call_tile_setup();
@@ -166,5 +184,12 @@ static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t eve
                                         else {
                                             setup_hide_indicator( bluettoth_setup_icon );
                                         }
+    }
+}
+
+static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED): blectl_set_txpower( lv_dropdown_get_selected( obj ) );
+                                        break;
     }
 }

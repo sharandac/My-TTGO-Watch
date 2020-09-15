@@ -183,5 +183,17 @@
      * @param   msg     pointer to a string
      */
     void blectl_send_msg( char *msg );
+    /**
+     * @brief set the transmission power
+     * 
+     * @param   txpower power from 0..4, from -12db to 0db in 3db steps
+     */
+    void blectl_set_txpower( int32_t txpower );
+    /**
+     * @brief get the current transmission power
+     * 
+     * @return  power from 0..4, from -12db to 0db in 3db steps
+     */
+    int32_t blectl_get_txpower( void );
 
 #endif // _BLECTL_H

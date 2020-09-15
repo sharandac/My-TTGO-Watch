@@ -311,9 +311,8 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
     // Slow advertising interval for battery life
-    // The maximum 0x4000 interval of ~16 sec was too slow, I could not reliably connect
-    pServer->getAdvertising()->setMinInterval( 100 );
-    pServer->getAdvertising()->setMaxInterval( 200 );
+    pServer->getAdvertising()->setMinInterval( 750 );
+    pServer->getAdvertising()->setMaxInterval( 1250 );
 
     if ( blectl_get_advertising() ) {
         pServer->getAdvertising()->start();
@@ -402,6 +401,31 @@ void blectl_set_advertising( bool advertising ) {
     else {
         pServer->getAdvertising()->stop();
     }
+}
+
+void blectl_set_txpower( int32_t txpower ) {
+    if ( txpower >= 0 && txpower <= 4 ) {
+        blectl_config.txpower = txpower;
+    }
+    switch( blectl_config.txpower ) {
+        case 0:             BLEDevice::setPower( ESP_PWR_LVL_N12 );
+                            break;
+        case 1:             BLEDevice::setPower( ESP_PWR_LVL_N9 );
+                            break;
+        case 2:             BLEDevice::setPower( ESP_PWR_LVL_N6 );
+                            break;
+        case 3:             BLEDevice::setPower( ESP_PWR_LVL_N3 );
+                            break;
+        case 4:             BLEDevice::setPower( ESP_PWR_LVL_N0 );
+                            break;
+        default:            BLEDevice::setPower( ESP_PWR_LVL_N9 );
+                            break;
+    }
+    blectl_save_config();
+}
+
+int32_t blectl_get_txpower( void ) {
+    return( blectl_config.txpower );
 }
 
 bool blectl_get_enable_on_standby( void ) {
