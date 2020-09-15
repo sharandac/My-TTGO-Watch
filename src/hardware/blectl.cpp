@@ -67,7 +67,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
-        blectl_send_event_cb( BLECTL_CONNECT, (char*)"connected" );
+        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
         blectl_send_msg( (char*)"\x03\x10" );
         pServer->updateConnParams( param->connect.remote_bda, 500, 1000, 750, 10000 );
         log_i("BLE connected");
@@ -76,7 +76,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onDisconnect(BLEServer* pServer) {
         blectl_set_event( BLECTL_DISCONNECT );
         blectl_clear_event( BLECTL_CONNECT );
-        blectl_send_event_cb( BLECTL_DISCONNECT, (char*)"disconnected" );
+        blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
         log_i("BLE disconnected");
         delay(500);
         if ( blectl_get_advertising() ) {
@@ -95,7 +95,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
         char pin[16]="";
         snprintf( pin, sizeof( pin ), "%06d", pass_key );
         blectl_set_event( BLECTL_PIN_AUTH );
-        blectl_send_event_cb( BLECTL_PIN_AUTH, (char*)pin );
+        blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
         log_i("Bluetooth Pairing Request\r\nPIN: %s", pin );
     }
     bool onConfirmPIN(uint32_t pass_key){
@@ -110,12 +110,12 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
 
         if( cmpl.success ){
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-                blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (char*)"success" );
+                blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
             }
         }
         else {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-                blectl_send_event_cb( BLECTL_PAIRING_ABORT, (char*)"abort" );
+                blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
             }
             pServer->startAdvertising();
         }
@@ -195,11 +195,11 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = '\0';
                                                 log_i("msg: %s", &gadgetbridge_msg[ 3 ] );
-                                                blectl_send_event_cb( BLECTL_MSG, (char*)&gadgetbridge_msg[ 3 ] );
+                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gadgetbridge_msg[ 3 ] );
                                             }
                                             else {
                                                 log_i("msg: %s", gadgetbridge_msg );
-                                                blectl_send_event_cb( BLECTL_MSG, (char*)gadgetbridge_msg );
+                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gadgetbridge_msg[ 0 ] );
                                             }
                                             break;
                     default:                blectl_add_char_to_gadgetbridge_msg( msg[ i ] );

@@ -81,14 +81,14 @@ bool bluetooth_pairing_event_cb( EventBits_t event, void *arg ) {
         case BLECTL_PIN_AUTH:           statusbar_hide( true );
                                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                                         mainbar_jump_to_tilenumber( bluetooth_pairing_tile_num, LV_ANIM_OFF );
-                                        lv_label_set_text( bluetooth_pairing_info_label, (char*)arg );
+                                        lv_label_set_text( bluetooth_pairing_info_label, (const char*)arg );
                                         lv_obj_align( bluetooth_pairing_info_label, bluetooth_pairing_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                                         lv_obj_invalidate( lv_scr_act() );
                                         motor_vibe(20);
                                         break;
         case BLECTL_PAIRING_SUCCESS:    statusbar_hide( true );
                                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                                        lv_label_set_text( bluetooth_pairing_info_label, (char*)arg );
+                                        lv_label_set_text( bluetooth_pairing_info_label, (const char*)arg );
                                         lv_obj_align( bluetooth_pairing_info_label, bluetooth_pairing_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                                         mainbar_jump_to_tilenumber( bluetooth_pairing_tile_num, LV_ANIM_OFF );
                                         lv_obj_invalidate( lv_scr_act() );
@@ -96,7 +96,7 @@ bool bluetooth_pairing_event_cb( EventBits_t event, void *arg ) {
                                         break;
         case BLECTL_PAIRING_ABORT:      statusbar_hide( true );
                                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                                        lv_label_set_text( bluetooth_pairing_info_label, (char*)arg );
+                                        lv_label_set_text( bluetooth_pairing_info_label, (const char*)arg );
                                         lv_obj_align( bluetooth_pairing_info_label, bluetooth_pairing_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                                         mainbar_jump_to_tilenumber( bluetooth_pairing_tile_num, LV_ANIM_OFF );
                                         lv_obj_invalidate( lv_scr_act() );

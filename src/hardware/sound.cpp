@@ -124,23 +124,30 @@ void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     
     if ( enabled ) {
-        ttgo->enableLDO3( AXP202_ON );
+        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
     }
     else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-        ttgo->enableLDO3( AXP202_OFF );
+        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     }
 }
 
 void sound_loop( void ) {
     if ( sound_config.enable && sound_init ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
-        if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
-        if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
-        if ( !is_speaking ) sound_set_enabled(false);
+        if ( mp3->isRunning() && !mp3->loop() ) {
+            log_i("stop playing mp3 sound");
+            sound_set_enabled(false);
+        }
+        if ( wav->isRunning() && !wav->loop() ) {
+            log_i("stop playing wav sound");
+            sound_set_enabled(false);
+        }
     }
 }
 

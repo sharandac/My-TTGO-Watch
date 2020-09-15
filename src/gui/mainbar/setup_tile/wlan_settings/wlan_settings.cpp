@@ -65,7 +65,7 @@ void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event );
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg );
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg );
-static void wifi_setup_bluetooth_message_msg_pharse( char* msg );
+static void wifi_setup_bluetooth_message_msg_pharse( const char* msg );
 
 LV_IMG_DECLARE(lock_16px);
 LV_IMG_DECLARE(unlock_16px);
@@ -415,13 +415,13 @@ static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            wifi_setup_bluetooth_message_msg_pharse( (char*)arg );
+        case BLECTL_MSG:            wifi_setup_bluetooth_message_msg_pharse( (const char*)arg );
                                     break;
     }
     return( true );
 }
 
-void wifi_setup_bluetooth_message_msg_pharse( char* msg ) {
+void wifi_setup_bluetooth_message_msg_pharse( const char* msg ) {
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
 

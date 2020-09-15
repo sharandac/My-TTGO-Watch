@@ -56,7 +56,7 @@ static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
 static void weather_imperial_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
 
 bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg );
-static void weather_bluetooth_message_msg_pharse( char* msg );
+static void weather_bluetooth_message_msg_pharse( const char* msg );
 
 void weather_setup_tile_setup( uint32_t tile_num ) {
 
@@ -261,13 +261,13 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
 
 bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            weather_bluetooth_message_msg_pharse( (char*)arg );
+        case BLECTL_MSG:            weather_bluetooth_message_msg_pharse( (const char*)arg );
                                     break;
     }
     return( true );
 }
 
-void weather_bluetooth_message_msg_pharse( char* msg ) {
+void weather_bluetooth_message_msg_pharse( const char* msg ) {
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
 

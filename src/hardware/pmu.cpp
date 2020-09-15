@@ -95,6 +95,7 @@ void IRAM_ATTR  pmu_irq( void ) {
 
 void pmu_loop( void ) {
     static uint64_t nextmillis = 0;
+    static int32_t percent = 0;
     TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * handle IRQ event
@@ -133,15 +134,17 @@ void pmu_loop( void ) {
         ttgo->power->clearIRQ();
         bool plug = ttgo->power->isVBUSPlug();
         bool charging = ttgo->power->isChargeing();
-        pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
-        pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
+        pmu_send_cb( PMUCTL_VBUS_PLUG, (void *)&plug );
+        pmu_send_cb( PMUCTL_CHARGING, (void *)&charging );
     }
 
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
         if ( nextmillis < millis() ) {
-            nextmillis = millis() + 5000;
-            int32_t percent = pmu_get_battery_percent();
-            pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+            nextmillis = millis() + 1000;
+            if ( pmu_get_battery_percent() != percent ) {
+                percent = pmu_get_battery_percent();
+                pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+            }
         }
     }
 

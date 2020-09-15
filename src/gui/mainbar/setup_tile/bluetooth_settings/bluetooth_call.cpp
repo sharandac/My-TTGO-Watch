@@ -44,7 +44,7 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event );
 bool bluetooth_call_event_cb( EventBits_t event, void *arg );
-static void bluetooth_call_msg_pharse( char* msg );
+static void bluetooth_call_msg_pharse( const char* msg );
 
 void bluetooth_call_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -81,7 +81,7 @@ void bluetooth_call_tile_setup( void ) {
 
 bool bluetooth_call_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            bluetooth_call_msg_pharse( (char*)arg );
+        case BLECTL_MSG:            bluetooth_call_msg_pharse( (const char*)arg );
                                     break;
     }
     return( true );
@@ -94,7 +94,7 @@ static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
-void bluetooth_call_msg_pharse( char* msg ) {
+void bluetooth_call_msg_pharse( const char* msg ) {
     static bool standby = false;
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );

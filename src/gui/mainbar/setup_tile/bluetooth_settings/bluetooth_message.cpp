@@ -25,10 +25,12 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/sound/piep.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 #include "hardware/json_psram_allocator.h"
+#include "hardware/sound.h"
 
 lv_obj_t *bluetooth_message_tile=NULL;
 lv_style_t bluetooth_message_style;
@@ -71,7 +73,7 @@ static bool bluetooth_message_active = true;
 
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event );
 bool bluetooth_message_event_cb( EventBits_t event, void *arg );
-static void bluetooth_message_msg_pharse( char* msg );
+static void bluetooth_message_msg_pharse( const char* msg );
 const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name );
 
 void bluetooth_message_tile_setup( void ) {
@@ -128,8 +130,10 @@ void bluetooth_message_tile_setup( void ) {
 }
 
 bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
+    log_i("msg = %s", (char*)arg );
+    
     switch( event ) {
-        case BLECTL_MSG:            bluetooth_message_msg_pharse( (char*)arg );
+        case BLECTL_MSG:            bluetooth_message_msg_pharse( (const char*)arg );
                                     break;
     }
     return( true );
@@ -163,12 +167,10 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
     return( &message_32px );
 }
 
-void bluetooth_message_msg_pharse( char* msg ) {
+void bluetooth_message_msg_pharse( const char* msg ) {
     if ( bluetooth_message_active == false ) {
         return;
     }
-
-    log_i("msg: %s", msg );
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
 
@@ -217,6 +219,8 @@ void bluetooth_message_msg_pharse( char* msg ) {
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
 
             lv_obj_invalidate( lv_scr_act() );
+
+            sound_play_progmem_wav( piep_wav, piep_wav_len );
         }
     }        
     doc.clear();

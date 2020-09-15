@@ -148,17 +148,17 @@ void bma_loop( void ) {
 
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
-            bma_send_event_cb( BMACTL_DOUBLECLICK, (void*)"" );
+            bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
         }
         if ( ttgo->bma->isTilt() ) {
             powermgm_set_event( POWERMGM_BMA_TILT );
-            bma_send_event_cb( BMACTL_TILT, (void*)"" );
+            bma_send_event_cb( BMACTL_TILT, (void *)"" );
         }
         if ( ttgo->bma->isStepCounter() ) {
             stepcounter_before_reset = ttgo->bma->getCounter();
             char msg[16]="";
             snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-            bma_send_event_cb( BMACTL_STEPCOUNTER, (void*)msg );
+            bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
         }
     }
 
