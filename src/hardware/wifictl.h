@@ -23,6 +23,7 @@
     #define _WIFICTL_H
 
     #include "TTGO.h"
+    #include "callback.h"
 
     #define WIFICTL_DELAY               10
     #define NETWORKLIST_ENTRYS          20
@@ -45,15 +46,6 @@
         bool autoon = true;
         bool webserver = false;
     } wifictl_config_t;
-
-    typedef void ( * WIFICTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
-    
-    typedef struct {
-        EventBits_t event;
-        WIFICTL_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } wifictl_event_cb_t;
 
     enum wifictl_event_t {
         WIFICTL_CONNECT                = _BV(0),
@@ -135,7 +127,7 @@
      * @param   wifictl_event_cb   pointer to the callback function 
      * @param   id      program id
      */
-    void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb, const char *id );
+    bool wifictl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
      * @brief get the current wifi auto on configuration
      * 

@@ -25,7 +25,12 @@
 callback_t *callback_init( const char *name ) {
     callback_t *callback = NULL;
     
-    callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
+    if ( psramFound() ) {
+        callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
+    }
+    else {
+        callback = (callback_t*)calloc( sizeof( callback_t ), 1 );
+    }
     if ( callback == NULL ) {
         log_e("callback_t structure calloc faild for: %s", name );
     }
@@ -42,16 +47,23 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     bool retval = false;
 
     if ( callback == NULL ) {
-        log_w("no callback_t structure found");
+        log_w("no callback_t structure found for: %s", id );
         return( retval );
     }
 
     callback->entrys++;
 
     if ( callback->table == NULL ) {
-        callback->table = ( callback_table_t * )ps_malloc( sizeof( callback_table_t ) * callback->entrys );
+
+        if ( psramFound() ) {
+            callback->table = ( callback_table_t * )ps_malloc( sizeof( callback_table_t ) * callback->entrys );
+        }
+        else {
+            callback->table = ( callback_table_t * )malloc( sizeof( callback_table_t ) * callback->entrys );
+        }
+
         if ( callback->table == NULL ) {
-            log_e("callback_table_t malloc faild");
+            log_e("callback_table_t malloc faild for: %s", id );
             return( retval );
         }
         retval = true;
@@ -59,11 +71,18 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     else {
         callback_table_t *new_callback_table = NULL;
 
-        new_callback_table = ( callback_table_t * )ps_realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
+        if ( psramFound() ) {
+            new_callback_table = ( callback_table_t * )ps_realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
+        }
+        else {
+            new_callback_table = ( callback_table_t * )realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
+        }
+
         if ( new_callback_table == NULL ) {
-            log_e("callback_table_t realloc faild");
+            log_e("callback_table_t realloc faild for: %s", id );
             return( retval );
         }
+
         callback->table = new_callback_table;
         retval = true;
     }
@@ -72,7 +91,7 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     callback->table[ callback->entrys - 1 ].callback_func = callback_func;
     callback->table[ callback->entrys - 1 ].id = id;
     callback->table[ callback->entrys - 1 ].counter = 0;
-    log_i("register callback_func success (%p:%s)", callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
+    log_i("register callback_func for %s success (%p:%s)", callback->name, callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
     return( retval );
 }
 
@@ -88,14 +107,43 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
         log_w("no callback found");
         return( retval );
     }
-      
+
+    retval = true;
+
     for ( int entry = 0 ; entry < callback->entrys ; entry++ ) {
         yield();
         if ( event & callback->table[ entry ].event ) {
             log_i("call %s cb (%p:%04x:%s)", callback->name, callback->table[ entry ].callback_func, event, callback->table[ entry ].id );
             callback->table[ entry ].counter++;
-            if ( callback->table[ entry ].callback_func( event, arg ) ) {
-                retval = true;
+            if ( !callback->table[ entry ].callback_func( event, arg ) ) {
+                retval = false;
+            }
+        }
+    }
+    return( retval );
+}
+
+bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) {
+    bool retval = false;
+
+    if ( callback == NULL ) {
+        log_e("no callback structure found");
+        return( retval );
+    }
+
+    if ( callback->entrys == 0 ) {
+        log_w("no callback found");
+        return( retval );
+    }
+
+    retval = true;
+
+    for ( int entry = 0 ; entry < callback->entrys ; entry++ ) {
+        yield();
+        if ( event & callback->table[ entry ].event ) {
+            callback->table[ entry ].counter++;
+            if ( !callback->table[ entry ].callback_func( event, arg ) ) {
+                retval = false;
             }
         }
     }

@@ -28,7 +28,7 @@ lv_indev_t *touch_indev = NULL;
 
 static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data);
 static bool touch_getXY( int16_t &x, int16_t &y );
-bool touch_powermgm_event_cb( EventBits_t event );
+bool touch_powermgm_event_cb( EventBits_t event, void *arg );
 
 void touch_setup( void ) {
     touch_indev = lv_indev_get_next( NULL );
@@ -37,7 +37,7 @@ void touch_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, touch_powermgm_event_cb, "touch" );
 }
 
-bool touch_powermgm_event_cb( EventBits_t event ) {
+bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     switch( event ) {
         case POWERMGM_STANDBY:          log_i("go standby");
@@ -50,7 +50,7 @@ bool touch_powermgm_event_cb( EventBits_t event ) {
                                         ttgo->touch->enterSleepMode();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
 static bool touch_getXY( int16_t &x, int16_t &y ) {

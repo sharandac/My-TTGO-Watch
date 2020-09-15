@@ -23,20 +23,12 @@
     #define _BMA_H
 
     #include "TTGO.h"
+    #include "callback.h"
     
     #define BMACTL_EVENT_INT            _BV(0)
     #define BMACTL_DOUBLECLICK          _BV(1)
     #define BMACTL_STEPCOUNTER          _BV(2)
     #define BMACTL_TILT                 _BV(3)
-
-    typedef void ( * BMA_CALLBACK_FUNC ) ( EventBits_t event, const char *msg );
-
-    typedef struct {
-        EventBits_t event;
-        BMA_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } bma_event_cb_t;
 
     #define BMA_COFIG_FILE          "/bma.cfg"
     #define BMA_JSON_COFIG_FILE     "/bma.json"
@@ -105,7 +97,9 @@
      * @param   event   possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT
      * @param   rtc_event_cb   pointer to the callback function
      * @param   id      program id
+     * 
+     * @return  true if success, false if failed
      */
-    void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb, const char *id );
+    bool bma_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
 #endif // _BMA_H

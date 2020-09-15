@@ -50,8 +50,8 @@
 
 LV_IMG_DECLARE(bg2);
 
-bool gui_powermgm_event_cb( EventBits_t event );
-void gui_powermgm_loop_event_cb( EventBits_t event );
+bool gui_powermgm_event_cb( EventBits_t event, void *arg );
+bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
 void gui_setup( void )
 {
@@ -91,7 +91,7 @@ void gui_setup( void )
     return;
 }
 
-bool gui_powermgm_event_cb( EventBits_t event ) {
+bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     switch ( event ) {
@@ -110,10 +110,10 @@ bool gui_powermgm_event_cb( EventBits_t event ) {
                                         lv_disp_trig_activity( NULL );
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void gui_powermgm_loop_event_cb( EventBits_t event ) {
+bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
     static uint64_t nextmillis = 0;
 
     if ( nextmillis < millis() ) {
@@ -135,4 +135,5 @@ void gui_powermgm_loop_event_cb( EventBits_t event ) {
                                             break;
         }
     }
+    return( true );
 }

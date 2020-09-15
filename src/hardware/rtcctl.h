@@ -23,20 +23,12 @@
     #define _RTCCTL_H
 
     #include "TTGO.h"
+    #include "callback.h"
 
     #define RTCCTL_ALARM_OCCURRED    _BV(0)
     #define RTCCTL_ALARM_TERM_SET    _BV(1)
     #define RTCCTL_ALARM_DISABLED    _BV(2)
     #define RTCCTL_ALARM_ENABLED     _BV(3)
-
-    typedef void ( * RTCCTL_CALLBACK_FUNC ) ( EventBits_t event );
-
-    typedef struct {
-        EventBits_t event;
-        RTCCTL_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } rtcctl_event_cb_t;
 
     /**
      * @brief setup rtc controller routine
@@ -52,8 +44,10 @@
      * @param   event           possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
      * @param   rtc_event_cb    pointer to the callback function 
      * @param   id              programm id
+     * 
+     * @return  true if success, false if failed
      */
-    void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtc_event_cb, const char *id );
+    bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
      * @brief set an alarm time
      *

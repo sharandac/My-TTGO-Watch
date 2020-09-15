@@ -23,6 +23,7 @@
     #define _BLECTL_H
 
     #include "TTGO.h"
+    #include "callback.h"
 
     // See the following for generating UUIDs:
     // https://www.uuidgenerator.net/
@@ -82,15 +83,6 @@
         int32_t msgchunk;
     } blectl_msg_t;
 
-    typedef void ( * BLECTL_CALLBACK_FUNC ) ( EventBits_t event, char *msg );
-
-    typedef struct {
-        EventBits_t event;
-        BLECTL_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } blectl_event_t;
-
     #define BLECTL_CONNECT               _BV(0)
     #define BLECTL_DISCONNECT            _BV(1)
     #define BLECTL_STANDBY               _BV(2)
@@ -144,7 +136,7 @@
      * @param   blectl_event_cb     pointer to the callback function
      * @param   id                  pointer to an string
      */
-    void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id );
+    bool blectl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
      * @brief enable blueetooth on standby
      * 

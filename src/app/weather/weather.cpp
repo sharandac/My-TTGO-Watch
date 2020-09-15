@@ -52,7 +52,7 @@ icon_t *weather_app = NULL;
 icon_t * weather_widget = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
-void weather_widget_wifictl_event_cb( EventBits_t event, char* msg );
+bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(owm_01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
@@ -84,7 +84,7 @@ void weather_app_setup( void ) {
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb, "weather" );
 }
 
-void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
+bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       if ( weather_config.autosync ) {
                                         weather_widget_sync_request();
@@ -93,6 +93,7 @@ void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
         case WIFICTL_OFF:           widget_hide_indicator( weather_widget );
                                     break;
     }
+    return( true );
 }
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -20,8 +20,8 @@ callback_t *pmu_callback = NULL;
 pmu_config_t pmu_config;
 
 void IRAM_ATTR pmu_irq( void );
-bool pmu_powermgm_event_cb( EventBits_t event );
-void pmu_powermgm_loop_cb( EventBits_t event );
+bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
+bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
 bool pmu_send_cb( EventBits_t event, void *arg );
 
 void pmu_setup( void ) {
@@ -67,15 +67,14 @@ void pmu_setup( void ) {
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, pmu_powermgm_event_cb, "pmu" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
-
-    pmu_callback = callback_init( "pmu callback table" );
 }
 
-void pmu_powermgm_loop_cb( EventBits_t event ) {
+bool pmu_powermgm_loop_cb( EventBits_t event, void *arg ) {
     pmu_loop();
+    return( true );
 }
 
-bool pmu_powermgm_event_cb( EventBits_t event ) {
+bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          pmu_standby();
                                         break;
@@ -85,7 +84,7 @@ bool pmu_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
 void IRAM_ATTR  pmu_irq( void ) {
@@ -96,7 +95,6 @@ void IRAM_ATTR  pmu_irq( void ) {
 
 void pmu_loop( void ) {
     static uint64_t nextmillis = 0;
-    static bool firstrun = true;
     TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * handle IRQ event
@@ -159,6 +157,13 @@ void pmu_loop( void ) {
 }
 
 bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( pmu_callback == NULL ) {
+        pmu_callback = callback_init( "pmu" );
+        if ( pmu_callback == NULL ) {
+            log_e("pmu_callback alloc failed");
+            while(true);
+        }
+    }
     return( callback_register( pmu_callback, event, callback_func, id ) );
 }
 

@@ -23,6 +23,7 @@
     #define _POWERMGM_H
 
     #include "TTGO.h"
+    #include "callback.h"
 
     #define POWERMGM_STANDBY                    _BV(0)
     #define POWERMGM_STANDBY_REQUEST            _BV(1)
@@ -34,25 +35,7 @@
     #define POWERMGM_BMA_DOUBLECLICK            _BV(9)
     #define POWERMGM_BMA_TILT                   _BV(10)
     #define POWERMGM_RTC_ALARM                  _BV(11)
-
-    typedef void ( * POWERMGM_LOOP_CALLBACK_FUNC ) ( EventBits_t event );
-
-    typedef struct {
-        EventBits_t event;
-        POWERMGM_LOOP_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } powermgm_loop_event_cb_t;
     
-    typedef bool ( * POWERMGM_CALLBACK_FUNC ) ( EventBits_t event );
-
-    typedef struct {
-        EventBits_t event;
-        POWERMGM_CALLBACK_FUNC event_cb;
-        const char *id;
-        uint64_t counter;
-    } powermgm_event_cb_t;
-
     /**
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
      */
@@ -85,17 +68,17 @@
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP and POWERMGM_RTC_ALARM
-     * @param   powermgm_event_cb   pointer to the callback function 
+     * @param   callback_func       pointer to the callback function 
      * @param   id                  pointer to an string
      */
-    void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_event_cb, const char *id );
+    bool powermgm_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
      * @brief registers a callback function which is called on a corresponding loop event
      * 
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP
-     * @param   powermgm_loop_cb    pointer to the callback function 
+     * @param   callback_func       pointer to the callback function 
      * @param   id                  pointer to an string
      */
-    void powermgm_register_loop_cb( EventBits_t event, POWERMGM_LOOP_CALLBACK_FUNC powermgm_loop_cb, const char *id );
+    bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
 #endif // _POWERMGM_H

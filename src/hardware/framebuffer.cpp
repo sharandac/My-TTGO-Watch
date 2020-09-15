@@ -40,7 +40,7 @@ portMUX_TYPE DRAM_ATTR FRAMEBUFFER_Mux = portMUX_INITIALIZER_UNLOCKED;
 static int32_t frame = 0;
 static int32_t framerate = 0;
 
-bool framebuffer_powermgm_event_cb( EventBits_t event );
+bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg );
 void framebuffer_ipc_call( void * arg );
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
 
@@ -64,7 +64,7 @@ void framebuffer_setup( void ) {
     log_i("framebuffer enable");
 }
 
-bool framebuffer_powermgm_event_cb( EventBits_t event ) {
+bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case    POWERMGM_STANDBY:           framebuffer_flag = true;
                                             log_i("go standby");
@@ -76,7 +76,7 @@ bool framebuffer_powermgm_event_cb( EventBits_t event ) {
                                             log_i("go wakeup");
                                             break;
     }
-    return( false );
+    return( true );
 }
 
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {

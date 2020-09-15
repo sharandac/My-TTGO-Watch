@@ -67,5 +67,15 @@
      * @return  true if success, false if failed
      */
     bool callback_send( callback_t *callback, EventBits_t event, void *arg );
+    /**
+     * @brief   call all callback function thats match with the event filter mask without logging
+     * 
+     * @param   callback        pointer to a callback_t structure
+     * @param   event           event filter mask
+     * @param   arg             argument for the called callback function
+     * 
+     * @return  true if success, false if failed
+     */
+    bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg );
 
 #endif // _CALLBACK_H

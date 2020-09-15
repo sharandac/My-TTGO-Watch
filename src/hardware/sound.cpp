@@ -56,8 +56,8 @@ bool is_speaking = false;
 
 sound_config_t sound_config;
 
-bool sound_powermgm_event_cb( EventBits_t event );
-void sound_powermgm_loop_cb( EventBits_t event );
+bool sound_powermgm_event_cb( EventBits_t event, void *arg );
+bool sound_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void sound_setup( void ) {
     if ( sound_init )
@@ -87,7 +87,7 @@ void sound_setup( void ) {
     sound_init = true;
 }
 
-bool sound_powermgm_event_cb( EventBits_t event ) {
+bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          sound_standby();
                                         break;
@@ -96,11 +96,12 @@ bool sound_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   sound_wakeup();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void sound_powermgm_loop_cb( EventBits_t event ) {
+bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
     sound_loop();
+    return( true );
 }
 
 void sound_standby( void ) {

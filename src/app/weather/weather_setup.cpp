@@ -55,8 +55,8 @@ static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t eve
 static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
 static void weather_imperial_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
 
-static void bluetooth_message_event_cb( EventBits_t event, char* msg );
-static void bluetooth_message_msg_pharse( char* msg );
+bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg );
+static void weather_bluetooth_message_msg_pharse( char* msg );
 
 void weather_setup_tile_setup( uint32_t tile_num ) {
 
@@ -211,7 +211,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     else
         lv_switch_off( weather_imperial_onoff, LV_ANIM_OFF );
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "weather setup" );
+    blectl_register_cb( BLECTL_MSG, weather_bluetooth_message_event_cb, "weather setup" );
 }
 
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -259,14 +259,15 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
     }
 }
 
-static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
+bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
+        case BLECTL_MSG:            weather_bluetooth_message_msg_pharse( (char*)arg );
                                     break;
     }
+    return( true );
 }
 
-void bluetooth_message_msg_pharse( char* msg ) {
+void weather_bluetooth_message_msg_pharse( char* msg ) {
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
 

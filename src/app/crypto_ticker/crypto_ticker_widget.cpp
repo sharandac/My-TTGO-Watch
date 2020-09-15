@@ -44,7 +44,7 @@ crypto_ticker_widget_data_t crypto_ticker_widget_data;
 icon_t *crypto_ticker_widget = NULL;
 
 static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t event );
-void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg );
+bool crypto_ticker_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(bitcoin_64px);
 
@@ -66,9 +66,7 @@ void crypto_ticker_hide_widget_icon_info( bool show ) {
     }
 }
 
-void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("crypto_ticker widget wifictl event: %04x", event );
-
+bool crypto_ticker_widget_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       if ( crypto_ticker_get_config()->autosync ) {
                                         crypto_ticker_widget_sync_request();
@@ -80,6 +78,7 @@ void crypto_ticker_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
 
 
     }
+    return( true );
 }
 
 static void enter_crypto_ticker_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {

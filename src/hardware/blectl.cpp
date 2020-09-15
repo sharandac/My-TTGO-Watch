@@ -34,6 +34,7 @@
 
 #include "blectl.h"
 #include "powermgm.h"
+#include "callback.h"
 #include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
@@ -44,11 +45,11 @@ portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 blectl_config_t blectl_config;
 blectl_msg_t blectl_msg;
 
-blectl_event_t *blectl_event_cb_table = NULL;
-uint32_t blectl_event_cb_entrys = 0;
-void blectl_send_event_cb( EventBits_t event, char *msg );
-bool blectl_powermgm_event_cb( EventBits_t event );
-void blectl_powermgm_loop_cb( EventBits_t event );
+callback_t *blectl_callback = NULL;
+
+bool blectl_send_event_cb( EventBits_t event, void *arg );
+bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
+bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
 void blectl_loop( void );
 
 BLEServer *pServer = NULL;
@@ -94,7 +95,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
         char pin[16]="";
         snprintf( pin, sizeof( pin ), "%06d", pass_key );
         blectl_set_event( BLECTL_PIN_AUTH );
-        blectl_send_event_cb( BLECTL_PIN_AUTH, pin );
+        blectl_send_event_cb( BLECTL_PIN_AUTH, (char*)pin );
         log_i("Bluetooth Pairing Request\r\nPIN: %s", pin );
     }
     bool onConfirmPIN(uint32_t pass_key){
@@ -194,11 +195,11 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = '\0';
                                                 log_i("msg: %s", &gadgetbridge_msg[ 3 ] );
-                                                blectl_send_event_cb( BLECTL_MSG, &gadgetbridge_msg[ 3 ] );
+                                                blectl_send_event_cb( BLECTL_MSG, (char*)&gadgetbridge_msg[ 3 ] );
                                             }
                                             else {
                                                 log_i("msg: %s", gadgetbridge_msg );
-                                                blectl_send_event_cb( BLECTL_MSG, gadgetbridge_msg );
+                                                blectl_send_event_cb( BLECTL_MSG, (char*)gadgetbridge_msg );
                                             }
                                             break;
                     default:                blectl_add_char_to_gadgetbridge_msg( msg[ i ] );
@@ -322,15 +323,17 @@ void blectl_setup( void ) {
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "blectl loop" );
 }
 
-bool blectl_powermgm_event_cb( EventBits_t event ) {
-    bool retval = false;
+bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
+    bool retval = true;
 
     switch( event ) {
-        case POWERMGM_STANDBY:          retval = blectl_get_enable_on_standby();
-                                        if ( retval )
+        case POWERMGM_STANDBY:          if ( blectl_get_enable_on_standby() ) {
+                                            retval = false;
                                             log_w("standby blocked by \"enable_on_standby\" option");
-                                        else
+                                        }
+                                        else {
                                             log_i("go standby");
+                                        }
                                         break;
         case POWERMGM_WAKEUP:           log_i("go wakeup");
                                         break;
@@ -340,8 +343,9 @@ bool blectl_powermgm_event_cb( EventBits_t event ) {
     return( retval );
 }
 
-void blectl_powermgm_loop_cb( EventBits_t event ) {
+bool blectl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     blectl_loop();
+    return( true );
 }
 
 void blectl_set_event( EventBits_t bits ) {
@@ -366,51 +370,19 @@ bool blectl_get_event( EventBits_t bits ) {
     return( false );
 }
 
-void blectl_register_cb( EventBits_t event, BLECTL_CALLBACK_FUNC blectl_event_cb, const char *id ) {
-    blectl_event_cb_entrys++;
-
-    if ( blectl_event_cb_table == NULL ) {
-        blectl_event_cb_table = ( blectl_event_t * )ps_malloc( sizeof( blectl_event_t ) * blectl_event_cb_entrys );
-        if ( blectl_event_cb_table == NULL ) {
-            log_e("blectl_event_cb_table malloc faild");
+bool blectl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( blectl_callback == NULL ) {
+        blectl_callback = callback_init( "blectl" );
+        if ( blectl_callback == NULL ) {
+            log_e("blectl callback alloc failed");
             while(true);
         }
-    }
-    else {
-        blectl_event_t *new_blectl_event_cb_table = NULL;
-
-        new_blectl_event_cb_table = ( blectl_event_t * )ps_realloc( blectl_event_cb_table, sizeof( blectl_event_t ) * blectl_event_cb_entrys );
-        if ( new_blectl_event_cb_table == NULL ) {
-            log_e("blectl_event_cb_table realloc faild");
-            while(true);
-        }
-        blectl_event_cb_table = new_blectl_event_cb_table;
-    }
-
-    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event = event;
-    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb = blectl_event_cb;
-    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id = id;
-    blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].counter = 0;
-    log_i("register blectl_event_cb success (%p:%s)", blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].event_cb, blectl_event_cb_table[ blectl_event_cb_entrys - 1 ].id );
+    }    
+    return( callback_register( blectl_callback, event, callback_func, id ) );
 }
 
-void blectl_send_event_cb( EventBits_t event, char *msg ) {
-    for ( int entry = 0 ; entry < blectl_event_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & blectl_event_cb_table[ entry ].event ) {
-            char * tmp_msg = (char *)ps_malloc( strlen( msg ) + 1 );
-            if ( tmp_msg != NULL ) {
-                strcpy( tmp_msg, msg );
-                log_i("call blectl_event_cb (%p:%04x:%s)", blectl_event_cb_table[ entry ].event_cb, event, blectl_event_cb_table[ entry ].id );
-                blectl_event_cb_table[ entry ].counter++;
-                blectl_event_cb_table[ entry ].event_cb( event, tmp_msg );
-                free( tmp_msg );
-            }
-            else {
-                log_e("ps_alloc error");
-            }
-        }
-    }
+bool blectl_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( blectl_callback, event, arg ) );
 }
 
 void blectl_set_enable_on_standby( bool enable_on_standby ) {        

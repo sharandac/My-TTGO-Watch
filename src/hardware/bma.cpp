@@ -25,6 +25,7 @@
 
 #include "bma.h"
 #include "powermgm.h"
+#include "callback.h"
 #include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
@@ -37,15 +38,14 @@ __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
 bma_config_t bma_config[ BMA_CONFIG_NUM ];
-bma_event_cb_t *bma_event_cb_table = NULL;
-uint32_t bma_event_cb_entrys = 0;
+callback_t *bma_callback = NULL;
 
 bool first_loop_run = true;
 
 void IRAM_ATTR bma_irq( void );
-void bma_send_event_cb( EventBits_t event, const char *msg );
-bool bma_powermgm_event_cb( EventBits_t event );
-void bma_powermgm_loop_cb( EventBits_t event );
+bool bma_send_event_cb( EventBits_t event, void *arg );
+bool bma_powermgm_event_cb( EventBits_t event, void *arg );
+bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -78,7 +78,7 @@ void bma_setup( void ) {
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "bma loop" );
 }
 
-bool bma_powermgm_event_cb( EventBits_t event ) {
+bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          bma_standby();
                                         break;
@@ -87,11 +87,12 @@ bool bma_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   bma_wakeup();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void bma_powermgm_loop_cb( EventBits_t event ) {
+bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
     bma_loop();
+    return( true );
 }
 
 void bma_standby( void ) {
@@ -147,17 +148,17 @@ void bma_loop( void ) {
 
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
-            bma_send_event_cb( BMACTL_DOUBLECLICK, "" );
+            bma_send_event_cb( BMACTL_DOUBLECLICK, (void*)"" );
         }
         if ( ttgo->bma->isTilt() ) {
             powermgm_set_event( POWERMGM_BMA_TILT );
-            bma_send_event_cb( BMACTL_TILT, "" );
+            bma_send_event_cb( BMACTL_TILT, (void*)"" );
         }
         if ( ttgo->bma->isStepCounter() ) {
             stepcounter_before_reset = ttgo->bma->getCounter();
             char msg[16]="";
             snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-            bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+            bma_send_event_cb( BMACTL_STEPCOUNTER, (void*)msg );
         }
     }
 
@@ -171,47 +172,19 @@ void bma_loop( void ) {
     }
 }
 
-void bma_register_cb( EventBits_t event, BMA_CALLBACK_FUNC bma_event_cb, const char *id ) {
-    bma_event_cb_entrys++;
-
-    if ( bma_event_cb_table == NULL ) {
-        bma_event_cb_table = ( bma_event_cb_t * )ps_malloc( sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
-        if ( bma_event_cb_table == NULL ) {
-            log_e("bma_event_cb_table malloc faild");
+bool bma_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( bma_callback == NULL ) {
+        bma_callback = callback_init( "bma" );
+        if ( bma_callback == NULL ) {
+            log_e("bma_callback alloc failed");
             while(true);
         }
     }
-    else {
-        bma_event_cb_t *new_bma_event_cb_table = NULL;
-
-        new_bma_event_cb_table = ( bma_event_cb_t * )ps_realloc( bma_event_cb_table, sizeof( bma_event_cb_t ) * bma_event_cb_entrys );
-        if ( new_bma_event_cb_table == NULL ) {
-            log_e("bma_event_cb_table realloc faild");
-            while(true);
-        }
-        bma_event_cb_table = new_bma_event_cb_table;
-    }
-
-    bma_event_cb_table[ bma_event_cb_entrys - 1 ].event = event;
-    bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb = bma_event_cb;
-    bma_event_cb_table[ bma_event_cb_entrys - 1 ].id = id;
-    bma_event_cb_table[ bma_event_cb_entrys - 1 ].counter = 0;
-    log_i("register bma_event_cb success (%p:%s)", bma_event_cb_table[ bma_event_cb_entrys - 1 ].event_cb, bma_event_cb_table[ bma_event_cb_entrys - 1 ].id );
+    return( callback_register( bma_callback, event, callback_func, id ) );
 }
 
-void bma_send_event_cb( EventBits_t event, const char *msg ) {
-    if ( bma_event_cb_entrys == 0 ) {
-      return;
-    }
-      
-    for ( int entry = 0 ; entry < bma_event_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & bma_event_cb_table[ entry ].event ) {
-            bma_event_cb_table[ entry ].counter++;
-            log_i("call bma_event_cb (%p:%04x:%s)", bma_event_cb_table[ entry ].event_cb, event, bma_event_cb_table[ entry ].id );
-            bma_event_cb_table[ entry ].event_cb( event, msg );
-        }
-    }
+bool bma_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( bma_callback, event, arg ) );
 }
 
 void bma_save_config( void ) {

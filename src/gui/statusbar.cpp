@@ -68,10 +68,10 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event );
-void statusbar_blectl_event_cb( EventBits_t event, char* msg );
-void statusbar_wifictl_event_cb( EventBits_t event, char* msg );
-void statusbar_rtcctl_event_cb( EventBits_t event );
-void statusbar_bma_event_cb( EventBits_t event, const char *msg );
+bool statusbar_blectl_event_cb( EventBits_t event, void *arg );
+bool statusbar_wifictl_event_cb( EventBits_t event, void *arg );
+bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg );
+bool statusbar_bma_event_cb( EventBits_t event, void *arg );
 bool statusbar_pmu_event_cb( EventBits_t event, void *arg );
 void statusbar_wifi_set_state( bool state, const char *wifiname );
 void statusbar_wifi_set_ip_state( bool state, const char *ip );
@@ -280,36 +280,40 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-void statusbar_rtcctl_event_cb( EventBits_t event ) {
+bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg ) {
     switch( event ) {
-        case RTCCTL_ALARM_ENABLED:   statusbar_show_icon( STATUSBAR_ALARM );
-                                    break;
-        case RTCCTL_ALARM_DISABLED:  statusbar_hide_icon( STATUSBAR_ALARM );
-                                    break;
+        case RTCCTL_ALARM_ENABLED:  
+            statusbar_show_icon( STATUSBAR_ALARM );
+            break;
+        case RTCCTL_ALARM_DISABLED: 
+            statusbar_hide_icon( STATUSBAR_ALARM );
+            break;
     }
+    return( true );
 }
 
-void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
+bool statusbar_blectl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BLECTL_CONNECT:        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
                                     break;
         case BLECTL_DISCONNECT:     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
                                     break;
     }
+    return( true );
 }
 
-void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
+bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_CONNECT_IP:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
-                                    statusbar_wifi_set_ip_state( true, msg );
+                                    statusbar_wifi_set_ip_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_DISCONNECT:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_OFF:           statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
@@ -317,22 +321,23 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     statusbar_wifi_set_state( false, "" );
                                     break;
         case WIFICTL_ON:            statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_WPS_SUCCESS:   statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_WPS_FAILED:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_SCAN:          statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
     }
+    return( true );
 }
 
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
@@ -430,11 +435,12 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
-void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
+bool statusbar_bma_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
+        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)arg );
                                     break;
     }
+    return( true );
 }
 
 void statusbar_hide( bool hide ) {
