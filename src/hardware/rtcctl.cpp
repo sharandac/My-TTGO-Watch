@@ -23,6 +23,7 @@
 
 #include "rtcctl.h"
 #include "powermgm.h"
+#include "callback.h"
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -32,12 +33,11 @@ static bool alarm_enabled = false;
 static int alarm_hour = 0;
 static int alarm_minute = 0;
 
-void rtcctl_send_event_cb( EventBits_t event );
-bool rtcctl_powermgm_event_cb( EventBits_t event );
-void rtcctl_powermgm_loop_cb( EventBits_t event );
+bool rtcctl_send_event_cb( EventBits_t event );
+bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg );
+bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg );
 
-rtcctl_event_cb_t *rtcctl_event_cb_table = NULL;
-uint32_t rtcctl_event_cb_entrys = 0;
+callback_t *rtcctl_callback = NULL;
 
 void rtcctl_setup( void ) {
 
@@ -57,7 +57,7 @@ void rtcctl_setup( void ) {
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "rtcctl loop" );
 }
 
-bool rtcctl_powermgm_event_cb( EventBits_t event ) {
+bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          log_i("go standby");
                                         gpio_wakeup_enable( (gpio_num_t)RTC_INT, GPIO_INTR_LOW_LEVEL );
@@ -68,11 +68,12 @@ bool rtcctl_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void rtcctl_powermgm_loop_cb( EventBits_t event ) {
+bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     rtcctl_loop();
+    return( true );
 }
 
 static void IRAM_ATTR rtcctl_irq( void ) {
@@ -95,45 +96,19 @@ void rtcctl_loop( void ) {
     }
 }
 
-void rtcctl_register_cb( EventBits_t event, RTCCTL_CALLBACK_FUNC rtcctl_event_cb, const char *id ) {
-    rtcctl_event_cb_entrys++;
-
-    if ( rtcctl_event_cb_table == NULL ) {
-        rtcctl_event_cb_table = ( rtcctl_event_cb_t * )ps_malloc( sizeof( rtcctl_event_cb_t ) * rtcctl_event_cb_entrys );
-        if ( rtcctl_event_cb_table == NULL ) {
-            log_e("rtc_event_cb_table malloc faild");
+bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( rtcctl_callback == NULL ) {
+        rtcctl_callback = callback_init( "rtctl" );
+        if ( rtcctl_callback == NULL ) {
+            log_e("rtcctl callback alloc failed");
             while(true);
         }
-    }
-    else {
-        rtcctl_event_cb_t *new_rtcctl_event_cb_table = NULL;
-
-        new_rtcctl_event_cb_table = ( rtcctl_event_cb_t * )ps_realloc( rtcctl_event_cb_table, sizeof( rtcctl_event_cb_t ) * rtcctl_event_cb_entrys );
-        if ( new_rtcctl_event_cb_table == NULL ) {
-            log_e("rtc_event_cb_table realloc faild");
-            while(true);
-        }
-        rtcctl_event_cb_table = new_rtcctl_event_cb_table;
-    }
-
-    rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event = event;
-    rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb = rtcctl_event_cb;
-    rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id = id;
-    log_i("register rtc_event_cb success (%p:%04x:%s)", rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].event_cb, event, rtcctl_event_cb_table[ rtcctl_event_cb_entrys - 1 ].id );
+    }    
+    return( callback_register( rtcctl_callback, event, callback_func, id ) );
 }
 
-void rtcctl_send_event_cb( EventBits_t event ) {
-    if ( rtcctl_event_cb_entrys == 0 ) {
-      return;
-    }
-
-    for ( int entry = 0 ; entry < rtcctl_event_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & rtcctl_event_cb_table[ entry ].event ) {
-            log_i("call rtc_event_cb (%p:%04x:%s)", rtcctl_event_cb_table[ entry ].event_cb, event, rtcctl_event_cb_table[ entry ].id );
-            rtcctl_event_cb_table[ entry ].event_cb( event );
-        }
-    }
+bool rtcctl_send_event_cb( EventBits_t event ) {
+    return( callback_send( rtcctl_callback, event, (void*)NULL ) );
 }
 
 void rtcctl_set_alarm_term( uint8_t hour, uint8_t minute ) {

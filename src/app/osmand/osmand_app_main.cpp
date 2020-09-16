@@ -90,8 +90,8 @@ struct direction_t direction[] = {
 };
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
-static void osmand_bluetooth_message_event_cb( EventBits_t event, char* msg );
-void osmand_bluetooth_message_msg_pharse( char* msg );
+bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg );
+void osmand_bluetooth_message_msg_pharse( const char* msg );
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg );
 void osmand_activate_cb( void );
 void osmand_hibernate_cb( void );
@@ -156,19 +156,18 @@ static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
-static void osmand_bluetooth_message_event_cb( EventBits_t event, char* msg ) {
+bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            osmand_bluetooth_message_msg_pharse( msg );
+        case BLECTL_MSG:            osmand_bluetooth_message_msg_pharse( (const char*)arg );
                                     break;
     }
+    return( true );
 }
 
-void osmand_bluetooth_message_msg_pharse( char* msg ) {
+void osmand_bluetooth_message_msg_pharse( const char* msg ) {
     if ( osmand_active == false ) {
         return;
     }
-
-    log_i("msg: %s", msg );
 
     SpiRamJsonDocument doc( strlen( msg ) * 2 );
 

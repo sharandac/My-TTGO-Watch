@@ -45,27 +45,22 @@
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
-powermgm_event_cb_t *powermgm_event_cb_table = NULL;
-uint32_t powermgm_event_cb_entrys = 0;
-
-powermgm_loop_event_cb_t *powermgm_loop_cb_table = NULL;
-uint32_t powermgm_loop_cb_entrys = 0;
+callback_t *powermgm_callback = NULL;
+callback_t *powermgm_loop_callback = NULL;
 
 bool powermgm_send_event_cb( EventBits_t event );
-void powermgm_send_loop_event_cb( EventBits_t event );
+bool powermgm_send_loop_event_cb( EventBits_t event );
 
 void powermgm_setup( void ) {
 
     powermgm_status = xEventGroupCreate();
 
-    adc_power_off();
-
     pmu_setup();
     bma_setup();
-    wifictl_setup();
-    timesync_setup();
-    touch_setup();
     rtcctl_setup();
+    wifictl_setup();
+    touch_setup();
+    timesync_setup();
     blectl_read_config();
 
     powermgm_set_event( POWERMGM_WAKEUP );
@@ -94,18 +89,19 @@ void powermgm_loop( void ) {
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
-        log_i("go wakeup");
-
         //Network transfer times are likely a greater time consumer than actual computational time
         if (powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+            log_i("go silence wakeup");
             setCpuFrequencyMhz(80);
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
         }
         else {
+            log_i("go wakeup");
             setCpuFrequencyMhz(240);
             powermgm_set_event( POWERMGM_WAKEUP );
             powermgm_send_event_cb( POWERMGM_WAKEUP );
+            motor_vibe(3);
         }
 
         log_i("Free heap: %d", ESP.getFreeHeap());
@@ -118,16 +114,19 @@ void powermgm_loop( void ) {
         //Save info to avoid buzz when standby after silent wake
         bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
         
+        // send standby event
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
 
-        if ( !powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
+        adc_power_off();
+
+        if ( powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
             if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
-            delay(50);
             log_i("Free heap: %d", ESP.getFreeHeap());
             log_i("Free PSRAM heap: %d", ESP.getFreePsram());
             log_i("uptime: %d", millis() / 1000 );
             log_i("go standby");
+            delay( 100 );
             setCpuFrequencyMhz( 80 );
             esp_light_sleep_start();
             // from here, the consumption is round about 2.5mA
@@ -145,6 +144,7 @@ void powermgm_loop( void ) {
     }
     powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
 
+    // send loop event depending on powermem state
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
         vTaskDelay( 100 );
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
@@ -176,90 +176,32 @@ EventBits_t powermgm_get_event( EventBits_t bits ) {
     return( temp );
 }
 
-void powermgm_register_cb( EventBits_t event, POWERMGM_CALLBACK_FUNC powermgm_event_cb, const char *id ) {
-    powermgm_event_cb_entrys++;
-
-    if ( powermgm_event_cb_table == NULL ) {
-        powermgm_event_cb_table = ( powermgm_event_cb_t * )ps_malloc( sizeof( powermgm_event_cb_t ) * powermgm_event_cb_entrys );
-        if ( powermgm_event_cb_table == NULL ) {
-            log_e("powermgm_event_cb_table malloc faild");
+bool powermgm_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( powermgm_callback == NULL ) {
+        powermgm_callback = callback_init( "powermgm" );
+        if ( powermgm_callback == NULL ) {
+            log_e("powermgm callback alloc failed");
             while(true);
         }
-    }
-    else {
-        powermgm_event_cb_t *new_powermgm_event_cb_table = NULL;
-
-        new_powermgm_event_cb_table = ( powermgm_event_cb_t * )ps_realloc( powermgm_event_cb_table, sizeof( powermgm_event_cb_t ) * powermgm_event_cb_entrys );
-        if ( new_powermgm_event_cb_table == NULL ) {
-            log_e("powermgm_event_cb_table realloc faild");
-            while(true);
-        }
-        powermgm_event_cb_table = new_powermgm_event_cb_table;
-    }
-
-    powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event = event;
-    powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event_cb = powermgm_event_cb;
-    powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].id = id;
-    log_i("register powermgm_event_cb success (%p:%s)", powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].event_cb, powermgm_event_cb_table[ powermgm_event_cb_entrys - 1 ].id );
+    }    
+    return( callback_register( powermgm_callback, event, callback_func, id ) );
 }
 
-void powermgm_register_loop_cb( EventBits_t event, POWERMGM_LOOP_CALLBACK_FUNC powermgm_loop_cb, const char *id ) {
-    powermgm_loop_cb_entrys++;
-
-    if ( powermgm_loop_cb_table == NULL ) {
-        powermgm_loop_cb_table = ( powermgm_loop_event_cb_t * )ps_malloc( sizeof( powermgm_loop_event_cb_t ) * powermgm_loop_cb_entrys );
-        if ( powermgm_loop_cb_table == NULL ) {
-            log_e("powermgm_event_cb_table malloc faild");
+bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( powermgm_loop_callback == NULL ) {
+        powermgm_loop_callback = callback_init( "powermgm loop" );
+        if ( powermgm_loop_callback == NULL ) {
+            log_e("powermgm loop callback alloc failed");
             while(true);
         }
-    }
-    else {
-        powermgm_loop_event_cb_t *new_powermgm_loop_cb_table = NULL;
-
-        new_powermgm_loop_cb_table = ( powermgm_loop_event_cb_t * )ps_realloc( powermgm_loop_cb_table, sizeof( powermgm_loop_event_cb_t ) * powermgm_loop_cb_entrys );
-        if ( new_powermgm_loop_cb_table == NULL ) {
-            log_e("powermgm_loop_cb_table realloc faild");
-            while(true);
-        }
-        powermgm_loop_cb_table = new_powermgm_loop_cb_table;
-    }
-
-    powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event = event;
-    powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event_cb = powermgm_loop_cb;
-    powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].id = id;
-    log_i("register powermgm_event_cb success (%p:%s)", powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].event_cb, powermgm_loop_cb_table[ powermgm_loop_cb_entrys - 1 ].id );
+    }    
+    return( callback_register( powermgm_loop_callback, event, callback_func, id ) );
 }
 
 bool powermgm_send_event_cb( EventBits_t event ) {
-    bool retval = false;
-    
-    if ( powermgm_event_cb_entrys == 0 ) {
-      return( false );
-    }
-      
-    for ( int entry = 0 ; entry < powermgm_event_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & powermgm_event_cb_table[ entry ].event ) {
-            log_i("call powermgm_event_cb (%p:%04x:%s)", powermgm_event_cb_table[ entry ].event_cb, event, powermgm_event_cb_table[ entry ].id );
-            if ( powermgm_event_cb_table[ entry ].event_cb( event ) ) {
-                retval = true;
-                log_w("standby blocked by: %s", powermgm_event_cb_table[ entry ].id );
-            }
-        }
-    }
-    return( retval );
+    return( callback_send( powermgm_callback, event, (void*)NULL ) );
 }
 
-void powermgm_send_loop_event_cb( EventBits_t event ) {
-    if ( powermgm_loop_cb_entrys == 0 ) {
-      return;
-    }
-      
-    for ( int entry = 0 ; entry < powermgm_loop_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & powermgm_loop_cb_table[ entry ].event ) {
-//            log_i("call powermgm_loop_event_cb (%p:%04x:%s)", powermgm_loop_cb_table[ entry ].event_cb, event, powermgm_loop_cb_table[ entry ].id );
-            powermgm_loop_cb_table[ entry ].event_cb( event );
-        }
-    }
+bool powermgm_send_loop_event_cb( EventBits_t event ) {
+    return( callback_send_no_log( powermgm_loop_callback, event, (void*)NULL ) );
 }

@@ -37,6 +37,7 @@
         bool autosync = true;
         bool showWind = false;
         bool imperial = false;
+        bool widget = true;
     } weather_config_t;
 
     typedef struct {
@@ -65,5 +66,9 @@
     void weather_save_config( void );
 
     void weather_load_config( void );
+
+    void weather_add_widget( void );
+    
+    void weather_remove_widget( void );
     
 #endif // _WEATHER_H

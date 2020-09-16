@@ -26,6 +26,5 @@
     #include <TTGO.h>
     
     void gui_setup( void );
-    void gui_loop( void );
 
 #endif // _STATUSBAR_H

@@ -39,6 +39,7 @@
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
 #include "hardware/sound.h"
+#include "hardware/framebuffer.h"
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
@@ -54,7 +55,7 @@ TTGOClass *ttgo = TTGOClass::getWatch();
 void setup()
 {
     Serial.begin(115200);
-    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ "\r\n");
+    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ " core: %d\r\n", xPortGetCoreID() );
     Serial.printf("Configure watchdog to 30s: %d\r\n", esp_task_wdt_init( 30, true ) );
 
     ttgo->begin();
@@ -67,6 +68,7 @@ void setup()
     heap_caps_malloc_extmem_enable( 1 );
     display_setup();
     screenshot_setup();
+
     splash_screen_stage_one();
     splash_screen_stage_update( "init serial", 10 );
 
@@ -114,7 +116,7 @@ void setup()
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
     sound_setup();
-    
+
     display_set_brightness( display_get_brightness() );
 
     delay(500);
@@ -127,9 +129,6 @@ void setup()
     disableCore0WDT();
 }
 
-void loop()
-{
-    gui_loop();
-    sound_loop();
+void loop() {
     powermgm_loop();
 }

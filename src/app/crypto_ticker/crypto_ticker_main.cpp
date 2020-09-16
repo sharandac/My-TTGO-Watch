@@ -54,7 +54,7 @@ crypto_ticker_main_data_t crypto_ticker_main_data;
 
 
 void crypto_ticker_main_sync_Task( void * pvParameters );
-void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg );
+bool crypto_ticker_main_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -151,7 +151,7 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_main_wifictl_event_cb, "crypto ticker main" );
 }
 
-void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg ) {    
+bool crypto_ticker_main_wifictl_event_cb( EventBits_t event, void *arg ) {    
     switch( event ) {
         case WIFICTL_CONNECT:       crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
                                     if ( crypto_ticker_config->autosync ) {
@@ -159,6 +159,7 @@ void crypto_ticker_main_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     }
                                     break;
     }
+    return( true );
 }
 
 static void enter_crypto_ticker_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -34,8 +34,8 @@ TaskHandle_t _timesync_Task;
 timesync_config_t timesync_config;
 
 void timesync_Task( void * pvParameters );
-bool timesync_powermgm_event_cb( EventBits_t event );
-void timesync_wifictl_event_cb( EventBits_t event, char* msg );
+bool timesync_powermgm_event_cb( EventBits_t event, void *arg );
+bool timesync_wifictl_event_cb( EventBits_t event, void *arg );
 
 void timesync_setup( void ) {
 
@@ -46,7 +46,7 @@ void timesync_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
 }
 
-bool timesync_powermgm_event_cb( EventBits_t event ) {
+bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          log_i("go standby");
                                         timesyncToRTC();
@@ -58,16 +58,14 @@ bool timesync_powermgm_event_cb( EventBits_t event ) {
                                         timesyncToSystem();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {
-    log_i("timesync wifictl event: %04x", event );
-
+bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
         case WIFICTL_CONNECT:       if ( timesync_config.timesync ) {
                                         if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
-                                            return;
+                                            break;
                                         }
                                         else {
                                             xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
@@ -81,6 +79,7 @@ void timesync_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     }
                                     break;
     }
+    return( true );
 }
 
 void timesync_save_config( void ) {

@@ -39,6 +39,7 @@
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
 #include "hardware/bma.h"
+#include "hardware/pmu.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -67,10 +68,14 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event );
-void statusbar_blectl_event_cb( EventBits_t event, char* msg );
-void statusbar_wifictl_event_cb( EventBits_t event, char* msg );
-void statusbar_rtcctl_event_cb( EventBits_t event );
-void statusbar_bma_event_cb( EventBits_t event, const char *msg );
+bool statusbar_blectl_event_cb( EventBits_t event, void *arg );
+bool statusbar_wifictl_event_cb( EventBits_t event, void *arg );
+bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg );
+bool statusbar_bma_event_cb( EventBits_t event, void *arg );
+bool statusbar_pmu_event_cb( EventBits_t event, void *arg );
+void statusbar_wifi_set_state( bool state, const char *wifiname );
+void statusbar_wifi_set_ip_state( bool state, const char *ip );
+void statusbar_bluetooth_set_state( bool state );
 
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
@@ -206,6 +211,7 @@ void statusbar_setup( void )
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb, "statusbar stepcounter" );
+    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, statusbar_pmu_event_cb, "statusbar pmu");
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -214,36 +220,97 @@ void statusbar_update_task( lv_task_t * task ) {
     statusbar_refresh();
 }
 
-void statusbar_rtcctl_event_cb( EventBits_t event ) {
+bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
+    char level[8]="";
+    static int32_t percent = 0;
+    static bool plug = false;
+
     switch( event ) {
-        case RTCCTL_ALARM_ENABLED:   statusbar_show_icon( STATUSBAR_ALARM );
-                                    break;
-        case RTCCTL_ALARM_DISABLED:  statusbar_hide_icon( STATUSBAR_ALARM );
-                                    break;
+        case PMUCTL_BATTERY_PERCENT:    if ( *(int32_t*)arg >= 0 ) {
+                                            snprintf( level, sizeof( level ), "%d%%", *(int32_t*)arg );
+                                        }
+                                        else {
+                                            snprintf( level, sizeof( level ), "?" );
+                                        }
+                                        lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );
+                                        percent = *(int32_t*)arg;
+                                        if ( !plug ) {
+                                            if ( percent >= 75 ) { 
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_FULL );
+                                            } else if( percent >=50 && percent < 74) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_3 );
+                                            } else if( percent >=35 && percent < 49) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_2 );
+                                            } else if( percent >=15 && percent < 34) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_1 );
+                                            } else if( percent >=0 && percent < 14) {
+                                                lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_EMPTY );
+                                            }
+
+                                            if ( percent >= 25 ) {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_WHITE );
+                                            } else if ( percent >= 15 ) {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_YELLOW );
+                                            } else {
+                                                statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
+                                            }       
+                                        }
+                                        break;
+
+        case PMUCTL_CHARGING:           if ( *(bool*)arg ) {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
+                                        }
+                                        else {
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                        }
+                                        break;
+        case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {
+                                            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                            plug = true;
+                                        }
+                                        else {
+                                            plug = false;
+                                        }
+                                        break;
     }
+    return( true );
 }
 
-void statusbar_blectl_event_cb( EventBits_t event, char* msg ) {
+bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg ) {
+    switch( event ) {
+        case RTCCTL_ALARM_ENABLED:  
+            statusbar_show_icon( STATUSBAR_ALARM );
+            break;
+        case RTCCTL_ALARM_DISABLED: 
+            statusbar_hide_icon( STATUSBAR_ALARM );
+            break;
+    }
+    return( true );
+}
+
+bool statusbar_blectl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BLECTL_CONNECT:        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
                                     break;
         case BLECTL_DISCONNECT:     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
                                     break;
     }
+    return( true );
 }
 
-void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
+bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_CONNECT_IP:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
-                                    statusbar_wifi_set_ip_state( true, msg );
+                                    statusbar_wifi_set_ip_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_DISCONNECT:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_OFF:           statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
@@ -251,22 +318,23 @@ void statusbar_wifictl_event_cb( EventBits_t event, char* msg ) {
                                     statusbar_wifi_set_state( false, "" );
                                     break;
         case WIFICTL_ON:            statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_WPS_SUCCESS:   statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_WPS_FAILED:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
         case WIFICTL_SCAN:          statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
-                                    statusbar_wifi_set_state( true, msg );
+                                    statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
     }
+    return( true );
 }
 
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
@@ -364,54 +432,12 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
-void statusbar_bma_event_cb( EventBits_t event, const char *msg ) {
+bool statusbar_bma_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)msg );
+        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)arg );
                                     break;
     }
-}
-
-void statusbar_update_battery( int32_t percent, bool charging, bool plug ) {
-    char level[8]="";
-    if ( percent >= 0 ) {
-        snprintf( level, sizeof( level ), "%d%%", percent );
-    }
-    else {
-        snprintf( level, sizeof( level ), "?" );
-    }
-    lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );   
-
-    if ( charging && plug ) {
-        lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_CHARGE );
-        statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-    }
-    else { 
-        if ( percent >= 75 ) { 
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_FULL );
-        } else if( percent >=50 && percent < 74) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_3 );
-        } else if( percent >=35 && percent < 49) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_2 );
-        } else if( percent >=15 && percent < 34) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_1 );
-        } else if( percent >=0 && percent < 14) {
-            lv_img_set_src( statusicon[ STATUSBAR_BATTERY ].icon, LV_SYMBOL_BATTERY_EMPTY );
-        }
-
-        if ( percent >= 25 ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_WHITE );
-        }
-        else if ( percent >= 15 ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_YELLOW );
-        }
-        else {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-        }
-
-        if ( plug ) {
-            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
-        }
-    }
+    return( true );
 }
 
 void statusbar_hide( bool hide ) {

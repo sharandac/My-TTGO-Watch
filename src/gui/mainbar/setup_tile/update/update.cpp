@@ -64,7 +64,7 @@ LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
 
-void update_wifictl_event_cb( EventBits_t event, char* msg );
+bool update_wifictl_event_cb( EventBits_t event, void *arg );
 
 void update_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -136,13 +136,14 @@ void update_tile_setup( void ) {
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
 }
 
-void update_wifictl_event_cb( EventBits_t event, char* msg ) {
+bool update_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       if ( update_setup_get_autosync() ) {
                                     update_check_version();
                                     break;
         }
     }
+    return( true );
 }
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -275,6 +276,7 @@ void update_Task( void * pvParameters ) {
     }
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
     lv_disp_trig_activity(NULL);
+    lv_obj_invalidate( lv_scr_act() );
     log_i("finish update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }

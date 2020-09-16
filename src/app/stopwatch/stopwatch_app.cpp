@@ -48,9 +48,6 @@ void stopwatch_app_setup( void ) {
     stopwatch_app_main_tile_num = mainbar_add_app_tile( 1, 1, "Stopwatch App" );
 
     stopwatch_app = app_register( "stop\nwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
-#ifdef stopwatch_WIDGET
-    stopwatch_widget = widget_register( "stopwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
-#endif // stopwatch_WIDGET
 
     // init main and setup tile, see stopwatch_app_main.cpp and stopwatch_app_setup.cpp
     stopwatch_app_main_setup( stopwatch_app_main_tile_num );
@@ -67,14 +64,23 @@ static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       statusbar_hide( true );
                                         stopwatch_app_hide_app_icon_info( true );
-                                        #ifdef stopwatch_WIDGET
-                                            stopwatch_app_hide_widget_icon_info( true );
-                                        #endif
                                         mainbar_jump_to_tilenumber( stopwatch_app_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }
 
+
+void stopwatch_add_widget( void ) {
+    stopwatch_widget = widget_register( "stopwatch", &stopwatch_app_64px, enter_stopwatch_app_event_cb );
+}
+
+void stopwatch_remove_widget( void ) {
+    stopwatch_widget = widget_remove( stopwatch_widget );
+}
+
+void stopwatch_app_update_widget_label( char *label ) {
+    widget_set_label( stopwatch_widget, label );
+}
 /*
  *
  */

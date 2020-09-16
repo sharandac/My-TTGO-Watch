@@ -27,6 +27,7 @@
 
 #include "wifictl.h"
 #include "powermgm.h"
+#include "callback.h"
 #include "json_psram_allocator.h"
 
 #include "gui/statusbar.h"
@@ -35,11 +36,10 @@
 bool wifi_init = false;
 EventGroupHandle_t wifictl_status = NULL;
 portMUX_TYPE DRAM_ATTR wifictlMux = portMUX_INITIALIZER_UNLOCKED;
+callback_t *wifictl_callback = NULL;
 
-wifictl_event_cb_t *wifictl_event_cb_table = NULL;
-uint32_t wifictl_event_cb_entrys = 0;
 void wifictl_send_event_cb( EventBits_t event, char *msg );
-bool wifictl_powermgm_event_cb( EventBits_t event );
+bool wifictl_powermgm_event_cb( EventBits_t event, void *arg );
 
 void wifictl_StartTask( void );
 void wifictl_Task( void * pvParameters );
@@ -53,7 +53,7 @@ wifictl_config_t wifictl_config;
 
 static esp_wps_config_t esp_wps_config;
 
-void wifictl_send_event_cb( EventBits_t event, char *msg );
+bool wifictl_send_event_cb( EventBits_t event, void *arg );
 void wifictl_set_event( EventBits_t bits );
 bool wifictl_get_event( EventBits_t bits );
 void wifictl_clear_event( EventBits_t bits );
@@ -91,10 +91,10 @@ void wifictl_setup( void ) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_CONNECT );
         if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
-          wifictl_send_event_cb( WIFICTL_DISCONNECT, (char *)"wait for WPS" );
+          wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"wait for WPS" );
         else {
           wifictl_set_event( WIFICTL_SCAN );
-          wifictl_send_event_cb( WIFICTL_DISCONNECT, (char *)"scan ..." );
+          wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
           WiFi.scanNetworks();
         }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
@@ -108,7 +108,7 @@ void wifictl_setup( void ) {
             if ( !strcmp( wifictl_networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
               wifiname = wifictl_networklist[ entry ].ssid;
               wifipassword = wifictl_networklist[ entry ].password;
-              wifictl_send_event_cb( WIFICTL_SCAN, (char *)"connecting ..." );
+              wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
               WiFi.begin( wifiname, wifipassword );
               return;
             }
@@ -124,8 +124,8 @@ void wifictl_setup( void ) {
           wifictl_save_config();
         }
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST  );
-        wifictl_send_event_cb( WIFICTL_CONNECT, (char*)WiFi.SSID().c_str() );
-        wifictl_send_event_cb( WIFICTL_CONNECT_IP, (char*)WiFi.localIP().toString().c_str() );
+        wifictl_send_event_cb( WIFICTL_CONNECT, (void *)WiFi.SSID().c_str() );
+        wifictl_send_event_cb( WIFICTL_CONNECT_IP, (void *)WiFi.localIP().toString().c_str() );
         if ( wifictl_config.webserver ) {
           asyncwebserver_start();
         }
@@ -135,10 +135,10 @@ void wifictl_setup( void ) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST );
         if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
-          wifictl_send_event_cb( WIFICTL_ON, (char *)"wait for WPS" );
+          wifictl_send_event_cb( WIFICTL_ON, (void *)"wait for WPS" );
         else {
           wifictl_set_event( WIFICTL_SCAN );
-          wifictl_send_event_cb( WIFICTL_ON, (char *)"scan ..." );
+          wifictl_send_event_cb( WIFICTL_ON, (void *)"scan ..." );
           WiFi.scanNetworks();
         }
     }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
@@ -146,23 +146,23 @@ void wifictl_setup( void ) {
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         asyncwebserver_end();
         wifictl_clear_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST );
-        wifictl_send_event_cb( WIFICTL_OFF, (char *)"" );
+        wifictl_send_event_cb( WIFICTL_OFF, (void *)"" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
       esp_wifi_wps_disable();
       WiFi.begin();
-      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (char *)"wps success" );
+      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps success" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
       esp_wifi_wps_disable();
-      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (char *)"wps failed" );
+      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps failed" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_FAILED );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
       esp_wifi_wps_disable();
-      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (char *)"wps timeout" );
+      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
 
     xTaskCreatePinnedToCore(  wifictl_Task,     /* Function to implement the task */
@@ -177,7 +177,7 @@ void wifictl_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "wifictl" );
 }
 
-bool wifictl_powermgm_event_cb( EventBits_t event ) {
+bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          wifictl_standby();
                                         break;
@@ -186,7 +186,7 @@ bool wifictl_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   wifictl_wakeup();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
 void wifictl_save_config( void ) {
@@ -314,45 +314,19 @@ bool wifictl_get_event( EventBits_t bits ) {
     return( false );
 }
 
-void wifictl_register_cb( EventBits_t event, WIFICTL_CALLBACK_FUNC wifictl_event_cb, const char *id ) {
-    wifictl_event_cb_entrys++;
-
-    if ( wifictl_event_cb_table == NULL ) {
-        wifictl_event_cb_table = ( wifictl_event_cb_t * )ps_malloc( sizeof( wifictl_event_cb_t ) * wifictl_event_cb_entrys );
-        if ( wifictl_event_cb_table == NULL ) {
-            log_e("wifictl_event_cb_table malloc faild");
+bool wifictl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( wifictl_callback == NULL ) {
+        wifictl_callback = callback_init( "wifictl" );
+        if ( wifictl_callback == NULL ) {
+            log_e("wifictl callback alloc failed");
             while(true);
         }
-    }
-    else {
-        wifictl_event_cb_t *new_wifictl_event_cb_table = NULL;
-
-        new_wifictl_event_cb_table = ( wifictl_event_cb_t * )ps_realloc( wifictl_event_cb_table, sizeof( wifictl_event_cb_t ) * wifictl_event_cb_entrys );
-        if ( new_wifictl_event_cb_table == NULL ) {
-            log_e("wifictl_event_cb_table realloc faild");
-            while(true);
-        }
-        wifictl_event_cb_table = new_wifictl_event_cb_table;
-    }
-
-    wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event = event;
-    wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb = wifictl_event_cb;
-    wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id = id;
-    log_i("register wifictl_event_cb success (%p:%s)", wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].event_cb, wifictl_event_cb_table[ wifictl_event_cb_entrys - 1 ].id );
+    }    
+    return( callback_register( wifictl_callback, event, callback_func, id ) );
 }
 
-void wifictl_send_event_cb( EventBits_t event, char *msg ) {
-    if ( wifictl_event_cb_entrys == 0 ) {
-      return;
-    }
-      
-    for ( int entry = 0 ; entry < wifictl_event_cb_entrys ; entry++ ) {
-        yield();
-        if ( event & wifictl_event_cb_table[ entry ].event ) {
-            log_i("call wifictl_event_cb (%p:%04x:%s)", wifictl_event_cb_table[ entry ].event_cb, event, wifictl_event_cb_table[ entry ].id );
-            wifictl_event_cb_table[ entry ].event_cb( event, msg );
-        }
-    }
+bool wifictl_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( wifictl_callback, event, arg ) );
 }
 
 void wifictl_load_network( void ) {

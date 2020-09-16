@@ -62,10 +62,10 @@ static void enter_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event );
-void WiFiScanDone(WiFiEvent_t event, WiFiEventInfo_t info);
+bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg );
 
-static void bluetooth_message_event_cb( EventBits_t event, char* msg );
-static void bluetooth_message_msg_pharse( char* msg );
+bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg );
+static void wifi_setup_bluetooth_message_msg_pharse( const char* msg );
 
 LV_IMG_DECLARE(lock_16px);
 LV_IMG_DECLARE(unlock_16px);
@@ -130,19 +130,38 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_add_style( wifiname_list, LV_OBJ_PART_MAIN, &wifi_list_style  );
     lv_obj_align( wifiname_list, wifi_settings_tile, LV_ALIGN_IN_TOP_MID, 0, 80);
 
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        lv_switch_on( wifi_onoff, LV_ANIM_OFF );
-    }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
-
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        lv_switch_off( wifi_onoff, LV_ANIM_OFF );
-        while ( lv_list_remove( wifiname_list, 0 ) );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
-
-    WiFi.onEvent( WiFiScanDone, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
-
     wlan_password_tile_setup( wifi_password_tile_num );
     wlan_setup_tile_setup( wifi_setup_tile_num );
+
+    wifictl_register_cb( WIFICTL_ON | WIFICTL_ON | WIFICTL_SCAN , wifi_setup_wifictl_event_cb, "wifi settings" );
+}
+
+bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case    WIFICTL_ON:
+            lv_switch_on( wifi_onoff, LV_ANIM_OFF );
+            break;
+        case    WIFICTL_OFF:
+            lv_switch_off( wifi_onoff, LV_ANIM_OFF );
+            while ( lv_list_remove( wifiname_list, 0 ) );
+            break;
+        case    WIFICTL_SCAN:
+            while ( lv_list_remove( wifiname_list, 0 ) );
+
+            int len = WiFi.scanComplete();
+            for( int i = 0 ; i < len ; i++ ) {
+                if ( wifictl_is_known( WiFi.SSID(i).c_str() ) ) {
+                    lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &unlock_16px, WiFi.SSID(i).c_str() );
+                    lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
+                }
+                else {
+                    lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &lock_16px, WiFi.SSID(i).c_str() );
+                    lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
+                }
+            }            
+            break;
+    }
+    return( true );
 }
 
 static void enter_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -156,23 +175,6 @@ static void exit_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         break;
-    }
-}
-
-void WiFiScanDone(WiFiEvent_t event, WiFiEventInfo_t info) {
-
-    while ( lv_list_remove( wifiname_list, 0 ) );
-
-    int len = WiFi.scanComplete();
-    for( int i = 0 ; i < len ; i++ ) {
-        if ( wifictl_is_known( WiFi.SSID(i).c_str() ) ) {
-             lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &unlock_16px, WiFi.SSID(i).c_str() );
-             lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
-        }
-        else {
-             lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &lock_16px, WiFi.SSID(i).c_str() );
-             lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
-        }
     }
 }
 
@@ -367,7 +369,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     else
         lv_switch_off( wifi_webserver_onoff, LV_ANIM_OFF);
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "wlan settings" );
+    blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wlan settings" );
 }
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
@@ -411,14 +413,15 @@ static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event
     }
 }
 
-static void bluetooth_message_event_cb( EventBits_t event, char* msg ) {
+bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            bluetooth_message_msg_pharse( msg );
+        case BLECTL_MSG:            wifi_setup_bluetooth_message_msg_pharse( (const char*)arg );
                                     break;
     }
+    return( true );
 }
 
-void bluetooth_message_msg_pharse( char* msg ) {
+void wifi_setup_bluetooth_message_msg_pharse( const char* msg ) {
 
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
 

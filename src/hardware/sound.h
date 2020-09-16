@@ -44,12 +44,10 @@
      * 
      * @param   data    data from PROGMEM as array
      * @param   len     data array length
-     * 
      */
     void sound_play_progmem_wav( const void *data, uint32_t len );
     /**
      * @brief setup sound
-     * 
      */
     void sound_setup( void );
     /**
@@ -68,9 +66,14 @@
     void sound_set_enabled( bool enabled = true );
     /**
      * @brief sound loop
-     * 
      */
     void sound_loop( void );
+    /**
+     * @brief speak
+     *  
+     * @param   str    the text to be spoken
+     */
+    void sound_speak( const char *str );
     /**
      * @brief save config for sound to spiffs
      */

@@ -52,7 +52,7 @@ icon_t *weather_app = NULL;
 icon_t * weather_widget = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
-void weather_widget_wifictl_event_cb( EventBits_t event, char* msg );
+bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(owm_01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
@@ -71,9 +71,12 @@ void weather_app_setup( void ) {
     weather_forecast_tile_setup( weather_app_tile_num );
     weather_setup_tile_setup( weather_app_setup_tile_num );
 
-    // register app and widget icon
     weather_app = app_register( "weather", &owm_01d_64px, enter_weather_widget_event_cb );    
-    weather_widget = widget_register( "n/a", &owm_01d_64px, enter_weather_widget_event_cb );
+
+    // register app and widget icon
+    if ( weather_config.widget ) {
+        weather_add_widget();
+    }
 
     if( weather_config.showWind ) {
         widget_set_extended_label( weather_widget, "n/a" );
@@ -84,7 +87,7 @@ void weather_app_setup( void ) {
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb, "weather" );
 }
 
-void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
+bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       if ( weather_config.autosync ) {
                                         weather_widget_sync_request();
@@ -93,6 +96,7 @@ void weather_widget_wifictl_event_cb( EventBits_t event, char* msg ) {
         case WIFICTL_OFF:           widget_hide_indicator( weather_widget );
                                     break;
     }
+    return( true );
 }
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -101,6 +105,14 @@ static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF );
                                         break;
     }    
+}
+
+void weather_add_widget( void ) {
+    weather_widget = widget_register( "n/a", &owm_01d_64px, enter_weather_widget_event_cb );
+}
+
+void weather_remove_widget( void ) {
+    weather_widget = widget_remove( weather_widget );
 }
 
 void weather_jump_to_forecast( void ) {
@@ -185,6 +197,7 @@ void weather_save_config( void ) {
         doc["autosync"] = weather_config.autosync;
         doc["showWind"] = weather_config.showWind;
         doc["imperial"] = weather_config.imperial;
+        doc["widget"] = weather_config.widget;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -215,9 +228,10 @@ void weather_load_config( void ) {
                 strlcpy( weather_config.apikey, doc["apikey"], sizeof( weather_config.apikey ) );
                 strlcpy( weather_config.lat, doc["lat"], sizeof( weather_config.lat ) );
                 strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
-                weather_config.autosync = doc["autosync"].as<bool>();
-                weather_config.showWind = doc["showWind"].as<bool>();
-                weather_config.imperial = doc["imperial"].as<bool>();
+                weather_config.autosync = doc["autosync"] | true;
+                weather_config.showWind = doc["showWind"] | false;
+                weather_config.imperial = doc["imperial"] | false;
+                weather_config.widget = doc["widget"] | true;
             }        
             doc.clear();
         }

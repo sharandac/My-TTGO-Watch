@@ -28,12 +28,14 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
+#include "gui/widget.h"
 
 uint32_t osmand_app_main_tile_num;
 uint32_t osmand_app_setup_tile_num;
 
 // app icon
 icon_t *osmand_app = NULL;
+icon_t *osmand_widget = NULL;
 
 // declare you images or fonts you need
 LV_IMG_DECLARE(osmand_64px);
@@ -47,6 +49,8 @@ void osmand_app_setup( void ) {
     osmand_app_main_tile_num = mainbar_add_app_tile( 1, 1, "OsmAnd App" );
 
     osmand_app = app_register( "OsmAnd", &osmand_64px, enter_osmand_app_event_cb );
+
+//    osmand_widget = widget_register( "OsmAnd", &osmand_64px, enter_osmand_app_event_cb );
 
     // init main tile, see example_app_main.cpp and example_app_setup.cpp
     osmand_app_main_setup( osmand_app_main_tile_num );

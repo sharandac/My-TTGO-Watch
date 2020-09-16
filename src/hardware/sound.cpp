@@ -38,6 +38,7 @@
 #include <AudioGeneratorMIDI.h>
 
 #include "AudioOutputI2S.h"
+#include <ESP8266SAM.h>
 
 AudioFileSourceSPIFFS *spliffs_file;
 AudioOutputI2S *out;
@@ -45,16 +46,18 @@ AudioFileSourceID3 *id3;
 
 AudioGeneratorMP3 *mp3;
 AudioGeneratorWAV *wav;
+ESP8266SAM *sam;
 AudioFileSourcePROGMEM *progmem_file;
 
 #include "json_psram_allocator.h"
 
 bool sound_init = false;
+bool is_speaking = false;
 
 sound_config_t sound_config;
 
-bool sound_powermgm_event_cb( EventBits_t event );
-void sound_powermgm_loop_cb( EventBits_t event );
+bool sound_powermgm_event_cb( EventBits_t event, void *arg );
+bool sound_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void sound_setup( void ) {
     if ( sound_init )
@@ -75,38 +78,42 @@ void sound_setup( void ) {
     sound_set_volume_config( sound_config.volume );
     mp3 = new AudioGeneratorMP3();
     wav = new AudioGeneratorWAV();
+    sam = new ESP8266SAM;
+    sam->SetVoice(sam->VOICE_SAM);
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
-    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
+    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
+
+    sound_set_enabled( sound_config.enable );
 
     sound_init = true;
 }
 
-bool sound_powermgm_event_cb( EventBits_t event ) {
+bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          sound_standby();
-                                        return( false );
                                         break;
         case POWERMGM_WAKEUP:           sound_wakeup();
-                                        return( false );
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   sound_wakeup();
-                                        return( false );
                                         break;
     }
+    return( true );
 }
 
-void sound_powermgm_loop_cb( EventBits_t event ) {
+bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
     sound_loop();
+    return( true );
 }
 
 void sound_standby( void ) {
     log_i("go standby");
-    sound_set_enabled(false);
+    sound_set_enabled( false );
 }
 
 void sound_wakeup( void ) {
     log_i("go wakeup");
+    sound_set_enabled( sound_config.enable );
     // to avoid additional power consumtion when waking up, audio is only enabled when 
     // a 'play sound' method is called
     // this would be the place to play a wakeup sound
@@ -118,31 +125,36 @@ void sound_wakeup( void ) {
  */
 void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
+
     if ( enabled ) {
-        ttgo->enableLDO3(1);
-    } else {
-        
+        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
+    }
+    else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-        
-        ttgo->enableLDO3(0);
+        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     }
 }
 
 void sound_loop( void ) {
     if ( sound_config.enable && sound_init ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
-        if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
-        if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
+        if ( mp3->isRunning() && !mp3->loop() ) {
+            log_i("stop playing mp3 sound");
+        }
+        if ( wav->isRunning() && !wav->loop() ) {
+            log_i("stop playing wav sound");
+        }
     }
 }
 
 void sound_play_spiffs_mp3( const char *filename ) {
     if ( sound_config.enable && sound_init ) {
         log_i("playing file %s from SPIFFS", filename);
-        sound_set_enabled(true);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
         mp3->begin(id3, out);
@@ -154,11 +166,23 @@ void sound_play_spiffs_mp3( const char *filename ) {
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
     if ( sound_config.enable && sound_init ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
-        sound_set_enabled(true);
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
     } else {
         log_i("Cannot play wav, sound is disabled");
+    }
+}
+
+void sound_speak( const char *str )
+{
+    if ( sound_config.enable ) {
+        log_i("Speaking text", str);
+        is_speaking = true;
+        sam->Say(out, str);
+        is_speaking = false;
+    }
+    else {
+        log_i("Cannot speak, sound is disabled");
     }
 }
 
@@ -211,7 +235,10 @@ bool sound_get_enabled_config( void ) {
 
 void sound_set_enabled_config( bool enable ) {
     sound_config.enable = enable;
-    if ( ! sound_config.enable) {
+    if ( sound_config.enable) {
+        sound_set_enabled( true );
+    }
+    else {
         sound_set_enabled( false );
     }
     sound_save_config();

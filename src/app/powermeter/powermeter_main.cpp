@@ -61,7 +61,7 @@ LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
-static void powermeter_wifictl_event_cb( EventBits_t event, char *msg );
+bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
 static void exit_powermeter_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
@@ -209,7 +209,7 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     _powermeter_main_task = lv_task_create( powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL );
 }
 
-static void powermeter_wifictl_event_cb( EventBits_t event, char *msg ) {
+bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
     powermeter_config_t *powermeter_config = powermeter_get_config();
     switch( event ) {
         case WIFICTL_CONNECT_IP:    if ( powermeter_config->autoconnect ) {
@@ -236,6 +236,7 @@ static void powermeter_wifictl_event_cb( EventBits_t event, char *msg ) {
                                     widget_set_label( powermeter_get_widget_icon(), "n/a" );
                                     break;
     }
+    return( true );
 }
 
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

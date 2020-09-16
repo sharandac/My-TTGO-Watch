@@ -8,17 +8,21 @@
 #include "powermgm.h"
 #include "motor.h"
 #include "blectl.h"
+#include "callback.h"
 
 #include "gui/statusbar.h"
 
+static bool firstlooprun = true;
 volatile bool DRAM_ATTR pmu_irq_flag = false;
 portMUX_TYPE DRAM_ATTR PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
+callback_t *pmu_callback = NULL;
 pmu_config_t pmu_config;
 
 void IRAM_ATTR pmu_irq( void );
-bool pmu_powermgm_event_cb( EventBits_t event );
-void pmu_powermgm_loop_cb( EventBits_t event );
+bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
+bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
+bool pmu_send_cb( EventBits_t event, void *arg );
 
 void pmu_setup( void ) {
 
@@ -28,7 +32,7 @@ void pmu_setup( void ) {
 
     // Turn on the IRQ used
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
+    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
     ttgo->power->clearIRQ();
 
     // enable coulumb counter
@@ -63,23 +67,24 @@ void pmu_setup( void ) {
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, pmu_powermgm_event_cb, "pmu" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
-
 }
 
-void pmu_powermgm_loop_cb( EventBits_t event ) {
+bool pmu_powermgm_loop_cb( EventBits_t event, void *arg ) {
     pmu_loop();
+    return( true );
 }
 
-bool pmu_powermgm_event_cb( EventBits_t event ) {
+bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          pmu_standby();
                                         break;
         case POWERMGM_WAKEUP:           pmu_wakeup();
+                                        firstlooprun = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
                                         break;
     }
-    return( false );
+    return( true );
 }
 
 void IRAM_ATTR  pmu_irq( void ) {
@@ -90,7 +95,7 @@ void IRAM_ATTR  pmu_irq( void ) {
 
 void pmu_loop( void ) {
     static uint64_t nextmillis = 0;
-    bool updatetrigger = false;
+    static int32_t percent = 0;
     TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * handle IRQ event
@@ -102,29 +107,24 @@ void pmu_loop( void ) {
 
     if ( temp_pmu_irq_flag ) {        
         ttgo->power->readIRQ();
-        if ( ttgo->power->isVbusPlugInIRQ()) {
+        if ( ttgo->power->isVbusPlugInIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
         }
-        if ( ttgo->power->isVbusRemoveIRQ()) {
+        if ( ttgo->power->isVbusRemoveIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
         }
-        if ( ttgo->power->isChargingDoneIRQ()) {
+        if ( ttgo->power->isChargingIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            motor_vibe( 1 );
-            updatetrigger = true;
         }
-        if ( ttgo->power->isPEKShortPressIRQ()) {
-            updatetrigger = true;
+        if ( ttgo->power->isChargingDoneIRQ() ) {
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+        }
+        if ( ttgo->power->isPEKShortPressIRQ() ) {
             powermgm_set_event( POWERMGM_PMU_BUTTON );
             ttgo->power->clearIRQ();
             return;
         }
         if ( ttgo->power->isTimerTimeoutIRQ() ) {
-            updatetrigger = true;
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
             ttgo->power->clearTimerStatus();
             ttgo->power->offTimer();
@@ -132,15 +132,46 @@ void pmu_loop( void ) {
             return;
         }
         ttgo->power->clearIRQ();
+        bool plug = ttgo->power->isVBUSPlug();
+        bool charging = ttgo->power->isChargeing();
+        pmu_send_cb( PMUCTL_VBUS_PLUG, (void *)&plug );
+        pmu_send_cb( PMUCTL_CHARGING, (void *)&charging );
     }
 
     if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( nextmillis < millis() || updatetrigger == true ) {
+        if ( nextmillis < millis() ) {
             nextmillis = millis() + 1000;
-            statusbar_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
-            blectl_update_battery( pmu_get_battery_percent(), ttgo->power->isChargeing(), ttgo->power->isVBUSPlug() );
+            if ( pmu_get_battery_percent() != percent ) {
+                percent = pmu_get_battery_percent();
+                pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+            }
         }
     }
+
+    if ( firstlooprun ) {
+        int32_t percent = pmu_get_battery_percent();
+        bool plug = ttgo->power->isVBUSPlug();
+        bool charging = ttgo->power->isChargeing();
+        pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+        pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
+        pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
+        firstlooprun = false;
+    }
+}
+
+bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( pmu_callback == NULL ) {
+        pmu_callback = callback_init( "pmu" );
+        if ( pmu_callback == NULL ) {
+            log_e("pmu_callback alloc failed");
+            while(true);
+        }
+    }
+    return( callback_register( pmu_callback, event, callback_func, id ) );
+}
+
+bool pmu_send_cb( EventBits_t event, void *arg ) {
+    return( callback_send( pmu_callback, event, arg ) );
 }
 
 void pmu_standby( void ) {
@@ -166,7 +197,6 @@ void pmu_standby( void ) {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
         log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
     }
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
 
     gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
@@ -188,7 +218,6 @@ void pmu_wakeup( void ) {
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
 
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
 }
 

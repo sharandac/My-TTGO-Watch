@@ -112,7 +112,7 @@ static void alarm_task_function(lv_task_t * task){
     }
 }
 
-static void  alarm_occurred_event_event_callback ( EventBits_t event ){
+bool alarm_occurred_event_event_callback ( EventBits_t event, void* msg ) {
     switch ( event ){
         case ( RTCCTL_ALARM_OCCURRED ):
             statusbar_hide( true );
@@ -127,15 +127,16 @@ static void  alarm_occurred_event_event_callback ( EventBits_t event ){
             lv_task_create( alarm_task_function, highlight_time, LV_TASK_PRIO_MID, NULL );
             break;
     }
+    return( true );
 }
 
-bool powermgmt_callback( EventBits_t event ){
+bool powermgmt_callback( EventBits_t event, void *arg ){
     switch( event ) {
         case( POWERMGM_STANDBY ):
             in_progress = false;
             break;
     }
-    return( false );
+    return( true );
 }
 
 void alarm_in_progress_tile_setup( void ) {

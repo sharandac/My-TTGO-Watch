@@ -34,8 +34,8 @@ display_config_t display_config;
 static uint8_t dest_brightness = 0;
 static uint8_t brightness = 0;
 
-bool display_powermgm_event_cb( EventBits_t event );
-void display_powermgm_loop_cb( EventBits_t event );
+bool display_powermgm_event_cb( EventBits_t event, void *arg );
+bool display_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void display_setup( void ) {
     display_read_config();
@@ -51,7 +51,7 @@ void display_setup( void ) {
     powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "display loop" );
 }
 
-bool display_powermgm_event_cb( EventBits_t event ) {
+bool display_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          display_standby();
                                         break;
@@ -60,11 +60,12 @@ bool display_powermgm_event_cb( EventBits_t event ) {
         case POWERMGM_SILENCE_WAKEUP:   display_wakeup( true );
                                         break;
     }
-    return( false );
+    return( true );
 }
 
-void display_powermgm_loop_cb( EventBits_t event ) {
+bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
     display_loop();
+    return( true );
 }
 
 void display_loop( void ) {
@@ -120,7 +121,6 @@ void display_wakeup( bool silence ) {
     ttgo->bl->adjust( 0 );
     brightness = 0;
     dest_brightness = display_get_brightness();
-    motor_vibe( 1 );
   }
 }
 

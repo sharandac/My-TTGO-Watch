@@ -108,8 +108,13 @@ void main_tile_setup( void ) {
         lv_obj_add_style( widget_entry[ widget ].ext_label, LV_OBJ_PART_MAIN, style );
         lv_obj_set_size( widget_entry[ widget ].ext_label, WIDGET_X_SIZE, WIDGET_LABEL_Y_SIZE );
         lv_obj_align( widget_entry[ widget ].ext_label , widget_entry[ widget ].label, LV_ALIGN_OUT_TOP_MID, 0, 0 );
-
+        // create img and indicator
+        widget_entry[ widget ].icon_img = lv_imgbtn_create( widget_entry[ widget ].icon_cont , NULL );
+        widget_entry[ widget ].icon_indicator = lv_img_create( widget_entry[ widget ].icon_cont, NULL );
+        // hide all
         lv_obj_set_hidden( widget_entry[ widget ].icon_cont, true );
+        lv_obj_set_hidden( widget_entry[ widget ].icon_img, true );
+        lv_obj_set_hidden( widget_entry[ widget ].icon_indicator, true );
         lv_obj_set_hidden( widget_entry[ widget ].label, true );
         lv_obj_set_hidden( widget_entry[ widget ].ext_label, true );
     }
@@ -150,14 +155,22 @@ void main_tile_align_widgets( void ) {
         active_widgets++;
     }
 
-    if ( active_widgets == 0 ) return;
+    if ( active_widgets == 0 ) {
+        lv_obj_align( clock_cont, main_cont, LV_ALIGN_CENTER, 0, 0 );
+        return;
+    };
 
     lv_obj_align( clock_cont, main_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
 
     xpos = 0 - ( ( WIDGET_X_SIZE * active_widgets ) + ( ( active_widgets - 1 ) * WIDGET_X_CLEARENCE ) ) / 2;
 
-    for ( int widget = 0 ; widget < active_widgets ; widget++ ) {
-        lv_obj_align( widget_entry[ widget ].icon_cont , main_cont, LV_ALIGN_IN_BOTTOM_MID, xpos + ( WIDGET_X_SIZE * widget ) + ( widget * WIDGET_X_CLEARENCE ) + 32 , -32 );
+    active_widgets = 0;
+
+    for ( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
+        if ( widget_entry[ widget ].active ) {
+            lv_obj_align( widget_entry[ widget ].icon_cont , main_cont, LV_ALIGN_IN_BOTTOM_MID, xpos + ( WIDGET_X_SIZE * active_widgets ) + ( active_widgets * WIDGET_X_CLEARENCE ) + 32 , -32 );
+            active_widgets++;
+        }
     }
 
 }

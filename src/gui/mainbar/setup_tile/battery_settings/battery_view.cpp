@@ -100,7 +100,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_obj_align( battery_view_design_cap, battery_design_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     lv_obj_t *battery_current_cont = lv_obj_create( battery_view_tile, NULL );
-    lv_obj_set_size( battery_current_cont, lv_disp_get_hor_res( NULL ) , 25 );
+    lv_obj_set_size( battery_current_cont, lv_disp_get_hor_res( NULL ) , 22 );
     lv_obj_add_style( battery_current_cont, LV_OBJ_PART_MAIN, &battery_view_style  );
     lv_obj_align( battery_current_cont, battery_design_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *battery_current_cap_label = lv_label_create( battery_current_cont, NULL);
@@ -113,7 +113,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_obj_align( battery_view_current_cap, battery_current_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     lv_obj_t *battery_voltage_cont = lv_obj_create( battery_view_tile, NULL );
-    lv_obj_set_size( battery_voltage_cont, lv_disp_get_hor_res( NULL ) , 25 );
+    lv_obj_set_size( battery_voltage_cont, lv_disp_get_hor_res( NULL ) , 22 );
     lv_obj_add_style( battery_voltage_cont, LV_OBJ_PART_MAIN, &battery_view_style  );
     lv_obj_align( battery_voltage_cont, battery_current_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *battery_voltage_label = lv_label_create( battery_voltage_cont, NULL);
@@ -126,9 +126,9 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_obj_align( battery_view_voltage, battery_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     lv_obj_t *battery_charge_cont = lv_obj_create( battery_view_tile, NULL );
-    lv_obj_set_size( battery_charge_cont, lv_disp_get_hor_res( NULL ) , 25 );
+    lv_obj_set_size( battery_charge_cont, lv_disp_get_hor_res( NULL ) , 22 );
     lv_obj_add_style( battery_charge_cont, LV_OBJ_PART_MAIN, &battery_view_style  );
-    lv_obj_align( battery_charge_cont, battery_voltage_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_align( battery_charge_cont, battery_voltage_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *battery_charge_label = lv_label_create( battery_charge_cont, NULL);
     lv_obj_add_style( battery_charge_label, LV_OBJ_PART_MAIN, &battery_view_style  );
     lv_label_set_text( battery_charge_label, "charge current");
@@ -139,7 +139,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_obj_align( charge_view_current, battery_charge_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     lv_obj_t *battery_discharge_cont = lv_obj_create( battery_view_tile, NULL );
-    lv_obj_set_size( battery_discharge_cont, lv_disp_get_hor_res( NULL ) , 25 );
+    lv_obj_set_size( battery_discharge_cont, lv_disp_get_hor_res( NULL ) , 22 );
     lv_obj_add_style( battery_discharge_cont, LV_OBJ_PART_MAIN, &battery_view_style  );
     lv_obj_align( battery_discharge_cont, battery_charge_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *battery_discharge_label = lv_label_create( battery_discharge_cont, NULL);
@@ -152,7 +152,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_obj_align( discharge_view_current, battery_discharge_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
     lv_obj_t *vbus_voltage_cont = lv_obj_create( battery_view_tile, NULL );
-    lv_obj_set_size( vbus_voltage_cont, lv_disp_get_hor_res( NULL ) , 25 );
+    lv_obj_set_size( vbus_voltage_cont, lv_disp_get_hor_res( NULL ) , 22 );
     lv_obj_add_style( vbus_voltage_cont, LV_OBJ_PART_MAIN, &battery_view_style  );
     lv_obj_align( vbus_voltage_cont, battery_discharge_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *vbus_voltage_label = lv_label_create( vbus_voltage_cont, NULL);
