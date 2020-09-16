@@ -26,5 +26,6 @@
     #include <TTGO.h>
     
     void gui_setup( void );
+    void gui_set_background_image ( uint32_t background_image);
 
 #endif // _STATUSBAR_H
