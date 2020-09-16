@@ -27,8 +27,8 @@
     #define SOUND_JSON_CONFIG_FILE    "/sound.json"
 
     typedef struct {
-        bool enable = true;
         uint8_t volume = 50;
+        bool enable = true;
     } sound_config_t;
 
     /**

@@ -217,9 +217,8 @@ void sound_read_config( void ) {
             log_e("sound config deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            sound_config.enable = doc["enable"];
-            sound_config.volume = doc["volume"];
-            log_i("volume: %d", sound_config.volume);
+            sound_config.enable = doc["enable"] | false;
+            sound_config.volume = doc["volume"] | 100;
         }        
         doc.clear();
     }
@@ -246,10 +245,11 @@ uint8_t sound_get_volume_config( void ) {
 }
 
 void sound_set_volume_config( uint8_t volume ) {
+    sound_config.volume = volume;
+        
     if ( sound_config.enable && sound_init ) {
         log_i("Setting sound volume to: %d", volume);
-        sound_config.volume = volume;
         // limiting max gain to 3.5 (max gain is 4.0)
-        out->SetGain(3.5f * (sound_config.volume / 100.0f));
+        out->SetGain(3.5f * ( sound_config.volume / 100.0f ));
     }
 }
