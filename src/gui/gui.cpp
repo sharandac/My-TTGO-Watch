@@ -78,14 +78,14 @@ void gui_setup( void )
 
     statusbar_setup();
     lv_disp_trig_activity( NULL );
-    //set_background_image( 0 ); 
+    gui_set_background_image( display_get_background_image() );
     keyboard_setup();
     return;
 }
 
-void set_background_image ( uint32_t background_image ) {
+void gui_set_background_image ( uint32_t background_image ) {
 
-    switch (background_image)
+    switch ( background_image )
     {
     case 0:
         LV_IMG_DECLARE(bg);
