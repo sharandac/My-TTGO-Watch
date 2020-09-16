@@ -201,13 +201,13 @@ void display_settings_tile_setup( void ) {
     lv_obj_t *display_background_image_cont = lv_obj_create( display_settings_tile_2, NULL );
     lv_obj_set_size(display_background_image_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( display_background_image_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
-    lv_obj_align( display_background_image_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( display_background_image_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *display_background_image_label = lv_label_create( display_background_image_cont, NULL );
     lv_obj_add_style( display_background_image_label, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_label_set_text( display_background_image_label, "Bg image" );
     lv_obj_align( display_background_image_label, display_background_image_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     display_bg_img_list = lv_dropdown_create( display_background_image_cont, NULL );
-    lv_dropdown_set_options( display_bg_img_list, "bg\nbg1\nbg2\nbg3" );
+    lv_dropdown_set_options( display_bg_img_list, "bg\nbg1\nbg2\nbg3\nblack" );
     lv_obj_set_size( display_bg_img_list, 70, 40 );
     lv_obj_align( display_bg_img_list, display_background_image_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb(display_bg_img_list, display_background_image_setup_event_cb);
