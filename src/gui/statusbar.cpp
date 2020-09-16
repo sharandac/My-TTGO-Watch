@@ -224,7 +224,6 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
     char level[8]="";
     static int32_t percent = 0;
     static bool plug = false;
-    static bool charging = false;
 
     switch( event ) {
         case PMUCTL_BATTERY_PERCENT:    if ( *(int32_t*)arg >= 0 ) {
@@ -260,11 +259,9 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
 
         case PMUCTL_CHARGING:           if ( *(bool*)arg ) {
                                             statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
-                                            charging = true;
                                         }
                                         else {
                                             statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
-                                            charging = false;
                                         }
                                         break;
         case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {

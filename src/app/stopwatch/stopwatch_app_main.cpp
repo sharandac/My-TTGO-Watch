@@ -133,6 +133,7 @@ static void stopwatch_app_main_update_stopwatchlabel()
 
     lv_label_set_text(stopwatch_app_main_stopwatchlabel, msg);
     lv_obj_align(stopwatch_app_main_stopwatchlabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    stopwatch_app_update_widget_label( msg );
 }
 
 
@@ -144,10 +145,8 @@ static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
                                         _stopwatch_app_task = lv_task_create( stopwatch_app_task, 1000, LV_TASK_PRIO_MID, NULL );
                                         lv_obj_set_hidden(stopwatch_app_main_start_btn, true);
                                         lv_obj_set_hidden(stopwatch_app_main_stop_btn, false);
+                                        stopwatch_add_widget();
                                         stopwatch_app_hide_app_icon_info( false );
-                                        #ifdef stopwatch_WIDGET
-                                            stopwatch_app_hide_widget_icon_info( true );
-                                        #endif                                       
                                         break;
     }
 }
@@ -158,10 +157,8 @@ static void stop_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
                                         lv_task_del(_stopwatch_app_task);
                                         lv_obj_set_hidden(stopwatch_app_main_start_btn, false);
                                         lv_obj_set_hidden(stopwatch_app_main_stop_btn, true);
+                                        stopwatch_remove_widget();
                                         stopwatch_app_hide_app_icon_info( true );
-                                        #ifdef stopwatch_WIDGET
-                                            stopwatch_app_hide_widget_icon_info( true );
-                                        #endif                                        
                                         break;
     }
 }
