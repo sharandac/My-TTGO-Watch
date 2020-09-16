@@ -26,17 +26,16 @@
 #include "wifictl.h"
 
 #include "sound.h"
+#include "json_psram_allocator.h"
 
 // based on https://github.com/earlephilhower/ESP8266Audio
 #include <SPIFFS.h>
 #include "AudioFileSourceSPIFFS.h"
 #include "AudioFileSourcePROGMEM.h"
-
 #include "AudioFileSourceID3.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioGeneratorWAV.h"
 #include <AudioGeneratorMIDI.h>
-
 #include "AudioOutputI2S.h"
 #include <ESP8266SAM.h>
 
@@ -48,10 +47,6 @@ AudioGeneratorMP3 *mp3;
 AudioGeneratorWAV *wav;
 ESP8266SAM *sam;
 AudioFileSourcePROGMEM *progmem_file;
-
-ESP8266SAM *sam;
-
-#include "json_psram_allocator.h"
 
 bool sound_init = false;
 bool is_speaking = false;
@@ -82,15 +77,12 @@ void sound_setup( void ) {
     wav = new AudioGeneratorWAV();
     sam = new ESP8266SAM;
     sam->SetVoice(sam->VOICE_SAM);
-<<<<<<< HEAD
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
     powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
 
     sound_set_enabled( sound_config.enable );
 
-=======
->>>>>>> master
     sound_init = true;
 }
 
@@ -148,18 +140,12 @@ void sound_set_enabled( bool enabled ) {
 void sound_loop( void ) {
     if ( sound_config.enable && sound_init ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
-<<<<<<< HEAD
         if ( mp3->isRunning() && !mp3->loop() ) {
             log_i("stop playing mp3 sound");
         }
         if ( wav->isRunning() && !wav->loop() ) {
             log_i("stop playing wav sound");
         }
-=======
-        if ( mp3->isRunning() && !mp3->loop() ) sound_set_enabled(false);
-        if ( wav->isRunning() && !wav->loop() ) sound_set_enabled(false);
-        if ( !is_speaking ) sound_set_enabled(false);
->>>>>>> master
     }
 }
 
@@ -184,19 +170,11 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
     }
 }
 
-<<<<<<< HEAD
 void sound_speak( const char *str )
-=======
-void sound_speak(const char *str)
->>>>>>> master
 {
     if ( sound_config.enable ) {
         log_i("Speaking text", str);
         is_speaking = true;
-<<<<<<< HEAD
-=======
-        sound_set_enabled(true);
->>>>>>> master
         sam->Say(out, str);
         is_speaking = false;
     }

@@ -201,7 +201,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_t *display_background_image_cont = lv_obj_create( display_settings_tile_2, NULL );
     lv_obj_set_size(display_background_image_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( display_background_image_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
-    lv_obj_align( display_background_image_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( display_background_image_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *display_background_image_label = lv_label_create( display_background_image_cont, NULL );
     lv_obj_add_style( display_background_image_label, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_label_set_text( display_background_image_label, "Bg image" );

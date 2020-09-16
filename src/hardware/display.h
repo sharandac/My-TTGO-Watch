@@ -36,7 +36,7 @@
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;
         uint32_t rotation = 0;
         bool block_return_maintile = false;
-        uint32_t background_image = 0;
+        uint32_t background_image = 2;
     } display_config_t;
 
     #define DISPLAY_CONFIG_FILE         "/display.cfg"
