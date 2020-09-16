@@ -40,6 +40,7 @@
 #include "hardware/rtcctl.h"
 #include "hardware/bma.h"
 #include "hardware/pmu.h"
+#include "hardware/sound.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -60,6 +61,7 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
     { NULL, LV_SYMBOL_BATTERY_FULL, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BLUETOOTH, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_WIFI, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
+    { NULL, LV_SYMBOL_VOLUME_MAX, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BELL, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_WARNING, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, &alarm_16px, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
@@ -68,11 +70,14 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event );
+
+bool statusbar_soundctl_event_cb( EventBits_t event, void *arg );
 bool statusbar_blectl_event_cb( EventBits_t event, void *arg );
 bool statusbar_wifictl_event_cb( EventBits_t event, void *arg );
-bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg );
-bool statusbar_bma_event_cb( EventBits_t event, void *arg );
-bool statusbar_pmu_event_cb( EventBits_t event, void *arg );
+bool statusbar_rtcctl_event_cb( EventBits_t event, void *arg );
+bool statusbar_bmactl_event_cb( EventBits_t event, void *arg );
+bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg );
+
 void statusbar_wifi_set_state( bool state, const char *wifiname );
 void statusbar_wifi_set_ip_state( bool state, const char *ip );
 void statusbar_bluetooth_set_state( bool state );
@@ -80,9 +85,6 @@ void statusbar_bluetooth_set_state( bool state );
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
 
-/**
- * Create a demo application
- */
 void statusbar_setup( void )
 {
     /*Copy a built-in style to initialize the new style*/
@@ -205,13 +207,15 @@ void statusbar_setup( void )
     statusbar_hide_icon( STATUSBAR_WARNING );
     statusbar_hide_icon( STATUSBAR_WIFI );
     statusbar_hide_icon( STATUSBAR_ALARM );
+    statusbar_hide_icon( STATUSBAR_VOLUME );
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb, "statusbar bluetooth" );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
-    bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bma_event_cb, "statusbar stepcounter" );
-    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, statusbar_pmu_event_cb, "statusbar pmu");
+    bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bmactl_event_cb, "statusbar stepcounter" );
+    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, statusbar_pmuctl_event_cb, "statusbar pmu");
+    sound_register_cb( SOUNDCTL_ENABLED , statusbar_soundctl_event_cb, "statusbar sound");
 
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -220,7 +224,21 @@ void statusbar_update_task( lv_task_t * task ) {
     statusbar_refresh();
 }
 
-bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
+bool statusbar_soundctl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case SOUNDCTL_ENABLED:  
+            if ( *(bool*)arg ) {
+                statusbar_show_icon( STATUSBAR_VOLUME );
+            }
+            else {
+                statusbar_hide_icon( STATUSBAR_VOLUME );
+            }
+            break;
+    }
+    return( true );
+}
+
+bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
     char level[8]="";
     static int32_t percent = 0;
     static bool plug = false;
@@ -274,10 +292,19 @@ bool statusbar_pmu_event_cb( EventBits_t event, void *arg ) {
                                         }
                                         break;
     }
+    statusbar_refresh();
     return( true );
 }
 
-bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg ) {
+bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)arg );
+                                    break;
+    }
+    return( true );
+}
+
+bool statusbar_rtcctl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case RTCCTL_ALARM_ENABLED:  
             statusbar_show_icon( STATUSBAR_ALARM );
@@ -286,6 +313,7 @@ bool statusbar_rtcctl_event_cb( EventBits_t event, void* msg ) {
             statusbar_hide_icon( STATUSBAR_ALARM );
             break;
     }
+    statusbar_refresh();
     return( true );
 }
 
@@ -296,6 +324,7 @@ bool statusbar_blectl_event_cb( EventBits_t event, void *arg ) {
         case BLECTL_DISCONNECT:     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
                                     break;
     }
+    statusbar_refresh();
     return( true );
 }
 
@@ -334,6 +363,7 @@ bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
     }
+    statusbar_refresh();
     return( true );
 }
 
@@ -346,6 +376,7 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
                                                     break;
         }
     }
+    statusbar_refresh();
 }
 
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
@@ -356,6 +387,7 @@ void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
             default:                        break;
         }
     }
+    statusbar_refresh();
 }
 
 void statusbar_wifi_set_state( bool state, const char *wifiname ) {
@@ -430,14 +462,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
         lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     }
-}
-
-bool statusbar_bma_event_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
-        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)arg );
-                                    break;
-    }
-    return( true );
 }
 
 void statusbar_hide( bool hide ) {

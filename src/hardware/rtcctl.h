@@ -42,7 +42,7 @@
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event           possible values: RTCCTL_ALARM, RTCCTL_ALARM_SET, RTCCTL_ALARM_ENABLE and RTCCTL_ALARM_DISABLE
-     * @param   rtc_event_cb    pointer to the callback function 
+     * @param   callback_func   pointer to the callback function 
      * @param   id              programm id
      * 
      * @return  true if success, false if failed
