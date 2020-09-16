@@ -218,12 +218,9 @@ void display_set_rotation( uint32_t rotation ) {
 }
 
 uint32_t display_get_background_image( void ) {
-    //Set background on startup
-    set_background_image( display_config.background_image );
     return( display_config.background_image );
 }
 
 void display_set_background_image( uint32_t background_image ) {
     display_config.background_image = background_image;
-    set_background_image(background_image);
 }
