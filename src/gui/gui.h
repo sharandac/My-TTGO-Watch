@@ -27,6 +27,6 @@
     
     void gui_setup( void );
     void gui_loop( void );
-    void set_background_image ( uint32_t background_image);
+    void gui_set_background_image ( uint32_t background_image);
 
 #endif // _STATUSBAR_H
