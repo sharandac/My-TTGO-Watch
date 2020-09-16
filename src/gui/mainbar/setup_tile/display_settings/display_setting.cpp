@@ -26,6 +26,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/gui.h"
 
 #include "hardware/display.h"
 #include "hardware/motor.h"
@@ -327,6 +328,7 @@ static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t 
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     
                                             display_set_background_image( lv_dropdown_get_selected( obj ) );
+                                            gui_set_background_image( lv_dropdown_get_selected( obj ) );
     }
 }
 
