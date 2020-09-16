@@ -61,6 +61,7 @@ void powermgm_setup( void ) {
     touch_setup();
     rtcctl_setup();
     blectl_read_config();
+    sound_read_config();
 }
 
 void powermgm_loop( void ) {
