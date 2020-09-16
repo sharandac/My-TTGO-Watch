@@ -111,11 +111,9 @@
      */
     void display_set_block_return_maintile( bool block_return_maintile );
     /**
-<<<<<<< HEAD
-=======
      * @brief get the background for the display
      * 
-     * return image number
+     * @return image number
      */
     uint32_t display_get_background_image( void );
     /**
@@ -125,7 +123,6 @@
      */
     void display_set_background_image( uint32_t background_image );
     /**
->>>>>>> master
      * @brief set display into standby
      */
     void display_standby( void );

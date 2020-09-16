@@ -145,26 +145,21 @@ void gui_set_background_image ( uint32_t background_image ) {
 }
 
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
-    static uint64_t nextmillis = 0;
-
-    if ( nextmillis < millis() ) {
-        nextmillis = millis() + 25;
-        switch ( event ) {
-            case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
-                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
-                                            break;
-            case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
-                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
-                                            break;
-        }
+    switch ( event ) {
+        case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+                                            lv_task_handler();
+                                        }
+                                        else {
+                                            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                        }
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
+                                            lv_task_handler();
+                                        }
+                                        else {
+                                            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                        }
+                                        break;
     }
     return( true );
 }

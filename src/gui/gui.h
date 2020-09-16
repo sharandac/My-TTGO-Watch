@@ -25,7 +25,15 @@
 
     #include <TTGO.h>
     
+    /**
+     * @brief GUI setup
+     */
     void gui_setup( void );
+    /**
+     * @brief set the background
+     * 
+     * @param   background_image    background image index 0...4
+     */
     void gui_set_background_image ( uint32_t background_image);
 
 #endif // _STATUSBAR_H
