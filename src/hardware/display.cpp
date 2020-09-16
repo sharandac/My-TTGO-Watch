@@ -148,11 +148,11 @@ void display_read_config( void ) {
                 log_e("update check deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                display_config.brightness = doc["brightness"].as<uint32_t>();
-                display_config.rotation = doc["rotation"].as<uint32_t>();
-                display_config.timeout = doc["timeout"].as<uint32_t>();
-                display_config.block_return_maintile = doc["block_return_maintile"].as<bool>();
-                display_config.background_image = doc["background_image"].as<uint32_t>();
+                display_config.brightness = doc["brightness"] | DISPLAY_MAX_BRIGHTNESS / 2;
+                display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
+                display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
+                display_config.block_return_maintile = doc["block_return_maintile"] | false;
+                display_config.background_image = doc["background_image"] | 2;
             }        
             doc.clear();
         }
