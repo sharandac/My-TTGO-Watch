@@ -48,7 +48,8 @@
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 
-LV_IMG_DECLARE(bg2);
+
+lv_obj_t *img_bin;
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
@@ -56,12 +57,10 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 void gui_setup( void )
 {
     //Create wallpaper
-    lv_obj_t *img_bin = lv_img_create( lv_scr_act() , NULL );
-    lv_img_set_src( img_bin, &bg2 );
+    img_bin = lv_img_create( lv_scr_act() , NULL );
     lv_obj_set_width( img_bin, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( img_bin, lv_disp_get_ver_res( NULL ) );
     lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
-
     mainbar_setup();
     /* add the four mainbar screens */
     main_tile_setup();
@@ -82,13 +81,11 @@ void gui_setup( void )
 
     statusbar_setup();
     lv_disp_trig_activity( NULL );
-
+    gui_set_background_image( display_get_background_image() );
     keyboard_setup();
 
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
-
-    return;
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -113,27 +110,56 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
-    static uint64_t nextmillis = 0;
+void gui_set_background_image ( uint32_t background_image ) {
+    switch ( background_image ) {
+        case 0:
+            LV_IMG_DECLARE( bg );
+            lv_img_set_src( img_bin, &bg );
+            lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+            lv_obj_set_hidden( img_bin, false );
+            break;
+        case 1:
+            LV_IMG_DECLARE( bg1 );
+            lv_img_set_src( img_bin, &bg1 );
+            lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+            lv_obj_set_hidden( img_bin, false );
+            break;
+        case 2:
+            LV_IMG_DECLARE( bg2 );
+            lv_img_set_src( img_bin, &bg2 );
+            lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+            lv_obj_set_hidden( img_bin, false );
+            break;
+        case 3:
+            LV_IMG_DECLARE( bg3 );
+            lv_img_set_src( img_bin, &bg3 );
+            lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+            lv_obj_set_hidden( img_bin, false );
+            break;
+        case 4:
+            lv_obj_set_hidden( img_bin, true );
+            break;
+        default:
+            lv_obj_set_hidden( img_bin, true ); 
+    }
+}
 
-    if ( nextmillis < millis() ) {
-        nextmillis = millis() + 25;
-        switch ( event ) {
-            case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
-                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
-                                            break;
-            case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
-                                                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
-                                            break;
-        }
+bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
+    switch ( event ) {
+        case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+                                            lv_task_handler();
+                                        }
+                                        else {
+                                            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                        }
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
+                                            lv_task_handler();
+                                        }
+                                        else {
+                                            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                                        }
+                                        break;
     }
     return( true );
 }

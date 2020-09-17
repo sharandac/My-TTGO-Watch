@@ -26,6 +26,7 @@
 #include "powermgm.h"
 #include "motor.h"
 #include "bma.h"
+#include "gui/gui.h"
 
 #include "json_psram_allocator.h"
 
@@ -142,6 +143,7 @@ void display_save_config( void ) {
         doc["rotation"] = display_config.rotation;
         doc["timeout"] = display_config.timeout;
         doc["block_return_maintile"] = display_config.block_return_maintile;
+        doc["background_image"] = display_config.background_image;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -166,10 +168,11 @@ void display_read_config( void ) {
                 log_e("update check deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                display_config.brightness = doc["brightness"].as<uint32_t>();
-                display_config.rotation = doc["rotation"].as<uint32_t>();
-                display_config.timeout = doc["timeout"].as<uint32_t>();
-                display_config.block_return_maintile = doc["block_return_maintile"].as<bool>();
+                display_config.brightness = doc["brightness"] | DISPLAY_MAX_BRIGHTNESS / 2;
+                display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
+                display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
+                display_config.block_return_maintile = doc["block_return_maintile"] | false;
+                display_config.background_image = doc["background_image"] | 2;
             }        
             doc.clear();
         }
@@ -232,4 +235,12 @@ void display_set_rotation( uint32_t rotation ) {
   display_config.rotation = rotation;
   ttgo->tft->setRotation( rotation / 90 );
   lv_obj_invalidate( lv_scr_act() );
+}
+
+uint32_t display_get_background_image( void ) {
+    return( display_config.background_image );
+}
+
+void display_set_background_image( uint32_t background_image ) {
+    display_config.background_image = background_image;
 }

@@ -174,9 +174,6 @@ void weather_widget_sync_Task( void * pvParameters ) {
     vTaskDelete( NULL );
 }
 
-/*
- *
- */
 void weather_save_config( void ) {
     if ( SPIFFS.exists( WEATHER_CONFIG_FILE ) ) {
         SPIFFS.remove( WEATHER_CONFIG_FILE );
@@ -207,9 +204,6 @@ void weather_save_config( void ) {
     file.close();
 }
 
-/*
- *
- */
 void weather_load_config( void ) {
     if ( SPIFFS.exists( WEATHER_JSON_CONFIG_FILE ) ) {        
         fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_READ );

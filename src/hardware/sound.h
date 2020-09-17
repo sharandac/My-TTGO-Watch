@@ -23,12 +23,16 @@
     #define _SOUND_H
 
     #include "TTGO.h"
+    #include "callback.h"
+
+    #define SOUNDCTL_ENABLED           _BV(0)
+    #define SOUNDCTL_VOLUME            _BV(1)
 
     #define SOUND_JSON_CONFIG_FILE    "/sound.json"
 
     typedef struct {
-        bool enable = true;
         uint8_t volume = 50;
+        bool enable = true;
     } sound_config_t;
 
     /**
@@ -106,6 +110,16 @@
      * @param volume from 0-100
      */
     void sound_set_volume_config( uint8_t volume );
+    /**
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event           possible values: SOUNDCTL_ENABLED, SOUNDCTL_VOLUME
+     * @param   callback_func    pointer to the callback function 
+     * @param   id              programm id
+     * 
+     * @return  true if success, false if failed
+     */
+    bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
 
 

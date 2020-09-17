@@ -11,6 +11,11 @@
 
 A smartwatch based on ESP32 from LilyGo. Currently under development.
 
+# Telegram chatgroup
+
+Telegram chatgroup is here:
+https://t.me/TTGO_Watch
+
 # Install
 
 Clone this repository and open it with platformIO. Build and upload. On a terminal in vscode you can do it with
@@ -117,6 +122,7 @@ and the following projects:
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [pubsubclient](https://github.com/knolleary/pubsubclient)<br>
+[ssspeq](https://github.com/ssspeq)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>

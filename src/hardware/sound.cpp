@@ -26,17 +26,17 @@
 #include "wifictl.h"
 
 #include "sound.h"
+#include "callback.h"
+#include "json_psram_allocator.h"
 
 // based on https://github.com/earlephilhower/ESP8266Audio
 #include <SPIFFS.h>
 #include "AudioFileSourceSPIFFS.h"
 #include "AudioFileSourcePROGMEM.h"
-
 #include "AudioFileSourceID3.h"
 #include "AudioGeneratorMP3.h"
 #include "AudioGeneratorWAV.h"
 #include <AudioGeneratorMIDI.h>
-
 #include "AudioOutputI2S.h"
 #include <ESP8266SAM.h>
 
@@ -49,15 +49,16 @@ AudioGeneratorWAV *wav;
 ESP8266SAM *sam;
 AudioFileSourcePROGMEM *progmem_file;
 
-#include "json_psram_allocator.h"
-
 bool sound_init = false;
 bool is_speaking = false;
 
 sound_config_t sound_config;
 
+callback_t *sound_callback = NULL;
+
 bool sound_powermgm_event_cb( EventBits_t event, void *arg );
 bool sound_powermgm_loop_cb( EventBits_t event, void *arg );
+bool sound_send_event_cb( EventBits_t event, void*arg );
 
 void sound_setup( void ) {
     if ( sound_init )
@@ -86,6 +87,9 @@ void sound_setup( void ) {
 
     sound_set_enabled( sound_config.enable );
 
+    sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
+    sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+
     sound_init = true;
 }
 
@@ -104,6 +108,21 @@ bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
 bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
     sound_loop();
     return( true );
+}
+
+bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( sound_callback == NULL ) {
+        sound_callback = callback_init( "sound" );
+        if ( sound_callback == NULL ) {
+            log_e("sound callback alloc failed");
+            while(true);
+        }
+    }    
+    return( callback_register( sound_callback, event, callback_func, id ) );
+}
+
+bool sound_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( sound_callback, event, arg ) );
 }
 
 void sound_standby( void ) {
@@ -220,9 +239,8 @@ void sound_read_config( void ) {
             log_e("sound config deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            sound_config.enable = doc["enable"];
-            sound_config.volume = doc["volume"];
-            log_i("volume: %d", sound_config.volume);
+            sound_config.enable = doc["enable"] | false;
+            sound_config.volume = doc["volume"] | 100;
         }        
         doc.clear();
     }
@@ -241,7 +259,7 @@ void sound_set_enabled_config( bool enable ) {
     else {
         sound_set_enabled( false );
     }
-    sound_save_config();
+    sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable ); 
 }
 
 uint8_t sound_get_volume_config( void ) {
@@ -249,10 +267,12 @@ uint8_t sound_get_volume_config( void ) {
 }
 
 void sound_set_volume_config( uint8_t volume ) {
+    sound_config.volume = volume;
+        
     if ( sound_config.enable && sound_init ) {
         log_i("Setting sound volume to: %d", volume);
-        sound_config.volume = volume;
         // limiting max gain to 3.5 (max gain is 4.0)
-        out->SetGain(3.5f * (sound_config.volume / 100.0f));
+        out->SetGain(3.5f * ( sound_config.volume / 100.0f ));
     }
+    sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume ); 
 }
