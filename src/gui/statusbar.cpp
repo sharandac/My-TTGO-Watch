@@ -471,17 +471,26 @@ void statusbar_refresh( void ) {
 }
 
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
-    if ( event == LV_EVENT_PRESSED ) {
-        lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
-        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_50);
-        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-    } 
-    else if ( event == LV_EVENT_RELEASED ) {
-        lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
-        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
-        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+    static bool expand = false;
+
+    switch( event ) {
+        case LV_EVENT_PRESSED:
+            if ( !expand ) {
+                lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
+                lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_50);
+                lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+                lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+                expand = true;
+            } 
+            else {
+                lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
+                lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
+                lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+                lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+                expand = false;
+            }
+        default:
+            break;
     }
 }
 
