@@ -156,15 +156,13 @@ void statusbar_setup( void )
     lv_style_copy( &style, &statusbarstyle[ STATUSBAR_STYLE_GRAY ] );
 
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_RELEASED, LV_OPA_100 );
-    lv_style_set_image_recolor( &style, LV_BTN_STATE_RELEASED, LV_COLOR_GRAY );
+    lv_style_set_image_recolor( &style, LV_BTN_STATE_RELEASED, LV_COLOR_GREEN );
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_PRESSED, LV_OPA_100 );
-    lv_style_set_image_recolor( &style, LV_BTN_STATE_PRESSED, LV_COLOR_GREEN );
+    lv_style_set_image_recolor( &style, LV_BTN_STATE_PRESSED, LV_COLOR_GRAY );
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_CHECKED_RELEASED, LV_OPA_100 );
     lv_style_set_image_recolor( &style, LV_BTN_STATE_CHECKED_RELEASED, LV_COLOR_GRAY );
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_OPA_100 );
-    lv_style_set_image_recolor( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_COLOR_GRAY );
-    lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_DISABLED, LV_OPA_100);
-    lv_style_set_image_recolor( &style, LV_BTN_STATE_DISABLED, LV_COLOR_GREEN );
+    lv_style_set_image_recolor( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_COLOR_GREEN );
 
     statusbar_wifi = lv_imgbtn_create( statusbar, NULL);
     lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_RELEASED, &wifi_64px );
@@ -173,7 +171,7 @@ void statusbar_setup( void )
     lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_CHECKED_PRESSED, &wifi_64px );
     lv_imgbtn_set_checkable (statusbar_wifi, true );
     lv_obj_add_style( statusbar_wifi, LV_IMGBTN_PART_MAIN, &style );
-    lv_obj_align( statusbar_wifi, statusbar, LV_ALIGN_CENTER, 0, STATUSBAR_EXPAND_HEIGHT / 2 );
+    lv_obj_align( statusbar_wifi, statusbar, LV_ALIGN_IN_LEFT_MID, 32, STATUSBAR_EXPAND_HEIGHT / 2 );
     lv_obj_set_event_cb( statusbar_wifi, statusbar_wifi_event_cb );
     lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_PRESSED );
 
@@ -191,6 +189,17 @@ void statusbar_setup( void )
     lv_label_set_text(statusbar_wifiiplabel, "");
     lv_obj_align(statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
+    statusbar_bluetooth = lv_imgbtn_create( statusbar, NULL);
+    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_RELEASED, &bluetooth_64px );
+    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_PRESSED, &bluetooth_64px );
+    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_CHECKED_RELEASED, &bluetooth_64px );
+    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_CHECKED_PRESSED, &bluetooth_64px );
+    lv_imgbtn_set_checkable (statusbar_bluetooth, true );
+    lv_obj_add_style( statusbar_bluetooth, LV_IMGBTN_PART_MAIN, &style );
+    lv_obj_align( statusbar_bluetooth, statusbar, LV_ALIGN_IN_RIGHT_MID, -32, STATUSBAR_EXPAND_HEIGHT / 2 );
+    lv_obj_set_event_cb( statusbar_bluetooth, statusbar_bluetooth_event_cb );
+    lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_CHECKED_PRESSED );
+
     lv_obj_t *statusbar_stepicon = lv_img_create(statusbar, NULL );
     lv_img_set_src( statusbar_stepicon, &foot_16px );
     lv_obj_reset_style_list( statusbar_stepicon, LV_OBJ_PART_MAIN );
@@ -206,11 +215,12 @@ void statusbar_setup( void )
     statusbar_hide_icon( STATUSBAR_BELL );
     statusbar_hide_icon( STATUSBAR_WARNING );
     statusbar_hide_icon( STATUSBAR_WIFI );
+    statusbar_hide_icon( STATUSBAR_BLUETOOTH );
     statusbar_hide_icon( STATUSBAR_ALARM );
     statusbar_hide_icon( STATUSBAR_VOLUME );
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 
-    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_PIN_AUTH , statusbar_blectl_event_cb, "statusbar bluetooth" );
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, statusbar_blectl_event_cb, "statusbar bluetooth" );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bmactl_event_cb, "statusbar stepcounter" );
@@ -319,6 +329,13 @@ bool statusbar_rtcctl_event_cb( EventBits_t event, void *arg ) {
 
 bool statusbar_blectl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
+        case BLECTL_ON:             statusbar_show_icon( STATUSBAR_BLUETOOTH );
+                                    statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
+                                    lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_RELEASED );
+                                    break;
+        case BLECTL_OFF:            statusbar_hide_icon( STATUSBAR_BLUETOOTH );
+                                    lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_CHECKED_RELEASED );
+                                    break;
         case BLECTL_CONNECT:        statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_WHITE );
                                     break;
         case BLECTL_DISCONNECT:     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
@@ -382,8 +399,12 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
 void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     if ( event == LV_EVENT_VALUE_CHANGED ) {
         switch ( lv_imgbtn_get_state( wifi ) ) {
-            case( LV_BTN_STATE_RELEASED ):   break;
-            case( LV_BTN_STATE_PRESSED ):    break;
+            case( LV_BTN_STATE_CHECKED_RELEASED ):   
+                blectl_off();
+                break;
+            case( LV_BTN_STATE_RELEASED ):    
+                blectl_on();
+                break;
             default:                        break;
         }
     }

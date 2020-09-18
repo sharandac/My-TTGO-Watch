@@ -71,7 +71,11 @@ void wifictl_setup( void ) {
 
     wifi_init = true;
 
+#if defined( BOARD_HAS_PSRAM )
     wifictl_networklist = (networklist*)ps_calloc( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
+#else
+    wifictl_networklist = (networklist*)calloc( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
+#endif
     if( !wifictl_networklist ) {
       log_e("wifictl_networklist calloc faild");
       while(true);
