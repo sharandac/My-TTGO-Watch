@@ -85,7 +85,7 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
 
 void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
-void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event );
+void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event );
 void statusbar_volume_slider_event_handler_cb( lv_obj_t *sound_slider, lv_event_t event );
 void statusbar_brightness_slider_event_handler_cb( lv_obj_t *brightness_slider, lv_event_t event );
 
@@ -284,7 +284,6 @@ void statusbar_setup( void )
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bmactl_event_cb, "statusbar stepcounter" );
     pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, statusbar_pmuctl_event_cb, "statusbar pmu");
     sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, statusbar_soundctl_event_cb, "statusbar sound");
-    //lv_slider_set_value( statusbar_volume_slider, sound_get_volume_config(), LV_ANIM_OFF );
     lv_slider_set_value( statusbar_brightness_slider, display_get_brightness(), LV_ANIM_OFF );
     statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
 }
@@ -419,12 +418,10 @@ bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
         case WIFICTL_CONNECT_IP:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_WHITE );
                                     statusbar_wifi_set_ip_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
-                                    //lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_RELEASED );
                                     break;
         case WIFICTL_DISCONNECT:    statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
                                     statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
-                                    //lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_RELEASED );
                                     break;
         case WIFICTL_OFF:           statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
                                     statusbar_hide_icon( STATUSBAR_WIFI );
@@ -463,9 +460,9 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     statusbar_refresh();
 }
 
-void statusbar_bluetooth_event_cb( lv_obj_t *wifi, lv_event_t event ) {
+void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event ) {
     if ( event == LV_EVENT_VALUE_CHANGED ) {
-        switch ( lv_imgbtn_get_state( wifi ) ) {
+        switch ( lv_imgbtn_get_state( bluetooth ) ) {
             case( LV_BTN_STATE_CHECKED_RELEASED ):   
                 blectl_off();
                 break;
@@ -575,7 +572,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
         lv_obj_add_style( statusbar_volume_cont, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
         lv_obj_reset_style_list( statusbar_brightness_cont, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar_brightness_cont, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-        //lv_obj_set_hidden( statusbar_base, false );
     } 
     else if ( event == LV_EVENT_RELEASED ) {
         lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
@@ -588,7 +584,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
         lv_obj_add_style( statusbar_volume_cont, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
         lv_obj_reset_style_list( statusbar_brightness_cont, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar_brightness_cont, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-        //lv_obj_set_hidden( statusbar_base, true );
         //Save config here if anything has changed
         if( should_save_brightness_config ){
             display_save_config();
