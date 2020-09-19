@@ -314,9 +314,8 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->setMinInterval( 750 );
     pServer->getAdvertising()->setMaxInterval( 1250 );
 
-    if ( blectl_get_advertising() ) {
-        pServer->getAdvertising()->start();
-        log_i("BLE advertising...");
+    if ( blectl_get_autoon() ) {
+        blectl_on();
     }
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "blectl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "blectl loop" );
@@ -326,18 +325,28 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
     bool retval = true;
 
     switch( event ) {
-        case POWERMGM_STANDBY:          if ( blectl_get_enable_on_standby() ) {
-                                            retval = false;
-                                            log_w("standby blocked by \"enable_on_standby\" option");
-                                        }
-                                        else {
-                                            log_i("go standby");
-                                        }
-                                        break;
-        case POWERMGM_WAKEUP:           log_i("go wakeup");
-                                        break;
-        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
-                                        break;
+        case POWERMGM_STANDBY:          
+            if ( blectl_get_enable_on_standby() ) {
+                retval = false;
+                log_w("standby blocked by \"enable_on_standby\" option");
+            }
+            else {
+                blectl_off();
+                log_i("go standby");
+            }
+            break;
+        case POWERMGM_WAKEUP:           
+            if ( !blectl_get_enable_on_standby() ) {
+                blectl_on();
+            }
+            log_i("go wakeup");
+            break;
+        case POWERMGM_SILENCE_WAKEUP:   
+            if ( !blectl_get_enable_on_standby() ) {
+                blectl_on();
+            }
+            log_i("go silence wakeup");
+            break;
     }
     return( retval );
 }
@@ -389,7 +398,7 @@ void blectl_set_enable_on_standby( bool enable_on_standby ) {
     blectl_save_config();
 }
 
-void blectl_set_advertising( bool advertising ) {
+void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_save_config();
     if ( blectl_get_event( BLECTL_CONNECT ) )
@@ -424,12 +433,29 @@ void blectl_set_txpower( int32_t txpower ) {
     blectl_save_config();
 }
 
+void blectl_set_autoon( bool autoon ) {
+    blectl_config.autoon = autoon;
+
+    if( autoon ) {
+        blectl_on();
+    }
+    else {
+        blectl_off();
+    }
+
+    blectl_save_config();
+}
+
 int32_t blectl_get_txpower( void ) {
     return( blectl_config.txpower );
 }
 
 bool blectl_get_enable_on_standby( void ) {
     return( blectl_config.enable_on_standby );
+}
+
+bool blectl_get_autoon( void ) {
+    return( blectl_config.autoon );
 }
 
 bool blectl_get_advertising( void ) {
@@ -445,6 +471,7 @@ void blectl_save_config( void ) {
     else {
         SpiRamJsonDocument doc( 1000 );
 
+        doc["autoon"] = blectl_config.autoon;
         doc["advertising"] = blectl_config.advertising;
         doc["enable_on_standby"] = blectl_config.enable_on_standby;
         doc["tx_power"] = blectl_config.txpower;
@@ -472,6 +499,7 @@ void blectl_read_config( void ) {
                 log_e("blectl deserializeJson() failed: %s", error.c_str() );
             }
             else {                
+                blectl_config.autoon = doc["autoon"] | true;
                 blectl_config.advertising = doc["advertising"] | true;
                 blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
                 blectl_config.txpower = doc["tx_power"] | 1;
@@ -517,6 +545,21 @@ void blectl_send_msg( char *msg ) {
         blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, blectl is send another msg or not connected" );
         return;
     }
+}
+
+void blectl_on( void ) {
+    if ( blectl_config.advertising ) {
+        pServer->getAdvertising()->start();
+    }
+    else {
+        pServer->getAdvertising()->stop();
+    }
+    blectl_send_event_cb( BLECTL_ON, (void *)NULL );
+}
+
+void blectl_off( void ) {
+    pServer->getAdvertising()->stop();
+    blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
 }
 
 void blectl_loop ( void ) {
