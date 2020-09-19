@@ -70,6 +70,7 @@
     #define BLECTL_CHUNKDELAY       50
 
     typedef struct {
+        bool autoon = true;
         bool advertising = true;
         bool enable_on_standby = false;
         int32_t txpower = 1;
@@ -195,5 +196,25 @@
      * @return  power from 0..4, from -12db to 0db in 3db steps
      */
     int32_t blectl_get_txpower( void );
+    /**
+     * @brief enable the bluettoth stack
+     */
+    void blectl_on( void );
+    /**
+     * @brief disable the bluetooth stack
+     */
+    void blectl_off( void );
+    /**
+     * @brief get the current enable config
+     * 
+     * @return true if bl enabled, false if bl disabled
+     */
+    bool blectl_get_autoon( void );
+    /**
+     * @brief set the current bl enable config
+     * 
+     * @param enable    true if enabled, false if disable
+     */
+    void blectl_set_autoon( bool autoon );
 
 #endif // _BLECTL_H

@@ -25,12 +25,11 @@
 callback_t *callback_init( const char *name ) {
     callback_t *callback = NULL;
     
-    if ( psramFound() ) {
-        callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
-    }
-    else {
-        callback = (callback_t*)calloc( sizeof( callback_t ), 1 );
-    }
+#if defined( BOARD_HAS_PSRAM )
+    callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
+#else
+    callback = (callback_t*)calloc( sizeof( callback_t ), 1 );
+#endif // BOARD_HAS_PSRAM
     if ( callback == NULL ) {
         log_e("callback_t structure calloc faild for: %s", name );
     }
@@ -55,12 +54,11 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
 
     if ( callback->table == NULL ) {
 
-        if ( psramFound() ) {
-            callback->table = ( callback_table_t * )ps_malloc( sizeof( callback_table_t ) * callback->entrys );
-        }
-        else {
-            callback->table = ( callback_table_t * )malloc( sizeof( callback_table_t ) * callback->entrys );
-        }
+#if defined( BOARD_HAS_PSRAM )
+        callback->table = ( callback_table_t * )ps_malloc( sizeof( callback_table_t ) * callback->entrys );
+#else
+        callback->table = ( callback_table_t * )malloc( sizeof( callback_table_t ) * callback->entrys );
+#endif // BOARD_HAS_PSRAM
 
         if ( callback->table == NULL ) {
             log_e("callback_table_t malloc faild for: %s", id );
@@ -71,12 +69,11 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     else {
         callback_table_t *new_callback_table = NULL;
 
-        if ( psramFound() ) {
+#if defined( BOARD_HAS_PSRAM )
             new_callback_table = ( callback_table_t * )ps_realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
-        }
-        else {
+#else
             new_callback_table = ( callback_table_t * )realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
-        }
+#endif // BOARD_HAS_PSRAM
 
         if ( new_callback_table == NULL ) {
             log_e("callback_table_t realloc faild for: %s", id );
