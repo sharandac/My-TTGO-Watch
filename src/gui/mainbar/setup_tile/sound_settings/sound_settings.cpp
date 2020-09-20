@@ -51,6 +51,8 @@ static void exit_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sound_volume_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sound_enable_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
+bool sound_soundctl_event_cb( EventBits_t event, void *arg );
+
 void sound_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     sound_tile_num = mainbar_add_app_tile( 1, 2, "sound setup" );
@@ -133,6 +135,8 @@ void sound_settings_tile_setup( void ) {
 
     lv_tileview_add_element( sound_settings_tile, sound_enable_cont );
     lv_tileview_add_element( sound_settings_tile, sound_volume_cont );
+
+    sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, sound_soundctl_event_cb, "Soundsettingstile");
 }
 
 static void enter_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -175,4 +179,27 @@ static void sound_volume_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                             sound_set_volume_config( lv_slider_get_value( obj ) );
                                             break;
     }
+}
+
+bool sound_soundctl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case SOUNDCTL_ENABLED:  
+            if ( *(bool*)arg ) {
+                lv_switch_on( sound_enable, LV_ANIM_OFF);
+                lv_img_set_src( sound_icon, &sound_32px );
+            }
+            else {
+                lv_switch_off( sound_enable, LV_ANIM_OFF);
+                lv_img_set_src( sound_icon, &sound_mute_32px );
+            }
+            break;
+        case SOUNDCTL_VOLUME:
+            lv_slider_set_value( sound_volume_slider, *(int8_t*)arg, LV_ANIM_OFF );
+            char temp[16]="";
+            snprintf( temp, sizeof( temp ), "volume %d", lv_slider_get_value( sound_volume_slider ) );
+            lv_label_set_text( sound_volume_slider_label, temp );
+            lv_obj_align( sound_volume_slider_label, sound_volume_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+            break;
+    }
+    return( true );
 }
