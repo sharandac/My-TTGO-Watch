@@ -22,6 +22,10 @@
 
 #include "callback.h"
 
+void  display_record_event( callback_t *callback, EventBits_t event );
+
+static bool display_event_logging = false;
+
 callback_t *callback_init( const char *name ) {
     callback_t *callback = NULL;
     
@@ -92,7 +96,7 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     return( retval );
 }
 
-void  record_event( callback_t *callback, EventBits_t event ) {
+void display_record_event( callback_t *callback, EventBits_t event ) {
     time_t now;
     struct tm info;
 
@@ -156,7 +160,9 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
         return( retval );
     }
 
-    record_event(callback, event);
+    if( display_event_logging ) {
+        display_record_event( callback, event );
+    }
 
     if ( callback->entrys == 0 ) {
         log_w("no callback found");
@@ -203,4 +209,8 @@ bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) 
         }
     }
     return( retval );
+}
+
+void display_event_logging_enable( bool enable ) {
+    display_event_logging = enable;
 }
