@@ -22,6 +22,10 @@
 
 #include "callback.h"
 
+void  display_record_event( callback_t *callback, EventBits_t event );
+
+static bool display_event_logging = false;
+
 callback_t *callback_init( const char *name ) {
     callback_t *callback = NULL;
     
@@ -92,12 +96,72 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     return( retval );
 }
 
+void display_record_event( callback_t *callback, EventBits_t event ) {
+    time_t now;
+    struct tm info;
+
+    time( &now );
+    localtime_r( &now, &info );
+
+    char event_log_filename[32];
+    size_t written = strftime(event_log_filename, sizeof(event_log_filename), "/event_log_%Y-%m-%d.csv", &info);
+    if(written == 0){
+        log_e("Can't convert time to filename" );
+        return;
+    }
+
+    bool write_header = !(SPIFFS.exists(event_log_filename));
+
+    fs::File file = SPIFFS.open( event_log_filename, FILE_APPEND );
+
+    if (!file) {
+        log_e("Can't open file: %s!", event_log_filename );
+        return;
+    }
+
+    if (write_header) {
+        file.println("Date\tTime\tFirmware\tUptime_ms\tCallback\tEvent\tFreeHeap\tBatt_V\tCharge_C\tDischarge_C\tBatt_%\tCharging_mA\tDischarging_mA\tPower_mW\tAXP_Temp_degC\tBMA_Temp_degC" );
+    }
+
+    if (! file.print( &info, "%F%t%T%t" ) ) {
+        log_e("Failed to append to event log file: %s!", event_log_filename );
+    } else {
+        AXP20X_Class *power = TTGOClass::getWatch()->power;
+        BMA *bma = TTGOClass::getWatch()->bma;
+        char log_line[256]="";
+        snprintf( log_line, sizeof( log_line ), "%s\t%lu\t%s\t%04x\t%u\t%0.2f\t%u\t%u\t%d\t%0.1f\t%0.1f\t%0.1f\t%0.1f\t%0.1f",
+            __FIRMWARE__,
+            millis(), 
+            callback->name,
+            event,
+            ESP.getFreeHeap(),
+            power->getBattVoltage() / 1000.0,
+            power->getBattChargeCoulomb(),
+            power->getBattDischargeCoulomb(),
+            power->getBattPercentage(),
+            power->getBattChargeCurrent(),
+            power->getBattDischargeCurrent(),
+            power->getBattInpower(),
+            power->getTemp(), // need to subtract 144.7 till this is resolved: https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library/issues/76
+            bma->temperature()
+        );
+        if (! file.println(log_line) ) {
+            log_e("Failed to append to event log file: %s!", event_log_filename );
+        }
+    }
+    file.close();
+}
+
 bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
     bool retval = false;
 
     if ( callback == NULL ) {
         log_e("no callback structure found");
         return( retval );
+    }
+
+    if( display_event_logging ) {
+        display_record_event( callback, event );
     }
 
     if ( callback->entrys == 0 ) {
@@ -145,4 +209,8 @@ bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) 
         }
     }
     return( retval );
+}
+
+void display_event_logging_enable( bool enable ) {
+    display_event_logging = enable;
 }
