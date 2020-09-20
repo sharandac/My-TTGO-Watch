@@ -77,5 +77,11 @@
      * @return  true if success, false if failed
      */
     bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg );
+    /**
+     * @brief enable/disable SPIFFS event logging
+     * 
+     * @param enable    true if logging enabled, false if logging disabled
+     */
+    void display_event_logging_enable( bool enable );
 
 #endif // _CALLBACK_H

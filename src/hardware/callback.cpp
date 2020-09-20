@@ -160,13 +160,13 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
         return( retval );
     }
 
-    if( display_event_logging ) {
-        display_record_event( callback, event );
-    }
-
     if ( callback->entrys == 0 ) {
         log_w("no callback found");
         return( retval );
+    }
+
+    if( display_event_logging ) {
+        display_record_event( callback, event );
     }
 
     retval = true;
