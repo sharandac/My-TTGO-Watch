@@ -167,8 +167,6 @@ void IRController_main_setup( uint32_t tile_num ) {
     lv_obj_t *IRController_main_rExit_label = lv_label_create( IRController_main_rExit_btn, NULL);
     lv_label_set_text( IRController_main_rExit_label, "Exit");    
 
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW); //No Current Limiting so keep it off
 
     lv_style_set_text_opa( &IRController_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
     lv_style_set_text_font( &IRController_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
@@ -201,6 +199,8 @@ static void exit_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) 
 static void pwr_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_pwr, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
@@ -210,7 +210,8 @@ static void pwr_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void mute_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_mute, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
@@ -221,7 +222,8 @@ static void mute_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) 
 static void source_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_scr, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
@@ -231,7 +233,8 @@ static void source_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event 
 static void volup_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_vup, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
@@ -242,7 +245,8 @@ static void volup_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event )
 static void voldn_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_vdown, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
@@ -252,7 +256,8 @@ static void voldn_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event )
 static void rExit_IRController_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-
+                                        pinMode(13, OUTPUT);
+                                        digitalWrite(13, LOW); //No Current Limiting so keep it off            
                                         irsend.sendRaw(S_exit, 68, 38);
                                         delay(50);
                                         digitalWrite(13, LOW); //No Current Limiting so keep it off
