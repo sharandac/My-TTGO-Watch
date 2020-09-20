@@ -94,9 +94,9 @@
     /**
      * @brief registers a callback function which is called on a corresponding event
      * 
-     * @param   event   possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT
-     * @param   rtc_event_cb   pointer to the callback function
-     * @param   id      program id
+     * @param   event           possible values: BMACTL_DOUBLECLICK, BMACTL_STEPCOUNTER and BMACTL_TILT
+     * @param   callback_func   pointer to the callback function
+     * @param   id              program id
      * 
      * @return  true if success, false if failed
      */

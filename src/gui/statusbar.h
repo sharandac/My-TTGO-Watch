@@ -27,7 +27,6 @@
 
     #define STATUSBAR_HEIGHT            26
     #define STATUSBAR_EXPAND_HEIGHT     200
-    #define STATUSBAR_PAGE_HEIGHT     160
 
     typedef struct {
         lv_obj_t *icon;
