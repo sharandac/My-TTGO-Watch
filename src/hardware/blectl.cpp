@@ -326,25 +326,18 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
 
     switch( event ) {
         case POWERMGM_STANDBY:          
-            if ( blectl_get_enable_on_standby() ) {
+            if ( blectl_get_enable_on_standby() && blectl_get_event( BLECTL_ON ) ) {
                 retval = false;
                 log_w("standby blocked by \"enable_on_standby\" option");
             }
             else {
-                blectl_off();
                 log_i("go standby");
             }
             break;
         case POWERMGM_WAKEUP:           
-            if ( !blectl_get_enable_on_standby() ) {
-                blectl_on();
-            }
             log_i("go wakeup");
             break;
         case POWERMGM_SILENCE_WAKEUP:   
-            if ( !blectl_get_enable_on_standby() ) {
-                blectl_on();
-            }
             log_i("go silence wakeup");
             break;
     }
@@ -442,7 +435,6 @@ void blectl_set_autoon( bool autoon ) {
     else {
         blectl_off();
     }
-
     blectl_save_config();
 }
 
@@ -548,17 +540,23 @@ void blectl_send_msg( char *msg ) {
 }
 
 void blectl_on( void ) {
+    blectl_config.autoon = true;
     if ( blectl_config.advertising ) {
         pServer->getAdvertising()->start();
     }
     else {
         pServer->getAdvertising()->stop();
     }
+    blectl_set_event( BLECTL_ON );
+    blectl_clear_event( BLECTL_OFF );
     blectl_send_event_cb( BLECTL_ON, (void *)NULL );
 }
 
 void blectl_off( void ) {
+    blectl_config.autoon = false;
     pServer->getAdvertising()->stop();
+    blectl_set_event( BLECTL_OFF );
+    blectl_clear_event( BLECTL_ON );
     blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
 }
 

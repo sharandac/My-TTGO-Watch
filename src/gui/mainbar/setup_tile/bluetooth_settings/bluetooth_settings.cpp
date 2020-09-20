@@ -49,6 +49,7 @@ LV_IMG_DECLARE(info_fail_16px);
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+bool blectl_onoff_event_cb( EventBits_t event, void *arg );
 static void bluetooth_enable_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
@@ -141,7 +142,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( txpower_list, txpower_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( txpower_list, bluetooth_txpower_event_handler );
 
-    if ( blectl_get_advertising() ) {
+    if ( blectl_get_autoon() ) {
         lv_switch_on( bluetooth_enable_onoff, LV_ANIM_OFF );
     }
     else {
@@ -168,6 +169,20 @@ void bluetooth_settings_tile_setup( void ) {
     bluetooth_pairing_tile_setup();
     bluetooth_call_tile_setup();
     bluetooth_message_tile_setup();
+
+    blectl_register_cb( BLECTL_ON | BLECTL_OFF, blectl_onoff_event_cb, "bluetooth settings");
+}
+
+bool blectl_onoff_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BLECTL_ON:
+            lv_switch_on( bluetooth_enable_onoff, LV_ANIM_OFF );
+            break;
+        case BLECTL_OFF:
+            lv_switch_off( bluetooth_enable_onoff, LV_ANIM_OFF );
+            break;
+    }
+    return( true );
 }
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
