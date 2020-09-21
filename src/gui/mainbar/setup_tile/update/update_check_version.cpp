@@ -27,7 +27,9 @@
 
 char *firmwarehost = NULL;
 char *firmwarefile = NULL;
-char* firmwareurl = NULL;
+char *firmwareurl = NULL;
+char *firmwaremd5 = NULL;
+
 int64_t firmwareversion = -1;
 
 int64_t update_check_new_version( char *url ) {
@@ -35,7 +37,6 @@ int64_t update_check_new_version( char *url ) {
 
     HTTPClient check_update_client;
 
-    check_update_client.useHTTP10( true );
     check_update_client.setUserAgent( "ESP32-" __FIRMWARE__ );
     check_update_client.begin( url );
     httpcode = check_update_client.GET();
@@ -46,7 +47,7 @@ int64_t update_check_new_version( char *url ) {
         return( -1 );
     }
 
-    SpiRamJsonDocument doc( check_update_client.getSize() * 2 );
+    SpiRamJsonDocument doc( check_update_client.getSize() * 4 );
 
     DeserializationError error = deserializeJson( doc, check_update_client.getStream() );
     if (error) {
@@ -120,6 +121,27 @@ int64_t update_check_new_version( char *url ) {
 
     if ( doc["version"] ) {
         firmwareversion = atoll( doc["version"] );
+        log_i("firmwareversion: %d", firmwareversion );
+    }
+
+    if ( doc["md5"] ) {
+        if ( firmwaremd5 == NULL ) {
+            firmwaremd5 = (char*)ps_calloc( strlen( doc["md5"] ) + 1, 1 );
+            if ( firmwaremd5 == NULL ) {
+                log_e("ps_calloc error");
+                while(true);
+            }
+        }
+        else {
+            char * tmp_firmwaremd5 = (char*)ps_realloc( firmwaremd5, strlen( doc["md5"] ) + 1 );
+            if ( tmp_firmwaremd5 == NULL ) {
+                log_e("ps_realloc error");
+                while(true);
+            }
+            firmwaremd5 = tmp_firmwaremd5;
+        }
+        strcpy( firmwaremd5, doc["md5"] );
+        log_i("md5: %s", firmwaremd5 );
     }
 
     doc.clear();
@@ -129,6 +151,13 @@ int64_t update_check_new_version( char *url ) {
 const char* update_get_url( void ) {
     if ( firmwareversion > 0 ) {
         return( (const char*)firmwareurl );
+    }
+    return( NULL );
+}
+
+const char* update_get_md5( void ) {
+    if ( firmwareversion > 0 ) {
+        return( (const char*)firmwaremd5 );
     }
     return( NULL );
 }

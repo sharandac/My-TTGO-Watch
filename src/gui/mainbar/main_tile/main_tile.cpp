@@ -27,6 +27,7 @@
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
 #include "main_tile.h"
 #include "hardware/timesync.h"
+#include "hardware/powermgm.h"
 
 static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
@@ -48,6 +49,7 @@ lv_task_t * main_tile_task;
 void main_tile_update_task( lv_task_t * task );
 void main_tile_align_widgets( void );
 void main_tile_format_time( char *, size_t, struct tm * );
+bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
 
 void main_tile_setup( void ) {
     main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
@@ -120,6 +122,17 @@ void main_tile_setup( void ) {
     }
 
     main_tile_task = lv_task_create( main_tile_update_task, 500, LV_TASK_PRIO_MID, NULL );
+
+    powermgm_register_cb( POWERMGM_WAKEUP , main_tile_powermgm_event_cb, "main tile time update" );
+}
+
+bool main_tile_powermgm_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case POWERMGM_WAKEUP:
+            main_tile_update_time();
+            break;
+    }
+    return( true );
 }
 
 lv_obj_t *main_tile_register_widget( void ) {
@@ -179,7 +192,7 @@ uint32_t main_tile_get_tile_num( void ) {
     return( main_tile_num );
 }
 
-void main_tile_update_task( lv_task_t * task ) {
+void main_tile_update_time( void ) {
     struct tm  info;
     char time_str[64]="";
     static char *old_time_str = NULL;
@@ -205,7 +218,11 @@ void main_tile_update_task( lv_task_t * task ) {
         strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
         lv_label_set_text( datelabel, time_str );
         lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-    }
+    }    
+}
+
+void main_tile_update_task( lv_task_t * task ) {
+    main_tile_update_time();
 }
 
 void main_tile_format_time( char * buf, size_t buf_len, struct tm * info ) {

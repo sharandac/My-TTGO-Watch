@@ -48,36 +48,47 @@ void timesync_setup( void ) {
 
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          log_i("go standby");
-                                        timesyncToRTC();
-                                        break;
-        case POWERMGM_WAKEUP:           log_i("go wkaeup");
-                                        timesyncToSystem();
-                                        break;
-        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
-                                        timesyncToSystem();
-                                        break;
+        case POWERMGM_STANDBY:          
+            // only update rtc time when an NTP timesync was success
+            if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_OK ) {
+                timesyncToRTC();
+                xEventGroupClearBits( time_event_handle, TIME_SYNC_OK );
+                log_i("go standby, timesync to RTC");
+            }
+            else {
+                log_i("go standby");
+            }
+            break;
+        case POWERMGM_WAKEUP:           
+            log_i("go wkaeup");
+            timesyncToSystem();
+            break;
+        case POWERMGM_SILENCE_WAKEUP:   
+            log_i("go silence wakeup");
+            timesyncToSystem();
+            break;
     }
     return( true );
 }
 
 bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
-        case WIFICTL_CONNECT:       if ( timesync_config.timesync ) {
-                                        if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
-                                            break;
-                                        }
-                                        else {
-                                            xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-                                            xTaskCreate(  timesync_Task,      /* Function to implement the task */
-                                                        "timesync Task",    /* Name of the task */
-                                                        2000,              /* Stack size in words */
-                                                        NULL,               /* Task input parameter */
-                                                        1,                  /* Priority of the task */
-                                                        &_timesync_Task );  /* Task handle. */
-                                        }
-                                    }
-                                    break;
+        case WIFICTL_CONNECT:       
+            if ( timesync_config.timesync ) {
+            if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
+                break;
+            }
+            else {
+                xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+                xTaskCreate(  timesync_Task,      /* Function to implement the task */
+                            "timesync Task",    /* Name of the task */
+                            2000,              /* Stack size in words */
+                            NULL,               /* Task input parameter */
+                            1,                  /* Priority of the task */
+                            &_timesync_Task );  /* Task handle. */
+            }
+        }
+        break;
     }
     return( true );
 }
@@ -218,6 +229,9 @@ void timesync_Task( void * pvParameters ) {
 
     if( !getLocalTime( &info ) ) {
         log_e("Failed to obtain time" );
+    }
+    else {
+        xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
     }
   }
   xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );

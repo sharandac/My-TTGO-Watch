@@ -41,7 +41,15 @@
      * @return  pointer to lv_obj_t icon container, here you can set your own icon with imgbtn or NULL if failed
      */
     lv_obj_t *main_tile_register_widget( void );
+    /**
+     * @brief align all enabled widgets
+     */
     void main_tile_align_widgets( void );
+    /**
+     * @brief get an free widget icon structure
+     * 
+     * @return a pointer to an free widget icon structure or NULL if failed
+     */
     icon_t *main_tile_get_free_widget_icon( void );
     /**
      * @brief get the tile number for the main tile
@@ -49,5 +57,9 @@
      * @return  tile number
      */
     uint32_t main_tile_get_tile_num( void );
+    /**
+     * @brief update main tile time
+     */
+    void main_tile_update_time( void );
 
 #endif // _MAIL_TILE_H

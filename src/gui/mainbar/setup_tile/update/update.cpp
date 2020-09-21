@@ -37,6 +37,7 @@
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
+#include "hardware/http_ota.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
@@ -51,6 +52,7 @@ uint32_t update_tile_num;
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
 lv_obj_t *update_btn_label = NULL;
+lv_obj_t *update_progressbar = NULL;
 
 static bool reset = false;
 
@@ -59,12 +61,13 @@ static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_event_handler(lv_obj_t * obj, lv_event_t event );
 
+bool update_http_ota_event_cb( EventBits_t event, void *arg );
+bool update_wifictl_event_cb( EventBits_t event, void *arg );
+
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
-
-bool update_wifictl_event_cb( EventBits_t event, void *arg );
 
 void update_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -121,7 +124,7 @@ void update_tile_setup( void ) {
     update_btn = lv_btn_create( update_settings_tile, NULL);
     lv_obj_set_event_cb( update_btn, update_event_handler );
     lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
-    lv_obj_align( update_btn, NULL, LV_ALIGN_CENTER, 0, 40);
+    lv_obj_align( update_btn, update_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     update_btn_label = lv_label_create( update_btn, NULL );
     lv_label_set_text( update_btn_label, "update");
 
@@ -130,39 +133,69 @@ void update_tile_setup( void ) {
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
+    update_progressbar = lv_bar_create( update_settings_tile, NULL );
+    lv_obj_set_size( update_progressbar, lv_disp_get_hor_res( NULL ) - 80, 20 );
+    lv_obj_add_style( update_progressbar, LV_OBJ_PART_MAIN, &update_settings_style );
+    lv_obj_align( update_progressbar, update_status_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_bar_set_anim_time( update_progressbar, 2000 );
+    lv_bar_set_value( update_progressbar, 0, LV_ANIM_ON );
+
     wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb, "update" );
+    http_ota_register_cb( HTTP_OTA_PROGRESS | HTTP_OTA_ERROR, update_http_ota_event_cb, "http updater");
 
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
 }
 
+bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
+    char msg[16]="";
+    
+    switch( event ) {
+        case HTTP_OTA_PROGRESS:
+            lv_bar_set_value( update_progressbar, *(int16_t *)arg , LV_ANIM_ON );
+            snprintf( msg, sizeof( msg ), "%d%%", *(int16_t *)arg );
+            lv_label_set_text( update_status_label, msg );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            break;
+        case HTTP_OTA_ERROR:        
+            lv_label_set_text( update_status_label, (char *)arg );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            break;
+    }
+    return( true );
+}
+
 bool update_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case WIFICTL_CONNECT:       if ( update_setup_get_autosync() ) {
-                                    update_check_version();
-                                    break;
-        }
+        case WIFICTL_CONNECT:
+            if ( update_setup_get_autosync() && reset == false ) {
+                update_check_version();
+                break;
+            }
     }
     return( true );
 }
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( update_tile_num + 1, LV_ANIM_OFF );
-                                        break;
+        case( LV_EVENT_CLICKED ):
+            mainbar_jump_to_tilenumber( update_tile_num + 1, LV_ANIM_OFF );
+            break;
     }
 }
 
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( update_tile_num, LV_ANIM_OFF );
-                                        break;
+        case( LV_EVENT_CLICKED ):       
+            mainbar_jump_to_tilenumber( update_tile_num, LV_ANIM_OFF );
+            break;
     }
 }
 static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
-                                        break;
+        case( LV_EVENT_CLICKED ):       
+            mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+            break;
     }
 }
 
@@ -187,7 +220,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
             xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
             xTaskCreate(    update_Task,        /* Function to implement the task */
                             "update Task",      /* Name of the task */
-                            10000,               /* Stack size in words */
+                            20000,               /* Stack size in words */
                             NULL,               /* Task input parameter */
                             0,                  /* Priority of the task */
                             &_update_Task );    /* Task handle. */
@@ -219,17 +252,17 @@ void update_Task( void * pvParameters ) {
             char version_msg[48] = "";
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
             lv_label_set_text( update_status_label, (const char*)version_msg );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
         }
         else if ( firmware_version == atol( __FIRMWARE__ ) ) {
             lv_label_set_text( update_status_label, "yeah! up to date ..." );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
             setup_hide_indicator( update_setup_icon );
         }
         else {
             lv_label_set_text( update_status_label, "get update info failed" );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
             setup_hide_indicator( update_setup_icon );
         }
         lv_obj_invalidate( lv_scr_act() );
@@ -240,38 +273,22 @@ void update_Task( void * pvParameters ) {
             uint32_t display_timeout = display_get_timeout();
             display_set_timeout( DISPLAY_MAX_TIMEOUT );
 
-            WiFiClient client;
-
             lv_label_set_text( update_status_label, "start update ..." );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-            httpUpdate.rebootOnUpdate( false );
-
-            t_httpUpdate_return ret = httpUpdate.update( client, update_get_url() );
-
-            switch(ret) {
-                case HTTP_UPDATE_FAILED:
-                    lv_label_set_text( update_status_label, "update failed" );
-                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-                    break;
-
-                case HTTP_UPDATE_NO_UPDATES:
-                    lv_label_set_text( update_status_label, "no update" );
-                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
-                    break;
-
-                case HTTP_UPDATE_OK:
-                    lv_label_set_text( update_status_label, "update ok, turn off and on!" );
-                    lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
-                    reset = true;
-                    lv_label_set_text( update_btn_label, "restart");
-                    break;
+            if ( http_ota_start( update_get_url(), update_get_md5() ) ) {
+                lv_label_set_text( update_status_label, "update ok, turn off and on!" );
+                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+                reset = true;
+                lv_label_set_text( update_btn_label, "restart");
             }
+            lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );            
             display_set_timeout( display_timeout );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
         else {
             lv_label_set_text( update_status_label, "turn wifi on!" );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
         }
     }
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );

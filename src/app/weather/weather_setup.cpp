@@ -210,7 +210,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( weather_widget_onoff, weather_widget_onoff_event_handler);
     lv_obj_t *weather_widget_label = lv_label_create( weather_widget_cont, NULL);
     lv_obj_add_style( weather_widget_label, LV_OBJ_PART_MAIN, &weather_setup_style );
-    lv_label_set_text( weather_widget_label, "Use Imperial");
+    lv_label_set_text( weather_widget_label, "widget");
     lv_obj_align( weather_widget_label, weather_widget_cont, LV_ALIGN_IN_LEFT_MID, 5, 0);
 
     if ( weather_config->autosync)
