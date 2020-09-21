@@ -41,6 +41,7 @@
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;
+lv_task_t *_update_progress_task;
 void update_Task( void * pvParameters );
 
 icon_t *update_setup_icon = NULL;
@@ -48,6 +49,7 @@ icon_t *update_setup_icon = NULL;
 lv_obj_t *update_settings_tile=NULL;
 lv_style_t update_settings_style;
 uint32_t update_tile_num;
+static int16_t progress = 0;
 
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
@@ -63,6 +65,10 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event );
 
 bool update_http_ota_event_cb( EventBits_t event, void *arg );
 bool update_wifictl_event_cb( EventBits_t event, void *arg );
+
+void update_update_activate_cb( void );
+void update_update_hibernate_cb( void );
+void update_progress_task( lv_task_t *task );
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -143,19 +149,36 @@ void update_tile_setup( void ) {
     wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb, "update" );
     http_ota_register_cb( HTTP_OTA_PROGRESS | HTTP_OTA_ERROR, update_http_ota_event_cb, "http updater");
 
+    mainbar_add_tile_activate_cb( update_tile_num, update_update_activate_cb );
+    mainbar_add_tile_hibernate_cb( update_tile_num, update_update_hibernate_cb );
+
     update_event_handle = xEventGroupCreate();
     xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
 }
 
+void update_update_activate_cb( void ) {
+    _update_progress_task = lv_task_create( update_progress_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
+}
+
+void update_update_hibernate_cb( void ) {
+    lv_task_del( _update_progress_task );
+}
+
+void update_progress_task( lv_task_t *task ) {
+    if ( progress > 0 ) {
+        char msg[16]="";
+        lv_bar_set_value( update_progressbar, progress , LV_ANIM_ON );
+        snprintf( msg, sizeof( msg ), "%d%%", progress );
+        lv_label_set_text( update_status_label, msg );
+        lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    }
+}
+
+
 bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
-    char msg[16]="";
-    
     switch( event ) {
         case HTTP_OTA_PROGRESS:
-            lv_bar_set_value( update_progressbar, *(int16_t *)arg , LV_ANIM_ON );
-            snprintf( msg, sizeof( msg ), "%d%%", *(int16_t *)arg );
-            lv_label_set_text( update_status_label, msg );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            progress = *(int16_t *)arg;
             break;
         case HTTP_OTA_ERROR:        
             lv_label_set_text( update_status_label, (char *)arg );
@@ -218,12 +241,12 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
         }
         else {
             xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
-            xTaskCreate(    update_Task,        /* Function to implement the task */
-                            "update Task",      /* Name of the task */
-                            20000,               /* Stack size in words */
-                            NULL,               /* Task input parameter */
-                            0,                  /* Priority of the task */
-                            &_update_Task );    /* Task handle. */
+            xTaskCreate(    update_Task,
+                            "update Task",
+                            10000,
+                            NULL,
+                            0,
+                            &_update_Task );
         }
     }
 }
@@ -234,12 +257,12 @@ void update_check_version( void ) {
     }
     else {
         xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
-        xTaskCreate(    update_Task,        /* Function to implement the task */
-                        "update Task",      /* Name of the task */
-                        5000,               /* Stack size in words */
-                        NULL,               /* Task input parameter */
-                        1,                  /* Priority of the task */
-                        &_update_Task );    /* Task handle. */
+        xTaskCreate(    update_Task,
+                        "update Task",
+                        5000,
+                        NULL,
+                        1,
+                        &_update_Task );
     }
 }
 
@@ -277,11 +300,13 @@ void update_Task( void * pvParameters ) {
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
             if ( http_ota_start( update_get_url(), update_get_md5() ) ) {
+                progress = 0;
                 lv_label_set_text( update_status_label, "update ok, turn off and on!" );
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                 reset = true;
                 lv_label_set_text( update_btn_label, "restart");
             }
+            progress = 0;
             lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );            
             display_set_timeout( display_timeout );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );

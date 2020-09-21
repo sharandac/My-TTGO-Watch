@@ -39,8 +39,8 @@ bool http_ota_start( const char* url, const char* md5 ) {
     int written = 0;
     int total = 1;
     int len = 1;
-    uint8_t buff[1024] = { 0 };
-    size_t size = sizeof(buff);
+    uint8_t buff[ 1024 * 2 ] = { 0 };
+    size_t size = sizeof( buff );
     bool ret = true;
 
     HTTPClient http;

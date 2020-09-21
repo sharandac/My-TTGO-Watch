@@ -67,12 +67,13 @@ void sound_setup( void ) {
     sound_read_config();
 
     // disable sound when webserver is enabled
+/*
     if ( wifictl_get_webserver() ) {
         log_i("disable sound while webserver is enabled, issue #104");
         sound_set_enabled_config( false );
         return;
     }
-    
+*/    
     //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out = new AudioOutputI2S();
     out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );

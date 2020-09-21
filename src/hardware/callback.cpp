@@ -188,12 +188,10 @@ bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) 
     bool retval = false;
 
     if ( callback == NULL ) {
-        log_e("no callback structure found");
         return( retval );
     }
 
     if ( callback->entrys == 0 ) {
-        log_w("no callback found");
         return( retval );
     }
 
