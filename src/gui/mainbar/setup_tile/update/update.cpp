@@ -300,10 +300,10 @@ void update_Task( void * pvParameters ) {
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
             if ( http_ota_start( update_get_url(), update_get_md5() ) ) {
+                reset = true;
                 progress = 0;
                 lv_label_set_text( update_status_label, "update ok, turn off and on!" );
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
-                reset = true;
                 lv_label_set_text( update_btn_label, "restart");
             }
             progress = 0;

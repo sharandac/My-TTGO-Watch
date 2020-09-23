@@ -180,12 +180,12 @@ void pmu_standby( void ) {
     ttgo->power->clearTimerStatus();
     if ( pmu_get_silence_wakeup() ) {
         if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
-            ttgo->power->setTimer( pmu_config.silence_wakeup_time_vbplug );
-            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_time_vbplug );
+            ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
+            log_i("enable silence wakeup interval timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
         }
         else {
-            ttgo->power->setTimer( pmu_config.silence_wakeup_time );
-            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_time );
+            ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
+            log_i("enable silence wakeup interval timer, %dmin", pmu_config.silence_wakeup_interval );
         }
     }
 
@@ -236,8 +236,8 @@ void pmu_save_config( void ) {
         SpiRamJsonDocument doc( 3000 );
 
         doc["silence_wakeup"] = pmu_config.silence_wakeup;
-        doc["silence_wakeup_time"] = pmu_config.silence_wakeup_time;
-        doc["silence_wakeup_time_vbplug"] = pmu_config.silence_wakeup_time_vbplug;
+        doc["silence_wakeup_time"] = pmu_config.silence_wakeup_interval;
+        doc["silence_wakeup_time_vbplug"] = pmu_config.silence_wakeup_interval_vbplug;
         doc["experimental_power_save"] = pmu_config.experimental_power_save;
         doc["normal_voltage"] = pmu_config.normal_voltage;
         doc["normal_power_save_voltage"] = pmu_config.normal_power_save_voltage;
@@ -271,8 +271,8 @@ void pmu_read_config( void ) {
             }
             else {
                 pmu_config.silence_wakeup = doc["silence_wakeup"] | false;
-                pmu_config.silence_wakeup_time = doc["silence_wakeup_time"] | SILENCEWAKEUPTIME;
-                pmu_config.silence_wakeup_time_vbplug = doc["silence_wakeup_time_vbplug"] | SILENCEWAKEUPTIME_PLUG;
+                pmu_config.silence_wakeup_interval = doc["silence_wakeup_interval"] | SILENCEWAKEINTERVAL;
+                pmu_config.silence_wakeup_interval_vbplug = doc["silence_wakeup_interval_vbplug"] | SILENCEWAKEINTERVAL_PLUG;
                 pmu_config.experimental_power_save = doc["experimental_power_save"] | false;
                 pmu_config.compute_percent = doc["compute_percent"] | false;
                 pmu_config.high_charging_target_voltage = doc["high_charging_target_voltage"] | false;

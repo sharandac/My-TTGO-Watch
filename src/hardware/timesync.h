@@ -27,14 +27,17 @@
     #define TIME_SYNC_REQUEST       _BV(0)
     #define TIME_SYNC_OK            _BV(1)
 
-    #define TIMESYNC_CONFIG_FILE        "/timesync.cfg"
-    #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"
+    #define TIMESYNC_CONFIG_FILE        "/timesync.cfg"     /** @brief defines binary config file name (deprecated) */
+    #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"    /** @brief defines json config file name */
 
+    /**
+     * @brief time sync config structure
+     */
     typedef struct {
-        bool timesync = true;
-        bool daylightsave = false;
-        int32_t timezone = 0;
-        bool use_24hr_clock = true;
+        bool timesync = true;               /** @brief time sync on/off */
+        bool daylightsave = false;          /** @brief day light save on/off */
+        int32_t timezone = 0;               /** @brief time zone from 0..24, 0 means -12 */
+        bool use_24hr_clock = true;         /** @brief 12h/24h time format */
     } timesync_config_t;
 
     /**

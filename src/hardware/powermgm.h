@@ -25,16 +25,16 @@
     #include "TTGO.h"
     #include "callback.h"
 
-    #define POWERMGM_STANDBY                    _BV(0)
-    #define POWERMGM_STANDBY_REQUEST            _BV(1)
-    #define POWERMGM_SILENCE_WAKEUP             _BV(2)
-    #define POWERMGM_SILENCE_WAKEUP_REQUEST     _BV(3)
-    #define POWERMGM_WAKEUP                     _BV(4)
-    #define POWERMGM_WAKEUP_REQUEST             _BV(5)
-    #define POWERMGM_PMU_BUTTON                 _BV(6)
-    #define POWERMGM_BMA_DOUBLECLICK            _BV(9)
-    #define POWERMGM_BMA_TILT                   _BV(10)
-    #define POWERMGM_RTC_ALARM                  _BV(11)
+    #define POWERMGM_STANDBY                    _BV(0)         /** @brief event mask for powermgm standby */
+    #define POWERMGM_STANDBY_REQUEST            _BV(1)         /** @brief event mask for powermgm standby request */
+    #define POWERMGM_SILENCE_WAKEUP             _BV(2)         /** @brief event mask for powermgm silence wakeup */
+    #define POWERMGM_SILENCE_WAKEUP_REQUEST     _BV(3)         /** @brief event mask for powermgm wakeup silence request */
+    #define POWERMGM_WAKEUP                     _BV(4)         /** @brief event mask for powermgm wakeup */
+    #define POWERMGM_WAKEUP_REQUEST             _BV(5)         /** @brief event mask for powermgm wakeup request */
+    #define POWERMGM_PMU_BUTTON                 _BV(6)         /** @brief event mask for powermgm pmu button is pressed */
+    #define POWERMGM_BMA_DOUBLECLICK            _BV(9)         /** @brief event mask for powermgm bma soubleclick */
+    #define POWERMGM_BMA_TILT                   _BV(10)        /** @brief event mask for powermgm bma tilt */
+    #define POWERMGM_RTC_ALARM                  _BV(11)        /** @brief event mask for powermgm rtc alarm */
     
     /**
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl

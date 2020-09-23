@@ -24,28 +24,29 @@
 
     #include "callback.h"
 
-    #define DISPLAYCTL_BRIGHTNESS       _BV(0)
-    #define DISPLAYCTL_TIMEOUT          _BV(1)
+    #define DISPLAYCTL_BRIGHTNESS       _BV(0)      /** @brief event mask display brightness, callback arg is (uint32_t*) */
+    #define DISPLAYCTL_TIMEOUT          _BV(1)      /** @brief event mask display brightness, callback arg is (uint32_t*) */
+
+    #define DISPLAY_CONFIG_FILE         "/display.cfg"  /** @brief defines binary config file name (deprecated) */
+    #define DISPLAY_JSON_CONFIG_FILE    "/display.json" /** @brief defines json config file name */
     
-    #define DISPLAY_MIN_TIMEOUT         15
-    #define DISPLAY_MAX_TIMEOUT         300
+    #define DISPLAY_MIN_TIMEOUT         15      /** @brief min display timeout */
+    #define DISPLAY_MAX_TIMEOUT         300     /** @brief max display timeout */
+    #define DISPLAY_MIN_BRIGHTNESS      8       /** @brief min display brightness */
+    #define DISPLAY_MAX_BRIGHTNESS      255     /** @brief max display brightness */
+    #define DISPLAY_MIN_ROTATE          0       /** @brief min display rotation */
+    #define DISPLAY_MAX_ROTATE          270     /** @brief max display rotation */
 
-    #define DISPLAY_MIN_BRIGHTNESS      8
-    #define DISPLAY_MAX_BRIGHTNESS      255
-
-    #define DISPLAY_MIN_ROTATE          0
-    #define DISPLAY_MAX_ROTATE          270
-
+    /**
+     * @brief display config structure
+     */
     typedef struct {
-        uint32_t brightness = DISPLAY_MAX_BRIGHTNESS;
-        uint32_t timeout = DISPLAY_MIN_TIMEOUT;
-        uint32_t rotation = 0;
-        bool block_return_maintile = false;
-        uint32_t background_image = 2;
+        uint32_t brightness = DISPLAY_MAX_BRIGHTNESS;   /** @brief display brightness */
+        uint32_t timeout = DISPLAY_MIN_TIMEOUT;         /** @brief display time out */
+        uint32_t rotation = 0;                          /** @brief display rotation */
+        bool block_return_maintile = false;             /** @brief block back to main tile on standby */
+        uint32_t background_image = 2;                  /** @brief background image */
     } display_config_t;
-
-    #define DISPLAY_CONFIG_FILE         "/display.cfg"
-    #define DISPLAY_JSON_CONFIG_FILE    "/display.json"
 
     /**
      * @brief setup display

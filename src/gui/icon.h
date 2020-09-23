@@ -47,17 +47,20 @@
         ICON_BTN_REFRESH,
         ICON_BTN_EXIT
     } icon_btn_t;
-    
+
+    /**
+     * @brief icon structure
+     */
     typedef struct {
-        lv_obj_t *icon_cont;
-        lv_obj_t *icon_img;
-        lv_obj_t *icon_indicator;
-        lv_obj_t *label;
-        lv_obj_t *ext_label;
-        lv_event_cb_t *icon_event_cb;
-        lv_coord_t x;
-        lv_coord_t y;
-        bool active;
+        lv_obj_t *icon_cont;            /** @brief pointer to an icon container */
+        lv_obj_t *icon_img;             /** @brief pointer to an icon image */
+        lv_obj_t *icon_indicator;       /** @brief pointer to an icon indicator image */
+        lv_obj_t *label;                /** @brief pointer to an icon label */
+        lv_obj_t *ext_label;            /** @brief pointer to an icon ext label */
+        lv_event_cb_t *icon_event_cb;   /** @brief pointer to an callback function when the icon was clicked */
+        lv_coord_t x;                   /** @brief x coordinate on the screen */
+        lv_coord_t y;                   /** @brief y coordinate on the screen */
+        bool active;                    /** @brief icon active marker */
     } icon_t;
 
 #endif // _ICON_H

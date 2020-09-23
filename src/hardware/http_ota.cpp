@@ -45,7 +45,7 @@ bool http_ota_start( const char* url, const char* md5 ) {
 
     HTTPClient http;
 
-    http.setUserAgent( "ESP32-" __FIRMWARE__ );
+    http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
     http.begin( url );
     int httpCode = http.GET();
 
