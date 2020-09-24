@@ -118,6 +118,7 @@ void wifictl_setup( void ) {
             }
           }
         }
+        wifictl_send_event_cb( WIFICTL_SCAN, (void *)"scan done" );
     }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
