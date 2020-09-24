@@ -25,10 +25,10 @@
     #include "TTGO.h"
     #include "callback.h"
 
-    #define RTCCTL_ALARM_OCCURRED    _BV(0)
-    #define RTCCTL_ALARM_TERM_SET    _BV(1)
-    #define RTCCTL_ALARM_DISABLED    _BV(2)
-    #define RTCCTL_ALARM_ENABLED     _BV(3)
+    #define RTCCTL_ALARM_OCCURRED    _BV(0)     /** @brief event mask for alarm occurred */
+    #define RTCCTL_ALARM_TERM_SET    _BV(1)     /** @brief event mask for alarm set */     
+    #define RTCCTL_ALARM_DISABLED    _BV(2)     /** @brief event mask for alarm disabled */
+    #define RTCCTL_ALARM_ENABLED     _BV(3)     /** @brief event mask for alarm enabled */
 
     /**
      * @brief setup rtc controller routine

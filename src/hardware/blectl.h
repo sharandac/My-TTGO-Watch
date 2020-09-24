@@ -25,40 +25,55 @@
     #include "TTGO.h"
     #include "callback.h"
 
+    #define BLECTL_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
+    #define BLECTL_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
+    #define BLECTL_STANDBY               _BV(2)         /** @brief event mask for blectl standby */
+    #define BLECTL_ON                    _BV(3)         /** @brief event mask for blectl on */
+    #define BLECTL_OFF                   _BV(4)         /** @brief event mask for blectl off */
+    #define BLECTL_ACTIVE                _BV(5)         /** @brief event mask for blectl active */
+    #define BLECTL_MSG                   _BV(6)         /** @brief event mask for blectl msg */
+    #define BLECTL_PIN_AUTH              _BV(7)         /** @brief event mask for blectl for pin auth, callback arg is (uint32*) */
+    #define BLECTL_PAIRING               _BV(8)         /** @brief event mask for blectl pairing requested */
+    #define BLECTL_PAIRING_SUCCESS       _BV(9)         /** @brief event mask for blectl pairing success */
+    #define BLECTL_PAIRING_ABORT         _BV(10)        /** @brief event mask for blectl pairing abort */
+    #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
+    #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
+
+
     // See the following for generating UUIDs:
     // https://www.uuidgenerator.net/
-    #define SERVICE_UUID BLEUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E") /** @brief UART service UUID */
-    #define CHARACTERISTIC_UUID_RX BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-    #define CHARACTERISTIC_UUID_TX BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+    #define SERVICE_UUID                                    BLEUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")     /** @brief UART service UUID */
+    #define CHARACTERISTIC_UUID_RX                          BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
+    #define CHARACTERISTIC_UUID_TX                          BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
 
-    #define DEVICE_INFORMATION_SERVICE_UUID  BLEUUID((uint16_t)0x180A) /** @brief Device Information server UUID */
-    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A29) /** @brief Device Information - manufacturer name string UUID */
-    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A26) /** @brief Device Information - firmware revision UUID */
+    #define DEVICE_INFORMATION_SERVICE_UUID                 BLEUUID((uint16_t)0x180A)                           /** @brief Device Information server UUID */
+    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    BLEUUID((uint16_t)0x2A29)                           /** @brief Device Information - manufacturer name string UUID */
+    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    BLEUUID((uint16_t)0x2A26)                           /** @brief Device Information - firmware revision UUID */
 
-    #define BATTERY_SERVICE_UUID  BLEUUID((uint16_t)0x180F) /** @brief Battery service UUID */
-    #define BATTERY_LEVEL_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A19) /** @brief battery level characteristic UUID */
-    #define BATTERY_LEVEL_DESCRIPTOR_UUID  BLEUUID((uint16_t)0x2901) /** @brief battery level descriptor UUID */
-    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID  BLEUUID((uint16_t)0x2A1A) /** @brief battery power state characteristic UUID */
+    #define BATTERY_SERVICE_UUID                            BLEUUID((uint16_t)0x180F)                           /** @brief Battery service UUID */
+    #define BATTERY_LEVEL_CHARACTERISTIC_UUID               BLEUUID((uint16_t)0x2A19)                           /** @brief battery level characteristic UUID */
+    #define BATTERY_LEVEL_DESCRIPTOR_UUID                   BLEUUID((uint16_t)0x2901)                           /** @brief battery level descriptor UUID */
+    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID         BLEUUID((uint16_t)0x2A1A)                           /** @brief battery power state characteristic UUID */
 
-    #define BATTERY_POWER_STATE_BATTERY_UNKNOWN 0x0
-    #define BATTERY_POWER_STATE_BATTERY_NOT_SUPPORTED 0x1
-    #define BATTERY_POWER_STATE_BATTERY_NOT_PRESENT 0x2
-    #define BATTERY_POWER_STATE_BATTERY_PRESENT 0x3
+    #define BATTERY_POWER_STATE_BATTERY_UNKNOWN             0x0
+    #define BATTERY_POWER_STATE_BATTERY_NOT_SUPPORTED       0x1
+    #define BATTERY_POWER_STATE_BATTERY_NOT_PRESENT         0x2
+    #define BATTERY_POWER_STATE_BATTERY_PRESENT             0x3
 
-    #define BATTERY_POWER_STATE_DISCHARGE_UNKNOWN 0x0
-    #define BATTERY_POWER_STATE_DISCHARGE_NOT_SUPPORTED 0x4
-    #define BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING 0x8
-    #define BATTERY_POWER_STATE_DISCHARGE_DISCHARING 0xc
+    #define BATTERY_POWER_STATE_DISCHARGE_UNKNOWN           0x0
+    #define BATTERY_POWER_STATE_DISCHARGE_NOT_SUPPORTED     0x4
+    #define BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING    0x8
+    #define BATTERY_POWER_STATE_DISCHARGE_DISCHARING        0xc
 
-    #define BATTERY_POWER_STATE_CHARGE_UNKNOWN 0x0
-    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARGEABLE  0x10
-    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARING 0x20
-    #define BATTERY_POWER_STATE_CHARGE_CHARING 0x30
+    #define BATTERY_POWER_STATE_CHARGE_UNKNOWN              0x0
+    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARGEABLE       0x10
+    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARING          0x20
+    #define BATTERY_POWER_STATE_CHARGE_CHARING              0x30
 
-    #define BATTERY_POWER_STATE_LEVEL_UNKNOWN 0x0
-    #define BATTERY_POWER_STATE_LEVEL_NOT_SUPPORTED 0x40
-    #define BATTERY_POWER_STATE_LEVEL_GOOD 0x80
-    #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW 0xC0
+    #define BATTERY_POWER_STATE_LEVEL_UNKNOWN               0x0
+    #define BATTERY_POWER_STATE_LEVEL_NOT_SUPPORTED         0x40
+    #define BATTERY_POWER_STATE_LEVEL_GOOD                  0x80
+    #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW        0xC0
 
     #define BLECTL_JSON_COFIG_FILE         "/blectl.json"   /** @brief defines json config file name */
 
@@ -88,20 +103,6 @@
         int32_t msglen;                 /** @brief msg lenght */
         int32_t msgpos;                 /** @brief msg postition for next send */
     } blectl_msg_t;
-
-    #define BLECTL_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
-    #define BLECTL_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
-    #define BLECTL_STANDBY               _BV(2)         /** @brief event mask for blectl standby */
-    #define BLECTL_ON                    _BV(3)         /** @brief event mask for blectl on */
-    #define BLECTL_OFF                   _BV(4)         /** @brief event mask for blectl off */
-    #define BLECTL_ACTIVE                _BV(5)         /** @brief event mask for blectl active */
-    #define BLECTL_MSG                   _BV(6)         /** @brief event mask for blectl msg */
-    #define BLECTL_PIN_AUTH              _BV(7)         /** @brief event mask for blectl for pin auth, callback arg is (uint32*) */
-    #define BLECTL_PAIRING               _BV(8)         /** @brief event mask for blectl pairing requested */
-    #define BLECTL_PAIRING_SUCCESS       _BV(9)         /** @brief event mask for blectl pairing success */
-    #define BLECTL_PAIRING_ABORT         _BV(10)        /** @brief event mask for blectl pairing abort */
-    #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
-    #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
 
     /**
      * @brief ble setup function

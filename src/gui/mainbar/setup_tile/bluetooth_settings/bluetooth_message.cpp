@@ -43,6 +43,8 @@ lv_obj_t *bluetooth_message_sender_label = NULL;
 lv_obj_t *bluetooth_message_msg_label = NULL;
 lv_obj_t *bluetooth_message_page = NULL;
 
+bluetooth_msg_chain_t *bluetooth_msg_chain_head = NULL;
+
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(telegram_32px);
 LV_IMG_DECLARE(whatsapp_32px);
@@ -106,7 +108,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_obj_align( bluetooth_message_sender_label, bluetooth_message_img, LV_ALIGN_OUT_BOTTOM_LEFT, 5, 5 );
 
     bluetooth_message_page = lv_page_create( bluetooth_message_tile, NULL);
-    lv_obj_set_size( bluetooth_message_page, lv_disp_get_hor_res( NULL ) - 20, 160 );
+    lv_obj_set_size( bluetooth_message_page, lv_disp_get_hor_res( NULL ) - 20, 128 );
     lv_obj_add_style( bluetooth_message_page, LV_OBJ_PART_MAIN, &bluetooth_message_style );
     lv_page_set_scrlbar_mode( bluetooth_message_page, LV_SCRLBAR_MODE_DRAG );
     lv_obj_align( bluetooth_message_page, bluetooth_message_sender_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
@@ -129,6 +131,49 @@ void bluetooth_message_tile_setup( void ) {
     blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "bluetooth_message" );
 }
 
+
+void bluetooth_add_msg_to_chain( const char *msg ) {
+    if ( bluetooth_msg_chain_head->prev_msg == NULL ) {
+        bluetooth_msg_chain_head = (bluetooth_msg_chain_t *)ps_calloc( sizeof( bluetooth_msg_chain_t ), 1 );
+        if ( bluetooth_msg_chain_head == NULL ) {
+            log_e("bluetooth_msg_chain_head alloc failed");
+            while( 1 );
+        }
+        bluetooth_msg_chain_head->msg = (const char*)ps_calloc( strlen( msg ) + 1, 1 );
+        if ( bluetooth_msg_chain_head->msg == NULL ) {
+            log_e("bluetooth_msg_chain_head->msg alloc failed");
+            while( 1 );
+        }
+        strcpy( (char*)bluetooth_msg_chain_head->msg, msg );
+        bluetooth_msg_chain_head->prev_msg = NULL;
+        bluetooth_msg_chain_head->next_msg = NULL;
+        return;
+    }
+
+    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
+    bluetooth_msg_chain_t *new_msg_chain = NULL;
+
+    // find the last entry in to chain
+    while( msg_chain->next_msg != NULL ) {
+        msg_chain = msg_chain->next_msg;
+    }
+
+    new_msg_chain = (bluetooth_msg_chain_t *)ps_calloc( sizeof( bluetooth_msg_chain_t ), 1 );
+    if ( new_msg_chain == NULL ) {
+        log_e("new_msg_chain alloc failed");
+        while( 1 );
+    }
+
+    msg_chain->next_msg = new_msg_chain;
+    new_msg_chain->prev_msg = msg_chain;
+    new_msg_chain->next_msg = NULL;
+    new_msg_chain->msg = (const char*)ps_calloc( strlen( msg ) + 1, 1 );
+    if ( new_msg_chain->msg == NULL ) {
+        log_e("new_msg_chain->msg alloc failed");
+        while( 1 );
+    }
+    strcpy( (char*)bluetooth_msg_chain_head->msg, msg );
+}
 bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     log_i("msg = %s", (char*)arg );
     
