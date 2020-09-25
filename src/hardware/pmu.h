@@ -25,28 +25,25 @@
     #include "TTGO.h"
     #include "callback.h"
 
-    #define PMUCTL_BATTERY_PERCENT      _BV(0)                  /** @brief event mask for pmuctl battery percent update, callback arg is (int32_t*) */
-    #define PMUCTL_VBUS_PLUG            _BV(1)                  /** @brief event mask for pmuctl plug/unplug update, callback arg is (bool*) */
-    #define PMUCTL_CHARGING             _BV(2)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_BATTERY_PERCENT      1       
+    #define PMUCTL_VBUS_PLUG            2
+    #define PMUCTL_CHARGING             4
 
-    #define PMU_CONFIG_FILE         "/pmu.cfg"                  /** @brief defines binary config file name (deprecated) */
-    #define PMU_JSON_CONFIG_FILE    "/pmu.json"                 /** @brief defines json config file name */
+    #define PMU_CONFIG_FILE         "/pmu.cfg"
+    #define PMU_JSON_CONFIG_FILE    "/pmu.json"
 
 	//Some default values, used below as well as in pmu.cpp during json reads
-    #define SILENCEWAKEINTERVAL             45                  /** @brief defines the silence wakeup interval in minutes */
-	#define SILENCEWAKEINTERVAL_PLUG		3                   /** @brief defines the silence wakeup interval in minutes when plugged*/
-    #define NORMALVOLTAGE                   3300                /** @brief defines the norminal voltages while working */
-    #define NORMALPOWERSAVEVOLTAGE          3000                /** @brief defines the norminal voltages while in powersave */
-    #define EXPERIMENTALNORMALVOLTAGE       3000                /** @brief defines the norminal voltages while working with exprimental powersave enabled */
-    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
+    #define SILENCEWAKEUPTIME                 45
+	#define SILENCEWAKEUPTIME_PLUG			   3
+    #define NORMALVOLTAGE                   3300
+    #define NORMALPOWERSAVEVOLTAGE          3000
+    #define EXPERIMENTALNORMALVOLTAGE       3000
+    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700
 
-    /**
-     * @brief pmu config structure in memory
-     */
     typedef struct {
         int32_t designed_battery_cap = 300;
-        int32_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
-        int32_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
+        int32_t silence_wakeup_time = SILENCEWAKEUPTIME;
+        int32_t silence_wakeup_time_vbplug = SILENCEWAKEUPTIME_PLUG;
         int32_t normal_voltage = NORMALVOLTAGE;
         int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
@@ -54,7 +51,7 @@
         bool high_charging_target_voltage = false;
         bool compute_percent = false;
         bool experimental_power_save = false;
-        bool silence_wakeup = false;
+        bool silence_wakeup = true;
     } pmu_config_t;
 
     /**
@@ -172,8 +169,25 @@
      */
     bool pmu_is_vbus_plug( void );
     /**
+     * @brief get the high charging voltage config
      * 
+     * @return true means enabled, false means disabled
+     */
+    bool pmu_get_high_charging_target_voltage( void );
+    /**
+     * @brief set the high charging voltage config
      * 
+     * @param   enable  true means enable, false means disable
+     */
+    void pmu_set_high_charging_target_voltage( bool enable );
+    /**
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event           possible values: PMUCTL_CHARGING, PMUCTL_VBUS_PLUG and PMUCTL_BATTERY_PERCENT
+     * @param   callback_func   pointer to the callback function
+     * @param   id              program id
+     * 
+     * @return  true if success, false if failed
      */
     bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 

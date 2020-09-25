@@ -183,15 +183,24 @@ void wifictl_setup( void ) {
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
+    bool retval = true;
+    
     switch( event ) {
-        case POWERMGM_STANDBY:          wifictl_standby();
+        case POWERMGM_STANDBY:          
+            if ( !wifictl_config.enable_on_standby ) {
+                wifictl_standby();
+            }
+            else {
+              log_w("standby blocked by \"enable on standby\" option");
+              retval = false;
+            }
                                         break;
         case POWERMGM_WAKEUP:           wifictl_wakeup();
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   wifictl_wakeup();
                                         break;
     }
-    return( true );
+    return( retval );
 }
 
 void wifictl_save_config( void ) {
@@ -214,6 +223,7 @@ void wifictl_save_config( void ) {
 
         doc["autoon"] = wifictl_config.autoon;
         doc["webserver"] = wifictl_config.webserver;
+        doc["enable_on_standby"] = wifictl_config.enable_on_standby;
         for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
             doc["networklist"][ i ]["ssid"] = wifictl_networklist[ i ].ssid;
             doc["networklist"][ i ]["psk"] = wifictl_networklist[ i ].password;
@@ -244,6 +254,7 @@ void wifictl_load_config( void ) {
             else {
                 wifictl_config.autoon = doc["autoon"] | true;
                 wifictl_config.webserver = doc["webserver"] | false;
+                wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
                 for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
                     if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
                         strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
@@ -285,8 +296,17 @@ bool wifictl_get_autoon( void ) {
   return( wifictl_config.autoon );
 }
 
+bool wifictl_get_enable_on_standby( void ) {
+  return( wifictl_config.enable_on_standby );
+}
+
 void wifictl_set_autoon( bool autoon ) {
   wifictl_config.autoon = autoon;
+  wifictl_save_config();
+}
+
+void wifictl_set_enable_on_standby( bool enable ) {
+  wifictl_config.enable_on_standby = enable;
   wifictl_save_config();
 }
 
