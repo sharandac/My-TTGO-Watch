@@ -110,6 +110,7 @@ Special thanks to the following people for their help:
 [NorthernDIY](https://github.com/NorthernDIY)<br>
 [rnisthal](https://github.com/rnisthal)<br>
 [paulstueber](https://github.com/paulstueber)<br>
+[ssspeq](https://github.com/ssspeq)<br>
 
 and the following projects:
 
@@ -122,7 +123,6 @@ and the following projects:
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [pubsubclient](https://github.com/knolleary/pubsubclient)<br>
-[ssspeq](https://github.com/ssspeq)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>
