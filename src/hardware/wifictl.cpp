@@ -245,8 +245,10 @@ void wifictl_load_config( void ) {
                 wifictl_config.autoon = doc["autoon"] | true;
                 wifictl_config.webserver = doc["webserver"] | false;
                 for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-                    strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
-                    strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
+                    if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
+                        strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
+                        strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
+                    }
                 }
             }        
             doc.clear();
