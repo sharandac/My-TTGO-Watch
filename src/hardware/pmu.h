@@ -51,10 +51,10 @@
         int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
         int32_t experimental_power_save_voltage = EXPERIMENTALPOWERSAVEVOLTAGE;
-        bool high_charging_target_voltage = true;
+        bool high_charging_target_voltage = false;
         bool compute_percent = false;
         bool experimental_power_save = false;
-        bool silence_wakeup = true;
+        bool silence_wakeup = false;
     } pmu_config_t;
 
     /**
