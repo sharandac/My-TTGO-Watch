@@ -25,25 +25,24 @@
     #include "TTGO.h"
     #include "callback.h"
 
-    #define PMUCTL_BATTERY_PERCENT      1       
-    #define PMUCTL_VBUS_PLUG            2
-    #define PMUCTL_CHARGING             4
+    #define PMUCTL_BATTERY_PERCENT      _BV(0)                  /** @brief event mask for pmuctl battery percent update, callback arg is (int32_t*) */
+    #define PMUCTL_VBUS_PLUG            _BV(1)                  /** @brief event mask for pmuctl plug/unplug update, callback arg is (bool*) */
+    #define PMUCTL_CHARGING             _BV(2)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
 
-    #define PMU_CONFIG_FILE         "/pmu.cfg"
-    #define PMU_JSON_CONFIG_FILE    "/pmu.json"
+    #define PMU_JSON_CONFIG_FILE    "/pmu.json"                 /** @brief defines json config file name */
 
 	//Some default values, used below as well as in pmu.cpp during json reads
-    #define SILENCEWAKEUPTIME                 45
-	#define SILENCEWAKEUPTIME_PLUG			   3
-    #define NORMALVOLTAGE                   3300
-    #define NORMALPOWERSAVEVOLTAGE          3000
-    #define EXPERIMENTALNORMALVOLTAGE       3000
-    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700
+    #define SILENCEWAKEINTERVAL             45                  /** @brief defines the silence wakeup interval in minutes */
+	#define SILENCEWAKEINTERVAL_PLUG		3                   /** @brief defines the silence wakeup interval in minutes when plugged*/
+    #define NORMALVOLTAGE                   3300                /** @brief defines the norminal voltages while working */
+    #define NORMALPOWERSAVEVOLTAGE          3000                /** @brief defines the norminal voltages while in powersave */
+    #define EXPERIMENTALNORMALVOLTAGE       3000                /** @brief defines the norminal voltages while working with exprimental powersave enabled */
+    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
 
     typedef struct {
         int32_t designed_battery_cap = 300;
-        int32_t silence_wakeup_time = SILENCEWAKEUPTIME;
-        int32_t silence_wakeup_time_vbplug = SILENCEWAKEUPTIME_PLUG;
+        int32_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
+        int32_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
         int32_t normal_voltage = NORMALVOLTAGE;
         int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;

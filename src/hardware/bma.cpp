@@ -188,11 +188,6 @@ bool bma_send_event_cb( EventBits_t event, void *arg ) {
 }
 
 void bma_save_config( void ) {
-    if ( SPIFFS.exists( BMA_COFIG_FILE ) ) {
-        SPIFFS.remove( BMA_COFIG_FILE );
-        log_i("remove old binary bma config");
-    }
-
     fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -214,49 +209,26 @@ void bma_save_config( void ) {
 }
 
 void bma_read_config( void ) {
-    if ( SPIFFS.exists( BMA_JSON_COFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"] | true;
-                bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"] | true;
-                bma_config[ BMA_TILT ].enable = doc["tilt"] | false;
-            }        
-            doc.clear();
-        }
-        file.close();
+    fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( BMA_COFIG_FILE, FILE_READ );
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-        if (!file) {
-            log_e("Can't open file: %s!", BMA_COFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( bma_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)bma_config, filesize );
-                file.close();
-                bma_save_config();
-                return; 
-            }
-        file.close();
-        }
+            bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"] | true;
+            bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"] | true;
+            bma_config[ BMA_TILT ].enable = doc["tilt"] | false;
+        }        
+        doc.clear();
     }
+    file.close();
 }
 
 bool bma_get_config( int config ) {

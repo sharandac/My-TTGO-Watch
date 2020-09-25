@@ -204,15 +204,6 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void wifictl_save_config( void ) {
-    if ( SPIFFS.exists( WIFICTL_CONFIG_FILE ) ) {
-        SPIFFS.remove( WIFICTL_CONFIG_FILE );
-        log_i("remove old binary wificfg config");
-    }
-    if ( SPIFFS.exists( WIFICTL_LIST_FILE ) ) {
-        SPIFFS.remove( WIFICTL_LIST_FILE );
-        log_i("remove old binary wifilist config");
-    }
-
     fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -238,58 +229,32 @@ void wifictl_save_config( void ) {
 }
 
 void wifictl_load_config( void ) {
-    if ( SPIFFS.exists( WIFICTL_JSON_CONFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                wifictl_config.autoon = doc["autoon"] | true;
-                wifictl_config.webserver = doc["webserver"] | false;
-                wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
-                for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-                    if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
-                        strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
-                        strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
-                    }
-                }
-            }        
-            doc.clear();
-        }
-        file.close();
+    fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-        wifictl_load_network();
-
-        fs::File file = SPIFFS.open( WIFICTL_CONFIG_FILE, FILE_READ );
-
-        if (!file) {
-            log_e("Can't open file: %s!", WIFICTL_CONFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( wifictl_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
+            wifictl_config.autoon = doc["autoon"] | true;
+            wifictl_config.webserver = doc["webserver"] | false;
+            wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
+            for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
+                if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
+                    strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
+                    strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
+                }
             }
-            else {
-                file.read( (uint8_t *)&wifictl_config, filesize );
-                file.close();
-                wifictl_save_config();
-                return;
-            }
-        file.close();
-        }
+        }        
+        doc.clear();
     }
+    file.close();
 }
 
 bool wifictl_get_autoon( void ) {
@@ -354,24 +319,6 @@ bool wifictl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const 
 
 bool wifictl_send_event_cb( EventBits_t event, void *arg ) {
     return( callback_send( wifictl_callback, event, arg ) );
-}
-
-void wifictl_load_network( void ) {
-  fs::File file = SPIFFS.open( WIFICTL_LIST_FILE, FILE_READ );
-
-  if (!file) {
-    log_e("Can't open file: %s", WIFICTL_LIST_FILE );
-  }
-  else {
-    int filesize = file.size();
-    if ( filesize > sizeof( wifictl_networklist  ) ) {
-      log_e("Failed to read configfile. Wrong filesize!" );
-    }
-    else {
-      file.read( (uint8_t *)wifictl_networklist, filesize );
-    }
-    file.close();
-  }
 }
 
 bool wifictl_is_known( const char* networkname ) {

@@ -30,7 +30,6 @@
     #define BMACTL_STEPCOUNTER          _BV(2)              /** @brief event mask for an stepcounter update event, callback arg is (uint32*) */
     #define BMACTL_TILT                 _BV(3)              /** @brief event mask for an tilt event */
 
-    #define BMA_COFIG_FILE              "/bma.cfg"          /** @brief defines binary config file name (deprecated) */
     #define BMA_JSON_COFIG_FILE         "/bma.json"         /** @brief defines json config file name */
 
     /**

@@ -27,7 +27,6 @@
     #define DISPLAYCTL_BRIGHTNESS       _BV(0)          /** @brief event mask display brightness, callback arg is (uint32_t*) */
     #define DISPLAYCTL_TIMEOUT          _BV(1)          /** @brief event mask display brightness, callback arg is (uint32_t*) */
 
-    #define DISPLAY_CONFIG_FILE         "/display.cfg"  /** @brief defines binary config file name (deprecated) */
     #define DISPLAY_JSON_CONFIG_FILE    "/display.json" /** @brief defines json config file name */
     
     #define DISPLAY_MIN_TIMEOUT         15              /** @brief min display timeout */

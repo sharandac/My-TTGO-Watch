@@ -175,11 +175,6 @@ void weather_widget_sync_Task( void * pvParameters ) {
 }
 
 void weather_save_config( void ) {
-    if ( SPIFFS.exists( WEATHER_CONFIG_FILE ) ) {
-        SPIFFS.remove( WEATHER_CONFIG_FILE );
-        log_i("remove old binary weather config");
-    }
-
     fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -205,52 +200,29 @@ void weather_save_config( void ) {
 }
 
 void weather_load_config( void ) {
-    if ( SPIFFS.exists( WEATHER_JSON_CONFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 4 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                strlcpy( weather_config.apikey, doc["apikey"], sizeof( weather_config.apikey ) );
-                strlcpy( weather_config.lat, doc["lat"], sizeof( weather_config.lat ) );
-                strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
-                weather_config.autosync = doc["autosync"] | true;
-                weather_config.showWind = doc["showWind"] | false;
-                weather_config.imperial = doc["imperial"] | false;
-                weather_config.widget = doc["widget"] | true;
-            }        
-            doc.clear();
-        }
-        file.close();
+    fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( WEATHER_CONFIG_FILE, FILE_READ );
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 4 );
 
-        if (!file) {
-            log_e("Can't open file: %s!", WEATHER_CONFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( weather_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)&weather_config, filesize );
-                file.close();
-                weather_save_config();
-                return; 
-            }
-            file.close();
-        }
+            strlcpy( weather_config.apikey, doc["apikey"], sizeof( weather_config.apikey ) );
+            strlcpy( weather_config.lat, doc["lat"], sizeof( weather_config.lat ) );
+            strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
+            weather_config.autosync = doc["autosync"] | true;
+            weather_config.showWind = doc["showWind"] | false;
+            weather_config.imperial = doc["imperial"] | false;
+            weather_config.widget = doc["widget"] | true;
+        }        
+        doc.clear();
     }
+    file.close();
 }
 

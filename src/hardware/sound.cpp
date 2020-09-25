@@ -228,6 +228,7 @@ void sound_save_config( void ) {
 
 void sound_read_config( void ) {
     fs::File file = SPIFFS.open( SOUND_JSON_CONFIG_FILE, FILE_READ );
+    
     if (!file) {
         log_e("Can't open file: %s!", SOUND_JSON_CONFIG_FILE );
     }

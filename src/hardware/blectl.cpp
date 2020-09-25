@@ -478,29 +478,28 @@ void blectl_save_config( void ) {
 }
 
 void blectl_read_config( void ) {
-    if ( SPIFFS.exists( BLECTL_JSON_COFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
+    fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_READ );
 
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("blectl deserializeJson() failed: %s", error.c_str() );
-            }
-            else {                
-                blectl_config.autoon = doc["autoon"] | true;
-                blectl_config.advertising = doc["advertising"] | true;
-                blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
-                blectl_config.txpower = doc["tx_power"] | 1;
-            }        
-            doc.clear();
-        }
-        file.close();
+    if (!file) {
+        log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
     }
+    else {
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
+
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("blectl deserializeJson() failed: %s", error.c_str() );
+        }
+        else {                
+            blectl_config.autoon = doc["autoon"] | true;
+            blectl_config.advertising = doc["advertising"] | true;
+            blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
+            blectl_config.txpower = doc["tx_power"] | 1;
+        }        
+        doc.clear();
+    }
+    file.close();
 }
 
 void blectl_update_battery( int32_t percent, bool charging, bool plug ) {

@@ -24,7 +24,6 @@
 
     #include "TTGO.h"
 
-    #define MOTOR_CONFIG_FILE       "/motor.cfg"            /** @brief defines binary config file name (deprecated) */
     #define MOTOR_JSON_CONFIG_FILE  "/motor.json"           /** @brief defines binary config file name */
 
     /**

@@ -42,6 +42,7 @@ lv_obj_t *wifi_settings_tile=NULL;
 lv_style_t wifi_settings_style;
 lv_style_t wifi_list_style;
 uint32_t wifi_settings_tile_num;
+icon_t *wifi_setup_icon = NULL;
 
 lv_obj_t *wifi_password_tile=NULL;
 lv_style_t wifi_password_style;
@@ -88,7 +89,7 @@ void wlan_settings_tile_setup( void ) {
     lv_style_set_border_width( &wifi_settings_style, LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( wifi_settings_tile, LV_OBJ_PART_MAIN, &wifi_settings_style );
 
-    icon_t *wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
+    wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
     setup_hide_indicator( wifi_setup_icon );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( wifi_settings_tile, NULL);
@@ -374,20 +375,28 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_obj_t *wps_btn_label = lv_label_create( wps_btn, NULL );
     lv_label_set_text( wps_btn_label, "start WPS");
 
-    if ( wifictl_get_autoon() )
+    if ( wifictl_get_autoon() ) {
         lv_switch_on( wifi_autoon_onoff, LV_ANIM_OFF);
-    else
+    }
+    else {
         lv_switch_off( wifi_autoon_onoff, LV_ANIM_OFF);
+    }
 
-    if ( wifictl_get_webserver() )
+    if ( wifictl_get_webserver() ) {
         lv_switch_on( wifi_webserver_onoff, LV_ANIM_OFF);
-    else
+    }
+    else {
         lv_switch_off( wifi_webserver_onoff, LV_ANIM_OFF);
+    }
 
-    if ( wifictl_get_enable_on_standby() )
+    if ( wifictl_get_enable_on_standby() ) {
         lv_switch_on( wifi_enabled_on_standby_onoff, LV_ANIM_OFF);
-    else
+        setup_set_indicator( wifi_setup_icon, ICON_INDICATOR_FAIL );
+    }
+    else {
         lv_switch_off( wifi_enabled_on_standby_onoff, LV_ANIM_OFF);
+        setup_hide_indicator( wifi_setup_icon );
+    }
 
     blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wlan settings" );
 }
@@ -436,6 +445,12 @@ static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_enable_on_standby( lv_switch_get_state( obj ) );
+                                        if ( lv_switch_get_state( obj ) ) {
+                                            setup_set_indicator( wifi_setup_icon, ICON_INDICATOR_FAIL );
+                                        }
+                                        else {
+                                            setup_hide_indicator( wifi_setup_icon );
+                                        }
                                         break;
     }
 }

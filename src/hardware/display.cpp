@@ -143,11 +143,6 @@ void display_wakeup( bool silence ) {
 }
 
 void display_save_config( void ) {
-    if ( SPIFFS.exists( DISPLAY_CONFIG_FILE ) ) {
-        SPIFFS.remove( DISPLAY_CONFIG_FILE );
-        log_i("remove old binary display config");
-    }
-
     fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -171,51 +166,28 @@ void display_save_config( void ) {
 }
 
 void display_read_config( void ) {
-    if ( SPIFFS.exists( DISPLAY_JSON_CONFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                display_config.brightness = doc["brightness"] | DISPLAY_MAX_BRIGHTNESS / 2;
-                display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
-                display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
-                display_config.block_return_maintile = doc["block_return_maintile"] | false;
-                display_config.background_image = doc["background_image"] | 2;
-            }        
-            doc.clear();
-        }
-        file.close();
+    fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( DISPLAY_CONFIG_FILE, FILE_READ );
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-        if (!file) {
-            log_e("Can't open file: %s!", DISPLAY_CONFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( display_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)&display_config, filesize );
-                file.close();
-                display_save_config();
-                return; 
-            }
-        file.close();
-        }
+            display_config.brightness = doc["brightness"] | DISPLAY_MAX_BRIGHTNESS / 2;
+            display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
+            display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
+            display_config.block_return_maintile = doc["block_return_maintile"] | false;
+            display_config.background_image = doc["background_image"] | 2;
+        }        
+        doc.clear();
     }
+    file.close();
 }
 
 uint32_t display_get_timeout( void ) {

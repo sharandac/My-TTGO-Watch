@@ -94,11 +94,6 @@ bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
 }
 
 void timesync_save_config( void ) {
-    if ( SPIFFS.exists( TIMESYNC_CONFIG_FILE ) ) {
-        SPIFFS.remove( TIMESYNC_CONFIG_FILE );
-        log_i("remove old binary timesync config");
-    }
-
     fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -120,51 +115,29 @@ void timesync_save_config( void ) {
     file.close();
 }
 
-void timesync_read_config( void ) {
-    if ( SPIFFS.exists( TIMESYNC_JSON_CONFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
+void timesync_read_config( void ) {    
+    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_READ );
 
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                timesync_config.daylightsave = doc["daylightsave"] | false;
-                timesync_config.timesync = doc["timesync"] | true;
-                timesync_config.timezone = doc["timezone"] | 0;
-                timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
-            }        
-            doc.clear();
-        }
-        file.close();
+    if (!file) {
+        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( TIMESYNC_CONFIG_FILE, FILE_READ );
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-        if (!file) {
-            log_e("Can't open file: %s!", TIMESYNC_CONFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( timesync_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)&timesync_config, filesize );
-                file.close();
-                timesync_save_config();
-                return;
-            }
-        file.close();
-        }
+            timesync_config.daylightsave = doc["daylightsave"] | false;
+            timesync_config.timesync = doc["timesync"] | true;
+            timesync_config.timezone = doc["timezone"] | 0;
+            timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
+        }        
+        doc.clear();
     }
+    file.close();
 }
 
 bool timesync_get_timesync( void ) {

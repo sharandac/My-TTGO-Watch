@@ -83,11 +83,6 @@ void motor_set_vibe_config( bool enable ) {
 }
 
 void motor_save_config( void ) {
-    if ( SPIFFS.exists( MOTOR_CONFIG_FILE ) ) {
-        SPIFFS.remove( MOTOR_CONFIG_FILE );
-        log_i("remove old binary motor config");
-    }
-
     fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
@@ -107,45 +102,22 @@ void motor_save_config( void ) {
 }
 
 void motor_read_config( void ) {
-    if ( SPIFFS.exists( MOTOR_JSON_CONFIG_FILE ) ) {        
-        fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                motor_config.vibe = doc["motor"].as<bool>();
-            }        
-            doc.clear();
-        }
-        file.close();
+    fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
     }
     else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( MOTOR_CONFIG_FILE, FILE_READ );
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-        if (!file) {
-            log_e("Can't open file: %s!", MOTOR_CONFIG_FILE );
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            int filesize = file.size();
-            if ( filesize > sizeof( motor_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)&motor_config, filesize );
-                file.close();
-                motor_save_config();
-                return;   
-            }
-        file.close();
-        }
+            motor_config.vibe = doc["motor"].as<bool>();
+        }        
+        doc.clear();
     }
+    file.close();
 }

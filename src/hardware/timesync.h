@@ -27,7 +27,6 @@
     #define TIME_SYNC_REQUEST       _BV(0)
     #define TIME_SYNC_OK            _BV(1)
 
-    #define TIMESYNC_CONFIG_FILE        "/timesync.cfg"     /** @brief defines binary config file name (deprecated) */
     #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"    /** @brief defines json config file name */
 
     /**
