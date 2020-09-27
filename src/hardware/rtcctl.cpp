@@ -20,23 +20,40 @@
  */
 #include "config.h"
 #include <TTGO.h>
+#include <SPIFFS.h>
 
 #include "rtcctl.h"
 #include "powermgm.h"
 #include "callback.h"
 
+#include "hardware/powermgm.h"
+#include "hardware/json_psram_allocator.h"
+
+#include <time.h>
+
+#define CONFIG_FILE_PATH "/rtcctr.json"
+
+#define VERSION_KEY "version"
+#define ENABLED_KEY "enabled"
+#define HOUR_KEY "hour"
+#define MINUTE_KEY "minute"
+#define WEEK_DAYS_KEY "week_days" 
+
+static rtcctl_alarm_t alarm_data = {
+    .enabled = false,
+    .hour = 0,
+    .minute = 0,
+    .week_days = {false, false, false, false, false, false, false,}
+}; 
+static time_t alarm_time = 0;
+
 volatile bool DRAM_ATTR rtc_irq_flag = false;
 portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 static void IRAM_ATTR rtcctl_irq( void );
 
-static bool alarm_enabled = false;
-static int alarm_hour = 0;
-static int alarm_minute = 0;
-
-bool rtcctl_send_event_cb( EventBits_t event );
 bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg );
 bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg );
-
+static void load_data();
 callback_t *rtcctl_callback = NULL;
 
 void rtcctl_setup( void ) {
@@ -44,17 +61,82 @@ void rtcctl_setup( void ) {
     pinMode( RTC_INT, INPUT_PULLUP);
     attachInterrupt( RTC_INT, &rtcctl_irq, FALLING );
 
-    //set values to be aligned with default variable values
-    if (alarm_enabled){
-        rtcctl_enable_alarm();
-    }
-    else{
-        rtcctl_disable_alarm();
-    }
-    rtcctl_set_alarm_term( alarm_hour, alarm_minute );
-
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_event_cb, "rtcctl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "rtcctl loop" );
+
+    load_data();
+}
+
+static bool send_event_cb( EventBits_t event ) {
+    return( callback_send( rtcctl_callback, event, (void*)NULL ) );
+}
+
+static bool is_any_day_enabled(){
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        if (alarm_data.week_days[index])
+            return true; 
+    }
+    return false;
+}
+
+static time_t find_next_alarm_day(int day_of_week, time_t now){
+    //it is expected that test if any day is enabled has been performed
+    
+    time_t ret_val = now;
+    int wday_index = day_of_week;
+    do {
+        ret_val += 60 * 60 * 24; //number of seconds in day
+        if (++wday_index == DAYS_IN_WEEK){
+            wday_index = 0;
+        } 
+        if (alarm_data.week_days[wday_index]){
+            return ret_val;
+        }        
+    } while (wday_index != day_of_week);
+    
+    return ret_val; //the same day of next week
+}
+
+static void set_next_alarm(TTGOClass *ttgo){
+    if (!is_any_day_enabled()){
+        ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
+        send_event_cb( RTCCTL_ALARM_TERM_SET );
+        return;
+    } 
+
+    //trc ans system must be synchronized, it is important when alarm has been raised and we want to set next concurency 
+    //if the synchronisation is not done the time can be set to now again
+    ttgo->rtc->syncToSystem(); 
+    
+    time_t now;
+    time(&now);
+    alarm_time = now;
+    struct tm  alarm_tm;
+    localtime_r(&alarm_time, &alarm_tm);
+    alarm_tm.tm_hour = alarm_data.hour;
+    alarm_tm.tm_min = alarm_data.minute;
+    alarm_time = mktime(&alarm_tm);
+
+    if (!alarm_data.week_days[alarm_tm.tm_wday] || alarm_time <= now){
+       alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
+       localtime_r(&alarm_time, &alarm_tm);
+    }
+    //it is better define alarm by day in month rather than weekday. This way will be work-around an error in pcf8563 source and will avoid eaising alarm when there is only one alarm in the week (today) and alarm time is set to now
+    ttgo->rtc->setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
+    send_event_cb( RTCCTL_ALARM_TERM_SET );
+}
+
+void rtcctl_set_next_alarm(){
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    if (alarm_data.enabled){
+        ttgo->rtc->disableAlarm();
+    }
+
+    set_next_alarm(ttgo);
+    
+    if (alarm_data.enabled){
+        ttgo->rtc->enableAlarm();
+    }
 }
 
 bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -91,7 +173,7 @@ void rtcctl_loop( void ) {
         rtc_irq_flag = false;
         portEXIT_CRITICAL( &RTC_IRQ_Mux );
         if ( temp_rtc_irq_flag ) {
-            rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
+            send_event_cb( RTCCTL_ALARM_OCCURRED );
         }
     }
 }
@@ -107,52 +189,107 @@ bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
     return( callback_register( rtcctl_callback, event, callback_func, id ) );
 }
 
-bool rtcctl_send_event_cb( EventBits_t event ) {
-    return( callback_send( rtcctl_callback, event, (void*)NULL ) );
+static void load_data(){
+    if (! SPIFFS.exists( CONFIG_FILE_PATH ) ) {
+        return; //wil be used default values set during theier creation
+    }
+
+    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
+        return;
+    }
+
+    int filesize = file.size();
+    SpiRamJsonDocument doc( filesize * 2 );
+
+    DeserializationError error = deserializeJson( doc, file );
+    if ( error ) {
+        log_e("update check deserializeJson() failed: %s", error.c_str() );
+        return;
+    }
+
+    rtcctl_alarm_t stored_data;
+    stored_data.enabled = doc[ENABLED_KEY].as<bool>();
+    stored_data.hour = doc[HOUR_KEY].as<uint8_t>();
+    stored_data.minute =  doc[MINUTE_KEY].as<uint8_t>();
+    uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        stored_data.week_days[index] = ((stored_week_days >> index) & 1) != 0;
+    }
+    rtcctl_set_alarm(&stored_data);
+
+    doc.clear();
+    file.close();
 }
 
-void rtcctl_set_alarm_term( uint8_t hour, uint8_t minute ) {
+static void store_data(){
+    if ( SPIFFS.exists( CONFIG_FILE_PATH ) ) {
+        SPIFFS.remove( CONFIG_FILE_PATH );
+        log_i("remove old binary rtcctl config");
+    }
+
+    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_WRITE );
+    if (!file) {
+        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
+        return;
+    }
+
+    SpiRamJsonDocument doc( 1000 );
+
+    doc[VERSION_KEY] = 1;
+    doc[ENABLED_KEY] = alarm_data.enabled;
+    doc[HOUR_KEY] = alarm_data.hour;
+    doc[MINUTE_KEY] = alarm_data.minute;
+
+    uint8_t week_days_to_store = 0;
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        week_days_to_store |= alarm_data.week_days[index] << index; 
+    }
+    doc[WEEK_DAYS_KEY] = week_days_to_store;
+    
+    if ( serializeJsonPretty( doc, file ) == 0) {
+        log_e("Failed to write rtcctl config file");
+    }
+
+    doc.clear();
+    file.close();
+}
+
+void rtcctl_set_alarm( rtcctl_alarm_t *data ){
     TTGOClass *ttgo = TTGOClass::getWatch();
-    if (alarm_enabled){
+    bool was_enabled = alarm_data.enabled;
+    if (was_enabled){
         ttgo->rtc->disableAlarm();
     }
-    alarm_hour = hour;
-    alarm_minute = minute;
-    ttgo->rtc->setAlarm( hour, minute, PCF8563_NO_ALARM, PCF8563_NO_ALARM );
-    if (alarm_enabled){
-        ttgo->rtc->enableAlarm();
+    alarm_data = *data;
+    store_data();
+
+    set_next_alarm(ttgo);
+
+    if (was_enabled && !alarm_data.enabled){
+        //already disabled
+        send_event_cb( RTCCTL_ALARM_DISABLED );
     }
-    rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
+    else if (was_enabled && alarm_data.enabled){
+        ttgo->rtc->enableAlarm();
+        //nothing actually changed;
+    }
+    else if (!was_enabled && alarm_data.enabled){
+        ttgo->rtc->enableAlarm();
+        send_event_cb( RTCCTL_ALARM_ENABLED );   
+    }    
 }
 
-void rtcctl_enable_alarm( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    ttgo->rtc->enableAlarm();
-    alarm_enabled = true;
-    rtcctl_send_event_cb( RTCCTL_ALARM_ENABLED );
+rtcctl_alarm_t *rtcctl_get_alarm_data(){
+    return &alarm_data;
 }
 
-void rtcctl_disable_alarm( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    ttgo->rtc->disableAlarm();
-    alarm_enabled = false;
-    rtcctl_send_event_cb( RTCCTL_ALARM_DISABLED );
-}
-
-bool rtcctl_is_alarm_enabled( void ) {
-    return alarm_enabled;
-}
-
-bool rtcctl_is_alarm_time(){
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    RTC_Date date_time = ttgo->rtc->getDateTime();
-    return alarm_hour == date_time.hour && alarm_minute == date_time.minute;
-}
-
-uint8_t rtcctl_get_alarm_hour(){
-    return alarm_hour;
-}
-
-uint8_t rtcctl_get_alarm_minute(){
-    return alarm_minute;
+int rtcctl_get_next_alarm_week_day(){
+    if (!is_any_day_enabled()){
+        return RTCCTL_ALARM_NOT_SET;
+    }
+    tm alarm_tm;
+    localtime_r(&alarm_time, &alarm_tm);
+    return alarm_tm.tm_wday;
 }

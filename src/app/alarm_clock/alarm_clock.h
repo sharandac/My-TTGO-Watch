@@ -22,14 +22,21 @@
 
 #include <TTGO.h>
 
+typedef struct {
+    bool beep;
+    bool fade;
+    bool vibe;
+} alarm_properties_t;
+
 //#define ALARM_CLOCK_WIDGET    // uncomment if an widget need
 
 void alarm_clock_setup( void );
-void alarm_clock_hide_widget_icon_info( bool show );
 uint32_t alarm_clock_get_app_setup_tile_num( void );
 uint32_t alarm_clock_get_app_main_tile_num( void );
 
-void alarm_start();
-bool alarm_is_active();
-void alarm_stop();
+alarm_properties_t * alarm_clock_get_properties();
+int alarm_clock_get_am_pm_hour(int hour24);
+char const * alarm_clock_get_am_pm_value(int hour24, bool short_format);
+char const * alarm_clock_get_week_day(int index, bool short_format);
+char * alarm_clock_get_clock_label(bool show_day);
 

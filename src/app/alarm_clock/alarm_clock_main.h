@@ -20,8 +20,8 @@
  */
 #pragma once
 #include <TTGO.h>
+#include <hardware/rtcctl.h>
 
 void alarm_clock_main_setup( uint32_t tile_num );
-void alarm_clock_set_gui_values();
-int alarm_clock_main_get_am_pm_hour(int hour24);
-char* alarm_clock_main_get_am_pm_value(int hour24);
+void alarm_clock_main_set_data_to_display(rtcctl_alarm_t *alarm_data, bool clock_24);
+rtcctl_alarm_t * alarm_clock_main_get_data_to_store();
