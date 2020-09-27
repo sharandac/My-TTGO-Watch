@@ -479,9 +479,11 @@ void statusbar_brightness_slider_event_handler_cb(lv_obj_t *brightness_slider, l
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
     if ( event == LV_EVENT_VALUE_CHANGED ) {
         switch ( lv_imgbtn_get_state( wifi ) ) {
-            case( LV_BTN_STATE_CHECKED_RELEASED ):  wifictl_off(); 
+            case( LV_BTN_STATE_CHECKED_RELEASED ):  wifictl_off();
+                                                    wifictl_set_autoon( false );
                                                     break;
             case( LV_BTN_STATE_RELEASED ):          wifictl_on();
+                                                    wifictl_set_autoon( true );
                                                     break;
         }
     }

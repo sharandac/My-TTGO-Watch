@@ -180,6 +180,8 @@ void wifictl_setup( void ) {
     vTaskSuspend( _wifictl_Task );
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "wifictl" );
+
+    wifictl_set_event( WIFICTL_OFF );
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -187,7 +189,7 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
     
     switch( event ) {
         case POWERMGM_STANDBY:          
-            if ( !wifictl_config.enable_on_standby ) {
+            if ( !wifictl_config.enable_on_standby || wifictl_get_event( WIFICTL_OFF ) ) {
                 wifictl_standby();
             }
             else {
@@ -267,6 +269,7 @@ bool wifictl_get_enable_on_standby( void ) {
 
 void wifictl_set_autoon( bool autoon ) {
   wifictl_config.autoon = autoon;
+  wifictl_send_event_cb( WIFICTL_AUTOON, (void*)&autoon );
   wifictl_save_config();
 }
 
@@ -464,11 +467,15 @@ void wifictl_Task( void * pvParameters ) {
       WiFi.mode( WIFI_OFF );
       esp_wifi_stop();
       log_i("request wifictl off done");
+      wifictl_set_event( WIFICTL_OFF );
+      wifictl_clear_event( WIFICTL_ON );
     }
     else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
       esp_wifi_start();
       WiFi.mode( WIFI_STA );
       log_i("request wifictl on done");
+      wifictl_set_event( WIFICTL_ON );
+      wifictl_clear_event( WIFICTL_OFF );
     }
     wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_SCAN | WIFICTL_ON_REQUEST );
     vTaskSuspend( _wifictl_Task );

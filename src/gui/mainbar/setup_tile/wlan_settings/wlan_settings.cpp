@@ -300,6 +300,7 @@ static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
+bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg );
 
 void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     // get an app tile and copy mainstyle
@@ -398,7 +399,8 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
         setup_hide_indicator( wifi_setup_icon );
     }
 
-    blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wlan settings" );
+    blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
+    wifictl_register_cb( WIFICTL_AUTOON, wifi_setup_autoon_event_cb, "wifi autoon");
 }
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
@@ -453,6 +455,20 @@ static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_even
                                         }
                                         break;
     }
+}
+
+bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case WIFICTL_AUTOON:
+            if ( *(bool*)arg ) {
+                lv_switch_on( wifi_autoon_onoff, LV_ANIM_OFF);
+            }
+            else {
+                lv_switch_off( wifi_autoon_onoff, LV_ANIM_OFF);
+            }
+            break;
+    }
+    return( true );
 }
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {

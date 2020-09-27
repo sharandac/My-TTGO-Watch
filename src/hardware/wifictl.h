@@ -65,7 +65,8 @@
         WIFICTL_WPS_SUCCESS            = _BV(9),
         WIFICTL_WPS_FAILED             = _BV(10),
         WIFICTL_SCAN                   = _BV(11),
-        WIFICTL_FIRST_RUN              = _BV(12)
+        WIFICTL_FIRST_RUN              = _BV(12),
+        WIFICTL_AUTOON                 = _BV(13)
     };
 
     /**
