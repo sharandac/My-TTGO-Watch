@@ -153,8 +153,8 @@ void pmu_loop( void ) {
         bool plug = ttgo->power->isVBUSPlug();
         bool charging = ttgo->power->isChargeing();
         pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
-        pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
+        pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
         firstlooprun = false;
     }
 }

@@ -355,7 +355,7 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
                                             statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_RED );
                                         }
                                         else {
-                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_GREEN );
+                                            statusbar_style_icon( STATUSBAR_BATTERY, STATUSBAR_STYLE_WHITE );
                                         }
                                         break;
         case PMUCTL_VBUS_PLUG:          if ( *(bool*)arg ) {
