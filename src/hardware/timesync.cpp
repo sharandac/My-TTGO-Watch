@@ -44,6 +44,8 @@ void timesync_setup( void ) {
 
     wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "timesync" );
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
+
+    timesyncToSystem();
 }
 
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {

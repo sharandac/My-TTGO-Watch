@@ -21,26 +21,57 @@
 #include "config.h"
 
 #include "callback.h"
+#include "alloc.h"
 
 void  display_record_event( callback_t *callback, EventBits_t event );
 
+callback_t *callback_head = NULL;
 static bool display_event_logging = false;
+
+void callback_print( void ) {
+    if ( callback_head == NULL ) {
+        return;
+    }
+
+    callback_t *callback_counter = callback_head;
+
+    do {
+        log_i(" |--%s", callback_counter->name, callback_counter );
+        for( int32_t i = 0 ; i < callback_counter->entrys ; i++ ) {
+            log_i(" |  |--id:%s, event mask:%04x", callback_counter->table[ i ].id, callback_counter->table[ i ].event );
+        }
+        callback_counter = callback_counter->next_callback_t;
+    }
+    while ( callback_counter );
+}
 
 callback_t *callback_init( const char *name ) {
     callback_t *callback = NULL;
-    
-#if defined( BOARD_HAS_PSRAM )
-    callback = (callback_t*)ps_calloc( sizeof( callback_t ), 1 );
-#else
-    callback = (callback_t*)calloc( sizeof( callback_t ), 1 );
-#endif // BOARD_HAS_PSRAM
+
+    callback = (callback_t*)CALLOC( sizeof( callback_t ), 1 );
+
     if ( callback == NULL ) {
         log_e("callback_t structure calloc faild for: %s", name );
     }
     else {
+        if ( callback_head == NULL ) {
+            callback_head = callback;
+        }
+            
         callback->entrys = 0;
         callback->table = NULL;
         callback->name = name;
+        callback->next_callback_t = NULL;
+
+        callback_t *callback_counter = callback_head;
+
+        if ( callback_head != callback ) {
+            while( callback_counter->next_callback_t ) {
+                callback_counter = callback_counter->next_callback_t;
+            }
+            callback_counter->next_callback_t = callback;
+        }
+
         log_i("init callback_t structure success for: %s", name );
     }
     return( callback );
@@ -57,28 +88,16 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     callback->entrys++;
 
     if ( callback->table == NULL ) {
-
-#if defined( BOARD_HAS_PSRAM )
-        callback->table = ( callback_table_t * )ps_malloc( sizeof( callback_table_t ) * callback->entrys );
-#else
-        callback->table = ( callback_table_t * )malloc( sizeof( callback_table_t ) * callback->entrys );
-#endif // BOARD_HAS_PSRAM
-
+        callback->table = ( callback_table_t * )CALLOC( sizeof( callback_table_t ) * callback->entrys, 1 );
         if ( callback->table == NULL ) {
-            log_e("callback_table_t malloc faild for: %s", id );
+            log_e("callback_table_t calloc faild for: %s", id );
             return( retval );
         }
         retval = true;
     }
     else {
         callback_table_t *new_callback_table = NULL;
-
-#if defined( BOARD_HAS_PSRAM )
-            new_callback_table = ( callback_table_t * )ps_realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
-#else
-            new_callback_table = ( callback_table_t * )realloc( callback->table, sizeof( callback_table_t ) * callback->entrys );
-#endif // BOARD_HAS_PSRAM
-
+        new_callback_table = ( callback_table_t * )REALLOC( callback->table, sizeof( callback_table_t ) * callback->entrys );
         if ( new_callback_table == NULL ) {
             log_e("callback_table_t realloc faild for: %s", id );
             return( retval );

@@ -30,6 +30,7 @@
 #include "gui/keyboard.h"
 
 #include "hardware/json_psram_allocator.h"
+#include "hardware/alloc.h"
 
 static update_config_t *update_config = NULL;
 
@@ -52,7 +53,7 @@ void update_save_config( void );
 
 void update_setup_tile_setup( uint32_t tile_num ) {
 
-    update_config = (update_config_t*)ps_calloc( sizeof( update_config_t ), 1 );
+    update_config = (update_config_t*)CALLOC( sizeof( update_config_t ), 1 );
     if( !update_config ) {
       log_e("update_config calloc faild");
       while(true);

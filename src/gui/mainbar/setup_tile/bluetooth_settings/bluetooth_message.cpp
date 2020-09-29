@@ -31,6 +31,7 @@
 #include "hardware/motor.h"
 #include "hardware/json_psram_allocator.h"
 #include "hardware/sound.h"
+#include "hardware/alloc.h"
 
 lv_obj_t *bluetooth_message_tile=NULL;
 lv_style_t bluetooth_message_style;
@@ -258,12 +259,12 @@ void bluetooth_message_enable( void ) {
 
 void bluetooth_add_msg_to_chain( const char *msg ) {
     if ( bluetooth_msg_chain_head == NULL ) {
-        bluetooth_msg_chain_head = (bluetooth_msg_chain_t *)ps_calloc( sizeof( bluetooth_msg_chain_t ), 1 );
+        bluetooth_msg_chain_head = (bluetooth_msg_chain_t *)CALLOC( sizeof( bluetooth_msg_chain_t ), 1 );
         if ( bluetooth_msg_chain_head == NULL ) {
             log_e("bluetooth_msg_chain_head alloc failed");
             while( 1 );
         }
-        bluetooth_msg_chain_head->msg = (const char*)ps_calloc( strlen( msg ) + 1, 1 );
+        bluetooth_msg_chain_head->msg = (const char*)CALLOC( strlen( msg ) + 1, 1 );
         if ( bluetooth_msg_chain_head->msg == NULL ) {
             log_e("bluetooth_msg_chain_head->msg alloc failed");
             while( 1 );
@@ -283,7 +284,7 @@ void bluetooth_add_msg_to_chain( const char *msg ) {
         msg_chain = msg_chain->next_msg;
     }
 
-    new_msg_chain = (bluetooth_msg_chain_t *)ps_calloc( sizeof( bluetooth_msg_chain_t ), 1 );
+    new_msg_chain = (bluetooth_msg_chain_t *)CALLOC( sizeof( bluetooth_msg_chain_t ), 1 );
     if ( new_msg_chain == NULL ) {
         log_e("new_msg_chain alloc failed");
         while( 1 );
@@ -292,7 +293,7 @@ void bluetooth_add_msg_to_chain( const char *msg ) {
     msg_chain->next_msg = new_msg_chain;
     new_msg_chain->prev_msg = msg_chain;
     new_msg_chain->next_msg = NULL;
-    new_msg_chain->msg = (const char*)ps_calloc( strlen( msg ) + 1, 1 );
+    new_msg_chain->msg = (const char*)CALLOC( strlen( msg ) + 1, 1 );
     if ( new_msg_chain->msg == NULL ) {
         log_e("new_msg_chain->msg alloc failed");
         while( 1 );

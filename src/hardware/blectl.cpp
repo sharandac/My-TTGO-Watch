@@ -33,9 +33,11 @@
 #include <BLE2902.h>
 
 #include "blectl.h"
+#include "pmu.h"
 #include "powermgm.h"
 #include "callback.h"
 #include "json_psram_allocator.h"
+#include "alloc.h"
 
 #include "gui/statusbar.h"
 
@@ -50,6 +52,7 @@ callback_t *blectl_callback = NULL;
 bool blectl_send_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
+bool blectl_pmu_event_cb( EventBits_t event, void *arg );
 void blectl_loop( void );
 
 BLEServer *pServer = NULL;
@@ -68,18 +71,18 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
-        blectl_send_msg( (char*)"\x03\x10" );
-        pServer->getAdvertising()->stop();
-        pServer->updateConnParams( param->connect.remote_bda, 500, 1000, 750, 10000 );
         log_i("BLE connected");
+
+        pServer->getAdvertising()->stop();
     };
 
     void onDisconnect(BLEServer* pServer) {
         blectl_set_event( BLECTL_DISCONNECT );
         blectl_clear_event( BLECTL_CONNECT );
         blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
+        blectl_msg.active = false;
         log_i("BLE disconnected");
-        delay(500);
+
         if ( blectl_get_advertising() ) {
             pServer->getAdvertising()->start();
             log_i("BLE advertising...");
@@ -131,7 +134,7 @@ void blectl_add_char_to_gadgetbridge_msg( char msg_char ) {
     gadgetbridge_msg_size++;
 
     if ( gadgetbridge_msg == NULL ) {
-        gadgetbridge_msg = (char *)ps_calloc( gadgetbridge_msg_size + 1, 1 );
+        gadgetbridge_msg = (char *)CALLOC( gadgetbridge_msg_size + 1, 1 );
         if ( gadgetbridge_msg == NULL ) {
             log_e("gadgetbridge_msg alloc fail");
             while(true);
@@ -139,7 +142,7 @@ void blectl_add_char_to_gadgetbridge_msg( char msg_char ) {
     }
     else {
         char *new_gadgetbridge_msg = NULL;
-        new_gadgetbridge_msg = (char *)ps_realloc( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
+        new_gadgetbridge_msg = (char *)REALLOC( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
         if ( new_gadgetbridge_msg == NULL ) {
             log_e("gadgetbridge_msg realloc fail");
             while(true);            
@@ -154,7 +157,7 @@ void blectl_delete_gadgetbridge_msg ( void ) {
     gadgetbridge_msg_size = 0;
 
     if ( gadgetbridge_msg == NULL ) {
-        gadgetbridge_msg = (char *)ps_calloc( gadgetbridge_msg_size + 1, 1 );
+        gadgetbridge_msg = (char *)CALLOC( gadgetbridge_msg_size + 1, 1 );
         if ( gadgetbridge_msg == NULL ) {
             log_e("gadgetbridge_msg alloc fail");
             while(true);
@@ -162,7 +165,7 @@ void blectl_delete_gadgetbridge_msg ( void ) {
     }
     else {
         char *new_gadgetbridge_msg = NULL;
-        new_gadgetbridge_msg = (char *)ps_realloc( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
+        new_gadgetbridge_msg = (char *)REALLOC( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
         if ( new_gadgetbridge_msg == NULL ) {
             log_e("gadgetbridge_msg realloc fail");
             while(true);            
@@ -176,9 +179,9 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite(BLECharacteristic *pCharacteristic)
     {
-        char *msg = (char *)ps_calloc( pCharacteristic->getValue().length() + 1, 1 );
+        char *msg = (char *)CALLOC( pCharacteristic->getValue().length() + 1, 1 );
         if ( msg == NULL ) {
-            Serial.printf("ps_calloc fail\r\n");
+            log_e("calloc fail");
             return;
         }
         else {
@@ -187,6 +190,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                 switch( msg[ i ] ) {
                     case EndofText:         blectl_delete_gadgetbridge_msg();
                                             log_i("attention, new link establish");
+                                            blectl_send_msg( (char*)"\x03\x10" );
                                             break;
                     case DataLinkEscape:    blectl_delete_gadgetbridge_msg();
                                             log_i("attention, new message");
@@ -277,7 +281,6 @@ void blectl_setup( void ) {
     // Start advertising
     pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
 
-
     // Create device information service
     BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
     // Create manufacturer name string Characteristic - 
@@ -295,7 +298,6 @@ void blectl_setup( void ) {
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pDeviceInformationService->getUUID() );
 
-
     // Create battery service
     BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
     // Create a BLE battery service, batttery level Characteristic - 
@@ -312,14 +314,15 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
     // Slow advertising interval for battery life
-    pServer->getAdvertising()->setMinInterval( 750 );
-    pServer->getAdvertising()->setMaxInterval( 1250 );
+    pServer->getAdvertising()->setMinInterval( 200 );
+    pServer->getAdvertising()->setMaxInterval( 300 );
 
     if ( blectl_get_autoon() ) {
         blectl_on();
     }
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "blectl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "blectl loop" );
+    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, blectl_pmu_event_cb, "bluetooth battery");
 }
 
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -502,6 +505,28 @@ void blectl_read_config( void ) {
     file.close();
 }
 
+bool blectl_pmu_event_cb( EventBits_t event, void *arg ) {
+    static int32_t percent = 0;
+    static bool charging = false;
+    static bool plug = false;
+
+    switch( event ) {
+        case PMUCTL_BATTERY_PERCENT:
+            percent = *(int32_t*)arg;
+            break;
+        case PMUCTL_CHARGING:
+            charging = *(bool*)arg;
+            break;
+        case PMUCTL_VBUS_PLUG:
+            plug = *(bool*)arg;
+            break;
+    }
+    if ( blectl_get_event( BLECTL_CONNECT ) ) {
+        blectl_update_battery( percent, charging, plug );
+    }
+    return( true );
+}
+
 void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
@@ -519,13 +544,13 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
 
 void blectl_send_msg( char *msg ) {
     if ( !blectl_msg.active && blectl_get_event( BLECTL_CONNECT ) ) {
-        blectl_msg.msg = (char *)ps_calloc( strlen( (const char*)msg + 1 ), 1 );
+        blectl_msg.msg = (char *)CALLOC( strlen( (const char*)msg + 1 ), 1 );
         if ( blectl_msg.msg ) {
             memcpy( blectl_msg.msg, msg, strlen( (const char*)msg + 1 ) );
         }
         else {
-            log_e("ps_calloc failed");
-            blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, ps_calloc failed" );
+            log_e("calloc failed");
+            blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, calloc failed" );
             return;
         }
         blectl_msg.active = true;
@@ -562,6 +587,10 @@ void blectl_off( void ) {
 
 void blectl_loop ( void ) {
     static uint64_t NextMillis = millis();
+
+    if ( !blectl_get_event( BLECTL_CONNECT ) ) {
+        return;
+    }
 
     if ( millis() - NextMillis > BLECTL_CHUNKDELAY ) {
         NextMillis += BLECTL_CHUNKDELAY;

@@ -23,11 +23,14 @@
 #include <time.h>
 
 #include "config.h"
+#include "main_tile.h"
+
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
-#include "main_tile.h"
+
 #include "hardware/timesync.h"
 #include "hardware/powermgm.h"
+#include "hardware/alloc.h"
 
 static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
@@ -199,7 +202,7 @@ void main_tile_update_time( void ) {
 
     // on first run, alloc psram
     if ( old_time_str == NULL ) {
-        old_time_str = (char *)ps_calloc( sizeof( time_str), 1 );
+        old_time_str = (char *)CALLOC( sizeof( time_str), 1 );
         if ( old_time_str == NULL ) {
             log_e("old_time_str allocation failed");
             while(true);

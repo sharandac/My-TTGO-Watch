@@ -44,12 +44,13 @@
     } callback_table_t;
 
     /**
-     * @brief callback main structure
+     * @brief callback structure
      */
-    typedef struct {
+    typedef struct callback_t {
         uint32_t entrys;                    /** @brief count callback entrys */
         callback_table_t *table;            /** @brief pointer to an callback table */
-        const char *name;                   /** @brief id for the callback main structure */
+        const char *name;                   /** @brief id for the callback structure */
+        callback_t *next_callback_t;
     } callback_t;
 
     /**
@@ -97,5 +98,6 @@
      * @param enable    true if logging enabled, false if logging disabled
      */
     void display_event_logging_enable( bool enable );
+    void callback_print( void );
 
 #endif // _CALLBACK_H

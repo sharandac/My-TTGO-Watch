@@ -136,7 +136,7 @@ void sound_settings_tile_setup( void ) {
     lv_tileview_add_element( sound_settings_tile, sound_enable_cont );
     lv_tileview_add_element( sound_settings_tile, sound_volume_cont );
 
-    sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, sound_soundctl_event_cb, "Soundsettingstile");
+    sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, sound_soundctl_event_cb, "sound settings");
 }
 
 static void enter_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

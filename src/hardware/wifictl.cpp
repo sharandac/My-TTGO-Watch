@@ -29,6 +29,7 @@
 #include "powermgm.h"
 #include "callback.h"
 #include "json_psram_allocator.h"
+#include "alloc.h"
 
 #include "gui/statusbar.h"
 #include "webserver/webserver.h"
@@ -71,11 +72,8 @@ void wifictl_setup( void ) {
 
     wifi_init = true;
 
-#if defined( BOARD_HAS_PSRAM )
-    wifictl_networklist = (networklist*)ps_calloc( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
-#else
-    wifictl_networklist = (networklist*)calloc( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
-#endif
+    wifictl_networklist = (networklist*)CALLOC( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
+
     if( !wifictl_networklist ) {
       log_e("wifictl_networklist calloc faild");
       while(true);

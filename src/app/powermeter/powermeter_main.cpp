@@ -36,6 +36,7 @@
 
 #include "hardware/wifictl.h"
 #include "hardware/json_psram_allocator.h"
+#include "hardware/alloc.h"
 
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;
@@ -68,9 +69,9 @@ void powermeter_main_task( lv_task_t * task );
 
 void callback(char* topic, byte* payload, unsigned int length) {
     char *msg = NULL;
-    msg = (char*)ps_calloc( length + 1, 1 );
+    msg = (char*)CALLOC( length + 1, 1 );
     if ( msg == NULL ) {
-        log_e("ps_calloc failed");
+        log_e("calloc failed");
         return;
     }
     memcpy( msg, payload, length );

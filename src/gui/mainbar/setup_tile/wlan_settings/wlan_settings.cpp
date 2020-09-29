@@ -134,7 +134,7 @@ void wlan_settings_tile_setup( void ) {
     wlan_password_tile_setup( wifi_password_tile_num );
     wlan_setup_tile_setup( wifi_setup_tile_num );
 
-    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN , wifi_setup_wifictl_event_cb, "wifi settings" );
+    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN , wifi_setup_wifictl_event_cb, "wifi network scan" );
 }
 
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
@@ -400,7 +400,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     }
 
     blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
-    wifictl_register_cb( WIFICTL_AUTOON, wifi_setup_autoon_event_cb, "wifi autoon");
+    wifictl_register_cb( WIFICTL_AUTOON, wifi_setup_autoon_event_cb, "wifi setup");
 }
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
