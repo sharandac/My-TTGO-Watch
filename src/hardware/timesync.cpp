@@ -200,7 +200,7 @@ void timesync_Task( void * pvParameters ) {
     if ( timesync_config.daylightsave )
       daylightOffset_sec = 3600;
             
-    configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
+    configTzTime( "NZST-12NZDT,M9.5.0,M4.1.0/3", "pool.ntp.org" );
 
     if( !getLocalTime( &info ) ) {
         log_e("Failed to obtain time" );
