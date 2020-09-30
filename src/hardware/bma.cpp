@@ -113,7 +113,7 @@ void bma_standby( void ) {
 
     time( &now );
     localtime_r( &now, &info );
-    strftime( bma_old_date, sizeof( bma_old_date ), "%H.%M", &info );
+    strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
 
     gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
     esp_sleep_enable_gpio_wakeup ();
@@ -131,12 +131,12 @@ void bma_wakeup( void ) {
 
     time( &now );
     localtime_r( &now, &info );
-    strftime( bma_date, sizeof( bma_date ), "%H.%M", &info );
+    strftime( bma_date, sizeof( bma_date ), "%d.%b", &info );
     if ( strcmp( bma_date, bma_old_date ) ) {
         if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
             log_i("reset setcounter: %s != %s", bma_date, bma_old_date );
             ttgo->bma->resetStepCounter();
-            strftime( bma_old_date, sizeof( bma_old_date ), "%H.%M", &info );
+            strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
         }
     }
 
