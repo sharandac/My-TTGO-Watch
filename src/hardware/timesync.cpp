@@ -108,6 +108,8 @@ void timesync_save_config( void ) {
         doc["timesync"] = timesync_config.timesync;
         doc["timezone"] = timesync_config.timezone;
         doc["use_24hr_clock"] = timesync_config.use_24hr_clock;
+        doc["timezone_name"] = timesync_config.timezone_name;
+        doc["timezone_rule"] = timesync_config.timezone_rule;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -136,7 +138,14 @@ void timesync_read_config( void ) {
             timesync_config.timesync = doc["timesync"] | true;
             timesync_config.timezone = doc["timezone"] | 0;
             timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
-        }        
+            // todo: for upgrade, default name = Etc\GMTxxx based on timezone & daylightsave
+            // todo: for upgrade, default rule = GMT0 or <-xx>xx based on timezone & daylightsave
+            // todo: upgrade rtc clock to be in utc? (First sync will fix it.)
+            strlcpy( timesync_config.timezone_name, doc["timezone_name"] | TIMEZONE_NAME_DEFAULT, sizeof( timesync_config.timezone_name ) );
+            strlcpy( timesync_config.timezone_rule, doc["timezone_rule"] | TIMEZONE_RULE_DEFAULT, sizeof( timesync_config.timezone_rule ) );
+            setenv("TZ", timesync_config.timezone_rule, 1);
+            tzset();
+        }
         doc.clear();
     }
     file.close();
@@ -169,6 +178,26 @@ void timesync_set_timezone( int32_t timezone ) {
     timesync_save_config();
 }
 
+char* timesync_get_timezone_name( void ) {
+    return( timesync_config.timezone_name );
+}
+
+void timesync_set_timezone_name( char * timezone_name ) {
+    strlcpy( timesync_config.timezone_name, timezone_name, sizeof( timesync_config.timezone_name ) );
+    timesync_save_config();
+}
+
+char* timesync_get_timezone_rule( void ) {
+    return( timesync_config.timezone_rule );
+}
+
+void timesync_set_timezone_rule( const char * timezone_rule ) {
+    strlcpy( timesync_config.timezone_rule, timezone_rule, sizeof( timesync_config.timezone_rule ) );
+    setenv("TZ", timesync_config.timezone_rule, 1);
+    tzset();
+    timesync_save_config();
+}
+
 void timesync_set_24hr( bool use24 ) {
     timesync_config.use_24hr_clock = use24;
     timesync_save_config();
@@ -179,13 +208,21 @@ bool timesync_get_24hr(void) {
 }
 
 void timesyncToSystem( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-  ttgo->rtc->syncToSystem();
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    setenv("TZ", "GMT0", 1);
+    tzset();
+    ttgo->rtc->syncToSystem();
+    setenv("TZ", timesync_config.timezone_rule, 1);
+    tzset();
 }
 
 void timesyncToRTC( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-  ttgo->rtc->syncToRtc();
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    setenv("TZ", "GMT0", 1);
+    tzset();
+    ttgo->rtc->syncToRtc();
+    setenv("TZ", timesync_config.timezone_rule, 1);
+    tzset();
 }
 
 void timesync_Task( void * pvParameters ) {
@@ -194,13 +231,7 @@ void timesync_Task( void * pvParameters ) {
   if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
     struct tm info;
 
-    long gmtOffset_sec = timesync_config.timezone * 3600;
-    int daylightOffset_sec = 0;
-    
-    if ( timesync_config.daylightsave )
-      daylightOffset_sec = 3600;
-            
-    configTime( gmtOffset_sec, daylightOffset_sec, "pool.ntp.org" );
+    configTzTime( timesync_config.timezone_rule, "pool.ntp.org" );
 
     if( !getLocalTime( &info ) ) {
         log_e("Failed to obtain time" );
