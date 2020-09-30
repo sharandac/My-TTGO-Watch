@@ -36,6 +36,8 @@
 extern const uint8_t timezones_json_start[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_start");
 extern const uint8_t timezones_json_end[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_end");
 const size_t capacity = JSON_OBJECT_SIZE(460) + 14920;
+const char * timezone_options;
+uint16_t timezone_selected_index;
 
 lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
@@ -55,7 +57,36 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event);
 static void clock_fmt_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
+static void setup_timezone_data( char * selected_timezone ) {
+    String zones = String("");
+    if (timezone_options) return;
+    SpiRamJsonDocument doc( capacity );
+    DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+    if ( error ) {
+        log_e("timezones deserializeJson() failed: %s", error.c_str() );
+        return;
+    }
+    else {
+        JsonObject obj = doc.as<JsonObject>();
+        // Loop through all the key-value pairs in obj
+        uint16_t current_index = 0;
+        for (JsonPair p : obj) {
+            const char * k = p.key().c_str();
+            zones += k; // todo: replace _ with space
+            zones += "\n";
+            if (strcmp(k, selected_timezone) == 0) {
+                timezone_selected_index = current_index;
+            }
+            current_index++;
+        }
+    }
+    doc.clear();
+    timezone_options = zones.c_str();
+}
+
 void time_settings_tile_setup( void ) {
+    setup_timezone_data( timesync_get_timezone_name() );
+
     // get an app tile and copy mainstyle
     time_tile_num = mainbar_add_app_tile( 1, 1, "time setup" );
     time_settings_tile = mainbar_get_tile_obj( time_tile_num );
@@ -122,26 +153,7 @@ void time_settings_tile_setup( void ) {
     lv_obj_align( timezone_label, timezone_cont, LV_ALIGN_IN_TOP_LEFT, 5, 5 );
 
     utczone_list = lv_dropdown_create( timezone_cont, NULL);
-
-    String zones = String("");
-    SpiRamJsonDocument doc( capacity );
-    DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
-    if ( error ) {
-        log_e("timezones deserializeJson() failed: %s", error.c_str() );
-    }
-    else {
-        JsonObject obj = doc.as<JsonObject>();
-        // Loop through all the key-value pairs in obj
-        for (JsonPair p : obj) {
-            const char * k = p.key().c_str(); // is a JsonString
-            //p.value() // is a JsonVariant
-            zones += k;
-            zones += "\n";
-        }
-    }
-    doc.clear();
-
-    lv_dropdown_set_options( utczone_list, zones.c_str() );
+    lv_dropdown_set_options( utczone_list, timezone_options );
     lv_obj_set_size( utczone_list, lv_disp_get_hor_res( NULL ), 40 );
     lv_obj_align( utczone_list, timezone_cont, LV_ALIGN_IN_TOP_LEFT, 5, 40 );
     lv_obj_set_event_cb(utczone_list, utczone_event_handler);
@@ -156,7 +168,7 @@ void time_settings_tile_setup( void ) {
     else
         lv_switch_off( clock_fmt_onoff, LV_ANIM_OFF );
 
-    lv_dropdown_set_selected( utczone_list, timesync_get_timezone() + 12 );
+    lv_dropdown_set_selected( utczone_list, timezone_selected_index );
 }
 
 static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -181,7 +193,22 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
-        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
+        case ( LV_EVENT_VALUE_CHANGED):     char timezone_name[32] = "";
+                                            timezone_selected_index = lv_dropdown_get_selected( obj );
+                                            lv_dropdown_get_selected_str( obj, timezone_name, sizeof(timezone_name) );
+                                            timesync_set_timezone_name( timezone_name );
+
+                                            SpiRamJsonDocument doc( capacity );
+                                            DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+                                            if ( error ) {
+                                                log_e("timezones deserializeJson() failed: %s", error.c_str() );
+                                                return;
+                                            }
+                                            else {
+                                                const char * timezone_rule = doc[timezone_name];
+                                                timesync_set_timezone_rule( timezone_rule );
+                                            }
+                                            doc.clear();
     }
 }
 
