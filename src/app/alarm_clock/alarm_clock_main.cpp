@@ -175,7 +175,7 @@ static void enter_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event )
 static void exit_alarm_clock_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            mainbar_jump_to_maintile( LV_ANIM_ON ); // user action (return back) will be performed first
+            mainbar_jump_to_maintile( LV_ANIM_OFF ); // user action (return back) will be performed first
             break;
     }
 }

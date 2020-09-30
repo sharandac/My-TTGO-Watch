@@ -25,6 +25,8 @@
     #include "TTGO.h"
     #include "callback.h"
 
+    #define CONFIG_FILE_PATH         "/rtcctr.json"
+
     #define RTCCTL_ALARM_OCCURRED    _BV(0)     /** @brief event mask for alarm occurred */
     #define RTCCTL_ALARM_TERM_SET    _BV(1)     /** @brief event mask for alarm set */     
     #define RTCCTL_ALARM_DISABLED    _BV(2)     /** @brief event mask for alarm disabled */
@@ -70,16 +72,16 @@
     /**
      * @brief   returns pointer to data coresponding to alarm
      */
-    rtcctl_alarm_t *rtcctl_get_alarm_data();
+    rtcctl_alarm_t *rtcctl_get_alarm_data( void );
 
     /**
      * @brief find and set term for next alarm 
      */
-    void rtcctl_set_next_alarm();
+    void rtcctl_set_next_alarm( void );
 
     /**
      * @brief if alarm is set, returns day of week number where sunday=0, othervise is returned DAY_NOT_SET 
      */
-    int rtcctl_get_next_alarm_week_day();
+    int rtcctl_get_next_alarm_week_day( void );
 
 #endif // _RTCCTL_H

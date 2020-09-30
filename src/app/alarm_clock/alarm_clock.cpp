@@ -40,7 +40,7 @@
 #define FADE_KEY "fade"
 #define VIBE_KEY "vibe"
 
-#define CONFIG_FILE_PATH "/alarm_clock.json"
+#define CONFIG_ALARM_FILE_PATH "/alarm_clock.json"
 
 #define AM "AM"
 #define PM "PM"
@@ -69,57 +69,51 @@ static alarm_properties_t properties;
 static void enter_alarm_clock_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static void load_data(){
-    if (! SPIFFS.exists( CONFIG_FILE_PATH ) ) {
+    if (! SPIFFS.exists( CONFIG_ALARM_FILE_PATH ) ) {
         return; //wil be used default values set during theier creation
     }
 
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_READ );
+    fs::File file = SPIFFS.open( CONFIG_ALARM_FILE_PATH, FILE_READ );
     if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
+        log_e("Can't open file: %s!", CONFIG_ALARM_FILE_PATH );
         return;
     }
+    else {
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 2 );
 
-    int filesize = file.size();
-    SpiRamJsonDocument doc( filesize * 2 );
-
-    DeserializationError error = deserializeJson( doc, file );
-    if ( error ) {
-        log_e("update check deserializeJson() failed: %s", error.c_str() );
-        return;
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
+        }
+        else {
+            properties.beep = doc[BEEP_KEY].as<bool>();
+            properties.fade = doc[FADE_KEY].as<bool>();
+            properties.vibe = doc[VIBE_KEY].as<bool>();
+        }
+        doc.clear();
     }
-
-    properties.beep = doc[BEEP_KEY].as<bool>();
-    properties.fade = doc[FADE_KEY].as<bool>();
-    properties.vibe = doc[VIBE_KEY].as<bool>();
-
-    doc.clear();
     file.close();
 }
 
 static void store_data(){
-    if ( SPIFFS.exists( CONFIG_FILE_PATH ) ) {
-        SPIFFS.remove( CONFIG_FILE_PATH );
-        log_i("remove old binary weather config");
-    }
-
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_WRITE );
+    fs::File file = SPIFFS.open( CONFIG_ALARM_FILE_PATH, FILE_WRITE );
     if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
-        return;
+        log_e("Can't open file: %s!", CONFIG_ALARM_FILE_PATH );
     }
+    else {
+        SpiRamJsonDocument doc( 1000 );
 
-    SpiRamJsonDocument doc( 1000 );
+        doc[VERSION_KEY] = 1;
+        doc[BEEP_KEY] = properties.beep;
+        doc[FADE_KEY] = properties.fade;
+        doc[VIBE_KEY] = properties.vibe;
 
-    doc[VERSION_KEY] = 1;
-    doc[BEEP_KEY] = properties.beep;
-    doc[FADE_KEY] = properties.fade;
-    doc[VIBE_KEY] = properties.vibe;
-
-    if ( serializeJsonPretty( doc, file ) == 0) {
-        log_e("Failed to write config file");
+        if ( serializeJsonPretty( doc, file ) == 0) {
+            log_e("Failed to write config file");
+        }
+        doc.clear();
     }
-
-    doc.clear();
     file.close();
 }
 
@@ -221,13 +215,14 @@ static void create_widget_icon(){
 #endif // ALARM_CLOCK_WIDGET
 }
 
-static bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
+bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
     switch ( event ){
         case ( RTCCTL_ALARM_OCCURRED ):
             alarm_in_progress_start_alarm();
             rtcctl_set_next_alarm();
             break;
     }
+    return( true );
 }
 
 bool powermgmt_callback( EventBits_t event, void *arg  ){
@@ -236,6 +231,7 @@ bool powermgmt_callback( EventBits_t event, void *arg  ){
             alarm_in_progress_finish_alarm();
             break;
     }
+    return( true );
 }
 
 // setup routine for example app
