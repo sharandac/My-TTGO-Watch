@@ -19,40 +19,40 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
+
+#include "alarm_clock.h"
 #include "alarm_in_progress.h"
-#include "alarm_clock_main.h"
-#include "alarm_data.h"
-#include "hardware/powermgm.h"
-#include "hardware/motor.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/statusbar.h"
+#include "gui/sound/piep.h"
+#include "hardware/display.h"
+#include "hardware/motor.h"
+#include "hardware/rtcctl.h"
+#include "hardware/sound.h"
+#include "hardware/timesync.h"
 #include "widget_factory.h"
 #include "widget_styles.h"
-#include "hardware/rtcctl.h"
-#include "gui/statusbar.h"
-#include "hardware/display.h"
-#include "hardware/timesync.h"
 
-//#include "gui/mainbar/setup_tile/setup.h"
+#define BEEP_TO_VIBE_DELAY 2
+#define BEEP_OFTEN_DELAY 5
 
 LV_FONT_DECLARE(Ubuntu_72px);
-
+LV_IMG_DECLARE(cancel_32px);
+LV_IMG_DECLARE(alarm_clock_64px);
 
 static const int highlight_time = 1000; //ms
 static const int vibe_time = 500; //ms
 
-static char time_str[9]; // (23:50 or 11:50 pm) + /0
 static lv_obj_t *tile=NULL;
 static uint32_t tile_num = 0;
 static bool in_progress = false;
 static bool highlighted = false;
-static lv_obj_t *container = NULL;
 static lv_obj_t *label = NULL;
 static lv_style_t popup_style;
 static lv_style_t label_style;
 static int brightness = 0;
-
-LV_IMG_DECLARE(cancel_32px);
-LV_IMG_DECLARE(alarm_clock_64px);
+static int vibe_delay_coutdown = 0;
+static int beep_often_countown = 0;
 
 static void exit_event_callback( lv_obj_t * obj, lv_event_t event ){
     switch( event ) {
@@ -62,25 +62,17 @@ static void exit_event_callback( lv_obj_t * obj, lv_event_t event ){
     }
 }
 
-char * alarm_in_progress_get_clock_label()
-{
-    //FIXME: there should be one source for the string in main_tile and alarm_clock - the format should be exactly the same
-    if (timesync_get_24hr()){
-        sprintf(time_str, "%d:%.2d", alarm_get_hour(), alarm_get_minute());
-    }
-    else{
-        sprintf(
-            time_str,
-            "%d:%.2d",
-            alarm_clock_main_get_am_pm_hour(alarm_get_hour()),
-            alarm_get_minute()
-        );
-    }
-    return time_str;
+static bool is_alarm_time(){
+    time_t now;
+    struct tm time_tm;
+    time( &now );
+    localtime_r( &now, &time_tm );
+    return time_tm.tm_hour == rtcctl_get_alarm_data()->hour && time_tm.tm_min == rtcctl_get_alarm_data()->minute;
 }
 
 static void alarm_task_function(lv_task_t * task){
-    if (in_progress && !alarm_is_time()){
+    alarm_properties_t * properties = alarm_clock_get_properties();
+    if (in_progress && !is_alarm_time()){
         in_progress = false;
     }
 
@@ -89,11 +81,26 @@ static void alarm_task_function(lv_task_t * task){
         highlighted = false; //set default value
     }
 
-    if (highlighted && alarm_is_vibe_allowed()){
+    if (properties->beep && in_progress && vibe_delay_coutdown == 0){ //beeping starts after defined number of vibrations
+        if (beep_often_countown == 0 || highlighted){ //increase number of beeps after a defined while 
+            if (beep_often_countown > 0){
+                beep_often_countown--;
+            }
+            sound_play_progmem_wav(piep_wav, piep_wav_len);
+        }
+    }
+    
+    if (highlighted && properties->vibe){
         motor_vibe(vibe_time / 10, true);
+        
+        if (vibe_delay_coutdown > 0){
+            vibe_delay_coutdown--;
+        }
     }
 
-    if (alarm_is_fade_allowed()){
+    
+
+    if (properties->fade){
         //used brightmess because is smooth for SW dimming would be necessary to use double buffer display
         display_set_brightness(highlighted ? DISPLAY_MAX_BRIGHTNESS : DISPLAY_MIN_BRIGHTNESS);
     }
@@ -112,31 +119,22 @@ static void alarm_task_function(lv_task_t * task){
     }
 }
 
-bool alarm_occurred_event_event_callback ( EventBits_t event, void* msg ) {
-    switch ( event ){
-        case ( RTCCTL_ALARM_OCCURRED ):
-            statusbar_hide( true );
-            mainbar_jump_to_tilenumber( tile_num, LV_ANIM_OFF );
+void alarm_in_progress_start_alarm(){
+    statusbar_hide( true );
+    mainbar_jump_to_tilenumber( tile_num, LV_ANIM_OFF );
 
-            lv_label_set_text(label, alarm_in_progress_get_clock_label());
-            lv_obj_align(label, container, LV_ALIGN_IN_TOP_MID, 0, 0);
+    lv_label_set_text(label, alarm_clock_get_clock_label(false));
 
-            highlighted = true;
-            in_progress = true;
-            brightness = display_get_brightness();
-            lv_task_create( alarm_task_function, highlight_time, LV_TASK_PRIO_MID, NULL );
-            break;
-    }
-    return( true );
+    highlighted = true;
+    in_progress = true;
+    vibe_delay_coutdown = alarm_clock_get_properties()->vibe ? BEEP_TO_VIBE_DELAY : 0;
+    beep_often_countown = BEEP_OFTEN_DELAY;
+    brightness = display_get_brightness();
+    lv_task_create( alarm_task_function, highlight_time, LV_TASK_PRIO_MID, NULL );
 }
 
-bool powermgmt_callback( EventBits_t event, void *arg ){
-    switch( event ) {
-        case( POWERMGM_STANDBY ):
-            in_progress = false;
-            break;
-    }
-    return( true );
+void alarm_in_progress_finish_alarm(){
+    in_progress = false;
 }
 
 void alarm_in_progress_tile_setup( void ) {
@@ -150,25 +148,21 @@ void alarm_in_progress_tile_setup( void ) {
     lv_style_set_bg_opa(&popup_style, LV_OBJ_PART_MAIN, LV_OPA_10);
     lv_style_set_bg_color( &popup_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
 
-    lv_obj_t * cancel_btm = wf_add_image_button(tile, cancel_32px, tile, LV_ALIGN_IN_TOP_LEFT, 10, 10, exit_event_callback);
+    lv_obj_t *tile_container = wf_add_tile_container(tile, LV_LAYOUT_COLUMN_MID);
+    lv_obj_t * cancel_container = wf_add_container(tile_container, LV_LAYOUT_ROW_MID, LV_FIT_PARENT);
+    lv_obj_t * cancel_btm = wf_add_image_button(cancel_container, cancel_32px, exit_event_callback);
     static lv_style_t cancel_btn_style;
     lv_style_init(&cancel_btn_style);
     lv_style_set_image_recolor_opa(&cancel_btn_style, LV_OBJ_PART_MAIN, LV_OPA_COVER);
     lv_style_set_image_recolor(&cancel_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-    lv_style_set_pad_all(&cancel_btn_style, LV_OBJ_PART_MAIN, 100);
     lv_obj_add_style(cancel_btm, LV_OBJ_PART_MAIN, &cancel_btn_style);
 
-    container = wf_add_container(tile, tile, LV_ALIGN_CENTER, 0, 0, lv_disp_get_hor_res( NULL ), 72 + 20 + 64 );
-
-    label = wf_add_label(tile, "00:00", container, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    label = wf_add_label(tile_container, "00:00");
     lv_style_init( &label_style );
     lv_style_copy( &label_style, ws_get_label_style() );
     lv_style_set_text_color( &label_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_text_font( &label_style, LV_STATE_DEFAULT, &Ubuntu_72px);
     lv_obj_add_style( label, LV_OBJ_PART_MAIN, &label_style );
-
-    wf_add_image( tile, alarm_clock_64px, container, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-
-    rtcctl_register_cb( RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm in progress" );
-    powermgm_register_cb( POWERMGM_STANDBY, powermgmt_callback, "alarm in progress" );
+    lv_label_set_align(label, LV_LABEL_ALIGN_CENTER);
+    wf_add_image( tile_container, alarm_clock_64px);
 }

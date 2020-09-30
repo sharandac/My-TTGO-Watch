@@ -20,5 +20,9 @@
  */
 #pragma once
 #include <TTGO.h>
+#include "alarm_clock.h"
 
 void alarm_clock_setup_setup( uint32_t tile_num );
+
+void alarm_clock_setup_set_data_to_display(alarm_properties_t *alarm_properties);
+alarm_properties_t *alarm_clock_setup_get_data_to_store();

@@ -23,12 +23,47 @@
 
 #include "config.h"
 
+/**
+ * @brief   returns a common container style
+ */
 lv_style_t *ws_get_container_style();
-lv_style_t *ws_get_setup_tile_style();
-lv_style_t *ws_get_img_button_style();
-lv_style_t *ws_get_label_style();
-lv_style_t *ws_get_switch_style();
-lv_style_t *ws_get_roller_bg_style();
-lv_style_t *ws_get_roller_part_selected_style();
-lv_style_t *ws_get_popup_style();
 
+/**
+ * @brief   returns a common setup_tile style
+ */
+lv_style_t *ws_get_setup_tile_style();
+
+/**
+ * @brief   returns a common button style
+ */
+lv_style_t *ws_get_button_style();
+
+/**
+ * @brief   returns a common image button style
+ */
+lv_style_t *ws_get_img_button_style();
+
+/**
+ * @brief   returns a common label style
+ */
+lv_style_t *ws_get_label_style();
+
+/**
+ * @brief   returns a common switch style
+ */
+lv_style_t *ws_get_switch_style();
+
+/**
+ * @brief   returns a common roller style for LV_ROLLER_PART_BG
+ */
+lv_style_t *ws_get_roller_bg_style();
+
+/**
+ * @brief   returns a common roller style for LV_ROLLER_PART_SELECTED
+ */
+lv_style_t *ws_get_roller_part_selected_style();
+
+/**
+ * @brief   returns a common style for popup tile
+ */
+lv_style_t *ws_get_popup_style();

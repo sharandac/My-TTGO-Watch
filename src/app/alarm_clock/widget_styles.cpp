@@ -21,10 +21,13 @@
 
 #include "widget_styles.h"
 
+#define ROLLER_TEXT_SPACE 8 //half of font size - good size for 4 lines roller on the small display
+
 static bool styles_defined = false;
 
 static lv_style_t mainbar_style;
 static lv_style_t setup_tile_style;
+static lv_style_t button_style;
 static lv_style_t img_button_style;
 static lv_style_t label_style;
 static lv_style_t switch_style;
@@ -47,6 +50,10 @@ static void define_styles(){
     lv_style_set_bg_opa( &setup_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0);
 
+    lv_style_init( &button_style );
+    lv_style_set_radius(&button_style, LV_STATE_DEFAULT, 4);
+
+
     lv_style_copy(&img_button_style, &mainbar_style);
 
     lv_style_init( &label_style );
@@ -56,6 +63,7 @@ static void define_styles(){
     lv_style_set_bg_color( &switch_style, LV_STATE_CHECKED, LV_COLOR_GREEN );
 
     lv_style_init( &roller_bg_style );
+    lv_style_set_text_line_space(&roller_bg_style, LV_STATE_DEFAULT, ROLLER_TEXT_SPACE);
     lv_style_init( &roller_part_selected_style );
     //the default roller color is red - may be it is the best one as default
     //lv_style_set_bg_color( &roller_part_selected_style, LV_STATE_DEFAULT, LV_COLOR_GRAY);
@@ -80,12 +88,20 @@ lv_style_t *ws_get_setup_tile_style(){
     return &setup_tile_style;
 }
 
+lv_style_t *ws_get_button_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &button_style;
+}
+
 lv_style_t *ws_get_img_button_style(){
     if (!styles_defined){
          define_styles();
     }
     return &mainbar_style;
 }
+
 
 lv_style_t *ws_get_label_style(){
     if (!styles_defined){
