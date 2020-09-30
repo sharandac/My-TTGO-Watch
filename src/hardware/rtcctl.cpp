@@ -104,10 +104,15 @@ static void set_next_alarm(TTGOClass *ttgo){
         return;
     } 
 
-    //trc ans system must be synchronized, it is important when alarm has been raised and we want to set next concurency 
+    //trc and system must be synchronized, it is important when alarm has been raised and we want to set next concurency
     //if the synchronisation is not done the time can be set to now again
-    ttgo->rtc->syncToSystem(); 
-    
+    //ttgo->rtc->syncToSystem();
+
+    //FIXME: for now would be better to synchronize to rtc because time zone setting is not finished yet (#124).
+    //Unfortunately, each synchToRtc without a NTP synchronization inacurate internal clock
+    //This issue is complex and should be solbed when timezone setting will be finished .
+    ttgo->rtc->syncToRtc();
+
     time_t now;
     time(&now);
     alarm_time = now;
