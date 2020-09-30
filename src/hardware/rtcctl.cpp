@@ -21,15 +21,15 @@
 #include "config.h"
 #include <TTGO.h>
 #include <SPIFFS.h>
+#include <time.h>
 
 #include "rtcctl.h"
 #include "powermgm.h"
 #include "callback.h"
+#include "timesync.h"
 
 #include "hardware/powermgm.h"
 #include "hardware/json_psram_allocator.h"
-
-#include <time.h>
 
 #define VERSION_KEY "version"
 #define ENABLED_KEY "enabled"
@@ -80,7 +80,7 @@ bool is_any_day_enabled( void ) {
     return false;
 }
 
-static time_t find_next_alarm_day( int day_of_week, time_t now ) {
+time_t find_next_alarm_day( int day_of_week, time_t now ) {
     //it is expected that test if any day is enabled has been performed
     
     time_t ret_val = now;
@@ -98,7 +98,7 @@ static time_t find_next_alarm_day( int day_of_week, time_t now ) {
     return ret_val; //the same day of next week
 }
 
-static void set_next_alarm( void ) {
+void set_next_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if (!is_any_day_enabled()){
@@ -114,13 +114,16 @@ static void set_next_alarm( void ) {
     //FIXME: for now would be better to synchronize to rtc because time zone setting is not finished yet (#124).
     //Unfortunately, each synchToRtc without a NTP synchronization inacurate internal clock
     //This issue is complex and should be solbed when timezone setting will be finished .
-    // ttgo->rtc->syncToRtc();
+    // timesyncToRTC();
 
     time_t now;
     time(&now);
     alarm_time = now;
-    struct tm  alarm_tm;
+    struct tm alarm_tm;
+
+    // get local time and set alarm time
     localtime_r(&alarm_time, &alarm_tm);
+    log_i("local time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
     alarm_tm.tm_hour = alarm_data.hour;
     alarm_tm.tm_min = alarm_data.minute;
     alarm_time = mktime(&alarm_tm);
@@ -129,6 +132,19 @@ static void set_next_alarm( void ) {
        alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
        localtime_r(&alarm_time, &alarm_tm);
     }
+
+    log_i("local alarm time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+
+    // change to GMT0 and calculate RTC alarm time and day
+    setenv("TZ", "GMT0", 1);
+    tzset();
+
+    localtime_r(&alarm_time, &alarm_tm);
+    log_i("GMT0 alarm time: %02d:%02d day %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+
+    setenv("TZ", timesync_get_timezone_rule(), 1);
+    tzset();
+
     //it is better define alarm by day in month rather than weekday. This way will be work-around an error in pcf8563 source and will avoid eaising alarm when there is only one alarm in the week (today) and alarm time is set to now
     ttgo->rtc->setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
     rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );

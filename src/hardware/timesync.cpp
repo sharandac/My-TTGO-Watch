@@ -21,8 +21,8 @@
  */
 #include "config.h"
 #include "TTGO.h"
+#include <time.h>
 
-#include "time.h"
 #include "wifictl.h"
 #include "config.h"
 #include "timesync.h"
