@@ -91,6 +91,12 @@
      * @param   hide    true or false, ture means statusbar is hide
      */
     void statusbar_hide( bool hide );
+    /**
+     * @brief expand the statusbar
+     * 
+     * @param   expand  true if expand of false if not
+     */
+    void statusbar_expand( bool expand );
 
 #endif // _STATUSBAR_H
 

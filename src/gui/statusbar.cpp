@@ -573,31 +573,40 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
 
     switch( event ) {
         case LV_EVENT_PRESSED:
-            if ( !expand ) {
-                lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
-                lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_50);
-                lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-                lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-                expand = true;
+            if ( expand ) {
+                statusbar_expand( false );
+                expand = false;
             } 
             else {
-                lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
-                lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
-                lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-                lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-                expand = false;
-                //Save config here if anything has changed
-                if( should_save_brightness_config ){
-                    display_save_config();
-                    should_save_brightness_config = false;
-                }
-                if( should_save_sound_config ){
-                    sound_save_config();
-                    should_save_sound_config = false;
-                }
+                statusbar_expand( true );
+                expand = true;
             }
         default:
             break;
+    }
+}
+
+void statusbar_expand( bool expand ) {
+    if ( expand ) {
+        lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
+        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_50);
+        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+    } 
+    else {
+        lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
+        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
+        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+        //Save config here if anything has changed
+        if( should_save_brightness_config ){
+            display_save_config();
+            should_save_brightness_config = false;
+        }
+        if( should_save_sound_config ){
+            sound_save_config();
+            should_save_sound_config = false;
+        }
     }
 }
 

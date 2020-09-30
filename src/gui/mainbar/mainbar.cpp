@@ -200,9 +200,10 @@ lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
 }
 
 void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
-    statusbar_hide( false );
     if ( tile_entrys != 0 ) {
         mainbar_jump_to_tilenumber( 0, anim );
+        statusbar_hide( false );
+        statusbar_expand( false );
     }
     else {
         log_e( "main tile do not exist" );
