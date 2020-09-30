@@ -154,8 +154,8 @@ void time_settings_tile_setup( void ) {
 
     utczone_list = lv_dropdown_create( timezone_cont, NULL);
     lv_dropdown_set_options( utczone_list, timezone_options );
-    lv_obj_set_size( utczone_list, lv_disp_get_hor_res( NULL ), 40 );
-    lv_obj_align( utczone_list, timezone_cont, LV_ALIGN_IN_TOP_LEFT, 5, 40 );
+    lv_obj_set_size( utczone_list, lv_disp_get_hor_res( NULL )-20, 35 );
+    lv_obj_align( utczone_list, timezone_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_set_event_cb(utczone_list, utczone_event_handler);
 
     if ( timesync_get_timesync() )
