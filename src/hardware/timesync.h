@@ -28,6 +28,8 @@
     #define TIME_SYNC_OK            _BV(1)
 
     #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"    /** @brief defines json config file name */
+    #define TIMEZONE_NAME_DEFAULT       "Etc/GMT"           /** @brief defines default time zone name */
+    #define TIMEZONE_RULE_DEFAULT       "GMT0"              /** @brief defines default time zone rule */
 
     /**
      * @brief time sync config structure
@@ -37,6 +39,8 @@
         bool daylightsave = false;          /** @brief day light save on/off */
         int32_t timezone = 0;               /** @brief time zone from 0..24, 0 means -12 */
         bool use_24hr_clock = true;         /** @brief 12h/24h time format */
+        char timezone_name[32] = TIMEZONE_NAME_DEFAULT; /** @brief name of the time zone to use */
+        char timezone_rule[48] = TIMEZONE_RULE_DEFAULT; /** @brief time zone rule to use */
     } timesync_config_t;
 
     /**
@@ -99,6 +103,10 @@
      * @param use24  true or false
      */
     void timesync_set_24hr( bool use24 );
+    char* timesync_get_timezone_name( void );
+    void timesync_set_timezone_name( char * timezone_name );
+    char* timesync_get_timezone_rule( void );
+    void timesync_set_timezone_rule( const char * timezone_rule );
     /**
      * @brief wrapper function to sync the system with rtc
      */

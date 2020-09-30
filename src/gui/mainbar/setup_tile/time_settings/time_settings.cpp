@@ -30,13 +30,21 @@
 #include "hardware/timesync.h"
 #include "hardware/motor.h"
 
+#include "hardware/json_psram_allocator.h"
+// Source: https://raw.githubusercontent.com/nayarsystems/posix_tz_db/master/zones.json
+// 2020a-1
+extern const uint8_t timezones_json_start[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_start");
+extern const uint8_t timezones_json_end[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_end");
+const size_t capacity = JSON_OBJECT_SIZE(460) + 14920;
+const char * timezone_options;
+uint16_t timezone_selected_index;
+
 lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
 uint32_t time_tile_num;
 
 lv_obj_t *utczone_list = NULL;
 lv_obj_t *wifisync_onoff = NULL;
-lv_obj_t *daylight_onoff = NULL;
 lv_obj_t *clock_fmt_onoff = NULL;
 
 LV_IMG_DECLARE(exit_32px);
@@ -46,11 +54,39 @@ LV_IMG_DECLARE(time_64px);
 static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
-static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event);
 static void clock_fmt_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
+static void setup_timezone_data( char * selected_timezone ) {
+    String zones = String("");
+    if (timezone_options) return;
+    SpiRamJsonDocument doc( capacity );
+    DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+    if ( error ) {
+        log_e("timezones deserializeJson() failed: %s", error.c_str() );
+        return;
+    }
+    else {
+        JsonObject obj = doc.as<JsonObject>();
+        // Loop through all the key-value pairs in obj
+        uint16_t current_index = 0;
+        for (JsonPair p : obj) {
+            const char * k = p.key().c_str();
+            zones += k; // todo: replace _ with space
+            zones += "\n";
+            if (strcmp(k, selected_timezone) == 0) {
+                timezone_selected_index = current_index;
+            }
+            current_index++;
+        }
+    }
+    doc.clear();
+    timezone_options = zones.c_str();
+}
+
 void time_settings_tile_setup( void ) {
+    setup_timezone_data( timesync_get_timezone_name() );
+
     // get an app tile and copy mainstyle
     time_tile_num = mainbar_add_app_tile( 1, 1, "time setup" );
     time_settings_tile = mainbar_get_tile_obj( time_tile_num );
@@ -92,39 +128,10 @@ void time_settings_tile_setup( void ) {
     lv_label_set_text( wifisync_label, "sync when connect");
     lv_obj_align( wifisync_label, wifisync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
-    lv_obj_t *daylight_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(daylight_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( daylight_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_obj_align( daylight_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    daylight_onoff = lv_switch_create( daylight_cont, NULL );
-    lv_obj_add_protect( daylight_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( daylight_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
-    lv_switch_off( daylight_onoff, LV_ANIM_ON );
-    lv_obj_align( daylight_onoff, daylight_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( daylight_onoff, daylight_onoff_event_handler );
-    lv_obj_t *daylight_label = lv_label_create( daylight_cont, NULL);
-    lv_obj_add_style( daylight_label, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_label_set_text( daylight_label, "daylight saving");
-    lv_obj_align( daylight_label, daylight_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    lv_obj_t *utczone_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(utczone_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( utczone_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_obj_align( utczone_cont, daylight_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
-    lv_obj_t *utczone_label = lv_label_create( utczone_cont, NULL);
-    lv_obj_add_style( utczone_label, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_label_set_text( utczone_label, "utc timezone");
-    lv_obj_align( utczone_label, utczone_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-    utczone_list = lv_dropdown_create( utczone_cont, NULL);
-    lv_dropdown_set_options( utczone_list, "-12\n-11\n-10\n-9\n-8\n-7\n-6\n-5\n-4\n-3\n-2\n-1\n0\n+1\n+2\n+3\n+4\n+5\n+6\n+7\n+8\n+9\n+10\n+11\n+12" );
-    lv_obj_set_size( utczone_list, 70, 40 );
-    lv_obj_align(utczone_list, utczone_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-    lv_obj_set_event_cb(utczone_list, utczone_event_handler);
-
     lv_obj_t *clock_fmt_cont = lv_obj_create( time_settings_tile, NULL );
     lv_obj_set_size(clock_fmt_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( clock_fmt_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_obj_align( clock_fmt_cont, utczone_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( clock_fmt_cont, wifisync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     clock_fmt_onoff = lv_switch_create( clock_fmt_cont, NULL );
     lv_obj_add_protect( clock_fmt_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( clock_fmt_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
@@ -136,22 +143,32 @@ void time_settings_tile_setup( void ) {
     lv_label_set_text( clock_fmt_label, "use 24hr clock");
     lv_obj_align( clock_fmt_label, clock_fmt_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *timezone_cont = lv_obj_create( time_settings_tile, NULL );
+    lv_obj_set_size(timezone_cont, lv_disp_get_hor_res( NULL ) , 80);
+    lv_obj_add_style( timezone_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_obj_align( timezone_cont, clock_fmt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *timezone_label = lv_label_create( timezone_cont, NULL);
+    lv_obj_add_style( timezone_label, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_label_set_text( timezone_label, "timezone");
+    lv_obj_align( timezone_label, timezone_cont, LV_ALIGN_IN_TOP_LEFT, 5, 5 );
+
+    utczone_list = lv_dropdown_create( timezone_cont, NULL);
+    lv_dropdown_set_options( utczone_list, timezone_options );
+    lv_obj_set_size( utczone_list, lv_disp_get_hor_res( NULL )-20, 35 );
+    lv_obj_align( utczone_list, timezone_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_set_event_cb(utczone_list, utczone_event_handler);
+
     if ( timesync_get_timesync() )
         lv_switch_on( wifisync_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( wifisync_onoff, LV_ANIM_OFF );
-
-    if ( timesync_get_daylightsave() )
-        lv_switch_on( daylight_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( daylight_onoff, LV_ANIM_OFF );
 
     if ( timesync_get_24hr() )
         lv_switch_on( clock_fmt_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( clock_fmt_onoff, LV_ANIM_OFF );
 
-    lv_dropdown_set_selected( utczone_list, timesync_get_timezone() + 12 );
+    lv_dropdown_set_selected( utczone_list, timezone_selected_index );
 }
 
 static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -174,15 +191,24 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     }
 }
 
-static void daylight_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
-    switch( event ) {
-        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_daylightsave( lv_switch_get_state( obj ) );
-    }
-}
-
 static void utczone_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
-        case ( LV_EVENT_VALUE_CHANGED):     timesync_set_timezone( lv_dropdown_get_selected( obj ) - 12 );
+        case ( LV_EVENT_VALUE_CHANGED):     char timezone_name[32] = "";
+                                            timezone_selected_index = lv_dropdown_get_selected( obj );
+                                            lv_dropdown_get_selected_str( obj, timezone_name, sizeof(timezone_name) );
+                                            timesync_set_timezone_name( timezone_name );
+
+                                            SpiRamJsonDocument doc( capacity );
+                                            DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+                                            if ( error ) {
+                                                log_e("timezones deserializeJson() failed: %s", error.c_str() );
+                                                return;
+                                            }
+                                            else {
+                                                const char * timezone_rule = doc[timezone_name];
+                                                timesync_set_timezone_rule( timezone_rule );
+                                            }
+                                            doc.clear();
     }
 }
 

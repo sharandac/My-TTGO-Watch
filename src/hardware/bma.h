@@ -29,6 +29,7 @@
     #define BMACTL_DOUBLECLICK          _BV(1)              /** @brief event mask for an doubleclick event */
     #define BMACTL_STEPCOUNTER          _BV(2)              /** @brief event mask for an stepcounter update event, callback arg is (uint32*) */
     #define BMACTL_TILT                 _BV(3)              /** @brief event mask for an tilt event */
+    #define BMACTL_DAILY_STEPCOUNTER    _BV(4)              /** @brief event mask for an tilt event */
 
     #define BMA_JSON_COFIG_FILE         "/bma.json"         /** @brief defines json config file name */
 
@@ -43,6 +44,7 @@
         BMA_STEPCOUNTER,
         BMA_DOUBLECLICK,
         BMA_TILT,
+        BMA_DAILY_STEPCOUNTER,
         BMA_CONFIG_NUM
     };
 

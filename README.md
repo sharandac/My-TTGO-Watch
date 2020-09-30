@@ -29,7 +29,6 @@ or simple press "build and upload" in platformIO.
 # known issues
 
 * the webserver crashes the ESP32 really often
-* sound and webserver will not work at the same time ( cause cache crashes )
 * the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
 * from time to time the esp32 crashes accidentally
 * and some other small things
@@ -37,8 +36,14 @@ or simple press "build and upload" in platformIO.
 
 # how to use
 
+## weather app
+
 On startup you see the main screen (time tile). It show the time and the current weather (if correct configure). Now you can swipe with you fingers up, down, left and right between the four main screens. The four screens are organized in time, apps, note and setup tile.
 For the weather app you need an openweather.com api-id. http://openweathermap.org/appid is a good starting point.
+
+## bluetooth
+
+The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) verry well. But keep in mind, bluetooth in standby reduces the battery runtime. In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
 
 # for the programmers
 
