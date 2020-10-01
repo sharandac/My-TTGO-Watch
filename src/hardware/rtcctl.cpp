@@ -101,7 +101,7 @@ time_t find_next_alarm_day( int day_of_week, time_t now ) {
 void set_next_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    if (!is_any_day_enabled()){
+    if ( !is_any_day_enabled() ) {
         ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
         rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
         return;
@@ -117,7 +117,7 @@ void set_next_alarm( void ) {
     // timesyncToRTC();
 
     time_t now;
-    time(&now);
+    time( &now );
     alarm_time = now;
     struct tm alarm_tm;
 
@@ -126,26 +126,19 @@ void set_next_alarm( void ) {
     log_i("local time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
     alarm_tm.tm_hour = alarm_data.hour;
     alarm_tm.tm_min = alarm_data.minute;
-    alarm_time = mktime(&alarm_tm);
+    alarm_time = mktime( &alarm_tm );
 
-    if (!alarm_data.week_days[alarm_tm.tm_wday] || alarm_time <= now){
-       alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
-       localtime_r(&alarm_time, &alarm_tm);
+    if ( !alarm_data.week_days[ alarm_tm.tm_wday ] || alarm_time <= now ) {
+        alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
+        localtime_r( &alarm_time, &alarm_tm );
     }
 
-    log_i("local alarm time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+    // convert local alarm time into GMT0 alarm time, it is necessary sine rtc store time in GMT0
+    log_i("next local alarm time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+    gmtime_r( &alarm_time, &alarm_tm );
+    log_i("next GMT0 alarm time: %02d:%02d day %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
 
-    // change to GMT0 and calculate RTC alarm time and day
-    setenv("TZ", "GMT0", 1);
-    tzset();
-
-    localtime_r(&alarm_time, &alarm_tm);
-    log_i("GMT0 alarm time: %02d:%02d day %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
-
-    setenv("TZ", timesync_get_timezone_rule(), 1);
-    tzset();
-
-    //it is better define alarm by day in month rather than weekday. This way will be work-around an error in pcf8563 source and will avoid eaising alarm when there is only one alarm in the week (today) and alarm time is set to now
+    // it is better define alarm by day in month rather than weekday. This way will be work-around an error in pcf8563 source and will avoid eaising alarm when there is only one alarm in the week (today) and alarm time is set to now
     ttgo->rtc->setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
     rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
 }
