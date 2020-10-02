@@ -33,6 +33,7 @@
 lv_obj_t * vibe_switch = NULL;
 lv_obj_t * fade_switch = NULL;
 lv_obj_t * beep_switch = NULL;
+lv_obj_t * main_tile_switch = NULL;
 
 static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -46,11 +47,9 @@ void alarm_clock_setup_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( exit_btn, exit_alarm_clock_setup_event_cb );
 
     wf_add_labeled_switch(tile_container, "Vibrate", &vibe_switch);
-    lv_switch_off(vibe_switch, LV_ANIM_OFF);
     wf_add_labeled_switch(tile_container, "Fade", &fade_switch);
-    lv_switch_off(fade_switch, LV_ANIM_OFF);
     wf_add_labeled_switch(tile_container, "Beep", &beep_switch);
-    lv_switch_off(beep_switch, LV_ANIM_OFF);
+    wf_add_labeled_switch(tile_container, "Show on main tile", &main_tile_switch);
 }
 
 static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -61,27 +60,19 @@ static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event ) 
     }
 }
 
+static void set_switch_state(lv_obj_t *switch_obj, bool state){
+    if (state){
+        lv_switch_on(switch_obj, LV_ANIM_OFF);
+    }
+    else{
+        lv_switch_off(switch_obj, LV_ANIM_OFF);
+    }
+}
 void alarm_clock_setup_set_data_to_display(alarm_properties_t *alarm_properties){
-    if (alarm_properties->vibe){
-        lv_switch_on(vibe_switch, LV_ANIM_OFF);
-    }
-    else{
-        lv_switch_off(vibe_switch, LV_ANIM_OFF);
-    }
-
-    if (alarm_properties->fade){
-        lv_switch_on(fade_switch, LV_ANIM_OFF);
-    }
-    else{
-        lv_switch_off(fade_switch, LV_ANIM_OFF);
-    }
-
-    if (alarm_properties->beep){
-        lv_switch_on(beep_switch, LV_ANIM_OFF);
-    }
-    else{
-        lv_switch_off(beep_switch, LV_ANIM_OFF);
-    }
+    set_switch_state(vibe_switch, alarm_properties->vibe);
+    set_switch_state(fade_switch, alarm_properties->fade);
+    set_switch_state(beep_switch, alarm_properties->beep);
+    set_switch_state(main_tile_switch, alarm_properties->show_on_main_tile);
 }
 
 alarm_properties_t *alarm_clock_setup_get_data_to_store(){
@@ -89,5 +80,10 @@ alarm_properties_t *alarm_clock_setup_get_data_to_store(){
     properties.vibe = lv_switch_get_state(vibe_switch);
     properties.fade = lv_switch_get_state(fade_switch);
     properties.beep = lv_switch_get_state(beep_switch);
+    properties.show_on_main_tile = lv_switch_get_state(main_tile_switch);
     return &properties;
+}
+
+bool alarm_clock_setup_is_main_tile_switch_on(){
+    return lv_switch_get_state(main_tile_switch);
 }
