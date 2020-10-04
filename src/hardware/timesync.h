@@ -23,6 +23,7 @@
     #define _TIME_SYNC_H
 
     #include <TTGO.h>
+    #include "callback.h"
 
     #define TIME_SYNC_REQUEST       _BV(0)
     #define TIME_SYNC_OK            _BV(1)
@@ -115,5 +116,15 @@
      * @brief wrapper function to sync the rtc with system
      */
     void timesyncToRTC( void );
+   /**
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event           possible values: TIME_SYNC_OK
+     * @param   callback_func   pointer to the callback function 
+     * @param   id              program id
+     * 
+     * @return  true if success, false if failed
+     */
+    bool timesync_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
 #endif // _TIME_SYNC_H

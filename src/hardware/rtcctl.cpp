@@ -51,6 +51,7 @@ void IRAM_ATTR rtcctl_irq( void );
 
 bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg );
 bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg );
+bool rtcctl_timesync_event_cb( EventBits_t event, void *arg );
 bool rtcctl_send_event_cb( EventBits_t event );
 void rtcctl_load_data( void );
 void rtcctl_store_data( void );
@@ -64,6 +65,7 @@ void rtcctl_setup( void ) {
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_event_cb, "rtcctl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "rtcctl loop" );
+    timesync_register_cb( TIME_SYNC_OK, rtcctl_timesync_event_cb, "rtcctl timesync" );
 
     rtcctl_load_data();
 }
@@ -173,6 +175,15 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
 
 bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     rtcctl_loop();
+    return( true );
+}
+
+bool rtcctl_timesync_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case TIME_SYNC_OK:
+            rtcctl_set_next_alarm();
+            break;
+    }
     return( true );
 }
 

@@ -24,20 +24,23 @@
 #include <sys/time.h>
 
 #include "wifictl.h"
-#include "config.h"
 #include "timesync.h"
 #include "powermgm.h"
 #include "blectl.h"
 #include "json_psram_allocator.h"
+#include "callback.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
 timesync_config_t timesync_config;
 
+callback_t *timesync_callback = NULL;
+
 void timesync_Task( void * pvParameters );
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg );
 bool timesync_wifictl_event_cb( EventBits_t event, void *arg );
 bool timesync_blectl_event_cb( EventBits_t event, void *arg );
+bool timesync_send_event_cb( EventBits_t event, void *arg );
 
 void timesync_setup( void ) {
 
@@ -49,6 +52,21 @@ void timesync_setup( void ) {
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
 
     timesyncToSystem();
+}
+
+bool timesync_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( timesync_callback == NULL ) {
+        timesync_callback = callback_init( "timesync" );
+        if ( timesync_callback == NULL ) {
+            log_e("timesync callback alloc failed");
+            while(true);
+        }
+    }    
+    return( callback_register( timesync_callback, event, callback_func, id ) );
+}
+
+bool timesync_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( timesync_callback, event, (void*)NULL ) );
 }
 
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -118,6 +136,7 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
                 else {
                     log_e("set new time failed, errno = %d", errno );
                 }
+                xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
             }
     }
     return( true );
@@ -224,6 +243,7 @@ void timesync_set_timezone_rule( const char * timezone_rule ) {
     setenv("TZ", timesync_config.timezone_rule, 1);
     tzset();
     timesync_save_config();
+    timesync_send_event_cb( TIME_SYNC_OK, (void *)NULL );
 }
 
 void timesync_set_24hr( bool use24 ) {
@@ -251,6 +271,7 @@ void timesyncToRTC( void ) {
     ttgo->rtc->syncToRtc();
     setenv("TZ", timesync_config.timezone_rule, 1);
     tzset();
+    timesync_send_event_cb( TIME_SYNC_OK, (void *)NULL );
 }
 
 void timesync_Task( void * pvParameters ) {
