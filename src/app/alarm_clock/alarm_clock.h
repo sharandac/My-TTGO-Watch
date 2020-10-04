@@ -26,9 +26,8 @@ typedef struct {
     bool beep;
     bool fade;
     bool vibe;
+    bool show_on_main_tile;
 } alarm_properties_t;
-
-//#define ALARM_CLOCK_WIDGET    // uncomment if an widget need
 
 void alarm_clock_setup( void );
 uint32_t alarm_clock_get_app_setup_tile_num( void );

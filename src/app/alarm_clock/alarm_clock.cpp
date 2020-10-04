@@ -30,6 +30,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget.h"
 #include "hardware/json_psram_allocator.h"
 #include "hardware/powermgm.h"
 #include "hardware/rtcctl.h"
@@ -39,6 +40,7 @@
 #define BEEP_KEY "beep"
 #define FADE_KEY "fade"
 #define VIBE_KEY "vibe"
+#define SHOW_ON_MAIN_TILE_KEY "show_on_main_tile_key"
 
 #define CONFIG_ALARM_FILE_PATH "/alarm_clock.json"
 
@@ -60,10 +62,7 @@ static uint32_t main_tile_num;
 static uint32_t setup_tile_num;
 static alarm_properties_t properties;
 
-#ifdef ALARM_CLOCK_WIDGET
-    static lv_obj_t *alarm_clock_widget_label;
-    static lv_obj_t *alarm_clock_widget_cont;
-#endif
+static icon_t *alarm_clock_widget = NULL;
 
 // declare callback functions
 static void enter_alarm_clock_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -90,6 +89,7 @@ static void load_data(){
             properties.beep = doc[BEEP_KEY].as<bool>();
             properties.fade = doc[FADE_KEY].as<bool>();
             properties.vibe = doc[VIBE_KEY].as<bool>();
+            properties.show_on_main_tile = doc[SHOW_ON_MAIN_TILE_KEY].as<bool>();
         }
         doc.clear();
     }
@@ -108,6 +108,7 @@ static void store_data(){
         doc[BEEP_KEY] = properties.beep;
         doc[FADE_KEY] = properties.fade;
         doc[VIBE_KEY] = properties.vibe;
+        doc[SHOW_ON_MAIN_TILE_KEY] = properties.show_on_main_tile;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -149,9 +150,45 @@ static void setup_tile_activate_callback (){
     alarm_clock_setup_set_data_to_display(&properties);
 }
 
+static void update_main_tile_widget_label(){
+    if (alarm_clock_widget != NULL){
+        widget_set_label(alarm_clock_widget, alarm_clock_get_clock_label(true));
+    }
+}
+
+static bool alarm_term_changed_cb(EventBits_t event, void *arg ){
+    switch ( event ){
+        case ( RTCCTL_ALARM_ENABLED):
+        case ( RTCCTL_ALARM_DISABLED):
+        case ( RTCCTL_ALARM_TERM_SET ):
+            update_main_tile_widget_label();
+            break;
+    }
+    return true;
+}
+
+static void remove_main_tile_widget(){
+    alarm_clock_widget = widget_remove( alarm_clock_widget );
+}
+
+static void add_main_tile_widget(){
+    alarm_clock_widget = widget_register( alarm_clock_get_clock_label(true), &alarm_clock_48px, enter_alarm_clock_event_cb );
+    widget_hide_indicator(alarm_clock_widget);
+    update_main_tile_widget_label();
+}
+
 static void setup_tile_hibernate_callback (){
-   properties = *alarm_clock_setup_get_data_to_store();
-   store_data();
+    log_n("alarm_clock_setup_is_main_tile_switch_on(): %d, properties.show_on_main_tile: %d", alarm_clock_setup_is_main_tile_switch_on(), properties.show_on_main_tile);
+    if (alarm_clock_setup_is_main_tile_switch_on() != properties.show_on_main_tile) {
+        if (alarm_clock_setup_is_main_tile_switch_on()){
+            add_main_tile_widget();
+        }
+        else{
+            remove_main_tile_widget();
+        }
+    }
+    properties = *alarm_clock_setup_get_data_to_store();
+    store_data();
 }
 
 static void create_alarm_main_tile(uint32_t tile_num ){
@@ -168,51 +205,6 @@ static void create_alarm_setup_tile(uint32_t tile_num){
 
 static void create_alarm_in_progress_tile(){
     alarm_in_progress_tile_setup();
-}
-
-#ifdef ALARM_CLOCK_WIDGET
-    static bool alarm_term_changed_cb(EventBits_t event, void *arg ){
-        switch ( event ){
-            case ( RTCCTL_ALARM_ENABLED):
-            case ( RTCCTL_ALARM_DISABLED):
-            case ( RTCCTL_ALARM_TERM_SET ):
-                lv_label_set_text( alarm_clock_widget_label, alarm_clock_get_clock_label(true));
-                break;
-        }
-        //content has been changed text position must be recalculated
-        lv_obj_align( alarm_clock_widget_label, alarm_clock_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-    }
-#endif
-
-static void create_widget_icon(){
-#ifdef ALARM_CLOCK_WIDGET
-    // app icon container
-    // get an widget container from main_tile
-    // remember, an widget icon must have an size of 64x64 pixel
-    // total size of the container is 64x80 pixel, the bottom 16 pixel is for your label
-    alarm_clock_widget_cont = main_tile_register_widget();
-    lv_obj_t *alarm_clock_widget_icon = lv_imgbtn_create( alarm_clock_widget_cont, NULL );
-    lv_imgbtn_set_src( alarm_clock_widget_icon, LV_BTN_STATE_RELEASED, &alarm_clock_48px);
-    lv_imgbtn_set_src( alarm_clock_widget_icon, LV_BTN_STATE_PRESSED, &alarm_clock_48px);
-    lv_imgbtn_set_src( alarm_clock_widget_icon, LV_BTN_STATE_CHECKED_RELEASED, &alarm_clock_48px);
-    lv_imgbtn_set_src( alarm_clock_widget_icon, LV_BTN_STATE_CHECKED_PRESSED, &alarm_clock_48px);
-    lv_obj_reset_style_list( alarm_clock_widget_icon, LV_OBJ_PART_MAIN );
-    lv_obj_align( alarm_clock_widget_icon , alarm_clock_widget_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
-    lv_obj_set_event_cb( alarm_clock_widget_icon, enter_alarm_clock_event_cb );
-
-    // make widget icon drag scroll the mainbar
-    mainbar_add_slide_element(alarm_clock_widget_icon);
-
-    // label your widget
-    alarm_clock_widget_label = lv_label_create( alarm_clock_widget_cont , NULL);
-    lv_label_set_text( alarm_clock_widget_label, alarm_clock_get_clock_label(true));
-    lv_label_set_align(alarm_clock_widget_label, LV_LABEL_ALIGN_CENTER);
-    lv_obj_reset_style_list( alarm_clock_widget_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( alarm_clock_widget_label, alarm_clock_widget_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-
-    // RTCCTL_ALARM_TERM_SET doesn't have to be caught because alarm is disabled when new alarm is set. After the set it is enabled again
-    rtcctl_register_cb(RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
-#endif // ALARM_CLOCK_WIDGET
 }
 
 bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
@@ -239,8 +231,9 @@ void alarm_clock_setup( void ) {
     load_data();
 
     create_alarm_app_icon();
-    create_widget_icon();
-
+    if (properties.show_on_main_tile){
+        add_main_tile_widget();
+    }
     // register 2 vertical tiles and get the first tile number and save it for later use
     main_tile_num = mainbar_add_app_tile( 1, 2, "alarm_clock");
     create_alarm_main_tile(main_tile_num);
@@ -251,6 +244,7 @@ void alarm_clock_setup( void ) {
 
     rtcctl_register_cb(RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm_clock");
     powermgm_register_cb(POWERMGM_STANDBY, powermgmt_callback, "alarm_clock");
+    rtcctl_register_cb(RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
 }
 
 uint32_t alarm_clock_get_app_main_tile_num( void ) {
