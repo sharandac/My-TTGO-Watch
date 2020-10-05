@@ -33,7 +33,6 @@ or simple press "build and upload" in platformIO.
 * from time to time the esp32 crashes accidentally
 * and some other small things
 
-
 # how to use
 
 ## weather app
@@ -44,6 +43,11 @@ For the weather app you need an openweather.com api-id. http://openweathermap.or
 ## bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime. In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
+
+# Forks that are recommended
+
+[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)
+[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)
 
 # for the programmers
 
