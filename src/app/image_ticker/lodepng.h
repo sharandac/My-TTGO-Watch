@@ -23,6 +23,11 @@ freely, subject to the following restrictions:
     distribution.
 */
 
+/* Corrado MOD
+   #define LODEPNG_SPIFFS to use spiffs instead stdio
+*/
+#define LODEPNG_SPIFFS
+
 #ifndef LODEPNG_H
 #define LODEPNG_H
 
