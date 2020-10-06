@@ -7,7 +7,7 @@
 </p>
 <hr/>
 
-# My-TTGO-Watch-MyBasic
+# My-TTGO-Watch-MyBasic "Mosconi Inside"
 
 Software per lo smartwatch T-WATCH 2020 di LILIGO, basato sull'ottimo lavoro di Dirk Broßwick [sharandac](https://github.com/sharandac) che potete trovare qui https://github.com/sharandac/My-TTGO-Watch
 
