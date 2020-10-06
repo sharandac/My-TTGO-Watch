@@ -208,7 +208,7 @@ void display_settings_tile_setup( void ) {
     lv_label_set_text( display_background_image_label, "Bg image" );
     lv_obj_align( display_background_image_label, display_background_image_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     display_bg_img_list = lv_dropdown_create( display_background_image_cont, NULL );
-    lv_dropdown_set_options( display_bg_img_list, "bg\nbg1\nbg2\nbg3\nblack" );
+    lv_dropdown_set_options( display_bg_img_list, "porcodiOS\nbg\nbg1\nbg2\nbg3\nblack" );
     lv_obj_set_size( display_bg_img_list, 70, 40 );
     lv_obj_align( display_bg_img_list, display_background_image_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb(display_bg_img_list, display_background_image_setup_event_cb);

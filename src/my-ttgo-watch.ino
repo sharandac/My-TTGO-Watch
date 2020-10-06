@@ -46,11 +46,13 @@
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
-#include "app/example_app/example_app.h"
+//#include "app/example_app/example_app.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
-#include "app/powermeter/powermeter_app.h"
+//#include "app/powermeter/powermeter_app.h"
 #include "app/my_basic/my_basic_app.h"
+#include "app/image_ticker/image_ticker.h"
+#include "app/prayer_app/prayer_app.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -91,6 +93,9 @@ void setup()
     splash_screen_stage_update( "init powermgm", 60 );
     powermgm_setup();
     splash_screen_stage_update( "init gui", 80 );
+    delay(500);
+    splash_screen_stage_update( "ma che oooohh !", 90 );
+    delay(500);
     splash_screen_stage_finish();
     
     gui_setup();
@@ -102,12 +107,14 @@ void setup()
     stopwatch_app_setup();
     alarm_clock_setup();
     crypto_ticker_setup();
-    example_app_setup();
+    //example_app_setup();
     osmand_app_setup();
     IRController_setup();
-    powermeter_app_setup();
+    //powermeter_app_setup();
     my_basic_app_setup();
-    
+    image_ticker_setup();
+    prayer_app_setup();
+
     /*
      *
      */
@@ -118,6 +125,7 @@ void setup()
     heap_caps_malloc_extmem_enable( 16*1024 );
     blectl_setup();
     sound_setup();
+    sound_play_spiffs_mp3( "/mosconi_macheoh.mp3" );
 
     display_set_brightness( display_get_brightness() );
 

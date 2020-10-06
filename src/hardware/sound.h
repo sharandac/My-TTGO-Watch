@@ -36,6 +36,7 @@
     typedef struct {
         uint8_t volume = 50;    /** @brief sound value from 0..100 */
         bool enable = true;     /** @brief sound on/off */
+        bool mosconi_call = true; /** Ma cos'è 'sto telefono */
     } sound_config_t;
 
     /**
@@ -124,6 +125,8 @@
      */
     bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
-
+    // Grida "ma cos'è 'sto telefono" quando via bluetooth riceve la notifica della chiamata
+    void sound_play_mosconi_telefono (void );
+    bool sound_get_mosconi_enabled_config( void );
 
 #endif // _SOUND_H

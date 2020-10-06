@@ -28,7 +28,12 @@ lv_obj_t *preload = NULL;
 lv_obj_t *preload_label = NULL;
 lv_style_t style;
 
-LV_IMG_DECLARE(hedgehog);
+LV_IMG_DECLARE(boot1);
+LV_IMG_DECLARE(boot2);
+LV_IMG_DECLARE(boot3);
+LV_IMG_DECLARE(boot4);
+LV_IMG_DECLARE(boot5);
+LV_IMG_DECLARE(boot6);
 
 void splash_screen_stage_one( void ) {
 
@@ -47,7 +52,7 @@ void splash_screen_stage_one( void ) {
     lv_obj_align( background, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     logo = lv_img_create( background , NULL );
-    lv_img_set_src( logo, &hedgehog );
+    lv_img_set_src( logo, &boot1 );
     lv_obj_align( logo, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     preload = lv_bar_create( background, NULL );
@@ -75,6 +80,34 @@ void splash_screen_stage_one( void ) {
 }
 
 void splash_screen_stage_update( const char* msg, int value ) {
+    static int stepcount=1;
+    switch (stepcount)
+    {
+        case 1:
+            lv_img_set_src( logo, &boot1 );
+            break; 
+
+        case 2:
+            lv_img_set_src( logo, &boot2 );
+            break; 
+
+        case 3:
+            lv_img_set_src( logo, &boot3 );
+            break;
+
+        case 4:
+            lv_img_set_src( logo, &boot4 );
+            break; 
+
+/*         case 5:
+            lv_img_set_src( logo, &boot5 );
+            break;  */
+
+        default:
+            lv_img_set_src( logo, &boot6 ); 
+    }
+    stepcount++;
+    
     lv_obj_move_foreground( preload );
     lv_disp_trig_activity( NULL );
     lv_task_handler();

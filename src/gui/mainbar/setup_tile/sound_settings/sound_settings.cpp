@@ -40,6 +40,7 @@ lv_obj_t *sound_volume_slider = NULL;
 lv_obj_t *sound_volume_slider_label = NULL;
 lv_obj_t *sound_enable = NULL;
 lv_obj_t *sound_icon = NULL;
+lv_obj_t *mosconi_enable = NULL;
 
 LV_IMG_DECLARE(sound_64px);
 LV_IMG_DECLARE(exit_32px);
@@ -117,6 +118,21 @@ void sound_settings_tile_setup( void ) {
     lv_img_set_src( sound_icon, &sound_32px );
     lv_obj_align( sound_icon, sound_volume_cont, LV_ALIGN_IN_LEFT_MID, 15, 0 );
 
+    lv_obj_t *mosconi_enable_cont = lv_obj_create( sound_settings_tile, NULL );
+    lv_obj_set_size(mosconi_enable_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( mosconi_enable_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
+    lv_obj_align( mosconi_enable_cont, sound_settings_tile, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0 );
+    mosconi_enable = lv_switch_create( mosconi_enable_cont, NULL );
+    lv_obj_add_protect( mosconi_enable, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( mosconi_enable, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( mosconi_enable, LV_ANIM_ON );
+    lv_obj_align( mosconi_enable, mosconi_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    //lv_obj_set_event_cb( mosconi_enable, sound_enable_setup_event_cb );
+    lv_obj_t *mosconi_enable_label = lv_label_create( mosconi_enable_cont, NULL);
+    lv_obj_add_style( mosconi_enable_label, LV_OBJ_PART_MAIN, &sound_settings_style );
+    lv_label_set_text( mosconi_enable_label, "Mosconi call");
+    lv_obj_align( mosconi_enable_label, mosconi_enable_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     log_i("Setting initial volume configuration to %d", sound_get_volume_config());
     lv_slider_set_value( sound_volume_slider, sound_get_volume_config(), LV_ANIM_OFF );
     char temp[16]="";
@@ -131,6 +147,14 @@ void sound_settings_tile_setup( void ) {
     } else {
         log_i("Setting initial volume configuration to disabled");
         lv_switch_off( sound_enable, LV_ANIM_OFF );
+    }
+    
+    if ( sound_get_mosconi_enabled_config() ) {
+        log_i("Setting initial mosconi configuration to enabled");
+        lv_switch_on( mosconi_enable, LV_ANIM_OFF );
+    } else {
+        log_i("Setting initial mosconi configuration to disabled");
+        lv_switch_off( mosconi_enable, LV_ANIM_OFF );
     }
 
     lv_tileview_add_element( sound_settings_tile, sound_enable_cont );

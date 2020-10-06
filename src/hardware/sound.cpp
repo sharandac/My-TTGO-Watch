@@ -183,6 +183,12 @@ void sound_play_spiffs_mp3( const char *filename ) {
     }
 }
 
+void sound_play_mosconi_telefono( void ) {
+    if (sound_config.mosconi_call) {
+        sound_play_spiffs_mp3( "/mosconi_telefono.mp3" );   
+    }
+}
+
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
     if ( sound_config.enable && sound_init ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
@@ -217,6 +223,7 @@ void sound_save_config( void ) {
 
         doc["enable"] = sound_config.enable;
         doc["volume"] = sound_config.volume;
+        doc["mosconi-call"] = sound_config.mosconi_call;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -243,6 +250,7 @@ void sound_read_config( void ) {
         else {
             sound_config.enable = doc["enable"] | false;
             sound_config.volume = doc["volume"] | 100;
+            sound_config.mosconi_call = doc["mosconi-call"] | true;
         }        
         doc.clear();
     }
@@ -251,6 +259,10 @@ void sound_read_config( void ) {
 
 bool sound_get_enabled_config( void ) {
     return sound_config.enable;
+}
+
+bool sound_get_mosconi_enabled_config( void ) {
+    return sound_config.mosconi_call;
 }
 
 void sound_set_enabled_config( bool enable ) {

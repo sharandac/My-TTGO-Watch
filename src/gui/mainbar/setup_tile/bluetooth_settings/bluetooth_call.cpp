@@ -29,6 +29,7 @@
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 #include "hardware/json_psram_allocator.h"
+#include "hardware/sound.h"
 
 lv_obj_t *bluetooth_call_tile=NULL;
 lv_style_t bluetooth_call_style;
@@ -130,6 +131,7 @@ void bluetooth_call_msg_pharse( const char* msg ) {
                 lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
                 lv_obj_invalidate( lv_scr_act() );
                 motor_vibe(100);            
+                sound_play_mosconi_telefono(); /* Ma cos'è 'sto telefono */
             }
         }
 

@@ -40,6 +40,7 @@ uint32_t update_setup_tile_num;
 
 lv_obj_t *update_check_autosync_onoff = NULL;
 lv_obj_t *update_check_url_textfield = NULL;
+lv_obj_t *reset_btn = NULL;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -48,6 +49,8 @@ static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event
 static void update_reset_url_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
+static void reset_btn_event_handler( lv_obj_t * obj, lv_event_t event );
+
 void update_read_config( void );
 void update_save_config( void );
 
@@ -156,6 +159,12 @@ static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event )
                                             strlcpy( update_config->updateurl , lv_textarea_get_text( update_check_url_textfield ), sizeof( update_config->updateurl ) );
                                             update_save_config();
                                             break;
+    }
+}
+
+static void reset_btn_event_handler( lv_obj_t * obj, lv_event_t event ) {
+    if(event == LV_EVENT_CLICKED) {
+        lv_textarea_set_text(update_check_url_textfield, FIRMWARE_UPDATE_URL);  
     }
 }
 

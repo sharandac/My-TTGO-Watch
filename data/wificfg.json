@@ -1,0 +1,87 @@
+{
+  "autoon": true,
+  "webserver": true,
+  "enable_on_standby": true,
+  "networklist": [
+    {
+      "ssid": "WIFI_RICERCA_&_SVILUPPO",
+      "psk": "ricercaesviluppo"
+    },
+    {
+      "ssid": "p20pro",
+      "psk": "cucculullu"
+    },
+    {
+      "ssid": "bambini",
+      "psk": "internet"
+    },
+    {
+      "ssid": "HUAWEI P20 Pro",
+      "psk": "cucculullu"
+    },
+    {
+      "ssid": "Vodafone-35124901",
+      "psk": "83i9ciiawb3z3x8"
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    }
+  ]
+}
