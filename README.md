@@ -7,9 +7,23 @@
 </p>
 <hr/>
 
-# My-TTGO-Watch
+# My-TTGO-Watch-MyBasic
 
-A smartwatch based on ESP32 from LilyGo. Currently under development.
+Software per lo smartwatch T-WATCH 2020 di LILIGO, basato sull'ottimo lavoro di Dirk Broßwick (<a href="https://github.com/sharandac">sharandac</a>) che potete trovare qui <a href="https://github.com/sharandac/My-TTGO-Watch">https://github.com/sharandac/My-TTGO-Watch</a> 
+Questo fork si differisce per l'implementazione di un interprete BASIC, basato sul progetto https://github.com/paladin-t/my_basic
+e sul suo porting esp32 https://github.com/EternityForest/mybasic_esp32
+
+L'idea alla base di questo fork è avere delle "app" scritte in BASIC, che implementino tutte le funzionalità dell'orologio (sveglia, contapassi ecc) e le caratteristiche dell'hardware (touchscreen, accelerometro, connessione internet, filesystem ecc) come funzioni speciali BASIC, in modo da rendere semplice lo sviluppo di "app" che possano girare in un ambiente protetto, senza la necessità e la difficoltà di essere integrate in un software monolitico.
+
+Il passo successivo sarà creare una sorta di "app store", in modo che le applicazioni BASIC possano essere condivise e scaricate direttamente sull'orologio.
+
+Software for LILIGO's T-WATCH 2020 smartwatch, based on the excellent work of Dirk Browick (<a href"https://github.com/sharandac">sharandac</a>) that you can find here <a href"https://github.com/sharandac/My-TTGO-Watch">https://github.com/sharandac/My-TTGO-Watch</a>
+This fork differs in the implementation of a BASIC interpreter, based on the project https://github.com/paladin-t/my_basic
+and it's esp32 porting https://github.com/EternityForest/mybasic_esp32
+
+The idea behind this fork is to have "apps" written in BASIC, which implement all the features of the watch (alarm clock, pedometer etc.) and the features of the hardware (touchscreen, accelerometer, internet connection, filesystem etc.) as special BASIC functions, so as to make it easy to develop "apps" that can run in a protected environment, without the need and difficulty of being integrated into monolithic software.
+
+The next step will be to create a kind of "app store" so that BASIC apps can be shared and downloaded directly to your watch.
 
 # Telegram chatgroup
 
@@ -43,11 +57,6 @@ For the weather app you need an openweather.com api-id. http://openweathermap.or
 ## bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime. In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
-
-# Forks that are recommended
-
-[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)
-[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)
 
 # for the programmers
 
