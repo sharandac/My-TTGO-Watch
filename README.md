@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch-MyBasic
 
-Software per lo smartwatch T-WATCH 2020 di LILIGO, basato sull'ottimo lavoro di Dirk Broßwick (<a href="https://github.com/sharandac">sharandac</a>) che potete trovare qui https://github.com/sharandac/My-TTGO-Watch
+Software per lo smartwatch T-WATCH 2020 di LILIGO, basato sull'ottimo lavoro di Dirk Broßwick [sharandac](https://github.com/sharandac) che potete trovare qui https://github.com/sharandac/My-TTGO-Watch
 
 Questo fork si differisce per l'implementazione di un interprete BASIC, basato sul progetto https://github.com/paladin-t/my_basic
 e sul suo porting esp32 https://github.com/EternityForest/mybasic_esp32
@@ -18,7 +18,7 @@ L'idea alla base di questo fork è avere delle "app" scritte in BASIC, che imple
 
 Il passo successivo sarà creare una sorta di "app store", in modo che le applicazioni BASIC possano essere condivise e scaricate direttamente sull'orologio.
 
-Software for LILIGO's T-WATCH 2020 smartwatch, based on the excellent work of Dirk Browick (<a href"https://github.com/sharandac">sharandac</a>) that you can find here https://github.com/sharandac/My-TTGO-Watch
+Software for LILIGO's T-WATCH 2020 smartwatch, based on the excellent work of Dirk Browick [sharandac](https://github.com/sharandac) that you can find here https://github.com/sharandac/My-TTGO-Watch
 
 This fork differs in the implementation of a BASIC interpreter, based on the project https://github.com/paladin-t/my_basic
 and it's esp32 porting https://github.com/EternityForest/mybasic_esp32
