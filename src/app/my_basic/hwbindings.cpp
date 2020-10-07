@@ -27,6 +27,9 @@ extern "C"
 
 #include "Arduino.h"
 
+#include "lvgl/lvgl.h"
+static lv_obj_t *MyBasic_output;
+
 static void _unref(struct mb_interpreter_t* s, void* d) {
   free(d);
 }
@@ -57,7 +60,7 @@ static int bas_bytearray(struct mb_interpreter_t* s, void** l) {
 
 int xprintf(const char *format, ...)
 {
-  char *buf = (char *)malloc(128);
+  char *buf = (char *)malloc(128); // Massimo 128 bytes per linea ? Nessun controllo qui !
 
   va_list ap;
   va_start(ap, format);
@@ -71,6 +74,21 @@ int xprintf(const char *format, ...)
   va_end(ap);
   free(buf);
   Serial.println("\n");
+}
+
+
+
+int lvglprint(const char *format, ...)
+{
+  char *buf = (char *)malloc(128); // Massimo 128 bytes per linea ? Nessun controllo qui !
+
+  va_list ap;
+  va_start(ap, format);
+  vsnprintf(buf, 128, format, ap);
+  lv_label_ins_text(MyBasic_output, LV_LABEL_POS_LAST, buf);
+  va_end(ap);
+  free(buf);
+
 }
 
 
@@ -428,4 +446,10 @@ void enableArduinoBindings(struct mb_interpreter_t* bas)
   mb_register_func(bas, "sersend", bas_sersend);
 
 
+}
+
+void enableLVGLprint(struct mb_interpreter_t* bas, lv_obj_t *l)
+{
+  MyBasic_output=l;
+  mb_set_printer(bas, lvglprint);
 }

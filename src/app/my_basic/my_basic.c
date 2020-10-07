@@ -35,7 +35,7 @@
 #endif /* ARDUINO && !MB_CP_ARDUINO */
 #ifdef MB_CP_ARDUINO
 # ifndef MB_DISABLE_LOAD_FILE
-#   define MB_DISABLE_LOAD_FILE
+#   define MB_DISABLE_LOAD_FILE  // Corrado: questa poi è da abilitare
 # endif /* MB_DISABLE_LOAD_FILE */
 # ifndef MB_MANUAL_REAL_FORMATTING
 #   define MB_MANUAL_REAL_FORMATTING

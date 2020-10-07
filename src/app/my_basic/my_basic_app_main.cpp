@@ -50,7 +50,7 @@ static void enter_my_basic_app_setup_event_cb( lv_obj_t * obj, lv_event_t event 
 static void refresh_output_event_cb( lv_obj_t * obj, lv_event_t event );
 void my_basic_app_task( lv_task_t * task );
 
-lv_obj_t *output;
+static lv_obj_t *output;
 
 void DoBasic( void );
 
@@ -93,8 +93,9 @@ void my_basic_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_color(&my_basic_text_main_style, LV_STATE_DEFAULT, LV_COLOR_BLUE);
     output = lv_label_create(page, NULL);
     lv_obj_add_style( output, LV_OBJ_PART_MAIN, &my_basic_text_main_style );
-    lv_label_set_long_mode(output, LV_LABEL_LONG_BREAK);            /*Automatically break long lines*/
+    //lv_label_set_long_mode(output, LV_LABEL_LONG_SROLL);            /*Automatically scroll long lines*/
     lv_obj_set_width(output, lv_page_get_width_fit(page));          /*Set the label width to max value to not show hor. scroll bars*/
+    lv_label_set_text(output, "");
 
 
     lv_obj_t * reload_btn = lv_imgbtn_create( my_basic_app_main_tile, NULL);
@@ -145,24 +146,27 @@ void DoBasic() {
     struct mb_interpreter_t* bas = NULL;
 
     const char *program =
-            "PRINT \"Hello world !\"\r\n"
-            "FOR i=1 to 3\r\n"
-            "  PRINT i\r\n"
-            "NEXT i\r\n"
-            "PRINT \"Yes I'm working\"\r\n";
+            "PRINT \"Hello world !\"\n"
+            "FOR i=1 to 3\n"
+            "  PRINT i\n"
+            "NEXT i\n"
+            "PRINT \"Yes I'm working\"\n";
 
     Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
     
-    Serial.printf("My Basic RUN\r\n");
+    Serial.printf("My Basic RUN\n");
 
+    lv_label_set_text(output, "My Basic RUN\n");
 	mb_init();
 	mb_open(&bas);
     enableArduinoBindings(bas);
+    enableLVGLprint(bas, output);
 	mb_load_string(bas, program, true);
 	mb_run(bas, true);
 	mb_close(&bas);
 	mb_dispose();
+    lv_label_ins_text(output, LV_LABEL_POS_LAST, "My Basic END\n");
 
     Serial.printf("My Basic END\r\n");
 
