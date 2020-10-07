@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 18 12:37:31 2020
+ *   Oct 05 23:05:42 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,19 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLUETOOTH_MESSAGE_H
-    #define _BLUETOOTH_MESSAGE_H
+#ifndef _BLUETOOTH_MEDIA_H
+    #define _BLUETOOTH_MEDIA_H
 
     #include <TTGO.h>
 
-    struct src_icon_t {
-        const char src_name[ 24 ];
-        const int32_t vibe;
-        const lv_img_dsc_t *img;
-    };
+    void bluetooth_media_tile_setup( void );
 
-    void bluetooth_message_tile_setup( void );
-    void bluetooth_message_disable( void );
-    void bluetooth_message_enable( void );
-
-#endif // _BLUETOOTH_MESSAGE_H
+#endif // _BLUETOOTH_MEDIA_H

@@ -82,7 +82,8 @@
     #define DataLinkEscape          0x10
 
     #define BLECTL_CHUNKSIZE        20      /** @brief chunksize for send msg */
-    #define BLECTL_CHUNKDELAY       50      /** @brief chunk delay in ms for each msg chunk */
+    #define BLECTL_CHUNKDELAY       20      /** @brief chunk delay in ms for each msg chunk */
+    #define BLECTL_MSG_MTU          256     /** @brief max msg size */
 
     /**
      * @brief blectl config structure
@@ -98,8 +99,8 @@
      * @brief blectl send msg structure
      */
     typedef struct {
-        bool active;                    /** @brief send msg structure active */
         char *msg;                      /** @brief pointer to an sending msg */
+        bool active;                    /** @brief send msg structure active */
         int32_t msglen;                 /** @brief msg lenght */
         int32_t msgpos;                 /** @brief msg postition for next send */
     } blectl_msg_t;

@@ -46,8 +46,8 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 
 # Forks that are recommended
 
-[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)
-[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)
+[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
+[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
 
 # for the programmers
 
