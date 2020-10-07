@@ -24,12 +24,6 @@
 
     #include <TTGO.h>
 
-    struct bluetooth_msg_chain_t {
-        bluetooth_msg_chain_t *prev_msg;
-        const char *msg;
-        bluetooth_msg_chain_t *next_msg;
-    };
-
     struct src_icon_t {
         const char src_name[ 24 ];
         const int32_t vibe;

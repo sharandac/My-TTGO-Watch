@@ -38,6 +38,7 @@
 #include "callback.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
+#include "msg_chain.h"
 
 #include "gui/statusbar.h"
 
@@ -46,6 +47,7 @@ portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
 blectl_config_t blectl_config;
 blectl_msg_t blectl_msg;
+msg_chain_t *blectl_msg_chain = NULL;
 
 callback_t *blectl_callback = NULL;
 
@@ -53,6 +55,7 @@ bool blectl_send_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
 bool blectl_pmu_event_cb( EventBits_t event, void *arg );
+void blectl_send_next_msg( char *msg );
 void blectl_loop( void );
 
 BLEServer *pServer = NULL;
@@ -546,6 +549,10 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
 }
 
 void blectl_send_msg( char *msg ) {
+    blectl_msg_chain = msg_chain_add_msg( blectl_msg_chain, msg );
+}
+
+void blectl_send_next_msg( char *msg ) {
     if ( !blectl_msg.active && blectl_get_event( BLECTL_CONNECT ) ) {
 
         if ( blectl_msg.msg == NULL ) { 
@@ -595,6 +602,11 @@ void blectl_loop ( void ) {
 
     if ( !blectl_get_event( BLECTL_CONNECT ) ) {
         return;
+    }
+
+    if ( !blectl_msg.active && msg_chain_get_entrys( blectl_msg_chain ) > 0 ) {
+        blectl_send_next_msg( (char *)msg_chain_get_msg_entry( blectl_msg_chain, 0 ) );
+        msg_chain_delete_msg_entry( blectl_msg_chain, 0 );
     }
 
     if ( millis() - NextMillis > BLECTL_CHUNKDELAY ) {
