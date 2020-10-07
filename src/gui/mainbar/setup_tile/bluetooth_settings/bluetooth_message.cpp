@@ -188,7 +188,6 @@ static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
             if ( bluetooth_current_msg > 0 ) {
                 bluetooth_current_msg--;
                 bluetooth_message_show_msg( bluetooth_current_msg );
-//                msg_chain_printf_msg_chain( bluetooth_msg_chain );
             }
             break;
     }
@@ -212,7 +211,6 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):
             if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 1 ) {
                 msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
-//                msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 bluetooth_current_msg--;
                 mainbar_jump_to_maintile( LV_ANIM_OFF );
             }
@@ -221,12 +219,10 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
                     msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
                     bluetooth_current_msg--;
                     bluetooth_message_show_msg( bluetooth_current_msg );
-//                    msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 }
                 else {
                     msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
                     bluetooth_message_show_msg( bluetooth_current_msg );
-//                    msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 }
             }
     }
@@ -263,11 +259,6 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
     for ( int i = 0; src_icon[ i ].img != NULL; i++ ) {
         if ( strstr( src_name, src_icon[ i ].src_name ) ) {
             log_i("hit: %s -> %s", src_name, src_icon[ i ].src_name );
-/*
-            if ( src_icon[ i ].vibe != 0 ) {
-                motor_vibe( src_icon[ i ].vibe );
-            }
-*/
             return( src_icon[ i ].img );
         }
     }
@@ -290,7 +281,6 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     else {
         if( !strcmp( doc["t"], "notify" ) ) {
             bluetooth_msg_chain = msg_chain_add_msg( bluetooth_msg_chain, msg );
-//            msg_chain_printf_msg_chain( bluetooth_msg_chain );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
             sound_play_progmem_wav( piep_wav, piep_wav_len );
