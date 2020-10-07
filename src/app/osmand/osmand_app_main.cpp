@@ -86,6 +86,14 @@ struct direction_t direction[] = {
     { "droite et continuez", "franchement", &sharply_right_128px },
     { "gauche et continuez", "", &turn_left_128px },
     { "droite et continuez", "", &turn_right_128px },
+        // italian direction
+    { "Avanti", "", &ahead_128px },
+    { "sinistra", "leggermente", &slightly_left_128px },
+    { "destra", "leggermente", &slightly_right_128px },
+    { "sinistra", "bruscamente", &sharply_left_128px },
+    { "destra", "bruscamente", &sharply_right_128px },
+    { "gira a sinistra", "", &turn_left_128px },
+    { "gira a destra", "", &turn_right_128px },
     { "", "", NULL }
 };
 

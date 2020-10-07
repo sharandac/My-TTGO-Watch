@@ -21,7 +21,7 @@
 #ifndef _CALLBACK_H
     #define _CALLBACK_H
 
-    #include "config.h"
+    #include <stdint.h>
 
     /**
      * @brief typedef for the callback function call

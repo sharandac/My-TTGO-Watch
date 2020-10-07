@@ -45,6 +45,11 @@ For the weather app you need an openweather.com api-id. http://openweathermap.or
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime. In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
 
+# Forks that are recommended
+
+[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
+[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
+
 # for the programmers
 
 Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this

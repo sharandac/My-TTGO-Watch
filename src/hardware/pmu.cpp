@@ -12,7 +12,7 @@
 
 #include "gui/statusbar.h"
 
-static bool firstlooprun = true;
+static bool pmu_update = true;
 volatile bool DRAM_ATTR pmu_irq_flag = false;
 portMUX_TYPE DRAM_ATTR PMU_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -22,6 +22,7 @@ pmu_config_t pmu_config;
 void IRAM_ATTR pmu_irq( void );
 bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
 bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
+bool pmu_blectl_event_cb( EventBits_t event, void *arg );
 bool pmu_send_cb( EventBits_t event, void *arg );
 
 void pmu_setup( void ) {
@@ -67,6 +68,7 @@ void pmu_setup( void ) {
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, pmu_powermgm_event_cb, "pmu" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
+    blectl_register_cb( BLECTL_CONNECT, pmu_blectl_event_cb, "pmu blectl" );
 }
 
 bool pmu_powermgm_loop_cb( EventBits_t event, void *arg ) {
@@ -79,10 +81,17 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_STANDBY:          pmu_standby();
                                         break;
         case POWERMGM_WAKEUP:           pmu_wakeup();
-                                        firstlooprun = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
                                         break;
+    }
+    return( true );
+}
+
+bool pmu_blectl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BLECTL_CONNECT:
+            pmu_update = true;
     }
     return( true );
 }
@@ -136,26 +145,29 @@ void pmu_loop( void ) {
         bool charging = ttgo->power->isChargeing();
         pmu_send_cb( PMUCTL_VBUS_PLUG, (void *)&plug );
         pmu_send_cb( PMUCTL_CHARGING, (void *)&charging );
+        pmu_update = true;
     }
 
-    if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        if ( nextmillis < millis() ) {
-            nextmillis = millis() + 1000;
-            if ( pmu_get_battery_percent() != percent ) {
-                percent = pmu_get_battery_percent();
-                pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
-            }
+    if ( nextmillis < millis() ) {
+        nextmillis = millis() + 1000;
+        if ( pmu_get_battery_percent() != percent ) {
+            pmu_update = true;
         }
     }
 
-    if ( firstlooprun ) {
-        int32_t percent = pmu_get_battery_percent();
+    if ( pmu_update ) {
+
+        char msg[64]="";
+        percent = pmu_get_battery_percent();
+        snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
+        blectl_send_msg( msg );
+
         bool plug = ttgo->power->isVBUSPlug();
         bool charging = ttgo->power->isChargeing();
         pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
         pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
-        firstlooprun = false;
+        pmu_update = false;
     }
 }
 
@@ -219,6 +231,8 @@ void pmu_wakeup( void ) {
     ttgo->power->offTimer();
 
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
+
+    pmu_update = true;
 }
 
 void pmu_save_config( void ) {

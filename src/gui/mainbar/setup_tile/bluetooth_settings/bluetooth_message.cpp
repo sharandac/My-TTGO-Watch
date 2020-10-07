@@ -32,6 +32,7 @@
 #include "hardware/json_psram_allocator.h"
 #include "hardware/sound.h"
 #include "hardware/alloc.h"
+#include "hardware/msg_chain.h"
 
 lv_obj_t *bluetooth_message_tile=NULL;
 lv_style_t bluetooth_message_style;
@@ -48,7 +49,7 @@ lv_obj_t *bluetooth_next_msg_btn = NULL;
 lv_obj_t *bluetooth_trash_msg_btn = NULL;
 lv_obj_t *bluetooth_msg_entrys_label = NULL;
 
-bluetooth_msg_chain_t *bluetooth_msg_chain_head = NULL;
+msg_chain_t *bluetooth_msg_chain = NULL;
 static bool bluetooth_message_active = true;
 int32_t bluetooth_current_msg = -1;
 
@@ -187,7 +188,7 @@ static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
             if ( bluetooth_current_msg > 0 ) {
                 bluetooth_current_msg--;
                 bluetooth_message_show_msg( bluetooth_current_msg );
-                bluetooth_print_msg_chain();
+//                msg_chain_printf_msg_chain( bluetooth_msg_chain );
             }
             break;
     }
@@ -196,10 +197,10 @@ static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
 static void bluetooth_next_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            if ( bluetooth_current_msg < ( bluetooth_get_msg_entrys() - 1 ) ) {
+            if ( bluetooth_current_msg < ( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 ) ) {
                 bluetooth_current_msg++;
                 bluetooth_message_show_msg( bluetooth_current_msg );
-                bluetooth_print_msg_chain();
+//                msg_chain_printf_msg_chain( bluetooth_msg_chain );
             }
             break;
         
@@ -209,22 +210,23 @@ static void bluetooth_next_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
 static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            if ( bluetooth_get_msg_entrys() == 1 ) {
-                bluetooth_delete_msg_from_chain( bluetooth_current_msg );
+            if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 1 ) {
+                msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
+//                msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 bluetooth_current_msg--;
                 mainbar_jump_to_maintile( LV_ANIM_OFF );
             }
             else {
-                if ( bluetooth_current_msg == ( bluetooth_get_msg_entrys() - 1 ) ) {
-                    bluetooth_delete_msg_from_chain( bluetooth_current_msg );
+                if ( bluetooth_current_msg == ( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 ) ) {
+                    msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
                     bluetooth_current_msg--;
                     bluetooth_message_show_msg( bluetooth_current_msg );
-                    bluetooth_print_msg_chain();
+//                    msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 }
                 else {
-                    bluetooth_delete_msg_from_chain( bluetooth_current_msg );
+                    msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
                     bluetooth_message_show_msg( bluetooth_current_msg );
-                    bluetooth_print_msg_chain();
+//                    msg_chain_printf_msg_chain( bluetooth_msg_chain );
                 }
             }
     }
@@ -234,8 +236,8 @@ bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BLECTL_MSG:            
             if ( bluetooth_message_queue_msg( (const char*)arg ) ) {
-                bluetooth_message_show_msg( bluetooth_get_msg_entrys() - 1 );
-                bluetooth_current_msg = bluetooth_get_msg_entrys() - 1;
+                bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
+                bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
             }
             break;
     }
@@ -255,171 +257,6 @@ void bluetooth_message_disable( void ) {
 
 void bluetooth_message_enable( void ) {
     bluetooth_message_active = true;    
-}
-
-void bluetooth_add_msg_to_chain( const char *msg ) {
-    if ( bluetooth_msg_chain_head == NULL ) {
-        bluetooth_msg_chain_head = (bluetooth_msg_chain_t *)CALLOC( sizeof( bluetooth_msg_chain_t ), 1 );
-        if ( bluetooth_msg_chain_head == NULL ) {
-            log_e("bluetooth_msg_chain_head alloc failed");
-            while( 1 );
-        }
-        bluetooth_msg_chain_head->msg = (const char*)CALLOC( strlen( msg ) + 1, 1 );
-        if ( bluetooth_msg_chain_head->msg == NULL ) {
-            log_e("bluetooth_msg_chain_head->msg alloc failed");
-            while( 1 );
-        }
-        strcpy( (char*)bluetooth_msg_chain_head->msg, msg );
-        bluetooth_msg_chain_head->prev_msg = NULL;
-        bluetooth_msg_chain_head->next_msg = NULL;
-        log_i("add new mesg into msg chain");
-        return;
-    }
-
-    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
-    bluetooth_msg_chain_t *new_msg_chain = NULL;
-
-    // find the last entry in to chain
-    while( msg_chain->next_msg != NULL ) {
-        msg_chain = msg_chain->next_msg;
-    }
-
-    new_msg_chain = (bluetooth_msg_chain_t *)CALLOC( sizeof( bluetooth_msg_chain_t ), 1 );
-    if ( new_msg_chain == NULL ) {
-        log_e("new_msg_chain alloc failed");
-        while( 1 );
-    }
-
-    msg_chain->next_msg = new_msg_chain;
-    new_msg_chain->prev_msg = msg_chain;
-    new_msg_chain->next_msg = NULL;
-    new_msg_chain->msg = (const char*)CALLOC( strlen( msg ) + 1, 1 );
-    if ( new_msg_chain->msg == NULL ) {
-        log_e("new_msg_chain->msg alloc failed");
-        while( 1 );
-    }
-    strcpy( (char*)new_msg_chain->msg, msg );
-    log_i("add new mesg into msg chain");
-}
-
-void bluetooth_print_msg_chain( void ) {
-    if ( bluetooth_msg_chain_head == NULL ) {
-        return;
-    }
-
-    int32_t msg_counter = 0;
-    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
-
-    // find the last entry in to chain
-    while( true ) {
-        log_i("msg %d: %s", msg_counter, msg_chain->msg );
-        if ( msg_chain->next_msg == NULL ) {
-            break;
-        }
-        msg_counter++;
-        msg_chain = msg_chain->next_msg;
-    };
-}
-
-int32_t bluetooth_get_msg_entrys( void ) {
-    int32_t msg_counter = 0;
-
-    if ( bluetooth_msg_chain_head == NULL ) {
-        return( msg_counter );
-    }
-
-    msg_counter++;
-    
-    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
-
-    // find the last entry in to chain
-    while( msg_chain->next_msg != NULL ) {
-        msg_counter++;
-        msg_chain = msg_chain->next_msg;
-    }
-    return( msg_counter );
-}
-
-const char* bluetooth_get_msg_entry( int32_t entry ) {
-    const char* retval = NULL;
-    int32_t msg_counter = 0;
-
-    if ( bluetooth_msg_chain_head == NULL ) {
-        return( retval );
-    }
-    
-    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
-
-    do {
-        if ( entry == msg_counter ) {
-            return( msg_chain->msg );
-        }
-        if ( msg_chain->next_msg != NULL ) {
-            msg_counter++;
-            msg_chain = msg_chain->next_msg;
-        }
-        else {
-            return( retval );
-        }
-    } while ( true );
-}
-
-bool bluetooth_delete_msg_from_chain( int32_t entry ) {
-    bool retval = false;
-    int32_t msg_counter = 0;
-
-    if ( bluetooth_msg_chain_head == NULL ) {
-        return( retval );
-    }
-
-    bluetooth_msg_chain_t *msg_chain = bluetooth_msg_chain_head;
-    bluetooth_msg_chain_t *prev_msg_chain = NULL;
-    bluetooth_msg_chain_t *next_msg_chain = NULL;
-
-    // find the last entry in to chain
-    do {
-        if ( entry == msg_counter ) {
-            // get the prev and next msg chain entry if exsist
-            if ( msg_chain->prev_msg != NULL ) {
-                prev_msg_chain = msg_chain->prev_msg;
-            }
-            if ( msg_chain->next_msg != NULL ) {
-                next_msg_chain = msg_chain->next_msg;
-            }
-
-            // free allocated json msg
-            free( (void *)msg_chain->msg );
-
-            if ( prev_msg_chain && next_msg_chain ) {
-                prev_msg_chain->next_msg = next_msg_chain;
-                next_msg_chain->prev_msg = prev_msg_chain;
-            }
-            else if( !prev_msg_chain && next_msg_chain ) {
-                next_msg_chain->prev_msg = NULL;
-                bluetooth_msg_chain_head = next_msg_chain;
-            }
-            else if( prev_msg_chain && !next_msg_chain ) {
-                prev_msg_chain->next_msg = NULL;
-            }
-            else {
-                bluetooth_msg_chain_head = NULL;
-            }
-
-            // free allocated msg chain entry
-            free( msg_chain );
-            retval = true;
-            return( retval );
-        }
-        if ( msg_chain->next_msg != NULL ) {
-            msg_counter++;
-            msg_chain = msg_chain->next_msg;
-        }
-        else {
-            retval = false;
-            return( retval );
-            break;
-        }
-    } while ( true );
 }
 
 const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
@@ -452,8 +289,8 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     }
     else {
         if( !strcmp( doc["t"], "notify" ) ) {
-            bluetooth_add_msg_to_chain( msg );
-            bluetooth_print_msg_chain();
+            bluetooth_msg_chain = msg_chain_add_msg( bluetooth_msg_chain, msg );
+//            msg_chain_printf_msg_chain( bluetooth_msg_chain );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
             sound_play_progmem_wav( piep_wav, piep_wav_len );
@@ -467,7 +304,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
 void bluetooth_message_show_msg( int32_t entry ) {
     char msg_num[16] = "";
 
-    const char *msg = bluetooth_get_msg_entry( entry );
+    const char *msg = msg_chain_get_msg_entry( bluetooth_msg_chain, entry );
     if ( msg == NULL ) {
         return;
     }
@@ -479,7 +316,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
         lv_obj_set_hidden( bluetooth_prev_msg_btn, true );
     }
 
-    if ( entry < ( bluetooth_get_msg_entrys() -1 ) ) {
+    if ( entry < ( msg_chain_get_entrys( bluetooth_msg_chain ) -1 ) ) {
         lv_obj_set_hidden( bluetooth_next_msg_btn, false );
     }
     else {
@@ -495,7 +332,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
     else {
         if( !strcmp( doc["t"], "notify" ) ) {
 
-            snprintf( msg_num, sizeof( msg_num ), "%d/%d", entry + 1, bluetooth_get_msg_entrys() );
+            snprintf( msg_num, sizeof( msg_num ), "%d/%d", entry + 1, msg_chain_get_entrys( bluetooth_msg_chain ) );
             lv_label_set_text( bluetooth_msg_entrys_label, msg_num );
             lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
 
