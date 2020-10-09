@@ -116,7 +116,7 @@ void bluetooth_media_tile_setup( void ) {
     lv_obj_add_style( bluetooth_media_album, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
     lv_label_set_text( bluetooth_media_album, "");
     lv_label_set_long_mode( bluetooth_media_album, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_album, lv_disp_get_hor_res( NULL ) - 20 );
+    lv_obj_set_width( bluetooth_media_album, lv_disp_get_hor_res( NULL ) - 60 );
     lv_obj_align( bluetooth_media_album, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     bluetooth_media_title = lv_label_create( bluetooth_media_tile, NULL);
