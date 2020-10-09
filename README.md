@@ -33,7 +33,6 @@ or simple press "build and upload" in platformIO.
 * from time to time the esp32 crashes accidentally
 * and some other small things
 
-
 # how to use
 
 ## weather app
