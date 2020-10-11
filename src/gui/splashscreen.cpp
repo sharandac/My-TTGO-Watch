@@ -21,7 +21,10 @@
  */
 #include "config.h"
 
+#include "splashscreen.h"
+
 #include "hardware/display.h"
+#include "gui/png_decoder/png_decoder.h"
 
 lv_obj_t *logo = NULL;
 lv_obj_t *preload = NULL;
@@ -33,6 +36,9 @@ LV_IMG_DECLARE(hedgehog);
 void splash_screen_stage_one( void ) {
 
     TTGOClass *ttgo = TTGOClass::getWatch();
+
+    png_decoder_init();
+    lv_img_cache_set_size(100);
 
     lv_style_init( &style );
     lv_style_set_radius( &style, LV_OBJ_PART_MAIN, 0 );
@@ -47,24 +53,37 @@ void splash_screen_stage_one( void ) {
     lv_obj_align( background, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     logo = lv_img_create( background , NULL );
-    lv_img_set_src( logo, &hedgehog );
+
+    // load boot logo from spiffs if exsist
+    FILE* file;
+    file = fopen( SPLASHSCREENLOGO, "rb" );
+
+    if ( file ) {
+        log_i("use custom boot logo from spiffs");
+        fclose( file );
+        lv_img_set_src( logo, SPLASHSCREENLOGO );
+    }
+    else {
+        log_i("use default boot logo");
+        lv_img_set_src( logo, &hedgehog );
+    }
     lv_obj_align( logo, NULL, LV_ALIGN_CENTER, 0, 0 );
 
-    preload = lv_bar_create( background, NULL );
+    preload = lv_bar_create( lv_scr_act(), NULL );
     lv_obj_set_size( preload, lv_disp_get_hor_res( NULL ) - 80, 20 );
     lv_obj_add_style( preload, LV_OBJ_PART_MAIN, &style );
     lv_obj_align( preload, logo, LV_ALIGN_OUT_BOTTOM_MID, 0, 30 );
     lv_bar_set_anim_time( preload, 2000);
     lv_bar_set_value( preload, 0, LV_ANIM_ON);
 
-    preload_label = lv_label_create( background, NULL );
+    preload_label = lv_label_create( lv_scr_act(), NULL );
     lv_label_set_text( preload_label, "booting" );
     lv_obj_add_style( preload_label, LV_OBJ_PART_MAIN, &style );
     lv_obj_align( preload_label, preload, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_disp_trig_activity( NULL );
 
-    lv_obj_move_foreground( preload );
+    lv_obj_move_foreground( preload_label );
 
     lv_task_handler();
 

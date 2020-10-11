@@ -22,6 +22,8 @@
 #ifndef _SPLASHSCREEN_H
     #define _SPLASHSCREEN_H
 
+    #define SPLASHSCREENLOGO    "/spiffs/logo.png"
+
     /**
      * @brief start splashscreen
      */

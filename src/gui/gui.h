@@ -25,6 +25,8 @@
 
     #include <TTGO.h>
     
+    #define BACKGROUNDIMAGE    "/spiffs/bg.png"
+
     /**
      * @brief GUI setup
      */

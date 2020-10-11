@@ -28,8 +28,6 @@
 #include "screenshot.h"
 #include "keyboard.h"
 
-#include "gui/png_decoder/png_decoder.h"
-
 #include "mainbar/mainbar.h"
 #include "mainbar/main_tile/main_tile.h"
 #include "mainbar/app_tile/app_tile.h"
@@ -57,9 +55,6 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
 void gui_setup( void )
 {
-    png_decoder_init();
-    lv_img_cache_set_size(100);
-
     //Create wallpaper
     img_bin = lv_img_create( lv_scr_act() , NULL );
     lv_obj_set_width( img_bin, lv_disp_get_hor_res( NULL ) );
@@ -146,9 +141,20 @@ void gui_set_background_image ( uint32_t background_image ) {
             lv_obj_set_hidden( img_bin, true );
             break;
         case 5:
-            lv_img_set_src( img_bin, "/spiffs/bg.png" );
-            lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
-            lv_obj_set_hidden( img_bin, false );
+            FILE* file;
+            file = fopen( BACKGROUNDIMAGE, "rb" );
+
+            if ( file ) {
+                log_i("set custom background image from spiffs");
+                fclose( file );
+                lv_img_set_src( img_bin, BACKGROUNDIMAGE );
+                lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+                lv_obj_set_hidden( img_bin, false );
+            }
+            else {
+                log_i("not custom background image found on spiffs, set to black");
+                lv_obj_set_hidden( img_bin, true );
+            }
             break;
         default:
             lv_obj_set_hidden( img_bin, true ); 
