@@ -175,6 +175,10 @@ void bluetooth_settings_tile_setup( void ) {
     blectl_register_cb( BLECTL_ON | BLECTL_OFF, blectl_onoff_event_cb, "bluetooth settings");
 }
 
+uint32_t bluetooth_get_setup_tile_num() {
+    return ( bluetooth_tile_num );
+}
+
 bool blectl_onoff_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BLECTL_ON:

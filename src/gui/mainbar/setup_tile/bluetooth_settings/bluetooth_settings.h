@@ -25,5 +25,11 @@
     #include <TTGO.h>
 
     void bluetooth_settings_tile_setup( void );
+    /**
+     * @brief   get the bluetooth tile number
+     * 
+     * @return  tile number
+     */
+    uint32_t bluetooth_get_setup_tile_num( void );
 
 #endif // _BLUETOOTH_SETTINGS_H

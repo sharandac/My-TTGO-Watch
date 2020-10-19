@@ -137,6 +137,10 @@ void wlan_settings_tile_setup( void ) {
     wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN , wifi_setup_wifictl_event_cb, "wifi network scan" );
 }
 
+uint32_t wifi_get_setup_tile_num( void ) {
+    return ( wifi_setup_tile_num );
+}
+
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case    WIFICTL_ON:

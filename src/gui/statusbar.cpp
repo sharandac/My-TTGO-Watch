@@ -44,6 +44,8 @@
 #include "hardware/display.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/mainbar/setup_tile/wlan_settings/wlan_settings.h"
+#include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -481,30 +483,45 @@ void statusbar_brightness_slider_event_handler_cb(lv_obj_t *brightness_slider, l
 }
 
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
-    if ( event == LV_EVENT_VALUE_CHANGED ) {
-        switch ( lv_imgbtn_get_state( wifi ) ) {
-            case( LV_BTN_STATE_CHECKED_RELEASED ):  wifictl_off();
-                                                    wifictl_set_autoon( false );
-                                                    break;
-            case( LV_BTN_STATE_RELEASED ):          wifictl_on();
-                                                    wifictl_set_autoon( true );
-                                                    break;
-        }
+    switch ( event ) {
+        case ( LV_EVENT_VALUE_CHANGED ):
+            switch ( lv_imgbtn_get_state( wifi ) ) {
+                case( LV_BTN_STATE_CHECKED_RELEASED ):  wifictl_off();
+                                                        wifictl_set_autoon( false );
+                                                        break;
+                case( LV_BTN_STATE_RELEASED ):          wifictl_on();
+                                                        wifictl_set_autoon( true );
+                                                        break;
+            }
+            statusbar_refresh();
+            break;
+        case ( LV_EVENT_LONG_PRESSED ):             
+            statusbar_expand( false );
+            mainbar_jump_to_tilenumber(wifi_get_setup_tile_num(), LV_ANIM_OFF);
+            break;
     }
     statusbar_refresh();
 }
 
 void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event ) {
-    if ( event == LV_EVENT_VALUE_CHANGED ) {
-        switch ( lv_imgbtn_get_state( bluetooth ) ) {
-            case( LV_BTN_STATE_CHECKED_RELEASED ):   
-                blectl_off();
-                break;
-            case( LV_BTN_STATE_RELEASED ):    
-                blectl_on();
-                break;
-            default:                        break;
-        }
+    switch ( event ) {
+        case ( LV_EVENT_VALUE_CHANGED ):
+            switch ( lv_imgbtn_get_state( bluetooth ) ) {
+                case( LV_BTN_STATE_CHECKED_RELEASED ):   
+                    blectl_off();
+                    break;
+                case( LV_BTN_STATE_RELEASED ):    
+                    blectl_on();
+                    break;
+                default:
+                    break;
+            }
+            statusbar_refresh();
+            break;
+        case ( LV_EVENT_LONG_PRESSED ):             
+            statusbar_expand( false );
+            mainbar_jump_to_tilenumber(bluetooth_get_setup_tile_num(), LV_ANIM_OFF);
+            break;
     }
     statusbar_refresh();
 }
