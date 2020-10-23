@@ -519,9 +519,9 @@ bool blectl_pmu_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case PMUCTL_BATTERY_PERCENT:
             percent = *(int32_t*)arg;
-			if ( blectl_get_event( BLECTL_CONNECT ) ) {
-				blectl_update_battery( percent, charging, plug );
-			}
+            if ( blectl_get_event( BLECTL_CONNECT ) ) {
+                blectl_update_battery( percent, charging, plug );
+            }
             break;
         case PMUCTL_CHARGING:
             charging = *(bool*)arg;
