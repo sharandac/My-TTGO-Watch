@@ -519,6 +519,9 @@ bool blectl_pmu_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case PMUCTL_BATTERY_PERCENT:
             percent = *(int32_t*)arg;
+			if ( blectl_get_event( BLECTL_CONNECT ) ) {
+				blectl_update_battery( percent, charging, plug );
+			}
             break;
         case PMUCTL_CHARGING:
             charging = *(bool*)arg;
@@ -526,9 +529,6 @@ bool blectl_pmu_event_cb( EventBits_t event, void *arg ) {
         case PMUCTL_VBUS_PLUG:
             plug = *(bool*)arg;
             break;
-    }
-    if ( blectl_get_event( BLECTL_CONNECT ) ) {
-        blectl_update_battery( percent, charging, plug );
     }
     return( true );
 }
@@ -597,7 +597,7 @@ void blectl_off( void ) {
 }
 
 void blectl_loop ( void ) {
-    static uint64_t NextMillis = millis();
+    static uint64_t nextmillis = 0;
     char chunk_msg[ 64 ] = "";
 
     if ( !blectl_get_event( BLECTL_CONNECT ) ) {
@@ -609,8 +609,8 @@ void blectl_loop ( void ) {
         msg_chain_delete_msg_entry( blectl_msg_chain, 0 );
     }
 
-    if ( millis() - NextMillis > BLECTL_CHUNKDELAY ) {
-        NextMillis += BLECTL_CHUNKDELAY;
+    if ( nextmillis < millis() ) {
+        nextmillis = millis() + BLECTL_CHUNKDELAY;
         if ( blectl_msg.active ) {
             if ( blectl_msg.msgpos < blectl_msg.msglen ) {
                 if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
