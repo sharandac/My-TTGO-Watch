@@ -111,7 +111,7 @@ void powermeter_load_config( void ) {
         }
         else {
             strlcpy( powermeter_config.server, doc["powermeter"]["server"], sizeof( powermeter_config.server ) );
-            powermeter_config.port = doc["powermeter"]["port"] | 1883;
+	    powermeter_config.port = doc["powermeter"]["port"] | 1883;
             powermeter_config.ssl = doc["powermeter"]["ssl"] | false;
             strlcpy( powermeter_config.user, doc["powermeter"]["user"], sizeof( powermeter_config.user ) );
             strlcpy( powermeter_config.password, doc["powermeter"]["password"], sizeof( powermeter_config.password ) );
@@ -139,6 +139,7 @@ void powermeter_save_config( void ) {
         doc["powermeter"]["user"] = powermeter_config.user;
         doc["powermeter"]["password"] = powermeter_config.password;
         doc["powermeter"]["topic"] = powermeter_config.topic;
+        doc["powermeter"]["port"] = powermeter_config.port;
         doc["powermeter"]["autoconnect"] = powermeter_config.autoconnect;
         doc["powermeter"]["widget"] = powermeter_config.widget;
 
