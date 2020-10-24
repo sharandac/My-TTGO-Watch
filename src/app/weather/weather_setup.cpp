@@ -51,6 +51,7 @@ lv_style_t weather_widget_setup_style;
 LV_IMG_DECLARE(exit_32px);
 
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
+static void weather_num_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void weather_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void weather_wind_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
@@ -130,11 +131,12 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     weather_lat_textfield = lv_textarea_create( weather_lat_cont, NULL);
     lv_textarea_set_text( weather_lat_textfield, weather_config->lat );
     lv_textarea_set_pwd_mode( weather_lat_textfield, false);
+    lv_textarea_set_accepted_chars( weather_lat_textfield, "-.0123456789.");
     lv_textarea_set_one_line( weather_lat_textfield, true);
     lv_textarea_set_cursor_hidden( weather_lat_textfield, true);
     lv_obj_set_width( weather_lat_textfield, lv_disp_get_hor_res( NULL ) / 4 );
     lv_obj_align( weather_lat_textfield, weather_lat_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( weather_lat_textfield, weather_textarea_event_cb );
+    lv_obj_set_event_cb( weather_lat_textfield, weather_num_textarea_event_cb );
 
     lv_obj_t *weather_lon_cont = lv_obj_create( weather_setup_tile, NULL );
     lv_obj_set_size(weather_lon_cont, lv_disp_get_hor_res( NULL ) / 2 , 35 );
@@ -147,11 +149,12 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     weather_lon_textfield = lv_textarea_create( weather_lon_cont, NULL);
     lv_textarea_set_text( weather_lon_textfield, weather_config->lon );
     lv_textarea_set_pwd_mode( weather_lon_textfield, false);
+    lv_textarea_set_accepted_chars( weather_lon_textfield, "-.0123456789.");
     lv_textarea_set_one_line( weather_lon_textfield, true);
     lv_textarea_set_cursor_hidden( weather_lon_textfield, true);
     lv_obj_set_width( weather_lon_textfield, lv_disp_get_hor_res( NULL ) / 4 );
     lv_obj_align( weather_lon_textfield, weather_lon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( weather_lon_textfield, weather_textarea_event_cb );
+    lv_obj_set_event_cb( weather_lon_textfield, weather_num_textarea_event_cb );
 
     lv_obj_t *weather_autosync_cont = lv_obj_create( weather_setup_tile, NULL );
     lv_obj_set_size( weather_autosync_cont, lv_disp_get_hor_res( NULL ) , 30);
@@ -239,6 +242,12 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
 static void weather_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         keyboard_set_textarea( obj );
+    }
+}
+
+static void weather_num_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    if( event == LV_EVENT_CLICKED ) {
+        num_keyboard_set_textarea( obj );
     }
 }
 
