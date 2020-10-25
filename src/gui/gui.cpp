@@ -84,6 +84,7 @@ void gui_setup( void )
     gui_set_background_image( display_get_background_image() );
 
     keyboard_setup();
+    num_keyboard_setup();
 
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
