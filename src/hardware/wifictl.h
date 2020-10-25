@@ -49,6 +49,9 @@
     typedef struct {
         bool autoon = true;             /** @brief enable on auto on/off an wakeup and standby */
         bool webserver = false;         /** @brief enable on webserver */
+        bool ftpserver = false;         /** @brief enable on ftpserver */
+        char ftpuser[32];   /** @brief ftpserver username*/
+        char ftppass[32];  /** @brief ftpserver password*/
         bool enable_on_standby = false; /** @brief enable on standby */
     } wifictl_config_t;
 
@@ -162,6 +165,18 @@
      * @param   webserver   true means webserver enable, false means webserver disable
      */
     void wifictl_set_webserver( bool webserver );
+    /**
+     * @brief   get the current webserver configuration
+     * 
+     * @return  true means ftpserver is enable, false ftpserver is disable
+     */
+    bool wifictl_get_ftpserver( void );
+    /**
+     * @brief   set the current werbserver configuration
+     * 
+     * @param   ftpserver   true means ftpserver enable, false means ftpserver disable
+     */
+    void wifictl_set_ftpserver( bool ftpserver );
     /**
      * @brief   set wifi enable on standby
      * 

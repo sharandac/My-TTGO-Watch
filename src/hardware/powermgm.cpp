@@ -158,6 +158,16 @@ void powermgm_loop( void ) {
     }
 }
 
+void powermgm_shutdown( void ) {
+    powermgm_send_event_cb( POWERMGM_SHUTDOWN );
+    pmu_shutdown();
+}
+
+void powermgm_reset( void ) {
+    powermgm_send_event_cb( POWERMGM_RESET );
+    ESP.restart();
+}
+
 void powermgm_set_event( EventBits_t bits ) {
     portENTER_CRITICAL(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );

@@ -33,6 +33,7 @@
 
 #include "gui/statusbar.h"
 #include "webserver/webserver.h"
+#include "ftpserver/ftpserver.h"
 
 bool wifi_init = false;
 EventGroupHandle_t wifictl_status = NULL;
@@ -132,6 +133,9 @@ void wifictl_setup( void ) {
         if ( wifictl_config.webserver ) {
           asyncwebserver_start();
         }
+        if ( wifictl_config.ftpserver ) {
+          ftpserver_start( wifictl_config.ftpuser , wifictl_config.ftppass );
+        }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -214,6 +218,9 @@ void wifictl_save_config( void ) {
 
         doc["autoon"] = wifictl_config.autoon;
         doc["webserver"] = wifictl_config.webserver;
+        doc["ftpserver"] = wifictl_config.ftpserver;
+        doc["ftpuser"] = wifictl_config.ftpuser;
+        doc["ftppass"] = wifictl_config.ftppass;
         doc["enable_on_standby"] = wifictl_config.enable_on_standby;
         for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
             doc["networklist"][ i ]["ssid"] = wifictl_networklist[ i ].ssid;
@@ -244,6 +251,17 @@ void wifictl_load_config( void ) {
         else {
             wifictl_config.autoon = doc["autoon"] | true;
             wifictl_config.webserver = doc["webserver"] | false;
+            wifictl_config.ftpserver = doc["ftpserver"] | false;
+            
+            if ( doc["ftpuser"] )
+              strlcpy( wifictl_config.ftpuser, doc["ftpuser"], sizeof( wifictl_config.ftpuser ) );
+            else
+              strlcpy( wifictl_config.ftpuser, FTPSERVER_USER, sizeof( wifictl_config.ftpuser ) );
+            if ( doc["ftppass"] )
+              strlcpy( wifictl_config.ftppass, doc["ftppass"], sizeof( wifictl_config.ftppass ) );
+            else
+              strlcpy( wifictl_config.ftppass, FTPSERVER_PASSWORD, sizeof( wifictl_config.ftppass ) );
+
             wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
             for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
                 if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
@@ -282,6 +300,15 @@ bool wifictl_get_webserver( void ) {
 
 void wifictl_set_webserver( bool webserver ) {
   wifictl_config.webserver = webserver;
+  wifictl_save_config();
+}
+
+bool wifictl_get_ftpserver( void ) {
+return( wifictl_config.ftpserver );
+}
+
+void wifictl_set_ftpserver( bool ftpserver ) {
+  wifictl_config.ftpserver = ftpserver;
   wifictl_save_config();
 }
 

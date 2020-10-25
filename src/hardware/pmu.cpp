@@ -182,6 +182,11 @@ bool pmu_send_cb( EventBits_t event, void *arg ) {
     return( callback_send( pmu_callback, event, arg ) );
 }
 
+void pmu_shutdown( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    ttgo->power->shutdown();
+}
+
 void pmu_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 

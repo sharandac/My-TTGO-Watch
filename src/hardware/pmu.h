@@ -68,6 +68,10 @@
      */
     int32_t pmu_get_battery_percent( void );
     /**
+     * @brief shutdown the axp202
+     */
+    void pmu_shutdown( void );
+    /**
      * @brief set the axp202 in standby
      */
     void pmu_standby( void );

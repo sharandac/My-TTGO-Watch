@@ -35,6 +35,8 @@
     #define POWERMGM_BMA_DOUBLECLICK            _BV(9)         /** @brief event mask for powermgm bma soubleclick */
     #define POWERMGM_BMA_TILT                   _BV(10)        /** @brief event mask for powermgm bma tilt */
     #define POWERMGM_RTC_ALARM                  _BV(11)        /** @brief event mask for powermgm rtc alarm */
+    #define POWERMGM_SHUTDOWN                   _BV(12)        /** @brief event mask for powermgm shutdown */
+    #define POWERMGM_RESET                      _BV(13)        /** @brief event mask for powermgm reset */
     
     /**
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
