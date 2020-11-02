@@ -30,6 +30,12 @@
     #include <LilyGoWatch.h>
 
     /*
+    * Built-in applications
+    */
+    #define ENABLE_WEBSERVER  // To disable built-in webserver, comment this line
+    #define ENABLE_FTPSERVER  // To disable built-in ftpserver, comment this line
+
+    /*
     * firmeware version string
     */
     #define __FIRMWARE__            "2020102502"

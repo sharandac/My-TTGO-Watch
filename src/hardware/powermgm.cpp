@@ -40,7 +40,6 @@
 #include "sound.h"
 
 #include "gui/mainbar/mainbar.h"
-#include <app/alarm_clock/alarm_in_progress.h>
 
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
