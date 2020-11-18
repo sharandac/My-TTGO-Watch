@@ -122,13 +122,15 @@ void watchface_tile_update_task(lv_task_t *task)
 }
 void watchface_tile_update_time(void)
 {
+	tm info;
 	time_t now;
 	time(&now);
+	localtime_r( &now, &info );
 
 	//Angle calculation for Hands
-	int Angle_S = (int)((now / (1) % 60) * 60) + 2700;
-	int Angle_M = (int)((now / (1 * 60) % 60) * 60) + 2700;
-	int Angle_H = (int)((now / (1 * 60 * 60) % 24) * 300) + (int)((now / (1000 * 60) % 60) * 5) + 2700;
+	int Angle_S = (int)((info.tm_sec % 60) * 60) + 2700;
+	int Angle_M = (int)((info.tm_min % 60) * 60) + 2700;
+	int Angle_H = (int)((info.tm_hour % 24) * 300) + (int)((info.tm_min % 60) * 5) + 2700;
 
 	while (Angle_S >= 3600)
 		Angle_S = Angle_S - 3600;
