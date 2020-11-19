@@ -25,6 +25,7 @@
 #include "bluetooth_call.h"
 #include "bluetooth_message.h"
 #include "bluetooth_media.h"
+#include "bluetooth_FindPhone.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
@@ -171,6 +172,8 @@ void bluetooth_settings_tile_setup( void ) {
     bluetooth_call_tile_setup();
     bluetooth_message_tile_setup();
     bluetooth_media_tile_setup();
+    bluetooth_FindPhone_tile_setup();
+
 
     blectl_register_cb( BLECTL_ON | BLECTL_OFF, blectl_onoff_event_cb, "bluetooth settings");
 }

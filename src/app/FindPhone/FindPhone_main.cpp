@@ -60,14 +60,22 @@
 #include "hardware/powermgm.h"
 
 lv_obj_t *FindPhone_main_tile = NULL;
+lv_obj_t *FindPhone_main_iris = NULL;
+
 lv_style_t FindPhone_main_style;
 
 lv_task_t * _FindPhone_search_task; 
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
+LV_IMG_DECLARE(eye_lid_closed);
+LV_IMG_DECLARE(eye_lid_open);
+LV_IMG_DECLARE(eye_iris);
 //LV_IMG_DECLARE(refresh_32px); //unused
 LV_FONT_DECLARE(Ubuntu_32px);
+
+int rem_iris_x = 0;
+int rem_iris_y = 0;
 
 static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event );
 //static void enter_FindPhone_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -102,25 +110,24 @@ void FindPhone_main_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( setup_btn, enter_FindPhone_setup_event_cb );
     */
     
-    //Top Left, power button
-    lv_obj_t *FindPhone_main_go_btn = NULL;
-    FindPhone_main_go_btn = lv_btn_create( FindPhone_main_tile, NULL);  
-    lv_obj_set_size( FindPhone_main_go_btn, 170, 40);
-    lv_obj_set_event_cb( FindPhone_main_go_btn, go_FindPhone_main_event_cb );
-    lv_obj_add_style( FindPhone_main_go_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
-    lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, -90 );
-    lv_obj_t *FindPhone_main_pwr_label = lv_label_create( FindPhone_main_go_btn, NULL);
-    lv_label_set_text( FindPhone_main_pwr_label, "Start Search");
-    
-    //Middle Left, mute button
-    lv_obj_t *FindPhone_main_stop_btn = NULL;
-    FindPhone_main_stop_btn = lv_btn_create( FindPhone_main_tile, NULL);  
-    lv_obj_set_event_cb( FindPhone_main_stop_btn, stop_FindPhone_main_event_cb );
-    lv_obj_set_size( FindPhone_main_stop_btn, 170, 40);
-    lv_obj_add_style( FindPhone_main_stop_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
-    lv_obj_align( FindPhone_main_stop_btn, NULL, LV_ALIGN_CENTER, 0, -30 );
-    lv_obj_t *FindPhone_main_mute_label = lv_label_create( FindPhone_main_stop_btn, NULL);
-    lv_label_set_text( FindPhone_main_mute_label, "Stop Search");
+    // eye toggle button
+	lv_obj_t *FindPhone_main_go_btn = NULL;
+    FindPhone_main_go_btn = lv_imgbtn_create( FindPhone_main_tile, NULL);  
+	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_RELEASED, &eye_lid_open);
+	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_open);
+    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_RELEASED, &eye_lid_closed);
+    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_closed);
+	lv_btn_set_checkable(FindPhone_main_go_btn, true);
+    lv_btn_toggle(FindPhone_main_go_btn);
+    lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
+	lv_obj_set_event_cb( FindPhone_main_go_btn, go_FindPhone_main_event_cb );
+
+	
+	// iris 
+	FindPhone_main_iris = lv_img_create( FindPhone_main_tile, NULL);
+	lv_img_set_src (FindPhone_main_iris,&eye_iris);
+	lv_obj_set_hidden(FindPhone_main_iris,true);
+    lv_obj_align( FindPhone_main_iris, NULL, LV_ALIGN_CENTER, 0, 0 );
     
     lv_style_set_text_opa( &FindPhone_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
     lv_style_set_text_font( &FindPhone_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
@@ -129,7 +136,8 @@ void FindPhone_main_setup( uint32_t tile_num ) {
     lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
     lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &FindPhone_main_style );
     lv_obj_align( app_label, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
-    
+    lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
+
 }
 
 /*//Not yet in use
@@ -141,8 +149,52 @@ static void enter_FindPhone_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 */
+static void REM (bool val)
+{
+	if (!val )
+	{
+		lv_obj_set_hidden(FindPhone_main_iris,true);
+	} else {
+		lv_obj_set_hidden(FindPhone_main_iris,false);
+		//move iris between +-50,+-50 around center
+		if (rand()%2)
+		{ 
+			//Horizontal Move
+			lv_anim_t rem_iris_x_anim;
+			lv_anim_init(&rem_iris_x_anim);
+			lv_anim_set_exec_cb(&rem_iris_x_anim,(lv_anim_exec_xcb_t)lv_obj_set_x);
+			lv_anim_set_var(&rem_iris_x_anim,FindPhone_main_iris);
+			lv_anim_set_time(&rem_iris_x_anim,1000);
+			lv_anim_set_values(&rem_iris_x_anim,lv_obj_get_x(FindPhone_main_iris),(LV_HOR_RES/2)+(rand()%40)-50);
+			lv_anim_start(&rem_iris_x_anim);
+		} else {
+			//Vertical Move
+			lv_anim_t rem_iris_y_anim;
+			lv_anim_init(&rem_iris_y_anim);
+			lv_anim_set_exec_cb(&rem_iris_y_anim,(lv_anim_exec_xcb_t)lv_obj_set_y);
+			lv_anim_set_var(&rem_iris_y_anim,FindPhone_main_iris);
+			lv_anim_set_time(&rem_iris_y_anim,1000);
+			lv_anim_set_values(&rem_iris_y_anim,lv_obj_get_y(FindPhone_main_iris),(LV_VER_RES/2)+(rand()%30)-60);
+			lv_anim_start(&rem_iris_y_anim);
+		}	
+	}		
+}
 
-
+static void toggle_searching ()
+{
+	if (searching) 
+	{
+		//lv_task_del(_FindPhone_search_task);
+		REM(false);
+		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
+		//lv_btn_set_state(FindPhone_main_go_btn,LV_BTN_STATE_RELEASED);
+		searching = false;
+	}else {
+	    _FindPhone_search_task = lv_task_create( FindPhone_search_task, 1000, LV_TASK_PRIO_MID, NULL );
+		//lv_btn_set_state(FindPhone_main_go_btn,LV_BTN_STATE_RELEASED);
+		searching = true;
+	}		
+}
 
 static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event ) 
 {
@@ -156,9 +208,8 @@ static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event )
 static void go_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event ) 
 {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       //msg: {"t":"find","n":true}
-                                        searching = true;
-									    _FindPhone_search_task = lv_task_create( FindPhone_search_task, 1000, LV_TASK_PRIO_MID, NULL );
+        case( LV_EVENT_VALUE_CHANGED ):       //msg: {"t":"find","n":true}
+                                        toggle_searching();
                                         break;
     }
 }
@@ -177,6 +228,7 @@ static void FindPhone_search_task( lv_task_t * task )
 	if (searching) 
 	{
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"true\"}\r\n" );
+		REM(true);
 	} else {
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 		//lv_task_del(_FindPhone_search_task);

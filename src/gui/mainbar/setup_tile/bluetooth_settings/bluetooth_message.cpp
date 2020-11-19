@@ -287,17 +287,6 @@ bool bluetooth_message_queue_msg( const char *msg ) {
             motor_vibe(10);
             retval = true;
         }
-        // FindPhone
-        if( !strcmp( doc["t"], "find" ) ) {
-            bluetooth_msg_chain = msg_chain_add_msg( bluetooth_msg_chain, msg );
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
-            for (int i; i<5;i++) {
-            sound_play_progmem_wav( piep_wav, piep_wav_len );
-            motor_vibe(10);}
-            retval = true;
-        }
-        //FindPhone
     }
     return( retval );
 }
