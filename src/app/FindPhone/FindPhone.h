@@ -1,7 +1,10 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *  FindPhone.h
+ *  Neuroplant  11/2020
+ *  Email: m.roych@gmail.com
+ *
+ *
+ *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch  Example_App"
  ****************************************************************************/
  
 /*
