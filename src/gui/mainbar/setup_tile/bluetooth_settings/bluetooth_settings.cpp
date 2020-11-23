@@ -25,7 +25,6 @@
 #include "bluetooth_call.h"
 #include "bluetooth_message.h"
 #include "bluetooth_media.h"
-#include "bluetooth_FindPhone.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
