@@ -171,6 +171,8 @@ void bluetooth_settings_tile_setup( void ) {
     bluetooth_call_tile_setup();
     bluetooth_message_tile_setup();
     bluetooth_media_tile_setup();
+    bluetooth_FindPhone_tile_setup();
+
 
     blectl_register_cb( BLECTL_ON | BLECTL_OFF, blectl_onoff_event_cb, "bluetooth settings");
 }

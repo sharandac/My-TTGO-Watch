@@ -65,8 +65,8 @@ void gui_setup( void )
     /* add the four mainbar screens */
     main_tile_setup();
     app_tile_setup();
-    //note_tile_setup();
-    watchface_tile_setup();
+	//note_tile_setup();
+	watchface_tile_setup();
     setup_tile_setup();
 
     /* add setup */
