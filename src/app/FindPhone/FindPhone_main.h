@@ -1,7 +1,10 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *  FindPhone_main.h
+ *  Neuroplant  11/2020
+ *  Email: m.roych@gmail.com
+ *
+ *
+ *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch  Example_App"
  ****************************************************************************/
  
 /*
@@ -25,5 +28,5 @@
     #include <TTGO.h>
 	static bool searching = false;
     void FindPhone_main_setup( uint32_t tile_num );
-
+    void bluetooth_FindPhone_tile_setup( void );
 #endif // _EXAMPLE_APP_MAIN_H

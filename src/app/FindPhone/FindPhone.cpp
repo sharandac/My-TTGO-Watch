@@ -1,7 +1,10 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *  FindPhone.cpp
+ *  Neuroplant  11/2020
+ *  Email: m.roych@gmail.com
+ *
+ *
+ *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch  Example_App"
  ****************************************************************************/
  
 /*
@@ -77,6 +80,8 @@ void FindPhone_setup( void ) {
     // init main and setup tile, see FindPhone_main.cpp and FindPhone_setup.cpp
     FindPhone_main_setup( FindPhone_main_tile_num );
     //FindPhone_setup_setup( FindPhone_setup_tile_num ); //No use just yet
+	
+	bluetooth_FindPhone_tile_setup();
 }
 
 /*
