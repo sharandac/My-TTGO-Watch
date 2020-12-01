@@ -114,7 +114,12 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
         uint32_t retval = crypto_ticker_fetch_price(crypto_ticker_get_config() , &crypto_ticker_widget_data );
         if ( retval == 200 ) {
             widget_set_indicator( crypto_ticker_widget, ICON_INDICATOR_OK );
-            widget_set_label( crypto_ticker_widget, crypto_ticker_widget_data.price );
+            // Check for label text width overflow
+            auto price = crypto_ticker_widget_data.price;
+            if (strlen(price) > 7 && strchr(price, '.') != NULL) {
+                price[7] = '\0'; // Trim it
+            }
+            widget_set_label( crypto_ticker_widget, price );
         }
         else {
             widget_set_indicator( crypto_ticker_widget, ICON_INDICATOR_FAIL );
