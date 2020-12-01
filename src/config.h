@@ -36,7 +36,7 @@
     /*
     * Enable non-latin languages support:
     */
-    //#define USE_EXTENDED_CHARSET CHARSET_CYRILLIC
+    #define USE_EXTENDED_CHARSET CHARSET_CYRILLIC
 
     /*
     * firmeware version string

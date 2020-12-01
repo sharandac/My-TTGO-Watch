@@ -4,3 +4,4 @@ deploy.sh
 .gitignore
 data/tile_map.ods
 firmware_fork_list.json
+src/my-ttgo-watch.ino.cpp
