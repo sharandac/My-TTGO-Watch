@@ -26,9 +26,7 @@
 #include "crypto_ticker_fetch.h"
 #include "crypto_ticker_main.h"
 #include "crypto_ticker_setup.h"
-#ifdef CRYPTO_TICKER_WIDGET
-    #include "crypto_ticker_widget.h"
-#endif // CRYPTO_TICKER_WIDGET
+#include "crypto_ticker_widget.h"
 
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -66,14 +64,14 @@ void crypto_ticker_setup( void ) {
 
     // register app and widget icon
     crypto_ticker_app = app_register( "crypto\nticker", &bitcoin_64px, enter_crypto_ticker_event_cb );
-#ifdef CRYPTO_TICKER_WIDGET
-    crypto_ticker_widget_setup();
-#endif // CRYPTO_TICKER_WIDGET
+    
+    if ( crypto_ticker_config.widget ) {
+        crypto_ticker_add_widget();
+    }
 
     // init main and setup tile, see crypto_ticker_main.cpp and crypto_ticker_setup.cpp
     crypto_ticker_main_setup( crypto_ticker_main_tile_num );
     crypto_ticker_setup_setup( crypto_ticker_setup_tile_num );
-
 }
 
 uint32_t crypto_ticker_get_app_main_tile_num( void ) {
@@ -122,10 +120,11 @@ void crypto_ticker_save_config( void ) {
         log_e("Can't open file: %s!", crypto_ticker_JSON_CONFIG_FILE );
     }
     else {
-        SpiRamJsonDocument doc( 1000 );
+        SpiRamJsonDocument doc( 1200 );
 
         doc["symbol"] = crypto_ticker_config.symbol;
         doc["autosync"] = crypto_ticker_config.autosync;
+        doc["widget"] = crypto_ticker_config.widget;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -155,6 +154,7 @@ void crypto_ticker_load_config( void ) {
             else {
                 strlcpy( crypto_ticker_config.symbol, doc["symbol"], sizeof( crypto_ticker_config.symbol ) );
                 crypto_ticker_config.autosync = doc["autosync"].as<bool>();
+                crypto_ticker_config.widget = doc["widget"].as<bool>();
             }        
             doc.clear();
         }

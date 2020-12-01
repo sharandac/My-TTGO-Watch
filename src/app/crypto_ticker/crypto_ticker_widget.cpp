@@ -35,6 +35,7 @@
 #include "hardware/wifictl.h"
 
 EventGroupHandle_t crypto_ticker_widget_event_handle = NULL;
+
 TaskHandle_t _crypto_ticker_widget_sync_Task;
 void crypto_ticker_widget_sync_Task( void * pvParameters );
 
@@ -48,13 +49,12 @@ bool crypto_ticker_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(bitcoin_64px);
 
-void crypto_ticker_widget_setup( void ) {
-    
+void crypto_ticker_add_widget( void ) {
     crypto_ticker_widget = widget_register( "BTC", &bitcoin_64px, enter_crypto_ticker_widget_event_cb );
+}
 
-    crypto_ticker_widget_event_handle = xEventGroupCreate();
-
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_widget_wifictl_event_cb, "crypto ticker widget" );
+void crypto_ticker_remove_widget( void ) {
+        crypto_ticker_widget = widget_remove( crypto_ticker_widget );
 }
 
 void crypto_ticker_hide_widget_icon_info( bool show ) {
@@ -114,7 +114,12 @@ void crypto_ticker_widget_sync_Task( void * pvParameters ) {
         uint32_t retval = crypto_ticker_fetch_price(crypto_ticker_get_config() , &crypto_ticker_widget_data );
         if ( retval == 200 ) {
             widget_set_indicator( crypto_ticker_widget, ICON_INDICATOR_OK );
-            widget_set_label( crypto_ticker_widget, crypto_ticker_widget_data.price );
+            // Check for label text width overflow
+            auto price = crypto_ticker_widget_data.price;
+            if (strlen(price) > 7 && strchr(price, '.') != NULL) {
+                price[7] = '\0'; // Trim it
+            }
+            widget_set_label( crypto_ticker_widget, price );
         }
         else {
             widget_set_indicator( crypto_ticker_widget, ICON_INDICATOR_FAIL );
