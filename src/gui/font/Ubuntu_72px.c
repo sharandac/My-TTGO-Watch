@@ -1,3 +1,8 @@
+#include <config.h>
+#include "gui/charsets.h"
+
+#if !defined(USE_EXTENDED_CHARSET) // Use dafault charset: latin chars only
+
 #include "lvgl/lvgl.h"
 
 /*******************************************************************************
@@ -5896,3 +5901,5 @@ lv_font_t Ubuntu_72px = {
 
 #endif /*#if UBUNTU_72PX*/
 
+
+#endif // !USE_EXTENDED_CHARSET
