@@ -31,6 +31,7 @@
     typedef struct {
             char symbol[10] = "";
             bool autosync = true;
+            bool widget = false;
         } crypto_ticker_config_t;
 
 

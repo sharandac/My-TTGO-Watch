@@ -25,7 +25,7 @@
     #include <TTGO.h>
 
     #define CRYPTO_TICKER_WIDGET_SYNC_REQUEST    _BV(0)
-
+    extern EventGroupHandle_t crypto_ticker_widget_event_handle;
 
     typedef struct {
         bool valide = false;
@@ -33,9 +33,11 @@
         char price[50] = "";
     } crypto_ticker_widget_data_t;
 
-    void crypto_ticker_widget_setup( void );
+    void crypto_ticker_add_widget( void );
+    void crypto_ticker_remove_widget( void );
     void crypto_ticker_hide_widget_icon_info( bool show );
 
     void crypto_ticker_widget_sync_request( void );
+    bool crypto_ticker_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
 #endif // CRYPTO_TICKER_WIDGET_H
