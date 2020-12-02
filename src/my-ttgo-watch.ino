@@ -50,8 +50,11 @@
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
 #include "app/powermeter/powermeter_app.h"
+#include "app/FindPhone/FindPhone.h"
+#include "app/Walking_app/Walking.h"
 
-TTGOClass *ttgo = TTGOClass::getWatch();
+static TTGOClass* ttgo = TTGOClass::getWatch();
+
 
 void setup()
 {
@@ -105,6 +108,8 @@ void setup()
     osmand_app_setup();
     IRController_setup();
     powermeter_app_setup();
+    FindPhone_setup();
+    Walking_setup();
     /*
      *
      */
