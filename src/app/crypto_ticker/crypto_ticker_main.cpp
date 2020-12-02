@@ -25,12 +25,8 @@
 #include "crypto_ticker.h"
 #include "crypto_ticker_fetch.h"
 #include "crypto_ticker_main.h"
-
-#ifdef CRYPTO_TICKER_WIDGET
-
 #include "crypto_ticker_widget.h"
 
-#endif // CRYPTO_TICKER_WIDGET
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -149,6 +145,11 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     crypto_ticker_main_event_handle = xEventGroupCreate();
 
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_main_wifictl_event_cb, "crypto ticker main" );
+
+    
+    crypto_ticker_widget_event_handle = xEventGroupCreate();
+    
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, crypto_ticker_widget_wifictl_event_cb, "crypto ticker widget" );
 }
 
 bool crypto_ticker_main_wifictl_event_cb( EventBits_t event, void *arg ) {    
@@ -180,12 +181,10 @@ static void exit_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event )
 static void refresh_crypto_ticker_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       crypto_ticker_main_sync_request();
-
-#ifdef CRYPTO_TICKER_WIDGET
-
-                                        crypto_ticker_widget_sync_request();
-
-#endif // CRYPTO_TICKER_WIDGET
+                                        crypto_ticker_config_t *crypto_ticker_config = crypto_ticker_get_config();
+                                        if ( crypto_ticker_config->widget ) {
+                                            crypto_ticker_widget_sync_request();
+                                        }
                                         break;
     }
 }
