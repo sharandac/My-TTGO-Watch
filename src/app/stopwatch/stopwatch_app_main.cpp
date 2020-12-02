@@ -30,8 +30,8 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 
-long stopwatch_milliseconds;
-long prev_time;
+long stopwatch_milliseconds = 0;
+time_t prev_time;
 
 lv_obj_t *stopwatch_app_main_tile = NULL;
 lv_style_t stopwatch_app_main_style;
@@ -46,7 +46,7 @@ lv_obj_t *stopwatch_app_main_reset_btn = NULL;
 lv_task_t * _stopwatch_app_task;
 
 LV_IMG_DECLARE(exit_32px);
-LV_FONT_DECLARE(Ubuntu_48px);
+LV_FONT_DECLARE(Ubuntu_72px);
 
 static void exit_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -61,21 +61,18 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     lv_style_copy( &stopwatch_app_main_style, mainbar_get_style());
 
     lv_style_copy( &stopwatch_app_main_stopwatchstyle, &stopwatch_app_main_style);
-    lv_style_set_text_font( &stopwatch_app_main_stopwatchstyle, LV_STATE_DEFAULT, &Ubuntu_48px);
+    lv_style_set_text_font( &stopwatch_app_main_stopwatchstyle, LV_STATE_DEFAULT, &Ubuntu_72px);
 
 
     lv_obj_t * stopwatch_cont = mainbar_obj_create( stopwatch_app_main_tile );
-    lv_obj_set_size( stopwatch_cont, LV_HOR_RES , LV_VER_RES  );
+    lv_obj_set_size( stopwatch_cont, LV_HOR_RES , LV_VER_RES / 2 );
     lv_obj_add_style( stopwatch_cont, LV_OBJ_PART_MAIN, &stopwatch_app_main_style );
     lv_obj_align( stopwatch_cont, stopwatch_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
 
     stopwatch_app_main_stopwatchlabel = lv_label_create( stopwatch_cont , NULL);
-	lv_label_set_long_mode(stopwatch_app_main_stopwatchlabel,LV_LABEL_LONG_BREAK);
-	lv_label_set_align(stopwatch_app_main_stopwatchlabel, LV_LABEL_ALIGN_CENTER);
-    lv_label_set_text(stopwatch_app_main_stopwatchlabel, "00:00\n00:00");
+    lv_label_set_text(stopwatch_app_main_stopwatchlabel, "00:00");
     lv_obj_reset_style_list( stopwatch_app_main_stopwatchlabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( stopwatch_app_main_stopwatchlabel, LV_OBJ_PART_MAIN, &stopwatch_app_main_stopwatchstyle );
-    lv_obj_set_size( stopwatch_app_main_stopwatchlabel, LV_HOR_RES-10 , LV_VER_RES-10  );
     lv_obj_align(stopwatch_app_main_stopwatchlabel, NULL, LV_ALIGN_CENTER, 0, 0);
 
     stopwatch_app_main_start_btn = lv_btn_create(stopwatch_app_main_tile, NULL);  
@@ -120,7 +117,7 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
 
 static void stopwatch_app_main_update_stopwatchlabel()
 {
-    int hr = (stopwatch_milliseconds / (1000 * 60 * 60)) % 24;
+    //int hr = (stopwatch_milliseconds / (1000 * 60 * 60)) % 24;
 
     // minutes
     int min = (stopwatch_milliseconds / (1000 * 60)) % 60;
@@ -129,13 +126,10 @@ static void stopwatch_app_main_update_stopwatchlabel()
     int sec = (stopwatch_milliseconds / 1000) % 60;
 
     // milliseconds
-    int mill = (stopwatch_milliseconds /10 % 100);
+    //int mill = stopwatch_milliseconds % 1000;
 
-    char msg[20];
-	if (sec % 2) 
-		sprintf(msg,"%02d:%02d\n%02d:%02d",hr, min, sec, mill);
-	else
-		sprintf(msg,"%02d %02d\n%02d %02d",hr, min, sec, mill);
+    char msg[10];
+    sprintf(msg,"%02d:%02d", min, sec);
 
     lv_label_set_text(stopwatch_app_main_stopwatchlabel, msg);
     lv_obj_align(stopwatch_app_main_stopwatchlabel, NULL, LV_ALIGN_CENTER, 0, 0);
@@ -147,8 +141,8 @@ static void stopwatch_app_main_update_stopwatchlabel()
 static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
-                                        prev_time = millis();
-                                        _stopwatch_app_task = lv_task_create( stopwatch_app_task, 100, LV_TASK_PRIO_MID, NULL );
+                                        prev_time = time(0);
+                                        _stopwatch_app_task = lv_task_create( stopwatch_app_task, 1000, LV_TASK_PRIO_MID, NULL );
                                         lv_obj_set_hidden(stopwatch_app_main_start_btn, true);
                                         lv_obj_set_hidden(stopwatch_app_main_stop_btn, false);
                                         stopwatch_add_widget();
@@ -188,9 +182,10 @@ static void exit_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
 
 void stopwatch_app_task( lv_task_t * task ) {
 
-    double dif_millis = millis()-prev_time;
-    stopwatch_milliseconds += dif_millis;
-    prev_time = millis();
+    time_t now = time(0);
+    double dif_seconds = difftime(now,prev_time);
+    stopwatch_milliseconds += dif_seconds * 1000;
+    prev_time = now;
 
     stopwatch_app_main_update_stopwatchlabel();
 }
