@@ -1,3 +1,8 @@
+#include <config.h>
+#include "gui/charsets.h"
+
+#if !defined(USE_EXTENDED_CHARSET) // Use dafault charset: latin chars only
+
 #include "lvgl/lvgl.h"
 
 /*******************************************************************************
@@ -2645,3 +2650,5 @@ lv_font_t Ubuntu_32px = {
 
 #endif /*#if UBUNTU_32PX*/
 
+
+#endif // !USE_EXTENDED_CHARSET
