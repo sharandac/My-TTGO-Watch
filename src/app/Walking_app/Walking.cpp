@@ -49,7 +49,6 @@ LV_IMG_DECLARE(info_1_16px);
 
 // declare callback functions for the app and widget icon to enter the app
 static void enter_Walking_event_cb( lv_obj_t * obj, lv_event_t event );
-static void enter_Walking_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
 /*
  * setup routine for Walking app
@@ -66,16 +65,6 @@ void Walking_setup( void ) {
     // the resulting c-file can put in /app/Walkings/images/ and declare it like LV_IMG_DECLARE( your_icon );
     Walking = app_register( "Walking", &Walking_app_64px, enter_Walking_event_cb );
     app_set_indicator( Walking, ICON_INDICATOR_OK );
-
-#ifdef WALKING_WIDGET
-    // register widget icon on the main tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an widget icon must have an max size of 64x64 pixel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/Walkings/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    Walking_widget = widget_register( "myapp", &Walking_64px, enter_Walking_widget_event_cb );
-    widget_set_indicator( Walking_widget, ICON_INDICATOR_UPDATE );
-#endif // WALKING_WIDGET
 
     // init main and setup tile, see Walking_main.cpp and Walking_setup.cpp
     Walking_main_setup( Walking_main_tile_num );
@@ -103,18 +92,6 @@ static void enter_Walking_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       statusbar_hide( true );
                                         app_hide_indicator( Walking );
-                                        mainbar_jump_to_tilenumber( Walking_main_tile_num, LV_ANIM_OFF );
-                                        break;
-    }    
-}
-
-/*
- *
- */
-static void enter_Walking_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        widget_hide_indicator( Walking_widget );
                                         mainbar_jump_to_tilenumber( Walking_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    
