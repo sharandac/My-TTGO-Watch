@@ -1,12 +1,7 @@
 /****************************************************************************
- *  FindPhone_main.cpp
- *  Copyright  2020  David Stewart
- *  Email: genericsoftwaredeveloper@gmail.com
- *
- *  Requires Library: IRremoteESP8266 by David Conran
- *
- *  Remote codes are stored in FindPhone_main.h, currently only a handful
- *  of Samsung TV remote codes are defined.
+ *  FindPhone app for My-TTGO-Watch
+ *  Neuroplant  12/2020
+ *  Email: m.roych@gmail.com
  *
  *
  *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch  Example_App"
