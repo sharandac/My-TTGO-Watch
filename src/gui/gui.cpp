@@ -31,7 +31,8 @@
 #include "mainbar/mainbar.h"
 #include "mainbar/main_tile/main_tile.h"
 #include "mainbar/app_tile/app_tile.h"
-#include "mainbar/note_tile/note_tile.h"
+//#include "mainbar/note_tile/note_tile.h"
+#include "mainbar/watchface_tile/watchface_tile.h"
 #include "mainbar/setup_tile/setup_tile.h"
 
 #include "mainbar/setup_tile/battery_settings/battery_settings.h"
@@ -64,7 +65,8 @@ void gui_setup( void )
     /* add the four mainbar screens */
     main_tile_setup();
     app_tile_setup();
-    note_tile_setup();
+    //note_tile_setup();
+	watchface_tile_setup();
     setup_tile_setup();
 
     /* add setup */
