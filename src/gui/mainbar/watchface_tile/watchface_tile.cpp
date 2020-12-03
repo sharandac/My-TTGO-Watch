@@ -27,10 +27,14 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
+#include "gui/statusbar.h"
 
 #include "hardware/timesync.h"
 #include "hardware/powermgm.h"
 #include "hardware/alloc.h"
+
+bool statusbar_hide_toggle = false;
+
 void watchface_tile_setup(void)
 {
 	watchface_cont = mainbar_get_tile_obj(mainbar_add_tile(0, 1, "watchface tile"));
@@ -165,7 +169,10 @@ static void hide_statusbar_toggle_event_cb(lv_obj_t *obj, lv_event_t event)
 	switch (event)
 	{
 	case (LV_EVENT_CLICKED):
-		lv_obj_set_hidden( statusbar, !(lv_obj_get_hidden(statusbar));
+		{
+			statusbar_hide(!statusbar_hide_toggle);
+			statusbar_hide_toggle = !statusbar_hide_toggle;
+		}
 		break;
 	}
 }
