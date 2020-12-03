@@ -1,6 +1,6 @@
 /****************************************************************************
- *  FindPhone app for My-TTGO-Watch
- *  Neuroplant  12/2020
+ *  FindPhone.cpp
+ *  Neuroplant  11/2020
  *  Email: m.roych@gmail.com
  *
  *
@@ -27,7 +27,6 @@
 
 #include "FindPhone.h"
 #include "FindPhone_main.h"
-#include "FindPhone_setup.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -49,7 +48,7 @@ LV_IMG_DECLARE(info_1_16px);
 
 // declare callback functions for the app and widget icon to enter the app
 static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event );
-static void enter_FindPhone_widget_event_cb( lv_obj_t * obj, lv_event_t event );
+//static void enter_FindPhone_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
 /*
  * setup routine for example app
@@ -67,19 +66,10 @@ void FindPhone_setup( void ) {
     FindPhone = app_register( "Find\nPhone", &eye_64px, enter_FindPhone_event_cb );
     //app_set_indicator( FindPhone, ICON_INDICATOR_OK );
 
-#ifdef FindPhone_WIDGET
-    // register widget icon on the main tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an widget icon must have an max size of 64x64 pixel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    FindPhone_widget = widget_register( "Find\nPhone", &eye_64px, enter_FindPhone_widget_event_cb );
-    widget_set_indicator( FindPhone_widget, ICON_INDICATOR_UPDATE );
-#endif // EXAMPLE_WIDGET
-
     // init main and setup tile, see FindPhone_main.cpp and FindPhone_setup.cpp
     FindPhone_main_setup( FindPhone_main_tile_num );
-    //FindPhone_setup_setup( FindPhone_setup_tile_num ); //No use just yet
+	
+	bluetooth_FindPhone_tile_setup();
 }
 
 /*
@@ -111,11 +101,4 @@ static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event ) {
 /*
  *
  */
-static void enter_FindPhone_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        widget_hide_indicator( FindPhone_widget );
-                                        mainbar_jump_to_tilenumber( FindPhone_main_tile_num, LV_ANIM_OFF );
-                                        break;
-    }    
-}
+

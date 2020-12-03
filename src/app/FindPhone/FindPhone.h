@@ -1,6 +1,6 @@
 /****************************************************************************
- *  FindPhone app for My-TTGO-Watch
- *  Neuroplant  12/2020
+ *  FindPhone.h
+ *  Neuroplant  11/2020
  *  Email: m.roych@gmail.com
  *
  *

@@ -1,6 +1,6 @@
 /****************************************************************************
- *  FindPhone app for My-TTGO-Watch
- *  Neuroplant  12/2020
+ *  FindPhone_main.h
+ *  Neuroplant  11/2020
  *  Email: m.roych@gmail.com
  *
  *
@@ -26,7 +26,6 @@
     #define _FindPhone_MAIN_H
 
     #include <TTGO.h>
-	static bool searching = false;
     void FindPhone_main_setup( uint32_t tile_num );
-
+    void bluetooth_FindPhone_tile_setup( void );
 #endif // _EXAMPLE_APP_MAIN_H

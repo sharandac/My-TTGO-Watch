@@ -51,7 +51,6 @@
 #include "app/IRController/IRController.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
-#include "app/Walking_app/Walking.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -107,9 +106,8 @@ void setup()
     osmand_app_setup();
     IRController_setup();
     powermeter_app_setup();
-	  FindPhone_setup();
-  	Walking_setup();
-    /*
+	FindPhone_setup();
+  	/*
      *
      */
     if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) )
