@@ -44,14 +44,7 @@
 	//	lv_obj_t* Moon;		//you can add more complications
 		lv_style_t Hands_Style;
 	};
-	static Analog_Parts_t APart; 
-	static Analog_Parts_t APartS;
-	static lv_anim_t Second_Ani;
-	static lv_anim_path_t FlowsecPath;
-	static lv_obj_t *watchface_cont = NULL;
-	static lv_task_t *watchface_tile_task;
 
-	static void hide_statusbar_toggle_event_cb(lv_obj_t *obj, lv_event_t event);
     void watchface_tile_setup( void );
 	bool watchface_tile_powermgm_event_cb( EventBits_t event, void *arg );
 	void watchface_tile_update_time( void );
