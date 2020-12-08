@@ -77,7 +77,32 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
     p = ttgo->touch->getPoint();
 
     uint8_t rotation = ttgo->tft->getRotation();
-    switch ( rotation ) {
+#if defined(LILYGO_WATCH_2019_WITH_TOUCH)
+    p.x = (p.x - 4) * 240 / (320 - 4);
+    p.y = (p.y - 20) * 240 / (320 - 20);
+
+    switch (rotation)
+    {
+    case 2:
+        x = TFT_WIDTH - p.x;
+        y = TFT_HEIGHT - p.y;
+        break;
+    case 3:
+        x = TFT_WIDTH - p.y;
+        y = p.x;
+        break;
+    case 1:
+        x = p.y;
+        y = TFT_HEIGHT - p.x;
+        break;
+    case 0:
+    default:
+        x = p.x;
+        y = p.y;
+    }
+#else
+    switch (rotation)
+    {
     case 0:
         x = TFT_WIDTH - p.x;
         y = TFT_HEIGHT - p.y;
@@ -97,10 +122,11 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
     }
 
     // issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
-    float temp_x = ( x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * 1.15;
-    float temp_y = ( y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
-    x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
-    y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
+    float temp_x = (x - (lv_disp_get_hor_res(NULL) / 2)) * 1.15;
+    float temp_y = (y - (lv_disp_get_ver_res(NULL) / 2)) * 1.0;
+    x = temp_x + (lv_disp_get_hor_res(NULL) / 2);
+    y = temp_y + (lv_disp_get_ver_res(NULL) / 2);
+#endif
 
     return( true );
 }
