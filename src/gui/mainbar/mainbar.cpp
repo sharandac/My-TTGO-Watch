@@ -72,7 +72,6 @@ void mainbar_setup( void ) {
     lv_style_set_border_width( &mainbar_button_style, LV_STATE_DEFAULT, 2 );
 
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
-    lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
     lv_tileview_set_edge_flash( mainbar, false);
     lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, &mainbar_style );
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
