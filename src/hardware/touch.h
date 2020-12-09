@@ -29,4 +29,7 @@
      */
     void touch_setup( void );
 
+    bool touch_lock_take( void );
+    void touch_lock_give( void );
+
 #endif // _TOUCH_H
