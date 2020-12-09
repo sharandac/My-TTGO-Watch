@@ -28,13 +28,7 @@
 	
 	#define SHADOW_X 4
 	#define SHADOW_Y 5
-	LV_IMG_DECLARE(dial_silver);
-	LV_IMG_DECLARE(HourHand_S);
-	LV_IMG_DECLARE(MinuteHand_S);
-	LV_IMG_DECLARE(SecondHand_S);
-	LV_IMG_DECLARE(HourHand);
-	LV_IMG_DECLARE(MinuteHand);
-	LV_IMG_DECLARE(SecondHand);
+
 	struct Analog_Parts_t
 	{
 		lv_obj_t* Marks; 	//use transparent Image with Marks to use general Background
