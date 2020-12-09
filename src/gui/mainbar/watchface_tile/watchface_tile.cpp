@@ -33,6 +33,14 @@
 #include "hardware/powermgm.h"
 #include "hardware/alloc.h"
 
+LV_IMG_DECLARE(dial_silver);
+LV_IMG_DECLARE(HourHand_S);
+LV_IMG_DECLARE(MinuteHand_S);
+LV_IMG_DECLARE(SecondHand_S);
+LV_IMG_DECLARE(HourHand);
+LV_IMG_DECLARE(MinuteHand);
+LV_IMG_DECLARE(SecondHand);
+
 bool statusbar_hide_toggle = false;
 static Analog_Parts_t APart; 
 static Analog_Parts_t APartS;
