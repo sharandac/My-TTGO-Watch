@@ -255,25 +255,25 @@ void asyncwebserver_start(void){
   asyncserver.on("/touch", HTTP_GET, [](AsyncWebServerRequest *request) {
     TTGOClass * ttgo = TTGOClass::getWatch();
 
-	String html;
+    String html;
     if ( touch_lock_take() ) {
 
-		html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Touch Parameters</h3>" +
-					"<b>Device Mode: </b>" + ttgo->touch->getDeviceMode() + "<br>" +
-					"<b>Interrupt Mode: </b>" + ttgo->touch->getINTMode() + "<br>" +
-					"<b>Control: </b>" + ttgo->touch->getControl() + "<br>" +
-					"<b>Power Mode: </b>" + ttgo->touch->getPowerMode() + "<br>" +
-					"<b>Monitor time: </b>" + ttgo->touch->getMonitorTime() + "<br>" +
-					"<b>Active period: </b>" + ttgo->touch->getActivePeriod() + "<br>" +
-					"<b>Monitor period: </b>" + ttgo->touch->getMonitorPeriod() + "<br>" +
+        html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Touch Parameters</h3>" +
+                    "<b>Device Mode: </b>" + ttgo->touch->getDeviceMode() + "<br>" +
+                    "<b>Interrupt Mode: </b>" + ttgo->touch->getINTMode() + "<br>" +
+                    "<b>Control: </b>" + ttgo->touch->getControl() + "<br>" +
+                    "<b>Power Mode: </b>" + ttgo->touch->getPowerMode() + "<br>" +
+                    "<b>Monitor time: </b>" + ttgo->touch->getMonitorTime() + "<br>" +
+                    "<b>Active period: </b>" + ttgo->touch->getActivePeriod() + "<br>" +
+                    "<b>Monitor period: </b>" + ttgo->touch->getMonitorPeriod() + "<br>" +
 
-					"<br><b><u>System</u></b><br>" +
-					"<b>Uptime: </b>" + millis() / 1000 + "<br>" +
-					"</body></html>";
+                    "<br><b><u>System</u></b><br>" +
+                    "<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                    "</body></html>";
         touch_lock_give();
-	} else {
-		html = (String) "<html><head><meta charset=\"utf-8\"></head><body>No Lock</body></html>";
-	}
+    } else {
+        html = (String) "<html><head><meta charset=\"utf-8\"></head><body>No Lock</body></html>";
+    }
     request->send(200, "text/html", html);
   });
 
