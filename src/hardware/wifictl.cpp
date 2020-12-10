@@ -323,7 +323,7 @@ void wifictl_set_webserver( bool webserver ) {
 }
 #endif
 
-#ifdef ENABLE_WEBSERVER
+#ifdef ENABLE_FTPSERVER
 bool wifictl_get_ftpserver( void ) {
 return( wifictl_config.ftpserver );
 }
