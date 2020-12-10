@@ -83,7 +83,7 @@ bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
             }
             break;
         case POWERMGM_WAKEUP:           
-            log_i("go wkaeup");
+            log_i("go wakeup");
             timesyncToSystem();
             break;
         case POWERMGM_SILENCE_WAKEUP:   
