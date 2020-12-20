@@ -28,14 +28,8 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 
-#include "quickglue/quickglue.h"
-
-Widget prev;
-Widget line1; Label label1; TextArea edit1;
-Widget line2; Label label2; Switch switch2;
-
 lv_obj_t *example_app_setup_tile = NULL;
-//lv_style_t example_app_setup_style;
+lv_style_t example_app_setup_style;
 
 lv_obj_t *example_app_foobar_switch = NULL;
 
@@ -47,54 +41,36 @@ static void example_app_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event
 void example_app_setup_setup( uint32_t tile_num ) {
 
     example_app_setup_tile = mainbar_get_tile_obj( tile_num );
-    Widget parent = Widget(example_app_setup_tile);
+    lv_style_copy( &example_app_setup_style, mainbar_get_style() );
 
-    //lv_style_copy( &example_app_setup_style, mainbar_get_style() );
+    lv_style_set_bg_color( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
+    lv_style_set_bg_opa( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &example_app_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_obj_add_style( example_app_setup_tile, LV_OBJ_PART_MAIN, &example_app_setup_style );
 
-    //lv_style_set_bg_color( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    //lv_style_set_bg_opa( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    //lv_style_set_border_width( &example_app_setup_style, LV_OBJ_PART_MAIN, 0);
-    //lv_obj_add_style( example_app_setup_tile, LV_OBJ_PART_MAIN, &example_app_setup_style );
+    lv_obj_t *exit_cont = lv_obj_create( example_app_setup_tile, NULL );
+    lv_obj_set_size( exit_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
+    lv_obj_align( exit_cont, example_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
-
-    // // line0 = Widget(&parent);
-    // // line0.size(LV_HOR_RES, 40)
-    // //     .align(parent, LV_ALIGN_IN_TOP_MID, 0, 10);
-
-    // // exitBtn = Button(&line0, exit_32px, [](Widget target) {
-    // //     log_i("WOW!!!!! %d %d", target.handle(), parent.handle() );
-    // //     mainbar_jump_to_tilenumber( example_app_get_app_main_tile_num(), LV_ANIM_ON );
-    // // });
-    // // exitBtn.alignInParentLeft(10, 0);
-
-    // // label0 = Label(&line0, "my app setup");
-    // // label0.alignOutsideRight(exitBtn, 5, 0);
+    lv_obj_t *exit_btn = lv_imgbtn_create( exit_cont, NULL);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
+    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &example_app_setup_style );
+    lv_obj_align( exit_btn, exit_cont, LV_ALIGN_IN_TOP_LEFT, 10, 0 );
+    lv_obj_set_event_cb( exit_btn, exit_example_app_setup_event_cb );
     
-    //lv_obj_t *exit_cont = parent.header().handle();
-
-    // lv_obj_t *exit_cont = lv_obj_create( example_app_setup_tile, NULL );
-    // lv_obj_set_size( exit_cont, lv_disp_get_hor_res( NULL ) , 40);
-    // lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
-    // lv_obj_align( exit_cont, example_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
-
-    // // lv_obj_t *exit_btn = lv_imgbtn_create( exit_cont, NULL);
-    // // lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    // // lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    // // lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    // // lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    // // lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &example_app_setup_style );
-    // // lv_obj_align( exit_btn, exit_cont, LV_ALIGN_IN_TOP_LEFT, 10, 0 );
-    // // lv_obj_set_event_cb( exit_btn, exit_example_app_setup_event_cb );
-    
-    // lv_obj_t *exit_label = lv_label_create( exit_cont, NULL);
-    // lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &example_app_setup_style  );
-    // lv_label_set_text( exit_label, "my app setup");
-    // lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *exit_label = lv_label_create( exit_cont, NULL);
+    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &example_app_setup_style  );
+    lv_label_set_text( exit_label, "my app setup");
+    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *example_app_foobar_switch_cont = lv_obj_create( example_app_setup_tile, NULL );
     lv_obj_set_size( example_app_foobar_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
-    //lv_obj_add_style( example_app_foobar_switch_cont, LV_OBJ_PART_MAIN, tmp.handle()  );
-    //lv_obj_align( example_app_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+    lv_obj_add_style( example_app_foobar_switch_cont, LV_OBJ_PART_MAIN, &example_app_setup_style  );
+    lv_obj_align( example_app_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
     example_app_foobar_switch = lv_switch_create( example_app_foobar_switch_cont, NULL );
     lv_obj_add_protect( example_app_foobar_switch, LV_PROTECT_CLICK_FOCUS);
@@ -104,34 +80,9 @@ void example_app_setup_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( example_app_foobar_switch, example_app_foobar_switch_event_cb );
 
     lv_obj_t *example_app_foobar_switch_label = lv_label_create( example_app_foobar_switch_cont, NULL);
-    //lv_obj_add_style( example_app_foobar_switch_label, LV_OBJ_PART_MAIN, tmp.handle()  );
+    lv_obj_add_style( example_app_foobar_switch_label, LV_OBJ_PART_MAIN, &example_app_setup_style  );
     lv_label_set_text( example_app_foobar_switch_label, "foo bar");
     lv_obj_align( example_app_foobar_switch_label, example_app_foobar_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    char* confValue = "42";
-    //prev = Widget(example_app_foobar_switch_cont);
-
-    line1 = Widget(&parent);
-    line1.size(LV_HOR_RES, 40);
-        //.alignOutsideBottom(prev, 0, 5);
-
-    label1 = Label(&line1, "Record #");
-    label1.alignInParentLeft(5, 0);
-    
-    edit1 = TextArea(&line1, confValue);
-    edit1.digitsMode(true)
-        .width(LV_HOR_RES/2)
-        .alignInParentRight(-5, 0);
-        
-    line2 = Widget(&parent);
-    line2.size(LV_HOR_RES, 40);
-        //.alignOutsideBottom(line1, 0, 5);
-
-    label2 = Label(&line2, "Ok?");
-    label2.alignInParentLeft(5, 0);
-    
-    switch2 = Switch(&line2, false);
-    switch2.alignInParentRight(-5, 0);
 }
 
 static void example_app_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {

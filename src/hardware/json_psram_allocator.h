@@ -1,3 +1,6 @@
+#ifndef SPI_RAM_JSON_DOC_H_
+#define SPI_RAM_JSON_DOC_H_
+
 #include "config.h"
 #include "ArduinoJson.h"
 
@@ -19,3 +22,5 @@ struct SpiRamAllocator {
     }
 };
 using SpiRamJsonDocument = BasicJsonDocument<SpiRamAllocator>;
+
+#endif

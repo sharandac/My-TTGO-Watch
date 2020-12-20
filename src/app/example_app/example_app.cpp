@@ -31,8 +31,6 @@
 #include "gui/app.h"
 #include "gui/widget.h"
 
-#include "quickglue/quickglue.h"
-
 uint32_t example_app_main_tile_num;
 uint32_t example_app_setup_tile_num;
 
@@ -50,22 +48,21 @@ LV_IMG_DECLARE(info_1_16px);
 static void enter_example_app_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_example_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
-Application exampleApp;
 /*
  * setup routine for example app
  */
 void example_app_setup( void ) {
-    // // register 2 vertical tiles and get the first tile number and save it for later use
-    // example_app_main_tile_num = mainbar_add_app_tile( 1, 2, "example app" );
-    // example_app_setup_tile_num = example_app_main_tile_num + 1;
+    // register 2 vertical tiles and get the first tile number and save it for later use
+    example_app_main_tile_num = mainbar_add_app_tile( 1, 2, "example app" );
+    example_app_setup_tile_num = example_app_main_tile_num + 1;
 
-    // // register app icon on the app tile
-    // // set your own icon and register her callback to activate by an click
-    // // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    // example_app = app_register( "myapp", &example_app_64px, enter_example_app_event_cb );
-    // app_set_indicator( example_app, ICON_INDICATOR_OK );
+    // register app icon on the app tile
+    // set your own icon and register her callback to activate by an click
+    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
+    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
+    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+    example_app = app_register( "myapp", &example_app_64px, enter_example_app_event_cb );
+    app_set_indicator( example_app, ICON_INDICATOR_OK );
 
 #ifdef EXAMPLE_WIDGET
     // register widget icon on the main tile
@@ -77,17 +74,9 @@ void example_app_setup( void ) {
     widget_set_indicator( example_widget, ICON_INDICATOR_UPDATE );
 #endif // EXAMPLE_WIDGET
 
-    exampleApp.init("myapp", &example_app_64px, true);
-    exampleApp.registerAppWidget("wow!", &example_app_64px);
     // init main and setup tile, see example_app_main.cpp and example_app_setup.cpp
-    //example_app_main_setup( example_app_main_tile_num );
-    //main.init(mainbar_get_tile_obj( example_app_main_tile_num ), true);
-
-    exampleApp.mainPage().addRefreshButton([](Widget btn) {
-        log_i("YUUUHOOO! I'm succesfully refreshed! :P");
-    });
-
-    example_app_setup_setup( exampleApp.settingsTileId() );
+    example_app_main_setup( example_app_main_tile_num );
+    example_app_setup_setup( example_app_setup_tile_num );
 }
 
 /*
