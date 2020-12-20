@@ -165,9 +165,11 @@ void sound_loop( void ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
         if ( mp3->isRunning() && !mp3->loop() ) {
             log_i("stop playing mp3 sound");
+            mp3->stop();
         }
         if ( wav->isRunning() && !wav->loop() ) {
             log_i("stop playing wav sound");
+            wav->stop(); 
         }
     }
 }
