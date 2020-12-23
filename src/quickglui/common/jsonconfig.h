@@ -19,7 +19,26 @@ class JsonOption;
 class JsonBoolOption;
 class JsonStringOption;
 
-class JsonConfig {
+class BaseJsonConfig {
+public:
+  BaseJsonConfig(const char* configFileName);
+
+  bool load();
+  bool save();
+  
+  void debugPrint();
+  
+protected:
+  virtual bool onSave(JsonDocument& document) = 0;
+  virtual bool onLoad(JsonDocument& document) = 0;
+  virtual size_t getJsonBufferSize() { return 4096; }
+
+protected:
+  char fileName[MAX_CONFIG_FILE_NAME_LENGTH];
+  bool prettyJson = true;
+};
+
+class JsonConfig : public BaseJsonConfig  {
 public:
   JsonConfig(const char* configFileName);
   ~JsonConfig();
@@ -31,8 +50,6 @@ public:
   const char* getString(const char* optionName, const char* defValue = "");
 
   void applyFromUI();
-  bool save();
-  bool load();
 
   int totalCount() { return count; }
   JsonOption* getOption(int id) { return options[id]; }
@@ -40,12 +57,11 @@ public:
   void onLoadSaveHandler(SettingsAction saveSettingsHandler);
 
 protected:
-  virtual bool onSave(JsonDocument& document);
   virtual bool onLoad(JsonDocument& document);
+  virtual bool onSave(JsonDocument& document);
   virtual size_t getJsonBufferSize() { return (count+1)*128; }
 
 protected:
-  char fileName[MAX_CONFIG_FILE_NAME_LENGTH];
   JsonOption* options[MAX_OPTIONS_COUNT];
   int count = 0;
   SettingsAction processHandler;

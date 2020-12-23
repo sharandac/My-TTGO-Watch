@@ -11,7 +11,7 @@
 #include "ArduinoJson.h"
 #include "hardware/json_psram_allocator.h"
 
-class JsonRequest 
+class JsonRequest : public SpiRamJsonDocument
 {
 public:
   JsonRequest(size_t maxJsonBufferSize);
@@ -19,17 +19,15 @@ public:
 
   bool process(const char* url);
 
-  JsonDocument& result();
-
   int httpCode() { return httpcode; }
   DeserializationError getDeserializationError() { return dsError; }
 
   tm completedAt() { return timeStamp; }
   String fromatCompletedAt(const char* format);
+  String errorString();
 
 protected:
   int httpcode = -1;
-  SpiRamJsonDocument document;
   time_t now;
   struct tm timeStamp;
   DeserializationError dsError;

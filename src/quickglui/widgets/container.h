@@ -13,13 +13,16 @@
 class Container : public Widget {
 public:
   Container(){};
-  /** Create a label from lvgl object */
+  Container(Widget* parent);
+  /** Create from lvgl object */
   Container(lv_obj_t* handle);
 
-  virtual void createObject(lv_obj_t* parent);
   void autoLayout(lv_layout_t value);
 
   constexpr static const char* TypeName = "lv_cont";
+
+protected:
+  virtual void createObject(lv_obj_t* parent);
 };
 
 #endif

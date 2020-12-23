@@ -17,19 +17,20 @@ public:
     /** Create a button based on lvgl object */
     Button(lv_obj_t * btn);
     // Create image button
-    Button(const Widget* parent, const lv_img_dsc_t& image, WidgetAction onClick = NULL);
-    //Button(const Widget* parent, const char * txt);
+    Button(const Widget* parent, const lv_img_dsc_t& image, WidgetAction onClick = nullptr);
+    Button(const Widget* parent, const char * txt, WidgetAction onClick = nullptr);
 
     Button& clicked(WidgetAction onClick);
 
-    Button& text(const char * txt){ label.text(txt); return *this; };
+    Button& text(const char * txt);
 
     // Disables the button and makes it inactive
     Button& disable();
     // Enables the button and makes it active
     Button& enable();
 
-    constexpr static const char* TypeName = "lv_btn";
+    constexpr static const char* TypeNameWithImage = "lv_imgbtn";
+    constexpr static const char* TypeNameWithText = "lv_btn";
 
 protected:
     virtual void createObject(lv_obj_t* parent);

@@ -18,6 +18,9 @@ public:
   AppPage& addSettingsButton(WidgetAction onSettingsBtnClick);
   AppPage& addRefreshButton(WidgetAction onRefreshBtnClick);
 
+  virtual Container& createChildContainer(lv_layout_t autoLayoutOptios);
+  bool hasChildContainer() { return childContainer.handle() != nullptr; }
+
 protected:
   virtual void onChildAdded(Widget& child, const TypeInfo& type);
 
@@ -25,6 +28,7 @@ protected:
   Widget btnExit;
   Widget btnSettings;
   Widget btnRefresh;
+  Container childContainer;
 };
 
 #endif

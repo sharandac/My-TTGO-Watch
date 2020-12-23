@@ -22,7 +22,7 @@ friend ApplicationIcon;
 public:
   Application() : appIcon(*this) {};
 
-  virtual Application& init(const char* name, const lv_img_dsc_t *iconImg, int userPageCount = 1, int settingsPageCount = 1);
+  virtual Application& init(const char* name, const lv_img_dsc_t *iconImg, int userPageCount = 1, int settingsPageCount = 0);
 
   AppPage& mainPage() { return main; }
   SettingsPage& settingsPage() { return settings; }

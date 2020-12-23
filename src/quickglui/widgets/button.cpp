@@ -31,13 +31,25 @@ Button::Button(const Widget* parent, const lv_img_dsc_t& image, WidgetAction onC
     clicked(onClick);
 }
 
-// Button::Button(const Widget* parent, const char * txt){
-//   native = lv_btn_create(lv_scr_act(), NULL);
-//   lv_obj_t * lbl = lv_label_create(native, NULL);
-//   lv_label_set_text(lbl, txt);
-//   label = Label(lv_obj_get_child(native, NULL));
-//   //label.alignText(LV_ALIGN_TEXT_CENTER);
-// }
+Button::Button(const Widget* parent, const char * txt, WidgetAction onClick){
+  assign(lv_btn_create(parent->handle(), NULL));
+  lv_obj_t * lbl = lv_label_create(native, NULL);
+  label = Label(lbl);
+  if (txt != nullptr)
+  {
+    label.text(txt);
+    label.alignText(LV_LABEL_ALIGN_CENTER);
+  }
+
+  if (onClick != nullptr)
+    clicked(onClick);
+}
+
+Button& Button::text(const char * txt) {
+  if (label.isCreated())
+    label.text(txt);
+  return *this;
+};
 
 Button& Button::clicked(WidgetAction onClick){
     auto wh = DefaultWidgetManager.GetOrCreate(native);

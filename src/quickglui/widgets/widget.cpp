@@ -34,6 +34,14 @@ void Widget::assign(lv_obj_t* newHandle)
 lv_obj_t* Widget::handle() const{
   return native;
 }
+bool Widget::isCreated() const {
+  return handle() != nullptr;
+}
+void Widget::free() {
+  DefaultWidgetManager.Free(handle());
+  lv_obj_del(handle());
+  native = nullptr;
+}
 
 Widget& Widget::size(uint16_t width, uint16_t height){
   lv_obj_set_size(native, width, height);

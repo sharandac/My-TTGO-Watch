@@ -27,7 +27,7 @@ public:
     }
 
     WidgetAction Action = NULL;
-    WidgetEventHandler Event = NULL;
+    //WidgetEventHandler Event = NULL; //TODO: Add it in future
     OnChildAddedHandler OnChildAdded = NULL;
 
 private:

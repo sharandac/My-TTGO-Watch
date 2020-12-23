@@ -26,8 +26,8 @@ Style big;
 void fxrates_app_setup() {
     // Create and register new application
     //   params: name, icon, auto add "refresh" button (this app will use synchronize function of the SynchronizedApplication class).
-    //   Also, optionally, you can configure count of the required screens/pages in next two params (to have more pages in this app).
-    fxratesApp.init("forex rates", &fx_rates_64px, true);
+    //   Also, you can configure count of the required pages in the next two params (to have more app screens).
+    fxratesApp.init("forex rates", &fx_rates_64px, true, 1, 1);
     
     // Build and configure application
     build_main_page();
@@ -120,15 +120,16 @@ bool fetch_fx_rates(String apiKey, String pair1, String pair2) {
         url[strlen(url)-1]='\0';
 
     JsonRequest request(320);
-    if (!request.process(url))
+    if (!request.process(url)) {
+        updatedAt = request.errorString();
         return false;
+    }
 
-    JsonDocument& doc = request.result();
     mainPairValue = secondPairValue = "";
-    p1 = doc[mainPair].as<float>();
+    p1 = request[mainPair].as<float>();
     mainPairValue = String(p1, 2);
-    if (doc.size() > 1) { // Second currency pair available
-        p2 = doc[secondPair].as<float>();
+    if (request.size() > 1) { // Second currency pair available
+        p2 = request[secondPair].as<float>();
         secondPairValue = String(p2, 2);
     }
     updatedAt = request.fromatCompletedAt("Upd: %d.%m %M:%S");

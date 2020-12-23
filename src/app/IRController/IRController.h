@@ -24,10 +24,17 @@
 
     #include <TTGO.h>
 
-//    #define EXAMPLE_WIDGET    // uncomment if an widget need
+    enum IRControlSettingsAction {
+        Ignore,
+        Load,
+        Save
+    };
+
+    struct InfraButton;
 
     void IRController_setup( void );
-    //uint32_t IRController_get_app_setup_tile_num( void );//No use just yet
-    uint32_t IRController_get_app_main_tile_num( void );
+    bool IRController_bluetooth_event_cb(EventBits_t event, void *arg);
+    void IRController_build_UI(IRControlSettingsAction settingsAction);
+    void execute_ir_cmd(InfraButton* config);
 
 #endif // _IRCONTROLLER_H

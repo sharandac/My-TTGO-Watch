@@ -21,7 +21,9 @@ public:
   Widget(lv_obj_t* handle);
 
   lv_obj_t* handle() const;
-  void parent(const Widget& parent);
+  bool isCreated() const;
+  virtual void free();
+  //void parent(const Widget& parent);
   //Widget parent();
 
   Widget& size(uint16_t width, uint16_t height);
@@ -58,7 +60,7 @@ protected:
   virtual void assign(lv_obj_t* style);
   void fireParentHandlers();
 
-  lv_obj_t *native = NULL;
+  lv_obj_t *native = nullptr;
 };
 
 #endif

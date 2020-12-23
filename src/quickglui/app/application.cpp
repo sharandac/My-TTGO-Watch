@@ -41,6 +41,7 @@ void Application::onInitializing()
   // Build both main and settings pages
   auto mainTile = mainbar_get_tile_obj(mainTileId());
   onBuildMainPage(mainTile);
+  
   if (settingsPageCount > 0)
   {
     auto settingsTile = mainbar_get_tile_obj(settingsTileId());

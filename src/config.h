@@ -31,7 +31,7 @@
     * Built-in applications
     */
     #define ENABLE_WEBSERVER  // To disable built-in webserver, comment this line
-    #define ENABLE_FTPSERVER  // To disable built-in ftpserver, comment this line
+    //#define ENABLE_FTPSERVER  // To disable built-in ftpserver, comment this line
 
     /*
     * Enable non-latin languages support:

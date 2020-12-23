@@ -8,18 +8,18 @@
 #include "jsonrequest.h"
 #include "HTTPClient.h"
 
-JsonRequest::JsonRequest(size_t maxJsonBufferSize) : document(maxJsonBufferSize)
+JsonRequest::JsonRequest(size_t maxJsonBufferSize) : SpiRamJsonDocument(maxJsonBufferSize)
 {
 }
 
 JsonRequest::~JsonRequest() {
-    document.clear();
+    clear();
 }
 
 bool JsonRequest::process(const char* url)
 {
     if (httpcode != -1)
-      document.clear();
+      clear();
 
     HTTPClient client;
 
@@ -37,10 +37,10 @@ bool JsonRequest::process(const char* url)
         return false;
     }
 
-    dsError = deserializeJson(document, client.getStream());
+    dsError = deserializeJson(*this, client.getStream());
     if (dsError) {
         log_e("deserializeJson() failed: %s", dsError.c_str());
-        document.clear();
+        clear();
         client.end();
         return false;
     }
@@ -49,13 +49,18 @@ bool JsonRequest::process(const char* url)
     return true;
 }
 
-JsonDocument& JsonRequest::result() {
-    return document;
-}
-
 String JsonRequest::fromatCompletedAt(const char* format)
 {
     char txttime[64];
     strftime(txttime, sizeof(txttime), format, &timeStamp);
     return String(txttime);
+}
+
+String JsonRequest::errorString() {
+    if (httpcode != 200)
+        return String("HTTP error: ") + httpcode;
+    else if (dsError)
+        return String(dsError.c_str());
+    else
+        return "";
 }

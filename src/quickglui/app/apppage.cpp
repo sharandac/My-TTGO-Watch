@@ -45,6 +45,23 @@ AppPage& AppPage::addRefreshButton(WidgetAction onRefreshBtnClick)
   return *this;
 }
 
+Container& AppPage::createChildContainer(lv_layout_t autoLayoutOptios) {
+  if (!hasChildContainer()) {
+    childContainer = Container(this);
+    // Space top/buttom for action buttons:
+    if (btnRefresh.handle() == nullptr)
+      childContainer.size(LV_HOR_RES, LV_VER_RES - 42);
+    else {
+      childContainer.size(LV_HOR_RES, LV_VER_RES - 84);
+      childContainer.alignInParentTopLeft(0, 42);
+    }
+    // Auto-align child widgets on it
+    childContainer.autoLayout(autoLayoutOptios);
+    childContainer.style(mainbar_get_style());
+  }
+  return childContainer;
+}
+
 void AppPage::onChildAdded(Widget& child, const TypeInfo& type)
 {
   //log_i("Style processind for %s", type.name());

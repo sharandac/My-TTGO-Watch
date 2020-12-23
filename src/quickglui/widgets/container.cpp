@@ -10,6 +10,9 @@
 Container::Container(lv_obj_t* handle){
   assign(handle);
 }
+Container::Container(Widget* parent) {
+  createObject(parent->handle());
+}
 
 void Container::createObject(lv_obj_t* parent) {
   assign(lv_cont_create(parent, NULL));
