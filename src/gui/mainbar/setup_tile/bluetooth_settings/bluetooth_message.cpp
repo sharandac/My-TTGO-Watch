@@ -65,6 +65,7 @@ LV_IMG_DECLARE(whatsapp_32px);
 LV_IMG_DECLARE(k9mail_32px);
 LV_IMG_DECLARE(email_32px);
 LV_IMG_DECLARE(message_32px);
+LV_IMG_DECLARE(message_48px);
 LV_IMG_DECLARE(message_64px);
 LV_IMG_DECLARE(osmand_32px);
 LV_IMG_DECLARE(youtube_32px);
@@ -314,7 +315,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
             motor_vibe(10);
             app_set_indicator( messages_app, ICON_INDICATOR_N );
             if ( messages_widget == NULL ) {
-                messages_widget = widget_register( "message", &message_64px, enter_bluetooth_messages_cb );
+                messages_widget = widget_register( "message", &message_48px, enter_bluetooth_messages_cb );
                 widget_set_indicator( messages_widget, ICON_INDICATOR_N );
             }
             retval = true;
