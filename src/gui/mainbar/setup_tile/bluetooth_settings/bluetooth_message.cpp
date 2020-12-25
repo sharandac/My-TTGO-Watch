@@ -24,6 +24,8 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
+#include "gui/app.h"
+#include "gui/widget.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"
 #include "hardware/blectl.h"
@@ -33,6 +35,10 @@
 #include "hardware/sound.h"
 #include "hardware/alloc.h"
 #include "hardware/msg_chain.h"
+
+// messages app and widget
+icon_t *messages_app = NULL;
+icon_t *messages_widget = NULL;
 
 lv_obj_t *bluetooth_message_tile=NULL;
 lv_style_t bluetooth_message_style;
@@ -59,6 +65,7 @@ LV_IMG_DECLARE(whatsapp_32px);
 LV_IMG_DECLARE(k9mail_32px);
 LV_IMG_DECLARE(email_32px);
 LV_IMG_DECLARE(message_32px);
+LV_IMG_DECLARE(message_64px);
 LV_IMG_DECLARE(osmand_32px);
 LV_IMG_DECLARE(youtube_32px);
 LV_IMG_DECLARE(instagram_32px);
@@ -86,6 +93,7 @@ static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_next_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event );
+static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event );
 bool bluetooth_message_event_cb( EventBits_t event, void *arg );
 const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name );
 
@@ -180,6 +188,22 @@ void bluetooth_message_tile_setup( void ) {
     lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
 
     blectl_register_cb( BLECTL_MSG, bluetooth_message_event_cb, "bluetooth_message" );
+
+    messages_app = app_register( "messages", &message_64px, enter_bluetooth_messages_cb );
+}
+
+/*
+ *
+ */
+static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       if ( msg_chain_get_entrys( bluetooth_msg_chain ) > 0 ) {
+                                            statusbar_hide( true );
+                                            bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
+                                            mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
+                                        }
+                                        break;
+    }    
 }
 
 static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -212,6 +236,8 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
             if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 1 ) {
                 msg_chain_delete_msg_entry( bluetooth_msg_chain, bluetooth_current_msg );
                 bluetooth_current_msg--;
+                app_hide_indicator( messages_app );
+                messages_widget = widget_remove( messages_widget );
                 mainbar_jump_to_maintile( LV_ANIM_OFF );
             }
             else {
@@ -282,9 +308,15 @@ bool bluetooth_message_queue_msg( const char *msg ) {
         if( !strcmp( doc["t"], "notify" ) ) {
             bluetooth_msg_chain = msg_chain_add_msg( bluetooth_msg_chain, msg );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
             sound_play_progmem_wav( piep_wav, piep_wav_len );
             motor_vibe(10);
+            app_set_indicator( messages_app, ICON_INDICATOR_N );
+            if ( messages_widget == NULL ) {
+                messages_widget = widget_register( "message", &message_64px, enter_bluetooth_messages_cb );
+                widget_set_indicator( messages_widget, ICON_INDICATOR_N );
+            }
             retval = true;
         }
     }

@@ -46,6 +46,7 @@ lv_obj_t *FindPhone_main_iris = NULL;
 lv_style_t FindPhone_main_style;
 lv_obj_t *bluetooth_FindPhone_tile = NULL;
 lv_style_t bluetooth_FindPhone_style;
+lv_style_t bluetooth_FindPhone_exit_btn_style;
 uint32_t bluetooth_FindPhone_tile_num;
 
 lv_obj_t *bluetooth_FindPhone_img = NULL;
@@ -86,6 +87,14 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_style_set_text_color(&bluetooth_FindPhone_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
 
+    lv_style_copy(&bluetooth_FindPhone_exit_btn_style, mainbar_get_style());
+    lv_style_set_bg_color(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
+    lv_style_set_bg_opa(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+    lv_style_set_text_color(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
+
     bluetooth_FindPhone_img = lv_img_create(bluetooth_FindPhone_tile, NULL);
     lv_img_set_src(bluetooth_FindPhone_img, &eye_200px);
     lv_obj_align(bluetooth_FindPhone_img, bluetooth_FindPhone_tile, LV_ALIGN_CENTER, 0, 0);
@@ -116,7 +125,7 @@ void FindPhone_main_setup( uint32_t tile_num ) {
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px );
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px );
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px );
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &FindPhone_main_style );
+    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_FindPhone_exit_btn_style );
     lv_obj_align( exit_btn, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
     lv_obj_set_event_cb( exit_btn, exit_FindPhone_main_event_cb );
 
@@ -218,6 +227,7 @@ static void FindPhone_search_task( lv_task_t * task )
 	} else {
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 	}
+    lv_task_del( _FindPhone_search_task );
 }
 bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg)
 {
