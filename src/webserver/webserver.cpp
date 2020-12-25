@@ -32,6 +32,7 @@
 #include "webserver.h"
 #include "config.h"
 #include "gui/screenshot.h"
+#include "hardware/touch.h"
 
 AsyncWebServer asyncserver( WEBSERVERPORT );
 TaskHandle_t _WEBSERVER_Task;
@@ -161,6 +162,9 @@ void asyncwebserver_start(void){
       "<p>Here are some URLs the device already supports, which you might find helpful:"
       "<ul>"
       "<li><a target=\"cont\" href=\"/info\">/info</a> - Display information about the device"
+      "<li><a target=\"cont\" href=\"/memory\">/memory</a> - Display memory information"
+      "<li><a target=\"cont\" href=\"/battery\">/battery</a> - Display battery charging information"
+      "<li><a target=\"cont\" href=\"/touch\">/touch</a> - Display touch screen information"
       "<li><a target=\"cont\" href=\"/network\">/network</a> - Display network information"
       "<li><a target=\"cont\" href=\"/shot\">/shot</a> - Capture a screen shot"
       "<li><a target=\"cont\" href=\"/screen.data\">/screen.data</a> - Retrieve the image in RGB565 format, open it with gimp"
@@ -175,14 +179,14 @@ void asyncwebserver_start(void){
 
   asyncserver.on("/info", HTTP_GET, [](AsyncWebServerRequest *request) {
     FlashMode_t mode = ESP.getFlashChipMode();
-    int SketchFull = ESP.getSketchSize() + ESP.getFreeSketchSpace();
+    uint32_t FreeSketchSpace = ESP.getFreeSketchSpace();
+    uint32_t SketchFull = ESP.getSketchSize() + FreeSketchSpace;
 
     String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Information</h3>" +
                   "<b><u>Memory</u></b><br>" +
                   "<b>Heap size: </b>" + ESP.getHeapSize() + "<br>" +
                   "<b>Heap free: </b>" + ESP.getFreeHeap() + "<br>" +
                   "<b>Heap free min: </b>" + ESP.getMinFreeHeap() + "<br>" +
-                  "<b>Heap size: </b>" + ESP.getHeapSize() + "<br>" +
                   "<b>Psram size: </b>" + ESP.getPsramSize() + "<br>" +
                   "<b>Psram free: </b>" + ESP.getFreePsram() + "<br>" +
 
@@ -198,21 +202,91 @@ void asyncwebserver_start(void){
                   "<b>FlashChipSpeed: </b>" + String(ESP.getFlashChipSpeed() / 1000000) + " MHz<br>" +
                   "<b>Flash mode: </b>" + String( mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN") + "</b><br>" +
                   "<b>Flash sector size: </b>" + String( SPI_FLASH_SEC_SIZE) + "<br>" +
-                  "<b>FlashChipMode: </b>" + ESP.getFlashChipMode() + "<br>" +
+                  "<b>FlashChipMode: </b>" + mode + "<br>" +
                   "<b>FlashChipSize (SDK): </b>" + ESP.getFlashChipSize() + "<br>" +
                   
                   "<br><b><u>Firmware</u></b><br>" +
-                  "<b>SketchSpace free: </b>" + ESP.getFreeSketchSpace() + " (" + (ESP.getFreeSketchSpace() / (SketchFull / 100)) + "%)<br>" +
+                  "<b>SketchSpace free: </b>" + FreeSketchSpace + " (" + (FreeSketchSpace / (SketchFull / 100)) + "%)<br>" +
                   "<b>BuildTime: </b>" +  __DATE__ + " " + __TIME__  + "<br>" +
                   "<b>Version: </b>" + __FIRMWARE__ + "<br>" +
                   "<b>GCC-Version: </b>" + __VERSION__ + "<br>" +
-                  "<b>SketchMD5: </b>" + String(ESP.getSketchMD5()) + "<br>" +
+                  //"<b>SketchMD5: </b>" + String(ESP.getSketchMD5()) + "<br>" +
                   
-                  "<br><b><u>Filesystem</u></b><br>" +
-                  "<b>Total size: </b>" + SPIFFS.totalBytes() + "<br>" +
-                  "<b>Used size: </b>" + SPIFFS.usedBytes() + "<br>" +
+                  //"<br><b><u>Filesystem</u></b><br>" +
+                  //"<b>Total size: </b>" + SPIFFS.totalBytes() + "<br>" +
+                  //"<b>Used size: </b>" + SPIFFS.usedBytes() + "<br>" +
 
-                  "<br>";
+                  "</body></html>";
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/memory", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Memory Details</h3>" +
+                  "<b>Heap size: </b>" + ESP.getHeapSize() + "<br>" +
+                  "<b>Heap free: </b>" + ESP.getFreeHeap() + "<br>" +
+                  "<b>Heap free min: </b>" + ESP.getMinFreeHeap() + "<br>" +
+                  "<b>Psram size: </b>" + ESP.getPsramSize() + "<br>" +
+                  "<b>Psram free: </b>" + ESP.getFreePsram() + "<br>" +
+
+                  "<br><b><u>System</u></b><br>" +
+                  "<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                  "</body></html>";
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/battery", HTTP_GET, [](AsyncWebServerRequest *request) {
+    TTGOClass * ttgo = TTGOClass::getWatch();
+
+    String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Battery Details</h3>" +
+                  "<b>Battery voltage: </b>" + ttgo->power->getBattVoltage() / 1000 + " Volts" + "<br>" +
+                  "<b>Coulomb Charge: </b>" + ttgo->power->getBattChargeCoulomb() + "<br>" +
+                  "<b>Coulomb Discharge: </b>" + ttgo->power->getBattDischargeCoulomb() + "<br>" +
+                  "<b>Current Charge: </b>" + ttgo->power->getBattChargeCurrent() + "<br>" +
+                  "<b>Current Discharge: </b>" + ttgo->power->getBattDischargeCurrent() + "<br>" +
+                  "<b>Fuel Gauge: </b>" + ttgo->power->getBattPercentage() + "%" + "<br>" +
+                  "<b>Calculated: </b>" + ttgo->power->getCoulombData() + "mAh remaining" + "<br>" +
+
+                  "<br><b><u>System</u></b><br>" +
+                  "<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                  "</body></html>";
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/touch", HTTP_GET, [](AsyncWebServerRequest *request) {
+    TTGOClass * ttgo = TTGOClass::getWatch();
+
+    String html;
+    if ( touch_lock_take() ) {
+
+        html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Touch Parameters</h3>" +
+                    "<b>Device Mode: </b>" + ttgo->touch->getDeviceMode() + "<br>" +
+                    "<b>Interrupt Mode: </b>" + ttgo->touch->getINTMode() + "<br>" +
+                    "<b>Control: </b>" + ttgo->touch->getControl() + "<br>" +
+                    "<b>Power Mode: </b>" + ttgo->touch->getPowerMode() + "<br>" +
+                    "<b>Monitor time: </b>" + ttgo->touch->getMonitorTime() + "<br>" +
+                    "<b>Active period: </b>" + ttgo->touch->getActivePeriod() + "<br>" +
+                    "<b>Monitor period: </b>" + ttgo->touch->getMonitorPeriod() + "<br>" +
+
+                    "<br><b><u>System</u></b><br>" +
+                    "<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                    "</body></html>";
+        touch_lock_give();
+    } else {
+        html = (String) "<html><head><meta charset=\"utf-8\"></head><body>No Lock</body></html>";
+    }
+    request->send(200, "text/html", html);
+  });
+
+  asyncserver.on("/temp", HTTP_GET, [](AsyncWebServerRequest *request) {
+    TTGOClass * ttgo = TTGOClass::getWatch();
+
+    String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Device Temperature</h3>" +
+                  "<b>AXP202: </b>" + ttgo->power->getTemp() + "<br>" +
+                  "<b>BMA423: </b>" + ttgo->bma->temperature() + "<br>" +
+
+                  "<br><b><u>System</u></b><br>" +
+                  "<b>Uptime: </b>" + millis() / 1000 + "<br>" +
+                  "</body></html>";
     request->send(200, "text/html", html);
   });
 
@@ -228,7 +302,7 @@ void asyncwebserver_start(void){
                   "<b>Hostname: </b>" + WiFi.getHostname() + "<br>" +
                   "<b>SSID: </b>" + WiFi.SSID() + "<br>" +
                   "<br>Upnp Info: <a target=\"_blank\" href='/description.xml'>description.xml</a>" + "<br>" +
-                  "</body></head></html>";
+                  "</body></html>";
     request->send(200, "text/html", html);
   });
 

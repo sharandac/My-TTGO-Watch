@@ -47,7 +47,9 @@ void screenshot_take( void ) {
 }
 
 void screenshot_save( void ) {
-    SPIFFS.remove( SCREENSHOT_FILE_NAME );
+	if (SPIFFS.exists( SCREENSHOT_FILE_NAME )) {
+	    SPIFFS.remove( SCREENSHOT_FILE_NAME );
+	}
     fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
     
     file.write( (uint8_t *)png, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * 2 );

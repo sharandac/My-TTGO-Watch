@@ -161,7 +161,7 @@ void display_record_event( callback_t *callback, EventBits_t event ) {
             power->getBattChargeCurrent(),
             power->getBattDischargeCurrent(),
             power->getBattInpower(),
-            power->getTemp(), // need to subtract 144.7 till this is resolved: https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library/issues/76
+            power->getTemp(),
             bma->temperature()
         );
         if (! file.println(log_line) ) {

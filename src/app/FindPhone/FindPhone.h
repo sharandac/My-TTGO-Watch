@@ -1,7 +1,10 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *  FindPhone.h
+ *  Neuroplant  11/2020
+ *  Email: m.roych@gmail.com
+ *
+ *
+ *  Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch  Example_App"
  ****************************************************************************/
  
 /*
@@ -19,17 +22,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _TOUCH_H
+#ifndef _FindPhone_H
+    #define _FindPhone_H
 
-    #define _TOUCH_H
+    #include <TTGO.h>
 
-    #include "TTGO.h"
-    /**
-     * @brief setup touch
-     */
-    void touch_setup( void );
+//    #define EXAMPLE_WIDGET    // uncomment if an widget need
 
-    bool touch_lock_take( void );
-    void touch_lock_give( void );
+    void FindPhone_setup( void );
+    //uint32_t FindPhone_get_app_setup_tile_num( void );//No use just yet
+    uint32_t FindPhone_get_app_main_tile_num( void );
 
-#endif // _TOUCH_H
+#endif // _FindPhone_H

@@ -30,6 +30,10 @@
      * @param   widgetname  widget name
      * @param   icon        pointer to an 48x48px icon
      * @param   event_cb    pointer to an callback function
+     * 
+     * @return  pointer to an icon_t struct
+     * 
+     * @note    Please check if your destination pointer is NULL to prevent double register an old widget.
      */
     icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb );
     /**
@@ -72,6 +76,8 @@
      * @param   widget      pointer to an widget_icon_t structure
      * 
      * @return  destructive pointer for widget_icon_t structure
+     * 
+     * @note    Please use the return value to destroy widget pointer.
      */
     icon_t *widget_remove( icon_t *widget );
 
