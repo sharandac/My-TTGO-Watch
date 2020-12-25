@@ -10,6 +10,7 @@
 
 //#include <hardware/json_psram_allocator.h>
 #include "hardware/json_psram_allocator.h"
+#include "hardware/alloc.h"
 #include <FS.h>
 
 JsonConfig::JsonConfig(const char* configFileName) : BaseJsonConfig(configFileName) {
@@ -24,13 +25,13 @@ JsonConfig::~JsonConfig() {
 }
 
 JsonBoolOption& JsonConfig::addBoolean(const char* optionName, bool defValue) {
-  auto ptr = ps_malloc(sizeof(JsonBoolOption));
+  auto ptr = MALLOC(sizeof(JsonBoolOption));
   options[count] = new(ptr) JsonBoolOption(optionName, defValue);
   return *(JsonBoolOption*)options[count++];
 }
 
 JsonStringOption& JsonConfig::addString(const char* optionName, int maxValueLength, const char* defValue) {
-  auto ptr = ps_malloc(sizeof(JsonStringOption));
+  auto ptr = MALLOC(sizeof(JsonStringOption));
   options[count] = new(ptr) JsonStringOption(optionName, maxValueLength, defValue);
   return *(JsonStringOption*)options[count++];
 }
