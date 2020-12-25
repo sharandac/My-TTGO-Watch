@@ -10,6 +10,10 @@
 
 #include "page.h"
 
+/*
+* @brief Base class which represent single application page.
+* Methods can be overridden in sub-classes
+*/
 class AppPage : public Page {
 public:
   AppPage(){};

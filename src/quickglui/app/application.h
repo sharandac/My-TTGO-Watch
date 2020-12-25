@@ -17,11 +17,21 @@
 
 class JsonConfig;
 
+/*
+* @brief Application class
+*/
 class Application {
-friend ApplicationIcon;
+  friend ApplicationIcon;
 public:
   Application() : appIcon(*this) {};
 
+  /*
+  * @brief Initialize and register application
+  * @param name               application name and icon title
+  * @param iconImg            application icon
+  * @param userPageCount      count of user pages required for application
+  * @param settingsPageCount  count of settings pages required for application
+  */
   virtual Application& init(const char* name, const lv_img_dsc_t *iconImg, int userPageCount = 1, int settingsPageCount = 0);
 
   AppPage& mainPage() { return main; }
@@ -34,6 +44,11 @@ public:
   uint32_t mainTileId() { return initialTileId; }
   uint32_t settingsTileId() { return initialTileId + userPageCount; }
 
+  /*
+  * @brief Assign external configuration for application
+  * @param externalConfig             reference to configuration instance. It should be stored by user while application exist (shouldn't be destroyed)
+  * @param autoBuildSettingsPage      automatically create settings page widgets based on provided settings options list
+  */
   Application& useConfig(JsonConfig& externalConfig, bool autoBuildSettingsPage);
 
 protected:

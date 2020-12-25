@@ -12,6 +12,9 @@
 #include "../common/style.h"
 #include "../common/typeinfo.h"
 
+/*
+* @brief Base application page class. Parent for all specialized application pages
+*/
 class Page : public Container {
 public:
   Page(){};

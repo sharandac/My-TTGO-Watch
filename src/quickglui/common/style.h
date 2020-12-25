@@ -10,6 +10,11 @@
 
 #include "../widgets/widget.h"
 
+/*
+* @brief Represent LVGL Style. Styles are used to set the appearance of the objects. Styles in lvgl are heavily inspired by CSS.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/overview/style.html
+*/
 class Style {
 public:
   Style() {}

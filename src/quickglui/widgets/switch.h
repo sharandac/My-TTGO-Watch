@@ -10,6 +10,11 @@
 
 #include "widget.h"
 
+/*
+* @brief Represent Switch LVGL widget.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/widgets/switch.html
+*/
 class Switch : public Widget {
 public:
   Switch(){};

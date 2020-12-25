@@ -65,12 +65,18 @@ struct JsonBoolOption : public JsonOption
       control.value(value);
   }
 
+  /*
+  * @brief Assign settings option to the variable
+  */
   JsonBoolOption& assign(bool* sourceVariable) {
     source = sourceVariable;
     if (source != nullptr)
       *source = value;
     return *this;
   }
+  /*
+  * @brief Assign settings option to the UI widget
+  */
   JsonBoolOption& assign(Switch& sourceControl) {
     isControlAssigned = true;
     control = sourceControl;
@@ -86,7 +92,6 @@ public:
   bool isControlAssigned = false;
   Switch control;
 };
-
 
 struct JsonStringOption : public JsonOption
 {
@@ -125,12 +130,18 @@ struct JsonStringOption : public JsonOption
       control.text(value);
   }
 
+  /*
+  * @brief Assign settings option to the variable
+  */
   JsonStringOption& assign(String* sourceVariable) {
     source = sourceVariable;
     if (source != nullptr)
       *source = value;
     return *this;
   }
+  /*
+  * @brief Assign settings option to the UI widget
+  */
   JsonStringOption& assign(TextArea& sourceControl) {
     isControlAssigned = true;
     control = sourceControl;

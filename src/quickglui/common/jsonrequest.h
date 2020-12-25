@@ -11,6 +11,10 @@
 #include "ArduinoJson.h"
 #include "hardware/json_psram_allocator.h"
 
+/*
+* @brief HTTP request wrapper with internal JSON parser.
+* Reponse should be in JSON format
+*/
 class JsonRequest : public SpiRamJsonDocument
 {
 public:

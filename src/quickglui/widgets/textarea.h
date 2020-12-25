@@ -10,6 +10,11 @@
 
 #include "widget.h"
 
+/*
+* @brief Represent TextArea LVGL widget.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/widgets/textarea.html
+*/
 class TextArea : public Widget {
 public:
   TextArea(){};

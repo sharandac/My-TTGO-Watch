@@ -16,6 +16,10 @@
 #include "../widgets/switch.h"
 #include "../widgets/button.h"
 
+/*
+* @brief Represent object's and its ancestors type.
+* See lv_obj_get_type
+*/
 class TypeInfo {
 public:
   TypeInfo(Widget* widget) {

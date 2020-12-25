@@ -13,6 +13,11 @@
 
 class Style;
 
+/*
+* @brief Represent base LVGL object.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/widgets/obj.html
+*/
 class Widget
 {
 public:

@@ -12,6 +12,10 @@
 
 class JsonConfig;
 
+/*
+* @brief Base class which represent single application settings page.
+* Methods can be overridden in sub-classes
+*/
 class SettingsPage : public Page {
 public:
   SettingsPage() {};

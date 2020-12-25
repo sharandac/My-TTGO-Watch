@@ -11,22 +11,40 @@
 #include "widget.h"
 #include "label.h"
 
+/*
+* @brief Represent Button and ImageButton LVGL widgets.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/widgets/btn.html
+* https://docs.lvgl.io/latest/en/html/widgets/imgbtn.html
+*/
 class Button : public Widget {
 public:
     Button() {};
     /** Create a button based on lvgl object */
     Button(lv_obj_t * btn);
-    // Create image button
+    /*
+    * @brief Create Image button
+    **/
     Button(const Widget* parent, const lv_img_dsc_t& image, WidgetAction onClick = nullptr);
+    /*
+    * @brief Create text button
+    **/
     Button(const Widget* parent, const char * txt, WidgetAction onClick = nullptr);
 
+    /*
+    * @brief Set click event handler
+    **/
     Button& clicked(WidgetAction onClick);
 
     Button& text(const char * txt);
 
-    // Disables the button and makes it inactive
+    /*
+    * @brief  Disables the button and makes it inactive
+    **/
     Button& disable();
-    // Enables the button and makes it active
+    /*
+    * @brief Enables the button and makes it active
+    **/
     Button& enable();
 
     constexpr static const char* TypeNameWithImage = "lv_imgbtn";

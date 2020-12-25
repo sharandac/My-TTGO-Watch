@@ -11,6 +11,11 @@
 #include "widget.h"
 #include <Arduino.h>
 
+/*
+* @brief Represent Label LVGL widget.
+* Documentation:
+* https://docs.lvgl.io/latest/en/html/widgets/label.html
+*/
 class Label : public Widget {
 public:
   Label(){};
