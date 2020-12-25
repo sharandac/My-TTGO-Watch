@@ -12,6 +12,7 @@
 #include "ArduinoJson.h"
 #include "../widgets/switch.h"
 #include "../widgets/textarea.h"
+#include "hardware/alloc.h"
 
 enum OptionDataType
 {
@@ -98,7 +99,8 @@ struct JsonStringOption : public JsonOption
   JsonStringOption(const char* optionName, int maxValueLength, const char* defValue = nullptr) : JsonOption(optionName)
   {
     maxLength = maxValueLength;
-    value = (char*)ps_malloc(maxLength);
+    value = (char*)MALLOC(maxLength);
+    // todo check if malloc failed!
     if (defValue != nullptr)
       strlcpy(value, defValue, maxLength);
     else
