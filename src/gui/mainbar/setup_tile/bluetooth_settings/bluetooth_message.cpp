@@ -269,7 +269,23 @@ bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
 
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 1 ) {
+                                            widget_set_indicator( messages_widget, ICON_INDICATOR_1 );
+                                            app_set_indicator( messages_app, ICON_INDICATOR_1 );
+                                        }
+                                        else if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 2 ) {
+                                            widget_set_indicator( messages_widget, ICON_INDICATOR_2 );
+                                            app_set_indicator( messages_app, ICON_INDICATOR_2 );
+                                        }
+                                        else if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 3 ) {
+                                            widget_set_indicator( messages_widget, ICON_INDICATOR_3 );
+                                            app_set_indicator( messages_app, ICON_INDICATOR_3 );
+                                        }
+                                        else {
+                                            widget_set_indicator( messages_widget, ICON_INDICATOR_N );
+                                            app_set_indicator( messages_app, ICON_INDICATOR_N );
+                                        }
+                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }
 }
@@ -316,7 +332,22 @@ bool bluetooth_message_queue_msg( const char *msg ) {
             app_set_indicator( messages_app, ICON_INDICATOR_N );
             if ( messages_widget == NULL ) {
                 messages_widget = widget_register( "message", &message_48px, enter_bluetooth_messages_cb );
-                widget_set_indicator( messages_widget, ICON_INDICATOR_N );
+                if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 1 ) {
+                    widget_set_indicator( messages_widget, ICON_INDICATOR_1 );
+                    app_set_indicator( messages_app, ICON_INDICATOR_1 );
+                }
+                else if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 2 ) {
+                    widget_set_indicator( messages_widget, ICON_INDICATOR_2 );
+                    app_set_indicator( messages_app, ICON_INDICATOR_2 );
+                }
+                else if ( msg_chain_get_entrys( bluetooth_msg_chain ) == 3 ) {
+                    widget_set_indicator( messages_widget, ICON_INDICATOR_3 );
+                    app_set_indicator( messages_app, ICON_INDICATOR_3 );
+                }
+                else {
+                    widget_set_indicator( messages_widget, ICON_INDICATOR_N );
+                    app_set_indicator( messages_app, ICON_INDICATOR_N );
+                }
             }
             retval = true;
         }
