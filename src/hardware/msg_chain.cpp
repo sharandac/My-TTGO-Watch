@@ -53,6 +53,7 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
         }
         msg_chain_entry->prev_msg = NULL;
         msg_chain_entry->next_msg = NULL;
+        time( &msg_chain_entry->timestamp );
         strcpy( (char*)msg_chain_entry->msg, msg );
     }
     
@@ -144,6 +145,38 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
     } while ( true );
 
     return( retval );
+}
+
+time_t* msg_chain_get_msg_timestamp_entry( msg_chain_t *msg_chain, int32_t entry ) {
+    time_t* retval = NULL;
+    int32_t msg_counter = 0;
+
+    if ( msg_chain == NULL ) {
+        return( retval );
+    }
+
+    if ( entry > msg_chain->entrys ) {
+        return( retval );
+    }
+
+    if ( msg_chain->first_msg_chain_entry == NULL ) {
+        return( retval );
+    }
+
+    msg_chain_entry_t *msg_chain_entry = msg_chain->first_msg_chain_entry;
+
+    do {
+        if ( entry == msg_counter ) {
+            return( &msg_chain_entry->timestamp );
+        }
+        if ( msg_chain_entry->next_msg != NULL ) {
+            msg_counter++;
+            msg_chain_entry = msg_chain_entry->next_msg;
+        }
+        else {
+            return( retval );
+        }
+    } while ( true );
 }
 
 const char* msg_chain_get_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {

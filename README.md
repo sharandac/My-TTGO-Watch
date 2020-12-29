@@ -61,9 +61,17 @@ and create your json with
 
 to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
 
-```ps_malloc(), ps_calloc() and ps_realloc()```
+```
+#include "hardware/alloc.h"
+```
+with
+```
+MALLOC( ... ); // repleace malloc or ps_malloc
+CALLOC( ... ); // repleace calloc or ps_calloc
+REALLOC( ... ); // repleace realloc or ps_realloc
+```
 
-as often as possible.
+as often as possible. It managed internal or PSRAM for you.
 And one very important thing: Do not talk directly to the hardware!
 
 ## Sound

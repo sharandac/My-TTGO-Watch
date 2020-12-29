@@ -23,9 +23,11 @@
     #define _MSG_CHAIN_H
 
     #include <stdint.h>
+    #include <sys/time.h>
 
     struct msg_chain_entry_t {
         msg_chain_entry_t *prev_msg;
+        time_t timestamp;
         const char *msg;
         msg_chain_entry_t *next_msg;
     };
@@ -55,6 +57,15 @@
      * @return  true if success, false if failed
      */
     bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry );
+    /**
+     * @brief get an messges timestamp entry from the msg_chain
+     * 
+     * @param   msg_chain   pointer to the msg_chain
+     * @param   entry       entry numger to get
+     * 
+     * @return  pointer to the messages timestamp of NULL if failed
+     */
+    time_t* msg_chain_get_msg_timestamp_entry( msg_chain_t *msg_chain, int32_t entry );
     /**
      * @brief get an messges entry from the msg_chain
      * 
