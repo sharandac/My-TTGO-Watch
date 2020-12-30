@@ -5,7 +5,7 @@
  * All QuickGLUI project files are provided under the MIT License.
  ****/
 
-#include "AppPage.h"
+#include "apppage.h"
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>

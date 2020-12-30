@@ -5,7 +5,7 @@
  * All QuickGLUI project files are provided under the MIT License.
  ****/
 
-#include "Label.h"
+#include "label.h"
 
 Label::Label(lv_obj_t* handle){
   assign(handle);
