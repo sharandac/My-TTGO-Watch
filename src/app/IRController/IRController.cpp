@@ -23,96 +23,147 @@
 #include <TTGO.h>
 
 #include "IRController.h"
-#include "IRController_main.h"
-#include "IRController_setup.h"
+#include "quickglui/quickglui.h"
 
 #include "gui/mainbar/mainbar.h"
-#include "gui/statusbar.h"
-#include "gui/app.h"
-#include "gui/widget.h"
+#include "hardware/blectl.h"
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
 
-uint32_t IRController_main_tile_num;
-uint32_t IRController_setup_tile_num;
+#include "IRConfig.h"
 
-// app icon
-icon_t *IRController = NULL;
-
-// widget icon container
-icon_t *ircontroller_widget = NULL;
-
-// declare you images or fonts you need
+// App icon must have an size of 64x64 pixel with an alpha channel
+// Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
 LV_IMG_DECLARE(IRController_64px);
-LV_IMG_DECLARE(info_1_16px);
 
-// declare callback functions for the app and widget icon to enter the app
-static void enter_IRController_event_cb( lv_obj_t * obj, lv_event_t event );
-static void enter_ircontroller_widget_event_cb( lv_obj_t * obj, lv_event_t event );
+IRConfig irConfig;
+Application irController;
+IRsend irsend(13);
+Style irDeskStyle;
 
 /*
- * setup routine for example app
+ * setup routine for IR Controller app
  */
 void IRController_setup( void ) {
-    // register 1 vertical tile and get the first tile number and save it for later use
-    IRController_main_tile_num = mainbar_add_app_tile( 1, 1, "IRController" );
-    //IRController_setup_tile_num = IRController_main_tile_num + 1;//No use just yet
+    irController.init("IR Remote", &IRController_64px);
+    // Load config and build user interface
+    IRController_build_UI(IRControlSettingsAction::Load);
 
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    IRController = app_register( "IR\nRemote", &IRController_64px, enter_IRController_event_cb );
-    //app_set_indicator( IRController, ICON_INDICATOR_OK );
-
-#ifdef IRCONTROLLER_WIDGET
-    // register widget icon on the main tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an widget icon must have an max size of 64x64 pixel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    ircontroller_widget = widget_register( "IR\nRemote", &IRController_64px, enter_ircontroller_widget_event_cb );
-    widget_set_indicator( ircontroller_widget, ICON_INDICATOR_UPDATE );
-#endif // EXAMPLE_WIDGET
-
-    // init main and setup tile, see IRController_main.cpp and IRController_setup.cpp
-    IRController_main_setup( IRController_main_tile_num );
-    //IRController_setup_setup( IRController_setup_tile_num ); //No use just yet
+    blectl_register_cb(BLECTL_MSG, IRController_bluetooth_event_cb, "ir-remote setup");
 }
 
-/*
- *
- */
-uint32_t IRController_get_app_main_tile_num( void ) {
-    return( IRController_main_tile_num );
+void IRController_build_UI(IRControlSettingsAction settingsAction)
+{
+    if (settingsAction == IRControlSettingsAction::Load)
+        irConfig.load();
+
+    AppPage& main = irController.mainPage();
+    // Create parent widget which will contains all IR control buttons
+    // It also will auto-align child buttons on it:
+    Container& desk = main.createChildContainer(LV_LAYOUT_PRETTY_MID);
+    
+    irDeskStyle = Style::Create(mainbar_get_style(), true);
+    irDeskStyle.paddingInner(irConfig.defSpacing);
+    irDeskStyle.padding(7, 16, 7, 16);
+    desk.style(irDeskStyle);
+
+    for (int i = 0; i < irConfig.totalCount(); i++)
+    {
+        auto btnConfig = irConfig.get(i);
+        if (btnConfig->uiButton.isCreated()) {
+            btnConfig->uiButton.alignInParentTopLeft(0, 0); // Call auto alignment
+            continue;
+        }
+        
+        // Add new button
+        Button btn(&desk, btnConfig->name.c_str(), [btnConfig](Widget& btn) {
+            execute_ir_cmd(btnConfig);
+        });
+        btn.size(irConfig.defBtnWidth, irConfig.defBtnHeight);
+        btnConfig->uiButton = btn;
+    }
+
+    // Refresh screen
+    lv_obj_invalidate(lv_scr_act());
+
+    if (settingsAction == IRControlSettingsAction::Save)
+        irConfig.save();
 }
 
-/*
- *
- */
-uint32_t IRController_get_app_setup_tile_num( void ) {
-    return( IRController_setup_tile_num );
+void execute_ir_cmd(InfraButton* config) {
+    pinMode(13, OUTPUT);
+    digitalWrite(13, LOW); // No Current Limiting so keep it off (!!!)
+
+    switch (config->mode)
+    {
+    case RC5:
+        irsend.sendRC5(config->code);
+        break;
+    case RC6:
+        irsend.sendRC6(config->code);
+        break;
+    case NEC:
+        irsend.sendNEC(config->code);
+        break;
+    case SONY:
+        irsend.sendSony(config->code);
+        break;
+    case SAMSUNG:
+        irsend.sendSAMSUNG(config->code);
+        break;
+    case RAW:
+        if (config->raw != nullptr && config->rawLength > 0)
+            irsend.sendRaw(config->raw, config->rawLength, 38);
+        break;
+    
+    default:
+        log_e("IR Protocol %d not supported, please add it first!", (int)config->mode);
+        break;
+    }
+
+    delay(50);
+    digitalWrite(13, LOW); // No Current Limiting so keep it off (!!!)
+    log_i("IR button clicked: %s", config->name);
 }
 
-/*
- *
- */
-static void enter_IRController_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        app_hide_indicator( IRController );
-                                        mainbar_jump_to_tilenumber( IRController_main_tile_num, LV_ANIM_OFF );
-                                        break;
-    }    
-}
+bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
+    if (event != BLECTL_MSG) return false; // Not supported
 
-/*
- *
- */
-static void enter_ircontroller_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        widget_hide_indicator( ircontroller_widget );
-                                        mainbar_jump_to_tilenumber( IRController_main_tile_num, LV_ANIM_OFF );
-                                        break;
-    }    
+    auto msg = (const char*)arg;
+    InfraButton* btn = nullptr;
+    BluetoothJsonRequest request(msg);
+
+    if (request.isRequest() && request.isForApplication("ir"))
+    {
+        BluetoothJsonResponse response(request);
+        String cmd = request.command(); // Requested command
+        log_i("RECIVED cmd: %s, msg: %s", cmd.c_str(), msg);
+        if (cmd == "list") {
+            irConfig.sendListNames(response);
+        } else if (cmd == "edit" || cmd == "save") {
+            String name = request["v"];
+            if (cmd == "save") {
+                // Update button data:
+                btn = irConfig.get(name.c_str());
+                if (btn != nullptr) {
+                    JsonObject obj = request.as<JsonObject>();
+                    btn->loadFrom(obj);
+                    irConfig.save();
+                }
+            }
+            irConfig.sendButtonEdit(response, name.c_str());
+        } else if (cmd == "add") {
+            String name = request["v"];
+            btn = irConfig.add(name.c_str());
+            irConfig.sendListNames(response);
+            IRController_build_UI(IRControlSettingsAction::Save);
+        } else if (cmd == "del") {
+            String name = request["v"];
+            irConfig.del(name.c_str());
+            irConfig.sendListNames(response);
+            IRController_build_UI(IRControlSettingsAction::Save);
+        }
+    }
+
+    return true;
 }
