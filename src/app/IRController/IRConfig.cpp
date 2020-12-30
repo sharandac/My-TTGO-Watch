@@ -1,5 +1,6 @@
 #include <IRremoteESP8266.h>
 #include "IRConfig.h"
+#include "hardware/alloc.h"
 
 IRConfig::IRConfig() : BaseJsonConfig("ir-remote.json") {
     count = 0;
@@ -8,7 +9,7 @@ IRConfig::IRConfig() : BaseJsonConfig("ir-remote.json") {
 }
 
 InfraButton* IRConfig::add(const char* name) {
-    void* pointer = ps_malloc(sizeof(InfraButton));
+    void* pointer = MALLOC(sizeof(InfraButton));
     InfraButton* btn = new (pointer) InfraButton();
     btn->name = name;
     buttons[count++] = btn;

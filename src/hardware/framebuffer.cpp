@@ -25,6 +25,7 @@
 
 #include "framebuffer.h"
 #include "powermgm.h"
+#include "alloc.h"
 
 lv_color_t *framebuffer;
 
@@ -45,7 +46,7 @@ void framebuffer_ipc_call( void * arg );
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
 
 void framebuffer_setup( void ) {
-    framebuffer = (lv_color_t*)ps_malloc( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
+    framebuffer = (lv_color_t*)MALLOC( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
     if ( framebuffer == NULL ) {
         log_e("framebuffer 1 malloc failed");
         return;

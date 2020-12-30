@@ -7,6 +7,7 @@
 
 #include "widgetmanager.h"
 #include <config.h>
+#include "hardware/alloc.h"
 
 WidgetManager DefaultWidgetManager;
 
@@ -29,7 +30,7 @@ WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj)
     auto type = buf.type[0] != NULL ? buf.type[0] : "lv_obj";
     log_i("WidgetHandle allocated for %s. Total count: %d", type, ++current);
     
-    auto addr = ps_malloc(sizeof(WidgetHandle));
+    auto addr = MALLOC(sizeof(WidgetHandle));
     return new(addr) WidgetHandle();
 }
 

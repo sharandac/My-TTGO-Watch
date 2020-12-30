@@ -21,13 +21,14 @@
  */
 #include "config.h"
 #include "screenshot.h"
+#include "hardware/alloc.h"
 
 uint16_t *png;
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
 
 void screenshot_setup( void ) {
-    png = (uint16_t*)ps_malloc( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
+    png = (uint16_t*)MALLOC( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
     if ( png == NULL ) {
         log_e("screenshot malloc failed");
         while(1);
