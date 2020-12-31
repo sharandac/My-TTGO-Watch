@@ -10,7 +10,6 @@
 
 #include "lvgl/lvgl.h"
 #include "../widgets/widget.h"
-#include "../widgets/widget.h"
 #include "../widgets/label.h"
 #include "../widgets/textarea.h"
 #include "../widgets/switch.h"
