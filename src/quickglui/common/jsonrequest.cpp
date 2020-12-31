@@ -49,7 +49,7 @@ bool JsonRequest::process(const char* url)
     return true;
 }
 
-String JsonRequest::fromatCompletedAt(const char* format)
+String JsonRequest::formatCompletedAt(const char* format)
 {
     char txttime[64];
     strftime(txttime, sizeof(txttime), format, &timeStamp);

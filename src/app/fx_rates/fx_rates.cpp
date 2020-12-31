@@ -132,7 +132,7 @@ bool fetch_fx_rates(String apiKey, String pair1, String pair2) {
         p2 = request[secondPair].as<float>();
         secondPairValue = String(p2, 2);
     }
-    updatedAt = request.fromatCompletedAt("Upd: %d.%m %M:%S");
+    updatedAt = request.formatCompletedAt("Upd: %d.%m %M:%S");
     //log_i("fx rates: %d = %f, %f", doc.size(), p1, p2);
 
     return true;

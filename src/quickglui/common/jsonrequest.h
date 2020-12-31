@@ -27,7 +27,7 @@ public:
   DeserializationError getDeserializationError() { return dsError; }
 
   tm completedAt() { return timeStamp; }
-  String fromatCompletedAt(const char* format);
+  String formatCompletedAt(const char* format);
   String errorString();
 
 protected:
