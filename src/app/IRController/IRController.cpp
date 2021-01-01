@@ -106,7 +106,10 @@ void execute_ir_cmd(InfraButton* config) {
         irsend.sendNEC(config->code);
         break;
     case SONY:
-        irsend.sendSony(config->code);
+        if (config->bits > 0)
+            irsend.sendSony(config->code, config->bits);
+        else
+            irsend.sendSony(config->code);
         break;
     case SAMSUNG:
         irsend.sendSAMSUNG(config->code);

@@ -16,6 +16,7 @@ struct InfraButton
   String name;
   decode_type_t mode;
   uint32_t code = 0;
+  int bits = 0;
   uint16_t *raw = nullptr;
   int rawLength = 0;
   Button uiButton;
@@ -42,6 +43,10 @@ struct InfraButton
       const char* hex = source["hex"];
       if (hex != nullptr)
         code = strtoul(hex, NULL, 16);
+    }
+
+    if (source.containsKey("bits")) {
+      bits = source["bits"];
     }
 
     if (mode == decode_type_t::RAW && source.containsKey("raw")) {
