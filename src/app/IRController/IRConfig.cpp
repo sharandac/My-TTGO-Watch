@@ -112,7 +112,7 @@ bool IRConfig::onLoad(JsonDocument& document) {
     defBtnHeight = 12;
   if (defBtnWidth < 50 || defBtnWidth > LV_HOR_RES-10)
     defBtnWidth = 50;
-  if (defBtnWidth < 0 || defBtnWidth > 100)
+  if (defSpacing < 0 || defSpacing > 100)
     defSpacing = 5;
 
   return true;
