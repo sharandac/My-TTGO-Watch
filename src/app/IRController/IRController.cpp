@@ -137,7 +137,7 @@ bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
     {
         BluetoothJsonResponse response(request);
         String cmd = request.command(); // Requested command
-        log_i("RECIVED cmd: %s, msg: %s", cmd.c_str(), msg);
+        log_i("RECEIVED cmd: %s, msg: %s", cmd.c_str(), msg);
         if (cmd == "list") {
             irConfig.sendListNames(response);
         } else if (cmd == "edit" || cmd == "save") {
