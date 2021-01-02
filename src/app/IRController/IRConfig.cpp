@@ -73,6 +73,9 @@ bool IRConfig::onSave(JsonDocument& document) {
     btnRecord["m"] = buttons[i]->mode;
     String hex((uint32_t)buttons[i]->code, 16);
     btnRecord["hex"] = hex;
+    if (buttons[i]->bits > 0 && buttons[i]->mode == decode_type_t::SONY) {
+      btnRecord["bits"] = buttons[i]->bits;
+    }
     if (buttons[i]->mode == decode_type_t::RAW) {
       auto rawArray = btnRecord.createNestedArray("raw");
       for (int j = 0; j < buttons[i]->rawLength; j++)

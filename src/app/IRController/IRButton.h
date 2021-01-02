@@ -47,6 +47,14 @@ struct InfraButton
 
     if (source.containsKey("bits")) {
       bits = source["bits"];
+    } else if (mode == decode_type_t::SONY && source.containsKey("hex")) {
+      const char* hex = source["hex"];
+      size_t hexLength = strlen(hex);
+      if (hexLength == 3) {
+        bits = 12;
+      } else if (hexLength == 4) {
+        bits = 15;
+      } // otherwise sony default length of 20 will be used.
     }
 
     if (mode == decode_type_t::RAW && source.containsKey("raw")) {
