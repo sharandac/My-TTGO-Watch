@@ -203,3 +203,7 @@ bool sound_soundctl_event_cb( EventBits_t event, void *arg ) {
     }
     return( true );
 }
+
+uint32_t sound_get_setup_tile_num( void ) {
+    return ( sound_tile_num );
+}

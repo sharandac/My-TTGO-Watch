@@ -347,3 +347,6 @@ static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t 
     }
 }
 
+uint32_t display_get_setup_tile_num( void ) {
+    return ( display_tile_num_1 );
+}

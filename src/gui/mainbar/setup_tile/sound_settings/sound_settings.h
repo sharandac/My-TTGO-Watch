@@ -25,5 +25,11 @@
     #include <TTGO.h>
 
     void sound_settings_tile_setup( void );
+    /**
+     * @brief   get the sound setup tile number
+     * 
+     * @return  tile number
+     */
+    uint32_t sound_get_setup_tile_num( void );
 
 #endif // _SOUND_SETTINGS_H

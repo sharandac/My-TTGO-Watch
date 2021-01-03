@@ -46,6 +46,8 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
+#include "gui/mainbar/setup_tile/sound_settings/sound_settings.h"
+#include "gui/mainbar/setup_tile/display_settings/display_settings.h"
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -56,6 +58,7 @@ static lv_obj_t *statusbar_stepcounterlabel = NULL;
 static lv_obj_t *statusbar_volume_slider = NULL;
 static lv_obj_t *statusbar_brightness_slider = NULL;
 static lv_obj_t *statusbar_sound_icon = NULL;
+static lv_obj_t *statusbar_brightness_icon = NULL;
 static lv_style_t statusbarstyle[ STATUSBAR_STYLE_NUM ];
 
 LV_IMG_DECLARE(wifi_64px);
@@ -85,6 +88,8 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event );
 void statusbar_volume_slider_event_handler_cb( lv_obj_t *sound_slider, lv_event_t event );
+void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event );
+void statusbar_display_event_cb( lv_obj_t *display, lv_event_t event );
 void statusbar_brightness_slider_event_handler_cb( lv_obj_t *brightness_slider, lv_event_t event );
 
 bool statusbar_soundctl_event_cb( EventBits_t event, void *arg );
@@ -242,6 +247,8 @@ void statusbar_setup( void )
     lv_slider_set_range( statusbar_volume_slider, 0, 100 );
     lv_obj_set_event_cb( statusbar_volume_slider, statusbar_volume_slider_event_handler_cb ) ;
     statusbar_sound_icon = lv_img_create( statusbar_volume_cont, NULL );
+    lv_obj_set_click( statusbar_sound_icon, true );
+    lv_obj_set_event_cb( statusbar_sound_icon, statusbar_sound_event_cb );
     lv_img_set_src( statusbar_sound_icon, &sound_32px );
     lv_obj_align( statusbar_sound_icon, statusbar_volume_cont, LV_ALIGN_IN_LEFT_MID, 15, 0 );
 
@@ -257,7 +264,9 @@ void statusbar_setup( void )
     lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
     lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
     lv_obj_set_event_cb( statusbar_brightness_slider, statusbar_brightness_slider_event_handler_cb ) ;
-    lv_obj_t *statusbar_brightness_icon = lv_img_create( statusbar_brightness_cont, NULL );
+    statusbar_brightness_icon = lv_img_create( statusbar_brightness_cont, NULL );
+    lv_obj_set_click( statusbar_brightness_icon, true );
+    lv_obj_set_event_cb( statusbar_brightness_icon, statusbar_display_event_cb );
     lv_img_set_src( statusbar_brightness_icon, &brightness_32px );
     lv_obj_align( statusbar_brightness_icon, statusbar_brightness_cont, LV_ALIGN_IN_LEFT_MID, 15, 0 );
 
@@ -480,6 +489,39 @@ void statusbar_brightness_slider_event_handler_cb(lv_obj_t *brightness_slider, l
         display_set_brightness( lv_slider_get_value( brightness_slider ));
         should_save_brightness_config = true;
     }
+}
+
+
+void statusbar_display_event_cb( lv_obj_t *display, lv_event_t event ){
+    switch ( event ) {
+        case ( LV_EVENT_LONG_PRESSED ):             
+            statusbar_expand( false );
+            mainbar_jump_to_tilenumber( display_get_setup_tile_num(), LV_ANIM_OFF);
+            break;
+    }
+    statusbar_refresh();
+}
+
+void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event ) {
+    static uint8_t volume;
+
+    switch ( event ) {
+        case ( LV_EVENT_PRESSED ):             
+            if ( sound_get_enabled_config() ) {
+                volume = sound_get_volume_config();
+                sound_set_enabled_config( false );
+            }
+            else {
+                sound_set_enabled_config( true );
+                sound_set_volume_config( volume );
+            }
+            break;
+        case ( LV_EVENT_LONG_PRESSED ):             
+            statusbar_expand( false );
+            mainbar_jump_to_tilenumber( sound_get_setup_tile_num(), LV_ANIM_OFF);
+            break;
+    }
+    statusbar_refresh();
 }
 
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {

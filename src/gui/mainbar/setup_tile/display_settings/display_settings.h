@@ -25,5 +25,11 @@
     #include <TTGO.h>
 
     void display_settings_tile_setup( void );
+    /**
+     * @brief   get the display setup tile number
+     * 
+     * @return  tile number
+     */
+    uint32_t display_get_setup_tile_num( void );
 
 #endif // _DISPLAY_SETTINGS_H
