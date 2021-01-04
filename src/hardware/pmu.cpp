@@ -133,6 +133,11 @@ void pmu_loop( void ) {
             ttgo->power->clearIRQ();
             return;
         }
+        if ( ttgo->power->isPEKLongtPressIRQ() ) {
+            powermgm_set_event( POWERMGM_PMU_LONG_BUTTON );
+            ttgo->power->clearIRQ();
+            return;
+        }
         if ( ttgo->power->isTimerTimeoutIRQ() ) {
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
             ttgo->power->clearTimerStatus();
