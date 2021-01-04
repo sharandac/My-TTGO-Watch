@@ -67,6 +67,12 @@ void powermgm_setup( void ) {
 }
 
 void powermgm_loop( void ) {
+    //Check if its a long press
+    if( powermgm_get_event( POWERMGM_PMU_LONG_BUTTON  ) ) {
+        motor_vibe(5);
+        mainbar_jump_to_maintile( LV_ANIM_OFF );
+        powermgm_clear_event( POWERMGM_PMU_LONG_BUTTON );
+    }
     // check if a button or doubleclick was release
     if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
