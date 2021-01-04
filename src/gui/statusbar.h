@@ -49,6 +49,7 @@
     
     typedef enum {
         STATUSBAR_STYLE_NORMAL,
+        STATUSBAR_STYLE_BLACK,
         STATUSBAR_STYLE_WHITE,
         STATUSBAR_STYLE_RED,
         STATUSBAR_STYLE_GRAY,
