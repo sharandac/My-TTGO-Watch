@@ -234,6 +234,27 @@ int32_t msg_chain_get_entrys( msg_chain_t *msg_chain ) {
     return( msg_counter );
 }
 
+msg_chain_t *msg_chain_delete( msg_chain_t *msg_chain ) {
+    int32_t entrys = 0;
+    
+    if ( msg_chain == NULL ) {
+        return( NULL );
+    }
+    
+    entrys = msg_chain_get_entrys( msg_chain );
+
+    // delete all msg_chain entrys
+    for ( int32_t i = 0 ; i < entrys ; i++ ) {
+        if ( !msg_chain_delete_msg_entry( msg_chain, 0 ) ) {
+            log_e("delete msg from msg_chain failed");
+            return( msg_chain );
+        }
+    }
+
+    free( msg_chain );
+    return( NULL );
+}
+
 void msg_chain_printf_msg_chain( msg_chain_t *msg_chain ) {
     if ( msg_chain == NULL ) {
         return;

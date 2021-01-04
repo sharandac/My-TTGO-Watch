@@ -82,6 +82,12 @@
      */
     int32_t msg_chain_get_entrys( msg_chain_t *msg_chain );
     /**
+     * @brief delete all msg from the chain and the msg_chain by itself
+     * 
+     * @return  new NULL pointer for msg_chain_t * variable or msg_chain pointer when failed
+     */
+    msg_chain_t * msg_chain_delete( msg_chain_t *msg_chain );
+    /**
      * @brief printf all messages from the chain
      * 
      * @param   msg_chain   pointer to the msg_chain

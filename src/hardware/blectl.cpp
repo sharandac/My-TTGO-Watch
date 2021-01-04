@@ -73,6 +73,8 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
+        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
+        blectl_msg_chain = msg_chain_delete( blectl_msg_chain );
         log_i("BLE connected");
 
         pServer->getAdvertising()->stop();
@@ -82,6 +84,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_DISCONNECT );
         blectl_clear_event( BLECTL_CONNECT );
         blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
+        blectl_msg_chain = msg_chain_delete( blectl_msg_chain );
         blectl_msg.active = false;
         log_i("BLE disconnected");
 
@@ -549,7 +552,12 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
 }
 
 void blectl_send_msg( char *msg ) {
-    blectl_msg_chain = msg_chain_add_msg( blectl_msg_chain, msg );
+    if ( blectl_get_event( BLECTL_CONNECT ) ) {
+        blectl_msg_chain = msg_chain_add_msg( blectl_msg_chain, msg );
+    }
+    else {
+        log_e("msg can't send while bluetooth is not connected");
+    }
 }
 
 void blectl_send_next_msg( char *msg ) {

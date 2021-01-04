@@ -83,7 +83,7 @@
 
     #define BLECTL_CHUNKSIZE        20      /** @brief chunksize for send msg */
     #define BLECTL_CHUNKDELAY       20      /** @brief chunk delay in ms for each msg chunk */
-    #define BLECTL_MSG_MTU          256     /** @brief max msg size */
+    #define BLECTL_MSG_MTU          512     /** @brief max msg size */
 
     /**
      * @brief blectl config structure
