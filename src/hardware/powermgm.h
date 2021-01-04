@@ -37,7 +37,7 @@
     #define POWERMGM_RTC_ALARM                  _BV(11)        /** @brief event mask for powermgm rtc alarm */
     #define POWERMGM_SHUTDOWN                   _BV(12)        /** @brief event mask for powermgm shutdown */
     #define POWERMGM_RESET                      _BV(13)        /** @brief event mask for powermgm reset */
-    #define POWERMGM_PMU_LONG_BUTTON            _BV(14)        /** @brief event mask for powermgm pmu button is pressed */
+    #define POWERMGM_PMU_LONG_BUTTON            _BV(14)        /** @brief event mask for powermgm pmu button is long pressed */
     
     /**
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
