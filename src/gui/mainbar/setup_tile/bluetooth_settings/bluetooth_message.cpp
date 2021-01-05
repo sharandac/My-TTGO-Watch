@@ -266,12 +266,8 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            
-            if ( bluetooth_message_queue_msg( (const char*)arg ) ) {
-                bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
-                bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
-            }
-            break;
+        case BLECTL_MSG:    bluetooth_message_queue_msg( (const char*)arg );
+                            break;
     }
     return( true );
 }
@@ -335,6 +331,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
             bluetooth_msg_chain = msg_chain_add_msg( bluetooth_msg_chain, msg );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
+            bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
             mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
             sound_play_progmem_wav( piep_wav, piep_wav_len );
             motor_vibe(10);
