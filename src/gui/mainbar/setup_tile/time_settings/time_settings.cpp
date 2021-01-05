@@ -29,6 +29,7 @@
 #include "gui/setup.h"
 #include "hardware/timesync.h"
 #include "hardware/motor.h"
+#include "hardware/alloc.h"
 
 #include "hardware/json_psram_allocator.h"
 // Source: https://raw.githubusercontent.com/nayarsystems/posix_tz_db/master/zones.json
@@ -36,14 +37,18 @@
 extern const uint8_t timezones_json_start[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_start");
 extern const uint8_t timezones_json_end[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_end");
 const size_t capacity = JSON_OBJECT_SIZE(460) + 14920;
-const char * timezone_options;
-uint16_t timezone_selected_index;
+String timezone = String("");
+String regionlist = String("");
+String locationlist = String("");
+String region = String("");
+String location = String("");
 
 lv_obj_t *time_settings_tile=NULL;
 lv_style_t time_settings_style;
 uint32_t time_tile_num;
 
-lv_obj_t *utczone_list = NULL;
+lv_obj_t *region_list = NULL;
+lv_obj_t *location_list = NULL;
 lv_obj_t *wifisync_onoff = NULL;
 lv_obj_t *clock_fmt_onoff = NULL;
 
@@ -54,12 +59,131 @@ LV_IMG_DECLARE(time_64px);
 static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
-static void utczone_event_handler(lv_obj_t * obj, lv_event_t event);
+static void region_event_handler(lv_obj_t * obj, lv_event_t event);
+static void location_event_handler(lv_obj_t * obj, lv_event_t event);
 static void clock_fmt_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
-static void setup_timezone_data( char * selected_timezone ) {
-    String zones = String("");
-    if (timezone_options) return;
+static void time_setting_set_region_location( const char *timezone ) {
+    char *timezone_tmp = NULL;
+    char *region_tmp = NULL;
+    char *location_tmp = NULL;
+
+    timezone_tmp = (char*)MALLOC( strlen( timezone ) + 1 );
+    if ( !timezone_tmp ) {
+        log_e("timezone_tmp malloc failed");
+        while(1);
+    }
+    strlcpy( timezone_tmp, timezone, strlen( timezone ) + 1 );
+
+    region_tmp = timezone_tmp;
+    location_tmp = timezone_tmp;
+    while( location_tmp ) {
+        if ( *location_tmp == '/' ) {
+            *location_tmp = '\0';
+            location_tmp++;
+            break;
+        }
+        location_tmp++;
+    }
+    location = location_tmp;
+    region = region_tmp;
+    free( timezone_tmp );
+    log_i("timezone = %s", timezone );
+    log_i("region = %s", region.c_str() );
+    log_i("location = %s", location.c_str() );
+}
+
+int32_t time_settings_create_regionlist( const char* selected_region ) {
+    int32_t selected_entry = 0, entry = -1;
+    SpiRamJsonDocument doc( capacity );
+    DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+
+    if ( error ) {
+        log_e("timezones deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        regionlist = "";
+        JsonObject obj = doc.as<JsonObject>();
+        for ( JsonPair p : obj ) {
+            int len = strlen( p.key().c_str() ) + 1 ;
+            char * region = (char*)MALLOC( len );
+            strlcpy( region, p.key().c_str(), len );
+            char * key = region;
+            while( key ) {
+                if ( *key == '/' ) {
+                    *key = '\0';
+                    break;
+                }
+                key++;
+            }
+            if (!strstr( regionlist.c_str(), region ) ) {
+                entry++;
+                if ( entry != 0 )
+                    regionlist += "\n";
+                regionlist += region;
+                if ( !strcmp( selected_region, region ) )
+                    selected_entry = entry;
+            }
+            free( region );
+        }        
+    }
+    doc.clear();
+    log_i("selected region entry = %d", selected_entry );
+    return( selected_entry );
+}
+
+int32_t time_settings_create_locationlist( const char* selected_region, const char* selected_location ) {
+    int32_t selected_entry = 0, entry = -1;
+
+    SpiRamJsonDocument doc( capacity );
+    DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
+
+    if ( error ) {
+        log_e("timezones deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        locationlist = "";
+        JsonObject obj = doc.as<JsonObject>();
+        for ( JsonPair p : obj ) {
+            int len = strlen( p.key().c_str() ) +  1;
+            char * region = (char*)MALLOC( len );
+            strlcpy( region, p.key().c_str(), len );
+            char * location = region;
+            while( location ) {
+                if ( *location == '/' ) {
+                    *location = '\0';
+                    location++;
+                    break;
+                }
+                location++;
+            }
+            if ( strstr( selected_region, region ) ) {
+                entry++;
+                if ( entry != 0 )
+                    locationlist += "\n";
+                locationlist += location;
+                if ( !strcmp( selected_location, location ) )
+                    selected_entry = entry;
+            }
+            free( region );
+        }        
+    }
+    doc.clear();
+    log_i("selected location entry = %d", selected_entry );
+    return( selected_entry );
+}
+
+static void time_settings_set_timezone_timerule( void ) {
+    char region_str[32] = "";
+    lv_dropdown_get_selected_str( region_list, region_str, sizeof( region_str ) );
+    region = region_str;
+    char location_str[32] = "";
+    lv_dropdown_get_selected_str( location_list, location_str, sizeof( location_str ) );
+    location = location_str;
+
+    timezone = region + "/" + location;
+    timesync_set_timezone_name( (char*)timezone.c_str() );
+
     SpiRamJsonDocument doc( capacity );
     DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
     if ( error ) {
@@ -67,25 +191,23 @@ static void setup_timezone_data( char * selected_timezone ) {
         return;
     }
     else {
-        JsonObject obj = doc.as<JsonObject>();
-        // Loop through all the key-value pairs in obj
-        uint16_t current_index = 0;
-        for (JsonPair p : obj) {
-            const char * k = p.key().c_str();
-            zones += k; // todo: replace _ with space
-            zones += "\n";
-            if (strcmp(k, selected_timezone) == 0) {
-                timezone_selected_index = current_index;
-            }
-            current_index++;
-        }
+        const char * timezone_rule = doc[ timezone.c_str() ];
+        timesync_set_timezone_rule( timezone_rule );
     }
     doc.clear();
-    timezone_options = zones.c_str();
+
+    log_i("set timezone \"%s\" and timerule \"%s\"", timesync_get_timezone_name() , timesync_get_timezone_rule() );
+
 }
 
 void time_settings_tile_setup( void ) {
-    setup_timezone_data( timesync_get_timezone_name() );
+    int32_t selected_region = 0;
+    int32_t selected_location = 0;
+
+    timezone =+ timesync_get_timezone_name();
+    time_setting_set_region_location( timezone.c_str() );
+    selected_region = time_settings_create_regionlist( region.c_str() );
+    selected_location = time_settings_create_locationlist( region.c_str(), location.c_str() );
 
     // get an app tile and copy mainstyle
     time_tile_num = mainbar_add_app_tile( 1, 1, "time setup" );
@@ -143,20 +265,35 @@ void time_settings_tile_setup( void ) {
     lv_label_set_text( clock_fmt_label, "use 24hr clock");
     lv_obj_align( clock_fmt_label, clock_fmt_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
-    lv_obj_t *timezone_cont = lv_obj_create( time_settings_tile, NULL );
-    lv_obj_set_size(timezone_cont, lv_disp_get_hor_res( NULL ) , 80);
-    lv_obj_add_style( timezone_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_obj_align( timezone_cont, clock_fmt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    lv_obj_t *timezone_label = lv_label_create( timezone_cont, NULL);
-    lv_obj_add_style( timezone_label, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_label_set_text( timezone_label, "timezone");
-    lv_obj_align( timezone_label, timezone_cont, LV_ALIGN_IN_TOP_LEFT, 5, 5 );
+    lv_obj_t *region_cont = lv_obj_create( time_settings_tile, NULL );
+    lv_obj_set_size( region_cont, lv_disp_get_hor_res( NULL ) , 40 );
+    lv_obj_add_style( region_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_obj_align( region_cont, clock_fmt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *region_label = lv_label_create( region_cont, NULL);
+    lv_obj_add_style( region_label, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_label_set_text( region_label, "region");
+    lv_obj_align( region_label, region_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    region_list = lv_dropdown_create( region_cont, NULL);
+    lv_dropdown_set_options( region_list, regionlist.c_str() );
+    lv_obj_set_size( region_list, lv_disp_get_hor_res( NULL )/2, 35 );
+    lv_obj_align( region_list, region_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( region_list, region_event_handler);
+    lv_dropdown_set_selected( region_list, selected_region );
 
-    utczone_list = lv_dropdown_create( timezone_cont, NULL);
-    lv_dropdown_set_options( utczone_list, timezone_options );
-    lv_obj_set_size( utczone_list, lv_disp_get_hor_res( NULL )-20, 35 );
-    lv_obj_align( utczone_list, timezone_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-    lv_obj_set_event_cb(utczone_list, utczone_event_handler);
+    lv_obj_t *location_cont = lv_obj_create( time_settings_tile, NULL );
+    lv_obj_set_size( location_cont, lv_disp_get_hor_res( NULL ) , 40 );
+    lv_obj_add_style( location_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_obj_align( location_cont, region_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_t *location_label = lv_label_create( location_cont, NULL);
+    lv_obj_add_style( location_label, LV_OBJ_PART_MAIN, &time_settings_style  );
+    lv_label_set_text( location_label, "location");
+    lv_obj_align( location_label, location_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    location_list = lv_dropdown_create( location_cont, NULL);
+    lv_dropdown_set_options( location_list, locationlist.c_str() );
+    lv_obj_set_size( location_list, lv_disp_get_hor_res( NULL )/2, 35 );
+    lv_obj_align( location_list, location_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( location_list, location_event_handler);
+    lv_dropdown_set_selected( location_list, selected_location );
 
     if ( timesync_get_timesync() )
         lv_switch_on( wifisync_onoff, LV_ANIM_OFF );
@@ -167,8 +304,6 @@ void time_settings_tile_setup( void ) {
         lv_switch_on( clock_fmt_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( clock_fmt_onoff, LV_ANIM_OFF );
-
-    lv_dropdown_set_selected( utczone_list, timezone_selected_index );
 }
 
 static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -180,7 +315,8 @@ static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       time_settings_set_timezone_timerule();
+                                        mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         break;
     }
 }
@@ -191,24 +327,26 @@ static void wifisync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     }
 }
 
-static void utczone_event_handler(lv_obj_t * obj, lv_event_t event) {
+static void region_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
-        case ( LV_EVENT_VALUE_CHANGED):     char timezone_name[32] = "";
-                                            timezone_selected_index = lv_dropdown_get_selected( obj );
-                                            lv_dropdown_get_selected_str( obj, timezone_name, sizeof(timezone_name) );
-                                            timesync_set_timezone_name( timezone_name );
+        case ( LV_EVENT_VALUE_CHANGED):     char region_str[32] = "";
+                                            lv_dropdown_get_selected_str( obj, region_str, sizeof( region_str ) );
+                                            region = region_str;
+                                            time_settings_create_locationlist( region.c_str(), location.c_str() );
+                                            lv_dropdown_set_options( location_list, locationlist.c_str() );
+                                            lv_obj_invalidate( lv_scr_act() );
+                                            time_settings_set_timezone_timerule();
+                                            break;
+    }
+}
 
-                                            SpiRamJsonDocument doc( capacity );
-                                            DeserializationError error = deserializeJson( doc, (const char *)timezones_json_start );
-                                            if ( error ) {
-                                                log_e("timezones deserializeJson() failed: %s", error.c_str() );
-                                                return;
-                                            }
-                                            else {
-                                                const char * timezone_rule = doc[timezone_name];
-                                                timesync_set_timezone_rule( timezone_rule );
-                                            }
-                                            doc.clear();
+static void location_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED):     char location_str[32] = "";
+                                            lv_dropdown_get_selected_str( obj, location_str, sizeof( location_str ) );
+                                            location = location_str;
+                                            time_settings_set_timezone_timerule();
+                                            break;
     }
 }
 
