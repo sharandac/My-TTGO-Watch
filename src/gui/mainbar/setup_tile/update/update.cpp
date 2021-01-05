@@ -30,6 +30,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
+#include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
 
@@ -50,6 +51,7 @@ lv_obj_t *update_settings_tile=NULL;
 lv_style_t update_settings_style;
 uint32_t update_tile_num;
 static int16_t progress = 0;
+static int64_t last_firmware_version = 0;
 
 lv_obj_t *update_btn = NULL;
 lv_obj_t *update_status_label = NULL;
@@ -76,6 +78,7 @@ LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
 
 void update_tile_setup( void ) {
+    last_firmware_version = atol( __FIRMWARE__ );
     // get an app tile and copy mainstyle
     update_tile_num = mainbar_add_app_tile( 1, 2, "update setup" );
     update_settings_tile = mainbar_get_tile_obj( update_tile_num );
@@ -277,6 +280,10 @@ void update_Task( void * pvParameters ) {
             lv_label_set_text( update_status_label, (const char*)version_msg );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
+            if ( last_firmware_version < firmware_version ) {
+                bluetooth_message_queue_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"update\",\"body\":\"new firmware version available\"}");
+                last_firmware_version = firmware_version;
+            }
         }
         else if ( firmware_version == atol( __FIRMWARE__ ) ) {
             lv_label_set_text( update_status_label, "yeah! up to date ..." );
