@@ -25,7 +25,8 @@
     #include "callback.h"
 
     #define DISPLAYCTL_BRIGHTNESS       _BV(0)          /** @brief event mask display brightness, callback arg is (uint32_t*) */
-    #define DISPLAYCTL_TIMEOUT          _BV(1)          /** @brief event mask display brightness, callback arg is (uint32_t*) */
+    #define DISPLAYCTL_TIMEOUT          _BV(1)          /** @brief event mask display timeout, callback arg is (bool*) */
+    #define DISPLAYCTL_SCREENSHOT       _BV(2)          /** @brief event mask display screenshot, callback arg is (bool*) */
 
     #define DISPLAY_JSON_CONFIG_FILE    "/display.json" /** @brief defines json config file name */
     
@@ -44,6 +45,7 @@
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;         /** @brief display time out */
         uint32_t rotation = 0;                          /** @brief display rotation */
         bool block_return_maintile = false;             /** @brief block back to main tile on standby */
+        bool long_press_take_screenshot = false;        /** @brief long press take a screenshoot, otherwise back to maintile */
         uint32_t background_image = 2;                  /** @brief background image */
     } display_config_t;
 
@@ -67,6 +69,18 @@
      * @brief read config for display from spiffs
      */
     void display_read_config( void );
+    /**
+     * @brief read the screenshot from config
+     * 
+     * @return TRUE if take screenshot while long press, FALSE get back to maintile while long press
+     */
+    bool display_get_screenshot( void );
+    /**
+     * @brief set the screenshot for long press
+     * 
+     * @param TRUE if take screenshot while long press, FALSE get back to maintile while long press 
+     */
+    void display_set_screenshot( bool screenshot );
     /**
      * @brief read the timeout from config
      * 

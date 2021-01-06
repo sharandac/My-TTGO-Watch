@@ -155,6 +155,7 @@ void display_save_config( void ) {
         doc["rotation"] = display_config.rotation;
         doc["timeout"] = display_config.timeout;
         doc["block_return_maintile"] = display_config.block_return_maintile;
+        doc["long_press_take_screenshot"] = display_config.long_press_take_screenshot;
         doc["background_image"] = display_config.background_image;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
@@ -183,11 +184,21 @@ void display_read_config( void ) {
             display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
             display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
             display_config.block_return_maintile = doc["block_return_maintile"] | false;
+            display_config.long_press_take_screenshot = doc["long_press_take_screenshot"] | false;
             display_config.background_image = doc["background_image"] | 2;
         }        
         doc.clear();
     }
     file.close();
+}
+
+bool display_get_screenshot( void ) {
+    return( display_config.long_press_take_screenshot );
+}
+
+void display_set_screenshot( bool screenshot ) {
+    display_config.long_press_take_screenshot = screenshot;
+    display_send_event_cb( DISPLAYCTL_SCREENSHOT, (void *)screenshot );
 }
 
 uint32_t display_get_timeout( void ) {

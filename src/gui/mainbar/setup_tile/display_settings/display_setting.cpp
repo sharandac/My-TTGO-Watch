@@ -48,6 +48,7 @@ lv_obj_t *display_rotation_list = NULL;
 lv_obj_t *display_bg_img_list = NULL;
 lv_obj_t *display_vibe_onoff = NULL;
 lv_obj_t *display_block_return_maintile_onoff = NULL;
+lv_obj_t *display_take_screenshot_onoff = NULL;
 lv_obj_t *display_background_image = NULL;
 
 LV_IMG_DECLARE(brightness_64px);
@@ -68,6 +69,7 @@ static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_rotation_event_handler(lv_obj_t * obj, lv_event_t event);
 static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void display_screenshot_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void display_settings_tile_setup( void ) {
@@ -199,10 +201,25 @@ void display_settings_tile_setup( void ) {
     lv_label_set_text( display_block_return_maintile_label, "block return maintile" );
     lv_obj_align( display_block_return_maintile_label, block_return_maintile_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *display_screenshot_cont = lv_obj_create( display_settings_tile_2, NULL );
+    lv_obj_set_size( display_screenshot_cont, lv_disp_get_hor_res( NULL ) , 40 );
+    lv_obj_add_style( display_screenshot_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
+    lv_obj_align( display_screenshot_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    display_take_screenshot_onoff = lv_switch_create( display_screenshot_cont, NULL );
+    lv_obj_add_protect( display_take_screenshot_onoff, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( display_take_screenshot_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( display_take_screenshot_onoff, LV_ANIM_ON );
+    lv_obj_align( display_take_screenshot_onoff, display_screenshot_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( display_take_screenshot_onoff, display_screenshot_setup_event_cb );    
+    lv_obj_t *display_take_screenshot_label = lv_label_create( display_screenshot_cont, NULL );
+    lv_obj_add_style( display_take_screenshot_label, LV_OBJ_PART_MAIN, &display_settings_style  );
+    lv_label_set_text( display_take_screenshot_label, "long press screenshot" );
+    lv_obj_align( display_take_screenshot_label, display_screenshot_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     lv_obj_t *display_background_image_cont = lv_obj_create( display_settings_tile_2, NULL );
     lv_obj_set_size(display_background_image_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( display_background_image_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
-    lv_obj_align( display_background_image_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( display_background_image_cont, display_screenshot_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *display_background_image_label = lv_label_create( display_background_image_cont, NULL );
     lv_obj_add_style( display_background_image_label, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_label_set_text( display_background_image_label, "Bg image" );
@@ -239,11 +256,17 @@ void display_settings_tile_setup( void ) {
     else
         lv_switch_off( display_block_return_maintile_onoff, LV_ANIM_OFF );
 
+    if ( display_get_screenshot() )
+        lv_switch_on( display_take_screenshot_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( display_take_screenshot_onoff, LV_ANIM_OFF );
+
     lv_tileview_add_element( display_settings_tile_1, brightness_cont );
     lv_tileview_add_element( display_settings_tile_1, timeout_cont );
     lv_tileview_add_element( display_settings_tile_1, rotation_cont );
     lv_tileview_add_element( display_settings_tile_2, vibe_cont );
     lv_tileview_add_element( display_settings_tile_2, block_return_maintile_cont );
+    lv_tileview_add_element( display_settings_tile_2, display_screenshot_cont );
     lv_tileview_add_element( display_settings_tile_2, display_background_image_cont );
 
     display_register_cb( DISPLAYCTL_BRIGHTNESS, display_displayctl_brightness_event_cb, "display settings" );
@@ -303,6 +326,13 @@ static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     display_set_block_return_maintile( lv_slider_get_value( obj ) );
+                                            break;
+    }
+}
+
+static void display_screenshot_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ):     display_set_screenshot( lv_slider_get_value( obj ) );
                                             break;
     }
 }

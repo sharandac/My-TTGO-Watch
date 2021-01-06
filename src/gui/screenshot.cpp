@@ -37,8 +37,10 @@ void screenshot_setup( void ) {
 
 void screenshot_take( void ) {
     lv_disp_drv_t driver;
-    lv_disp_t *system_disp;;
+    lv_disp_t *system_disp;
 
+    log_i("take screenshot");
+    
     system_disp = lv_disp_get_default();
     driver.flush_cb = system_disp->driver.flush_cb;
     system_disp->driver.flush_cb = screenshot_disp_flush;
@@ -51,6 +53,8 @@ void screenshot_save( void ) {
 	if (SPIFFS.exists( SCREENSHOT_FILE_NAME )) {
 	    SPIFFS.remove( SCREENSHOT_FILE_NAME );
 	}
+
+    log_i("save screenshot");
     fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
     
     file.write( (uint8_t *)png, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * 2 );

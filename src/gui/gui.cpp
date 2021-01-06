@@ -47,6 +47,7 @@
 
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
+#include "hardware/motor.h"
 
 lv_obj_t *img_bin;
 
@@ -86,7 +87,7 @@ void gui_setup( void )
     keyboard_setup();
     num_keyboard_setup();
 
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP | POWERMGM_PMU_LONG_BUTTON, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
 }
 
@@ -107,6 +108,17 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
+                                        break;
+        case POWERMGM_PMU_LONG_BUTTON:  ttgo->startLvglTick();
+                                        lv_disp_trig_activity( NULL );
+                                        motor_vibe(5);
+                                        if ( display_get_screenshot() ) {
+                                            screenshot_take();
+                                            screenshot_save();
+                                        }
+                                        else {
+                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        }
                                         break;
     }
     return( true );
