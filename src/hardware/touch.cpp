@@ -58,7 +58,7 @@ void touch_setup( void ) {
     touch_indev->driver.read_cb = touch_read;
     attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
 
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, touch_powermgm_event_cb, "touch" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , touch_powermgm_event_cb, "touch" );
 }
 
 bool touch_lock_take( void ) {
@@ -84,6 +84,12 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         }
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                        break;
+        case POWERMGM_ENABLE_INTERRUPTS:
+                                        attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
+                                        break;
+        case POWERMGM_DISABLE_INTERRUPTS:
+                                        detachInterrupt( TOUCH_INT );
                                         break;
     }
     return( true );

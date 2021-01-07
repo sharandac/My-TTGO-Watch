@@ -248,7 +248,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
                             "update Task",
                             10000,
                             NULL,
-                            0,
+                            1,
                             &_update_Task );
         }
     }
@@ -262,7 +262,7 @@ void update_check_version( void ) {
         xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
         xTaskCreate(    update_Task,
                         "update Task",
-                        5000,
+                        10000,
                         NULL,
                         1,
                         &_update_Task );
@@ -303,6 +303,9 @@ void update_Task( void * pvParameters ) {
             uint32_t display_timeout = display_get_timeout();
             display_set_timeout( DISPLAY_MAX_TIMEOUT );
 
+            statusbar_show_icon( STATUSBAR_WARNING );
+            statusbar_style_icon( STATUSBAR_WARNING, STATUSBAR_STYLE_YELLOW );
+
             lv_label_set_text( update_status_label, "start update ..." );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
@@ -314,7 +317,7 @@ void update_Task( void * pvParameters ) {
                 lv_label_set_text( update_btn_label, "restart");
             }
             progress = 0;
-            lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );            
+            lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );
             display_set_timeout( display_timeout );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }

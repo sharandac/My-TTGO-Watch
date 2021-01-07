@@ -80,7 +80,7 @@ void bma_setup( void ) {
 
     bma_reload_settings();
 
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_event_cb, "bma" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "bma" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "bma loop" );
 }
 
@@ -91,6 +91,12 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_WAKEUP:           bma_wakeup();
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   bma_wakeup();
+                                        break;
+        case POWERMGM_ENABLE_INTERRUPTS:
+                                        attachInterrupt( BMA423_INT1, bma_irq, RISING );
+                                        break;
+        case POWERMGM_DISABLE_INTERRUPTS:
+                                        detachInterrupt( BMA423_INT1 );
                                         break;
     }
     return( true );

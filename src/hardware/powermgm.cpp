@@ -72,6 +72,7 @@ void powermgm_loop( void ) {
         powermgm_send_event_cb( POWERMGM_PMU_LONG_BUTTON );
         powermgm_clear_event( POWERMGM_PMU_LONG_BUTTON );
     }
+
     // check if a button or doubleclick was release
     if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
@@ -219,4 +220,12 @@ bool powermgm_send_event_cb( EventBits_t event ) {
 
 bool powermgm_send_loop_event_cb( EventBits_t event ) {
     return( callback_send_no_log( powermgm_loop_callback, event, (void*)NULL ) );
+}
+
+void powermgm_disable_interrupts( void ) {
+    powermgm_send_event_cb( POWERMGM_DISABLE_INTERRUPTS );
+}
+
+void powermgm_enable_interrupts( void ) {
+    powermgm_send_event_cb( POWERMGM_ENABLE_INTERRUPTS );
 }

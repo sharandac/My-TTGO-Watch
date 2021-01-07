@@ -34,6 +34,8 @@ bool motor_init = false;
 
 motor_config_t motor_config;
 
+bool motor_powermgm_event_cb( EventBits_t event, void *arg );
+
 void IRAM_ATTR onTimer() {
     portENTER_CRITICAL_ISR(&timerMux);
     if ( motor_run_time_counter >0 ) {
@@ -59,7 +61,21 @@ void motor_setup( void ) {
     timerAlarmEnable(timer);
     motor_init = true;
 
+    powermgm_register_loop_cb( POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "motor powermgm");
+
     motor_vibe( 10 );
+}
+
+bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case POWERMGM_ENABLE_INTERRUPTS:
+                                        timerAttachInterrupt(timer, &onTimer, true);
+                                        break;
+        case POWERMGM_DISABLE_INTERRUPTS:
+                                        timerDetachInterrupt(timer);
+                                        break;
+    }
+    return( true );
 }
 
 void motor_vibe( int time, bool enforced ) {
