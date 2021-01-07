@@ -54,11 +54,13 @@ void screenshot_save( void ) {
 	    SPIFFS.remove( SCREENSHOT_FILE_NAME );
 	}
 
-    log_i("save screenshot");
     fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
     
     file.write( (uint8_t *)png, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * 2 );
+    file.flush();
     file.close();
+
+    log_i("save screenshot");
 }
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {
