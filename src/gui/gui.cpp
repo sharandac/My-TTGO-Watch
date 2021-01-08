@@ -120,6 +120,12 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         }
                                         break;
+        case POWERMGM_DISABLE_INTERRUPTS:
+                                        TTGOClass::getWatch()->stopLvglTick();
+                                        break;
+        case POWERMGM_ENABLE_INTERRUPTS:
+                                        TTGOClass::getWatch()->startLvglTick();
+                                        break;                                        
     }
     return( true );
 }

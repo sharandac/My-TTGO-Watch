@@ -38,6 +38,8 @@
     #define POWERMGM_SHUTDOWN                   _BV(12)        /** @brief event mask for powermgm shutdown */
     #define POWERMGM_RESET                      _BV(13)        /** @brief event mask for powermgm reset */
     #define POWERMGM_PMU_LONG_BUTTON            _BV(14)        /** @brief event mask for powermgm pmu button is long pressed */
+    #define POWERMGM_DISABLE_INTERRUPTS         _BV(15)        
+    #define POWERMGM_ENABLE_INTERRUPTS          _BV(16)        
     
     /**
      * @brief setp power managment, coordinate managment beween CPU, wifictl, pmu, bma, display, backlight and lvgl
@@ -83,5 +85,13 @@
      * @param   id                  pointer to an string
      */
     bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
+    /**
+     * @brief send an interrupt disable request
+     */
+    void powermgm_disable_interrupts( void );
+    /**
+     * @brief send an interrupt enable request
+     */
+    void powermgm_enable_interrupts( void );
 
 #endif // _POWERMGM_H

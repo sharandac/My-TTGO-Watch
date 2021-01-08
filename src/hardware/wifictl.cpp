@@ -93,6 +93,8 @@ void wifictl_setup( void ) {
     // load config from spiff
     wifictl_load_config();
 
+    esp_wifi_set_bandwidth( ESP_IF_WIFI_STA, WIFI_BW_HT20 );
+
     // register WiFi events
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );

@@ -30,6 +30,8 @@
 
 #include "callback.h"
 #include "http_ota.h"
+#include "alloc.h"
+#include "powermgm.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_send_event_cb( EventBits_t event, void *arg );
@@ -39,10 +41,17 @@ bool http_ota_start( const char* url, const char* md5 ) {
     int written = 0;
     int total = 1;
     int len = 1;
-    uint8_t buff[ 1024 * 2 ] = { 0 };
-    size_t size = sizeof( buff );
+    size_t size = sizeof( HTTP_OTA_BUFFER_SIZE );
     bool ret = true;
-
+    uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };
+/*
+    uint8_t *buff = NULL;
+    buff =(uint8_t*)MALLOC( HTTP_OTA_BUFFER_SIZE );
+    if( !buff ) {
+        log_e("buffer alloc failed");
+        while(1);
+    }
+*/
     HTTPClient http;
 
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
@@ -57,6 +66,7 @@ bool http_ota_start( const char* url, const char* md5 ) {
         downloaded = 0;
 
         WiFiClient * stream = http.getStreamPtr();
+        stream->setNoDelay( true );
 
         if ( Update.begin( total, U_FLASH ) ) {
             Update.setMD5( md5 );
@@ -65,8 +75,13 @@ bool http_ota_start( const char* url, const char* md5 ) {
                 if( http.connected() && ( len > 0 ) ) {
                     size = stream->available();
                     if( size > 0 ) {
-                        int c = stream->readBytes( buff, ( ( size > sizeof( buff ) ) ? sizeof( buff ) : size ) );
+                        int c = stream->readBytes( buff, ( ( size > HTTP_OTA_BUFFER_SIZE ) ? HTTP_OTA_BUFFER_SIZE : size ) );
+                        noInterrupts();
+                        powermgm_disable_interrupts();
                         written = Update.write( buff, c );
+                        powermgm_enable_interrupts();
+                        interrupts();
+                        log_i("streambuffer: %d bytes, got %d bytes to write, %d bytes written", size, c, written );
                         if ( written > 0 ) {
                             if( written != c ) {
                                 http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing chunk not full ... warning!" );
@@ -90,7 +105,6 @@ bool http_ota_start( const char* url, const char* md5 ) {
                             len -= c;
                         }
                     }
-                    delay( 1 );
                 }
             }
         }
@@ -121,6 +135,7 @@ bool http_ota_start( const char* url, const char* md5 ) {
         log_e("Download firmware ... failed!");
         ret = false;
     }
+
     return( ret );
 }
 

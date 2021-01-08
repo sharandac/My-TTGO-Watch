@@ -59,6 +59,7 @@ callback_t *callback_init( const char *name ) {
         }
             
         callback->entrys = 0;
+        callback->debug = false;
         callback->table = NULL;
         callback->name = name;
         callback->next_callback_t = NULL;
@@ -111,7 +112,9 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     callback->table[ callback->entrys - 1 ].callback_func = callback_func;
     callback->table[ callback->entrys - 1 ].id = id;
     callback->table[ callback->entrys - 1 ].counter = 0;
-    log_i("register callback_func for %s success (%p:%s)", callback->name, callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
+    if ( callback->debug ) {
+        log_i("register callback_func for %s success (%p:%s)", callback->name, callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
+    }
     return( retval );
 }
 
@@ -193,7 +196,9 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
     for ( int entry = 0 ; entry < callback->entrys ; entry++ ) {
         yield();
         if ( event & callback->table[ entry ].event ) {
-            log_i("call %s cb (%p:%04x:%s)", callback->name, callback->table[ entry ].callback_func, event, callback->table[ entry ].id );
+            if ( callback->debug ) {
+                log_i("call %s cb (%p:%04x:%s)", callback->name, callback->table[ entry ].callback_func, event, callback->table[ entry ].id );
+            }
             callback->table[ entry ].counter++;
             if ( !callback->table[ entry ].callback_func( event, arg ) ) {
                 retval = false;
@@ -230,4 +235,8 @@ bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) 
 
 void display_event_logging_enable( bool enable ) {
     display_event_logging = enable;
+}
+
+void callback_enable_debuging( callback_t *callback, bool debuging ) {
+    callback->debug = debuging;
 }
