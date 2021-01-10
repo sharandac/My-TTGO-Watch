@@ -27,7 +27,7 @@
 
     #define MAX_APPS_ICON_HORZ      3
     #define MAX_APPS_ICON_VERT      2
-    #define MAX_APPS_TILES          2
+    #define MAX_APPS_TILES          3
     #define MAX_APPS_ICON           ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT * MAX_APPS_TILES )
 
     #define APP_ICON_X_SIZE         64
@@ -64,5 +64,12 @@
      * @return  tile number
      */
     uint32_t app_tile_get_tile_num( void );
+    /**
+     * @brief   get the numbers of active app
+     * 
+     * @return  zero or the numbers of active apps
+     */
+    int32_t app_tile_get_active_app_entrys( void );
+    const char *app_get_appentrys_name( int32_t appentry );
 
 #endif // _APP_TILE_H

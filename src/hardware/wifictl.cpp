@@ -184,6 +184,8 @@ void wifictl_setup( void ) {
       wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
 
+    WiFi.setSleep(false);
+
     xTaskCreatePinnedToCore(  wifictl_Task,     /* Function to implement the task */
                               "wifictl Task",   /* Name of the task */
                               3000,             /* Stack size in words */
@@ -522,6 +524,7 @@ void wifictl_Task( void * pvParameters ) {
     else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
       esp_wifi_start();
       WiFi.mode( WIFI_STA );
+      WiFi.setSleep( false );
       log_i("request wifictl on done");
       wifictl_set_event( WIFICTL_ON );
       wifictl_clear_event( WIFICTL_OFF );

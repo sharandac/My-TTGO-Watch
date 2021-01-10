@@ -7,6 +7,7 @@
     #define HTTP_OTA_FINISH         _BV(1)      /** @brief http ota finish event mask, callback arg is (char*) */
     #define HTTP_OTA_ERROR          _BV(2)      /** @brief http ota error event mask, callback arg is (char*) */
     #define HTTP_OTA_PROGRESS       _BV(3)      /** @brief http ota progress event mask, callback arg is (int16_t*) */
+    #define HTTP_OTA_DATARATE       _BV(4)      /** @brief http ota progress event mask, callback arg is (int16_t*) */
 	
     #define HTTP_OTA_BUFFER_SIZE    ( 512 * 1 )
     /**

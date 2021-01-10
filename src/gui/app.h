@@ -52,5 +52,11 @@
      * @param   icon        pointer to an 64x64px icon
      */
     void app_set_icon( icon_t *app, lv_obj_t *icon );
+    /**
+     * @brief   get the numbers of active app
+     * 
+     * @return  zero or the numbers of active apps
+     */
+    int32_t app_get_active_app_entrys( void );
 
 #endif // _APP_H

@@ -124,3 +124,7 @@ void app_set_icon( icon_t *app, lv_obj_t *icon ) {
     lv_obj_align( app->icon_img , app->icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_obj_invalidate( lv_scr_act() );
 }
+
+int32_t app_get_active_app_entrys( void ) {
+    return( app_tile_get_active_app_entrys() );
+}

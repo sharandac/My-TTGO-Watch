@@ -37,21 +37,14 @@ callback_t *http_ota_callback = NULL;
 bool http_ota_send_event_cb( EventBits_t event, void *arg );
 
 bool http_ota_start( const char* url, const char* md5 ) {
-    int downloaded = 0;
-    int written = 0;
-    int total = 1;
-    int len = 1;
+    float downloaded = 0;                               /** @brief downloaded firmware size in bytes*/
+    int32_t total = 1;                                  /** @brief total firmware size in bytes*/
+    int32_t written = 0;                                /** @brief written firmware data block in bytes*/
+    int32_t len = 1;                                    /** @brief remaining firmware data in bytes*/
     size_t size = sizeof( HTTP_OTA_BUFFER_SIZE );
-    bool ret = true;
-    uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };
-/*
-    uint8_t *buff = NULL;
-    buff =(uint8_t*)MALLOC( HTTP_OTA_BUFFER_SIZE );
-    if( !buff ) {
-        log_e("buffer alloc failed");
-        while(1);
-    }
-*/
+    bool ret = true;                                    /** @brief return value */
+    uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };       /** @brief firmware write buffer */
+
     HTTPClient http;
 
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
@@ -81,18 +74,16 @@ bool http_ota_start( const char* url, const char* md5 ) {
                         written = Update.write( buff, c );
                         powermgm_enable_interrupts();
                         interrupts();
-                        log_i("streambuffer: %d bytes, got %d bytes to write, %d bytes written", size, c, written );
                         if ( written > 0 ) {
                             if( written != c ) {
                                 http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing chunk not full ... warning!" );
                                 log_w("Flashing chunk not full ... warning!");
                             }
                             downloaded += written;
-                            static int16_t old_progress = 0;
-                            int16_t progress = ( 100 * downloaded ) / total ;
+                            static float old_progress = -1;
+                            float progress = ( 100 * downloaded ) / total ;
                             if ( old_progress != progress ) {
                                 http_ota_send_event_cb( HTTP_OTA_PROGRESS, (void*)&progress );
-                                log_i("progress: %d", progress );
                                 old_progress = progress;
                             }
                         } else {
