@@ -156,7 +156,7 @@ void pmu_loop( void ) {
     }
 
     if ( nextmillis < millis() ) {
-        nextmillis = millis() + 30000L;
+        nextmillis = millis() + 60000L;
         if ( pmu_get_battery_percent() != percent ) {
             pmu_update = true;
         }

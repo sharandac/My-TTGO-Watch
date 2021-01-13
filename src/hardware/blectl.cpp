@@ -71,6 +71,7 @@ uint32_t gadgetbridge_msg_size = 0;
 
 class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
+        pServer->updateConnParams( param->connect.remote_bda, 1100, 1500, 0, 10000 );
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );

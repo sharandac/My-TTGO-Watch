@@ -141,7 +141,7 @@ void powermgm_loop( void ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
 
-        adc_power_off();
+//        adc_power_off();
 
         if ( powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
             if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
@@ -165,18 +165,20 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                // from here, the consumption is round about 14mA
+                // total standby time is 30h without use?
             #else
                 setCpuFrequencyMhz(80);
+                // from here, the consumption is round about 23mA
+                // total standby time is 19h without use?
             #endif
-            // from here, the consumption is round about 23mA
-            // total standby time is 19h without use?
         }
     }
     powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
 
     // send loop event depending on powermem state
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
-        vTaskDelay( 100 );
+        vTaskDelay( 250 );
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
