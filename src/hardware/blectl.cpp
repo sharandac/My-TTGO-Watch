@@ -323,8 +323,8 @@ void blectl_setup( void ) {
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
     // Slow advertising interval for battery life
-    pServer->getAdvertising()->setMinInterval( 200 );
-    pServer->getAdvertising()->setMaxInterval( 300 );
+    pServer->getAdvertising()->setMinInterval( 700 );
+    pServer->getAdvertising()->setMaxInterval( 800 );
 
     if ( blectl_get_autoon() ) {
         blectl_on();
