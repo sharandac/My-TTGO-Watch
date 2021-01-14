@@ -3,17 +3,22 @@
 
 #include "config.h"
 #include "ArduinoJson.h"
+#include "alloc.h"
 
 // arduinoJson allocator for external PSRAM
 // see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
 struct SpiRamAllocator {
-    void* allocate( size_t size ) { 
-        void *psram = ps_calloc( size, 1 );
-        if ( psram ) {
-            return( psram );
+    void* allocate( size_t size ) {
+        if ( size == 0 ) {
+            log_e("allocate zero bytes? really? abort");
+            return( NULL );
+        }
+        void *ram = MALLOC( size );
+        if ( ram ) {
+            return( ram );
         }
         else {
-            log_e("allocate %d bytes (%p) json psram failed", size, psram );
+            log_e("allocate %d bytes (%p) json psram failed", size, ram );
             while(1);
         }
     }

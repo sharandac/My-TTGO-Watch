@@ -92,3 +92,29 @@ icon_t *app_tile_get_free_app_icon( void ) {
 uint32_t app_tile_get_tile_num( void ) {
     return( app_tile_num[ 0 ] );
 }
+
+int32_t app_tile_get_active_app_entrys( void ) {
+    int32_t _appentry = 0;
+    
+    for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
+        if ( app_entry[ app ].active == true ) {
+            _appentry++;
+        }
+    }
+    return( _appentry ); 
+}
+
+const char *app_get_appentrys_name( int32_t appentry ) {
+    int32_t _appentry = 0;
+    const char *appname = NULL;
+        
+    for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
+        if ( app_entry[ app ].active == true ) {
+            _appentry++;
+            if ( _appentry == appentry ) {
+                appname = (const char*)lv_label_get_text( app_entry[ app ].label );
+            }
+        }
+    }
+    return( appname ); 
+}

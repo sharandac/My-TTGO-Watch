@@ -50,7 +50,7 @@ icon_t *update_setup_icon = NULL;
 lv_obj_t *update_settings_tile=NULL;
 lv_style_t update_settings_style;
 uint32_t update_tile_num;
-static int16_t progress = 0;
+static float progress = 0;
 static int64_t last_firmware_version = 0;
 
 lv_obj_t *update_btn = NULL;
@@ -160,7 +160,7 @@ void update_tile_setup( void ) {
 }
 
 void update_update_activate_cb( void ) {
-    _update_progress_task = lv_task_create( update_progress_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
+    _update_progress_task = lv_task_create( update_progress_task, 250,  LV_TASK_PRIO_LOWEST, NULL );
 }
 
 void update_update_hibernate_cb( void ) {
@@ -170,8 +170,8 @@ void update_update_hibernate_cb( void ) {
 void update_progress_task( lv_task_t *task ) {
     if ( progress > 0 ) {
         char msg[16]="";
-        lv_bar_set_value( update_progressbar, progress , LV_ANIM_ON );
-        snprintf( msg, sizeof( msg ), "%d%%", progress );
+        lv_bar_set_value( update_progressbar, progress, LV_ANIM_ON );
+        snprintf( msg, sizeof( msg ), "%.1f%%", progress );
         lv_label_set_text( update_status_label, msg );
         lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     }
@@ -181,7 +181,7 @@ void update_progress_task( lv_task_t *task ) {
 bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case HTTP_OTA_PROGRESS:
-            progress = *(int16_t *)arg;
+            progress = *(float *)arg;
             break;
         case HTTP_OTA_ERROR:        
             lv_label_set_text( update_status_label, (char *)arg );
