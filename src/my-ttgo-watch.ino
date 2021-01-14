@@ -63,6 +63,7 @@ void setup()
 
     ttgo->begin();
     ttgo->lvgl_begin();
+    framebuffer_setup();
 
     SPIFFS.begin();
     motor_setup();

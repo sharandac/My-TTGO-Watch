@@ -22,6 +22,8 @@
 #ifndef _FRAMEBUFFER_H
     #define _FRAMEBUFFER_H
 
+    #define FRAMEBUFFER_BUFFER_SIZE     (240*20)
+
     void framebuffer_setup( void );
     
 #endif // _FRAMEBUFFER_H

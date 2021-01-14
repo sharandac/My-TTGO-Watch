@@ -106,6 +106,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
             #else
                 setCpuFrequencyMhz(80);
             #endif
@@ -119,6 +120,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 240;
                 pm_config.light_sleep_enable = false;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
             #else
                 setCpuFrequencyMhz(240);
             #endif
@@ -165,6 +167,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
                 // from here, the consumption is round about 14mA
                 // total standby time is 30h without use?
             #else
