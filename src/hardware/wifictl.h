@@ -24,6 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
+    #include "ftpserver/ftpserver.h"
 
     #define WIFICTL_DELAY               10
     #define NETWORKLIST_ENTRYS          20
@@ -47,14 +48,14 @@
      * @brief wifictl config structure
      */
     typedef struct {
-        bool autoon = true;             /** @brief enable on auto on/off an wakeup and standby */
+        bool autoon = true;                     /** @brief enable on auto on/off an wakeup and standby */
         #ifdef ENABLE_WEBSERVER
-        bool webserver = false;         /** @brief enable on webserver */
+        bool webserver = false;                 /** @brief enable on webserver */
         #endif
         #ifdef ENABLE_FTPSERVER
-        bool ftpserver = false;         /** @brief enable on ftpserver */
-        char ftpuser[32];   /** @brief ftpserver username*/
-        char ftppass[32];  /** @brief ftpserver password*/
+        bool ftpserver = false;                 /** @brief enable on ftpserver */
+        char ftpuser[32] = FTPSERVER_USER;      /** @brief ftpserver username*/
+        char ftppass[32] = FTPSERVER_PASSWORD;  /** @brief ftpserver password*/
         #endif
         bool enable_on_standby = false; /** @brief enable on standby */
     } wifictl_config_t;

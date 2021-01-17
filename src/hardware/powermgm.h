@@ -75,6 +75,10 @@
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP and POWERMGM_RTC_ALARM
      * @param   callback_func       pointer to the callback function 
      * @param   id                  pointer to an string
+     * 
+     * @return  TRUE if successful, FALSE if not successful
+     * 
+     * @note  Your callback function return TRUE if all fine, FALSE when you want break, by example into to standby.
      */
     bool powermgm_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
