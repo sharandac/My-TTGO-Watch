@@ -9,17 +9,16 @@
 // see: https://arduinojson.org/v6/how-to/use-external-ram-on-esp32/
 struct SpiRamAllocator {
     void* allocate( size_t size ) {
-        if ( size == 0 ) {
-            log_e("allocate zero bytes? really? abort");
-            return( NULL );
-        }
         void *ram = MALLOC( size );
         if ( ram ) {
             return( ram );
         }
         else {
             log_e("allocate %d bytes (%p) json psram failed", size, ram );
-            while(1);
+            if ( size == 0 ) {
+                log_e("allocate zero bytes? really? abort");
+            }
+            return( ram );
         }
     }
     void deallocate( void* pointer ) {

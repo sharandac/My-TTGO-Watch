@@ -104,7 +104,7 @@ void wifictl_setup( void ) {
         else {
           wifictl_set_event( WIFICTL_SCAN );
           wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
-          WiFi.scanNetworks();
+          WiFi.scanNetworks( true, true );
         }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
@@ -156,7 +156,7 @@ void wifictl_setup( void ) {
         else {
           wifictl_set_event( WIFICTL_SCAN );
           wifictl_send_event_cb( WIFICTL_ON, (void *)"scan ..." );
-          WiFi.scanNetworks();
+          WiFi.scanNetworks( true, true );
         }
     }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
 
@@ -409,7 +409,7 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
     if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
       strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_config();
-      WiFi.scanNetworks();
+      WiFi.scanNetworks( true, true );
       wifictl_set_event( WIFICTL_SCAN );
       return( true );
     }
@@ -420,7 +420,7 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
       strlcpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
       strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
       wifictl_save_config();
-      WiFi.scanNetworks();
+      WiFi.scanNetworks(  true, true );
       wifictl_set_event( WIFICTL_SCAN );
       return( true );
     }
