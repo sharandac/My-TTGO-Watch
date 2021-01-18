@@ -28,6 +28,8 @@
     #define PMUCTL_BATTERY_PERCENT      _BV(0)                  /** @brief event mask for pmuctl battery percent update, callback arg is (int32_t*) */
     #define PMUCTL_VBUS_PLUG            _BV(1)                  /** @brief event mask for pmuctl plug/unplug update, callback arg is (bool*) */
     #define PMUCTL_CHARGING             _BV(2)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_SHORT_PRESS          _BV(3)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_LONG_PRESS           _BV(4)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
 
     #define PMU_JSON_CONFIG_FILE    "/pmu.json"                 /** @brief defines json config file name */
 

@@ -70,18 +70,6 @@
      */
     void display_read_config( void );
     /**
-     * @brief read the screenshot from config
-     * 
-     * @return TRUE if take screenshot while long press, FALSE get back to maintile while long press
-     */
-    bool display_get_screenshot( void );
-    /**
-     * @brief set the screenshot for long press
-     * 
-     * @param TRUE if take screenshot while long press, FALSE get back to maintile while long press 
-     */
-    void display_set_screenshot( bool screenshot );
-    /**
      * @brief read the timeout from config
      * 
      * @return  timeout in seconds
