@@ -28,6 +28,7 @@
         QUICKBAR_STYLE_NORMAL,
         QUICKBAR_STYLE_LIGHT,
         QUICKBAR_STYLE_DARK,
+        QUICKBAR_STYLE_TRANS,
         QUICKBAR_STYLE_NUM
     } quickbar_style_t;
 

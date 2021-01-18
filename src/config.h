@@ -41,7 +41,7 @@
     /*
     * firmeware version string
     */
-    #define __FIRMWARE__            "2021011801"
+    #define __FIRMWARE__            "2021011802"
 
     #ifdef __cplusplus // Allows to include config.h from C code
         #include <LilyGoWatch.h>
