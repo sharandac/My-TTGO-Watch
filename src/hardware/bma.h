@@ -53,10 +53,6 @@
      */
     void bma_setup( void );
     /**
-     * @brief loop function for activity measurement
-     */
-    void bma_loop( void );
-    /**
      * @brief put bma into standby, depending on ther config
      */
     void bma_standby( void );

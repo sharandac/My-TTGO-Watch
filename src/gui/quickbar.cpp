@@ -203,16 +203,16 @@ void quickbar_hide( bool hide ) {
         lv_obj_invalidate( lv_scr_act() );
 
         lv_anim_set_var( &quickbar_maintile_anim, quickbar_maintile_img );
-        lv_anim_set_values( &quickbar_maintile_anim, 255, 1 );
+        lv_anim_set_values( &quickbar_maintile_anim, 256, 1 );
         lv_anim_start( &quickbar_maintile_anim );
 
         lv_anim_set_var( &quickbar_setup_anim, quickbar_setup_img );
-        lv_anim_set_values( &quickbar_setup_anim, 255, 1 );
+        lv_anim_set_values( &quickbar_setup_anim, 256, 1 );
         lv_anim_set_delay( &quickbar_setup_anim, 100 );
         lv_anim_start( &quickbar_setup_anim );
 
         lv_anim_set_var( &quickbar_screenshot_anim, quickbar_screenshot_img );
-        lv_anim_set_values( &quickbar_screenshot_anim, 255, 1 );
+        lv_anim_set_values( &quickbar_screenshot_anim, 256, 1 );
         lv_anim_set_delay( &quickbar_screenshot_anim, 200 );
         lv_anim_start( &quickbar_screenshot_anim );
     }
@@ -221,16 +221,16 @@ void quickbar_hide( bool hide ) {
         lv_obj_invalidate( lv_scr_act() );
 
         lv_anim_set_var( &quickbar_maintile_anim, quickbar_maintile_img );
-        lv_anim_set_values( &quickbar_maintile_anim, 1, 255 );
+        lv_anim_set_values( &quickbar_maintile_anim, 1, 256 );
         lv_anim_start( &quickbar_maintile_anim );
 
         lv_anim_set_var( &quickbar_setup_anim, quickbar_setup_img );
-        lv_anim_set_values( &quickbar_setup_anim, 1, 255 );
+        lv_anim_set_values( &quickbar_setup_anim, 1, 256 );
         lv_anim_set_delay( &quickbar_setup_anim, 100 );
         lv_anim_start( &quickbar_setup_anim );
 
         lv_anim_set_var( &quickbar_screenshot_anim, quickbar_screenshot_img );
-        lv_anim_set_values( &quickbar_screenshot_anim, 1, 255 );
+        lv_anim_set_values( &quickbar_screenshot_anim, 1, 256 );
         lv_anim_set_delay( &quickbar_screenshot_anim, 200 );
         lv_anim_start( &quickbar_screenshot_anim );
     }

@@ -109,9 +109,14 @@ void IRAM_ATTR  pmu_irq( void ) {
 }
 
 void pmu_loop( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
     static uint64_t nextmillis = 0;
     static int32_t percent = 0;
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    int32_t tmp_percent = 0;
+    static bool plug = ttgo->power->isVBUSPlug();
+    static bool charging = ttgo->power->isChargeing();
+
     /*
      * handle IRQ event
      */
@@ -124,15 +129,19 @@ void pmu_loop( void ) {
         ttgo->power->readIRQ();
         if ( ttgo->power->isVbusPlugInIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            plug = true;
         }
         if ( ttgo->power->isVbusRemoveIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            plug = false;
         }
         if ( ttgo->power->isChargingIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            charging = true;
         }
         if ( ttgo->power->isChargingDoneIRQ() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            charging = false;
         }
         if ( ttgo->power->isPEKShortPressIRQ() ) {
             powermgm_set_event( POWERMGM_PMU_BUTTON );
@@ -141,7 +150,6 @@ void pmu_loop( void ) {
             return;
         }
         if ( ttgo->power->isPEKLongtPressIRQ() ) {
-            powermgm_set_event( POWERMGM_PMU_LONG_BUTTON );
             ttgo->power->clearIRQ();
             pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
             return;
@@ -157,22 +165,28 @@ void pmu_loop( void ) {
         pmu_update = true;
     }
 
+    // check if an update necessary
     if ( nextmillis < millis() ) {
-        nextmillis = millis() + 60000L;
-        if ( pmu_get_battery_percent() != percent ) {
+        // reduce byttery update interval to 60s if we are in standby
+        if ( powermgm_get_event( POWERMGM_STANDBY ) )
+            nextmillis = millis() + 60000L;
+        else
+            nextmillis = millis() + 10000L;
+
+        // only update if an change is detected
+        tmp_percent = pmu_get_battery_percent();
+        if ( tmp_percent != percent ) {
             pmu_update = true;
+            percent = tmp_percent;
         }
     }
 
     if ( pmu_update ) {
 
         char msg[64]="";
-        percent = pmu_get_battery_percent();
         snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
         blectl_send_msg( msg );
 
-        bool plug = ttgo->power->isVBUSPlug();
-        bool charging = ttgo->power->isChargeing();
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
         pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
         pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
