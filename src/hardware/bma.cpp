@@ -103,7 +103,46 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
-    bma_loop();
+    TTGOClass *ttgo = TTGOClass::getWatch();
+
+    /*
+     * handle IRQ event
+     */
+    portENTER_CRITICAL(&BMA_IRQ_Mux);
+    bool temp_bma_irq_flag = bma_irq_flag;
+    bma_irq_flag = false;
+    portEXIT_CRITICAL(&BMA_IRQ_Mux);
+
+    /*
+     * check for the event
+     */
+    if ( temp_bma_irq_flag ) {                
+        while( !ttgo->bma->readInterrupt() );
+
+        if ( ttgo->bma->isDoubleClick() ) {
+            powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
+            bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
+        }
+        if ( ttgo->bma->isTilt() ) {
+            powermgm_set_event( POWERMGM_BMA_TILT );
+            bma_send_event_cb( BMACTL_TILT, (void *)"" );
+        }
+        if ( ttgo->bma->isStepCounter() ) {
+            stepcounter_before_reset = ttgo->bma->getCounter();
+            char msg[16]="";
+            snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
+            bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+        }
+    }
+
+    // force update statusbar after restart/boot
+    if ( first_loop_run ) {
+        first_loop_run = false;
+        stepcounter_before_reset = ttgo->bma->getCounter();
+        char msg[16]="";
+        snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
+        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+    }
     return( true );
 }
 
@@ -135,6 +174,9 @@ void bma_wakeup( void ) {
     if ( bma_get_config( BMA_STEPCOUNTER ) )
         ttgo->bma->enableStepCountInterrupt( true );
 
+    /*
+     * check for a new day and reset stepcounter if configure
+     */
     time( &now );
     localtime_r( &now, &info );
     strftime( bma_date, sizeof( bma_date ), "%d.%b", &info );
@@ -146,6 +188,9 @@ void bma_wakeup( void ) {
         }
     }
 
+    /*
+     * force bma_powermgm_loop_cb update
+     */
     first_loop_run = true;
 }
 
@@ -162,46 +207,6 @@ void IRAM_ATTR bma_irq( void ) {
     portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
     bma_irq_flag = true;
     portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
-}
-
-void bma_loop( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-    /*
-     * handle IRQ event
-     */
-    portENTER_CRITICAL(&BMA_IRQ_Mux);
-    bool temp_bma_irq_flag = bma_irq_flag;
-    bma_irq_flag = false;
-    portEXIT_CRITICAL(&BMA_IRQ_Mux);
-
-    if ( temp_bma_irq_flag ) {                
-        while( !ttgo->bma->readInterrupt() );
-
-        if ( ttgo->bma->isDoubleClick() ) {
-            powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
-            bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
-        }
-        if ( ttgo->bma->isTilt() ) {
-            powermgm_set_event( POWERMGM_BMA_TILT );
-            bma_send_event_cb( BMACTL_TILT, (void *)"" );
-        }
-        if ( ttgo->bma->isStepCounter() ) {
-            stepcounter_before_reset = ttgo->bma->getCounter();
-            char msg[16]="";
-            snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-            bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
-        }
-    }
-
-    // force update statusbar after restart/boot
-    if ( first_loop_run ) {
-        first_loop_run = false;
-        stepcounter_before_reset = ttgo->bma->getCounter();
-        char msg[16]="";
-        snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
-    }
 }
 
 bool bma_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
