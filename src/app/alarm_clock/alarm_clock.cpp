@@ -210,6 +210,7 @@ static void create_alarm_in_progress_tile(){
 bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
     switch ( event ){
         case ( RTCCTL_ALARM_OCCURRED ):
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             alarm_in_progress_start_alarm();
             rtcctl_set_next_alarm();
             break;

@@ -197,19 +197,17 @@ void IRAM_ATTR rtcctl_irq( void ) {
     portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
     rtc_irq_flag = true;
     portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
-    powermgm_set_event( POWERMGM_RTC_ALARM );
 }
 
 void rtcctl_loop( void ) {
     // fire callback
-    if ( !powermgm_get_event( POWERMGM_STANDBY ) ) {
-        portENTER_CRITICAL( &RTC_IRQ_Mux );
-        bool temp_rtc_irq_flag = rtc_irq_flag;
-        rtc_irq_flag = false;
-        portEXIT_CRITICAL( &RTC_IRQ_Mux );
-        if ( temp_rtc_irq_flag ) {
-            rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
-        }
+    portENTER_CRITICAL( &RTC_IRQ_Mux );
+    bool temp_rtc_irq_flag = rtc_irq_flag;
+    rtc_irq_flag = false;
+    portEXIT_CRITICAL( &RTC_IRQ_Mux );
+
+    if ( temp_rtc_irq_flag ) {
+        rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
     }
 }
 

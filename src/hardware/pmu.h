@@ -25,13 +25,14 @@
     #include "TTGO.h"
     #include "callback.h"
 
-    #define PMUCTL_BATTERY_PERCENT      _BV(0)                  /** @brief event mask for pmuctl battery percent update, callback arg is (int32_t*) */
-    #define PMUCTL_VBUS_PLUG            _BV(1)                  /** @brief event mask for pmuctl plug/unplug update, callback arg is (bool*) */
-    #define PMUCTL_CHARGING             _BV(2)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
-    #define PMUCTL_SHORT_PRESS          _BV(3)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
-    #define PMUCTL_LONG_PRESS           _BV(4)                  /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_BATTERY_PERCENT          _BV(0)              /** @brief event mask for pmuctl battery percent update, callback arg is (int32_t*) */
+    #define PMUCTL_VBUS_PLUG                _BV(1)              /** @brief event mask for pmuctl plug/unplug update, callback arg is (bool*) */
+    #define PMUCTL_CHARGING                 _BV(2)              /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_SHORT_PRESS              _BV(3)              /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_LONG_PRESS               _BV(4)              /** @brief event mask for pmuctl charging, callback arg is (bool*) */
+    #define PMUCTL_TIMER_TIMEOUT            _BV(4)              /** @brief event mask for pmuctl charging, callback arg is (bool*) */
 
-    #define PMU_JSON_CONFIG_FILE    "/pmu.json"                 /** @brief defines json config file name */
+    #define PMU_JSON_CONFIG_FILE            "/pmu.json"         /** @brief defines json config file name */
 
 	//Some default values, used below as well as in pmu.cpp during json reads
     #define SILENCEWAKEINTERVAL             45                  /** @brief defines the silence wakeup interval in minutes */
@@ -40,6 +41,9 @@
     #define NORMALPOWERSAVEVOLTAGE          3000                /** @brief defines the norminal voltages while in powersave */
     #define EXPERIMENTALNORMALVOLTAGE       3000                /** @brief defines the norminal voltages while working with exprimental powersave enabled */
     #define EXPERIMENTALPOWERSAVEVOLTAGE    2700                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
+
+    #define PMU_CHARGE_LOG_FILENAME         "/pmu_charge.csv"
+    #define PMU_DISCHARGE_LOG_FILENAME      "/pmu_discharge.csv"
 
     typedef struct {
         int32_t designed_battery_cap = 300;
@@ -53,6 +57,7 @@
         bool compute_percent = false;
         bool experimental_power_save = false;
         bool silence_wakeup = true;
+        bool pmu_logging = false;
     } pmu_config_t;
 
     /**

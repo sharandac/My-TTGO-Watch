@@ -46,11 +46,16 @@ void framebuffer_setup( void ) {
         return;
     }
 
-    framebuffer2 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
-    if ( framebuffer2 == NULL ) {
-        log_e("framebuffer 2 malloc failed");
-        return;
-    }
+    #if defined( FRAMEBUFFER_DOUBLE_BUFFERING )
+        framebuffer2 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
+        if ( framebuffer2 == NULL ) {
+            log_e("framebuffer 2 malloc failed");
+            return;
+        }
+        log_i("custom arduino-esp32 framework detected, double DMA framebuffer enable ( 2 x %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
+    #else
+        log_i("custom arduino-esp32 framework detected, single DMA framebuffer enable ( %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
+    #endif
 
     lv_disp_buf_init( &disp_buf, framebuffer1, framebuffer2, FRAMEBUFFER_BUFFER_SIZE );
 
@@ -61,7 +66,6 @@ void framebuffer_setup( void ) {
     system_disp->driver.ver_res = lv_disp_get_ver_res( NULL );
     system_disp->driver.buffer = &disp_buf;
 
-    log_i("custom arduino-esp32 framework detected, double DMA framebuffer enable");
 #else
     return;
 #endif

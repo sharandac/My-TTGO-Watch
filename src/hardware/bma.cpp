@@ -120,11 +120,11 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
         while( !ttgo->bma->readInterrupt() );
 
         if ( ttgo->bma->isDoubleClick() ) {
-            powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
         }
         if ( ttgo->bma->isTilt() ) {
-            powermgm_set_event( POWERMGM_BMA_TILT );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             bma_send_event_cb( BMACTL_TILT, (void *)"" );
         }
         if ( ttgo->bma->isStepCounter() ) {

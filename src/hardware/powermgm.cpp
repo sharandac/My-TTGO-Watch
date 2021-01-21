@@ -70,31 +70,46 @@ void powermgm_setup( void ) {
 }
 
 void powermgm_loop( void ) {
-    // check if a button or doubleclick was release
-    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM ) ) {
+    static bool lighsleep = true;
+    /*
+     * check if power button was release
+     */
+    if( powermgm_get_event( POWERMGM_POWER_BUTTON ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
         else {
-            if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
-                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-            }
+            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
         }
-        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM );
+        powermgm_clear_event( POWERMGM_POWER_BUTTON );
     }
-
+    /*
+     * when we are in wakeup and get an wakeup request, reset activity timer
+     */
     if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {
         lv_disp_trig_activity( NULL );
         powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
     }
   
-    // drive into
+    /*
+     * handle powermgm request
+     */
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
+        /*
+         * clear powermgm state
+         */
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
-        //Network transfer times are likely a greater time consumer than actual computational time
-        if (powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+        if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             log_i("go silence wakeup");
+            /*
+             * set silence wakeup status and send events
+             */
+            powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
+            powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
+            /*
+             * set cpu speed
+             */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 240;
                 pm_config.min_freq_mhz = 40;
@@ -104,11 +119,17 @@ void powermgm_loop( void ) {
             #else
                 setCpuFrequencyMhz(80);
             #endif
-            powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
-            powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
         }
         else {
             log_i("go wakeup");
+            /*
+             * set wakeup status and send events
+             */
+            powermgm_set_event( POWERMGM_WAKEUP );
+            powermgm_send_event_cb( POWERMGM_WAKEUP );
+            /*
+             * set cpu speed
+             */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 240;
                 pm_config.min_freq_mhz = 240;
@@ -118,8 +139,6 @@ void powermgm_loop( void ) {
             #else
                 setCpuFrequencyMhz(240);
             #endif
-            powermgm_set_event( POWERMGM_WAKEUP );
-            powermgm_send_event_cb( POWERMGM_WAKEUP );
             motor_vibe(3);
         }
 
@@ -129,36 +148,51 @@ void powermgm_loop( void ) {
 
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
-        
-        //Save info to avoid buzz when standby after silent wake
+        /*
+         * Save info to avoid buzz when standby after silent wake
+         */
         bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
-        
-        // send standby event
+        /*
+         * clear powermgm state and send standby event
+         */
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
+        /*
+         * check if an standby callback block lightsleep in standby
+         */
+        lighsleep = powermgm_send_event_cb( POWERMGM_STANDBY );
+        /*
+         * print some memory stats
+         */
+        log_i("Free heap: %d", ESP.getFreeHeap());
+        log_i("Free PSRAM heap: %d", ESP.getFreePsram());
+        log_i("uptime: %d", millis() / 1000 );
 
-//        adc_power_off();
-
-        if ( powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
-            if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
+        if ( lighsleep ) {
             log_i("go standby");
-            delay( 100 );
+            /*
+             * Only buzz if a non silent wake was performed
+             */
+            if (!noBuzz) {
+                motor_vibe(3);
+                delay( 100 );
+            }
+            /*
+             * set cpu speed
+             */
             setCpuFrequencyMhz( 80 );
             esp_light_sleep_start();
             // from here, the consumption is round about 2.5mA
             // total standby time is 152h (6days) without use?
         }
         else {
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
             log_i("go standby blocked");
+            /*
+             * set cpu speed
+             */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 80;
-                pm_config.min_freq_mhz = 40;
+                pm_config.min_freq_mhz = 10;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
@@ -171,11 +205,20 @@ void powermgm_loop( void ) {
             #endif
         }
     }
+    /*
+     * clear all request
+     */
     powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
 
-    // send loop event depending on powermem state
+    /*
+     * send loop event depending on powermem state
+     */
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
-        vTaskDelay( 250 );
+        /*
+         * idle when lightsleep in standby not allowed
+         */
+        if ( !lighsleep )
+            vTaskDelay( 250 );
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
