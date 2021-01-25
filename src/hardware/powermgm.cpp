@@ -103,28 +103,31 @@ void powermgm_loop( void ) {
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             log_i("go silence wakeup");
             /*
-             * set silence wakeup status and send events
+             * set silence wakeup status/request and send events
              */
+            powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
             /*
              * set cpu speed
              */
             #if CONFIG_PM_ENABLE
-                pm_config.max_freq_mhz = 240;
-                pm_config.min_freq_mhz = 40;
+                pm_config.max_freq_mhz = 160;
+                pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 160/80MHz with light sleep");
             #else
                 setCpuFrequencyMhz(80);
+                log_i("CPU speed = 80MHz");
             #endif
         }
         else {
             log_i("go wakeup");
             /*
-             * set wakeup status and send events
+             * set wakeup status/request and send events
              */
+            powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
             powermgm_set_event( POWERMGM_WAKEUP );
             powermgm_send_event_cb( POWERMGM_WAKEUP );
             /*
@@ -132,12 +135,13 @@ void powermgm_loop( void ) {
              */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 240;
-                pm_config.min_freq_mhz = 240;
+                pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = false;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 240/80MHz with light sleep");
             #else
                 setCpuFrequencyMhz(240);
+                log_i("CPU speed = 240MHz");
             #endif
             motor_vibe(3);
         }
@@ -151,10 +155,11 @@ void powermgm_loop( void ) {
         /*
          * Save info to avoid buzz when standby after silent wake
          */
-        bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
+        bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP );
         /*
-         * clear powermgm state and send standby event
+         * clear powermgm state/request and send standby event
          */
+        powermgm_clear_event( POWERMGM_STANDBY_REQUEST );
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
         /*
@@ -182,8 +187,11 @@ void powermgm_loop( void ) {
              */
             setCpuFrequencyMhz( 80 );
             esp_light_sleep_start();
-            // from here, the consumption is round about 2.5mA
-            // total standby time is 152h (6days) without use?
+            log_i("CPU speed = 80MHz, start light sleep");
+            /*
+             * from here, the consumption is round about 2.5mA
+             * total standby time is 152h (6days) without use?
+             */
         }
         else {
             log_i("go standby blocked");
@@ -195,21 +203,21 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 10;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
-                // from here, the consumption is round about 14mA
-                // total standby time is 30h without use?
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/10MHz with light sleep");
+                /*
+                 * from here, the consumption is round about 14mA
+                 * total standby time is 30h without use?
+                 */
             #else
                 setCpuFrequencyMhz(80);
-                // from here, the consumption is round about 23mA
-                // total standby time is 19h without use?
+                log_i("CPU speed = 80MHz");
+                /*
+                 * from here, the consumption is round about 23mA
+                 * total standby time is 19h without use?
+                 */
             #endif
         }
     }
-    /*
-     * clear all request
-     */
-    powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
-
     /*
      * send loop event depending on powermem state
      */

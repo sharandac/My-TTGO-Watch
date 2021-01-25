@@ -85,8 +85,8 @@ void pmu_setup( void ) {
     /*
      * register all powermem callback functions
      */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "pmu" );
-    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "powermgm pmu" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "powermgm pmu loop" );
     /*
      * register blectl callback function
      */
@@ -236,7 +236,7 @@ void pmu_loop( void ) {
      */
     if ( nextmillis < millis() ) {
         /*
-         * reduce byttery update interval to 60s if we are in standby
+         * reduce battery update interval to 60s if we are in standby
          */
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             nextmillis = millis() + 60000L;
@@ -375,22 +375,14 @@ void pmu_wakeup( void ) {
         log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
     }
     /*
-     * wait for stable voltage
-     */
-    vTaskDelay( 50 );
-    /*
      * clear timer
      */
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
     /*
-     * enable LDO2, sound?
+     * enable LDO2, backlight?
      */
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
-    /*
-     * wait for stable voltage
-     */
-    vTaskDelay( 50 );
     /*
      * set update to force update the screen and so on
      */
@@ -591,7 +583,7 @@ void pmu_write_log( const char * filename ) {
         AXP20X_Class *power = TTGOClass::getWatch()->power;
 
         char log_line[256]="";
-        snprintf( log_line, sizeof( log_line ), "%s\t%lu\t%0.2f\t%0.1f\t%u\t%u\t%d\t%0.1f\t%0.1f\t%0.1f\t%0.1f",
+        snprintf( log_line, sizeof( log_line ), "%s\t%lu\t%0.3f\t%0.1f\t%u\t%u\t%d\t%0.1f\t%0.1f\t%0.1f\t%0.1f",
                                                 __FIRMWARE__,
                                                 millis(), 
                                                 power->getBattVoltage() / 1000.0,
@@ -605,7 +597,7 @@ void pmu_write_log( const char * filename ) {
                                                 power->getTemp()
         );
 
-        log_i("Firmware\tUptime_ms\tBatt_V\tBatt_mAh\tCharge_C\tDischarge_C\tBatt_%\tBatt_c_%\tCharging_mA\tDischarging_mA\tAXP_Temp_degC" );
+        log_i("Firmware\tUptime\tBatt_V\tBat_mAh\tCharge\tDischar\tBatt_%\tBatt_%\tCharg\tDischar\tAXP_degC" );
         log_i("%s", log_line );
 
         if ( !file.println( log_line ) ) {

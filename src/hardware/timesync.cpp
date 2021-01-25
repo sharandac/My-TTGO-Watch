@@ -47,9 +47,9 @@ void timesync_setup( void ) {
     timesync_read_config();
     time_event_handle = xEventGroupCreate();
 
-    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "timesync" );
-    blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "time sync ble" );
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "timesync" );
+    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
+    blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "powermgm timesync" );
 
     timesyncToSystem();
 }
