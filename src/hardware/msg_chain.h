@@ -24,21 +24,24 @@
 
     #include <stdint.h>
     #include <sys/time.h>
-
+    /**
+     * @brief msg chain entry structure
+     */
     struct msg_chain_entry_t {
-        msg_chain_entry_t *prev_msg;
-        time_t timestamp;
-        const char *msg;
-        msg_chain_entry_t *next_msg;
+        msg_chain_entry_t *prev_msg;                    /** @brief pointer to the preview msg chain entry, if NULL no preview entry available */
+        time_t timestamp;                               /** @brief timestamp, set when created */
+        const char *msg;                                /** @brief pointer to the msg itself, terminated with \0 */
+        msg_chain_entry_t *next_msg;                    /** @brief pointer to the next msg chain entry, if NULL no next entry available */
     };
-
+    /**
+     * @brief msg chain head structure
+     */
     struct msg_chain_t {
-        int32_t entrys;
-        msg_chain_entry_t *first_msg_chain_entry;
-        int32_t current_entry;
-        msg_chain_entry_t *current_msg_chain_entry;
+        int32_t entrys;                                 /** @brief number of entry, count by it self */
+        msg_chain_entry_t *first_msg_chain_entry;       /** @brief pointer to the first msg_chain_entry */
+        int32_t current_entry;                          /** @brief number of the current entry */
+        msg_chain_entry_t *current_msg_chain_entry;     /** @brief pointer to the current entry */
     };
-
     /**
      * @brief add a message to the msg_chain
      * 

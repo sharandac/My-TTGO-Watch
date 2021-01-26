@@ -110,6 +110,11 @@ void powermgm_loop( void ) {
             powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
             /*
              * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
              */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 160;
@@ -124,14 +129,19 @@ void powermgm_loop( void ) {
         }
         else {
             log_i("go wakeup");
-            /*
+            /**
              * set wakeup status/request and send events
              */
             powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
             powermgm_set_event( POWERMGM_WAKEUP );
             powermgm_send_event_cb( POWERMGM_WAKEUP );
-            /*
+            /**
              * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
              */
             #if CONFIG_PM_ENABLE
                 pm_config.max_freq_mhz = 240;
@@ -163,6 +173,7 @@ void powermgm_loop( void ) {
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
         /*
+         * send POWERMGM_STANDBY to all registered callback functions and
          * check if an standby callback block lightsleep in standby
          */
         lighsleep = powermgm_send_event_cb( POWERMGM_STANDBY );
@@ -184,37 +195,46 @@ void powermgm_loop( void ) {
             }
             /*
              * set cpu speed
+             * 
+             * note:    direct after change the CPU clock, we go to light sleep.
+             *          it is no difference in light sleep we have 80Mhz or 10Mhz
+             *          CPU clock. Current is the same.
              */
             setCpuFrequencyMhz( 80 );
-            esp_light_sleep_start();
             log_i("CPU speed = 80MHz, start light sleep");
             /*
              * from here, the consumption is round about 2.5mA
              * total standby time is 152h (6days) without use?
              */
+            esp_light_sleep_start();
         }
         else {
             log_i("go standby blocked");
             /*
              * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
              */
             #if CONFIG_PM_ENABLE
+                /*
+                 * from here, the consumption is round about 20mA with ble
+                 * total standby time is 15h with a 350mAh battery
+                 */
                 pm_config.max_freq_mhz = 80;
                 pm_config.min_freq_mhz = 10;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/10MHz with light sleep");
-                /*
-                 * from here, the consumption is round about 14mA
-                 * total standby time is 30h without use?
-                 */
             #else
+                /*
+                 * from here, the consumption is round about 28mA with ble
+                 * total standby time is 10h with a 350mAh battery
+                 */
                 setCpuFrequencyMhz(80);
                 log_i("CPU speed = 80MHz");
-                /*
-                 * from here, the consumption is round about 23mA
-                 * total standby time is 19h without use?
-                 */
             #endif
         }
     }
@@ -223,7 +243,12 @@ void powermgm_loop( void ) {
      */
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
         /*
-         * idle when lightsleep in standby not allowed
+         * Idle when lightsleep in standby not allowed
+         * It make it possible for the IDLE task to trottle
+         * down CPU clock or go into light sleep.
+         * 
+         * note:    When change vTaskDelay to an higher value, please
+         *          note that the reaction time to wake up increase.
          */
         if ( !lighsleep )
             vTaskDelay( 250 );
