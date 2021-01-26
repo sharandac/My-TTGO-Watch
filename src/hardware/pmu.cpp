@@ -585,7 +585,7 @@ void pmu_write_log( const char * filename ) {
         char log_line[256]="";
         snprintf( log_line, sizeof( log_line ), "%s\t%lu\t%0.3f\t%0.1f\t%u\t%u\t%d\t%0.1f\t%0.1f\t%0.1f\t%0.1f",
                                                 __FIRMWARE__,
-                                                millis(), 
+                                                millis() / 1000, 
                                                 power->getBattVoltage() / 1000.0,
                                                 pmu_get_coulumb_data(),
                                                 power->getBattChargeCoulomb(),

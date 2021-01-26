@@ -24,12 +24,21 @@
 #include "gui/mainbar/mainbar.h"
 #include "app_tile.h"
 
+static bool apptile_init = false;
+
 icon_t app_entry[ MAX_APPS_ICON ];
 lv_obj_t *app_cont[ MAX_APPS_TILES ];
 uint32_t app_tile_num[ MAX_APPS_TILES ];
 static lv_style_t app_style;
 
 void app_tile_setup( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( apptile_init ) {
+        log_e("apptile already initialized");
+        return;
+    }
 
     for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 0, "app tile" );
@@ -62,9 +71,18 @@ void app_tile_setup( void ) {
 
         log_d("icon screen/x/y: %d/%d/%d", app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ), app_entry[ app ].x, app_entry[ app ].y );
     }
+    apptile_init = true;
 }
 
 lv_obj_t *app_tile_register_app( const char* appname ) {
+    /*
+     * check if apptile alread initialized
+     */
+    if ( !apptile_init ) {
+        log_e("apptile not initialized");
+        while( true );
+    }
+
     for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         if ( app_entry[ app ].active == false ) {
             app_entry[ app ].active = true;
@@ -80,6 +98,14 @@ lv_obj_t *app_tile_register_app( const char* appname ) {
 }
 
 icon_t *app_tile_get_free_app_icon( void ) {
+    /*
+     * check if apptile alread initialized
+     */
+    if ( !apptile_init ) {
+        log_e("apptile not initialized");
+        while( true );
+    }
+
     for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         if ( app_entry[ app ].active == false ) {
             return( &app_entry[ app ] );
@@ -90,10 +116,26 @@ icon_t *app_tile_get_free_app_icon( void ) {
 }
 
 uint32_t app_tile_get_tile_num( void ) {
+    /*
+     * check if apptile alread initialized
+     */
+    if ( !apptile_init ) {
+        log_e("apptile not initialized");
+        while( true );
+    }
+
     return( app_tile_num[ 0 ] );
 }
 
 int32_t app_tile_get_active_app_entrys( void ) {
+    /*
+     * check if apptile alread initialized
+     */
+    if ( !apptile_init ) {
+        log_e("apptile not initialized");
+        while( true );
+    }
+    
     int32_t _appentry = 0;
     
     for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
@@ -105,6 +147,14 @@ int32_t app_tile_get_active_app_entrys( void ) {
 }
 
 const char *app_get_appentrys_name( int32_t appentry ) {
+    /*
+     * check if apptile alread initialized
+     */
+    if ( !apptile_init ) {
+        log_e("apptile not initialized");
+        while( true );
+    }
+    
     int32_t _appentry = 0;
     const char *appname = NULL;
         

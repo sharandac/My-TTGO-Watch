@@ -52,6 +52,14 @@ static uint32_t tile_entrys = 0;
 static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
 
 void mainbar_setup( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( mainbar ) {
+        log_e("main already initialized");
+        return;
+    }
+
     lv_style_init( &mainbar_style );
     lv_style_set_radius( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
@@ -79,7 +87,14 @@ void mainbar_setup( void ) {
 }
 
 uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
-    
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     tile_entrys++;
 
     if ( tile_pos_table == NULL ) {
@@ -135,22 +150,62 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
 }
 
 lv_style_t *mainbar_get_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     return( &mainbar_style );
 }
 
 lv_style_t *mainbar_get_switch_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     return( &mainbar_switch_style );
 }
 
 lv_style_t *mainbar_get_button_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     return( &mainbar_button_style );
 }
 
 lv_style_t *mainbar_get_slider_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     return( &mainbar_slider_style );
 }
 
 bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC hibernate_cb ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( tile_number < tile_entrys ) {
         tile[ tile_number ].hibernate_cb = hibernate_cb;
         return( true );
@@ -162,6 +217,14 @@ bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC 
 }
 
 bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( tile_number < tile_entrys ) {
         tile[ tile_number ].activate_cb = activate_cb;
         return( true );
@@ -173,6 +236,14 @@ bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC a
 }
 
 uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     uint32_t retval = -1;
 
     for ( int hor = 0 ; hor < x ; hor++ ) {
@@ -190,6 +261,14 @@ uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
 }
 
 lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( tile_number < tile_entrys ) {
         return( tile[ tile_number ].tile );
     }
@@ -200,6 +279,14 @@ lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
 }
 
 void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( tile_entrys != 0 ) {
         mainbar_jump_to_tilenumber( 0, anim );
         keyboard_hide();
@@ -212,6 +299,14 @@ void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
 }
 
 void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( tile_number < tile_entrys ) {
         log_i("jump to tile %d from tile %d", tile_number, current_tile );
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
@@ -232,15 +327,29 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
     }
 }
 
-lv_obj_t * mainbar_obj_create(lv_obj_t *parent)
-{
+lv_obj_t * mainbar_obj_create(lv_obj_t *parent) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     lv_obj_t * child = lv_obj_create( parent, NULL );
     lv_tileview_add_element( mainbar, child );
 
     return child;
 }
 
-void mainbar_add_slide_element(lv_obj_t *element)
-{
+void mainbar_add_slide_element(lv_obj_t *element) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     lv_tileview_add_element( mainbar, element );
 }
