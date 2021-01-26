@@ -59,6 +59,9 @@ void keyboard_prelim( void ) {
 }
 
 void keyboard_setup( void ) {
+    /*
+     * check if keyboard already initialized
+     */
     if ( kb != NULL )
         return;
 
@@ -74,6 +77,9 @@ void keyboard_setup( void ) {
 }
 
 void num_keyboard_setup( void ) {
+    /*
+     * check if keyboard already initialized
+     */
     if ( nkb != NULL )
         return;
 
@@ -89,6 +95,7 @@ void num_keyboard_setup( void ) {
 }
 
 static void kb_event_cb( lv_obj_t * ta, lv_event_t event ) {
+
     lv_keyboard_def_event_cb( ta, event );
     switch( event ) {
         case( LV_EVENT_CANCEL ):    keyboard_hide();
@@ -100,8 +107,12 @@ static void kb_event_cb( lv_obj_t * ta, lv_event_t event ) {
 }
 
 void keyboard_set_textarea( lv_obj_t *textarea ){
+    /*
+     * check if keyboard already initialized
+     */
     if ( kb == NULL )
         return;
+
     keyboard_show();
     kb_user_textarea = textarea;
     lv_textarea_set_text( kb_textarea, lv_textarea_get_text( textarea ) );
@@ -109,8 +120,12 @@ void keyboard_set_textarea( lv_obj_t *textarea ){
 }
 
 void num_keyboard_set_textarea( lv_obj_t *textarea ){
+    /*
+     * check if keyboard already initialized
+     */
     if ( nkb == NULL )
         return;
+
     num_keyboard_show();
     kb_user_textarea = textarea;
     lv_textarea_set_text( kb_textarea, lv_textarea_get_text( textarea ) );
@@ -136,6 +151,9 @@ void keyboard_hide( void ) {
 }
 
 void keyboard_show( void ) {
+    /*
+     * check if keyboard already initialized
+     */
     if ( kb == NULL )
         return;
 
@@ -145,6 +163,9 @@ void keyboard_show( void ) {
 }
 
 void num_keyboard_show( void ) {
+    /*
+     * check if keyboard already initialized
+     */
     if ( nkb == NULL )
         return;
     lv_obj_set_hidden( kb_screen, false );

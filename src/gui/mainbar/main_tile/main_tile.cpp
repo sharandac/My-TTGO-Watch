@@ -32,6 +32,8 @@
 #include "hardware/powermgm.h"
 #include "hardware/alloc.h"
 
+static bool maintile_init = false;
+
 static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
 static lv_obj_t *timelabel = NULL;
@@ -55,6 +57,14 @@ void main_tile_format_time( char *, size_t, struct tm * );
 bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
 
 void main_tile_setup( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( maintile_init ) {
+        log_e("maintile already initialized");
+        return;
+    }
+
     main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
     main_cont = mainbar_get_tile_obj( main_tile_num );
     style = mainbar_get_style();
@@ -127,9 +137,19 @@ void main_tile_setup( void ) {
     main_tile_task = lv_task_create( main_tile_update_task, 500, LV_TASK_PRIO_MID, NULL );
 
     powermgm_register_cb( POWERMGM_WAKEUP , main_tile_powermgm_event_cb, "main tile time update" );
+
+    maintile_init = true;
 }
 
 bool main_tile_powermgm_event_cb( EventBits_t event, void *arg ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        return( true );
+    }
+
     switch( event ) {
         case POWERMGM_WAKEUP:
             main_tile_update_time();
@@ -139,6 +159,14 @@ bool main_tile_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 lv_obj_t *main_tile_register_widget( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        while( true );
+    }
+
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             widget_entry[ widget ].active = true;
@@ -152,6 +180,14 @@ lv_obj_t *main_tile_register_widget( void ) {
 }
 
 icon_t *main_tile_get_free_widget_icon( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        while( true );
+    }
+
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             lv_obj_set_hidden( widget_entry[ widget ].icon_cont, false );
@@ -163,6 +199,14 @@ icon_t *main_tile_get_free_widget_icon( void ) {
 }
 
 void main_tile_align_widgets( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        return;
+    }
+
     int active_widgets = 0;
     lv_coord_t xpos = 0;
 
@@ -192,10 +236,26 @@ void main_tile_align_widgets( void ) {
 }
 
 uint32_t main_tile_get_tile_num( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        while( true );
+    }
+
     return( main_tile_num );
 }
 
 void main_tile_update_time( void ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        return;
+    }
+
     struct tm  info;
     char time_str[64]="";
     static char *old_time_str = NULL;
@@ -225,6 +285,14 @@ void main_tile_update_time( void ) {
 }
 
 void main_tile_update_task( lv_task_t * task ) {
+    /*
+     * check if maintile alread initialized
+     */
+    if ( !maintile_init ) {
+        log_e("maintile not initialized");
+        return;
+    }
+
     main_tile_update_time();
 }
 

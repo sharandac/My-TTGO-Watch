@@ -25,7 +25,9 @@
 #include "msg_chain.h"
 
 msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
-    // add msg_chain_t head structure if not exsist
+    /*
+     * add msg_chain_t head structure if not exsist
+     */
     if ( msg_chain == NULL ) {
         msg_chain = (msg_chain_t *)CALLOC( sizeof( msg_chain_t ), 1 );
         if ( msg_chain == NULL ) {
@@ -39,7 +41,9 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
         msg_chain->first_msg_chain_entry = NULL;
     }
  
-    // add new msg_chain_entry_t structure and add msg
+    /*
+     * add new msg_chain_entry_t structure and add msg
+     */
     msg_chain_entry_t *msg_chain_entry = (msg_chain_entry_t *)CALLOC( sizeof( msg_chain_entry_t ), 1 );
     if ( msg_chain_entry == NULL ) {
         log_e("msg_chain_entry_t alloc failed");
@@ -57,7 +61,9 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
         strcpy( (char*)msg_chain_entry->msg, msg );
     }
     
-    // add msg_chain_entry to the chain
+    /*
+     * add msg_chain_entry to the chain
+     */
     if ( msg_chain->first_msg_chain_entry == NULL ) {
         msg_chain->first_msg_chain_entry = msg_chain_entry;
         msg_chain->entrys++;
@@ -65,11 +71,15 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
     else {
         msg_chain_entry_t *current_msg_chain_entry = msg_chain->first_msg_chain_entry;
 
-        // find the last entry in the chain
+        /*
+         * find the last entry in the chain
+         */
         while( current_msg_chain_entry->next_msg != NULL ) {
             current_msg_chain_entry = current_msg_chain_entry->next_msg;
         }
-        // add a new msg_chain_entry
+        /*
+         * add a new msg_chain_entry
+         */
         current_msg_chain_entry->next_msg = msg_chain_entry;
         msg_chain_entry->prev_msg = current_msg_chain_entry;
         msg_chain->entrys++;
@@ -81,15 +91,22 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
     int32_t msg_counter = 0;
     bool retval = false;
 
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return( retval );
     }
-
-    if ( entry > msg_chain->entrys ) {
+    /*
+     * check if msg has an entry
+     */
+    if ( msg_chain->first_msg_chain_entry == NULL ) {
         return( retval );
     }
-
-    if ( msg_chain->first_msg_chain_entry == NULL ) {
+    /*
+     * check if entry exist
+     */
+    if ( entry > msg_chain->entrys ) {
         return( retval );
     }
 
@@ -97,10 +114,14 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
     msg_chain_entry_t *prev_msg_chain_entry = NULL;
     msg_chain_entry_t *next_msg_chain_entry = NULL;
 
-    // find the entry in the chain
+    /*
+     * find the entry in the chain
+     */
     do {
         if ( entry == msg_counter ) {
-            // get the prev and next msg chain entry if exsist
+            /*
+             * get the prev and next msg chain entry if exsist
+             */
             if ( msg_chain_entry->prev_msg != NULL ) {
                 prev_msg_chain_entry = msg_chain_entry->prev_msg;
             }
@@ -108,9 +129,14 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
                 next_msg_chain_entry = msg_chain_entry->next_msg;
             }
 
-            // free allocated msg
+            /*
+             * free allocated msg
+             */
             free( (void *)msg_chain_entry->msg );
 
+            /*
+             * delete chain entry in all conditions
+             */
             if ( prev_msg_chain_entry && next_msg_chain_entry ) {
                 prev_msg_chain_entry->next_msg = next_msg_chain_entry;
                 next_msg_chain_entry->prev_msg = prev_msg_chain_entry;
@@ -126,13 +152,18 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
                 msg_chain->first_msg_chain_entry = NULL;
             }
 
-            // free allocated msg chain entry
+            /*
+             * free allocated msg chain entry
+             */
             free( msg_chain_entry );
             msg_chain->entrys--;
             retval = true;
             break;
         }
 
+        /*
+         * get next chain entry
+         */
         if ( msg_chain_entry->next_msg != NULL ) {
             msg_counter++;
             msg_chain_entry = msg_chain_entry->next_msg;
@@ -151,73 +182,106 @@ time_t* msg_chain_get_msg_timestamp_entry( msg_chain_t *msg_chain, int32_t entry
     time_t* retval = NULL;
     int32_t msg_counter = 0;
 
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return( retval );
     }
-
+    /*
+     * check if msg has an entry
+     */
+    if ( msg_chain->first_msg_chain_entry == NULL ) {
+        return( retval );
+    }
+    /*
+     * check if entry exist
+     */
     if ( entry > msg_chain->entrys ) {
         return( retval );
     }
 
-    if ( msg_chain->first_msg_chain_entry == NULL ) {
-        return( retval );
-    }
-
+    /*
+     * get the first entry in the chain
+     */
     msg_chain_entry_t *msg_chain_entry = msg_chain->first_msg_chain_entry;
-
+    /*
+     * find the entry in the chain
+     */
     do {
         if ( entry == msg_counter ) {
-            return( &msg_chain_entry->timestamp );
+            retval = &msg_chain_entry->timestamp;
+            break;
         }
         if ( msg_chain_entry->next_msg != NULL ) {
             msg_counter++;
             msg_chain_entry = msg_chain_entry->next_msg;
         }
         else {
-            return( retval );
+            break;
         }
     } while ( true );
+
+    return( retval );
 }
 
 const char* msg_chain_get_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
     const char* retval = NULL;
     int32_t msg_counter = 0;
 
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return( retval );
     }
-
-    if ( entry > msg_chain->entrys ) {
-        return( retval );
-    }
-
+    /*
+     * check if msg has an entry
+     */
     if ( msg_chain->first_msg_chain_entry == NULL ) {
         return( retval );
     }
-
+    /*
+     * check if entry exist
+     */
+    if ( entry > msg_chain->entrys ) {
+        return( retval );
+    }
+    /*
+     * get the first entry in the chain
+     */
     msg_chain_entry_t *msg_chain_entry = msg_chain->first_msg_chain_entry;
-
+    /*
+     * find the entry in the chain
+     */
     do {
         if ( entry == msg_counter ) {
-            return( msg_chain_entry->msg );
+            retval = msg_chain_entry->msg;
+            break;
         }
         if ( msg_chain_entry->next_msg != NULL ) {
             msg_counter++;
             msg_chain_entry = msg_chain_entry->next_msg;
         }
         else {
-            return( retval );
+            break;
         }
     } while ( true );
+
+    return( retval );
 }
 
 int32_t msg_chain_get_entrys( msg_chain_t *msg_chain ) {
     int32_t msg_counter = 0;
-
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return( msg_counter );
     }
-
+    /*
+     * check if msg has an entry
+     */
     if ( msg_chain->first_msg_chain_entry == NULL ) {
         return( msg_counter );
     }
@@ -226,7 +290,9 @@ int32_t msg_chain_get_entrys( msg_chain_t *msg_chain ) {
     
     msg_chain_entry_t *msg_chain_entry = msg_chain->first_msg_chain_entry;
 
-    // find the last entry in to chain
+    /*
+     * count the entry in the chain
+     */
     while( msg_chain_entry->next_msg != NULL ) {
         msg_counter++;
         msg_chain_entry = msg_chain_entry->next_msg;
@@ -236,14 +302,21 @@ int32_t msg_chain_get_entrys( msg_chain_t *msg_chain ) {
 
 msg_chain_t *msg_chain_delete( msg_chain_t *msg_chain ) {
     int32_t entrys = 0;
-    
+
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return( NULL );
     }
-    
+    /*
+     * get number of entrys
+     */
     entrys = msg_chain_get_entrys( msg_chain );
 
-    // delete all msg_chain entrys
+    /*
+     * delete all msg_chain entrys
+     */
     for ( int32_t i = 0 ; i < entrys ; i++ ) {
         if ( !msg_chain_delete_msg_entry( msg_chain, 0 ) ) {
             log_e("delete msg from msg_chain failed");
@@ -252,14 +325,20 @@ msg_chain_t *msg_chain_delete( msg_chain_t *msg_chain ) {
     }
 
     free( msg_chain );
+
     return( NULL );
 }
 
 void msg_chain_printf_msg_chain( msg_chain_t *msg_chain ) {
+    /*
+     * check if msg chain exist
+     */
     if ( msg_chain == NULL ) {
         return;
     }
-
+    /*
+     * check if msg has an entry
+     */
     if ( msg_chain->first_msg_chain_entry == NULL ) {
         return;
     }
@@ -267,7 +346,9 @@ void msg_chain_printf_msg_chain( msg_chain_t *msg_chain ) {
     int32_t msg_counter = 0;
     msg_chain_entry_t *msg_chain_entry = msg_chain->first_msg_chain_entry;
 
-    // find the last entry in to chain
+    /*
+     * count and printf entry in the chain
+     */
     while( true ) {
         log_i("msg %d: %p < \"%s\" > %p", msg_counter, msg_chain_entry->prev_msg, msg_chain_entry->msg, msg_chain_entry->next_msg );
         if ( msg_chain_entry->next_msg == NULL ) {

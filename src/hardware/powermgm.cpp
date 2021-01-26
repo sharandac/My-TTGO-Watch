@@ -70,56 +70,89 @@ void powermgm_setup( void ) {
 }
 
 void powermgm_loop( void ) {
-    // check if a button or doubleclick was release
-    if( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM ) ) {
+    static bool lighsleep = true;
+    /*
+     * check if power button was release
+     */
+    if( powermgm_get_event( POWERMGM_POWER_BUTTON ) ) {
         if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
         else {
-            if ( powermgm_get_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK ) ) {
-                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-            }
+            powermgm_set_event( POWERMGM_STANDBY_REQUEST );
         }
-        powermgm_clear_event( POWERMGM_PMU_BUTTON | POWERMGM_BMA_DOUBLECLICK  | POWERMGM_BMA_TILT | POWERMGM_RTC_ALARM );
+        powermgm_clear_event( POWERMGM_POWER_BUTTON );
     }
-
+    /*
+     * when we are in wakeup and get an wakeup request, reset activity timer
+     */
     if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {
         lv_disp_trig_activity( NULL );
         powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
     }
   
-    // drive into
+    /*
+     * handle powermgm request
+     */
     if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST ) ) {
+        /*
+         * clear powermgm state
+         */
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
 
-        //Network transfer times are likely a greater time consumer than actual computational time
-        if (powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
+        if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             log_i("go silence wakeup");
-            #if CONFIG_PM_ENABLE
-                pm_config.max_freq_mhz = 240;
-                pm_config.min_freq_mhz = 40;
-                pm_config.light_sleep_enable = true;
-                ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
-            #else
-                setCpuFrequencyMhz(80);
-            #endif
+            /*
+             * set silence wakeup status/request and send events
+             */
+            powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
             powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
             powermgm_send_event_cb( POWERMGM_SILENCE_WAKEUP );
+            /*
+             * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
+             */
+            #if CONFIG_PM_ENABLE
+                pm_config.max_freq_mhz = 160;
+                pm_config.min_freq_mhz = 80;
+                pm_config.light_sleep_enable = true;
+                ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 160/80MHz with light sleep");
+            #else
+                setCpuFrequencyMhz(80);
+                log_i("CPU speed = 80MHz");
+            #endif
         }
         else {
             log_i("go wakeup");
-            #if CONFIG_PM_ENABLE
-                pm_config.max_freq_mhz = 240;
-                pm_config.min_freq_mhz = 240;
-                pm_config.light_sleep_enable = false;
-                ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
-            #else
-                setCpuFrequencyMhz(240);
-            #endif
+            /**
+             * set wakeup status/request and send events
+             */
+            powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
             powermgm_set_event( POWERMGM_WAKEUP );
             powermgm_send_event_cb( POWERMGM_WAKEUP );
+            /**
+             * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
+             */
+            #if CONFIG_PM_ENABLE
+                pm_config.max_freq_mhz = 240;
+                pm_config.min_freq_mhz = 80;
+                pm_config.light_sleep_enable = false;
+                ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 240/80MHz with light sleep");
+            #else
+                setCpuFrequencyMhz(240);
+                log_i("CPU speed = 240MHz");
+            #endif
             motor_vibe(3);
         }
 
@@ -129,53 +162,96 @@ void powermgm_loop( void ) {
 
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
-        
-        //Save info to avoid buzz when standby after silent wake
-        bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_SILENCE_WAKEUP_REQUEST );
-        
-        // send standby event
+        /*
+         * Save info to avoid buzz when standby after silent wake
+         */
+        bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP );
+        /*
+         * clear powermgm state/request and send standby event
+         */
+        powermgm_clear_event( POWERMGM_STANDBY_REQUEST );
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
         powermgm_set_event( POWERMGM_STANDBY );
+        /*
+         * send POWERMGM_STANDBY to all registered callback functions and
+         * check if an standby callback block lightsleep in standby
+         */
+        lighsleep = powermgm_send_event_cb( POWERMGM_STANDBY );
+        /*
+         * print some memory stats
+         */
+        log_i("Free heap: %d", ESP.getFreeHeap());
+        log_i("Free PSRAM heap: %d", ESP.getFreePsram());
+        log_i("uptime: %d", millis() / 1000 );
 
-//        adc_power_off();
-
-        if ( powermgm_send_event_cb( POWERMGM_STANDBY ) ) {
-            if (!noBuzz) motor_vibe(3);  //Only buzz if a non silent wake was performed
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
+        if ( lighsleep ) {
             log_i("go standby");
-            delay( 100 );
+            /*
+             * Only buzz if a non silent wake was performed
+             */
+            if (!noBuzz) {
+                motor_vibe(3);
+                delay( 100 );
+            }
+            /*
+             * set cpu speed
+             * 
+             * note:    direct after change the CPU clock, we go to light sleep.
+             *          it is no difference in light sleep we have 80Mhz or 10Mhz
+             *          CPU clock. Current is the same.
+             */
             setCpuFrequencyMhz( 80 );
+            log_i("CPU speed = 80MHz, start light sleep");
+            /*
+             * from here, the consumption is round about 2.5mA
+             * total standby time is 152h (6days) without use?
+             */
             esp_light_sleep_start();
-            // from here, the consumption is round about 2.5mA
-            // total standby time is 152h (6days) without use?
         }
         else {
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
             log_i("go standby blocked");
+            /*
+             * set cpu speed
+             * 
+             * note:    CONFIG_PM_ENABLE comes from the arduino IDF and is only use when
+             *          an custom arduino in platformio.ini is set. Is CONFIG_PM_ENABLE is set, it enabled
+             *          extra features like dynamic frequency scaling. Otherwise normal arduino function
+             *          will be used.
+             */
             #if CONFIG_PM_ENABLE
+                /*
+                 * from here, the consumption is round about 20mA with ble
+                 * total standby time is 15h with a 350mAh battery
+                 */
                 pm_config.max_freq_mhz = 80;
-                pm_config.min_freq_mhz = 40;
+                pm_config.min_freq_mhz = 10;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support");
-                // from here, the consumption is round about 14mA
-                // total standby time is 30h without use?
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/10MHz with light sleep");
             #else
+                /*
+                 * from here, the consumption is round about 28mA with ble
+                 * total standby time is 10h with a 350mAh battery
+                 */
                 setCpuFrequencyMhz(80);
-                // from here, the consumption is round about 23mA
-                // total standby time is 19h without use?
+                log_i("CPU speed = 80MHz");
             #endif
         }
     }
-    powermgm_clear_event( POWERMGM_SILENCE_WAKEUP_REQUEST | POWERMGM_WAKEUP_REQUEST | POWERMGM_STANDBY_REQUEST );
-
-    // send loop event depending on powermem state
+    /*
+     * send loop event depending on powermem state
+     */
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
-        vTaskDelay( 250 );
+        /*
+         * Idle when lightsleep in standby not allowed
+         * It make it possible for the IDLE task to trottle
+         * down CPU clock or go into light sleep.
+         * 
+         * note:    When change vTaskDelay to an higher value, please
+         *          note that the reaction time to wake up increase.
+         */
+        if ( !lighsleep )
+            vTaskDelay( 250 );
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
