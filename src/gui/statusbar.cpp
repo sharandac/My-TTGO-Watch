@@ -50,6 +50,7 @@
 #include "gui/mainbar/setup_tile/display_settings/display_settings.h"
 
 static bool statusbar_init = false;
+static bool statusbar_refresh_update = false;
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -306,7 +307,7 @@ void statusbar_setup( void )
     sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, statusbar_soundctl_event_cb, "statusbar sound");
     display_register_cb( DISPLAYCTL_BRIGHTNESS, statusbar_displayctl_event_cb, "statusbar display" );
 
-    statusbar_task = lv_task_create( statusbar_update_task, 500, LV_TASK_PRIO_MID, NULL );
+    statusbar_task = lv_task_create( statusbar_update_task, 250, LV_TASK_PRIO_MID, NULL );
 }
 
 void statusbar_update_task( lv_task_t * task ) {
@@ -318,7 +319,10 @@ void statusbar_update_task( lv_task_t * task ) {
         return;
     }
 
-    statusbar_refresh();
+    if ( statusbar_refresh_update ) {
+        statusbar_refresh();
+        statusbar_refresh_update = false;
+    }
 }
 
 bool statusbar_soundctl_event_cb( EventBits_t event, void *arg ) {
@@ -384,10 +388,14 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
                                             snprintf( level, sizeof( level ), "%d%%", *(int32_t*)arg );
                                             percent = *(int32_t*)arg;
                                         }
+                                        else if ( *(int32_t*)arg > 100 ) {
+                                            snprintf( level, sizeof( level ), "!%d%%", *(int32_t*)arg );
+                                            percent = *(int32_t*)arg;
+                                        }
                                         else {
                                             snprintf( level, sizeof( level ), "?" );
                                             percent = 0;
-                                    }
+                                        }
                                         lv_label_set_text( statusicon[  STATUSBAR_BATTERY_PERCENT ].icon, (const char *)level );
                                         if ( !plug ) {
                                             if ( percent >= 75 ) { 
@@ -429,7 +437,6 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
                                         }
                                         break;
     }
-    statusbar_refresh();
     return( true );
 }
 
@@ -466,7 +473,7 @@ bool statusbar_rtcctl_event_cb( EventBits_t event, void *arg ) {
             statusbar_hide_icon( STATUSBAR_ALARM );
             break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
     return( true );
 }
 
@@ -492,7 +499,7 @@ bool statusbar_blectl_event_cb( EventBits_t event, void *arg ) {
         case BLECTL_DISCONNECT:     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
                                     break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
     return( true );
 }
 
@@ -539,7 +546,7 @@ bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
     return( true );
 }
 
@@ -599,7 +606,7 @@ void statusbar_display_event_cb( lv_obj_t *display, lv_event_t event ){
             mainbar_jump_to_tilenumber( display_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
 }
 
 void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event ) {
@@ -629,7 +636,7 @@ void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event ) {
             mainbar_jump_to_tilenumber( sound_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
 }
 
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
@@ -651,14 +658,14 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
                                                         wifictl_set_autoon( true );
                                                         break;
             }
-            statusbar_refresh();
+            statusbar_refresh_update = true;
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
             mainbar_jump_to_tilenumber(wifi_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
 }
 
 void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event ) {
@@ -682,14 +689,14 @@ void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event ) {
                 default:
                     break;
             }
-            statusbar_refresh();
+            statusbar_refresh_update = true;
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
             mainbar_jump_to_tilenumber(bluetooth_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
 }
 
 void statusbar_wifi_set_state( bool state, const char *wifiname ) {
@@ -879,7 +886,7 @@ void statusbar_expand( bool expand ) {
             should_save_sound_config = false;
         }
     }
-    statusbar_refresh();
+    statusbar_refresh_update = true;
 }
 
 void statusbar_hide( bool hide ) {
