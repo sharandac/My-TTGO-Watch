@@ -246,7 +246,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
             xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
             xTaskCreate(    update_Task,
                             "update Task",
-                            10000,
+                            12000,
                             NULL,
                             1,
                             &_update_Task );
@@ -298,7 +298,7 @@ void update_Task( void * pvParameters ) {
         lv_obj_invalidate( lv_scr_act() );
     }
     if ( ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {
-        if( WiFi.status() == WL_CONNECTED ) {
+        if( ( WiFi.status() == WL_CONNECTED ) ) {
 
             uint32_t display_timeout = display_get_timeout();
             display_set_timeout( DISPLAY_MAX_TIMEOUT );

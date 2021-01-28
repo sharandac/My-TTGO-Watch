@@ -33,6 +33,8 @@
 #include "http_ota.h"
 #include "alloc.h"
 #include "powermgm.h"
+#include "pmu.h"
+#include "blectl.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -45,12 +47,25 @@ void http_ota_progress_cb( uint8_t progress ) {
 }
 
 bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
+    bool retval = false;
+    /*
+     * disable ble and set esp32 voltage to 3.3V to
+     * prevent some issues
+     */
+    blectl_off();
+    pmu_set_safe_voltage_for_update();
+    /*
+     * if firmware an .gz file, take compressed ota otherwise
+     * take a normal uncompressed firmware
+     */
     if ( strstr( url, ".gz") ) {
-        return( http_ota_start_compressed( url, md5, firmwaresize ) );
+        retval = http_ota_start_compressed( url, md5, firmwaresize );
     }
     else {
-        return( http_ota_start_uncompressed( url, md5 ) );
+        retval = http_ota_start_uncompressed( url, md5 );
     }
+
+    return( retval );
 }
 
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize ) {
@@ -59,13 +74,21 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
 
     HTTPClient http;
 
+    /*
+     * start get firmware file
+     */
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
     http.begin( url );
     int httpCode = http.GET();
 
     if ( httpCode > 0 && httpCode == HTTP_CODE_OK ) {
+        /*
+         * send http_ota_start event
+         */
         http_ota_send_event_cb( HTTP_OTA_START, (void *)NULL );
-
+        /*
+         * start an unpacker instance, reister progress callback and put the stream in
+         */
         GzUnpacker *GZUnpacker = new GzUnpacker();
 
         GZUnpacker->setGzProgressCallback( http_ota_progress_cb );

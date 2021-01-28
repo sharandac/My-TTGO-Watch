@@ -506,6 +506,15 @@ void pmu_set_experimental_power_save( bool value ) {
     pmu_save_config();
 }
 
+void pmu_set_safe_voltage_for_update( void ) {
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    
+    ttgo->power->setDCDC3Voltage( NORMALVOLTAGE + 100 );
+    log_i("set %dmV voltage", NORMALVOLTAGE );
+
+    vTaskDelay(250);
+}
+
 int32_t pmu_get_battery_percent( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 

@@ -205,5 +205,9 @@
      * @return  true if success, false if failed
      */
     bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
+    /**
+     *  @brief  set normal voltage (3.3V) for update/flashing
+     */
+    void pmu_set_safe_voltage_for_update( void );
 
 #endif // _PMU_H
