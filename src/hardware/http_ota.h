@@ -15,10 +15,11 @@
      * 
      * @param   url     pointer to an url
      * @param   md5     pointer to an md5 hash
+     * @param   size    size in bytes or 0 if unknown
      * 
      * @return  true if success or false if failed
      */
-    bool http_ota_start( const char* url, const char* md5 );
+    bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize );
     /**
      * @brief register an callback function for an http_ota event
      * 

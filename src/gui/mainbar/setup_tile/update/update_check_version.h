@@ -24,8 +24,37 @@
 
     #include <TTGO.h>
 
+    /**
+     * @brief   get firmware discription file
+     * 
+     * @param   firmware discription file url
+     * 
+     * @return  0 if failed or version number
+     */
     int64_t update_check_new_version( char *url );
+    /**
+     * @brief   get binary firmware file
+     * 
+     * @return  NULL if failed or pointer to the firmware file
+     */
     const char* update_get_url( void );
+    /**
+     * @brief   get md5 hash of the firmware file
+     * 
+     * @return  NULL if failed or pointer to the md5 hash
+     */
     const char* update_get_md5( void );
+    /**
+     * @brief   get comment from firmware discription
+     * 
+     * @return  NULL if failed or pointer to the discription
+     */
+    const char* update_get_comment( void );
+    /**
+     * @brief   get uncompressed firmware size
+     * 
+     * @return  <= 0 if unknown or size in bytes
+     */
+    int32_t update_get_size( void );
 
 #endif // _UPDATE_CHECK_VERSION_H

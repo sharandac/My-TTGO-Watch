@@ -25,6 +25,7 @@
  *
  */
 #include "config.h"
+#include "hardware/ESP32-targz/ESP32-targz.h"
 #include <HTTPClient.h>
 #include <Update.h>
 
@@ -34,9 +35,59 @@
 #include "powermgm.h"
 
 callback_t *http_ota_callback = NULL;
+bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
+bool http_ota_start_uncompressed( const char* url, const char* md5 );
 bool http_ota_send_event_cb( EventBits_t event, void *arg );
 
-bool http_ota_start( const char* url, const char* md5 ) {
+void http_ota_progress_cb( uint8_t progress ) {
+    float tmp_progress = progress;
+    http_ota_send_event_cb( HTTP_OTA_PROGRESS, (void*)&tmp_progress );
+}
+
+bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
+    if ( strstr( url, ".gz") ) {
+        return( http_ota_start_compressed( url, md5, firmwaresize ) );
+    }
+    else {
+        return( http_ota_start_uncompressed( url, md5 ) );
+    }
+}
+
+bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize ) {
+    bool retval = false;
+    int32_t size = UPDATE_SIZE_UNKNOWN;
+
+    HTTPClient http;
+
+    http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
+    http.begin( url );
+    int httpCode = http.GET();
+
+    if ( httpCode > 0 && httpCode == HTTP_CODE_OK ) {
+        http_ota_send_event_cb( HTTP_OTA_START, (void *)NULL );
+
+        GzUnpacker *GZUnpacker = new GzUnpacker();
+
+        GZUnpacker->setGzProgressCallback( http_ota_progress_cb );
+
+        if ( firmwaresize != 0 )
+            size = firmwaresize;
+
+        if( !GZUnpacker->gzStreamUpdater( http.getStreamPtr(), size, 0, false ) ) {
+            log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
+            http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing ... failed!" );
+        }
+        else {
+            http_ota_send_event_cb( HTTP_OTA_FINISH, (void*)"Flashing ... done!" );
+            retval = true;
+        }
+    }
+    http.end();
+
+    return( retval );
+}
+
+bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
     float downloaded = 0;                               /** @brief downloaded firmware size in bytes*/
     int32_t total = 1;                                  /** @brief total firmware size in bytes*/
     int32_t written = 0;                                /** @brief written firmware data block in bytes*/

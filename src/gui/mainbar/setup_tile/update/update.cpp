@@ -171,7 +171,7 @@ void update_progress_task( lv_task_t *task ) {
     if ( progress > 0 ) {
         char msg[16]="";
         lv_bar_set_value( update_progressbar, progress, LV_ANIM_ON );
-        snprintf( msg, sizeof( msg ), "%.1f%%", progress );
+        snprintf( msg, sizeof( msg ), "%.0f%%", progress );
         lv_label_set_text( update_status_label, msg );
         lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     }
@@ -309,7 +309,7 @@ void update_Task( void * pvParameters ) {
             lv_label_set_text( update_status_label, "start update ..." );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-            if ( http_ota_start( update_get_url(), update_get_md5() ) ) {
+            if ( http_ota_start( update_get_url(), update_get_md5(), update_get_size() ) ) {
                 reset = true;
                 progress = 0;
                 lv_label_set_text( update_status_label, "update ok, turn off and on!" );

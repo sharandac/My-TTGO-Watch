@@ -764,6 +764,7 @@ void statusbar_hide_icon( statusbar_icon_t icon ) {
     }
 
     lv_obj_set_hidden( statusicon[ icon ].icon, true );
+    statusbar_refresh_update = true;
 }
 
 void statusbar_show_icon( statusbar_icon_t icon ) {
@@ -780,6 +781,7 @@ void statusbar_show_icon( statusbar_icon_t icon ) {
     }
 
     lv_obj_set_hidden( statusicon[ icon ].icon, false );
+    statusbar_refresh_update = true;
 }
 
 void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
@@ -796,6 +798,7 @@ void statusbar_style_icon( statusbar_icon_t icon, statusbar_style_t style ) {
     }
 
     statusicon[ icon ].style = &statusbarstyle[ style ];
+    statusbar_refresh_update = true;
 }
 
 void statusbar_refresh( void ) {
