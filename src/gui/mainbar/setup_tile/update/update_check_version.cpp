@@ -81,6 +81,26 @@ int64_t update_check_new_version( char *url ) {
         log_i("firmwarehost: %s", firmwarehost );
     }
 
+    if ( doc["file"] ) {
+        if ( firmwarefile == NULL ) {
+            firmwarefile = (char*)CALLOC( strlen( doc["file"] ) + 1, 1 );
+            if ( firmwarefile == NULL ) {
+                log_e("calloc error");
+                while(true);
+            }
+        }
+        else {
+            char * tmp_firmwarefile = (char*)REALLOC( firmwarefile, strlen( doc["file"] ) + 1 );
+            if ( tmp_firmwarefile == NULL ) {
+                log_e("realloc error");
+                while(true);
+            }
+            firmwarefile = tmp_firmwarefile;
+        }
+        strcpy( firmwarefile, doc["file"] );
+        log_i("firmwarefile: %s", firmwarefile );
+    }
+
     if ( doc["gzipfile"] ) {
         if ( firmwarefile == NULL ) {
             firmwarefile = (char*)CALLOC( strlen( doc["gzipfile"] ) + 1, 1 );
