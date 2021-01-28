@@ -64,17 +64,13 @@ void sound_setup( void ) {
     if ( sound_init )
         return;
 
+    /*
+     * read config from SPIFFS
+     */
     sound_read_config();
-
-    // disable sound when webserver is enabled
-/*
-    if ( wifictl_get_webserver() ) {
-        log_i("disable sound while webserver is enabled, issue #104");
-        sound_set_enabled_config( false );
-        return;
-    }
-*/    
-    //out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+    /*
+     * config sound driver and interface
+     */
     out = new AudioOutputI2S();
     out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
     sound_set_volume_config( sound_config.volume );
@@ -82,10 +78,14 @@ void sound_setup( void ) {
     wav = new AudioGeneratorWAV();
     sam = new ESP8266SAM;
     sam->SetVoice(sam->VOICE_SAM);
-
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "sound" );
-    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "sound loop" );
-
+    /*
+     * register all powermgm callback functions
+     */
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
+    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
+    /*
+     * enable sound
+     */
     sound_set_enabled( sound_config.enable );
 
     sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
@@ -96,47 +96,56 @@ void sound_setup( void ) {
 
 bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          sound_standby();
+        case POWERMGM_STANDBY:          sound_set_enabled( false );
+                                        log_i("go standby");
                                         break;
-        case POWERMGM_WAKEUP:           sound_wakeup();
+        case POWERMGM_WAKEUP:           sound_set_enabled( sound_config.enable );
+                                        log_i("go wakeup");
                                         break;
-        case POWERMGM_SILENCE_WAKEUP:   sound_wakeup();
+        case POWERMGM_SILENCE_WAKEUP:   sound_set_enabled( sound_config.enable );
+                                        log_i("go wakeup");
                                         break;
     }
     return( true );
 }
 
 bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
-    sound_loop();
+    if ( sound_config.enable && sound_init ) {
+        // we call sound_set_enabled(false) to ensure the PMU stops all power
+        if ( mp3->isRunning() && !mp3->loop() ) {
+            log_i("stop playing mp3 sound");
+            mp3->stop();
+        }
+        if ( wav->isRunning() && !wav->loop() ) {
+            log_i("stop playing wav sound");
+            wav->stop(); 
+        }
+    }
     return( true );
 }
 
 bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    /*
+     * check if an callback table exist, if not allocate a callback table
+     */
     if ( sound_callback == NULL ) {
         sound_callback = callback_init( "sound" );
         if ( sound_callback == NULL ) {
             log_e("sound callback alloc failed");
             while(true);
         }
-    }    
+    }
+    /*
+     * register an callback entry and return them
+     */
     return( callback_register( sound_callback, event, callback_func, id ) );
 }
 
 bool sound_send_event_cb( EventBits_t event, void *arg ) {
+    /*
+     * call all callbacks with her event mask
+     */
     return( callback_send( sound_callback, event, arg ) );
-}
-
-void sound_standby( void ) {
-    log_i("go standby");
-    sound_set_enabled( false );
-}
-
-void sound_wakeup( void ) {
-    log_i("go wakeup");
-    sound_set_enabled( sound_config.enable );
-    // to avoid additional power consumtion when waking up, audio is only enabled when 
-    // a 'play sound' method is called
-    // this would be the place to play a wakeup sound
 }
 
 /**
@@ -148,6 +157,7 @@ void sound_set_enabled( bool enabled ) {
 
     if ( enabled ) {
         ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setLDO3Voltage( 3000 );
         ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
     }
     else {
@@ -157,20 +167,6 @@ void sound_set_enabled( bool enabled ) {
         }
         ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
         ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
-    }
-}
-
-void sound_loop( void ) {
-    if ( sound_config.enable && sound_init ) {
-        // we call sound_set_enabled(false) to ensure the PMU stops all power
-        if ( mp3->isRunning() && !mp3->loop() ) {
-            log_i("stop playing mp3 sound");
-            mp3->stop();
-        }
-        if ( wav->isRunning() && !wav->loop() ) {
-            log_i("stop playing wav sound");
-            wav->stop(); 
-        }
     }
 }
 

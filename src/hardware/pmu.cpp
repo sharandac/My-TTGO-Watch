@@ -24,19 +24,32 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
 bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
 bool pmu_blectl_event_cb( EventBits_t event, void *arg );
 bool pmu_send_cb( EventBits_t event, void *arg );
+void pmu_write_log( const char * filename );
 
 void pmu_setup( void ) {
 
+    /*
+     * read config from SPIFF
+     */
     pmu_read_config();
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    // Turn on the IRQ used
+    /*
+     * Turn on the IRQ used
+     */
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
     ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
     ttgo->power->clearIRQ();
-
-    // enable coulumb counter
+    /*
+     * delete old charge logfile
+     */
+    if ( ttgo->power->isVBUSPlug() ) {
+        SPIFFS.remove( PMU_CHARGE_LOG_FILENAME );
+    }
+    /*
+     * enable coulumb counter and set target voltage for charging
+     */
     if ( ttgo->power->EnableCoulombcounter() ) 
         log_e("enable coulumb counter failed!");    
     if ( pmu_config.high_charging_target_voltage ) {
@@ -53,21 +66,30 @@ void pmu_setup( void ) {
         log_e("charge current set failed!");
     if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) )
         log_e("adc sample set failed!");
-
-    // Turn off unused power
+    /*
+     * Turn off unused power
+     */
     ttgo->power->setPowerOutPut( AXP202_EXTEN, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
-
-    // Turn i2s DAC on
+    /*
+     * Turn i2s DAC on
+     */
     ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
     ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-
+    /*
+     * register IRQ function and GPIO pin
+     */
     pinMode( AXP202_INT, INPUT );
     attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
-
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "pmu" );
-    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "pmu loop" );
+    /*
+     * register all powermem callback functions
+     */
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "powermgm pmu" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "powermgm pmu loop" );
+    /*
+     * register blectl callback function
+     */
     blectl_register_cb( BLECTL_CONNECT, pmu_blectl_event_cb, "pmu blectl" );
 }
 
@@ -128,84 +150,168 @@ void pmu_loop( void ) {
     if ( temp_pmu_irq_flag ) {        
         ttgo->power->readIRQ();
         if ( ttgo->power->isVbusPlugInIRQ() ) {
+            /*
+             * set an wakeup request and
+             * delete old charging logfile when plug in and
+             * set variable plug to true
+             */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            SPIFFS.remove( PMU_CHARGE_LOG_FILENAME );
             plug = true;
         }
         if ( ttgo->power->isVbusRemoveIRQ() ) {
+            /*
+             * set an wakeup request and
+             * remove old discharging log file when unplug
+             * set variable plug to false
+             */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            SPIFFS.remove( PMU_DISCHARGE_LOG_FILENAME );
             plug = false;
         }
         if ( ttgo->power->isChargingIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to true
+             */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             charging = true;
         }
         if ( ttgo->power->isChargingDoneIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to false
+             */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             charging = false;
         }
         if ( ttgo->power->isPEKShortPressIRQ() ) {
-            powermgm_set_event( POWERMGM_PMU_BUTTON );
+            /*
+             * set an wakeup request
+             * clear IRQ state
+             * send PMUCTL_SHORT_PRESS event
+             * fast return for faster wakeup
+             */
+            powermgm_set_event( POWERMGM_POWER_BUTTON );
             ttgo->power->clearIRQ();
             pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
             return;
         }
         if ( ttgo->power->isPEKLongtPressIRQ() ) {
+            /*
+             * clear IRQ state
+             * set an wakeup request
+             * send PMUCTL_LONG_PRESS event
+             * fast return for faster wakeup
+             */
             ttgo->power->clearIRQ();
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
             return;
         }
         if ( ttgo->power->isTimerTimeoutIRQ() ) {
-            powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+            /*
+             * clear pmu timer and IRQ state
+             * set an silence wakeup request
+             * send PMUCTL_LONG_PRESS event
+             * fast return for faster wakeup
+             */
             ttgo->power->clearTimerStatus();
             ttgo->power->offTimer();
             ttgo->power->clearIRQ();
+            powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+            pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
             return;
         }
+        /*
+         * clear IRQ
+         * set update flag
+         */
         ttgo->power->clearIRQ();
         pmu_update = true;
     }
 
-    // check if an update necessary
+    /*
+     *  check if an update necessary and set percent variable if change
+     */
     if ( nextmillis < millis() ) {
-        // reduce byttery update interval to 60s if we are in standby
-        if ( powermgm_get_event( POWERMGM_STANDBY ) )
+        /*
+         * reduce battery update interval to 60s if we are in standby
+         */
+        if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             nextmillis = millis() + 60000L;
-        else
+        }
+        else {
             nextmillis = millis() + 10000L;
+        }
 
-        // only update if an change is detected
+        /*
+         * only update if an change is detected
+         */
         tmp_percent = pmu_get_battery_percent();
         if ( tmp_percent != percent ) {
             pmu_update = true;
             percent = tmp_percent;
         }
+
+        /* 
+         * log pmu data if enabled
+         */
+        if ( pmu_config.pmu_logging ) {
+            if ( plug && charging ) {
+                pmu_write_log( PMU_CHARGE_LOG_FILENAME );
+            }
+            else {
+                pmu_write_log( PMU_DISCHARGE_LOG_FILENAME );
+            }
+        }
+
     }
 
+    /*
+     * check if update flag is set
+     */
     if ( pmu_update ) {
-
+        /*
+         * send battery percent via blectl
+         */
         char msg[64]="";
         snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
         blectl_send_msg( msg );
-
+        /*
+         * send updates via pmu event
+         */
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
         pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
         pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+        /*
+         * clear update frag
+         */
         pmu_update = false;
     }
 }
 
 bool pmu_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    /*
+     * check if an callback table exist, if not allocate a callback table
+     */
     if ( pmu_callback == NULL ) {
         pmu_callback = callback_init( "pmu" );
         if ( pmu_callback == NULL ) {
             log_e("pmu_callback alloc failed");
-            while(true);
+            while( true );
         }
     }
+    /*
+     * register an callback entry and return them
+     */
     return( callback_register( pmu_callback, event, callback_func, id ) );
 }
 
 bool pmu_send_cb( EventBits_t event, void *arg ) {
+    /*
+     * call all callbacks with her event mask
+     */
     return( callback_send( pmu_callback, event, arg ) );
 }
 
@@ -218,6 +324,9 @@ void pmu_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     ttgo->power->clearTimerStatus();
+    /*
+     * if silence wakeup enabled set the wakeup timer, depending on vplug
+     */
     if ( pmu_get_silence_wakeup() ) {
         if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
             ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
@@ -229,6 +338,9 @@ void pmu_standby( void ) {
         }
     }
 
+    /*
+     * set powersave voltage depending on settings
+     */
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( pmu_config.experimental_power_save_voltage );
         log_i("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
@@ -237,8 +349,13 @@ void pmu_standby( void ) {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
         log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
     }
+    /*
+     * disable LD02, sound?
+     */
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
-
+    /*
+     * enable GPIO in lightsleep for wakeup
+     */
     gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
     esp_sleep_enable_gpio_wakeup ();
 }
@@ -246,6 +363,9 @@ void pmu_standby( void ) {
 void pmu_wakeup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
+    /*
+     * set normal voltage depending on settings
+     */
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( pmu_config.experimental_normal_voltage );
         log_i("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
@@ -254,12 +374,18 @@ void pmu_wakeup( void ) {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_voltage );
         log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
     }
-
+    /*
+     * clear timer
+     */
     ttgo->power->clearTimerStatus();
     ttgo->power->offTimer();
-
+    /*
+     * enable LDO2, backlight?
+     */
     ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );
-
+    /*
+     * set update to force update the screen and so on
+     */
     pmu_update = true;
 }
 
@@ -283,6 +409,7 @@ void pmu_save_config( void ) {
         doc["compute_percent"] = pmu_config.compute_percent;
         doc["high_charging_target_voltage"] = pmu_config.high_charging_target_voltage;
         doc["designed_battery_cap"] = pmu_config.designed_battery_cap;
+        doc["pmu_logging"] = pmu_config.pmu_logging;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -318,6 +445,7 @@ void pmu_read_config( void ) {
             pmu_config.normal_power_save_voltage = doc["normal_power_save_voltage"] | NORMALPOWERSAVEVOLTAGE;
             pmu_config.experimental_normal_voltage = doc["experimental_normal_voltage"] | EXPERIMENTALNORMALVOLTAGE;
             pmu_config.experimental_power_save_voltage = doc["experimental_power_save_voltage"] | EXPERIMENTALPOWERSAVEVOLTAGE;
+            pmu_config.pmu_logging = doc["pmu_logging"] | false;
         }        
         doc.clear();
     }
@@ -426,4 +554,55 @@ bool pmu_is_charging( void ) {
 bool pmu_is_vbus_plug( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     return( ttgo->power->isVBUSPlug() );
+}
+
+void pmu_write_log( const char * filename ) {
+    time_t now;
+    struct tm info;
+
+    time( &now );
+    localtime_r( &now, &info );
+
+    bool write_header = !( SPIFFS.exists( filename ) );
+
+    fs::File file = SPIFFS.open( filename, FILE_APPEND );
+
+    if (!file) {
+        log_e("Can't open file: %s!", filename );
+        return;
+    }
+
+    if ( write_header ) {
+        file.println("Date\tTime\tFirmware\tUptime_ms\tBatt_V\tBatt_mAh\tCharge_C\tDischarge_C\tBatt_%\tBatt_c_%\tCharging_mA\tDischarging_mA\tAXP_Temp_degC" );
+    }
+
+    if ( !file.print( &info, "%F%t%T%t" ) ) {
+        log_e("Failed to append to event log file: %s!", filename );
+    }
+    else {
+        AXP20X_Class *power = TTGOClass::getWatch()->power;
+
+        char log_line[256]="";
+        snprintf( log_line, sizeof( log_line ), "%s\t%lu\t%0.3f\t%0.1f\t%u\t%u\t%d\t%0.1f\t%0.1f\t%0.1f\t%0.1f",
+                                                __FIRMWARE__,
+                                                millis() / 1000, 
+                                                power->getBattVoltage() / 1000.0,
+                                                pmu_get_coulumb_data(),
+                                                power->getBattChargeCoulomb(),
+                                                power->getBattDischargeCoulomb(),
+                                                power->getBattPercentage(),
+                                                ( power->getCoulombData() / pmu_config.designed_battery_cap ) * 100,
+                                                power->getBattChargeCurrent(),
+                                                power->getBattDischargeCurrent(),
+                                                power->getTemp()
+        );
+
+        log_i("Firmware\tUptime\tBatt_V\tBat_mAh\tCharge\tDischar\tBatt_%\tBatt_%\tCharg\tDischar\tAXP_degC" );
+        log_i("%s", log_line );
+
+        if ( !file.println( log_line ) ) {
+            log_e("Failed to append to event log file: %s!", filename );
+        }
+    }
+    file.close();
 }

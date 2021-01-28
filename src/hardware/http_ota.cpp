@@ -69,11 +69,7 @@ bool http_ota_start( const char* url, const char* md5 ) {
                     size = stream->available();
                     if( size > 0 ) {
                         int c = stream->readBytes( buff, ( ( size > HTTP_OTA_BUFFER_SIZE ) ? HTTP_OTA_BUFFER_SIZE : size ) );
-                        noInterrupts();
-                        powermgm_disable_interrupts();
                         written = Update.write( buff, c );
-                        powermgm_enable_interrupts();
-                        interrupts();
                         if ( written > 0 ) {
                             if( written != c ) {
                                 http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing chunk not full ... warning!" );

@@ -80,8 +80,8 @@ void bma_setup( void ) {
 
     bma_reload_settings();
 
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "bma" );
-    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "bma loop" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "powermgm bma" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "powermgm bma loop" );
 }
 
 bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -120,11 +120,11 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
         while( !ttgo->bma->readInterrupt() );
 
         if ( ttgo->bma->isDoubleClick() ) {
-            powermgm_set_event( POWERMGM_BMA_DOUBLECLICK );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
         }
         if ( ttgo->bma->isTilt() ) {
-            powermgm_set_event( POWERMGM_BMA_TILT );
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             bma_send_event_cb( BMACTL_TILT, (void *)"" );
         }
         if ( ttgo->bma->isStepCounter() ) {

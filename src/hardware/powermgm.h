@@ -31,13 +31,9 @@
     #define POWERMGM_SILENCE_WAKEUP_REQUEST     _BV(3)         /** @brief event mask for powermgm wakeup silence request */
     #define POWERMGM_WAKEUP                     _BV(4)         /** @brief event mask for powermgm wakeup */
     #define POWERMGM_WAKEUP_REQUEST             _BV(5)         /** @brief event mask for powermgm wakeup request */
-    #define POWERMGM_PMU_BUTTON                 _BV(6)         /** @brief event mask for powermgm pmu button is pressed */
-    #define POWERMGM_BMA_DOUBLECLICK            _BV(9)         /** @brief event mask for powermgm bma soubleclick */
-    #define POWERMGM_BMA_TILT                   _BV(10)        /** @brief event mask for powermgm bma tilt */
-    #define POWERMGM_RTC_ALARM                  _BV(11)        /** @brief event mask for powermgm rtc alarm */
+    #define POWERMGM_POWER_BUTTON               _BV(6)         /** @brief event mask for powermgm pmu button is pressed */
     #define POWERMGM_SHUTDOWN                   _BV(12)        /** @brief event mask for powermgm shutdown */
     #define POWERMGM_RESET                      _BV(13)        /** @brief event mask for powermgm reset */
-    #define POWERMGM_PMU_LONG_BUTTON            _BV(14)        /** @brief event mask for powermgm pmu button is long pressed */
     #define POWERMGM_DISABLE_INTERRUPTS         _BV(15)        
     #define POWERMGM_ENABLE_INTERRUPTS          _BV(16)        
     

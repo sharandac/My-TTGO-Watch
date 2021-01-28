@@ -26,6 +26,8 @@
 #include "gui/icon.h"
 #include "hardware/motor.h"
 
+static bool setuptile_init = false;
+
 icon_t setup_entry[ MAX_SETUP_ICON ];
 
 lv_obj_t *setup_cont[ MAX_SETUP_TILES ];
@@ -33,6 +35,13 @@ uint32_t setup_tile_num[ MAX_SETUP_TILES ];
 lv_style_t setup_style;
 
 void setup_tile_setup( void ) {
+    /*
+     * check if setuptile alread initialized
+     */
+    if ( setuptile_init ) {
+        log_e("setuptile already initialized");
+        return;
+    }
 
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {
         setup_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 1, "setup tile" );
@@ -65,9 +74,18 @@ void setup_tile_setup( void ) {
 
         log_d("icon screen/x/y: %d/%d/%d", setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ), setup_entry[ setup ].x, setup_entry[ setup ].y );
     }
+    setuptile_init = true;
 }
 
 lv_obj_t *setup_tile_register_setup( void ) {
+    /*
+     * check if setuptile alread initialized
+     */
+    if ( !setuptile_init ) {
+        log_e("setuptile not initialized");
+        while( true );
+    }
+
     for( int setup = 0 ; setup < MAX_SETUP_ICON ; setup++ ) {
         if ( setup_entry[ setup ].active == false ) {
             setup_entry[ setup ].active = true;
@@ -80,6 +98,14 @@ lv_obj_t *setup_tile_register_setup( void ) {
 }
 
 icon_t *setup_tile_get_free_setup_icon( void ) {
+    /*
+     * check if setuptile alread initialized
+     */
+    if ( !setuptile_init ) {
+        log_e("setuptile not initialized");
+        while( true );
+    }
+
     for( int setup = 0 ; setup < MAX_SETUP_ICON ; setup++ ) {
         if ( setup_entry[ setup ].active == false ) {
             return( &setup_entry[ setup ] );
@@ -90,5 +116,13 @@ icon_t *setup_tile_get_free_setup_icon( void ) {
 }
 
 uint32_t setup_get_tile_num( void ) {
+    /*
+     * check if setuptile alread initialized
+     */
+    if ( !setuptile_init ) {
+        log_e("setuptile not initialized");
+        while( true );
+    }
+
     return( setup_tile_num[ 0 ] );
 }

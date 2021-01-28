@@ -36,7 +36,7 @@
     } lv_status_bar_t;
 
     typedef enum {
-        STATUSBAR_BATTERY_PERCENT,
+        STATUSBAR_BATTERY_PERCENT = 0,
         STATUSBAR_BATTERY,
         STATUSBAR_BLUETOOTH,
         STATUSBAR_WIFI,
@@ -48,7 +48,7 @@
     } statusbar_icon_t;
     
     typedef enum {
-        STATUSBAR_STYLE_NORMAL,
+        STATUSBAR_STYLE_NORMAL = 0,
         STATUSBAR_STYLE_BLACK,
         STATUSBAR_STYLE_WHITE,
         STATUSBAR_STYLE_RED,

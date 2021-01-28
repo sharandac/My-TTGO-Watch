@@ -61,7 +61,7 @@ void motor_setup( void ) {
     timerAlarmEnable(timer);
     motor_init = true;
 
-    powermgm_register_loop_cb( POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "motor powermgm");
+    powermgm_register_loop_cb( POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
 
     motor_vibe( 10 );
 }

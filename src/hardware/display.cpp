@@ -50,8 +50,8 @@ void display_setup( void ) {
     ttgo->tft->setRotation( display_config.rotation / 90 );
     bma_set_rotate_tilt( display_config.rotation );
 
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "display" );
-    powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "display loop" );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
+    powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "powermgm display loop" );
 }
 
 bool display_powermgm_event_cb( EventBits_t event, void *arg ) {

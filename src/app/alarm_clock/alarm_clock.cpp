@@ -210,6 +210,7 @@ static void create_alarm_in_progress_tile(){
 bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
     switch ( event ){
         case ( RTCCTL_ALARM_OCCURRED ):
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             alarm_in_progress_start_alarm();
             rtcctl_set_next_alarm();
             break;
@@ -242,9 +243,9 @@ void alarm_clock_setup( void ) {
     create_alarm_setup_tile(setup_tile_num);
     create_alarm_in_progress_tile();
 
-    rtcctl_register_cb(RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm_clock");
-    powermgm_register_cb(POWERMGM_STANDBY, powermgmt_callback, "alarm_clock");
-    rtcctl_register_cb(RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
+    rtcctl_register_cb( RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm_clock");
+    rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
+    powermgm_register_cb( POWERMGM_STANDBY, powermgmt_callback, "alarm_clock");
 }
 
 uint32_t alarm_clock_get_app_main_tile_num( void ) {
