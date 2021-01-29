@@ -57,7 +57,8 @@ bool fxrates_wifictl_event_cb(EventBits_t event, void *arg) {
     switch(event) {
         case WIFICTL_CONNECT:
             fxratesApp.icon().hideIndicator();
-            fxratesApp.startSynchronization(SyncRequestSource::ConnectionEvent);
+            if ( config.getBoolean("autosync", false ) )
+                fxratesApp.startSynchronization(SyncRequestSource::ConnectionEvent);
             break;
 
         case WIFICTL_OFF:
@@ -99,6 +100,7 @@ void build_settings()
     config.addString("apikey", 32).assign(&apiKey);
     config.addString("pair1", 12, "EUR_USD").assign(&mainPair);
     config.addString("pair2", 12).assign(&secondPair);
+    config.addBoolean("autosync", false);
     config.addBoolean("widget", false);
 
     // Switch desktop widget state based on the cuurent settings when changed

@@ -59,9 +59,11 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
      * take a normal uncompressed firmware
      */
     if ( strstr( url, ".gz") ) {
+        http_ota_send_event_cb( HTTP_OTA_START, (void*)"get compressed firmware ..." );
         retval = http_ota_start_compressed( url, md5, firmwaresize );
     }
     else {
+        http_ota_send_event_cb( HTTP_OTA_START, (void*)"get uncompressed firmware ..." );
         retval = http_ota_start_uncompressed( url, md5 );
     }
 

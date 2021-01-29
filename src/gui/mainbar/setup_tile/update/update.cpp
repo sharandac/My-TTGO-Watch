@@ -150,7 +150,7 @@ void update_tile_setup( void ) {
     lv_bar_set_value( update_progressbar, 0, LV_ANIM_ON );
 
     wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb, "update" );
-    http_ota_register_cb( HTTP_OTA_PROGRESS | HTTP_OTA_ERROR, update_http_ota_event_cb, "http updater");
+    http_ota_register_cb( HTTP_OTA_PROGRESS | HTTP_OTA_START | HTTP_OTA_FINISH | HTTP_OTA_ERROR, update_http_ota_event_cb, "http updater");
 
     mainbar_add_tile_activate_cb( update_tile_num, update_update_activate_cb );
     mainbar_add_tile_hibernate_cb( update_tile_num, update_update_hibernate_cb );
@@ -183,7 +183,21 @@ bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
         case HTTP_OTA_PROGRESS:
             progress = *(float *)arg;
             break;
-        case HTTP_OTA_ERROR:        
+        case HTTP_OTA_START:        
+            statusbar_show_icon( STATUSBAR_WARNING );
+            statusbar_style_icon( STATUSBAR_WARNING, STATUSBAR_STYLE_YELLOW );   
+            lv_label_set_text( update_status_label, (char *)arg );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            break;
+        case HTTP_OTA_FINISH:        
+            statusbar_show_icon( STATUSBAR_WARNING );
+            statusbar_style_icon( STATUSBAR_WARNING, STATUSBAR_STYLE_GREEN );   
+            lv_label_set_text( update_status_label, (char *)arg );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            break;
+        case HTTP_OTA_ERROR:
+            statusbar_show_icon( STATUSBAR_WARNING );
+            statusbar_style_icon( STATUSBAR_WARNING, STATUSBAR_STYLE_RED );   
             lv_label_set_text( update_status_label, (char *)arg );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             break;
@@ -246,7 +260,7 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
             xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
             xTaskCreate(    update_Task,
                             "update Task",
-                            12000,
+                            5000,
                             NULL,
                             1,
                             &_update_Task );
@@ -262,7 +276,7 @@ void update_check_version( void ) {
         xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
         xTaskCreate(    update_Task,
                         "update Task",
-                        10000,
+                        5000,
                         NULL,
                         1,
                         &_update_Task );
@@ -302,12 +316,6 @@ void update_Task( void * pvParameters ) {
 
             uint32_t display_timeout = display_get_timeout();
             display_set_timeout( DISPLAY_MAX_TIMEOUT );
-
-            statusbar_show_icon( STATUSBAR_WARNING );
-            statusbar_style_icon( STATUSBAR_WARNING, STATUSBAR_STYLE_YELLOW );
-
-            lv_label_set_text( update_status_label, "start update ..." );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
             if ( http_ota_start( update_get_url(), update_get_md5(), update_get_size() ) ) {
                 reset = true;
