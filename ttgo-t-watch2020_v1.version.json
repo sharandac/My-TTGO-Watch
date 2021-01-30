@@ -1,1 +1,1 @@
-{"version":"2021012901","host":"http://www.neo-guerillaz.de","size":"4608576","file":"ttgo-t-watch2020_v1.ino.bin","gzipfile":"ttgo-t-watch2020_v1.ino.bin.gz","md5":"6398deda6e85f50dc9579ce3648b162e","comment":"- some memory consumption improvement"}
+{"version":"2021013001","host":"http://www.neo-guerillaz.de","size":"4609840","file":"ttgo-t-watch2020_v1.ino.bin","gzipfile":"ttgo-t-watch2020_v1.ino.bin.gz","md5":"1c6829e0975a78757a7fd4f492ccf53d","comment":"- add framebuffer DMA transfer support"}
