@@ -39,7 +39,6 @@
 #include "hardware/pmu.h"
 #include "hardware/timesync.h"
 #include "hardware/sound.h"
-#include "hardware/framebuffer.h"
 #include "hardware/callback.h"
 
 #include "app/weather/weather.h"
@@ -63,7 +62,6 @@ void setup()
 
     ttgo->begin();
     ttgo->lvgl_begin();
-    framebuffer_setup();
 
     SPIFFS.begin();
     motor_setup();

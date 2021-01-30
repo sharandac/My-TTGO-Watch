@@ -45,7 +45,8 @@
         uint32_t timeout = DISPLAY_MIN_TIMEOUT;         /** @brief display time out */
         uint32_t rotation = 0;                          /** @brief display rotation */
         bool block_return_maintile = false;             /** @brief block back to main tile on standby */
-        bool long_press_take_screenshot = false;        /** @brief long press take a screenshoot, otherwise back to maintile */
+        bool use_dma = true;                            /** @brief use dma framebuffer */
+        bool use_double_buffering = false;              /** @brief use double framebuffer */
         uint32_t background_image = 2;                  /** @brief background image */
     } display_config_t;
 
@@ -87,6 +88,30 @@
      * @return  brightness from 0-255
      */
     uint32_t display_get_brightness( void );
+    /**
+     * @brief read the use DMA from config
+     * 
+     * @return  TRUE if used or false if not used
+     */    
+    bool display_get_use_dma( void );
+    /**
+     * @brief set use DMA for the display
+     * 
+     * @param  use_dma  true for use DMA or false
+     */    
+    void display_set_use_dma( bool use_dma );
+    /**
+     * @brief read the use double buffering from config
+     * 
+     * @return  TRUE if used or false if not used
+     */    
+    bool display_get_use_double_buffering( void );
+    /**
+     * @brief set use use_double_buffering for the display
+     * 
+     * @param  use_double_buffering  true for use_double_buffering or false
+     */    
+    void display_set_use_double_buffering( bool use_double_buffering );
     /**
      * @brief set brightness for the display
      * 

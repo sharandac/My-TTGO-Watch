@@ -103,8 +103,11 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    static bool BMA_tilt = false;
+    static bool BMA_doubleclick = false;
+    static bool BMA_stepcounter = false;
 
+    TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * handle IRQ event
      */
@@ -118,24 +121,50 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
      */
     if ( temp_bma_irq_flag ) {                
         while( !ttgo->bma->readInterrupt() );
-
+        /*
+         * set powermgm wakeup event and save BMA_* event
+         */
         if ( ttgo->bma->isDoubleClick() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            bma_send_event_cb( BMACTL_DOUBLECLICK, (void *)"" );
+            BMA_doubleclick = true;
         }
         if ( ttgo->bma->isTilt() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            bma_send_event_cb( BMACTL_TILT, (void *)"" );
+            BMA_tilt = true;
         }
         if ( ttgo->bma->isStepCounter() ) {
-            stepcounter_before_reset = ttgo->bma->getCounter();
-            char msg[16]="";
-            snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-            bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+            BMA_stepcounter = true;
         }
     }
 
-    // force update statusbar after restart/boot
+    switch( event ) {
+        case POWERMGM_WAKEUP:   {
+            /*
+             * check if an BMA_* event triggered
+             * one event per loop
+             */
+            if ( BMA_doubleclick ) {
+                BMA_doubleclick = false;
+                bma_send_event_cb( BMACTL_DOUBLECLICK, NULL );
+            }
+            else if ( BMA_tilt ) {
+                BMA_tilt = false;
+                bma_send_event_cb( BMACTL_TILT, NULL );
+            }
+            else if ( BMA_stepcounter ) {
+                BMA_stepcounter = false;
+                stepcounter_before_reset = ttgo->bma->getCounter();
+                char msg[16]="";
+                snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
+                bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+            }
+            break;
+        }
+    }
+
+    /*
+     *  force update statusbar after restart/boot
+     */
     if ( first_loop_run ) {
         first_loop_run = false;
         stepcounter_before_reset = ttgo->bma->getCounter();
