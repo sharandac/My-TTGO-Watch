@@ -179,8 +179,24 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
+void IRAM_ATTR rtcctl_irq( void ) {
+    portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+    rtc_irq_flag = true;
+    portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+}
+
 bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
-    rtcctl_loop();
+    portENTER_CRITICAL( &RTC_IRQ_Mux );
+    bool temp_rtc_irq_flag = rtc_irq_flag;
+    rtc_irq_flag = false;
+    portEXIT_CRITICAL( &RTC_IRQ_Mux );
+
+    if ( temp_rtc_irq_flag ) {
+        /*
+        * fire callback
+        */
+        rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
+    }
     return( true );
 }
 
@@ -191,24 +207,6 @@ bool rtcctl_timesync_event_cb( EventBits_t event, void *arg ) {
             break;
     }
     return( true );
-}
-
-void IRAM_ATTR rtcctl_irq( void ) {
-    portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
-    rtc_irq_flag = true;
-    portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
-}
-
-void rtcctl_loop( void ) {
-    // fire callback
-    portENTER_CRITICAL( &RTC_IRQ_Mux );
-    bool temp_rtc_irq_flag = rtc_irq_flag;
-    rtc_irq_flag = false;
-    portEXIT_CRITICAL( &RTC_IRQ_Mux );
-
-    if ( temp_rtc_irq_flag ) {
-        rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
-    }
 }
 
 bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {

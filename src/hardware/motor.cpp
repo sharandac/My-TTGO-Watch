@@ -61,13 +61,18 @@ void motor_setup( void ) {
     timerAlarmEnable(timer);
     motor_init = true;
 
-    powermgm_register_loop_cb( POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
 
     motor_vibe( 10 );
 }
 
 bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
+        case POWERMGM_STANDBY:          portENTER_CRITICAL(&timerMux);
+                                        motor_run_time_counter = 0;
+                                        portEXIT_CRITICAL(&timerMux);
+                                        vTaskDelay( 10 );
+                                        break;
         case POWERMGM_ENABLE_INTERRUPTS:
                                         timerAttachInterrupt(timer, &onTimer, true);
                                         break;

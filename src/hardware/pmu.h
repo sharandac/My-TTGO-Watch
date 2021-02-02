@@ -42,7 +42,7 @@
     #define NORMALVOLTAGE                   3300                /** @brief defines the norminal voltages while working */
     #define NORMALPOWERSAVEVOLTAGE          3000                /** @brief defines the norminal voltages while in powersave */
     #define EXPERIMENTALNORMALVOLTAGE       3000                /** @brief defines the norminal voltages while working with exprimental powersave enabled */
-    #define EXPERIMENTALPOWERSAVEVOLTAGE    2700                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
+    #define EXPERIMENTALPOWERSAVEVOLTAGE    2800                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
 	/** 
      * pmu file name
      */

@@ -1,1 +1,1 @@
-{"version":"2021013001","host":"http://www.neo-guerillaz.de","size":"4609840","file":"ttgo-t-watch2020_v1.ino.bin","gzipfile":"ttgo-t-watch2020_v1.ino.bin.gz","md5":"1c6829e0975a78757a7fd4f492ccf53d","comment":"- add framebuffer DMA transfer support"}
+{"version":"2021020201","host":"http://www.neo-guerillaz.de","size":"4609856","file":"ttgo-t-watch2020_v1.ino.bin","gzipfile":"ttgo-t-watch2020_v1.ino.bin.gz","md5":"a7a8acb5c6ac40658e2c094af34eec5c","comment":"- fix motor vibe when go standby"}
