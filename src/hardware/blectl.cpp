@@ -262,7 +262,6 @@ void blectl_setup( void ) {
     }
 
     // Enable encryption
-    BLEServer* pServer = BLEDevice::createServer();
     BLEDevice::setEncryptionLevel( ESP_BLE_SEC_ENCRYPT_NO_MITM );
     BLEDevice::setSecurityCallbacks( new BtlCtlSecurity() );
 
@@ -274,7 +273,7 @@ void blectl_setup( void ) {
     pSecurity->setRespEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
 
     // Create the BLE Server
-    pServer = BLEDevice::createServer();
+    BLEServer* pServer = BLEDevice::createServer();
     pServer->setCallbacks( new BleCtlServerCallbacks() );
 
     // Create the BLE Service
