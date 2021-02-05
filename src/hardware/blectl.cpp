@@ -273,7 +273,7 @@ void blectl_setup( void ) {
     pSecurity->setRespEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
 
     // Create the BLE Server
-    BLEServer* pServer = BLEDevice::createServer();
+    pServer = BLEDevice::createServer();
     pServer->setCallbacks( new BleCtlServerCallbacks() );
 
     // Create the BLE Service
