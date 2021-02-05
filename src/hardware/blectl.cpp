@@ -404,6 +404,11 @@ void blectl_set_enable_on_standby( bool enable_on_standby ) {
     blectl_save_config();
 }
 
+void blectl_set_show_notification( bool show_notification ) {        
+    blectl_config.show_notification = show_notification;
+    blectl_save_config();
+}
+
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_save_config();
@@ -459,6 +464,10 @@ bool blectl_get_enable_on_standby( void ) {
     return( blectl_config.enable_on_standby );
 }
 
+bool blectl_get_show_notification( void ) {
+    return( blectl_config.show_notification );
+}
+
 bool blectl_get_autoon( void ) {
     return( blectl_config.autoon );
 }
@@ -480,6 +489,7 @@ void blectl_save_config( void ) {
         doc["advertising"] = blectl_config.advertising;
         doc["enable_on_standby"] = blectl_config.enable_on_standby;
         doc["tx_power"] = blectl_config.txpower;
+        doc["show_notification"] = blectl_config.show_notification;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -508,6 +518,7 @@ void blectl_read_config( void ) {
             blectl_config.advertising = doc["advertising"] | true;
             blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
             blectl_config.txpower = doc["tx_power"] | 1;
+            blectl_config.show_notification = doc["show_notification"] | true;
         }        
         doc.clear();
     }

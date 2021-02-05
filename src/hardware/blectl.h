@@ -92,6 +92,7 @@
         bool autoon = true;             /** @brief auto on/off */
         bool advertising = true;        /** @brief advertising on/off */
         bool enable_on_standby = false; /** @brief enable on standby on/off */
+        bool show_notification = true;  /** @brief enable show notifications */
         int32_t txpower = 1;            /** @brief tx power, valide values are from 0 to 4 */
     } blectl_config_t;
 
@@ -152,6 +153,12 @@
      */
     void blectl_set_enable_on_standby( bool enable_on_standby );
     /**
+     * @brief enable show notification
+     * 
+     * @param   show_notification   true means enabled, false means disabled 
+     */
+    void blectl_set_show_notification( bool show_notification );
+    /**
      * @brief enable advertising
      * 
      * @param   advertising true means enabled, false means disabled
@@ -163,6 +170,12 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_enable_on_standby( void );
+    /**
+     * @brief get the current show notification config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_show_notification( void );
     /**
      * @brief get the current advertising config
      * 
