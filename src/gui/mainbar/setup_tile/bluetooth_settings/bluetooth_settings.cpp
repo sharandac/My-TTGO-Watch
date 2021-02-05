@@ -42,6 +42,7 @@ uint32_t bluetooth_tile_num;
 lv_obj_t *bluetooth_enable_onoff = NULL;
 lv_obj_t *bluetooth_standby_onoff = NULL;
 lv_obj_t *bluetooth_advertising_onoff = NULL;
+lv_obj_t *bluetooth_show_notifications_onoff = NULL;
 lv_obj_t *txpower_list = NULL;
 
 LV_IMG_DECLARE(exit_32px);
@@ -54,6 +55,7 @@ bool blectl_onoff_event_cb( EventBits_t event, void *arg );
 static void bluetooth_enable_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void bluetooth_show_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void bluetooth_settings_tile_setup( void ) {
@@ -85,7 +87,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *bluetooth_enable_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size( bluetooth_enable_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size( bluetooth_enable_cont, lv_disp_get_hor_res( NULL ) , 32);
     lv_obj_add_style( bluetooth_enable_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluetooth_enable_cont, bluetooth_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     bluetooth_enable_onoff = lv_switch_create( bluetooth_enable_cont, NULL );
@@ -100,7 +102,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_enable_label, bluetooth_enable_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *bluetooth_advertising_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size( bluetooth_advertising_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size( bluetooth_advertising_cont, lv_disp_get_hor_res( NULL ) , 32);
     lv_obj_add_style( bluetooth_advertising_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluetooth_advertising_cont, bluetooth_enable_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_advertising_onoff = lv_switch_create( bluetooth_advertising_cont, NULL );
@@ -115,7 +117,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_advertising_label, bluetooth_advertising_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
     
     lv_obj_t *bluetooth_standby_cont = lv_obj_create( bluetooth_settings_tile, NULL );
-    lv_obj_set_size( bluetooth_standby_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size( bluetooth_standby_cont, lv_disp_get_hor_res( NULL ) , 32);
     lv_obj_add_style( bluetooth_standby_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_obj_align( bluetooth_standby_cont, bluetooth_advertising_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_standby_onoff = lv_switch_create( bluetooth_standby_cont, NULL );
@@ -129,10 +131,25 @@ void bluetooth_settings_tile_setup( void ) {
     lv_label_set_text( bluetooth_standby_label, "always on");
     lv_obj_align( bluetooth_standby_label, bluetooth_standby_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *bluetooth_show_notifications_cont = lv_obj_create( bluetooth_settings_tile, NULL );
+    lv_obj_set_size( bluetooth_show_notifications_cont, lv_disp_get_hor_res( NULL ) , 32);
+    lv_obj_add_style( bluetooth_show_notifications_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
+    lv_obj_align( bluetooth_show_notifications_cont, bluetooth_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    bluetooth_show_notifications_onoff = lv_switch_create( bluetooth_show_notifications_cont, NULL );
+    lv_obj_add_protect( bluetooth_show_notifications_onoff, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( bluetooth_show_notifications_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( bluetooth_show_notifications_onoff, LV_ANIM_ON );
+    lv_obj_align( bluetooth_show_notifications_onoff, bluetooth_show_notifications_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( bluetooth_show_notifications_onoff, bluetooth_show_notifications_onoff_event_handler );
+    lv_obj_t *bluetooth_show_notifications_label = lv_label_create( bluetooth_show_notifications_cont, NULL);
+    lv_obj_add_style( bluetooth_show_notifications_label, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
+    lv_label_set_text( bluetooth_show_notifications_label, "show notifications");
+    lv_obj_align( bluetooth_show_notifications_label, bluetooth_show_notifications_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     lv_obj_t *txpower_cont = lv_obj_create( bluetooth_settings_tile, NULL );
     lv_obj_set_size( txpower_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( txpower_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
-    lv_obj_align( txpower_cont, bluetooth_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
+    lv_obj_align( txpower_cont, bluetooth_show_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );    
     lv_obj_t *txpower_label = lv_label_create( txpower_cont, NULL);
     lv_obj_add_style( txpower_label, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
     lv_label_set_text( txpower_label, "tx power");
@@ -163,6 +180,13 @@ void bluetooth_settings_tile_setup( void ) {
     }
     else {
         lv_switch_off( bluetooth_standby_onoff, LV_ANIM_OFF );
+    }
+
+    if ( blectl_get_show_notification() ) {
+        lv_switch_on( bluetooth_show_notifications_onoff, LV_ANIM_OFF );
+    }
+    else {
+        lv_switch_off( bluetooth_show_notifications_onoff, LV_ANIM_OFF );
     }
 
     lv_dropdown_set_selected( txpower_list, blectl_get_txpower() );
@@ -227,6 +251,14 @@ static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t eve
                                         else {
                                             setup_hide_indicator( bluettoth_setup_icon );
                                         }
+                                        break;
+    }
+}
+
+static void bluetooth_show_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED): blectl_set_show_notification( lv_switch_get_state( obj ) );
+                                        break;
     }
 }
 
