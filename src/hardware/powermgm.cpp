@@ -163,9 +163,12 @@ void powermgm_loop( void ) {
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
         /*
-         * Save info to avoid buzz when standby after silent wake
+         * avoid buzz when standby after silent wake
          */
-        bool noBuzz = powermgm_get_event( POWERMGM_SILENCE_WAKEUP );
+        if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
+            motor_vibe(3);
+            delay( 100 );
+        }
         /*
          * clear powermgm state/request and send standby event
          */
@@ -186,13 +189,6 @@ void powermgm_loop( void ) {
 
         if ( lighsleep ) {
             log_i("go standby");
-            /*
-             * Only buzz if a non silent wake was performed
-             */
-            if (!noBuzz) {
-                motor_vibe(3);
-                delay( 100 );
-            }
             /*
              * set cpu speed
              * 
