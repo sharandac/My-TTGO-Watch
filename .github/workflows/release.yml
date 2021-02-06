@@ -50,5 +50,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ./.pio/build/ttgo-t-watch/firmware.bin
-        asset_name: ttgo-t-watch2020_${{github.ref}}.ino.bin
+        asset_name: ttgo-t-watch2020_${{ github.ref }}.ino.bin
         asset_content_type: application/octet-stream
