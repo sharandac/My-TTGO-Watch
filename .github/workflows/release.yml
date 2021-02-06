@@ -46,13 +46,27 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset
-      id: upload-release-asset 
+    - name: Upload Firmware Asset
+      id: upload-firmware-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ./.pio/build/ttgo-t-watch/firmware.bin
-        asset_name: ttgo-t-watch2020_${{ steps.branch_name.outputs.SOURCE_TAG }}.ino.bin
+        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin
         asset_content_type: application/octet-stream
+    - name: Compress firmware
+      id: compress-firmware
+      run: |
+          gzip ./.pio/build/ttgo-t-watch/firmware.bin
+    - name: Upload Compressed Firmware Asset
+      id: upload-compressed-firmware-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./.pio/build/ttgo-t-watch/firmware.bin.gz
+        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz
+        asset_content_type: application/gzip
