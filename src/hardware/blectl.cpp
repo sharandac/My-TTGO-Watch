@@ -184,14 +184,15 @@ void blectl_delete_gadgetbridge_msg ( void ) {
 class BleCtlCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite( BLECharacteristic *pCharacteristic ) {
-        char *msg = (char *)CALLOC( pCharacteristic->getValue().length() + 1, 1 );
+        size_t msgLen = pCharacteristic->getValue().length();
+        char *msg = (char *)CALLOC( msgLen + 1, 1 );
         if ( msg == NULL ) {
             log_e("calloc fail");
             return;
         }
         else {
-            strlcpy( msg, pCharacteristic->getValue().c_str(), pCharacteristic->getValue().length() + 1 );
-            for ( int i = 0 ; i < pCharacteristic->getValue().length(); i++ ) {
+            strlcpy( msg, pCharacteristic->getValue().c_str(), msgLen + 1 );
+            for ( int i = 0 ; i < msgLen ; i++ ) {
                 switch( msg[ i ] ) {
                     case EndofText:         blectl_delete_gadgetbridge_msg();
                                             log_i("attention, new link establish");
@@ -216,6 +217,7 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                 }
             }
             free(msg);
+            msg = NULL;
         }
     }
 
