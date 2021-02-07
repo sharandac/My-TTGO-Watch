@@ -617,9 +617,26 @@ void blectl_off( void ) {
     blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
 }
 
+static void blectl_send_chunk ( int32_t len ) {
+    // Send
+    pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], len );
+    pTxCharacteristic->notify();
+    // Log
+    char chunk_msg[ 64 ] = "";
+    for( int i = 0 ; i < len ; i++ ) {
+        if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
+            chunk_msg[ i ] = blectl_msg.msg[ blectl_msg.msgpos + i ];
+        }
+        else {
+            chunk_msg[ i ] = '?';
+        }
+    }
+    chunk_msg[ len ] = '\0';
+    log_i("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
+}
+
 void blectl_loop ( void ) {
     static uint64_t nextmillis = 0;
-    char chunk_msg[ 64 ] = "";
 
     if ( !blectl_get_event( BLECTL_CONNECT ) ) {
         return;
@@ -635,38 +652,11 @@ void blectl_loop ( void ) {
         if ( blectl_msg.active ) {
             if ( blectl_msg.msgpos < blectl_msg.msglen ) {
                 if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
-                    chunk_msg[ 0 ] ='\0';
-                    for( int i = 0 ; i < BLECTL_CHUNKSIZE ; i++ ) {
-                        char tmp_str[16]="";
-                        if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
-                            snprintf( tmp_str, sizeof( tmp_str ),"%c", blectl_msg.msg[ blectl_msg.msgpos + i ] );
-                        }
-                        else {
-                            snprintf( tmp_str, sizeof( tmp_str ),"?" );
-                        }
-                        strcat( chunk_msg, tmp_str );
-                    }
-                    pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], BLECTL_CHUNKSIZE );
-                    pTxCharacteristic->notify();
-                    log_i("send %2dbyte [ \"%s\" ] chunk", BLECTL_CHUNKSIZE, chunk_msg );
+                    blectl_send_chunk ( BLECTL_CHUNKSIZE );
                     blectl_msg.msgpos += BLECTL_CHUNKSIZE;
                 }
                 else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
-                    chunk_msg[ 0 ] ='\0';
-                    for( int i = 0 ; i < ( blectl_msg.msglen - blectl_msg.msgpos ) ; i++ ) {
-                        char tmp_str[16]="";
-                        if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
-                            snprintf( tmp_str, sizeof( tmp_str ),"%c", blectl_msg.msg[ blectl_msg.msgpos + i ] );
-                        }
-                        else {
-                            snprintf( tmp_str, sizeof( tmp_str ),"?" );
-                        }
-                        strcat( chunk_msg, tmp_str );
-                    }
-                    
-                    pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], blectl_msg.msglen - blectl_msg.msgpos );
-                    pTxCharacteristic->notify();
-                    log_i("send %2dbyte [ \"%s\" ] chunk", blectl_msg.msglen - blectl_msg.msgpos, chunk_msg );
+                    blectl_send_chunk ( blectl_msg.msglen - blectl_msg.msgpos );
                     blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
                     blectl_msg.active = false;
                     blectl_msg.msglen = 0;
