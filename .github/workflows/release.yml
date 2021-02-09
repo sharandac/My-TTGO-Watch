@@ -70,3 +70,20 @@ jobs:
         asset_path: ./.pio/build/ttgo-t-watch/firmware.bin.gz
         asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz
         asset_content_type: application/gzip
+    - name: Build Version File
+      run: |
+        # get firmware version from config.h
+        firmwareversion=$(cat src/config.h | grep __FIRMWARE__ | tr -s " " | cut -d' ' -f4 | cut -d'"' -f2)
+        md5=$(md5sum .pio/build/ttgo-t-watch/firmware.bin | cut -d ' ' -f 1)
+        size=$(stat -c %s .pio/build/ttgo-t-watch/firmware.bin)
+        echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin\",\"gzipfile\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
+    - name: Upload Version File Asset
+      id: upload-version-file-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
+        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
+        asset_content_type: application/json
