@@ -39,7 +39,7 @@ JsonStringOption& JsonConfig::addString(const char* optionName, int maxValueLeng
 
 bool JsonConfig::getBoolean(const char* optionName, bool defValue) {
   for (int i = 0; i < count; i++) {
-    if (strcmp(options[i]->name, optionName) == 0 && options[i]->type() == OptionDataType::BoolOption)
+    if (options[i]->type() == OptionDataType::BoolOption && strcmp(options[i]->name, optionName) == 0)
       return ((JsonBoolOption*)options[i])->value;
   }
   return defValue;
@@ -47,7 +47,7 @@ bool JsonConfig::getBoolean(const char* optionName, bool defValue) {
 
 const char* JsonConfig::getString(const char* optionName, const char* defValue) {
   for (int i = 0; i < count; i++) {
-    if (strcmp(options[i]->name, optionName) == 0 && options[i]->type() == OptionDataType::StringOption)
+    if (options[i]->type() == OptionDataType::StringOption && strcmp(options[i]->name, optionName) == 0)
       return ((JsonStringOption*)options[i])->value;
   }
   return defValue;
