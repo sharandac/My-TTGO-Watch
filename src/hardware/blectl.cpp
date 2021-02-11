@@ -489,6 +489,9 @@ void blectl_send_next_msg( char *msg ) {
         strncpy( blectl_msg.msg, msg, BLECTL_MSG_MTU );
         blectl_msg.active = true;
         blectl_msg.msglen = strlen( (const char*)msg ) ;
+        if (blectl_msg.msglen > BLECTL_MSG_MTU)
+            // Only BLECTL_MSG_MTU copied max
+            blectl_msg.msglen = BLECTL_MSG_MTU;
         blectl_msg.msgpos = 0;
     }
     else {
