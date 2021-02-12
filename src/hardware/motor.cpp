@@ -52,7 +52,7 @@ void motor_setup( void ) {
     if ( motor_init == true )
         return;
 
-    motor_read_config();
+    motor_config.load();
 
     pinMode(GPIO_NUM_4, OUTPUT);
     timer = timerBegin(0, 80, true);
@@ -105,45 +105,13 @@ bool motor_get_vibe_config( void ) {
 
 void motor_set_vibe_config( bool enable ) {
     motor_config.vibe = enable;
-    motor_save_config();
+    motor_config.save();
 }
 
 void motor_save_config( void ) {
-    fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["motor"] = motor_config.vibe;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    motor_config.save();
 }
 
 void motor_read_config( void ) {
-    fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            motor_config.vibe = doc["motor"].as<bool>();
-        }        
-        doc.clear();
-    }
-    file.close();
+    motor_config.load();
 }
