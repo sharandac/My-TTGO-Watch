@@ -44,7 +44,7 @@ bool timesync_send_event_cb( EventBits_t event, void *arg );
 
 void timesync_setup( void ) {
 
-    timesync_read_config();
+    timesync_config.load();
     time_event_handle = xEventGroupCreate();
 
     wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
@@ -143,59 +143,11 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
 }
 
 void timesync_save_config( void ) {
-    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["daylightsave"] = timesync_config.daylightsave;
-        doc["timesync"] = timesync_config.timesync;
-        doc["timezone"] = timesync_config.timezone;
-        doc["use_24hr_clock"] = timesync_config.use_24hr_clock;
-        doc["timezone_name"] = timesync_config.timezone_name;
-        doc["timezone_rule"] = timesync_config.timezone_rule;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    timesync_config.save();
 }
 
 void timesync_read_config( void ) {    
-    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            timesync_config.daylightsave = doc["daylightsave"] | false;
-            timesync_config.timesync = doc["timesync"] | true;
-            timesync_config.timezone = doc["timezone"] | 0;
-            timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
-            // todo: for upgrade, default name = Etc\GMTxxx based on timezone & daylightsave
-            // todo: for upgrade, default rule = GMT0 or <-xx>xx based on timezone & daylightsave
-            // todo: upgrade rtc clock to be in utc? (First sync will fix it.)
-            strlcpy( timesync_config.timezone_name, doc["timezone_name"] | TIMEZONE_NAME_DEFAULT, sizeof( timesync_config.timezone_name ) );
-            strlcpy( timesync_config.timezone_rule, doc["timezone_rule"] | TIMEZONE_RULE_DEFAULT, sizeof( timesync_config.timezone_rule ) );
-            setenv("TZ", timesync_config.timezone_rule, 1);
-            tzset();
-        }
-        doc.clear();
-    }
-    file.close();
+    timesync_config.load();
 }
 
 bool timesync_get_timesync( void ) {
