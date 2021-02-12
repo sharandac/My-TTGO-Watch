@@ -42,7 +42,7 @@
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
-        virtual size_t getJsonBufferSize() { return 1000/*FIXME*/; }
+        virtual size_t getJsonBufferSize() { return 1000; }
     } ;
 
 #endif // _BLECTL_CONFIG_H
