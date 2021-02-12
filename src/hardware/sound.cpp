@@ -67,7 +67,7 @@ void sound_setup( void ) {
     /*
      * read config from SPIFFS
      */
-    sound_read_config();
+    sound_config.load();
     /*
      * config sound driver and interface
      */
@@ -205,46 +205,11 @@ void sound_speak( const char *str )
 }
 
 void sound_save_config( void ) {
-    fs::File file = SPIFFS.open( SOUND_JSON_CONFIG_FILE, FILE_WRITE );
-    sound_set_volume_config(sound_config.volume);
-    if (!file) {
-        log_e("Can't open file: %s!", SOUND_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["enable"] = sound_config.enable;
-        doc["volume"] = sound_config.volume;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    sound_config.save();
 }
 
 void sound_read_config( void ) {
-    fs::File file = SPIFFS.open( SOUND_JSON_CONFIG_FILE, FILE_READ );
-    
-    if (!file) {
-        log_e("Can't open file: %s!", SOUND_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 4 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("sound config deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            sound_config.enable = doc["enable"] | false;
-            sound_config.volume = doc["volume"] | 100;
-        }        
-        doc.clear();
-    }
-    file.close();
+    sound_config.load();
 }
 
 bool sound_get_enabled_config( void ) {
