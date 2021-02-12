@@ -24,6 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
+    #include "basejsonconfig.h"
 
 	/**
      * PMU events mask
@@ -52,7 +53,9 @@
     /**
      * @brief pmu config structure
      */
-    typedef struct {
+    class pmu_config_t : public BaseJsonConfig {
+        public:
+        pmu_config_t();
         int32_t designed_battery_cap = 300;
         int32_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
         int32_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
@@ -65,7 +68,13 @@
         bool experimental_power_save = false;
         bool silence_wakeup = true;
         bool pmu_logging = false;
-    } pmu_config_t;
+
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
     /**
      * @brief setup pmu: axp202
      */

@@ -26,12 +26,15 @@ bool pmu_blectl_event_cb( EventBits_t event, void *arg );
 bool pmu_send_cb( EventBits_t event, void *arg );
 void pmu_write_log( const char * filename );
 
+pmu_config_t::pmu_config_t() : BaseJsonConfig(PMU_JSON_CONFIG_FILE) {
+}
+
 void pmu_setup( void ) {
 
     /*
      * read config from SPIFF
      */
-    pmu_read_config();
+    pmu_config.load();
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -389,67 +392,47 @@ void pmu_wakeup( void ) {
     pmu_update = true;
 }
 
+bool pmu_config_t::onSave(JsonDocument& doc) {
+    doc["silence_wakeup"] = silence_wakeup;
+    doc["silence_wakeup_interval"] = silence_wakeup_interval;
+    doc["silence_wakeup_interval_vbplug"] = silence_wakeup_interval_vbplug;
+    doc["experimental_power_save"] = experimental_power_save;
+    doc["normal_voltage"] = normal_voltage;
+    doc["normal_power_save_voltage"] = normal_power_save_voltage;
+    doc["experimental_normal_voltage"] = experimental_normal_voltage;
+    doc["experimental_power_save_voltage"] = experimental_power_save_voltage;
+    doc["compute_percent"] = compute_percent;
+    doc["high_charging_target_voltage"] = high_charging_target_voltage;
+    doc["designed_battery_cap"] = designed_battery_cap;
+    doc["pmu_logging"] = pmu_logging;
+
+    return true;
+}
+
 void pmu_save_config( void ) {
-    fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_WRITE );
+    pmu_config.save();
+}
 
-    if (!file) {
-        log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 3000 );
 
-        doc["silence_wakeup"] = pmu_config.silence_wakeup;
-        doc["silence_wakeup_interval"] = pmu_config.silence_wakeup_interval;
-        doc["silence_wakeup_interval_vbplug"] = pmu_config.silence_wakeup_interval_vbplug;
-        doc["experimental_power_save"] = pmu_config.experimental_power_save;
-        doc["normal_voltage"] = pmu_config.normal_voltage;
-        doc["normal_power_save_voltage"] = pmu_config.normal_power_save_voltage;
-        doc["experimental_normal_voltage"] = pmu_config.experimental_normal_voltage;
-        doc["experimental_power_save_voltage"] = pmu_config.experimental_power_save_voltage;
-        doc["compute_percent"] = pmu_config.compute_percent;
-        doc["high_charging_target_voltage"] = pmu_config.high_charging_target_voltage;
-        doc["designed_battery_cap"] = pmu_config.designed_battery_cap;
-        doc["pmu_logging"] = pmu_config.pmu_logging;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+bool pmu_config_t::onLoad(JsonDocument& doc) {
+    silence_wakeup = doc["silence_wakeup"] | false;
+    silence_wakeup_interval = doc["silence_wakeup_interval"] | SILENCEWAKEINTERVAL;
+    silence_wakeup_interval_vbplug = doc["silence_wakeup_interval_vbplug"] | SILENCEWAKEINTERVAL_PLUG;
+    experimental_power_save = doc["experimental_power_save"] | false;
+    compute_percent = doc["compute_percent"] | false;
+    high_charging_target_voltage = doc["high_charging_target_voltage"] | false;
+    designed_battery_cap = doc["designed_battery_cap"] | 300;
+    normal_voltage = doc["normal_voltage"] | NORMALVOLTAGE;
+    normal_power_save_voltage = doc["normal_power_save_voltage"] | NORMALPOWERSAVEVOLTAGE;
+    experimental_normal_voltage = doc["experimental_normal_voltage"] | EXPERIMENTALNORMALVOLTAGE;
+    experimental_power_save_voltage = doc["experimental_power_save_voltage"] | EXPERIMENTALPOWERSAVEVOLTAGE;
+    pmu_logging = doc["pmu_logging"] | false;
+    
+    return true;
 }
 
 void pmu_read_config( void ) {
-    fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            pmu_config.silence_wakeup = doc["silence_wakeup"] | false;
-            pmu_config.silence_wakeup_interval = doc["silence_wakeup_interval"] | SILENCEWAKEINTERVAL;
-            pmu_config.silence_wakeup_interval_vbplug = doc["silence_wakeup_interval_vbplug"] | SILENCEWAKEINTERVAL_PLUG;
-            pmu_config.experimental_power_save = doc["experimental_power_save"] | false;
-            pmu_config.compute_percent = doc["compute_percent"] | false;
-            pmu_config.high_charging_target_voltage = doc["high_charging_target_voltage"] | false;
-            pmu_config.designed_battery_cap = doc["designed_battery_cap"] | 300;
-            pmu_config.normal_voltage = doc["normal_voltage"] | NORMALVOLTAGE;
-            pmu_config.normal_power_save_voltage = doc["normal_power_save_voltage"] | NORMALPOWERSAVEVOLTAGE;
-            pmu_config.experimental_normal_voltage = doc["experimental_normal_voltage"] | EXPERIMENTALNORMALVOLTAGE;
-            pmu_config.experimental_power_save_voltage = doc["experimental_power_save_voltage"] | EXPERIMENTALPOWERSAVEVOLTAGE;
-            pmu_config.pmu_logging = doc["pmu_logging"] | false;
-        }        
-        doc.clear();
-    }
-    file.close();
+    pmu_config.load();
 }
 
 bool pmu_get_silence_wakeup( void ) {
