@@ -24,6 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
+    #include "basejsonconfig.h"
 
     #define CONFIG_FILE_PATH         "/rtcctr.json"
 
@@ -35,12 +36,20 @@
     #define DAYS_IN_WEEK 7
     #define RTCCTL_ALARM_NOT_SET -1
 
-    typedef struct {
+    class rtcctl_alarm_t : public BaseJsonConfig {
+        public:
+        rtcctl_alarm_t();
         bool enabled;
         uint8_t hour;
         uint8_t minute;
         bool week_days[DAYS_IN_WEEK]; //starting from sunday to be aligned with tm
-    } rtcctl_alarm_t;
+
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
 
     /**
      * @brief setup rtc controller routine
