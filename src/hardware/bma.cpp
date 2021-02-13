@@ -28,6 +28,7 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "callback.h"
+#include "blectl.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
 
@@ -171,11 +172,25 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
 }
 
 static void bma_notify_stepcounter() {
+    static uint32_t last_val = 0;
     TTGOClass *ttgo = TTGOClass::getWatch();
     stepcounter_before_reset = ttgo->bma->getCounter();
+
+    uint32_t delta = stepcounter + stepcounter_before_reset - last_val;
+    if (delta > 0) {
+        // New val
+        last_val = stepcounter + stepcounter_before_reset;
+
     char msg[16]="";
-    snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-    bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+        snprintf( msg, sizeof( msg ),"%d", last_val );
+        // log debug stepcounter, stepcounter_before_reset
+        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+
+        // Cf. https://www.espruino.com/Gadgetbridge
+        char blemsg[64]="";
+        snprintf( blemsg, sizeof( blemsg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
+        blectl_send_msg( blemsg );
+    }
 }
 
 void bma_standby( void ) {
