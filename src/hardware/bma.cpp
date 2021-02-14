@@ -31,8 +31,26 @@
 #include "blectl.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
+#include "bleupdater.h"
 
 #include "gui/statusbar.h"
+
+class StepcounterBleUpdater : public BleUpdater<int32_t> {
+    public:
+    // Update every 5 minutes as GadgetBidge uses such value to detect activities
+    StepcounterBleUpdater() : BleUpdater(1000*60*5){}
+    protected:
+    bool notify(int32_t stepcounter) {
+        uint32_t delta = stepcounter - last_value;
+        // Cf. https://www.espruino.com/Gadgetbridge
+        char msg[64]="";
+        snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
+        bool ret = blectl_send_msg( msg );
+        return ret;
+    }
+};
+
+static StepcounterBleUpdater stepcounter_ble_updater;
 
 volatile bool DRAM_ATTR bma_irq_flag = false;
 portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -181,15 +199,12 @@ static void bma_notify_stepcounter() {
         // New val
         last_val = stepcounter + stepcounter_before_reset;
 
-    char msg[16]="";
+        char msg[16]="";
         snprintf( msg, sizeof( msg ),"%d", last_val );
         // log debug stepcounter, stepcounter_before_reset
         bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
 
-        // Cf. https://www.espruino.com/Gadgetbridge
-        char blemsg[64]="";
-        snprintf( blemsg, sizeof( blemsg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
-        blectl_send_msg( blemsg );
+        stepcounter_ble_updater.update(stepcounter + stepcounter_before_reset);
     }
 }
 
