@@ -39,6 +39,7 @@ class BleUpdater {
             }
         }
     }
+    void setTimeout(uint64_t timeout){ timeout_millis = timeout; }
     protected:
     BleUpdater(uint64_t timeout): timeout_millis(timeout) {}
     virtual bool notify(T value) = 0;
