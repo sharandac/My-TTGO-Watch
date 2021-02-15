@@ -1,14 +1,14 @@
 on:
   push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches: 
+      - master
+      - experimental
 
-name: Upload Release Asset
+name: Prepare Release Asset
 
 jobs:
   build:
-    name: Upload Release Asset
+    name: Prepare Release Asset
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,55 +35,29 @@ jobs:
     - name: Version name
       id: version_name
       run: |
-        echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-    - name: Upload Firmware Asset
-      id: upload-firmware-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./.pio/build/ttgo-t-watch/firmware.bin
-        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin
-        asset_content_type: application/octet-stream
-    - name: Compress firmware
-      id: compress-firmware
+        if [ "${GITHUB_REF#refs/heads/}" == "experimental"]
+        then
+          echo ::set-output name=SUFFIX::.experimental
+          echo ::set-output name=PREFIX::ttgo-t-watch2020_v1.experimental
+        else
+          echo ::set-output name=SUFFIX::
+          echo ::set-output name=PREFIX::ttgo-t-watch2020_v1
+        fi
+    - name: Prepare firmware
+      id: prepare-firmware
       run: |
-          gzip ./.pio/build/ttgo-t-watch/firmware.bin
-    - name: Upload Compressed Firmware Asset
-      id: upload-compressed-firmware-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./.pio/build/ttgo-t-watch/firmware.bin.gz
-        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz
-        asset_content_type: application/gzip
+          cp ./.pio/build/ttgo-t-watch/firmware.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin
+          gzip -c ./.pio/build/ttgo-t-watch/firmware.bin > ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz
     - name: Build Version File
+      id: build-version-file
       run: |
         # get firmware version from config.h
         firmwareversion=$(cat src/config.h | grep __FIRMWARE__ | tr -s " " | cut -d' ' -f4 | cut -d'"' -f2)
         md5=$(md5sum .pio/build/ttgo-t-watch/firmware.bin | cut -d ' ' -f 1)
         size=$(stat -c %s .pio/build/ttgo-t-watch/firmware.bin)
-        echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin\",\"gzipfile\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
-    - name: Upload Version File Asset
-      id: upload-version-file-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
-        asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
-        asset_content_type: application/json
+        echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin\",\"gzipfile\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ${{ steps.version_name.outputs.PREFIX }}.version.json
+    - name: Upload
+      id: upload-files
+      run: |
+        echo "TODO: Upload files"
+        ls -l ${{ steps.version_name.outputs.PREFIX }}.ino.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz ${{ steps.version_name.outputs.PREFIX }}.version.json
