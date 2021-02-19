@@ -42,7 +42,8 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
     StepcounterBleUpdater() : BleUpdater(1000*1800){}
     protected:
     bool notify(int32_t stepcounter) {
-        uint32_t delta = stepcounter - last_value;
+        // Take care of daily reset
+        uint32_t delta = stepcounter < last_value ? stepcounter : stepcounter - last_value;
         // Cf. https://www.espruino.com/Gadgetbridge
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
