@@ -269,6 +269,7 @@ void main_tile_update_time( void ) {
         }
     }
 
+    // Time
     main_tile_format_time( time_str, sizeof(time_str), &info );
 
     // only update while time_str changes
@@ -277,11 +278,17 @@ void main_tile_update_time( void ) {
         lv_label_set_text( timelabel, time_str );
         lv_obj_align( timelabel, clock_cont, LV_ALIGN_CENTER, 0, 0 );
         strlcpy( old_time_str, time_str, sizeof( time_str ) );
+    }    
 
-        strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
+    // Date
+    strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
+
+    // only update while date changes
+    char *olddate = lv_label_get_text( datelabel );
+    if ( strcmp( time_str, olddate ) ) {
         lv_label_set_text( datelabel, time_str );
         lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-    }    
+    }
 }
 
 void main_tile_update_task( lv_task_t * task ) {
