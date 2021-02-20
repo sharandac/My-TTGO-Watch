@@ -26,6 +26,9 @@ template <class T>
 class BleUpdater {
     public:
     void update(T value, bool force = false) {
+        if ( !blectl_get_event( BLECTL_CONNECT ) )
+            // BLE inactive, nothing to update
+            return;
         uint64_t current_millis = millis();
         if (force ||
             last_value != value ||
