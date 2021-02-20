@@ -286,7 +286,7 @@ void blectl_setup( void ) {
     }
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "powermgm blectl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "powermgm blectl loop" );
-    pmu_register_cb( PMUCTL_BATTERY_PERCENT | PMUCTL_CHARGING | PMUCTL_VBUS_PLUG, blectl_pmu_event_cb, "pmu blectl battery");
+    pmu_register_cb( PMUCTL_STATUS, blectl_pmu_event_cb, "pmu blectl battery");
 }
 
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -481,22 +481,14 @@ void blectl_read_config( void ) {
 }
 
 bool blectl_pmu_event_cb( EventBits_t event, void *arg ) {
-    static int32_t percent = 0;
-    static bool charging = false;
-    static bool plug = false;
-
     switch( event ) {
-        case PMUCTL_BATTERY_PERCENT:
-            percent = *(int32_t*)arg;
+        case PMUCTL_STATUS:
+            bool charging = *(bool*)arg & PMUCTL_STATUS_CHARGING;
+            bool plug = *(bool*)arg & PMUCTL_STATUS_PLUG;
+            int32_t percent = *(int32_t*)arg & PMUCTL_STATUS_PERCENT;
             if ( blectl_get_event( BLECTL_CONNECT ) ) {
                 blectl_update_battery( percent, charging, plug );
             }
-            break;
-        case PMUCTL_CHARGING:
-            charging = *(bool*)arg;
-            break;
-        case PMUCTL_VBUS_PLUG:
-            plug = *(bool*)arg;
             break;
     }
     return( true );
