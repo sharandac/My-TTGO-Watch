@@ -27,12 +27,49 @@
 
 #include "blectl.h"
 #include "pmu.h"
+#include "bleupdater.h"
+
+class BleBattLevelUpdater : public BleUpdater<uint8_t> {
+    public:
+    BleBattLevelUpdater(BLECharacteristic *charac, uint64_t timeout) : BleUpdater(timeout), characteristic(charac) {}
+    void set(uint8_t power) {
+        characteristic->setValue(&power, 1);
+    }
+    bool notify(uint8_t level) {
+        // Send battery level via standard characteristic
+        characteristic->notify();
+
+        // Send battery percent via BangleJS protocol
+        char msg[64]="";
+        snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", level );
+        bool ret = blectl_send_msg( msg );
+
+        return ret;
+    }
+    BLECharacteristic *characteristic;
+};
+
+class BleBattPowerUpdater : public BleUpdater<uint8_t> {
+    public:
+    BleBattPowerUpdater(BLECharacteristic *charac, uint64_t timeout) : BleUpdater(timeout), characteristic(charac) {}
+    void set(uint8_t power) {
+        characteristic->setValue(&power, 1);
+    }
+    bool notify(uint8_t level) {
+        characteristic->notify();
+        return true;
+    }
+    BLECharacteristic *characteristic;
+};
 
 static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg );
 static void blebatctl_update_battery( int32_t percent, bool charging, bool plug );
 
 static BLECharacteristic *pBatteryLevelCharacteristic;
 static BLECharacteristic *pBatteryPowerStateCharacteristic;
+
+static BleBattLevelUpdater *blebatctl_level_updater;
+static BleBattPowerUpdater *blebatctl_power_updater;
 
 void blebatctl_setup(BLEServer *pServer) {
     // Create battery service
@@ -49,6 +86,9 @@ void blebatctl_setup(BLEServer *pServer) {
     pBatteryService->start();
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
+
+    blebatctl_level_updater = new BleBattLevelUpdater(pBatteryLevelCharacteristic, 1000 * 60 * 5);
+    blebatctl_power_updater = new BleBattPowerUpdater(pBatteryPowerStateCharacteristic, 1000 * 60 * 5);
 
     pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery");
 }
@@ -70,21 +110,12 @@ static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg ) {
 static void blebatctl_update_battery( int32_t percent, bool charging, bool plug ) {
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
-
-    // Send battery level via standard characteristic
-    pBatteryLevelCharacteristic->setValue(&level, 1);
-    pBatteryLevelCharacteristic->notify();
-
-    // Send battery percent via BangleJS protocol
-    char msg[64]="";
-    snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
-    blectl_send_msg( msg );
+    blebatctl_level_updater->update(level);
 
     // Send powerstate via standard caracteristic
     uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT | 
         (plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING) |
         (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 
         (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
-    pBatteryPowerStateCharacteristic->setValue(&batteryPowerState, 1);
-    pBatteryPowerStateCharacteristic->notify();
+    blebatctl_power_updater->update(batteryPowerState);
 }
