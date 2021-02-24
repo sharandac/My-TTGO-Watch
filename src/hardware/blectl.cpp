@@ -185,13 +185,12 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite( BLECharacteristic *pCharacteristic ) {
         size_t msgLen = pCharacteristic->getValue().length();
-        char *msg = (char *)CALLOC( msgLen + 1, 1 );
+        const char *msg = pCharacteristic->getValue().c_str();
         if ( msg == NULL ) {
             log_e("calloc fail");
             return;
         }
         else {
-            strlcpy( msg, pCharacteristic->getValue().c_str(), msgLen + 1 );
             for ( int i = 0 ; i < msgLen ; i++ ) {
                 switch( msg[ i ] ) {
                     case EndofText:         blectl_delete_gadgetbridge_msg();
@@ -216,8 +215,6 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                     default:                blectl_add_char_to_gadgetbridge_msg( msg[ i ] );
                 }
             }
-            free(msg);
-            msg = NULL;
         }
     }
 
