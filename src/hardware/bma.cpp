@@ -40,8 +40,7 @@ __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
-static char bma_date[16];
-static char bma_old_date[16];
+static struct tm bma_old_date;
 
 bma_config_t bma_config[ BMA_CONFIG_NUM ];
 callback_t *bma_callback = NULL;
@@ -188,7 +187,6 @@ static void bma_notify_stepcounter() {
 void bma_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     time_t now;
-    tm info;
 
     log_i("go standby");
 
@@ -196,8 +194,7 @@ void bma_standby( void ) {
         ttgo->bma->enableStepCountInterrupt( false );
 
     time( &now );
-    localtime_r( &now, &info );
-    strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
+    localtime_r( &now, &bma_old_date );
 
     gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
     esp_sleep_enable_gpio_wakeup ();
@@ -205,8 +202,6 @@ void bma_standby( void ) {
 
 void bma_wakeup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-    time_t now;
-    tm info;
 
     log_i("go wakeup");
 
@@ -216,14 +211,15 @@ void bma_wakeup( void ) {
     /*
      * check for a new day and reset stepcounter if configure
      */
-    time( &now );
-    localtime_r( &now, &info );
-    strftime( bma_date, sizeof( bma_date ), "%d.%b", &info );
-    if ( strcmp( bma_date, bma_old_date ) ) {
-        if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
-            log_i("reset setcounter: %s != %s", bma_date, bma_old_date );
+    if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
+        time_t now;
+        tm info;
+        time( &now );
+        localtime_r( &now, &info );
+        if ( info.tm_yday != bma_old_date.tm_yday ) {
+            log_i("reset setcounter: %d != %d", info.tm_yday, bma_old_date.tm_yday );
             ttgo->bma->resetStepCounter();
-            strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
+            localtime_r( &now, &bma_old_date );
         }
     }
 
