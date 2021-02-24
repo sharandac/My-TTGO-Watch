@@ -92,14 +92,7 @@ void main_tile_setup( void ) {
     lv_obj_add_style( datelabel, LV_OBJ_PART_MAIN, &datestyle );
     lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
 
-    struct tm  info;
-    char buf[64];
-
-    main_tile_format_time( buf, sizeof(buf), &info );
-    lv_label_set_text( timelabel, buf );
-    strftime( buf, sizeof(buf), "%a %d.%b %Y", &info );
-    lv_label_set_text( datelabel, buf );
-    lv_obj_align( datelabel, timelabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    main_tile_update_time();
 
     for ( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         widget_entry[ widget ].active = false;
@@ -256,38 +249,36 @@ void main_tile_update_time( void ) {
         return;
     }
 
-    struct tm  info;
+    time_t now;
+    static time_t last = 0;
+    struct tm  info, last_info;
     char time_str[64]="";
-    static char *old_time_str = NULL;
 
-    // on first run, alloc psram
-    if ( old_time_str == NULL ) {
-        old_time_str = (char *)CALLOC( sizeof( time_str), 1 );
-        if ( old_time_str == NULL ) {
-            log_e("old_time_str allocation failed");
-            while(true);
-        }
+    time( &now );
+    
+    localtime_r( &now, &info );
+    if ( last != 0 )
+        localtime_r( &last, &last_info );
+
+    // Date
+    // only update while date changes
+    if ( last == 0 || info.tm_yday != last_info.tm_yday ) {
+        strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
+        log_i("renew date: %s", time_str );
+        lv_label_set_text( datelabel, time_str );
+        lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     }
 
     // Time
-    main_tile_format_time( time_str, sizeof(time_str), &info );
-
-    // only update while time_str changes
-    if ( strcmp( time_str, old_time_str ) ) {
-        log_i("renew time_str: %s != %s", time_str, old_time_str );
+    // only update while time changes
+    // Display has a minute resolution
+    if ( last == 0 || info.tm_min != last_info.tm_min || info.tm_hour != last_info.tm_hour ) {
+        main_tile_format_time( time_str, sizeof(time_str), &info );
+        log_i("renew time: %s", time_str );
         lv_label_set_text( timelabel, time_str );
         lv_obj_align( timelabel, clock_cont, LV_ALIGN_CENTER, 0, 0 );
-        strlcpy( old_time_str, time_str, sizeof( time_str ) );
-    }    
-
-    // Date
-    strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
-
-    // only update while date changes
-    char *olddate = lv_label_get_text( datelabel );
-    if ( strcmp( time_str, olddate ) ) {
-        lv_label_set_text( datelabel, time_str );
-        lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+        // Save for next loop
+        last = now;
     }
 }
 
@@ -304,10 +295,6 @@ void main_tile_update_task( lv_task_t * task ) {
 }
 
 void main_tile_format_time( char * buf, size_t buf_len, struct tm * info ) {
-    time_t now;
-
-    time( &now );
-    localtime_r( &now, info );
     int h = info->tm_hour;
     int m = info->tm_min;
 
