@@ -40,6 +40,8 @@
 #include "alloc.h"
 #include "msg_chain.h"
 
+#include "utils/charbuffer.h"
+
 #include "gui/statusbar.h"
 
 EventGroupHandle_t blectl_status = NULL;
@@ -66,8 +68,7 @@ uint8_t txValue = 0;
 BLECharacteristic *pBatteryLevelCharacteristic;
 BLECharacteristic *pBatteryPowerStateCharacteristic;
 
-char *gadgetbridge_msg = NULL;
-uint32_t gadgetbridge_msg_size = 0;
+static CharBuffer gadgetbridge_msg;
 
 class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
@@ -136,88 +137,42 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
     }
 };
 
-void blectl_add_char_to_gadgetbridge_msg( char msg_char ) {
-    gadgetbridge_msg_size++;
-
-    if ( gadgetbridge_msg == NULL ) {
-        gadgetbridge_msg = (char *)CALLOC( gadgetbridge_msg_size + 1, 1 );
-        if ( gadgetbridge_msg == NULL ) {
-            log_e("gadgetbridge_msg alloc fail");
-            while(true);
-        }
-    }
-    else {
-        char *new_gadgetbridge_msg = NULL;
-        new_gadgetbridge_msg = (char *)REALLOC( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
-        if ( new_gadgetbridge_msg == NULL ) {
-            log_e("gadgetbridge_msg realloc fail");
-            while(true);            
-        }
-        gadgetbridge_msg = new_gadgetbridge_msg;
-    }
-    gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = msg_char;
-    gadgetbridge_msg[ gadgetbridge_msg_size ] = '\0';
-}
-
-void blectl_delete_gadgetbridge_msg ( void ) {
-    gadgetbridge_msg_size = 0;
-
-    if ( gadgetbridge_msg == NULL ) {
-        gadgetbridge_msg = (char *)CALLOC( gadgetbridge_msg_size + 1, 1 );
-        if ( gadgetbridge_msg == NULL ) {
-            log_e("gadgetbridge_msg alloc fail");
-            while(true);
-        }
-    }
-    else {
-        char *new_gadgetbridge_msg = NULL;
-        new_gadgetbridge_msg = (char *)REALLOC( gadgetbridge_msg, gadgetbridge_msg_size + 1 );
-        if ( new_gadgetbridge_msg == NULL ) {
-            log_e("gadgetbridge_msg realloc fail");
-            while(true);            
-        }
-        gadgetbridge_msg = new_gadgetbridge_msg;
-    }
-    gadgetbridge_msg[ gadgetbridge_msg_size ] = '\0';
-}
-
 class BleCtlCallbacks : public BLECharacteristicCallbacks
 {
     void onWrite( BLECharacteristic *pCharacteristic ) {
         size_t msgLen = pCharacteristic->getValue().length();
-        char *msg = (char *)CALLOC( msgLen + 1, 1 );
+        const char *msg = pCharacteristic->getValue().c_str();
         if ( msg == NULL ) {
             log_e("calloc fail");
             return;
         }
         else {
-            strlcpy( msg, pCharacteristic->getValue().c_str(), msgLen + 1 );
+            const char *gbmsg = NULL;
             for ( int i = 0 ; i < msgLen ; i++ ) {
                 switch( msg[ i ] ) {
-                    case EndofText:         blectl_delete_gadgetbridge_msg();
+                    case EndofText:         gadgetbridge_msg.clear();
                                             log_i("attention, new link establish");
                                             blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
                                             break;
-                    case DataLinkEscape:    blectl_delete_gadgetbridge_msg();
+                    case DataLinkEscape:    gadgetbridge_msg.clear();
                                             log_i("attention, new message");
                                             break;
                     case LineFeed:          log_i("message complete, fire BLTCTL_MSG callback");
-                                            if( gadgetbridge_msg[ 0 ] == 'G' && gadgetbridge_msg[ 1 ] == 'B' ) {
+                                            gbmsg = gadgetbridge_msg.c_str();
+                                            if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
                                                 log_i("gadgetbridge message identified, cut down to json");
-                                                gadgetbridge_msg[ gadgetbridge_msg_size - 1 ] = '\0';
-                                                log_i("msg: %s", &gadgetbridge_msg[ 3 ] );
-                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gadgetbridge_msg[ 3 ] );
+                                                gadgetbridge_msg.erase( gadgetbridge_msg.length() - 1 );
+                                                log_i("msg: %s", &gbmsg[ 3 ] );
+                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gbmsg[ 3 ] );
                                             }
                                             else {
-                                                log_i("msg: %s", gadgetbridge_msg );
-                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gadgetbridge_msg[ 0 ] );
+                                                log_i("msg: %s", gbmsg );
+                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gbmsg[ 0 ] );
                                             }
                                             break;
-                    default:                blectl_add_char_to_gadgetbridge_msg( msg[ i ] );
+                    default:                gadgetbridge_msg.append( msg[ i ] );
                 }
             }
-            free(msg);
-            msg = NULL;
         }
     }
 
