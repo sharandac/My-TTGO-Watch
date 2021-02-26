@@ -142,36 +142,31 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
     void onWrite( BLECharacteristic *pCharacteristic ) {
         size_t msgLen = pCharacteristic->getValue().length();
         const char *msg = pCharacteristic->getValue().c_str();
-        if ( msg == NULL ) {
-            log_e("calloc fail");
-            return;
-        }
-        else {
-            const char *gbmsg = NULL;
-            for ( int i = 0 ; i < msgLen ; i++ ) {
-                switch( msg[ i ] ) {
-                    case EndofText:         gadgetbridge_msg.clear();
-                                            log_i("attention, new link establish");
-                                            blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
-                                            break;
-                    case DataLinkEscape:    gadgetbridge_msg.clear();
-                                            log_i("attention, new message");
-                                            break;
-                    case LineFeed:          log_i("message complete, fire BLTCTL_MSG callback");
-                                            gbmsg = gadgetbridge_msg.c_str();
+
+        log_i("receive %d bytes msg chunk", msgLen );
+
+        for ( int i = 0 ; i < msgLen ; i++ ) {
+            switch( msg[ i ] ) {
+                case EndofText:         gadgetbridge_msg.clear();
+                                        log_i("attention, new link establish");
+                                        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
+                                        break;
+                case DataLinkEscape:    gadgetbridge_msg.clear();
+                                        log_i("attention, new message");
+                                        break;
+                case LineFeed:          {
+                                            log_i("attention, message complete");
+                                            const char *gbmsg = gadgetbridge_msg.c_str();
                                             if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg.erase( gadgetbridge_msg.length() - 1 );
-                                                log_i("msg: %s", &gbmsg[ 3 ] );
-                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gbmsg[ 3 ] );
+                                                gbmsg += 3;
                                             }
-                                            else {
-                                                log_i("msg: %s", gbmsg );
-                                                blectl_send_event_cb( BLECTL_MSG, (void *)&gbmsg[ 0 ] );
-                                            }
+                                            log_i("msg: %s", gbmsg );
+                                            blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
                                             break;
-                    default:                gadgetbridge_msg.append( msg[ i ] );
-                }
+                                        }
+                default:                gadgetbridge_msg.append( msg[ i ] );
             }
         }
     }
