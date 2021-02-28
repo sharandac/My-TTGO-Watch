@@ -161,6 +161,7 @@ void display_save_config( void ) {
         doc["background_image"] = display_config.background_image;
         doc["use_dma"] = display_config.use_dma;
         doc["use_double_buffering"] = display_config.use_double_buffering;
+        doc["vibe"] = display_config.vibe;
 
         if ( serializeJsonPretty( doc, file ) == 0) {
             log_e("Failed to write config file");
@@ -191,6 +192,7 @@ void display_read_config( void ) {
             display_config.background_image = doc["background_image"] | 2;
             display_config.use_dma = doc["use_dma"] | true;
             display_config.use_double_buffering = doc["use_double_buffering"] | false;
+            display_config.vibe = doc["vibe"] | true;
         }        
         doc.clear();
     }
