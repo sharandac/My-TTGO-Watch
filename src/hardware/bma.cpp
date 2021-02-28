@@ -28,31 +28,10 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "callback.h"
-#include "blectl.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
-#include "bleupdater.h"
 
 #include "gui/statusbar.h"
-#include "quickglui/common/bluejsonrequest.h"
-
-class StepcounterBleUpdater : public BleUpdater<int32_t> {
-    public:
-    // Update every 1800 as GadgetBidge uses such value by default
-    StepcounterBleUpdater() : BleUpdater(1000*1800){}
-    protected:
-    bool notify(int32_t stepcounter) {
-        // Take care of daily reset
-        uint32_t delta = stepcounter < last_value ? stepcounter : stepcounter - last_value;
-        // Cf. https://www.espruino.com/Gadgetbridge
-        char msg[64]="";
-        snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
-        bool ret = blectl_send_msg( msg );
-        return ret;
-    }
-};
-
-static StepcounterBleUpdater stepcounter_ble_updater;
 
 volatile bool DRAM_ATTR bma_irq_flag = false;
 portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -73,7 +52,6 @@ void IRAM_ATTR bma_irq( void );
 bool bma_send_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
-static bool bma_bluetooth_event_cb(EventBits_t event, void *arg);
 
 static void bma_notify_stepcounter();
 
@@ -106,7 +84,6 @@ void bma_setup( void ) {
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "powermgm bma" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "powermgm bma loop" );
-    blectl_register_cb(BLECTL_MSG, bma_bluetooth_event_cb, "powermgm bma");
 }
 
 bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -204,30 +181,8 @@ static void bma_notify_stepcounter() {
         // New val
         last_val = stepcounter + stepcounter_before_reset;
 
-        char msg[16]="";
-        snprintf( msg, sizeof( msg ),"%d", last_val );
-        // log debug stepcounter, stepcounter_before_reset
-        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
-
-        stepcounter_ble_updater.update(stepcounter + stepcounter_before_reset);
+        bma_send_event_cb( BMACTL_STEPCOUNTER, &last_val );
     }
-}
-
-static bool bma_bluetooth_event_cb(EventBits_t event, void *arg) {
-    if (event != BLECTL_MSG) return false; // Not supported
-
-    auto msg = (const char*)arg;
-    BluetoothJsonRequest request(msg, strlen( msg ) * 4);
-
-    if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int"))
-    {
-        uint64_t timeout = request["int"].as<uint32_t>(); // Requested timeout, in seconds
-        log_i("RECEIVED timeout: %d seconds", timeout);
-        stepcounter_ble_updater.setTimeout(timeout*1000);
-        // TODO affect power loop rate
-    }
-
-    return true;
 }
 
 void bma_standby( void ) {

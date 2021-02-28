@@ -33,6 +33,7 @@
 #include <BLE2902.h>
 
 #include "blectl.h"
+#include "blestepctl.h"
 #include "pmu.h"
 #include "powermgm.h"
 #include "callback.h"
@@ -323,6 +324,8 @@ void blectl_setup( void ) {
     pBatteryService->start();
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
+
+    blestepctl_setup();
 
     // Slow advertising interval for battery life
     pServer->getAdvertising()->setMinInterval( 700 );
