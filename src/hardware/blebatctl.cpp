@@ -36,6 +36,11 @@ class BleBattLevelUpdater : public BleUpdater<uint8_t> {
         characteristic->setValue(&power, 1);
     }
     bool notify(uint8_t level) {
+        // TODO add a threshold to notify only significant changes
+        if (last_value == level)
+            // Do not notify on same value
+            return false;
+
         // Send battery level via standard characteristic
         characteristic->notify();
 
@@ -55,7 +60,11 @@ class BleBattPowerUpdater : public BleUpdater<uint8_t> {
     void set(uint8_t power) {
         characteristic->setValue(&power, 1);
     }
-    bool notify(uint8_t level) {
+    bool notify(uint8_t power) {
+        if (last_value == power)
+            // Do not notify on same value
+            return false;
+
         characteristic->notify();
         return true;
     }
