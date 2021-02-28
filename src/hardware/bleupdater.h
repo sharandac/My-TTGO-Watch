@@ -31,7 +31,6 @@ class BleUpdater {
             return;
         uint64_t current_millis = millis();
         if (force ||
-            last_value != value ||
             last_millis - current_millis > timeout_millis) {
             // Time to notify
             bool ret = notify(value);
