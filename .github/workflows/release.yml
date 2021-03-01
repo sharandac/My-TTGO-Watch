@@ -49,15 +49,15 @@ jobs:
     - name: Prepare firmware
       id: prepare-firmware
       run: |
-          cp ./.pio/build/ttgo-t-watch/firmware.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin
-          gzip -c ./.pio/build/ttgo-t-watch/firmware.bin > ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz
+          cp ./.pio/build/ttgo-t-watch-v1/firmware.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin
+          gzip -c ./.pio/build/ttgo-t-watch-v1/firmware.bin > ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz
     - name: Build Version File
       id: build-version-file
       run: |
         # get firmware version from config.h
         firmwareversion=$(cat src/config.h | grep __FIRMWARE__ | tr -s " " | cut -d' ' -f4 | cut -d'"' -f2)
-        md5=$(md5sum .pio/build/ttgo-t-watch/firmware.bin | cut -d ' ' -f 1)
-        size=$(stat -c %s .pio/build/ttgo-t-watch/firmware.bin)
+        md5=$(md5sum .pio/build/ttgo-t-watch-v1/firmware.bin | cut -d ' ' -f 1)
+        size=$(stat -c %s .pio/build/ttgo-t-watch-v1/firmware.bin)
         echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin\",\"gzipfile\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ${{ steps.version_name.outputs.PREFIX }}.version.json
     - name: Upload
       id: upload-files

@@ -53,13 +53,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./.pio/build/ttgo-t-watch/firmware.bin
+        asset_path: ./.pio/build/ttgo-t-watch-v1/firmware.bin
         asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin
         asset_content_type: application/octet-stream
     - name: Compress firmware
       id: compress-firmware
       run: |
-          gzip ./.pio/build/ttgo-t-watch/firmware.bin
+          gzip ./.pio/build/ttgo-t-watch-v1/firmware.bin
     - name: Upload Compressed Firmware Asset
       id: upload-compressed-firmware-asset 
       uses: actions/upload-release-asset@v1
@@ -67,15 +67,15 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./.pio/build/ttgo-t-watch/firmware.bin.gz
+        asset_path: ./.pio/build/ttgo-t-watch-v1/firmware.bin.gz
         asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz
         asset_content_type: application/gzip
     - name: Build Version File
       run: |
         # get firmware version from config.h
         firmwareversion=$(cat src/config.h | grep __FIRMWARE__ | tr -s " " | cut -d' ' -f4 | cut -d'"' -f2)
-        md5=$(md5sum .pio/build/ttgo-t-watch/firmware.bin | cut -d ' ' -f 1)
-        size=$(stat -c %s .pio/build/ttgo-t-watch/firmware.bin)
+        md5=$(md5sum .pio/build/ttgo-t-watch-v1/firmware.bin | cut -d ' ' -f 1)
+        size=$(stat -c %s .pio/build/ttgo-t-watch-v1/firmware.bin)
         echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin\",\"gzipfile\":\"ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
     - name: Upload Version File Asset
       id: upload-version-file-asset 
