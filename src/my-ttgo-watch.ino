@@ -51,6 +51,9 @@
 #include "app/fx_rates/fx_rates.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
+#include "app/esp3d/esp3d.h"
+
+
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -99,13 +102,14 @@ void setup()
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
-    crypto_ticker_setup();
-    example_app_setup();
-    osmand_app_setup();
+    //crypto_ticker_setup();
+    //example_app_setup();
+    //osmand_app_setup();
     IRController_setup();
-    fxrates_app_setup();
-    powermeter_app_setup();
+    //fxrates_app_setup();
+    //powermeter_app_setup();
 	FindPhone_setup();
+    esp3d_app_setup();
   	/*
      *
      */

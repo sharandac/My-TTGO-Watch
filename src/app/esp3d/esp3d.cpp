@@ -120,7 +120,7 @@ void build_esp_settings()
 
 bool fetch_esp3d_data(String esp3dServer, String esppair1, String esppair2) {
     char url[256]=""; float p1=0, p2=0;
-    snprintf(url, sizeof(url), "http://192.168.1.210:3344/#/printer/a8/print", esp3dServer.c_str(), esppair1.c_str(), esppair2.c_str());
+    snprintf(url, sizeof(url), "http://192.168.1.215", esp3dServer.c_str(), esppair1.c_str(), esppair2.c_str());
     if (esppair2.length() == 0) // If single currency used - remove ',' char
         url[strlen(url)-1]='\0';
 
