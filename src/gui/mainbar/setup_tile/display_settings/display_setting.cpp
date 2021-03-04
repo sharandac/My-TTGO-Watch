@@ -29,7 +29,6 @@
 #include "gui/gui.h"
 
 #include "hardware/display.h"
-#include "hardware/motor.h"
 #include "hardware/bma.h"
 
 
@@ -246,7 +245,7 @@ void display_settings_tile_setup( void ) {
     lv_dropdown_set_selected( display_rotation_list, display_get_rotation() / 90 );
     lv_dropdown_set_selected( display_bg_img_list, display_get_background_image() );
 
-    if ( motor_get_vibe_config() )
+    if ( display_get_vibe() )
         lv_switch_on( display_vibe_onoff, LV_ANIM_OFF );
     else
         lv_switch_off( display_vibe_onoff, LV_ANIM_OFF );
@@ -318,7 +317,7 @@ static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ):     motor_set_vibe_config( lv_slider_get_value( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ):     display_set_vibe( lv_slider_get_value( obj ) );
                                             break;
     }
 }
