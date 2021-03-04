@@ -506,9 +506,16 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
 
+    // Send battery level via standard characteristic
     pBatteryLevelCharacteristic->setValue(&level, 1);
     pBatteryLevelCharacteristic->notify();
 
+    // Send battery percent via BangleJS protocol
+    char msg[64]="";
+    snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
+    blectl_send_msg( msg );
+
+    // Send powerstate via standard caracteristic
     uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT | 
         (plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING) |
         (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 

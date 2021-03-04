@@ -273,12 +273,6 @@ void pmu_loop( void ) {
      */
     if ( pmu_update ) {
         /*
-         * send battery percent via blectl
-         */
-        char msg[64]="";
-        snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
-        blectl_send_msg( msg );
-        /*
          * send updates via pmu event
          */
         pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
