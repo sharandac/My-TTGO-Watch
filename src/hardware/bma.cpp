@@ -53,6 +53,8 @@ bool bma_send_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
 
+static void bma_notify_stepcounter();
+
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -153,10 +155,7 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             }
             else if ( BMA_stepcounter ) {
                 BMA_stepcounter = false;
-                stepcounter_before_reset = ttgo->bma->getCounter();
-                char msg[16]="";
-                snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-                bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+                bma_notify_stepcounter();
             }
             break;
         }
@@ -167,12 +166,23 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
      */
     if ( first_loop_run ) {
         first_loop_run = false;
-        stepcounter_before_reset = ttgo->bma->getCounter();
-        char msg[16]="";
-        snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+        bma_notify_stepcounter();
     }
     return( true );
+}
+
+static void bma_notify_stepcounter() {
+    static uint32_t last_val = 0;
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    stepcounter_before_reset = ttgo->bma->getCounter();
+
+    uint32_t delta = stepcounter + stepcounter_before_reset - last_val;
+    if (delta > 0) {
+        // New val
+        last_val = stepcounter + stepcounter_before_reset;
+
+        bma_send_event_cb( BMACTL_STEPCOUNTER, &last_val );
+    }
 }
 
 void bma_standby( void ) {

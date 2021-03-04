@@ -33,6 +33,7 @@
 #include <BLE2902.h>
 
 #include "blectl.h"
+#include "blestepctl.h"
 #include "pmu.h"
 #include "powermgm.h"
 #include "callback.h"
@@ -274,6 +275,8 @@ void blectl_setup( void ) {
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
+    blestepctl_setup();
+
     // Slow advertising interval for battery life
     pServer->getAdvertising()->setMinInterval( 700 );
     pServer->getAdvertising()->setMaxInterval( 800 );
@@ -514,12 +517,14 @@ void blectl_update_battery( int32_t percent, bool charging, bool plug ) {
     pBatteryPowerStateCharacteristic->notify();
 }
 
-void blectl_send_msg( char *msg ) {
+bool blectl_send_msg( char *msg ) {
     if ( blectl_get_event( BLECTL_CONNECT ) ) {
         blectl_msg_chain = msg_chain_add_msg( blectl_msg_chain, msg );
+        return true;
     }
     else {
         log_e("msg can't send while bluetooth is not connected");
+        return false;
     }
 }
 
