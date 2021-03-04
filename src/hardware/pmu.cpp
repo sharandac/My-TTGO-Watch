@@ -272,18 +272,18 @@ void pmu_loop( void ) {
      * check if update flag is set
      */
     if ( pmu_update ) {
-        /*
-         * send battery percent via blectl
-         */
-        char msg[64]="";
-        snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", percent );
-        blectl_send_msg( msg );
+        // Encode values on a single
+        // As percent is supposed to be <=100% it is encoded on a single byte
+        // We can use other bits to code the 2 booleans
+        int32_t msg = percent;
+        msg |= plug ? PMUCTL_STATUS_PLUG : 0;
+        msg |= charging ? PMUCTL_STATUS_CHARGING : 0;
+
         /*
          * send updates via pmu event
          */
-        pmu_send_cb( PMUCTL_CHARGING, (void*)&charging );
-        pmu_send_cb( PMUCTL_VBUS_PLUG, (void*)&plug );
-        pmu_send_cb( PMUCTL_BATTERY_PERCENT, (void*)&percent );
+        pmu_send_cb( PMUCTL_STATUS, (void*)&msg );
+
         /*
          * clear update frag
          */

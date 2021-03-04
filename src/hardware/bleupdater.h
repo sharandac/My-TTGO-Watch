@@ -30,6 +30,9 @@ class BleUpdater {
             // BLE inactive, nothing to update
             return;
         uint64_t current_millis = millis();
+        if (force || last_value != value) {
+            set(value);
+        }
         if (force ||
             last_millis - current_millis > timeout_millis) {
             // Time to notify
@@ -44,8 +47,10 @@ class BleUpdater {
     void setTimeout(uint64_t timeout){ timeout_millis = timeout; }
     protected:
     BleUpdater(uint64_t timeout): timeout_millis(timeout) {}
+    virtual void set(T value) { /* Nothing by default */ }
     virtual bool notify(T value) = 0;
     T last_value;
     uint64_t last_millis = 0;
     uint64_t timeout_millis = 0;
 };
+
