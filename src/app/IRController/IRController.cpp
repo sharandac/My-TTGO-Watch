@@ -134,7 +134,7 @@ bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
 
     auto msg = (const char*)arg;
     InfraButton* btn = nullptr;
-    BluetoothJsonRequest request(msg);
+    BluetoothJsonRequest request(msg, strlen( msg ) * 4);
 
     if (request.isRequest() && request.isForApplication("ir"))
     {

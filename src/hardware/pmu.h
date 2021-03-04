@@ -33,7 +33,7 @@
     #define PMUCTL_CHARGING                 _BV(2)              /** @brief event mask for pmuctl charging, callback arg is (bool*) */
     #define PMUCTL_SHORT_PRESS              _BV(3)              /** @brief event mask for pmuctl short press, no callback arg */
     #define PMUCTL_LONG_PRESS               _BV(4)              /** @brief event mask for pmuctl long press, nocallback arg */
-    #define PMUCTL_TIMER_TIMEOUT            _BV(4)              /** @brief event mask for pmuctl timer timeout, no callback arg */
+    #define PMUCTL_TIMER_TIMEOUT            _BV(5)              /** @brief event mask for pmuctl timer timeout, no callback arg */
 	/**
      * Some default values, used below as well as in pmu.cpp during json reads
      */
