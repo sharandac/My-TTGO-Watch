@@ -97,10 +97,10 @@ void blebatctl_setup(BLEServer *pServer) {
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
-    blebatctl_level_updater = new BleBattLevelUpdater(pBatteryLevelCharacteristic, 1000 * 60 * 5);
-    blebatctl_power_updater = new BleBattPowerUpdater(pBatteryPowerStateCharacteristic, 1000 * 60 * 5);
+    blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 1000 * 60 * 5 );
+    blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 1000 * 60 * 5 );
 
-    pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery");
+    pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery" );
     blectl_register_cb( BLECTL_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
 }
 
@@ -121,14 +121,14 @@ static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg ) {
 static void blebatctl_update_battery( int32_t percent, bool charging, bool plug ) {
     uint8_t level = (uint8_t)percent;
     if (level > 100) level = 100;
-    blebatctl_level_updater->update(level);
+    blebatctl_level_updater->update( level );
 
     // Send powerstate via standard caracteristic
     uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT | 
         (plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING) |
         (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 
         (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
-    blebatctl_power_updater->update(batteryPowerState);
+    blebatctl_power_updater->update( batteryPowerState );
 }
 
 static bool blebatctl_bluetooth_event_cb(EventBits_t event, void *arg) {
