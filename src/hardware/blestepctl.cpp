@@ -68,7 +68,7 @@ static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
 }
 
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
-    if (event != BLECTL_CONNECT) {
+    if (event == BLECTL_CONNECT) {
         // Try to refresh step counter value on (re)connect
         stepcounter_ble_updater.update(stepcounter);
         return true;
