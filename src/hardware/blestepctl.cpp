@@ -54,14 +54,14 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg);
 
 void blestepctl_setup() {
     bma_register_cb( BMACTL_STEPCOUNTER, blestepctl_bma_event_cb, "ble step counter");
-    blectl_register_cb(BLECTL_CONNECT|BLECTL_MSG, blestepctl_bluetooth_event_cb, "ble step counter");
+    blectl_register_cb( BLECTL_CONNECT|BLECTL_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
 }
 
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BMACTL_STEPCOUNTER:
             stepcounter = *(int32_t*)arg;
-            stepcounter_ble_updater.update(stepcounter);
+            stepcounter_ble_updater.update( stepcounter );
             break;
     }
     return( true );
@@ -70,7 +70,7 @@ static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
     if (event == BLECTL_CONNECT) {
         // Try to refresh step counter value on (re)connect
-        stepcounter_ble_updater.update(stepcounter);
+        stepcounter_ble_updater.update( stepcounter );
         return true;
     }
     if (event != BLECTL_MSG) return false; // Not supported
