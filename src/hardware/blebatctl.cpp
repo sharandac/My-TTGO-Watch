@@ -73,6 +73,7 @@ class BleBattPowerUpdater : public BleUpdater<uint8_t> {
 
 static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg );
 static void blebatctl_update_battery( int32_t percent, bool charging, bool plug );
+static bool blebatctl_bluetooth_event_cb( EventBits_t event, void *arg );
 
 static BLECharacteristic *pBatteryLevelCharacteristic;
 static BLECharacteristic *pBatteryPowerStateCharacteristic;
@@ -100,6 +101,7 @@ void blebatctl_setup(BLEServer *pServer) {
     blebatctl_power_updater = new BleBattPowerUpdater(pBatteryPowerStateCharacteristic, 1000 * 60 * 5);
 
     pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery");
+    blectl_register_cb( BLECTL_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
 }
 
 static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg ) {
@@ -127,4 +129,16 @@ static void blebatctl_update_battery( int32_t percent, bool charging, bool plug 
         (charging? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING) | 
         (percent > 10 ? BATTERY_POWER_STATE_LEVEL_GOOD : BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW );
     blebatctl_power_updater->update(batteryPowerState);
+}
+
+static bool blebatctl_bluetooth_event_cb(EventBits_t event, void *arg) {
+    if (event != BLECTL_CONNECT) return false; // Not supported
+
+    // Try to refresh values on (re)connect
+    bool charging = pmu_is_charging();
+    bool plug = pmu_is_vbus_plug();
+    int32_t percent = pmu_get_battery_percent();
+    blebatctl_update_battery( percent, charging, plug );
+
+    return true;
 }
