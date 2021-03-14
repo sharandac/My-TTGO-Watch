@@ -4,11 +4,15 @@ For quick clock application development use the new QuickGLUI - high level API. 
 
 Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this
 
-```#include "hardware/json_psram_allocator.h"```
+```
+#include "hardware/json_psram_allocator.h"
+```
 
 and create your json with
 
-```SpiRamJsonDocument doc( 1000 );```
+```
+SpiRamJsonDocument doc( 1000 );
+```
 
 to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
 
