@@ -49,6 +49,7 @@
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
+#include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 
@@ -106,6 +107,7 @@ void setup()
     fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
+    activity_app_setup();
   	/*
      *
      */
