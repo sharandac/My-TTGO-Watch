@@ -41,6 +41,7 @@ Cf. [Usage](USAGE.md)
 
 [FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
+[linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
 
 # for the programmers
 
@@ -69,10 +70,12 @@ Special thanks to the following people for their help:
 [bwagstaff](https://github.com/bwagstaff)<br>
 [chrismcna](https://github.com/chrismcna)<br>
 [datacute](https://github.com/datacute)<br>
+[guyou](https://github.com/guyou)<br>
 [jakub-vesely](https://github.com/jakub-vesely)<br>
 [joshvito](https://github.com/joshvito)<br>
 [JoanMCD](https://github.com/JoanMCD)<br>
 [NorthernDIY](https://github.com/NorthernDIY)<br>
+[Neuroplant](https://github.com/Neuroplant)<br>
 [rnisthal](https://github.com/rnisthal)<br>
 [paulstueber](https://github.com/paulstueber)<br>
 [ssspeq](https://github.com/ssspeq)<br>
@@ -88,6 +91,7 @@ and the following projects:
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [pubsubclient](https://github.com/knolleary/pubsubclient)<br>
+[ESP32-targz](https://github.com/tobozo/ESP32-targz)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>

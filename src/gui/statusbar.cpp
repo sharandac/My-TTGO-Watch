@@ -439,6 +439,7 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
+    char stepcounter[16]="";
     /*
      * check if statusbar ready
      */
@@ -448,7 +449,8 @@ bool statusbar_bmactl_event_cb( EventBits_t event, void *arg ) {
     }
 
     switch( event ) {
-        case BMACTL_STEPCOUNTER:    lv_label_set_text( statusbar_stepcounterlabel, (const char *)arg );
+        case BMACTL_STEPCOUNTER:    snprintf( stepcounter, sizeof( stepcounter ), "%d", *(uint32_t *)arg );
+                                    lv_label_set_text( statusbar_stepcounterlabel, stepcounter );
                                     break;
     }
     return( true );
