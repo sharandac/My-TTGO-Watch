@@ -134,6 +134,14 @@ struct JsonStringOption : public JsonOption
   }
 
   /*
+  * @brief Assign digits mode
+  */
+  JsonStringOption& setDigitsMode(bool onlyDigits, const char* filterDigitsList) {
+    this->onlyDigits = onlyDigits;
+    this->filterDigitsList = filterDigitsList;
+    return *this;
+  }
+  /*
   * @brief Assign settings option to the variable
   */
   JsonStringOption& assign(String* sourceVariable) {
@@ -149,6 +157,8 @@ struct JsonStringOption : public JsonOption
     isControlAssigned = true;
     control = sourceControl;
     control.text(value);
+    // Set digits mode
+    sourceControl.digitsMode(true, filterDigitsList);
     return *this;
   }
 
@@ -158,6 +168,8 @@ public:
   String* source = nullptr;
   bool isControlAssigned = false;
   TextArea control;
+  bool onlyDigits = false;
+  const char *filterDigitsList = nullptr;
 };
 
 #endif
