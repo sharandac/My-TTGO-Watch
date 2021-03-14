@@ -179,7 +179,6 @@ static void bma_notify_stepcounter() {
     if (delta > 0) {
         // New val
         last_val = stepcounter + stepcounter_before_reset;
-
         bma_send_event_cb( BMACTL_STEPCOUNTER, &last_val );
     }
 }
