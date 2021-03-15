@@ -10,16 +10,18 @@
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
 LV_IMG_DECLARE(move_64px);
 LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_32px);
 
 static Application activityApp;
 static JsonConfig config("activity.json");
 
 // Options
-static String size, length, goal;
+static String size, length, goal_step;
 // Widgets
-static Label lblStepcounter, lblStepachievement;
+static Label lblStep, lblStepcounter, lblStepachievement;
+static Arc arcStepcounter;
 
-static Style text;
+static Style big, small;
 
 
 static void build_main_page();
@@ -49,23 +51,35 @@ void activity_app_setup() {
 
 void build_main_page()
 {
-    text = Style::Create(mainbar_get_style(), true);
-    text.textFont(&Ubuntu_16px)
+    big = Style::Create(mainbar_get_style(), true);
+    big.textFont(&Ubuntu_32px)
+      .textOpacity(LV_OPA_80);
+    small = Style::Create(mainbar_get_style(), true);
+    small.textFont(&Ubuntu_16px)
       .textOpacity(LV_OPA_80);
 
     AppPage& screen = activityApp.mainPage(); // This is parent for all main screen widgets
 
+    lblStep = Label(&screen);
+    lblStep.text("Steps:")
+        .style(big, true)
+        .alignInParentTopLeft(0, 0);
+
     lblStepcounter = Label(&screen);
     lblStepcounter.text("0")
-        .alignText(LV_LABEL_ALIGN_CENTER)
-        .style(text, true)
-        .alignInParentTopLeft(0, 0);
+        .style(small, true)
+        .align(lblStep, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
     
     lblStepachievement = Label(&screen);
-    lblStepachievement.text("0")
-        .alignText(LV_LABEL_ALIGN_CENTER)
-        .style(text, true)
-        .align(lblStepcounter, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+    lblStepachievement.text("0%")
+        .style(small, true)
+        .align(lblStepcounter, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+
+    arcStepcounter = Arc(&screen, 0, 360);
+    arcStepcounter.start(0).end(0).rotation(90)
+        .style(mainbar_get_style(), true)
+        .size(100, 100)
+        .alignInParentTopRight(0, 0);
 }
 
 void refresh_main_page()
@@ -73,14 +87,15 @@ void refresh_main_page()
     char buff[36];
     // Get current value
     uint32_t stp = bma_get_stepcounter();
-    uint32_t ach = 100 * stp / goal.toInt();
+    uint32_t ach = 100 * stp / goal_step.toInt();
     log_i("Refresh activity: %d steps", stp);
     // Raw steps
-    snprintf( buff, sizeof( buff ), "Number of steps: %d", stp );
+    snprintf( buff, sizeof( buff ), "Steps: %d", stp );
     lblStepcounter.text(buff);
     // Achievement
-    snprintf( buff, sizeof( buff ), "Achievement: %d%%", ach );
+    snprintf( buff, sizeof( buff ), "Goal: %d%%", ach );
     lblStepachievement.text(buff);
+    arcStepcounter.end( 360 * stp / goal_step.toInt() );
 }
 
 void activity_activate_cb()
@@ -91,9 +106,8 @@ void activity_activate_cb()
 void build_settings()
 {
     // Create full options list and attach items to variables
-    config.addString("Taille", 5, "170").setDigitsMode(true,"0123456789").assign(&size);
-    config.addString("Longueur de pas", 3, "50").setDigitsMode(true,"0123456789").assign(&length);
-    config.addString("Objectif", 7, "10000").setDigitsMode(true,"0123456789").assign(&goal);
+    config.addString("Step length (cm)", 3, "50").setDigitsMode(true,"0123456789").assign(&length); // cm
+    config.addString("Step Goal", 7, "10000").setDigitsMode(true,"0123456789").assign(&goal_step); // steps
 
     activityApp.useConfig(config, true); // true - auto create settings page widgets
 }
