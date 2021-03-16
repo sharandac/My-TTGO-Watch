@@ -120,6 +120,16 @@ Widget& Widget::align(const Widget& base, lv_align_t align_mode, lv_coord_t x_of
 //   return *this;
 // }
 
+Widget& Widget::alignx(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset) {
+  lv_obj_align_x(native, base.handle(), align_mode, x_offset);
+  return *this;
+}
+
+Widget& Widget::aligny(const Widget& base, lv_align_t align_mode, lv_coord_t y_offset) {
+  lv_obj_align_y(native, base.handle(), align_mode, y_offset);
+  return *this;
+}
+
 Widget& Widget::alignInParentCenter(lv_coord_t x_offset, lv_coord_t y_offset)
 {
   auto parHandle = lv_obj_get_parent(native);
