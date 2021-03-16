@@ -16,10 +16,11 @@ static Application activityApp;
 static JsonConfig config("activity.json");
 
 // Options
-static String size, length, goal_step;
+static String size, length, goal_step, goal_dist;
 // Widgets
 static Label lblStep, lblStepcounter, lblStepachievement;
-static Arc arcStepcounter;
+static Label lblDist, lblDistance, lblDistachievement;
+static Arc arcStepcounter, arcDistance;
 
 static Style big, small;
 
@@ -80,14 +81,42 @@ void build_main_page()
         .style(mainbar_get_style(), true)
         .size(100, 100)
         .alignInParentTopRight(0, 0);
+    
+    lblDist = Label(&screen);
+    lblDist.text("Distance:")
+        .style(big, true)
+        .alignx(screen, LV_ALIGN_IN_LEFT_MID, 0)
+        .aligny(arcStepcounter, LV_ALIGN_OUT_BOTTOM_MID, 0);
+
+    lblDistance = Label(&screen);
+    lblDistance.text("0")
+        .alignText(LV_LABEL_ALIGN_CENTER)
+        .style(small, true)
+        .align(lblDist, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+    
+    lblDistachievement = Label(&screen);
+    lblDistachievement.text("0")
+        .alignText(LV_LABEL_ALIGN_CENTER)
+        .style(small, true)
+        .align(lblDistance, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+
+    arcDistance = Arc(&screen, 0, 360);
+    arcDistance.start(0).end(0).rotation(90)
+        .style(mainbar_get_style(), true)
+        .size(100, 100)
+        .aligny(arcStepcounter, LV_ALIGN_OUT_BOTTOM_MID, 0)
+        .alignx(screen, LV_ALIGN_IN_RIGHT_MID, 0);
 }
 
 void refresh_main_page()
 {
     char buff[36];
+    uint32_t gStep = goal_step.toInt();
+    uint32_t gDist = goal_dist.toInt();
     // Get current value
     uint32_t stp = bma_get_stepcounter();
-    uint32_t ach = 100 * stp / goal_step.toInt();
+    uint32_t ach = gStep == 0 ? 0 : 100 * stp / gStep;
+    uint32_t dist = stp * length.toInt() / 100;
     log_i("Refresh activity: %d steps", stp);
     // Raw steps
     snprintf( buff, sizeof( buff ), "Steps: %d", stp );
@@ -95,7 +124,14 @@ void refresh_main_page()
     // Achievement
     snprintf( buff, sizeof( buff ), "Goal: %d%%", ach );
     lblStepachievement.text(buff);
-    arcStepcounter.end( 360 * stp / goal_step.toInt() );
+    arcStepcounter.end( gStep == 0 ? 0 : 360 * stp / gStep );
+    // Distance
+    snprintf( buff, sizeof( buff ), "Dist: %d m", dist );
+    lblDistance.text(buff);
+    // Achievement
+    snprintf( buff, sizeof( buff ), "Goal: %d%%", gDist == 0 ? 0 : 100 * dist / gDist );
+    lblDistachievement.text(buff);
+    arcDistance.end( gDist == 0 ? 0 : 360 * dist / gDist );
 }
 
 void activity_activate_cb()
@@ -108,6 +144,7 @@ void build_settings()
     // Create full options list and attach items to variables
     config.addString("Step length (cm)", 3, "50").setDigitsMode(true,"0123456789").assign(&length); // cm
     config.addString("Step Goal", 7, "10000").setDigitsMode(true,"0123456789").assign(&goal_step); // steps
+    config.addString("Distance Goal", 7, "5000").setDigitsMode(true,"0123456789").assign(&goal_dist); // m
 
     activityApp.useConfig(config, true); // true - auto create settings page widgets
 }
