@@ -62,7 +62,14 @@ struct JsonBoolOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    value = document[name].as<bool>();
+    if (document.containsKey(name))
+    {
+      value = document[name].as<bool>();
+    }
+    else
+    {
+      value = false;
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
@@ -126,7 +133,14 @@ struct JsonStringOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    strlcpy(value, document[name], maxLength);
+    if (document.containsKey(name))
+    {
+      strlcpy(value, document[name], maxLength);
+    }
+    else
+    {
+      value[0] = '\0';
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
