@@ -95,7 +95,13 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 ![screenshot](images/screen6.png)
 
 In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
- 
+
+## Activity tracker
+
+The activity tracker let you check your activity.
+
+In the settings, set your step length and your goals in step and meters.
+
 # Updates
 
 ![screenshot](images/screen11.png)
