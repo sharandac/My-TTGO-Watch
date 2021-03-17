@@ -50,6 +50,7 @@ Cf. [contribution guide](CONTRIBUTING.md)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen9.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen10.png)
 ![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen11.png)
+![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen12.png)
 
 
 # Contributors

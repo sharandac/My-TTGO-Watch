@@ -104,6 +104,8 @@ In connection with [OsmAnd](https://osmand.net) the watch can also be used for n
 
 ## Activity tracker
 
+![screenshot](images/screen12.png)
+
 The activity tracker let you check your activity.
 
 In the settings, set your step length and your goals in step and meters.
