@@ -105,7 +105,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     if ( tile_pos_table == NULL ) {
         tile_pos_table = ( lv_point_t * )MALLOC( sizeof( lv_point_t ) * tile_entrys );
         if ( tile_pos_table == NULL ) {
-            log_e("tile_pos_table malloc faild");
+            log_e("tile_pos_table malloc failed");
             while(true);
         }
         tile = ( lv_tile_t * )MALLOC( sizeof( lv_tile_t ) * tile_entrys );
