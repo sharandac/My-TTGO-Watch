@@ -45,10 +45,10 @@
      *  It is usefull for alrm or notifications which can be set independently
      */
     void motor_vibe( int time, bool enforced = false );
-    /*
+    /**
      * @brief   get the current vibe configuration
      * 
-     * @return  bool    true means vibe enable, false means disable
+     * @return  true means vibe enable, false means disable
      */
     bool motor_get_vibe_config( void );
     /**

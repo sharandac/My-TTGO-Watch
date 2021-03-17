@@ -31,7 +31,6 @@ static void build_settings();
 
 static void activity_activate_cb();
 
-
 /*
  * setup routine for application
  */
@@ -40,7 +39,7 @@ void activity_app_setup() {
     //   params: name, icon, auto add "refresh" button (this app will use synchronize function of the SynchronizedApplication class).
     //   Also, you can configure count of the required pages in the next two params (to have more app screens).
     activityApp.init("activity", &move_64px, 1, 1);
-    
+
     mainbar_add_tile_activate_cb( activityApp.mainTileId(), activity_activate_cb );
 
     // Build and configure application
@@ -78,7 +77,7 @@ void build_main_page()
 
     arcStepcounter = Arc(&screen, 0, 360);
     arcStepcounter.start(0).end(0).rotation(90)
-        .style(mainbar_get_style(), true)
+        .style(mainbar_get_arc_style(), LV_ARC_PART_BG, false )
         .size(100, 100)
         .alignInParentTopRight(0, 0);
     
@@ -102,7 +101,7 @@ void build_main_page()
 
     arcDistance = Arc(&screen, 0, 360);
     arcDistance.start(0).end(0).rotation(90)
-        .style(mainbar_get_style(), true)
+        .style(mainbar_get_arc_style(), LV_ARC_PART_BG, false )
         .size(100, 100)
         .aligny(arcStepcounter, LV_ALIGN_OUT_BOTTOM_MID, 0)
         .alignx(screen, LV_ALIGN_IN_RIGHT_MID, 0);

@@ -431,8 +431,8 @@ bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case PMUCTL_STATUS:
             statusbar_pmuctl_update_batt(*(int32_t*)arg & PMUCTL_STATUS_PERCENT,
-                                         *(bool*)arg & PMUCTL_STATUS_CHARGING,
-                                         *(bool*)arg & PMUCTL_STATUS_PLUG);
+                                         *(int32_t*)arg & PMUCTL_STATUS_CHARGING,
+                                         *(int32_t*)arg & PMUCTL_STATUS_PLUG);
             break;
     }
     return( true );
