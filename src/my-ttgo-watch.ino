@@ -100,6 +100,7 @@ void setup()
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
+    activity_app_setup();
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
@@ -107,7 +108,6 @@ void setup()
     fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-    activity_app_setup();
   	/*
      *
      */

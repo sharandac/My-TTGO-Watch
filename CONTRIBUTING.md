@@ -21,13 +21,14 @@ void foo_setup( void ) {
    foo.init( "foo", &foo_64px );
    mainbar_add_tile_activate_cb( foo.mainTileId(), foo_activate_cb );
    mainbar_add_tile_hibernate_cb( foo.mainTileId(), foo_hibernate_cb );
+}
 
 void foo_activation_cb( void ) {
-    // to something when enter the tile
+    // do something when enter the tile
 }
 
 void foo_hibernate_cb( void ) {
-    // to something when exit the tile
+    // do something when exit the tile
 }
 ```
 
@@ -35,23 +36,23 @@ void foo_hibernate_cb( void ) {
 
 Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this
 
-```
+```c
 #include "hardware/json_psram_allocator.h"
 ```
 
 and create your json with
 
-```
+```c
 SpiRamJsonDocument doc( 1000 );
 ```
 
 to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
 
-```
+```c
 #include "hardware/alloc.h"
 ```
 with
-```
+```c
 MALLOC( ... ); // repleace malloc or ps_malloc
 CALLOC( ... ); // repleace calloc or ps_calloc
 REALLOC( ... ); // repleace realloc or ps_realloc
@@ -63,7 +64,7 @@ And one very important thing: Do not talk directly to the hardware!
 ## Sound
 To play sounds from the inbuild speakers use `hardware/sound.h`:
 
-```
+```c
 #include "hardware/sound.h"
 [...]
 // MP3 from SPIFFS:
