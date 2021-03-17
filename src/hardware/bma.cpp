@@ -359,3 +359,7 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
                     break;
     }
 }
+
+uint32_t bma_get_stepcounter( void ) {
+    return stepcounter + stepcounter_before_reset;
+}

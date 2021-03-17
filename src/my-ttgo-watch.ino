@@ -49,6 +49,7 @@
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
+#include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 
@@ -99,6 +100,7 @@ void setup()
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
+    activity_app_setup();
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();

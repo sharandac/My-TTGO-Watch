@@ -101,5 +101,11 @@
      * @return  true if success, false if failed
      */
     bool bma_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
-
+    /**
+     * @brief return the current step counter value
+     *
+     * @return steps from the stepcounter as uint32_t value
+     */
+    uint32_t bma_get_stepcounter( void );
+    
 #endif // _BMA_H

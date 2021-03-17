@@ -11,14 +11,14 @@
 LV_IMG_DECLARE(fx_rates_64px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
-SynchronizedApplication fxratesApp;
-JsonConfig config("fx-rates.json");
+static SynchronizedApplication fxratesApp;
+static JsonConfig config("fx-rates.json");
 
-String apiKey, mainPair, secondPair;
-String mainPairValue, secondPairValue, updatedAt;
-Label lblCurrency1, lblCurrency2, lblUpdatedAt;
+static String apiKey, mainPair, secondPair;
+static String mainPairValue, secondPairValue, updatedAt;
+static Label lblCurrency1, lblCurrency2, lblUpdatedAt;
 
-Style big;
+static Style big;
 
 /*
  * setup routine for application

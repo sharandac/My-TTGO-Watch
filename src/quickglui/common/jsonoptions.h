@@ -62,7 +62,14 @@ struct JsonBoolOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    value = document[name].as<bool>();
+    if (document.containsKey(name))
+    {
+      value = document[name].as<bool>();
+    }
+    else
+    {
+      value = false;
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
@@ -126,13 +133,28 @@ struct JsonStringOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    strlcpy(value, document[name], maxLength);
+    if (document.containsKey(name))
+    {
+      strlcpy(value, document[name], maxLength);
+    }
+    else
+    {
+      value[0] = '\0';
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
       control.text(value);
   }
 
+  /*
+  * @brief Assign digits mode
+  */
+  JsonStringOption& setDigitsMode(bool onlyDigits, const char* filterDigitsList) {
+    this->onlyDigits = onlyDigits;
+    this->filterDigitsList = filterDigitsList;
+    return *this;
+  }
   /*
   * @brief Assign settings option to the variable
   */
@@ -149,6 +171,8 @@ struct JsonStringOption : public JsonOption
     isControlAssigned = true;
     control = sourceControl;
     control.text(value);
+    // Set digits mode
+    sourceControl.digitsMode(true, filterDigitsList);
     return *this;
   }
 
@@ -158,6 +182,8 @@ public:
   String* source = nullptr;
   bool isControlAssigned = false;
   TextArea control;
+  bool onlyDigits = false;
+  const char *filterDigitsList = nullptr;
 };
 
 #endif
