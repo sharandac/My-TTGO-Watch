@@ -43,6 +43,12 @@ Enable:
 * tilt
 * display of step counter
 
+The stepcounter value is published to [gadgetbridge](https://gadgetbridge.org) automatically if bluetooth is enabled.
+The frequency of publication is driven by gadgetbridge.
+Initially, it is on a 30 minutes frequency.
+When the realtime tab of gadgetbridge is selected, the frequency is set to every 5 seconds.
+If the watch lost contact with gadgetbridge for more than 30 minutes, the stepcounter is also refreshed when bluetooth is reconnected.
+
 ## Bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime.
@@ -97,6 +103,8 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
 
 ## Activity tracker
+
+![screenshot](images/screen12.png)
 
 The activity tracker let you check your activity.
 
