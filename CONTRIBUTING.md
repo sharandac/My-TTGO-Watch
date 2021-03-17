@@ -1,3 +1,13 @@
+## Install
+
+Clone this repository and open it with platformIO. Build and upload. On a terminal in vscode you can do it with
+
+```bash
+pio run -t upload
+```
+
+or simple press "build and upload" in platformIO.
+
 ## Applications
 
 For quick clock application development use the new QuickGLUI - high level API. See [here](https://github.com/sharandac/My-TTGO-Watch/pull/163).

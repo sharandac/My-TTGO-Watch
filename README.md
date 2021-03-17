@@ -16,16 +16,6 @@ A smartwatch based on ESP32 from LilyGo. Currently under development.
 Telegram chatgroup is here:
 https://t.me/TTGO_Watch
 
-# Install
-
-Clone this repository and open it with platformIO. Build and upload. On a terminal in vscode you can do it with
-
-```bash
-pio run -t upload
-```
-
-or simple press "build and upload" in platformIO.
-
 # known issues
 
 * the webserver crashes the ESP32 really often
