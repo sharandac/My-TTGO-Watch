@@ -127,6 +127,12 @@
      */
     lv_style_t *mainbar_get_arc_style( void );
     /**
+     * @brief get main tile arc bg style
+     * 
+     * @return  pointer to the lv_style_t object
+     */
+    lv_style_t *mainbar_get_arc_bg_style( void );
+    /**
      * @brief get main tile switch style
      * 
      * @return  pointer to the lv_style_t object
