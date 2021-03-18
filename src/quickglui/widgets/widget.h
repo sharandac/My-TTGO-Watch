@@ -36,6 +36,7 @@ public:
   Widget& height(uint16_t height);
   Widget& position(uint16_t width, uint16_t height);
   Widget& align(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
+  Widget& alignOrig0(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   //Widget& align(Widget* base, lv_align_t align_mode, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignx(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset = 0);
   Widget& aligny(const Widget& base, lv_align_t align_mode, lv_coord_t y_offset = 0);

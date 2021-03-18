@@ -115,6 +115,12 @@ Widget& Widget::align(const Widget& base, lv_align_t align_mode, lv_coord_t x_of
   //return align(&base, align_mode, x_offset, y_offset);
 }
 
+Widget& Widget::alignOrig0(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset, lv_coord_t y_offset) {
+  lv_obj_align_origo(native, base.handle(), align_mode, x_offset, y_offset);
+  return *this;
+  //return align(&base, align_mode, x_offset, y_offset);
+}
+
 // Widget& Widget::align(Widget* base, lv_align_t align_mode, lv_coord_t x_offset, lv_coord_t y_offset) {
 //   lv_obj_align(native, base->handle(), align_mode, x_offset, y_offset);
 //   return *this;
