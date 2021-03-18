@@ -41,6 +41,8 @@ public:
   Widget& alignx(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset = 0);
   Widget& aligny(const Widget& base, lv_align_t align_mode, lv_coord_t y_offset = 0);
   
+  Widget& realign();
+  
   Widget& style(const Style& addStyle, bool resetStyleList);
   Widget& style(const Style& addStyle, uint8_t part = LV_OBJ_PART_MAIN, bool resetStyleList=false);
   Widget& style(lv_style_t* addStyle, uint8_t part = LV_OBJ_PART_MAIN, bool resetStyleList=false);

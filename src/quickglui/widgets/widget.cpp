@@ -194,6 +194,11 @@ Widget& Widget::alignOutsideBottomLeft(const Widget& base, lv_coord_t x_offset, 
   return *this;
 }
 
+Widget& Widget::realign() {
+  lv_obj_realign(native);
+  return *this;
+}
+
 // template<class T>
 // T Widget::add(T child)
 // {
