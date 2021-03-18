@@ -160,6 +160,18 @@ Widget& Widget::alignInParentTopRight(lv_coord_t x_offset, lv_coord_t y_offset)
   align(parHandle, LV_ALIGN_IN_TOP_RIGHT, x_offset, y_offset);
   return *this;
 }
+Widget& Widget::alignInParentBottomRight(lv_coord_t x_offset, lv_coord_t y_offset)
+{
+  auto parHandle = lv_obj_get_parent(native);
+  align(parHandle, LV_ALIGN_IN_BOTTOM_RIGHT, x_offset, y_offset);
+  return *this;
+}
+Widget& Widget::alignInParentBottomLeft(lv_coord_t x_offset, lv_coord_t y_offset)
+{
+  auto parHandle = lv_obj_get_parent(native);
+  align(parHandle, LV_ALIGN_IN_BOTTOM_LEFT, x_offset, y_offset);
+  return *this;
+}
 Widget& Widget::alignOutsideRightMid(const Widget& base, lv_coord_t x_offset, lv_coord_t y_offset)
 {
   align(base, LV_ALIGN_OUT_RIGHT_MID, x_offset, y_offset);

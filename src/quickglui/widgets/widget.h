@@ -54,6 +54,8 @@ public:
   Widget& alignInParentTopLeft(lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignInParentRightMid(lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignInParentTopRight(lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
+  Widget& alignInParentBottomRight(lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
+  Widget& alignInParentBottomLeft(lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignOutsideRightMid(const Widget& base, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignOutsideBottomMid(const Widget& base, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
   Widget& alignOutsideBottomLeft(const Widget& base, lv_coord_t x_offset = 0, lv_coord_t y_offset = 0);
