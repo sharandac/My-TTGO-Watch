@@ -133,6 +133,7 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
              * free allocated msg
              */
             free( (void *)msg_chain_entry->msg );
+            msg_chain_entry->msg = NULL;
 
             /*
              * delete chain entry in all conditions
@@ -156,6 +157,7 @@ bool msg_chain_delete_msg_entry( msg_chain_t *msg_chain, int32_t entry ) {
              * free allocated msg chain entry
              */
             free( msg_chain_entry );
+            msg_chain_entry = NULL;
             msg_chain->entrys--;
             retval = true;
             break;
