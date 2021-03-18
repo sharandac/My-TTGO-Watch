@@ -115,6 +115,12 @@ Widget& Widget::align(const Widget& base, lv_align_t align_mode, lv_coord_t x_of
   //return align(&base, align_mode, x_offset, y_offset);
 }
 
+Widget& Widget::alignOrig0(const Widget& base, lv_align_t align_mode, lv_coord_t x_offset, lv_coord_t y_offset) {
+  lv_obj_align_origo(native, base.handle(), align_mode, x_offset, y_offset);
+  return *this;
+  //return align(&base, align_mode, x_offset, y_offset);
+}
+
 // Widget& Widget::align(Widget* base, lv_align_t align_mode, lv_coord_t x_offset, lv_coord_t y_offset) {
 //   lv_obj_align(native, base->handle(), align_mode, x_offset, y_offset);
 //   return *this;
@@ -160,6 +166,18 @@ Widget& Widget::alignInParentTopRight(lv_coord_t x_offset, lv_coord_t y_offset)
   align(parHandle, LV_ALIGN_IN_TOP_RIGHT, x_offset, y_offset);
   return *this;
 }
+Widget& Widget::alignInParentBottomRight(lv_coord_t x_offset, lv_coord_t y_offset)
+{
+  auto parHandle = lv_obj_get_parent(native);
+  align(parHandle, LV_ALIGN_IN_BOTTOM_RIGHT, x_offset, y_offset);
+  return *this;
+}
+Widget& Widget::alignInParentBottomLeft(lv_coord_t x_offset, lv_coord_t y_offset)
+{
+  auto parHandle = lv_obj_get_parent(native);
+  align(parHandle, LV_ALIGN_IN_BOTTOM_LEFT, x_offset, y_offset);
+  return *this;
+}
 Widget& Widget::alignOutsideRightMid(const Widget& base, lv_coord_t x_offset, lv_coord_t y_offset)
 {
   align(base, LV_ALIGN_OUT_RIGHT_MID, x_offset, y_offset);
@@ -173,6 +191,11 @@ Widget& Widget::alignOutsideBottomMid(const Widget& base, lv_coord_t x_offset, l
 Widget& Widget::alignOutsideBottomLeft(const Widget& base, lv_coord_t x_offset, lv_coord_t y_offset)
 {
   align(base, LV_ALIGN_OUT_BOTTOM_LEFT, x_offset, y_offset);
+  return *this;
+}
+
+Widget& Widget::realign() {
+  lv_obj_realign(native);
   return *this;
 }
 
