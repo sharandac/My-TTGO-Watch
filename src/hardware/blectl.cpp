@@ -40,7 +40,6 @@
 #include "callback.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
-#include "msg_chain.h"
 
 #include "utils/charbuffer.h"
 
@@ -51,7 +50,7 @@ portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
 blectl_config_t blectl_config;
 blectl_msg_t blectl_msg;
-msg_chain_t *blectl_msg_chain = NULL;
+QueueHandle_t blectl_msg_queue;
 
 callback_t *blectl_callback = NULL;
 
@@ -75,7 +74,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
         blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
-        blectl_msg_chain = msg_chain_delete( blectl_msg_chain );
+        xQueueReset( blectl_msg_queue );
         log_i("BLE connected");
 
         pServer->getAdvertising()->stop();
@@ -85,7 +84,7 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         blectl_set_event( BLECTL_DISCONNECT );
         blectl_clear_event( BLECTL_CONNECT );
         blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
-        blectl_msg_chain = msg_chain_delete( blectl_msg_chain );
+        xQueueReset( blectl_msg_queue );
         blectl_msg.active = false;
         log_i("BLE disconnected");
 
@@ -190,6 +189,12 @@ void blectl_setup( void ) {
     blectl_msg.msg = NULL;
     blectl_msg.msglen = 0;
     blectl_msg.msgpos = 0;
+
+    blectl_msg_queue = xQueueCreate( 5, sizeof( char * ) );
+    if ( blectl_msg_queue == NULL ) {
+        log_e("Failed to allocate msg queue");
+        while(true);
+    }
 
     // Create the BLE Device
     // Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
@@ -464,9 +469,25 @@ void blectl_read_config( void ) {
     file.close();
 }
 
-bool blectl_send_msg( char *msg ) {
+bool blectl_send_msg( const char *msg ) {
     if ( blectl_get_event( BLECTL_CONNECT ) ) {
-        blectl_msg_chain = msg_chain_add_msg( blectl_msg_chain, msg );
+        // Duplicate message
+        size_t len = strlen( msg );
+        char *buff = (char *)CALLOC( len + 1, 1 );
+        if ( buff == NULL ) {
+            log_e("buff calloc failed");
+            while( true );
+        }
+        strcpy( buff, msg );
+        // Send message
+        BaseType_t ret;
+        ret = xQueueSend( blectl_msg_queue, &buff, 0);
+        // buff will be freeed on the receive part
+        buff = NULL;
+        if ( ret != pdTRUE ) {
+            log_e("fail to send msg");
+            return false;
+        }
         return true;
     }
     else {
@@ -544,39 +565,43 @@ void blectl_loop ( void ) {
         return;
     }
 
-    if ( !blectl_msg.active && msg_chain_get_entrys( blectl_msg_chain ) > 0 ) {
-        blectl_send_next_msg( (char *)msg_chain_get_msg_entry( blectl_msg_chain, 0 ) );
-        msg_chain_delete_msg_entry( blectl_msg_chain, 0 );
+    if ( !blectl_msg.active ) {
+        // Retrieve next message
+        char *msg;
+        BaseType_t available;
+        available = xQueueReceive( blectl_msg_queue, &msg, 0);
+        if ( available == pdTRUE ) {
+            blectl_send_next_msg( msg );
+            free( msg );
+        }
     }
 
-    if ( nextmillis < millis() ) {
+    if ( blectl_msg.active && nextmillis < millis() ) {
         nextmillis = millis() + BLECTL_CHUNKDELAY;
-        if ( blectl_msg.active ) {
-            if ( blectl_msg.msgpos < blectl_msg.msglen ) {
-                if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
-                    blectl_send_chunk ( BLECTL_CHUNKSIZE );
-                    blectl_msg.msgpos += BLECTL_CHUNKSIZE;
-                }
-                else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
-                    blectl_send_chunk ( blectl_msg.msglen - blectl_msg.msgpos );
-                    blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
-                    blectl_msg.active = false;
-                    blectl_msg.msglen = 0;
-                    blectl_msg.msgpos = 0;
-                }
-                else {
-                    log_e("malformed chunksize");
-                    blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, malformed chunksize" );
-                    blectl_msg.active = false;
-                    blectl_msg.msglen = 0;
-                    blectl_msg.msgpos = 0;
-                }
+        if ( blectl_msg.msgpos < blectl_msg.msglen ) {
+            if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
+                blectl_send_chunk ( BLECTL_CHUNKSIZE );
+                blectl_msg.msgpos += BLECTL_CHUNKSIZE;
             }
-            else {
+            else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
+                blectl_send_chunk ( blectl_msg.msglen - blectl_msg.msgpos );
+                blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
                 blectl_msg.active = false;
                 blectl_msg.msglen = 0;
                 blectl_msg.msgpos = 0;
             }
+            else {
+                log_e("malformed chunksize");
+                blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, malformed chunksize" );
+                blectl_msg.active = false;
+                blectl_msg.msglen = 0;
+                blectl_msg.msgpos = 0;
+            }
+        }
+        else {
+            blectl_msg.active = false;
+            blectl_msg.msglen = 0;
+            blectl_msg.msgpos = 0;
         }
     }
 }
