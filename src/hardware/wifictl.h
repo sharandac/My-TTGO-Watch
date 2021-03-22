@@ -25,6 +25,7 @@
     #include "TTGO.h"
     #include "callback.h"
     #include "ftpserver/ftpserver.h"
+    #include "basejsonconfig.h"
 
     #define WIFICTL_DELAY               10
     #define NETWORKLIST_ENTRYS          20
@@ -47,7 +48,9 @@
     /**
      * @brief wifictl config structure
      */
-    typedef struct {
+    class wifictl_config_t : public BaseJsonConfig {
+        public:
+        wifictl_config_t();
         bool autoon = true;                     /** @brief enable on auto on/off an wakeup and standby */
         #ifdef ENABLE_WEBSERVER
         bool webserver = false;                 /** @brief enable on webserver */
@@ -58,7 +61,13 @@
         char ftppass[32] = FTPSERVER_PASSWORD;  /** @brief ftpserver password*/
         #endif
         bool enable_on_standby = false; /** @brief enable on standby */
-    } wifictl_config_t;
+
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
 
     enum wifictl_event_t {
         WIFICTL_CONNECT                = _BV(0),

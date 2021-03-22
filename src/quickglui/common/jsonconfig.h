@@ -10,44 +10,15 @@
 
 #define MAX_OPTION_NAME_LENGTH 12
 #define MAX_OPTIONS_COUNT 24
-#define MAX_CONFIG_FILE_NAME_LENGTH 32
 
 #include "events.h"
 #include "ArduinoJson.h"
 
+#include "hardware/basejsonconfig.h"
+
 class JsonOption;
 class JsonBoolOption;
 class JsonStringOption;
-
-/*
-* @brief JSON configuration storage with bindings for variables and UI widgets
-*/
-class BaseJsonConfig {
-public:
-  BaseJsonConfig(const char* configFileName);
-
-  /*
-  * @brief Load settings from file
-  */
-  bool load();
-
-  /*
-  * @brief Save settings to file
-  */
-  bool save();
-  
-  void debugPrint();
-  
-protected:
-  ////////////// Available for overloading: //////////////
-  virtual bool onSave(JsonDocument& document) = 0;
-  virtual bool onLoad(JsonDocument& document) = 0;
-  virtual size_t getJsonBufferSize() { return 4096; }
-
-protected:
-  char fileName[MAX_CONFIG_FILE_NAME_LENGTH];
-  bool prettyJson = true;
-};
 
 class JsonConfig : public BaseJsonConfig  {
 public:

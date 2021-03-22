@@ -42,7 +42,7 @@ bool display_powermgm_loop_cb( EventBits_t event, void *arg );
 bool display_send_event_cb( EventBits_t event, void *arg );
 
 void display_setup( void ) {
-    display_read_config();
+    display_config.load();
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -146,57 +146,11 @@ void display_wakeup( bool silence ) {
 }
 
 void display_save_config( void ) {
-    fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["brightness"] = display_config.brightness;
-        doc["rotation"] = display_config.rotation;
-        doc["timeout"] = display_config.timeout;
-        doc["block_return_maintile"] = display_config.block_return_maintile;
-        doc["background_image"] = display_config.background_image;
-        doc["use_dma"] = display_config.use_dma;
-        doc["use_double_buffering"] = display_config.use_double_buffering;
-        doc["vibe"] = display_config.vibe;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+  display_config.save();
 }
 
 void display_read_config( void ) {
-    fs::File file = SPIFFS.open( DISPLAY_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", DISPLAY_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            display_config.brightness = doc["brightness"] | DISPLAY_MAX_BRIGHTNESS / 2;
-            display_config.rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
-            display_config.timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
-            display_config.block_return_maintile = doc["block_return_maintile"] | false;
-            display_config.background_image = doc["background_image"] | 2;
-            display_config.use_dma = doc["use_dma"] | true;
-            display_config.use_double_buffering = doc["use_double_buffering"] | false;
-            display_config.vibe = doc["vibe"] | true;
-        }        
-        doc.clear();
-    }
-    file.close();
+  display_config.load();
 }
 
 uint32_t display_get_timeout( void ) {

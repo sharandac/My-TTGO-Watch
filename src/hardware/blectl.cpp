@@ -345,17 +345,17 @@ bool blectl_send_event_cb( EventBits_t event, void *arg ) {
 
 void blectl_set_enable_on_standby( bool enable_on_standby ) {        
     blectl_config.enable_on_standby = enable_on_standby;
-    blectl_save_config();
+    blectl_config.save();
 }
 
 void blectl_set_show_notification( bool show_notification ) {        
     blectl_config.show_notification = show_notification;
-    blectl_save_config();
+    blectl_config.save();
 }
 
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
-    blectl_save_config();
+    blectl_config.save();
     if ( blectl_get_event( BLECTL_CONNECT ) )
         return;
 
@@ -385,7 +385,7 @@ void blectl_set_txpower( int32_t txpower ) {
         default:            BLEDevice::setPower( ESP_PWR_LVL_N9 );
                             break;
     }
-    blectl_save_config();
+    blectl_config.save();
 }
 
 void blectl_set_autoon( bool autoon ) {
@@ -397,7 +397,7 @@ void blectl_set_autoon( bool autoon ) {
     else {
         blectl_off();
     }
-    blectl_save_config();
+    blectl_config.save();
 }
 
 int32_t blectl_get_txpower( void ) {
@@ -421,52 +421,11 @@ bool blectl_get_advertising( void ) {
 }
 
 void blectl_save_config( void ) {
-    fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["autoon"] = blectl_config.autoon;
-        doc["advertising"] = blectl_config.advertising;
-        doc["enable_on_standby"] = blectl_config.enable_on_standby;
-        doc["tx_power"] = blectl_config.txpower;
-        doc["show_notification"] = blectl_config.show_notification;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    blectl_config.save();
 }
 
 void blectl_read_config( void ) {
-    fs::File file = SPIFFS.open( BLECTL_JSON_COFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", BLECTL_JSON_COFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("blectl deserializeJson() failed: %s", error.c_str() );
-        }
-        else {                
-            blectl_config.autoon = doc["autoon"] | true;
-            blectl_config.advertising = doc["advertising"] | true;
-            blectl_config.enable_on_standby = doc["enable_on_standby"] | false;
-            blectl_config.txpower = doc["tx_power"] | 1;
-            blectl_config.show_notification = doc["show_notification"] | true;
-        }        
-        doc.clear();
-    }
-    file.close();
+    blectl_config.load();
 }
 
 bool blectl_send_msg( const char *msg ) {

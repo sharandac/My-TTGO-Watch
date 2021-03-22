@@ -24,6 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
+    #include "blectlconfig.h"
 
     #define BLECTL_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
     #define BLECTL_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
@@ -75,8 +76,6 @@
     #define BATTERY_POWER_STATE_LEVEL_GOOD                  0x80
     #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW        0xC0
 
-    #define BLECTL_JSON_COFIG_FILE         "/blectl.json"   /** @brief defines json config file name */
-
     #define EndofText               0x03
     #define LineFeed                0x0a
     #define DataLinkEscape          0x10
@@ -84,17 +83,6 @@
     #define BLECTL_CHUNKSIZE        20      /** @brief chunksize for send msg */
     #define BLECTL_CHUNKDELAY       20      /** @brief chunk delay in ms for each msg chunk */
     #define BLECTL_MSG_MTU          512     /** @brief max msg size */
-
-    /**
-     * @brief blectl config structure
-     */
-    typedef struct {
-        bool autoon = true;             /** @brief auto on/off */
-        bool advertising = true;        /** @brief advertising on/off */
-        bool enable_on_standby = false; /** @brief enable on standby on/off */
-        bool show_notification = true;  /** @brief enable show notifications */
-        int32_t txpower = 1;            /** @brief tx power, valide values are from 0 to 4 */
-    } blectl_config_t;
 
     /**
      * @brief blectl send msg structure

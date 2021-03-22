@@ -69,6 +69,10 @@ void wifictl_save_config( void );
 void wifictl_load_config( void );
 void wifictl_Task( void * pvParameters );
 
+
+wifictl_config_t::wifictl_config_t() : BaseJsonConfig(WIFICTL_JSON_CONFIG_FILE) {
+}
+
 void wifictl_setup( void ) {
     /*
      * prevent wifictl init if already init
@@ -95,7 +99,7 @@ void wifictl_setup( void ) {
     /*
      * load config from spiff
      */
-    wifictl_load_config();
+    wifictl_config.load();
     /*
      * limit wifi bandwidth to 20Mhz channel width
      */
@@ -241,80 +245,61 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
   return( retval );
 }
 
+
+bool wifictl_config_t::onSave(JsonDocument& doc) {
+    doc["autoon"] = autoon;
+    #ifdef ENABLE_WEBSERVER
+    doc["webserver"] = webserver;
+    #endif
+    #ifdef ENABLE_FTPSERVER
+    doc["ftpserver"] = ftpserver;
+    doc["ftpuser"] = ftpuser;
+    doc["ftppass"] = ftppass;
+    #endif
+    doc["enable_on_standby"] = enable_on_standby;
+    for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
+        doc["networklist"][ i ]["ssid"] = wifictl_networklist[ i ].ssid;
+        doc["networklist"][ i ]["psk"] = wifictl_networklist[ i ].password;
+    }
+
+    return true;
+}
+
 void wifictl_save_config( void ) {
-    fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_WRITE );
+   wifictl_config.save();
+}
 
-    if (!file) {
-        log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 10000 );
+bool wifictl_config_t::onLoad(JsonDocument& doc) {
+    autoon = doc["autoon"] | true;
+    #ifdef ENABLE_WEBSERVER
+    webserver = doc["webserver"] | false;
+    #endif
+    #ifdef ENABLE_FTPSERVER
+    ftpserver = doc["ftpserver"] | false;
+    
+    if ( doc["ftpuser"] )
+        strlcpy( ftpuser, doc["ftpuser"], sizeof( ftpuser ) );
+    else
+        strlcpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
+    if ( doc["ftppass"] )
+        strlcpy( ftppass, doc["ftppass"], sizeof( ftppass ) );
+    else
+        strlcpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
+    #endif
 
-        doc["autoon"] = wifictl_config.autoon;
-        #ifdef ENABLE_WEBSERVER
-        doc["webserver"] = wifictl_config.webserver;
-        #endif
-        #ifdef ENABLE_FTPSERVER
-        doc["ftpserver"] = wifictl_config.ftpserver;
-        doc["ftpuser"] = wifictl_config.ftpuser;
-        doc["ftppass"] = wifictl_config.ftppass;
-        #endif
-        doc["enable_on_standby"] = wifictl_config.enable_on_standby;
-        for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-            doc["networklist"][ i ]["ssid"] = wifictl_networklist[ i ].ssid;
-            doc["networklist"][ i ]["psk"] = wifictl_networklist[ i ].password;
+    enable_on_standby = doc["enable_on_standby"] | false;
+    for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
+        if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
+            strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
+            strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
         }
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
     }
-    file.close();
+
+    return true;
 }
 
 void wifictl_load_config( void ) {
-    fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            wifictl_config.autoon = doc["autoon"] | true;
-            #ifdef ENABLE_WEBSERVER
-            wifictl_config.webserver = doc["webserver"] | false;
-            #endif
-            #ifdef ENABLE_FTPSERVER
-            wifictl_config.ftpserver = doc["ftpserver"] | false;
-            
-            if ( doc["ftpuser"] )
-              strlcpy( wifictl_config.ftpuser, doc["ftpuser"], sizeof( wifictl_config.ftpuser ) );
-            else
-              strlcpy( wifictl_config.ftpuser, FTPSERVER_USER, sizeof( wifictl_config.ftpuser ) );
-            if ( doc["ftppass"] )
-              strlcpy( wifictl_config.ftppass, doc["ftppass"], sizeof( wifictl_config.ftppass ) );
-            else
-              strlcpy( wifictl_config.ftppass, FTPSERVER_PASSWORD, sizeof( wifictl_config.ftppass ) );
-            #endif
-
-            wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
-            for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-                if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
-                    strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
-                    strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
-                }
-            }
-        }        
-        doc.clear();
-    }
-    file.close();
+    wifictl_config.load();
 }
 
 bool wifictl_get_autoon( void ) {

@@ -37,12 +37,7 @@
 #define MINUTE_KEY "minute"
 #define WEEK_DAYS_KEY "week_days" 
 
-static rtcctl_alarm_t alarm_data = {
-    .enabled = false,
-    .hour = 0,
-    .minute = 0,
-    .week_days = { false, false, false, false, false, false, false }
-}; 
+static rtcctl_alarm_t alarm_data; 
 static time_t alarm_time = 0;
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
@@ -57,6 +52,14 @@ void rtcctl_load_data( void );
 void rtcctl_store_data( void );
 
 callback_t *rtcctl_callback = NULL;
+
+rtcctl_alarm_t::rtcctl_alarm_t() : BaseJsonConfig(CONFIG_FILE_PATH) {
+    enabled = false;
+    hour = 0;
+    minute = 0;
+    for (int i = 0 ; i < DAYS_IN_WEEK ; i++)
+    week_days[i] = false;
+}
 
 void rtcctl_setup( void ) {
 
@@ -220,65 +223,41 @@ bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
     return( callback_register( rtcctl_callback, event, callback_func, id ) );
 }
 
+bool rtcctl_alarm_t::onLoad(JsonDocument& doc) {
+    enabled = doc[ENABLED_KEY].as<bool>();
+    hour = doc[HOUR_KEY].as<uint8_t>();
+    minute =  doc[MINUTE_KEY].as<uint8_t>();
+    uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        week_days[index] = ((stored_week_days >> index) & 1) != 0;
+    }
+
+    return true;
+}
+
 void rtcctl_load_data( void ) {
-    if (! SPIFFS.exists( CONFIG_FILE_PATH ) ) {
-        return; //wil be used default values set during theier creation
-    }
+    rtcctl_alarm_t stored_data;
+    stored_data.load();
+    rtcctl_set_alarm(&stored_data);
+}
 
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_READ );
+bool rtcctl_alarm_t::onSave(JsonDocument& doc) {
+    doc[VERSION_KEY] = 1;
+    doc[ENABLED_KEY] = enabled;
+    doc[HOUR_KEY] = hour;
+    doc[MINUTE_KEY] = minute;
 
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
+    uint8_t week_days_to_store = 0;
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        week_days_to_store |= week_days[index] << index; 
     }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("rtcctl config deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            rtcctl_alarm_t stored_data;
-            stored_data.enabled = doc[ENABLED_KEY].as<bool>();
-            stored_data.hour = doc[HOUR_KEY].as<uint8_t>();
-            stored_data.minute =  doc[MINUTE_KEY].as<uint8_t>();
-            uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
-            for (int index = 0; index < DAYS_IN_WEEK; ++index){
-                stored_data.week_days[index] = ((stored_week_days >> index) & 1) != 0;
-            }
-            rtcctl_set_alarm(&stored_data);
-            doc.clear();
-        }
-    }
-    file.close();
+    doc[WEEK_DAYS_KEY] = week_days_to_store;
+    
+    return true;
 }
 
 void rtcctl_store_data( void ) {
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_WRITE );
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc[VERSION_KEY] = 1;
-        doc[ENABLED_KEY] = alarm_data.enabled;
-        doc[HOUR_KEY] = alarm_data.hour;
-        doc[MINUTE_KEY] = alarm_data.minute;
-
-        uint8_t week_days_to_store = 0;
-        for (int index = 0; index < DAYS_IN_WEEK; ++index){
-            week_days_to_store |= alarm_data.week_days[index] << index; 
-        }
-        doc[WEEK_DAYS_KEY] = week_days_to_store;
-        
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write rtcctl config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    alarm_data.save();
 }
 
 void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
