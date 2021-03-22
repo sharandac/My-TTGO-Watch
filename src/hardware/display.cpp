@@ -148,6 +148,7 @@ void display_wakeup( bool silence ) {
 void display_save_config( void ) {
   display_config.save();
 }
+
 void display_read_config( void ) {
   display_config.load();
 }
@@ -214,4 +215,13 @@ uint32_t display_get_background_image( void ) {
 
 void display_set_background_image( uint32_t background_image ) {
     display_config.background_image = background_image;
+}
+
+void display_set_vibe( bool vibe ) {
+  display_config.vibe = vibe;
+
+}
+
+bool display_get_vibe( void ) {
+  return display_config.vibe;
 }

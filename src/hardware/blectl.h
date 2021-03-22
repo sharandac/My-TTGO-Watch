@@ -191,7 +191,7 @@
      * 
      * @param   msg     pointer to a string
      */
-    void blectl_send_msg( char *msg );
+    bool blectl_send_msg( const char *msg );
     /**
      * @brief set the transmission power
      * 

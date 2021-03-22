@@ -42,6 +42,9 @@ static lv_style_t mainbar_style;
 static lv_style_t mainbar_switch_style;
 static lv_style_t mainbar_button_style;
 static lv_style_t mainbar_slider_style;
+// Arc has two parts
+static lv_style_t mainbar_arc_bg_style;
+static lv_style_t mainbar_arc_style;
 
 static lv_obj_t *mainbar = NULL;
 
@@ -67,6 +70,13 @@ void mainbar_setup( void ) {
     lv_style_set_border_width( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+
+    lv_style_init( &mainbar_arc_bg_style );
+    lv_style_set_bg_opa( &mainbar_arc_bg_style, LV_ARC_PART_BG, LV_OPA_TRANSP );
+    lv_style_set_border_width( &mainbar_arc_bg_style, LV_OBJ_PART_MAIN, 0 );
+
+    lv_style_init( &mainbar_arc_style );
+    lv_style_set_line_rounded( &mainbar_arc_style, LV_STATE_DEFAULT, false );
 
     lv_style_init( &mainbar_switch_style );
     lv_style_set_bg_color( &mainbar_switch_style, LV_STATE_CHECKED, LV_COLOR_GREEN );
@@ -159,6 +169,30 @@ lv_style_t *mainbar_get_style( void ) {
     }
 
     return( &mainbar_style );
+}
+
+lv_style_t *mainbar_get_arc_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
+    return( &mainbar_arc_style );
+}
+
+lv_style_t *mainbar_get_arc_bg_style( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
+    return( &mainbar_arc_bg_style );
 }
 
 lv_style_t *mainbar_get_switch_style( void ) {

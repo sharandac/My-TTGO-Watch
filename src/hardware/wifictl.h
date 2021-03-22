@@ -194,12 +194,12 @@
      * @param   ftpserver   true means ftpserver enable, false means ftpserver disable
      */
     void wifictl_set_ftpserver( bool ftpserver );
+    #endif
     /**
      * @brief   set wifi enable on standby
      * 
      * @param   enable  true if wifi an standby enabled, false if not
      */
-    #endif
     void wifictl_set_enable_on_standby( bool enable );
     /**
      * @brief   get wifi enable on standby

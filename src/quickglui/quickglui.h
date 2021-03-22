@@ -9,6 +9,7 @@
 #define QUICKGLUE_H_
 
 #include "widgets/widget.h"
+#include "widgets/arc.h"
 #include "widgets/label.h"
 #include "widgets/textarea.h"
 #include "widgets/switch.h"

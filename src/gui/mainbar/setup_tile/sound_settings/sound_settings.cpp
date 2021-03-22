@@ -28,6 +28,7 @@
 #include "gui/setup.h"
 
 #include "hardware/sound.h"
+#include "hardware/motor.h"
 
 
 icon_t *sound_setup_icon = NULL;
@@ -40,6 +41,7 @@ lv_obj_t *sound_volume_slider = NULL;
 lv_obj_t *sound_volume_slider_label = NULL;
 lv_obj_t *sound_enable = NULL;
 lv_obj_t *sound_icon = NULL;
+lv_obj_t *sound_vibe_onoff = NULL;
 
 LV_IMG_DECLARE(sound_64px);
 LV_IMG_DECLARE(exit_32px);
@@ -50,6 +52,7 @@ static void enter_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sound_volume_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sound_enable_setup_event_cb( lv_obj_t * obj, lv_event_t event );
+static void sound_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 bool sound_soundctl_event_cb( EventBits_t event, void *arg );
 
@@ -81,10 +84,25 @@ void sound_settings_tile_setup( void ) {
     lv_label_set_text( exit_label_1, "sound settings");
     lv_obj_align( exit_label_1, exit_btn_1, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
+    lv_obj_t *vibe_cont = lv_obj_create( sound_settings_tile, NULL );
+    lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( vibe_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
+    lv_obj_align( vibe_cont, sound_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    sound_vibe_onoff = lv_switch_create( vibe_cont, NULL );
+    lv_obj_add_protect( sound_vibe_onoff, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( sound_vibe_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( sound_vibe_onoff, LV_ANIM_ON );
+    lv_obj_align( sound_vibe_onoff, vibe_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( sound_vibe_onoff, sound_vibe_setup_event_cb );
+    lv_obj_t *display_vibe_label = lv_label_create( vibe_cont, NULL);
+    lv_obj_add_style( display_vibe_label, LV_OBJ_PART_MAIN, &sound_settings_style );
+    lv_label_set_text( display_vibe_label, "enable vibe");
+    lv_obj_align( display_vibe_label, vibe_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     lv_obj_t *sound_enable_cont = lv_obj_create( sound_settings_tile, NULL );
     lv_obj_set_size(sound_enable_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( sound_enable_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
-    lv_obj_align( sound_enable_cont, sound_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( sound_enable_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     sound_enable = lv_switch_create( sound_enable_cont, NULL );
     lv_obj_add_protect( sound_enable, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( sound_enable, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
@@ -93,7 +111,7 @@ void sound_settings_tile_setup( void ) {
     lv_obj_set_event_cb( sound_enable, sound_enable_setup_event_cb );
     lv_obj_t *sound_enable_label = lv_label_create( sound_enable_cont, NULL);
     lv_obj_add_style( sound_enable_label, LV_OBJ_PART_MAIN, &sound_settings_style );
-    lv_label_set_text( sound_enable_label, "enable");
+    lv_label_set_text( sound_enable_label, "enable sound");
     lv_obj_align( sound_enable_label, sound_enable_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
 
@@ -125,6 +143,11 @@ void sound_settings_tile_setup( void ) {
     lv_obj_align( sound_volume_slider_label, sound_volume_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15 );
 
 
+    if ( motor_get_vibe_config() )
+        lv_switch_on( sound_vibe_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( sound_vibe_onoff, LV_ANIM_OFF );
+
     if ( sound_get_enabled_config() ) {
         log_i("Setting initial volume configuration to enabled");
         lv_switch_on( sound_enable, LV_ANIM_OFF );
@@ -133,6 +156,7 @@ void sound_settings_tile_setup( void ) {
         lv_switch_off( sound_enable, LV_ANIM_OFF );
     }
 
+    lv_tileview_add_element( sound_settings_tile, vibe_cont );
     lv_tileview_add_element( sound_settings_tile, sound_enable_cont );
     lv_tileview_add_element( sound_settings_tile, sound_volume_cont );
 
@@ -152,6 +176,13 @@ static void exit_sound_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
                                         sound_save_config();
                                         break;
+    }
+}
+
+static void sound_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ):     motor_set_vibe_config( lv_slider_get_value( obj ) );
+                                            break;
     }
 }
 

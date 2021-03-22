@@ -1,0 +1,66 @@
+on:
+  push:
+    branches: 
+      - master
+      - experimental
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+name: Prepare Release Asset
+
+jobs:
+  build:
+    name: Prepare Release Asset
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: Cache PlatformIO
+      uses: actions/cache@v2
+      with:
+        path: ~/.platformio
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+    - name: Install PlatformIO
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade platformio
+    - name: Run PlatformIO
+      run: pio run
+    - name: Version name
+      id: version_name
+      run: |
+        if [ "${GITHUB_REF#refs/heads/}" == "experimental"]
+        then
+          echo ::set-output name=SUFFIX::.experimental
+          echo ::set-output name=PREFIX::ttgo-t-watch2020_v1.experimental
+        else
+          echo ::set-output name=SUFFIX::
+          echo ::set-output name=PREFIX::ttgo-t-watch2020_v1
+        fi
+    - name: Prepare firmware
+      id: prepare-firmware
+      run: |
+          cp ./.pio/build/ttgo-t-watch-v1/firmware.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin
+          gzip -c ./.pio/build/ttgo-t-watch-v1/firmware.bin > ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz
+    - name: Build Version File
+      id: build-version-file
+      run: |
+        # get firmware version from config.h
+        firmwareversion=$(cat src/config.h | grep __FIRMWARE__ | tr -s " " | cut -d' ' -f4 | cut -d'"' -f2)
+        md5=$(md5sum .pio/build/ttgo-t-watch-v1/firmware.bin | cut -d ' ' -f 1)
+        size=$(stat -c %s .pio/build/ttgo-t-watch-v1/firmware.bin)
+        echo "{\"version\":\"$firmwareversion\",\"host\":\"http://www.neo-guerillaz.de\",\"size\":\"$size\",\"file\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin\",\"gzipfile\":\"${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz\",\"md5\":\"$md5\",\"comment\":\"$1\"}" > ${{ steps.version_name.outputs.PREFIX }}.version.json
+    - name: Upload
+      id: upload-files
+      run: |
+        echo "TODO: Upload files"
+        ls -l ${{ steps.version_name.outputs.PREFIX }}.ino.bin ${{ steps.version_name.outputs.PREFIX }}.ino.bin.gz ${{ steps.version_name.outputs.PREFIX }}.version.json

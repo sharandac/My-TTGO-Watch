@@ -23,6 +23,7 @@
 #include "touch.h"
 #include "powermgm.h"
 #include "motor.h"
+#include "display.h"
 
 volatile bool DRAM_ATTR touch_irq_flag = false;
 portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -117,7 +118,8 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
 
     if ( !touch_press ) {
         touch_press = true;
-        motor_vibe( 3 );
+        if ( display_get_vibe() )
+            motor_vibe( 3 );
     }
 
     // issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix

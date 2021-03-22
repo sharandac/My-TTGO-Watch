@@ -16,16 +16,6 @@ A smartwatch based on ESP32 from LilyGo. Currently under development.
 Telegram chatgroup is here:
 https://t.me/TTGO_Watch
 
-# Install
-
-Clone this repository and open it with platformIO. Build and upload. On a terminal in vscode you can do it with
-
-```bash
-pio run -t upload
-```
-
-or simple press "build and upload" in platformIO.
-
 # known issues
 
 * the webserver crashes the ESP32 really often
@@ -35,97 +25,32 @@ or simple press "build and upload" in platformIO.
 
 # how to use
 
-## weather app
-
-On startup you see the main screen (time tile). It show the time and the current weather (if correct configure). Now you can swipe with you fingers up, down, left and right between the four main screens. The four screens are organized in time, apps, note and setup tile.
-For the weather app you need an openweather.com api-id. http://openweathermap.org/appid is a good starting point.
-
-## ir-remote
-
-For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
-
-## bluetooth
-
-The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime. In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
+Cf. [Usage](USAGE.md)
 
 # Forks that are recommended
 
 [FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
+[linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
 
 # for the programmers
 
-For quick clock application development use the new QuickGLUI - high level API. See [here](https://github.com/sharandac/My-TTGO-Watch/pull/163).
-
-Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this
-
-```#include "hardware/json_psram_allocator.h"```
-
-and create your json with
-
-```SpiRamJsonDocument doc( 1000 );```
-
-to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
-
-```
-#include "hardware/alloc.h"
-```
-with
-```
-MALLOC( ... ); // repleace malloc or ps_malloc
-CALLOC( ... ); // repleace calloc or ps_calloc
-REALLOC( ... ); // repleace realloc or ps_realloc
-```
-
-as often as possible. It managed internal or PSRAM for you.
-And one very important thing: Do not talk directly to the hardware!
-
-## Sound
-To play sounds from the inbuild speakers use `hardware/sound.h`:
-
-```
-#include "hardware/sound.h"
-[...]
-// MP3 from SPIFFS:
-// void sound_play_spiffs_mp3( const char *filename );
-// example:
-sound_play_spiffs_mp3( "/sound.mp3" )
-
-// or WAV from PROGMEM via
-//void sound_play_progmem_wav( const void *data, uint32_t len );
-
-```
-
-There is a configuration tile to enable/disable all sound output and set the global volume.
-
-# how to make a screenshot
-
-In the display settings page 2 you can set what happens when the button is pressed for 2 seconds.
-This will normally takes you back to the main tile.
-If the option for a screenshot is activated, a screenshot is taken instead.
-This can be downloaded via the built-in FTP server (binary and passive mode, username: TTWatch and password: passord), if activated.
-The file name is screen.data.
-
-Or the other way:
-
-The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
-```bash
-wget x.x.x.x/shot ; wget x.x.x.x/screen.565
-```
+Cf. [contribution guide](CONTRIBUTING.md)
 
 # Interface
 
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen1.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen2.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen3.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen4.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen5.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen6.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen7.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen8.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen9.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen10.png)
-![screenshot](https://github.com/sharandac/My-TTGO-Watch/blob/master/images/screen11.png)
+![screenshot](images/screen1.png)
+![screenshot](images/screen2.png)
+![screenshot](images/screen3.png)
+![screenshot](images/screen4.png)
+![screenshot](images/screen5.png)
+![screenshot](images/screen6.png)
+![screenshot](images/screen7.png)
+![screenshot](images/screen8.png)
+![screenshot](images/screen9.png)
+![screenshot](images/screen10.png)
+![screenshot](images/screen11.png)
+![screenshot](images/screen12.png)
 
 
 # Contributors
@@ -136,10 +61,12 @@ Special thanks to the following people for their help:
 [bwagstaff](https://github.com/bwagstaff)<br>
 [chrismcna](https://github.com/chrismcna)<br>
 [datacute](https://github.com/datacute)<br>
+[guyou](https://github.com/guyou)<br>
 [jakub-vesely](https://github.com/jakub-vesely)<br>
 [joshvito](https://github.com/joshvito)<br>
 [JoanMCD](https://github.com/JoanMCD)<br>
 [NorthernDIY](https://github.com/NorthernDIY)<br>
+[Neuroplant](https://github.com/Neuroplant)<br>
 [rnisthal](https://github.com/rnisthal)<br>
 [paulstueber](https://github.com/paulstueber)<br>
 [ssspeq](https://github.com/ssspeq)<br>
@@ -155,6 +82,7 @@ and the following projects:
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [pubsubclient](https://github.com/knolleary/pubsubclient)<br>
+[ESP32-targz](https://github.com/tobozo/ESP32-targz)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>

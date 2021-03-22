@@ -134,6 +134,18 @@
      */
     void display_set_background_image( uint32_t background_image );
     /**
+     * @brief set the vibe feedback
+     * 
+     * @param vibe true or false, true for enabling touch feeback
+     */
+    void display_set_vibe( bool vibe );
+    /**
+     * @brief get the vibe feedback
+     * 
+     * @return true is vibe feedback is enabled, false otherwise
+     */
+    bool display_get_vibe( void );
+    /**
      * @brief set display into standby
      */
     void display_standby( void );

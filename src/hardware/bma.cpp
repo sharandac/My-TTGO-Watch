@@ -40,8 +40,7 @@ __NOINIT_ATTR uint32_t stepcounter_valid;
 __NOINIT_ATTR uint32_t stepcounter_before_reset;
 __NOINIT_ATTR uint32_t stepcounter;
 
-static char bma_date[16];
-static char bma_old_date[16];
+static struct tm bma_old_date;
 
 bma_config_t bma_config;
 callback_t *bma_callback = NULL;
@@ -52,6 +51,8 @@ void IRAM_ATTR bma_irq( void );
 bool bma_send_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
+
+static void bma_notify_stepcounter();
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -149,10 +150,7 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             }
             else if ( BMA_stepcounter ) {
                 BMA_stepcounter = false;
-                stepcounter_before_reset = ttgo->bma->getCounter();
-                char msg[16]="";
-                snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-                bma_send_event_cb( BMACTL_STEPCOUNTER, (void *)msg );
+                bma_notify_stepcounter();
             }
             break;
         }
@@ -163,18 +161,27 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
      */
     if ( first_loop_run ) {
         first_loop_run = false;
-        stepcounter_before_reset = ttgo->bma->getCounter();
-        char msg[16]="";
-        snprintf( msg, sizeof( msg ),"%d", stepcounter + stepcounter_before_reset );
-        bma_send_event_cb( BMACTL_STEPCOUNTER, msg );
+        bma_notify_stepcounter();
     }
     return( true );
+}
+
+static void bma_notify_stepcounter() {
+    static uint32_t last_val = 0;
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    stepcounter_before_reset = ttgo->bma->getCounter();
+
+    uint32_t delta = stepcounter + stepcounter_before_reset - last_val;
+    if (delta > 0) {
+        // New val
+        last_val = stepcounter + stepcounter_before_reset;
+        bma_send_event_cb( BMACTL_STEPCOUNTER, &last_val );
+    }
 }
 
 void bma_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     time_t now;
-    tm info;
 
     log_i("go standby");
 
@@ -182,8 +189,7 @@ void bma_standby( void ) {
         ttgo->bma->enableStepCountInterrupt( false );
 
     time( &now );
-    localtime_r( &now, &info );
-    strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
+    localtime_r( &now, &bma_old_date );
 
     gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
     esp_sleep_enable_gpio_wakeup ();
@@ -191,8 +197,6 @@ void bma_standby( void ) {
 
 void bma_wakeup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-    time_t now;
-    tm info;
 
     log_i("go wakeup");
 
@@ -202,14 +206,15 @@ void bma_wakeup( void ) {
     /*
      * check for a new day and reset stepcounter if configure
      */
-    time( &now );
-    localtime_r( &now, &info );
-    strftime( bma_date, sizeof( bma_date ), "%d.%b", &info );
-    if ( strcmp( bma_date, bma_old_date ) ) {
-        if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
-            log_i("reset setcounter: %s != %s", bma_date, bma_old_date );
+    if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
+        time_t now;
+        tm info;
+        time( &now );
+        localtime_r( &now, &info );
+        if ( info.tm_yday != bma_old_date.tm_yday ) {
+            log_i("reset setcounter: %d != %d", info.tm_yday, bma_old_date.tm_yday );
             ttgo->bma->resetStepCounter();
-            strftime( bma_old_date, sizeof( bma_old_date ), "%d.%b", &info );
+            localtime_r( &now, &bma_old_date );
         }
     }
 
@@ -306,4 +311,8 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
                     ttgo->bma->set_remap_axes(&remap_data);
                     break;
     }
+}
+
+uint32_t bma_get_stepcounter( void ) {
+    return stepcounter + stepcounter_before_reset;
 }

@@ -153,7 +153,10 @@ void powermgm_loop( void ) {
                 setCpuFrequencyMhz(240);
                 log_i("CPU speed = 240MHz");
             #endif
-            motor_vibe(3);
+            #if CORE_DEBUG_LEVEL > 3
+                // For debug, no interest for effective user
+                motor_vibe(3);
+            #endif
         }
 
         log_i("Free heap: %d", ESP.getFreeHeap());
@@ -166,7 +169,10 @@ void powermgm_loop( void ) {
          * avoid buzz when standby after silent wake
          */
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
-            motor_vibe(3);
+            #if CORE_DEBUG_LEVEL > 3
+                // For debug, no interest for effective user
+                motor_vibe(3);
+            #endif
             delay( 100 );
         }
         /*

@@ -22,8 +22,9 @@ enum OptionDataType
 
 struct JsonOption
 {
-  JsonOption(const char* optionName) {
+  JsonOption(const char* optionName, OptionDataType type) {
     strlcpy(name, optionName, MAX_OPTION_NAME_LENGTH);
+    optionDataType = type;
   }
   virtual ~JsonOption() {}
 
@@ -31,15 +32,17 @@ struct JsonOption
   virtual void save(JsonDocument& document) = 0;
   virtual void load(JsonDocument& document) = 0;
 
-  virtual OptionDataType type() = 0;
+  inline OptionDataType type() { return optionDataType; }
 
 public:
   char name[MAX_OPTION_NAME_LENGTH];
+private:
+  OptionDataType optionDataType;
 };
 
 struct JsonBoolOption : public JsonOption
 {
-  JsonBoolOption(const char* optionName, bool defValue = false) : JsonOption(optionName) {
+  JsonBoolOption(const char* optionName, bool defValue = false) : JsonOption(optionName, OptionDataType::BoolOption) {
     value = defValue;
   }
   virtual ~JsonBoolOption() {
@@ -59,7 +62,14 @@ struct JsonBoolOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    value = document[name].as<bool>();
+    if (document.containsKey(name))
+    {
+      value = document[name].as<bool>();
+    }
+    else
+    {
+      value = false;
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
@@ -85,8 +95,6 @@ struct JsonBoolOption : public JsonOption
     return *this;
   }
 
-  virtual OptionDataType type() { return OptionDataType::BoolOption; }
-
 public:
   bool value;
   bool* source = nullptr;
@@ -96,7 +104,7 @@ public:
 
 struct JsonStringOption : public JsonOption
 {
-  JsonStringOption(const char* optionName, int maxValueLength, const char* defValue = nullptr) : JsonOption(optionName)
+  JsonStringOption(const char* optionName, int maxValueLength, const char* defValue = nullptr) : JsonOption(optionName, OptionDataType::StringOption)
   {
     maxLength = maxValueLength;
     value = (char*)MALLOC(maxLength);
@@ -125,13 +133,28 @@ struct JsonStringOption : public JsonOption
     document[name] = value;
   }
   virtual void load(JsonDocument& document) {
-    strlcpy(value, document[name], maxLength);
+    if (document.containsKey(name))
+    {
+      strlcpy(value, document[name], maxLength);
+    }
+    else
+    {
+      value[0] = '\0';
+    }
     if (source != nullptr)
       *source = value;
     if (isControlAssigned)
       control.text(value);
   }
 
+  /*
+  * @brief Assign digits mode
+  */
+  JsonStringOption& setDigitsMode(bool onlyDigits, const char* filterDigitsList) {
+    this->onlyDigits = onlyDigits;
+    this->filterDigitsList = filterDigitsList;
+    return *this;
+  }
   /*
   * @brief Assign settings option to the variable
   */
@@ -148,10 +171,10 @@ struct JsonStringOption : public JsonOption
     isControlAssigned = true;
     control = sourceControl;
     control.text(value);
+    // Set digits mode
+    sourceControl.digitsMode(true, filterDigitsList);
     return *this;
   }
-
-  virtual OptionDataType type() { return OptionDataType::StringOption; }
 
 public:
   char* value;
@@ -159,6 +182,8 @@ public:
   String* source = nullptr;
   bool isControlAssigned = false;
   TextArea control;
+  bool onlyDigits = false;
+  const char *filterDigitsList = nullptr;
 };
 
 #endif
