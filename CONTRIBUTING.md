@@ -89,3 +89,19 @@ sound_play_spiffs_mp3( "/sound.mp3" )
 ```
 
 There is a configuration tile to enable/disable all sound output and set the global volume.
+
+## Gadgetbridge
+
+In order to debug features, it could be useful to access raw data stored on Gadgetbridge.
+On Gadgetbridge, go to Export/Import feature.
+
+The `Gadgetbridge` file is a SQLite3 database.
+Open it with `sqlite3 Gadgetbridge`.
+
+### Step counter
+
+As the firmware reuse the Espruino / BangleJS, the activity is stored in `BANGLE_JSACTIVITY_SAMPLE` table.
+
+```SQL
+select datetime(TIMESTAMP, 'unixepoch'),device_id,steps from BANGLE_JSACTIVITY_SAMPLE;
+```
