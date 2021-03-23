@@ -61,7 +61,6 @@
      * 
      * @return  pointer to the free setup_icon_t structure
      */
-
     icon_t *setup_tile_get_free_setup_icon( void );
 
 #endif // _SETUP_TILE_H

@@ -27,7 +27,7 @@
     #define FTPSERVER_USER      "TTWatch"
     #define FTPSERVER_PASSWORD  "password"
 
-    /*
+    /**
      *  @brief setup builtin ftpserver, call after first wifi-connection. otherwise esp32 will crash
      */
     void ftpserver_start( const char *user, const char *pass );
