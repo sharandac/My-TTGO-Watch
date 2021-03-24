@@ -20,12 +20,18 @@
 #include "config.h"
 #include <time.h>
 
-/*
+/**
  * @brief Timeout based updater.
  */
 template <class T>
 class BleUpdater {
     public:
+    /**
+     * @brief Update of value.
+     * 
+     * @param value the new value
+     * @param force force the notification of the new value
+     */
     void update(T value, bool force = false) {
         if ( !blectl_get_event( BLECTL_CONNECT ) )
             // BLE inactive, nothing to update
@@ -47,13 +53,42 @@ class BleUpdater {
             }
         }
     }
+    /**
+     * @brief Change the timeout.
+     * 
+     * @param timeout new timeout value, in seconds
+     */
     void setTimeout(time_t timeout){ this->timeout = timeout; }
     protected:
+    /**
+     * @brief Constructor
+     * 
+     * @param timeout the timeout to respect, in seconds
+     */
     BleUpdater(time_t timeout): timeout(timeout) {}
+    /**
+     * @brief Set the new value
+     * 
+     * Used to inform subclass of new value.
+     */
     virtual void set(T value) { /* Nothing by default */ }
+    /**
+     * @brief Notify the value in BLE channels
+     * 
+     * @param value the new value
+     */
     virtual bool notify(T value) = 0;
+    /**
+     * @brief the previous notified value
+     */
     T last_value;
+    /**
+     * @brief the time of the previous notification
+     */
     time_t last_time = 0;
+    /**
+     * @brief the current timeout
+     */
     time_t timeout = 0;
 };
 
