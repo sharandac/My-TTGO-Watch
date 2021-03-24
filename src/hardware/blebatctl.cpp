@@ -48,7 +48,7 @@ class BleBattLevelUpdater : public BleUpdater<uint8_t> {
         char msg[64]="";
         snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", level );
         bool ret = blectl_send_msg( msg );
-
+        log_i("Notified batt level: new=%d last=%d => %d", level, last_value, ret);
         return ret;
     }
     BLECharacteristic *characteristic;

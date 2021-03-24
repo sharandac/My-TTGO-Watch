@@ -32,6 +32,7 @@ class BleUpdater {
             return;
         time_t current_time;
         time(&current_time);
+        log_d("Updating: last_value=%d value=%d last_time=%lu current_time=%lu", last_value, value, last_time, current_time);
         if (force || last_value != value) {
             set(value);
         }

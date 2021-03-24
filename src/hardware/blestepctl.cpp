@@ -42,6 +42,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
         bool ret = blectl_send_msg( msg );
+        log_i("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
     }
 };
