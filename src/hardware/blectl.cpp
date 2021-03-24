@@ -73,8 +73,8 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
         pServer->updateConnParams( param->connect.remote_bda, 1450, 1500, 0, 10000 );
         blectl_set_event( BLECTL_CONNECT );
         blectl_clear_event( BLECTL_DISCONNECT );
-        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
         xQueueReset( blectl_msg_queue );
+        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
         log_i("BLE connected");
 
         pServer->getAdvertising()->stop();
