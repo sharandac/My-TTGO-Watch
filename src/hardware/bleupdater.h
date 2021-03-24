@@ -18,6 +18,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
+#include <time.h>
 
 /*
  * @brief Timeout based updater.
@@ -29,28 +30,29 @@ class BleUpdater {
         if ( !blectl_get_event( BLECTL_CONNECT ) )
             // BLE inactive, nothing to update
             return;
-        uint64_t current_millis = millis();
+        time_t current_time;
+        time(&current_time);
         if (force || last_value != value) {
             set(value);
         }
         if (force ||
-            last_millis - current_millis > timeout_millis) {
+            current_time - last_time  > timeout) {
             // Time to notify
             bool ret = notify(value);
             if (ret) {
                 // new value was published
-                last_millis = current_millis;
+                last_time = current_time;
                 last_value = value;
             }
         }
     }
-    void setTimeout(uint64_t timeout){ timeout_millis = timeout; }
+    void setTimeout(time_t timeout){ this->timeout = timeout; }
     protected:
-    BleUpdater(uint64_t timeout): timeout_millis(timeout) {}
+    BleUpdater(time_t timeout): timeout(timeout) {}
     virtual void set(T value) { /* Nothing by default */ }
     virtual bool notify(T value) = 0;
     T last_value;
-    uint64_t last_millis = 0;
-    uint64_t timeout_millis = 0;
+    time_t last_time = 0;
+    time_t timeout = 0;
 };
 

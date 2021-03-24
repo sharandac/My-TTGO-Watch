@@ -33,7 +33,7 @@
 class StepcounterBleUpdater : public BleUpdater<int32_t> {
     public:
     // Update every 1800 as GadgetBidge uses such value by default
-    StepcounterBleUpdater() : BleUpdater(1000*1800){}
+    StepcounterBleUpdater() : BleUpdater(1800){}
     protected:
     bool notify(int32_t stepcounter) {
         // Take care of daily reset
@@ -80,9 +80,9 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
 
     if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int"))
     {
-        uint64_t timeout = request["int"].as<uint32_t>(); // Requested timeout, in seconds
+        time_t timeout = request["int"].as<time_t>(); // Requested timeout, in seconds
         log_i("RECEIVED timeout: %d seconds", timeout);
-        stepcounter_ble_updater.setTimeout(timeout*1000);
+        stepcounter_ble_updater.setTimeout(timeout);
         // TODO affect power loop rate
     }
 

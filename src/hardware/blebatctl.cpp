@@ -31,7 +31,7 @@
 
 class BleBattLevelUpdater : public BleUpdater<uint8_t> {
     public:
-    BleBattLevelUpdater(BLECharacteristic *charac, uint64_t timeout) : BleUpdater(timeout), characteristic(charac) {}
+    BleBattLevelUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
     void set(uint8_t power) {
         characteristic->setValue(&power, 1);
     }
@@ -56,7 +56,7 @@ class BleBattLevelUpdater : public BleUpdater<uint8_t> {
 
 class BleBattPowerUpdater : public BleUpdater<uint8_t> {
     public:
-    BleBattPowerUpdater(BLECharacteristic *charac, uint64_t timeout) : BleUpdater(timeout), characteristic(charac) {}
+    BleBattPowerUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
     void set(uint8_t power) {
         characteristic->setValue(&power, 1);
     }
@@ -97,8 +97,8 @@ void blebatctl_setup(BLEServer *pServer) {
     // Start advertising battery service
     pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
-    blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 1000 * 60 * 5 );
-    blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 1000 * 60 * 5 );
+    blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 60 * 5 );
+    blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 60 * 5 );
 
     pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery" );
     blectl_register_cb( BLECTL_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
