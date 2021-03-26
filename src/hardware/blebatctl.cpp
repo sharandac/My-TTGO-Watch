@@ -110,9 +110,7 @@ static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg ) {
             bool charging = *(bool*)arg & PMUCTL_STATUS_CHARGING;
             bool plug = *(bool*)arg & PMUCTL_STATUS_PLUG;
             int32_t percent = *(int32_t*)arg & PMUCTL_STATUS_PERCENT;
-            if ( blectl_get_event( BLECTL_CONNECT ) ) {
                 blebatctl_update_battery( percent, charging, plug );
-            }
             break;
     }
     return( true );
