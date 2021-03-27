@@ -268,7 +268,7 @@ bool bluetooth_media_queue_msg( const char *msg ) {
             
             if ( doc["album"] ) {
                 lv_label_set_text( bluetooth_media_album, doc["album"] );
-                lv_obj_align( bluetooth_media_album, bluetooth_media_tile, LV_ALIGN_OUT_TOP_MID, 0, -16 );
+                lv_obj_align( bluetooth_media_album, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
             }
 
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
