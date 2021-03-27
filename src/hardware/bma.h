@@ -24,7 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
-    #include "bmaconfig.h"
+    #include "hardware/config/bmaconfig.h"
     
     #define BMACTL_EVENT_INT            _BV(0)              /** @brief event mask for bma interrupt */
     #define BMACTL_DOUBLECLICK          _BV(1)              /** @brief event mask for an doubleclick event */

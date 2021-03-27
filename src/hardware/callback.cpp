@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include "callback.h"
-#include "alloc.h"
+#include "utils/alloc.h"
 
 void  display_record_event( callback_t *callback, EventBits_t event );
 

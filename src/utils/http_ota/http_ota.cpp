@@ -19,22 +19,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-/*
- *  inspire by https://github.com/nhatuan84/esp32-http-firmware-update-over-the-air
- *
- */
 #include "config.h"
-#include "hardware/ESP32-targz/ESP32-targz.h"
 #include <HTTPClient.h>
 #include <Update.h>
 
-#include "callback.h"
 #include "http_ota.h"
-#include "alloc.h"
-#include "powermgm.h"
-#include "pmu.h"
-#include "blectl.h"
+
+#include "hardware/callback.h"
+#include "hardware/blectl.h"
+#include "hardware/pmu.h"
+
+#include "utils/ESP32-targz/ESP32-targz.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );

@@ -28,15 +28,6 @@
 #include "callback.h"
 #include "timesync.h"
 
-#include "hardware/powermgm.h"
-#include "hardware/json_psram_allocator.h"
-
-#define VERSION_KEY "version"
-#define ENABLED_KEY "enabled"
-#define HOUR_KEY "hour"
-#define MINUTE_KEY "minute"
-#define WEEK_DAYS_KEY "week_days" 
-
 static rtcctl_alarm_t alarm_data; 
 static time_t alarm_time = 0;
 
@@ -52,14 +43,6 @@ void rtcctl_load_data( void );
 void rtcctl_store_data( void );
 
 callback_t *rtcctl_callback = NULL;
-
-rtcctl_alarm_t::rtcctl_alarm_t() : BaseJsonConfig(CONFIG_FILE_PATH) {
-    enabled = false;
-    hour = 0;
-    minute = 0;
-    for (int i = 0 ; i < DAYS_IN_WEEK ; i++)
-    week_days[i] = false;
-}
 
 void rtcctl_setup( void ) {
 
@@ -223,37 +206,10 @@ bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
     return( callback_register( rtcctl_callback, event, callback_func, id ) );
 }
 
-bool rtcctl_alarm_t::onLoad(JsonDocument& doc) {
-    enabled = doc[ENABLED_KEY].as<bool>();
-    hour = doc[HOUR_KEY].as<uint8_t>();
-    minute =  doc[MINUTE_KEY].as<uint8_t>();
-    uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
-    for (int index = 0; index < DAYS_IN_WEEK; ++index){
-        week_days[index] = ((stored_week_days >> index) & 1) != 0;
-    }
-
-    return true;
-}
-
 void rtcctl_load_data( void ) {
     rtcctl_alarm_t stored_data;
     stored_data.load();
     rtcctl_set_alarm(&stored_data);
-}
-
-bool rtcctl_alarm_t::onSave(JsonDocument& doc) {
-    doc[VERSION_KEY] = 1;
-    doc[ENABLED_KEY] = enabled;
-    doc[HOUR_KEY] = hour;
-    doc[MINUTE_KEY] = minute;
-
-    uint8_t week_days_to_store = 0;
-    for (int index = 0; index < DAYS_IN_WEEK; ++index){
-        week_days_to_store |= week_days[index] << index; 
-    }
-    doc[WEEK_DAYS_KEY] = week_days_to_store;
-    
-    return true;
 }
 
 void rtcctl_store_data( void ) {

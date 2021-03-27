@@ -14,7 +14,7 @@
 #include "events.h"
 #include "ArduinoJson.h"
 
-#include "hardware/basejsonconfig.h"
+#include "utils/basejsonconfig.h"
 
 class JsonOption;
 class JsonBoolOption;

@@ -24,7 +24,7 @@
 
     #include "TTGO.h"
     #include "callback.h"
-    #include "blectlconfig.h"
+    #include "hardware/config/blectlconfig.h"
 
     #define BLECTL_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
     #define BLECTL_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
@@ -39,7 +39,6 @@
     #define BLECTL_PAIRING_ABORT         _BV(10)        /** @brief event mask for blectl pairing abort */
     #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
     #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
-
 
     // See the following for generating UUIDs:
     // https://www.uuidgenerator.net/
@@ -93,7 +92,6 @@
         int32_t msglen;                 /** @brief msg lenght */
         int32_t msgpos;                 /** @brief msg postition for next send */
     } blectl_msg_t;
-
     /**
      * @brief ble setup function
      */

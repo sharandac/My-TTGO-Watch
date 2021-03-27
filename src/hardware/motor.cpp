@@ -21,10 +21,11 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include "json_psram_allocator.h"
 
 #include "motor.h"
 #include "powermgm.h"
+
+#include "hardware/config/motorconfig.h"
 
 volatile int DRAM_ATTR motor_run_time_counter=0;
 hw_timer_t * timer = NULL;

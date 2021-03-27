@@ -19,21 +19,40 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _FRAMEBUFFER_H
-    #define _FRAMEBUFFER_H
 
-    #define FRAMEBUFFER_BUFFER_W        ( 240 )
-    #define FRAMEBUFFER_BUFFER_H        ( 20 )
-    #define FRAMEBUFFER_BUFFER_SIZE     ( FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H )
+#include "rtcctlconfig.h"
 
-    /**
-     * @brief setup framebuffer
-     * 
-     * @param dma   true enable DMA and false DMA memory transfers
-     * @param doubleframebuffer true enable framebuffer double buffering, false disabled double buffering
-     * 
-     * @note DMA and double buffering can enable/disable at any time with no restriction
-     */
-    void framebuffer_setup( bool dma, bool doubleframebuffer );
+rtcctl_alarm_t::rtcctl_alarm_t() : BaseJsonConfig( CONFIG_FILE_PATH ) {
+    enabled = false;
+    hour = 0;
+    minute = 0;
+    for (int i = 0 ; i < DAYS_IN_WEEK ; i++)
+    week_days[i] = false;
+}
+
+bool rtcctl_alarm_t::onSave(JsonDocument& doc) {
+    doc[VERSION_KEY] = 1;
+    doc[ENABLED_KEY] = enabled;
+    doc[HOUR_KEY] = hour;
+    doc[MINUTE_KEY] = minute;
+
+    uint8_t week_days_to_store = 0;
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        week_days_to_store |= week_days[index] << index; 
+    }
+    doc[WEEK_DAYS_KEY] = week_days_to_store;
     
-#endif // _FRAMEBUFFER_H
+    return true;
+}
+
+bool rtcctl_alarm_t::onLoad(JsonDocument& doc) {
+    enabled = doc[ENABLED_KEY].as<bool>();
+    hour = doc[HOUR_KEY].as<uint8_t>();
+    minute =  doc[MINUTE_KEY].as<uint8_t>();
+    uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
+    for (int index = 0; index < DAYS_IN_WEEK; ++index){
+        week_days[index] = ((stored_week_days >> index) & 1) != 0;
+    }
+
+    return true;
+}

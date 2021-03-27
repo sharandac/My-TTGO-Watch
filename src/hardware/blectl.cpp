@@ -38,10 +38,9 @@
 #include "pmu.h"
 #include "powermgm.h"
 #include "callback.h"
-#include "json_psram_allocator.h"
-#include "alloc.h"
 
 #include "utils/charbuffer.h"
+#include "utils/alloc.h"
 
 #include "gui/statusbar.h"
 
@@ -71,11 +70,11 @@ static CharBuffer gadgetbridge_msg;
 class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
         pServer->updateConnParams( param->connect.remote_bda, 1450, 1500, 0, 10000 );
-        blectl_set_event( BLECTL_CONNECT );
+        blectl_set_event( BLECTL_ACTIVE );
         blectl_clear_event( BLECTL_DISCONNECT );
-        blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
+        blectl_send_event_cb( BLECTL_ACTIVE, (void *)"active" );
         xQueueReset( blectl_msg_queue );
-        log_i("BLE connected");
+        log_i("BLE active");
 
         pServer->getAdvertising()->stop();
     };
@@ -115,22 +114,28 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
     }
 
     void onAuthenticationComplete( esp_ble_auth_cmpl_t cmpl ){
-        log_i("Bluetooth pairing %s", cmpl.success ? "successful" : "unsuccessful");
 
         if( cmpl.success ){
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
+                blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
             }
         }
         else {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
+                blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
             }
             pServer->startAdvertising();
         }
 
-        if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-            blectl_clear_event( BLECTL_PIN_AUTH );
+        log_i("BLECTL client authentication %s", cmpl.success ? "successful" : "unsuccessful");
+
+        if ( blectl_get_event( BLECTL_ACTIVE ) && cmpl.success ) {
+            blectl_clear_event( BLECTL_ACTIVE );
+            blectl_set_event( BLECTL_CONNECT );
+            blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
+            log_i("BLECLT client connected");
         }
     }
 };

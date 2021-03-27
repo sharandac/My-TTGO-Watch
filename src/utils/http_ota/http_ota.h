@@ -1,7 +1,7 @@
 #ifndef __HTTP_OTA_H
     #define __HTTP_OTA_H
 
-    #include "callback.h"
+    #include "hardware/callback.h"
 
     #define HTTP_OTA_START          _BV(0)      /** @brief http ota start event mask, callback arg is (char*) */
     #define HTTP_OTA_FINISH         _BV(1)      /** @brief http ota finish event mask, callback arg is (char*) */

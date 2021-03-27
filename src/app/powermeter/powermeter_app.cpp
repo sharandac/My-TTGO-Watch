@@ -31,7 +31,7 @@
 #include "gui/app.h"
 #include "gui/widget.h"
 
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 
 powermeter_config_t powermeter_config;
 

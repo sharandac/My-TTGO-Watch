@@ -29,8 +29,6 @@
 #include "framebuffer.h"
 #include "gui/gui.h"
 
-#include "json_psram_allocator.h"
-
 display_config_t display_config;
 callback_t *display_callback = NULL;
 

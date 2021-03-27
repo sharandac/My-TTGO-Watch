@@ -12,7 +12,7 @@
 #include "ArduinoJson.h"
 #include "../widgets/switch.h"
 #include "../widgets/textarea.h"
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 
 enum OptionDataType
 {

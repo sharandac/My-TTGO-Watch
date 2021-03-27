@@ -23,7 +23,7 @@
     #define _DISPLAY_H
 
     #include "callback.h"
-    #include "displayconfig.h"
+    #include "hardware/config/displayconfig.h"
 
     #define DISPLAYCTL_BRIGHTNESS       _BV(0)          /** @brief event mask display brightness, callback arg is (uint32_t*) */
     #define DISPLAYCTL_TIMEOUT          _BV(1)          /** @brief event mask display timeout, callback arg is (bool*) */

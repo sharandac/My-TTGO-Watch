@@ -40,9 +40,6 @@ bool timesync_config_t::onLoad(JsonDocument& doc) {
     timesync = doc["timesync"] | true;
     timezone = doc["timezone"] | 0;
     use_24hr_clock = doc["use_24hr_clock"] | true;
-    // todo: for upgrade, default name = Etc\GMTxxx based on timezone & daylightsave
-    // todo: for upgrade, default rule = GMT0 or <-xx>xx based on timezone & daylightsave
-    // todo: upgrade rtc clock to be in utc? (First sync will fix it.)
     strlcpy( timezone_name, doc["timezone_name"] | TIMEZONE_NAME_DEFAULT, sizeof( timezone_name ) );
     strlcpy( timezone_rule, doc["timezone_rule"] | TIMEZONE_RULE_DEFAULT, sizeof( timezone_rule ) );
     setenv("TZ", timezone_rule, 1);

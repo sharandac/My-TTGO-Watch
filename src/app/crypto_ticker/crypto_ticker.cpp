@@ -33,7 +33,7 @@
 #include "gui/statusbar.h"
 #include "gui/app.h"
 
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 
 crypto_ticker_config_t crypto_ticker_config;
 

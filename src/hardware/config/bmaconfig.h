@@ -22,7 +22,7 @@
 #ifndef _BMA_CONFIG_H
     #define _BMA_CONFIG_H
 
-    #include "basejsonconfig.h"
+    #include "utils/basejsonconfig.h"
     
     enum {  
         BMA_STEPCOUNTER,

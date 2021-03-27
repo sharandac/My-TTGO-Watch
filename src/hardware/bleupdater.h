@@ -19,7 +19,7 @@
  */
 #include "config.h"
 
-/*
+/**
  * @brief Timeout based updater.
  */
 template <class T>

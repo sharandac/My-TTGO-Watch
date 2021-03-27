@@ -25,7 +25,8 @@
 
 #include "framebuffer.h"
 #include "powermgm.h"
-#include "alloc.h"
+
+#include "utils/alloc.h"
 
 lv_color_t *framebuffer1 = NULL;
 lv_color_t *framebuffer2 = NULL;

@@ -22,7 +22,7 @@
 #ifndef _DISPLAY_CONFIG_H
     #define _DISPLAY_CONFIG_H
 
-    #include "basejsonconfig.h"
+    #include "utils/basejsonconfig.h"
 
     #define DISPLAY_JSON_CONFIG_FILE    "/display.json" /** @brief defines json config file name */
     
@@ -54,6 +54,4 @@
         virtual bool onSave(JsonDocument& document);
         virtual size_t getJsonBufferSize() { return 1000; }
     };
-
-
 #endif // _DISPLAY_CONFIG_H

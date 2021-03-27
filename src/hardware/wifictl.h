@@ -24,50 +24,14 @@
 
     #include "TTGO.h"
     #include "callback.h"
-    #include "ftpserver/ftpserver.h"
-    #include "basejsonconfig.h"
 
     #define WIFICTL_DELAY               10
-    #define NETWORKLIST_ENTRYS          20
-    #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"
 
     #define ESP_WPS_MODE                WPS_TYPE_PBC
     #define ESP_MANUFACTURER            "ESPRESSIF"
     #define ESP_MODEL_NUMBER            "ESP32"
     #define ESP_MODEL_NAME              "LILYGO T-WATCH2020 V1"
     #define ESP_DEVICE_NAME             "ESP STATION"
-
-    /**
-     * @brief network list structure
-     */
-    typedef struct {
-        char ssid[64]="";
-        char password[64]="";
-    } networklist;
-
-    /**
-     * @brief wifictl config structure
-     */
-    class wifictl_config_t : public BaseJsonConfig {
-        public:
-        wifictl_config_t();
-        bool autoon = true;                     /** @brief enable on auto on/off an wakeup and standby */
-        #ifdef ENABLE_WEBSERVER
-        bool webserver = false;                 /** @brief enable on webserver */
-        #endif
-        #ifdef ENABLE_FTPSERVER
-        bool ftpserver = false;                 /** @brief enable on ftpserver */
-        char ftpuser[32] = FTPSERVER_USER;      /** @brief ftpserver username*/
-        char ftppass[32] = FTPSERVER_PASSWORD;  /** @brief ftpserver password*/
-        #endif
-        bool enable_on_standby = false; /** @brief enable on standby */
-
-        protected:
-        ////////////// Available for overloading: //////////////
-        virtual bool onLoad(JsonDocument& document);
-        virtual bool onSave(JsonDocument& document);
-        virtual size_t getJsonBufferSize() { return 1000; }
-    } ;
 
     enum wifictl_event_t {
         WIFICTL_CONNECT                = _BV(0),
@@ -207,6 +171,5 @@
      * @return  true means enabled, false means disabled
      */
     bool wifictl_get_enable_on_standby( void );
-
 
 #endif // _WIFICTL_H

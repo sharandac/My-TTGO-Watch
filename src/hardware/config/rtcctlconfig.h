@@ -19,27 +19,35 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _SOUND_CONFIG_H
-    #define _SOUND_CONFIG_H
+#ifndef _RTCCTLCONFIG_H
+    #define _RTCCTLCONFIG_H    
 
-    #include "basejsonconfig.h"
+    #include "utils/basejsonconfig.h"    
 
-    #define SOUND_JSON_CONFIG_FILE    "/sound.json"     /** @brief defines json config file name */
+    #define CONFIG_FILE_PATH         "/rtcctr.json"
 
-    /**
-     * @brief sound config structure
-     */
-    class sound_config_t : public BaseJsonConfig {
+    #define VERSION_KEY "version"
+    #define ENABLED_KEY "enabled"
+    #define HOUR_KEY "hour"
+    #define MINUTE_KEY "minute"
+    #define WEEK_DAYS_KEY "week_days" 
+
+    #define DAYS_IN_WEEK 7
+    #define RTCCTL_ALARM_NOT_SET -1
+
+    class rtcctl_alarm_t : public BaseJsonConfig {
         public:
-        sound_config_t();
-        uint8_t volume = 50;    /** @brief sound value from 0..100 */
-        bool enable = true;     /** @brief sound on/off */
+        rtcctl_alarm_t();
+        bool enabled;                       /** @brief alarm enabled */
+        uint8_t hour;                       /** @brief alarm hour */
+        uint8_t minute;                     /** @brief alarm minute */
+        bool week_days[DAYS_IN_WEEK];       /** @brief starting from sunday to be aligned with tm */
 
         protected:
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
         virtual size_t getJsonBufferSize() { return 1000; }
-    };
+    } ;
 
-#endif // _SOUND_CONFIG_H
+#endif // _RTCCTLCONFIG_H

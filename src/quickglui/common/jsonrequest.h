@@ -9,7 +9,7 @@
 #define JSONREQUEST_H
 
 #include "ArduinoJson.h"
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 
 /*
 * @brief HTTP request wrapper with internal JSON parser.

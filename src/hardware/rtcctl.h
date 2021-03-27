@@ -24,32 +24,12 @@
 
     #include "TTGO.h"
     #include "callback.h"
-    #include "basejsonconfig.h"
-
-    #define CONFIG_FILE_PATH         "/rtcctr.json"
+    #include "hardware/config/rtcctlconfig.h"
 
     #define RTCCTL_ALARM_OCCURRED    _BV(0)     /** @brief event mask for alarm occurred */
     #define RTCCTL_ALARM_TERM_SET    _BV(1)     /** @brief event mask for alarm set */     
     #define RTCCTL_ALARM_DISABLED    _BV(2)     /** @brief event mask for alarm disabled */
     #define RTCCTL_ALARM_ENABLED     _BV(3)     /** @brief event mask for alarm enabled */
-
-    #define DAYS_IN_WEEK 7
-    #define RTCCTL_ALARM_NOT_SET -1
-
-    class rtcctl_alarm_t : public BaseJsonConfig {
-        public:
-        rtcctl_alarm_t();
-        bool enabled;
-        uint8_t hour;
-        uint8_t minute;
-        bool week_days[DAYS_IN_WEEK]; //starting from sunday to be aligned with tm
-
-        protected:
-        ////////////// Available for overloading: //////////////
-        virtual bool onLoad(JsonDocument& document);
-        virtual bool onSave(JsonDocument& document);
-        virtual size_t getJsonBufferSize() { return 1000; }
-    } ;
 
     /**
      * @brief setup rtc controller routine
@@ -69,7 +49,6 @@
      * @return  true if success, false if failed
      */
     bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
-    
     /**
      * @brief set an alarm
      *
@@ -77,17 +56,14 @@
      *
      */
     void rtcctl_set_alarm( rtcctl_alarm_t *alarm_data );
-
     /**
      * @brief   returns pointer to data coresponding to alarm
      */
     rtcctl_alarm_t *rtcctl_get_alarm_data( void );
-
     /**
      * @brief find and set term for next alarm 
      */
     void rtcctl_set_next_alarm( void );
-
     /**
      * @brief if alarm is set, returns day of week number where sunday=0, othervise is returned DAY_NOT_SET 
      */

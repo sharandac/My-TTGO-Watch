@@ -23,7 +23,7 @@
     #define _MOTOR_H
 
     #include "TTGO.h"
-    #include "motorconfig.h"
+    #include "hardware/config/motorconfig.h"
 
     /**
      * @brief setup motor I/O

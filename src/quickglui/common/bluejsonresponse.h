@@ -9,9 +9,9 @@
 #define BTJSONRESPONSE_H
 
 #include "ArduinoJson.h"
-#include "hardware/json_psram_allocator.h"
 #include "bluejsonrequest.h"
 #include "hardware/blectl.h"
+#include "utils/json_psram_allocator.h"
 
 #define BLUETOOTH_MAX_RESPONSE_SIZE 512
 #define BLUETOOTH_MAX_TRANSMISSION_SIZE 240

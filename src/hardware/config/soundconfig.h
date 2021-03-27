@@ -19,20 +19,21 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MOTOR_CONFIG_H
-    #define _MOTOR_CONFIG_H
+#ifndef _SOUND_CONFIG_H
+    #define _SOUND_CONFIG_H
 
-    #include "basejsonconfig.h"
+    #include "utils/basejsonconfig.h"
 
-    #define MOTOR_JSON_CONFIG_FILE  "/motor.json"           /** @brief defines binary config file name */
+    #define SOUND_JSON_CONFIG_FILE    "/sound.json"     /** @brief defines json config file name */
 
     /**
-     * @brief motor config structure in memory
+     * @brief sound config structure
      */
-    class motor_config_t : public BaseJsonConfig {
+    class sound_config_t : public BaseJsonConfig {
         public:
-        motor_config_t();
-        bool vibe = true;           /** @brief vibe config item, true if vibe enabled, false if disabled */
+        sound_config_t();
+        uint8_t volume = 50;    /** @brief sound value from 0..100 */
+        bool enable = true;     /** @brief sound on/off */
 
         protected:
         ////////////// Available for overloading: //////////////
@@ -41,4 +42,4 @@
         virtual size_t getJsonBufferSize() { return 1000; }
     };
 
-#endif // _MOTOR_CONFIG_H
+#endif // _SOUND_CONFIG_H

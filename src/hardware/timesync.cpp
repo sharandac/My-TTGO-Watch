@@ -27,8 +27,9 @@
 #include "timesync.h"
 #include "powermgm.h"
 #include "blectl.h"
-#include "json_psram_allocator.h"
 #include "callback.h"
+
+#include "hardware/config/timesyncconfig.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;

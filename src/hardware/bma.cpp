@@ -28,8 +28,6 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "callback.h"
-#include "json_psram_allocator.h"
-#include "alloc.h"
 
 #include "gui/statusbar.h"
 

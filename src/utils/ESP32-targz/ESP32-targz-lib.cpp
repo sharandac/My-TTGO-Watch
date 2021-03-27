@@ -37,7 +37,7 @@
 
 \*/
 #include "ESP32-targz-lib.h"
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 
 struct TarGzStream
 {

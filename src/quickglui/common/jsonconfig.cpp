@@ -8,9 +8,8 @@
 #include "jsonconfig.h"
 #include "jsonoptions.h"
 
-//#include <hardware/json_psram_allocator.h>
-#include "hardware/json_psram_allocator.h"
-#include "hardware/alloc.h"
+#include "utils/json_psram_allocator.h"
+#include "utils/alloc.h"
 #include <FS.h>
 
 JsonConfig::JsonConfig(const char* configFileName) : BaseJsonConfig(configFileName) {

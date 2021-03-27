@@ -28,7 +28,8 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
-#include "hardware/json_psram_allocator.h"
+
+#include "utils/json_psram_allocator.h"
 
 lv_obj_t *bluetooth_call_tile=NULL;
 lv_style_t bluetooth_call_style;

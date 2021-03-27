@@ -9,7 +9,7 @@
 #define BTJSONREQUEST_H
 
 #include "ArduinoJson.h"
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 
 #define BLUETOOTH_MAX_JSON_BUFFER_SIZE 4096
 

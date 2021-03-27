@@ -23,8 +23,9 @@
 #include "HTTPClient.h"
 
 #include "update_check_version.h"
-#include "hardware/json_psram_allocator.h"
-#include "hardware/alloc.h"
+
+#include "utils/json_psram_allocator.h"
+#include "utils/alloc.h"
 
 char *firmwarehost = NULL;
 char *firmwarefile = NULL;

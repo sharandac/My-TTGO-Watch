@@ -7,7 +7,7 @@
 
 #include "widgetmanager.h"
 #include <config.h>
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 
 WidgetManager DefaultWidgetManager;
 

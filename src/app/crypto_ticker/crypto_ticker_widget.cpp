@@ -31,7 +31,7 @@
 #include "gui/statusbar.h"
 #include "gui/widget.h"
 
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 #include "hardware/wifictl.h"
 
 EventGroupHandle_t crypto_ticker_widget_event_handle = NULL;

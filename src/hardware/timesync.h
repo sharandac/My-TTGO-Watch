@@ -24,7 +24,7 @@
 
     #include <TTGO.h>
     #include "callback.h"
-    #include "timesyncconfig.h"
+    #include "hardware/config/timesyncconfig.h"
 
     #define TIME_SYNC_REQUEST       _BV(0)
     #define TIME_SYNC_OK            _BV(1)
@@ -89,9 +89,29 @@
      * @param use24  true or false
      */
     void timesync_set_24hr( bool use24 );
+    /**
+     * @brief get the current timezone name
+     * 
+     * @return pointer to the current timezine name
+     */
     char* timesync_get_timezone_name( void );
+    /**
+     * @brief set the current timezine name
+     * 
+     * @param timezone_name pointer to the timezone name
+     */
     void timesync_set_timezone_name( char * timezone_name );
+    /**
+     * @brief get the current timezone rule
+     * 
+     * @return pointer to the current timezine rule
+     */
     char* timesync_get_timezone_rule( void );
+    /**
+     * @brief set the current timezine rule
+     * 
+     * @param timezone_rule pointer to the timezone rule
+     */
     void timesync_set_timezone_rule( const char * timezone_rule );
     /**
      * @brief wrapper function to sync the system with rtc
@@ -101,7 +121,7 @@
      * @brief wrapper function to sync the rtc with system
      */
     void timesyncToRTC( void );
-   /**
+    /**
      * @brief registers a callback function which is called on a corresponding event
      * 
      * @param   event           possible values: TIME_SYNC_OK

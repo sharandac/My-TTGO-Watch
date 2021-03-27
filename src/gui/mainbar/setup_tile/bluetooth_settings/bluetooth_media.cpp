@@ -28,8 +28,9 @@
 #include "gui/sound/piep.h"
 
 #include "hardware/blectl.h"
-#include "hardware/json_psram_allocator.h"
 #include "hardware/powermgm.h"
+
+#include "utils/json_psram_allocator.h"
 
 static bool bluetooth_media_play_state = false;
 

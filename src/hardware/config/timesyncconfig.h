@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 11 17:13:51 2020
+ *   Tu May 22 21:23:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,30 +19,34 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLECTL_CONFIG_H
-    #define _BLECTL_CONFIG_H
+#ifndef _TIME_SYNC_CONFIG_H
+    #define _TIME_SYNC_CONFIG_H
 
-    #include "basejsonconfig.h"
+    #include "utils/basejsonconfig.h"
 
-    #define BLECTL_JSON_COFIG_FILE         "/blectl.json"   /** @brief defines json config file name */
+    #define TIMESYNC_JSON_CONFIG_FILE   "/timesync.json"    /** @brief defines json config file name */
+    #define TIMEZONE_NAME_DEFAULT       "Etc/GMT"           /** @brief defines default time zone name */
+    #define TIMEZONE_RULE_DEFAULT       "GMT0"              /** @brief defines default time zone rule */
 
     /**
-     * @brief blectl config structure
+     * @brief time sync config structure
      */
-    class blectl_config_t : public BaseJsonConfig {
+    class timesync_config_t : public BaseJsonConfig {
         public:
-        blectl_config_t();
-        bool autoon = true;             /** @brief auto on/off */
-        bool advertising = true;        /** @brief advertising on/off */
-        bool enable_on_standby = false; /** @brief enable on standby on/off */
-        bool show_notification = true;  /** @brief enable show notifications */
-        int32_t txpower = 1;            /** @brief tx power, valide values are from 0 to 4 */
+        timesync_config_t();
+        bool timesync = true;                               /** @brief time sync on/off */
+        bool daylightsave = false;                          /** @brief day light save on/off */
+        int32_t timezone = 0;                               /** @brief time zone from 0..24, 0 means -12 */
+        bool use_24hr_clock = true;                         /** @brief 12h/24h time format */
+        char timezone_name[32] = TIMEZONE_NAME_DEFAULT;     /** @brief name of the time zone to use */
+        char timezone_rule[48] = TIMEZONE_RULE_DEFAULT;     /** @brief time zone rule to use */
 
         protected:
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
         virtual size_t getJsonBufferSize() { return 1000; }
+
     } ;
 
-#endif // _BLECTL_CONFIG_H
+#endif // _TIME_SYNC_CONFIG_H

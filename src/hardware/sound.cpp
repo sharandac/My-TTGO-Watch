@@ -27,9 +27,11 @@
 
 #include "sound.h"
 #include "callback.h"
-#include "json_psram_allocator.h"
+#include "hardware/config/soundconfig.h"
 
-// based on https://github.com/earlephilhower/ESP8266Audio
+/*
+ * based on https://github.com/earlephilhower/ESP8266Audio
+ */
 #include <SPIFFS.h>
 #include "AudioFileSourceSPIFFS.h"
 #include "AudioFileSourcePROGMEM.h"
