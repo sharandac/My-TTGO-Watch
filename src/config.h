@@ -47,4 +47,17 @@
         #define _CONFIG_H 
     #endif
 
+/*
+ * In order to control which application is built-in
+ * uncomment following
+ */
+// #define DISABLE_APP_CRYPTO
+// #define DISABLE_APP_EXAMPLE
+// #define DISABLE_APP_FINDPHONE
+// #define DISABLE_APP_FXRATES
+// #define DISABLE_APP_IR
+// #define DISABLE_APP_OSMAND
+// #define DISABLE_APP_POWERMETER
+// #define DISABLE_APP_WEATHER
+
 #endif // _CONFIG_H
