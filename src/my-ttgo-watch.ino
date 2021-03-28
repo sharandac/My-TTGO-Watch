@@ -41,17 +41,33 @@
 #include "hardware/sound.h"
 #include "hardware/callback.h"
 
+#ifndef DISABLE_APP_WEATHER
 #include "app/weather/weather.h"
+#endif
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/alarm_clock/alarm_clock.h"
+#ifndef DISABLE_APP_CRYPTO
 #include "app/crypto_ticker/crypto_ticker.h"
+#endif
+#ifndef DISABLE_APP_EXAMPLE
 #include "app/example_app/example_app.h"
+#endif
+#ifndef DISABLE_APP_OSMAND
 #include "app/osmand/osmand_app.h"
+#endif
+#ifndef DISABLE_APP_IR
 #include "app/IRController/IRController.h"
+#endif
+#ifndef DISABLE_APP_FXRATES
 #include "app/fx_rates/fx_rates.h"
+#endif
 #include "app/activity/activity.h"
+#ifndef DISABLE_APP_POWERMETER
 #include "app/powermeter/powermeter_app.h"
+#endif
+#ifndef DISABLE_APP_FINDPHONE
 #include "app/FindPhone/FindPhone.h"
+#endif
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -97,17 +113,33 @@ void setup()
     /*
      * add apps and widgets here!!!
      */
+#ifndef DISABLE_APP_WEATHER
     weather_app_setup();
+#endif
     stopwatch_app_setup();
     alarm_clock_setup();
     activity_app_setup();
+#ifndef DISABLE_APP_CRYPTO
     crypto_ticker_setup();
+#endif
+#ifndef DISABLE_APP_EXAMPLE
     example_app_setup();
+#endif
+#ifndef DISABLE_APP_OSMAND
     osmand_app_setup();
+#endif
+#ifndef DISABLE_APP_IR
     IRController_setup();
+#endif
+#ifndef DISABLE_APP_FXRATES
     fxrates_app_setup();
+#endif
+#ifndef DISABLE_APP_POWERMETER
     powermeter_app_setup();
+#endif
+#ifndef DISABLE_APP_FINDPHONE
 	FindPhone_setup();
+#endif
   	/*
      *
      */
