@@ -42,7 +42,7 @@ lv_obj_t *bluetooth_media_play = NULL;
 lv_obj_t *bluetooth_media_prev = NULL;
 lv_obj_t *bluetooth_media_next = NULL;
 lv_obj_t *bluetooth_media_title = NULL;
-lv_obj_t *bluetooth_media_album = NULL;
+lv_obj_t *bluetooth_media_artist = NULL;
 
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(play_64px);
@@ -113,12 +113,12 @@ void bluetooth_media_tile_setup( void ) {
     lv_obj_align( bluetooth_media_prev, bluetooth_media_play, LV_ALIGN_OUT_LEFT_MID, -32, 0 );
     lv_obj_set_event_cb( bluetooth_media_prev, exit_bluetooth_media_prev_event_cb );
 
-    bluetooth_media_album = lv_label_create( bluetooth_media_tile, NULL);
-    lv_obj_add_style( bluetooth_media_album, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
-    lv_label_set_text( bluetooth_media_album, "");
-    lv_label_set_long_mode( bluetooth_media_album, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_album, lv_disp_get_hor_res( NULL ) - 60 );
-    lv_obj_align( bluetooth_media_album, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    bluetooth_media_artist = lv_label_create( bluetooth_media_tile, NULL);
+    lv_obj_add_style( bluetooth_media_artist, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
+    lv_label_set_text( bluetooth_media_artist, "");
+    lv_label_set_long_mode( bluetooth_media_artist, LV_LABEL_LONG_SROLL_CIRC );
+    lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - 60 );
+    lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     bluetooth_media_title = lv_label_create( bluetooth_media_tile, NULL);
     lv_obj_add_style( bluetooth_media_title, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
@@ -266,9 +266,9 @@ bool bluetooth_media_queue_msg( const char *msg ) {
                 lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
             }
             
-            if ( doc["album"] ) {
-                lv_label_set_text( bluetooth_media_album, doc["album"] );
-                lv_obj_align( bluetooth_media_album, bluetooth_media_tile, LV_ALIGN_OUT_TOP_MID, 0, -16 );
+            if ( doc["artist"] ) {
+                lv_label_set_text( bluetooth_media_artist, doc["artist"] );
+                lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
             }
 
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
