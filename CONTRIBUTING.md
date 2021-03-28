@@ -8,6 +8,10 @@ pio run -t upload
 
 or simple press "build and upload" in platformIO.
 
+### Configuration
+
+It is possible to control which application is built in the firmware via `control.h`.
+
 ## Applications
 
 For quick clock application development use the new QuickGLUI - high level API. See [here](https://github.com/sharandac/My-TTGO-Watch/pull/163).
