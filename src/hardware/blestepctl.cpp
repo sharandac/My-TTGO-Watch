@@ -35,7 +35,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
     /*
      * Update every 1800 as GadgetBidge uses such value by default
      */
-    StepcounterBleUpdater() : BleUpdater(1000*1800){}
+    StepcounterBleUpdater() : BleUpdater(1800){}
     protected:
     bool notify(int32_t stepcounter) {
         /*
@@ -48,6 +48,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
         bool ret = blectl_send_msg( msg );
+        log_i("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
     }
 };
@@ -91,15 +92,14 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
         case BLECTL_MSG:
                 BluetoothJsonRequest request(msg, strlen( msg ) * 4);
 
-                if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int"))
-                {
+                if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int")) {
                     /*
                      * get requested timeout, in seconds
                      * TODO_ affect power loop rate
                      */
-                    uint64_t timeout = request["int"].as<uint32_t>();
+                    time_t timeout = request["int"].as<time_t>(); // Requested timeout, in seconds
                     log_i("RECEIVED timeout: %d seconds", timeout);
-                    stepcounter_ble_updater.setTimeout(timeout*1000);
+                    stepcounter_ble_updater.setTimeout(timeout);
                 }
                 retval = true;
                 break;
