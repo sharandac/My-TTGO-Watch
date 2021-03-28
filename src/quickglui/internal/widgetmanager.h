@@ -16,8 +16,8 @@
 // #endif
 
 //TODO: both modes - static and dynamic allocation
-class WidgetManager
-{
+class WidgetManager {
+
 public:
     WidgetManager(/* args */);
     ~WidgetManager();

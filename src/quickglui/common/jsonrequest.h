@@ -11,30 +11,29 @@
 #include "ArduinoJson.h"
 #include "utils/json_psram_allocator.h"
 
-/*
-* @brief HTTP request wrapper with internal JSON parser.
-* Reponse should be in JSON format
-*/
-class JsonRequest : public SpiRamJsonDocument
-{
+/**
+ * @brief HTTP request wrapper with internal JSON parser.
+ * Reponse should be in JSON format
+ */
+class JsonRequest : public SpiRamJsonDocument {
 public:
-  JsonRequest(size_t maxJsonBufferSize);
-  ~JsonRequest();
+    JsonRequest(size_t maxJsonBufferSize);
+    ~JsonRequest();
 
-  bool process(const char* url);
+    bool process(const char* url);
 
-  int httpCode() { return httpcode; }
-  DeserializationError getDeserializationError() { return dsError; }
+    int httpCode() { return httpcode; }
+    DeserializationError getDeserializationError() { return dsError; }
 
-  tm completedAt() { return timeStamp; }
-  String formatCompletedAt(const char* format);
-  String errorString();
+    tm completedAt() { return timeStamp; }
+    String formatCompletedAt(const char* format);
+    String errorString();
 
 protected:
-  int httpcode = -1;
-  time_t now;
-  struct tm timeStamp;
-  DeserializationError dsError;
+    int httpcode = -1;
+    time_t now;
+    struct tm timeStamp;
+    DeserializationError dsError;
 };
 
 #endif

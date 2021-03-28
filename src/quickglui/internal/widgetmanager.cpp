@@ -11,20 +11,16 @@
 
 WidgetManager DefaultWidgetManager;
 
-WidgetManager::WidgetManager()
-{
-}
+WidgetManager::WidgetManager() {}
 
-WidgetManager::~WidgetManager()
-{
-}
+WidgetManager::~WidgetManager() {}
 
-WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj)
-{
-    // Static allocation
-    //TODO: checks MAX_WIDGET_HANDLES
-    //return &handles[current++];
-    
+WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj) {
+    /**
+     * Static allocation
+     * TODO: checks MAX_WIDGET_HANDLES
+     * @return &handles[current++];
+     */
     lv_obj_type_t buf;
     lv_obj_get_type(obj, &buf);
     auto type = buf.type[0] != NULL ? buf.type[0] : "lv_obj";
@@ -34,8 +30,7 @@ WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj)
     return new(addr) WidgetHandle();
 }
 
-void WidgetManager::Free(lv_obj_t* obj)
-{
+void WidgetManager::Free(lv_obj_t* obj) {
     auto handle = GetIfExists(obj);
     lv_obj_set_user_data(obj, NULL);
     free(handle);
@@ -43,17 +38,14 @@ void WidgetManager::Free(lv_obj_t* obj)
     log_i("WidgetHandle was destroyed. Total count: %d", current);
 }
 
-WidgetHandle* WidgetManager::GetIfExists(lv_obj_t* obj)
-{
+WidgetHandle* WidgetManager::GetIfExists(lv_obj_t* obj) {
     auto handle = (WidgetHandle*)lv_obj_get_user_data(obj);
     return handle;
 }
 
-WidgetHandle* WidgetManager::GetOrCreate(lv_obj_t* obj)
-{
+WidgetHandle* WidgetManager::GetOrCreate(lv_obj_t* obj) {
     auto handle = GetIfExists(obj);
-    if (handle == NULL)
-    {
+    if (handle == NULL) {
         handle = Allocate(obj);
         lv_obj_set_user_data(obj, handle);
     }

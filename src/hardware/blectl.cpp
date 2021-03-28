@@ -70,18 +70,17 @@ static CharBuffer gadgetbridge_msg;
 class BleCtlServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
         pServer->updateConnParams( param->connect.remote_bda, 1450, 1500, 0, 10000 );
-        blectl_set_event( BLECTL_ACTIVE );
-        blectl_clear_event( BLECTL_DISCONNECT );
-        blectl_send_event_cb( BLECTL_ACTIVE, (void *)"active" );
+        blectl_set_event( BLECTL_AUTHWAIT );
+        blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
+        blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"active" );
         xQueueReset( blectl_msg_queue );
         log_i("BLE active");
-
         pServer->getAdvertising()->stop();
     };
 
     void onDisconnect(BLEServer* pServer) {
         blectl_set_event( BLECTL_DISCONNECT );
-        blectl_clear_event( BLECTL_CONNECT );
+        blectl_clear_event( BLECTL_CONNECT | BLECTL_AUTHWAIT );
         blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
         xQueueReset( blectl_msg_queue );
         blectl_msg.active = false;
@@ -96,20 +95,25 @@ class BleCtlServerCallbacks: public BLEServerCallbacks {
 
 class BtlCtlSecurity : public BLESecurityCallbacks {
 
-    uint32_t onPassKeyRequest(){
+    uint32_t onPassKeyRequest() {
+        log_i("BLECTL pass key request");
         return 123456;
     }
-    void onPassKeyNotify(uint32_t pass_key){
+    void onPassKeyNotify( uint32_t pass_key ){
         char pin[16]="";
         snprintf( pin, sizeof( pin ), "%06d", pass_key );
         blectl_set_event( BLECTL_PIN_AUTH );
         blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
-        log_i("Bluetooth Pairing Request\r\nPIN: %s", pin );
+        log_i("BLECTL pairing request, PIN: %s", pin );
     }
-    bool onConfirmPIN(uint32_t pass_key){
+    bool onConfirmPIN( uint32_t pass_key ) {
+        char pin[16]="";
+        snprintf( pin, sizeof( pin ), "%06d", pass_key );
+        log_i("BLECTL confirm PIN: %s", pin );
         return false;
     }
-    bool onSecurityRequest(){
+    bool onSecurityRequest() {
+        log_i("BLECTL security request");
         return true;
     }
 
@@ -119,24 +123,35 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
+                log_i("BLECLT pairing successful");
+                return;
+            }
+            if ( blectl_get_event( BLECTL_AUTHWAIT ) ) {
+                blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_DISCONNECT );
+                blectl_set_event( BLECTL_CONNECT );
+                blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
+                log_i("BLECLT authentication successful, client connected");
+                return;
             }
         }
         else {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
+                log_i("BLECLT pairing abort");
+                pServer->startAdvertising();
+                return;
             }
-            pServer->startAdvertising();
+            if ( blectl_get_event( BLECTL_AUTHWAIT ) || blectl_get_event( BLECTL_CONNECT ) ) {
+                blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
+                blectl_set_event( BLECTL_DISCONNECT );
+                blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
+                log_i("BLECLT authentication unsuccessful, client disconnected");
+                pServer->startAdvertising();
+                return;
+            }
         }
-
-        log_i("BLECTL client authentication %s", cmpl.success ? "successful" : "unsuccessful");
-
-        if ( blectl_get_event( BLECTL_ACTIVE ) && cmpl.success ) {
-            blectl_clear_event( BLECTL_ACTIVE );
-            blectl_set_event( BLECTL_CONNECT );
-            blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
-            log_i("BLECLT client connected");
-        }
+        log_e("authentication not handle. reason: %02x", cmpl.fail_reason );
     }
 };
 
@@ -434,8 +449,10 @@ void blectl_read_config( void ) {
 }
 
 bool blectl_send_msg( const char *msg ) {
-    if ( blectl_get_event( BLECTL_CONNECT ) ) {
-        // Duplicate message
+    if ( blectl_get_event( BLECTL_CONNECT ) || blectl_get_event( BLECTL_AUTHWAIT ) ) {
+        /*
+         * Duplicate message
+         */
         size_t len = strlen( msg );
         char *buff = (char *)CALLOC( len + 1, 1 );
         if ( buff == NULL ) {
@@ -443,10 +460,14 @@ bool blectl_send_msg( const char *msg ) {
             while( true );
         }
         strcpy( buff, msg );
-        // Send message
+        /*
+         * Send message
+         */
         BaseType_t ret;
         ret = xQueueSend( blectl_msg_queue, &buff, 0);
-        // buff will be freeed on the receive part
+        /*
+         * buff will be freeed on the receive part
+         */
         buff = NULL;
         if ( ret != pdTRUE ) {
             log_e("fail to send msg");

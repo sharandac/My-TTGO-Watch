@@ -22,45 +22,40 @@ class JsonStringOption;
 
 class JsonConfig : public BaseJsonConfig  {
 public:
-  JsonConfig(const char* configFileName);
-  ~JsonConfig();
+    JsonConfig(const char* configFileName);
+    ~JsonConfig();
 
-  /*
-  * @brief Add bool option to the settings list 
-  */
-  JsonBoolOption& addBoolean(const char* optionName, bool defValue = false);
-
-  /*
-  * @brief Add string option to the settings list 
-  */
-  JsonStringOption& addString(const char* optionName, int maxValueLength, const char* defValue = "");
-
-  bool getBoolean(const char* optionName, bool defValue = false);
-  const char* getString(const char* optionName, const char* defValue = "");
-
-  /*
-  * @brief Load option values from assigned UI widgets 
-  */
-  void applyFromUI();
-
-  int totalCount() { return count; }
-  JsonOption* getOption(int id) { return options[id]; }
-
-  /*
-  * @brief Set handler which will be called every time on load() ans save() actions
-  */
-  void onLoadSaveHandler(SettingsAction saveSettingsHandler);
+    /**
+     * @brief Add bool option to the settings list 
+     */
+    JsonBoolOption& addBoolean(const char* optionName, bool defValue = false);
+    /**
+     * @brief Add string option to the settings list 
+     */
+    JsonStringOption& addString(const char* optionName, int maxValueLength, const char* defValue = "");
+    bool getBoolean(const char* optionName, bool defValue = false);
+    const char* getString(const char* optionName, const char* defValue = "");
+    /**
+     * @brief Load option values from assigned UI widgets 
+     */
+    void applyFromUI();
+    int totalCount() { return count; }
+    JsonOption* getOption(int id) { return options[id]; }
+    /**
+     * @brief Set handler which will be called every time on load() ans save() actions
+     */
+    void onLoadSaveHandler(SettingsAction saveSettingsHandler);
 
 protected:
-  ////////////// Available for overloading: //////////////
-  virtual bool onLoad(JsonDocument& document);
-  virtual bool onSave(JsonDocument& document);
-  virtual size_t getJsonBufferSize() { return (count+1)*128; }
+    ////////////// Available for overloading: //////////////
+    virtual bool onLoad(JsonDocument& document);
+    virtual bool onSave(JsonDocument& document);
+    virtual size_t getJsonBufferSize() { return (count+1)*128; }
 
 protected:
-  JsonOption* options[MAX_OPTIONS_COUNT];
-  int count = 0;
-  SettingsAction processHandler;
+    JsonOption* options[MAX_OPTIONS_COUNT];
+    int count = 0;
+    SettingsAction processHandler;
 };
 
 #endif

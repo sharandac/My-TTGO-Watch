@@ -26,22 +26,35 @@
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
 
+    /**
+     * connection state
+     */
     #define BLECTL_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
     #define BLECTL_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
-    #define BLECTL_STANDBY               _BV(2)         /** @brief event mask for blectl standby */
-    #define BLECTL_ON                    _BV(3)         /** @brief event mask for blectl on */
-    #define BLECTL_OFF                   _BV(4)         /** @brief event mask for blectl off */
-    #define BLECTL_ACTIVE                _BV(5)         /** @brief event mask for blectl active */
-    #define BLECTL_MSG                   _BV(6)         /** @brief event mask for blectl msg */
-    #define BLECTL_PIN_AUTH              _BV(7)         /** @brief event mask for blectl for pin auth, callback arg is (uint32*) */
-    #define BLECTL_PAIRING               _BV(8)         /** @brief event mask for blectl pairing requested */
-    #define BLECTL_PAIRING_SUCCESS       _BV(9)         /** @brief event mask for blectl pairing success */
-    #define BLECTL_PAIRING_ABORT         _BV(10)        /** @brief event mask for blectl pairing abort */
+    #define BLECTL_AUTHWAIT              _BV(2)         /** @brief event mask for blectl wait for auth to get connect */
+    /**
+     * power state
+     */
+    #define BLECTL_STANDBY               _BV(3)         /** @brief event mask for blectl standby */
+    #define BLECTL_ON                    _BV(4)         /** @brief event mask for blectl on */
+    #define BLECTL_OFF                   _BV(5)         /** @brief event mask for blectl off */
+    /**
+     * pairing state
+     */
+    #define BLECTL_PIN_AUTH              _BV(6)         /** @brief event mask for blectl for pin auth, callback arg is (uint32*) */
+    #define BLECTL_PAIRING               _BV(7)         /** @brief event mask for blectl pairing requested */
+    #define BLECTL_PAIRING_SUCCESS       _BV(8)         /** @brief event mask for blectl pairing success */
+    #define BLECTL_PAIRING_ABORT         _BV(9)         /** @brief event mask for blectl pairing abort */
+    /**
+     * message state
+     */
+    #define BLECTL_MSG                   _BV(10)        /** @brief event mask for blectl msg */
     #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
     #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
-
-    // See the following for generating UUIDs:
-    // https://www.uuidgenerator.net/
+    /**
+     *  See the following for generating UUIDs:
+     * https://www.uuidgenerator.net/
+     */
     #define SERVICE_UUID                                    BLEUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")     /** @brief UART service UUID */
     #define CHARACTERISTIC_UUID_RX                          BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     #define CHARACTERISTIC_UUID_TX                          BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")

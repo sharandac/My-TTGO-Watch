@@ -40,17 +40,25 @@ bool display_powermgm_loop_cb( EventBits_t event, void *arg );
 bool display_send_event_cb( EventBits_t event, void *arg );
 
 void display_setup( void ) {
+    /**
+     * load config from json
+     */
     display_config.load();
-
+    /**
+     * setup backlight and rotation
+     */
     TTGOClass *ttgo = TTGOClass::getWatch();
-
     ttgo->openBL();
     ttgo->bl->adjust( 0 );
     ttgo->tft->setRotation( display_config.rotation / 90 );
     bma_set_rotate_tilt( display_config.rotation );
-
+    /**
+     * setup framebuffer
+     */
     framebuffer_setup( display_config.use_dma, display_config.use_double_buffering );
-
+    /**
+     * register powermgm and pwermgm loop callback functions
+     */
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "powermgm display loop" );
 }
@@ -74,25 +82,30 @@ bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
 
 void display_loop( void ) {
   TTGOClass *ttgo = TTGOClass::getWatch();
-
-  if ( dest_brightness != brightness ) {
-    if ( brightness < dest_brightness ) {
-      brightness++;
-      ttgo->bl->adjust( brightness );
-    }
-    else {
-      brightness--;
-      ttgo->bl->adjust( brightness );
-    }
+    /**
+     * check if backlight adjust has change
+     */
+    if ( dest_brightness != brightness ) {
+        if ( brightness < dest_brightness ) {
+            brightness++;
+            ttgo->bl->adjust( brightness );
+        }
+        else {
+            brightness--;
+            ttgo->bl->adjust( brightness );
+        }
   }
+  /**
+   * check timeout
+   */
   if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
-    if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-        dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+        if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+            dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+        }
+        else {
+            dest_brightness = display_get_brightness();
+        }
     }
-    else {
-        dest_brightness = display_get_brightness();
-    }
-  }
 }
 
 bool display_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
@@ -111,44 +124,44 @@ bool display_send_event_cb( EventBits_t event, void *arg ) {
 }
 
 void display_standby( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-  log_i("go standby");
-  ttgo->bl->adjust( 0 );
-  ttgo->displaySleep();
-  ttgo->closeBL();
-  brightness = 0;
-  dest_brightness = 0;
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    log_i("go standby");
+    ttgo->bl->adjust( 0 );
+    ttgo->displaySleep();
+    ttgo->closeBL();
+    brightness = 0;
+    dest_brightness = 0;
 }
 
 void display_wakeup( bool silence ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-
-  // wakeup without display
-  if ( silence ) {
-    log_i("go silence wakeup");
-    ttgo->openBL();
-    ttgo->displayWakeup();
-    ttgo->bl->adjust( 0 );
-    brightness = 0;
-    dest_brightness = 0;
-  }
-  // wakeup with display
-  else {
-    log_i("go wakeup");
-    ttgo->openBL();
-    ttgo->displayWakeup();
-    ttgo->bl->adjust( 0 );
-    brightness = 0;
-    dest_brightness = display_get_brightness();
-  }
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    /**
+     * wakeup with or without display
+     */
+    if ( silence ) {
+        log_i("go silence wakeup");
+        ttgo->openBL();
+        ttgo->displayWakeup();
+        ttgo->bl->adjust( 0 );
+        brightness = 0;
+        dest_brightness = 0;
+    }
+    else {
+        log_i("go wakeup");
+        ttgo->openBL();
+        ttgo->displayWakeup();
+        ttgo->bl->adjust( 0 );
+        brightness = 0;
+        dest_brightness = display_get_brightness();
+    }
 }
 
 void display_save_config( void ) {
-  display_config.save();
+      display_config.save();
 }
 
 void display_read_config( void ) {
-  display_config.load();
+    display_config.load();
 }
 
 uint32_t display_get_timeout( void ) {
@@ -171,15 +184,15 @@ void display_set_brightness( uint32_t brightness ) {
 }
 
 uint32_t display_get_rotation( void ) {
-  return( display_config.rotation );
+    return( display_config.rotation );
 }
 
 bool display_get_block_return_maintile( void ) {
-  return( display_config.block_return_maintile );
+    return( display_config.block_return_maintile );
 }
 
 bool display_get_use_double_buffering( void ) {
-  return( display_config.use_double_buffering );
+    return( display_config.use_double_buffering );
 }
 
 void display_set_use_double_buffering( bool use_double_buffering ) {
@@ -188,7 +201,7 @@ void display_set_use_double_buffering( bool use_double_buffering ) {
 }
 
 bool display_get_use_dma( void ) {
-  return( display_config.use_dma );
+    return( display_config.use_dma );
 }
 
 void display_set_use_dma( bool use_dma ) {
@@ -197,14 +210,14 @@ void display_set_use_dma( bool use_dma ) {
 }
 
 void display_set_block_return_maintile( bool block_return_maintile ) {
-  display_config.block_return_maintile = block_return_maintile;
+    display_config.block_return_maintile = block_return_maintile;
 }
 
 void display_set_rotation( uint32_t rotation ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-  display_config.rotation = rotation;
-  ttgo->tft->setRotation( rotation / 90 );
-  lv_obj_invalidate( lv_scr_act() );
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    display_config.rotation = rotation;
+    ttgo->tft->setRotation( rotation / 90 );
+    lv_obj_invalidate( lv_scr_act() );
 }
 
 uint32_t display_get_background_image( void ) {
@@ -216,10 +229,9 @@ void display_set_background_image( uint32_t background_image ) {
 }
 
 void display_set_vibe( bool vibe ) {
-  display_config.vibe = vibe;
-
+    display_config.vibe = vibe;
 }
 
 bool display_get_vibe( void ) {
-  return display_config.vibe;
+    return display_config.vibe;
 }

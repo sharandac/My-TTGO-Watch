@@ -16,23 +16,24 @@
 * @brief Base application page class. Parent for all specialized application pages
 */
 class Page : public Container {
+
 public:
-  Page(){};
+    Page(){};
 
-  // This class keep references so we should store it
-  Page & operator=(const Page&) = delete;
-  Page(const Page&) = delete;
+    // This class keep references so we should store it
+    Page & operator=(const Page&) = delete;
+    Page(const Page&) = delete;
 
-  void init(lv_obj_t* handle);
+    void init(lv_obj_t* handle);
 
-  virtual void assign(lv_obj_t* newHandle);
-
-protected:
-  virtual void onInitializing();
-  virtual void onChildAdded(Widget& child, const TypeInfo& type);
+    virtual void assign(lv_obj_t* newHandle);
 
 protected:
-  Style pageStyle;
+    virtual void onInitializing();
+    virtual void onChildAdded(Widget& child, const TypeInfo& type);
+
+protected:
+    Style pageStyle;
 };
 
 #endif

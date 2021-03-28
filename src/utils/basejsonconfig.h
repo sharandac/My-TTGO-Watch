@@ -12,23 +12,23 @@
 
 #include "ArduinoJson.h"
 
-/*
-* @brief JSON configuration storage with bindings for variables and UI widgets
-*/
+/**
+ * @brief JSON configuration storage with bindings for variables and UI widgets
+ */
 class BaseJsonConfig {
 public:
   BaseJsonConfig(const char* configFileName);
-
-  /*
-  * @brief Load settings from file
-  */
+  /**
+   * @brief Load settings from file
+   */
   bool load();
-
-  /*
-  * @brief Save settings to file
-  */
+  /**
+   * @brief Save settings to file
+   */
   bool save();
-  
+  /**
+   * @brief print out json
+   */
   void debugPrint();
   
 protected:
