@@ -35,8 +35,9 @@
 #include "gui/widget.h"
 
 #include "hardware/wifictl.h"
-#include "hardware/json_psram_allocator.h"
-#include "hardware/alloc.h"
+
+#include "utils/json_psram_allocator.h"
+#include "utils/alloc.h"
 
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;

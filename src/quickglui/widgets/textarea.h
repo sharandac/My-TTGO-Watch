@@ -24,6 +24,9 @@ public:
   /** Create a TextArea with text `txt` */
   TextArea(const Widget* parent, const char* txt = NULL);
   
+  /**
+   * @brief set text
+   */
   TextArea& text(const char * txt);
   const char* text();
 

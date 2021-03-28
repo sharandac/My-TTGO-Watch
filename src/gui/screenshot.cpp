@@ -21,7 +21,8 @@
  */
 #include "config.h"
 #include "screenshot.h"
-#include "hardware/alloc.h"
+
+#include "utils/alloc.h"
 
 uint16_t *png;
 

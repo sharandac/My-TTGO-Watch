@@ -29,8 +29,8 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-#include "hardware/json_psram_allocator.h"
-#include "hardware/alloc.h"
+#include "utils/json_psram_allocator.h"
+#include "utils/alloc.h"
 
 static update_config_t *update_config = NULL;
 

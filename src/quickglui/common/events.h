@@ -12,11 +12,11 @@
 #include <functional>
 
 enum SyncRequestSource {
-  ApplicationRequest = 1,
-  ConnectionEvent = 2,
-  UserDefinedRequest = 4,
-  IsRequired = ApplicationRequest | ConnectionEvent | UserDefinedRequest,
-  AllFlagsValues = UINT8_MAX
+    ApplicationRequest = 1,
+    ConnectionEvent = 2,
+    UserDefinedRequest = 4,
+    IsRequired = ApplicationRequest | ConnectionEvent | UserDefinedRequest,
+    AllFlagsValues = UINT8_MAX
 };
 
 class Widget;

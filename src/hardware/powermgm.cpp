@@ -90,7 +90,7 @@ void powermgm_loop( void ) {
         lv_disp_trig_activity( NULL );
         powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
     }
-  
+
     /*
      * handle powermgm request
      */

@@ -10,11 +10,11 @@
 
 #include "widget.h"
 
-/*
-* @brief Represent Container LVGL widget.
-* Documentation:
-* https://docs.lvgl.io/latest/en/html/widgets/cont.html
-*/
+/**
+ * @brief Represent Container LVGL widget.
+ * Documentation:
+ * https://docs.lvgl.io/latest/en/html/widgets/cont.html
+ */
 class Container : public Widget {
 public:
   Container(){};

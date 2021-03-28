@@ -20,16 +20,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #ifndef _TOUCH_H
-
     #define _TOUCH_H
 
     #include "TTGO.h"
+
     /**
      * @brief setup touch
      */
     void touch_setup( void );
-
+    /**
+     * @brief lock the touch interface
+     */
     bool touch_lock_take( void );
+    /**
+     * @brief unlock the touch interface
+     */
     void touch_lock_give( void );
 
 #endif // _TOUCH_H

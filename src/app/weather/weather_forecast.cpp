@@ -34,7 +34,8 @@
 
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
-#include "hardware/alloc.h"
+
+#include "utils/alloc.h"
 
 EventGroupHandle_t weather_forecast_event_handle = NULL;
 TaskHandle_t _weather_forecast_sync_Task;

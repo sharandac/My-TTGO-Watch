@@ -15,24 +15,25 @@
 * Methods can be overridden in sub-classes
 */
 class AppPage : public Page {
+
 public:
-  AppPage(){};
-  
-  AppPage& init(lv_obj_t* handle, bool defaultExitBtn = true);
-  AppPage& addSettingsButton(WidgetAction onSettingsBtnClick);
-  AppPage& addRefreshButton(WidgetAction onRefreshBtnClick);
+    AppPage(){};
 
-  virtual Container& createChildContainer(lv_layout_t autoLayoutOptios);
-  bool hasChildContainer() { return childContainer.handle() != nullptr; }
+    AppPage& init(lv_obj_t* handle, bool defaultExitBtn = true);
+    AppPage& addSettingsButton(WidgetAction onSettingsBtnClick);
+    AppPage& addRefreshButton(WidgetAction onRefreshBtnClick);
 
-protected:
-  virtual void onChildAdded(Widget& child, const TypeInfo& type);
+    virtual Container& createChildContainer(lv_layout_t autoLayoutOptios);
+    bool hasChildContainer() { return childContainer.handle() != nullptr; }
 
 protected:
-  Widget btnExit;
-  Widget btnSettings;
-  Widget btnRefresh;
-  Container childContainer;
+    virtual void onChildAdded(Widget& child, const TypeInfo& type);
+
+protected:
+    Widget btnExit;
+    Widget btnSettings;
+    Widget btnRefresh;
+    Container childContainer;
 };
 
 #endif

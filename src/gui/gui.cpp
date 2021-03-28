@@ -57,25 +57,32 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
 void gui_setup( void )
 {
-    //Create wallpaper
+    /*
+     * Create an blank wallpaper
+     */
     img_bin = lv_img_create( lv_scr_act() , NULL );
     lv_obj_set_width( img_bin, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( img_bin, lv_disp_get_ver_res( NULL ) );
     lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     mainbar_setup();
-    /* add the four mainbar screens */
+    /*
+     * add the four mainbar screens
+     */
     main_tile_setup();
     app_tile_setup();
     note_tile_setup();
     setup_tile_setup();
-
+    /*
+     * add input and status
+     */
     statusbar_setup();
     quickbar_setup();
     keyboard_setup();
     num_keyboard_setup();
-    
-    /* add setup */
+    /*
+     * add setup tool to the setup tile
+     */
     battery_settings_tile_setup();
     display_settings_tile_setup();
     move_settings_tile_setup();
@@ -85,11 +92,17 @@ void gui_setup( void )
     update_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
-
+    /*
+     * trigger an activity
+     */
     lv_disp_trig_activity( NULL );
-
+    /*
+     * setup background image
+     */
     gui_set_background_image( display_get_background_image() );
-
+    /*
+     * register the main powermgm routine for the gui
+     */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
 }
@@ -98,24 +111,40 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     switch ( event ) {
-        case POWERMGM_STANDBY:          log_i("go standby");
+        case POWERMGM_STANDBY:          /*
+                                         * get back to maintile if configure and
+                                         * stop all LVGL activitys and tasks
+                                         */
+                                        log_i("go standby");
                                         if ( !display_get_block_return_maintile() ) {
                                             mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         }                               
                                         ttgo->stopLvglTick();
                                         break;
-        case POWERMGM_WAKEUP:           log_i("go wakeup");
+        case POWERMGM_WAKEUP:           /*
+                                         * resume all LVGL activitys and tasks
+                                         */
+                                        log_i("go wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
                                         break;
-        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+        case POWERMGM_SILENCE_WAKEUP:   /*
+                                         * resume all LVGL activitys and tasks
+                                         */
+                                        log_i("go silence wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
                                         break;
         case POWERMGM_DISABLE_INTERRUPTS:
+                                        /*
+                                         * stop LVGL ticks
+                                         */
                                         TTGOClass::getWatch()->stopLvglTick();
                                         break;
         case POWERMGM_ENABLE_INTERRUPTS:
+                                        /*
+                                         * stop LVGL ticks
+                                         */
                                         TTGOClass::getWatch()->startLvglTick();
                                         break;                                        
     }

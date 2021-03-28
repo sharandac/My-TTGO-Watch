@@ -38,7 +38,8 @@
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
-#include "hardware/http_ota.h"
+
+#include "utils/http_ota/http_ota.h"
 
 EventGroupHandle_t update_event_handle = NULL;
 TaskHandle_t _update_Task;

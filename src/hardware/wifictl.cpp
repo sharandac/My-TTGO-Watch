@@ -28,15 +28,13 @@
 #include "wifictl.h"
 #include "powermgm.h"
 #include "callback.h"
-#include "json_psram_allocator.h"
-#include "alloc.h"
+#include "config/wifictlconfig.h"
 
-#include "gui/statusbar.h"
 #ifdef ENABLE_WEBSERVER
-#include "webserver/webserver.h"
+    #include "webserver/webserver.h"
 #endif
 #ifdef ENABLE_FTPSERVER
-#include "ftpserver/ftpserver.h"
+    #include "ftpserver/ftpserver.h"
 #endif
 
 bool wifi_init = false;
@@ -46,7 +44,6 @@ callback_t *wifictl_callback = NULL;
 
 void wifictl_send_event_cb( EventBits_t event, char *msg );
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg );
-
 void wifictl_StartTask( void );
 void wifictl_Task( void * pvParameters );
 TaskHandle_t _wifictl_Task;
@@ -54,7 +51,6 @@ TaskHandle_t _wifictl_Task;
 char *wifiname=NULL;
 char *wifipassword=NULL;
 
-static networklist *wifictl_networklist = NULL;
 wifictl_config_t wifictl_config;
 
 static esp_wps_config_t esp_wps_config;
@@ -81,21 +77,9 @@ void wifictl_setup( void ) {
      */
     wifictl_status = xEventGroupCreate();
     /*
-     * allocate networklist and clean networklist
-     */
-    wifictl_networklist = (networklist*)CALLOC( sizeof( networklist ) * NETWORKLIST_ENTRYS, 1 );
-    if( !wifictl_networklist ) {
-      log_e("wifictl_networklist calloc faild");
-      while(true);
-    }
-    for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
-      wifictl_networklist[ entry ].ssid[ 0 ] = '\0';
-      wifictl_networklist[ entry ].password[ 0 ] = '\0';
-    }
-    /*
      * load config from spiff
      */
-    wifictl_load_config();
+    wifictl_config.load();
     /*
      * limit wifi bandwidth to 20Mhz channel width
      */
@@ -106,12 +90,13 @@ void wifictl_setup( void ) {
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_CONNECT );
-        if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
-          wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"wait for WPS" );
+        if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) ) {
+            wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"wait for WPS" );
+        }
         else {
-          wifictl_set_event( WIFICTL_SCAN );
-          wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
-          WiFi.scanNetworks( true );
+            wifictl_set_event( WIFICTL_SCAN );
+            wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
+            WiFi.scanNetworks( true );
         }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
@@ -120,15 +105,13 @@ void wifictl_setup( void ) {
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_CONNECT | WIFICTL_WPS_REQUEST );
         int len = WiFi.scanComplete();
         for( int i = 0 ; i < len ; i++ ) {
-          for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
-            if ( !strcmp( wifictl_networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
-              wifiname = wifictl_networklist[ entry ].ssid;
-              wifipassword = wifictl_networklist[ entry ].password;
-              wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
-              WiFi.begin( wifiname, wifipassword );
-              return;
+            for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+                if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
+                    wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
+                    WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
+                    return;
+                }
             }
-          }
         }
         wifictl_send_event_cb( WIFICTL_SCAN, (void *)"scan done" );
     }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
@@ -136,21 +119,21 @@ void wifictl_setup( void ) {
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_CONNECT | WIFICTL_ACTIVE );
         if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) ) {
-          log_i("store new SSID and psk from WPS");
-          wifictl_insert_network( WiFi.SSID().c_str(), WiFi.psk().c_str() );
-          wifictl_save_config();
+            log_i("store new SSID and psk from WPS");
+            wifictl_insert_network( WiFi.SSID().c_str(), WiFi.psk().c_str() );
+            wifictl_save_config();
         }
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST  );
         wifictl_send_event_cb( WIFICTL_CONNECT, (void *)WiFi.SSID().c_str() );
         wifictl_send_event_cb( WIFICTL_CONNECT_IP, (void *)WiFi.localIP().toString().c_str() );
         #ifdef ENABLE_WEBSERVER
         if ( wifictl_config.webserver ) {
-          asyncwebserver_start();
+            asyncwebserver_start();
         }
         #endif
         #ifdef ENABLE_FTPSERVER
         if ( wifictl_config.ftpserver ) {
-          ftpserver_start( wifictl_config.ftpuser , wifictl_config.ftppass );
+            ftpserver_start( wifictl_config.ftpuser , wifictl_config.ftppass );
         }
         # endif
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
@@ -158,18 +141,19 @@ void wifictl_setup( void ) {
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST );
-        if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
-          wifictl_send_event_cb( WIFICTL_ON, (void *)"wait for WPS" );
+        if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) ) {
+            wifictl_send_event_cb( WIFICTL_ON, (void *)"wait for WPS" );
+        }
         else {
-          wifictl_set_event( WIFICTL_SCAN );
-          wifictl_send_event_cb( WIFICTL_ON, (void *)"scan ..." );
-          WiFi.scanNetworks( true );
+            wifictl_set_event( WIFICTL_SCAN );
+            wifictl_send_event_cb( WIFICTL_ON, (void *)"scan ..." );
+            WiFi.scanNetworks( true );
         }
     }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         #ifdef ENABLE_WEBSERVER
-        asyncwebserver_end();
+            asyncwebserver_end();
         #endif
         wifictl_clear_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST );
         wifictl_send_event_cb( WIFICTL_OFF, (void *)"" );
@@ -242,79 +226,11 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void wifictl_save_config( void ) {
-    fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 10000 );
-
-        doc["autoon"] = wifictl_config.autoon;
-        #ifdef ENABLE_WEBSERVER
-        doc["webserver"] = wifictl_config.webserver;
-        #endif
-        #ifdef ENABLE_FTPSERVER
-        doc["ftpserver"] = wifictl_config.ftpserver;
-        doc["ftpuser"] = wifictl_config.ftpuser;
-        doc["ftppass"] = wifictl_config.ftppass;
-        #endif
-        doc["enable_on_standby"] = wifictl_config.enable_on_standby;
-        for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-            doc["networklist"][ i ]["ssid"] = wifictl_networklist[ i ].ssid;
-            doc["networklist"][ i ]["psk"] = wifictl_networklist[ i ].password;
-        }
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+   wifictl_config.save();
 }
 
 void wifictl_load_config( void ) {
-    fs::File file = SPIFFS.open( WIFICTL_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", WIFICTL_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            wifictl_config.autoon = doc["autoon"] | true;
-            #ifdef ENABLE_WEBSERVER
-            wifictl_config.webserver = doc["webserver"] | false;
-            #endif
-            #ifdef ENABLE_FTPSERVER
-            wifictl_config.ftpserver = doc["ftpserver"] | false;
-            
-            if ( doc["ftpuser"] )
-              strlcpy( wifictl_config.ftpuser, doc["ftpuser"], sizeof( wifictl_config.ftpuser ) );
-            else
-              strlcpy( wifictl_config.ftpuser, FTPSERVER_USER, sizeof( wifictl_config.ftpuser ) );
-            if ( doc["ftppass"] )
-              strlcpy( wifictl_config.ftppass, doc["ftppass"], sizeof( wifictl_config.ftppass ) );
-            else
-              strlcpy( wifictl_config.ftppass, FTPSERVER_PASSWORD, sizeof( wifictl_config.ftppass ) );
-            #endif
-
-            wifictl_config.enable_on_standby = doc["enable_on_standby"] | false;
-            for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-                if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
-                    strlcpy( wifictl_networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( wifictl_networklist[ i ].ssid ) );
-                    strlcpy( wifictl_networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( wifictl_networklist[ i ].password ) );
-                }
-            }
-        }        
-        doc.clear();
-    }
-    file.close();
+    wifictl_config.load();
 }
 
 bool wifictl_get_autoon( void ) {
@@ -443,7 +359,7 @@ bool wifictl_is_known( const char* networkname ) {
    * check if network already in the networklist
    */
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( networkname, wifictl_networklist[ entry ].ssid ) ) {
+    if( !strcmp( networkname, wifictl_config.networklist[ entry ].ssid ) ) {
       retval = true;
       return( retval );
     }
@@ -465,9 +381,9 @@ bool wifictl_delete_network( const char *ssid ) {
    * search networklist entry and zero them
    */
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
-      wifictl_networklist[ entry ].ssid[ 0 ] = '\0';
-      wifictl_networklist[ entry ].password[ 0 ] = '\0';
+    if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
+      wifictl_config.networklist[ entry ].ssid[ 0 ] = '\0';
+      wifictl_config.networklist[ entry ].password[ 0 ] = '\0';
       wifictl_save_config();
       retval = true;
       return( retval );
@@ -490,8 +406,8 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
    * check if network exist
    */
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( ssid, wifictl_networklist[ entry ].ssid ) ) {
-      strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
+    if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
+      strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
       wifictl_save_config();
       WiFi.scanNetworks( true );
       wifictl_set_event( WIFICTL_SCAN );
@@ -503,9 +419,9 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
    * check for an emty entry and insert
    */
   for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( strlen( wifictl_networklist[ entry ].ssid ) == 0 ) {
-      strlcpy( wifictl_networklist[ entry ].ssid, ssid, sizeof( wifictl_networklist[ entry ].ssid ) );
-      strlcpy( wifictl_networklist[ entry ].password, password, sizeof( wifictl_networklist[ entry ].password ) );
+    if( strlen( wifictl_config.networklist[ entry ].ssid ) == 0 ) {
+      strlcpy( wifictl_config.networklist[ entry ].ssid, ssid, sizeof( wifictl_config.networklist[ entry ].ssid ) );
+      strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
       wifictl_save_config();
       WiFi.scanNetworks( true );
       wifictl_set_event( WIFICTL_SCAN );

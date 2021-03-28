@@ -19,22 +19,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-/*
- *  inspire by https://github.com/nhatuan84/esp32-http-firmware-update-over-the-air
- *
- */
 #include "config.h"
-#include "hardware/ESP32-targz/ESP32-targz.h"
 #include <HTTPClient.h>
 #include <Update.h>
 
-#include "callback.h"
 #include "http_ota.h"
-#include "alloc.h"
-#include "powermgm.h"
-#include "pmu.h"
-#include "blectl.h"
+
+#include "hardware/callback.h"
+#include "hardware/blectl.h"
+#include "hardware/pmu.h"
+
+#include "utils/ESP32-targz/ESP32-targz.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -75,8 +70,7 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
     int32_t size = UPDATE_SIZE_UNKNOWN;
 
     HTTPClient http;
-
-    /*
+    /**
      * start get firmware file
      */
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
@@ -84,20 +78,23 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
     int httpCode = http.GET();
 
     if ( httpCode > 0 && httpCode == HTTP_CODE_OK ) {
-        /*
+        /**
          * send http_ota_start event
          */
         http_ota_send_event_cb( HTTP_OTA_START, (void *)NULL );
-        /*
+        /**
          * start an unpacker instance, reister progress callback and put the stream in
          */
         GzUnpacker *GZUnpacker = new GzUnpacker();
-
         GZUnpacker->setGzProgressCallback( http_ota_progress_cb );
-
+        /**
+         * if firmware size known set the right value
+         */
         if ( firmwaresize != 0 )
             size = firmwaresize;
-
+        /**
+         * progress the stream
+         */
         if( !GZUnpacker->gzStreamUpdater( http.getStreamPtr(), size, 0, false ) ) {
             log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
             http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing ... failed!" );
@@ -122,30 +119,58 @@ bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
     uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };       /** @brief firmware write buffer */
 
     HTTPClient http;
-
+    /**
+     * setup user agent and get connect
+     */
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
     http.begin( url );
     int httpCode = http.GET();
-
+    /**
+     * check return code ok
+     */
     if ( httpCode > 0 && httpCode == HTTP_CODE_OK ) {
         http_ota_send_event_cb( HTTP_OTA_START, (void *)NULL );
-
+        /*
+         * get the file lenght
+         */
         len = http.getSize();
         total = len;
         downloaded = 0;
-
+        /*
+         * setup http stream and set nodelay option
+         */
         WiFiClient * stream = http.getStreamPtr();
         stream->setNoDelay( true );
-
+        /**
+         * start flashing
+         */
         if ( Update.begin( total, U_FLASH ) ) {
+            /*
+             * set md5 and reset downloaded counter
+             */
             Update.setMD5( md5 );
             downloaded = 0;
+            /**
+             * check if update finish
+             */
             while ( !Update.isFinished() ) {
+                /**
+                 * check for broken connection
+                 */
                 if( http.connected() && ( len > 0 ) ) {
+                    /**
+                     * get nxt chunk of bytes id available
+                     */
                     size = stream->available();
                     if( size > 0 ) {
+                        /*
+                         * prepare write buffer
+                         */
                         int c = stream->readBytes( buff, ( ( size > HTTP_OTA_BUFFER_SIZE ) ? HTTP_OTA_BUFFER_SIZE : size ) );
                         written = Update.write( buff, c );
+                        /**
+                         * if buffer written check if success and fire callback
+                         */
                         if ( written > 0 ) {
                             if( written != c ) {
                                 http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing chunk not full ... warning!" );
@@ -182,8 +207,13 @@ bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
         log_e("[HTTP] GET... failed!");
         ret = false;        
     }
+    /**
+     * close http connection
+     */
     http.end();
-
+    /**
+     * check if written bytes equal to downloaded bytes
+     */
     if( downloaded == total && len == 0 ) {
         if( Update.end() ) {
             http_ota_send_event_cb( HTTP_OTA_FINISH, (void*)"Flashing ... done!" );

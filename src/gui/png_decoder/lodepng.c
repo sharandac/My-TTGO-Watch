@@ -29,7 +29,7 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 */
 
 #include "lodepng.h"
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 
 #ifdef MEM_BLOCK  
 #include "block.h"

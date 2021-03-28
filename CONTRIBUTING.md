@@ -48,7 +48,7 @@ void foo_hibernate_cb( void ) {
 Internal RAM is very limited, use PSRAM as much as possible. When you work with ArduinoJson, include this
 
 ```c
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 ```
 
 and create your json with
@@ -60,7 +60,7 @@ SpiRamJsonDocument doc( 1000 );
 to move your json into PSRAM, here is enough RAM for all the crazy stuff you will do. And use
 
 ```c
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 ```
 with
 ```c

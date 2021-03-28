@@ -31,10 +31,11 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
-#include "hardware/json_psram_allocator.h"
 #include "hardware/sound.h"
-#include "hardware/alloc.h"
-#include "hardware/msg_chain.h"
+
+#include "utils/json_psram_allocator.h"
+#include "utils/alloc.h"
+#include "utils/msg_chain.h"
 
 // messages app and widget
 icon_t *messages_app = NULL;

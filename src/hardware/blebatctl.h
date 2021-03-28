@@ -24,6 +24,8 @@
 
     /**
      * @brief ble bat setup function
+     * 
+     * @param pServer   pointer to an BLEServer
      */
     void blebatctl_setup( BLEServer *pServer );
 

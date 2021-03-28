@@ -9,43 +9,41 @@
 #define BTJSONREQUEST_H
 
 #include "ArduinoJson.h"
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 
 #define BLUETOOTH_MAX_JSON_BUFFER_SIZE 4096
 
-class BluetoothJsonRequest : public SpiRamJsonDocument
-{
+class BluetoothJsonRequest : public SpiRamJsonDocument {
 public:
-  BluetoothJsonRequest(const char* message) : SpiRamJsonDocument(BLUETOOTH_MAX_JSON_BUFFER_SIZE)
-  {
-    dsError = deserializeJson(*this, message);
-    if (dsError) {
-        log_e("deserializeJson() failed: %s", dsError.c_str());
-        clear();
+    BluetoothJsonRequest(const char* message) : SpiRamJsonDocument(BLUETOOTH_MAX_JSON_BUFFER_SIZE) {
+        dsError = deserializeJson(*this, message);
+        if (dsError) {
+            log_e("deserializeJson() failed: %s", dsError.c_str());
+            clear();
+        }
     }
-  }
-  BluetoothJsonRequest(const char* message, size_t jsonBufferSize) : SpiRamJsonDocument(jsonBufferSize)
-  {
-    dsError = deserializeJson(*this, message);
-    if (dsError) {
-        log_e("deserializeJson() failed: %s", dsError.c_str());
-        clear();
+
+    BluetoothJsonRequest(const char* message, size_t jsonBufferSize) : SpiRamJsonDocument(jsonBufferSize) {
+        dsError = deserializeJson(*this, message);
+        if (dsError) {
+            log_e("deserializeJson() failed: %s", dsError.c_str());
+            clear();
+        }
     }
-  }
 
-  bool isValid() { return !dsError; }
-  DeserializationError getDeserializationError() { return dsError; }
+    bool isValid() { return !dsError; }
+    DeserializationError getDeserializationError() { return dsError; }
 
-  bool isConfiguration() { return isEqualKeyValue("t", "conf"); }
-  bool isRequest() { return isEqualKeyValue("t", "req");  }
+    bool isConfiguration() { return isEqualKeyValue("t", "conf"); }
+    bool isRequest() { return isEqualKeyValue("t", "req");  }
 
-  bool isForApplication(const char* appName) { return isEqualKeyValue("app", appName); }
-  String command() { return (*this)["r"]; } // What requested
+    bool isForApplication(const char* appName) { return isEqualKeyValue("app", appName); }
+    String command() { return (*this)["r"]; } // What requested
 
-  bool isEqualKeyValue(const char* key, const char* value) { return isValid() && containsKey(key) && strcmp((*this)[key], value) == 0; }
+    bool isEqualKeyValue(const char* key, const char* value) { return isValid() && containsKey(key) && strcmp((*this)[key], value) == 0; }
   
 protected:
-  DeserializationError dsError;
+    DeserializationError dsError;
 };
 
 #endif

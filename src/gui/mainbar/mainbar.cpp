@@ -29,7 +29,8 @@
 #include "app_tile/app_tile.h"
 #include "gui/keyboard.h"
 #include "gui/statusbar.h"
-#include "hardware/alloc.h"
+
+#include "utils/alloc.h"
 
 #include "setup_tile/battery_settings/battery_settings.h"
 #include "setup_tile/wlan_settings/wlan_settings.h"

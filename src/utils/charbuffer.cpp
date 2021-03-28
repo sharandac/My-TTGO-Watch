@@ -22,7 +22,7 @@
 
 #include "charbuffer.h"
 
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 
 CharBuffer::CharBuffer( void ) : msg(NULL), capacity(0), size(0) {
     // Do not alloc here, PSRAm subsystem is not necessarily ready

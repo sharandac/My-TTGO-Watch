@@ -2,7 +2,7 @@
 #define IR_BUTTON_H
 
 #include "config.h"
-#include "hardware/alloc.h"
+#include "utils/alloc.h"
 #include <IRremoteESP8266.h>
 
 #define RAW_CODE_BUFER_SIZE sizeof(uint16_t)*120

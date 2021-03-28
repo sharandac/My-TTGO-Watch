@@ -17,21 +17,22 @@ class JsonConfig;
 * Methods can be overridden in sub-classes
 */
 class SettingsPage : public Page {
+
 public:
-  SettingsPage() {};
-  
-  SettingsPage& init(lv_obj_t* handle, const char* title, WidgetAction onExitBtnClick);
-  const Widget& header() { return headerContainer; }
+    SettingsPage() {};
 
-  void buildFromConfig(JsonConfig& config);
+    SettingsPage& init(lv_obj_t* handle, const char* title, WidgetAction onExitBtnClick);
+    const Widget& header() { return headerContainer; }
 
-protected:
-  virtual void constructHeader(const char* title, WidgetAction onExitBtnClick);
-  virtual void onInitializing();
-  virtual void onChildAdded(Widget& child, const TypeInfo& type);
+    void buildFromConfig(JsonConfig& config);
 
 protected:
-  Widget headerContainer;
+    virtual void constructHeader(const char* title, WidgetAction onExitBtnClick);
+    virtual void onInitializing();
+    virtual void onChildAdded(Widget& child, const TypeInfo& type);
+
+protected:
+    Widget headerContainer;
 };
 
 #endif

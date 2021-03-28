@@ -19,6 +19,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <WiFi.h>
 #include "config.h"
 #include "wlan_settings.h"
 
@@ -30,13 +31,13 @@
 
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
-#ifdef ENABLE_WEBSERVER
-#include "webserver/webserver.h"
-#endif
 #include "hardware/blectl.h"
-#include "hardware/json_psram_allocator.h"
 
-#include <WiFi.h>
+#ifdef ENABLE_WEBSERVER
+    #include "webserver/webserver.h"
+#endif
+
+#include "utils/json_psram_allocator.h"
 
 LV_IMG_DECLARE(exit_32px);
 

@@ -106,6 +106,9 @@
      * @param   debuging        true enable debuging, false disable debuging
      */
     void callback_enable_debuging( callback_t *callback, bool debuging );
+    /**
+     * @brief prints out the complete callback table and their entrys
+     */
     void callback_print( void );
 
 #endif // _CALLBACK_H

@@ -29,9 +29,10 @@
 #include "gui/setup.h"
 #include "hardware/timesync.h"
 #include "hardware/motor.h"
-#include "hardware/alloc.h"
 
-#include "hardware/json_psram_allocator.h"
+#include "utils/alloc.h"
+#include "utils/json_psram_allocator.h"
+
 // Source: https://raw.githubusercontent.com/nayarsystems/posix_tz_db/master/zones.json
 // 2020a-1
 extern const uint8_t timezones_json_start[] asm("_binary_src_gui_mainbar_setup_tile_time_settings_timezones_json_start");
