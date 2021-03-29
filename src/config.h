@@ -47,17 +47,17 @@
         #define _CONFIG_H 
     #endif
 
-/*
- * In order to control which application is built-in
- * comment or not following
- */
-#define ENABLE_APP_CRYPTO
-#define ENABLE_APP_EXAMPLE
-#define ENABLE_APP_FINDPHONE
-#define ENABLE_APP_FXRATES
-#define ENABLE_APP_IR
-#define ENABLE_APP_OSMAND
-#define ENABLE_APP_POWERMETER
-#define ENABLE_APP_WEATHER
+    /*
+    * In order to control which application is built-in
+    * comment or not following
+    */
+    #define ENABLE_APP_CRYPTO
+    #define ENABLE_APP_EXAMPLE
+    #define ENABLE_APP_FINDPHONE
+    #define ENABLE_APP_FXRATES
+    #define ENABLE_APP_IR
+    #define ENABLE_APP_OSMAND
+    #define ENABLE_APP_POWERMETER
+    #define ENABLE_APP_WEATHER
 
 #endif // _CONFIG_H
