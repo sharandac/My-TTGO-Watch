@@ -142,7 +142,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 pServer->startAdvertising();
                 return;
             }
-            if ( blectl_get_event( BLECTL_AUTHWAIT ) || blectl_get_event( BLECTL_CONNECT ) ) {
+            if ( blectl_get_event( BLECTL_AUTHWAIT | BLECTL_CONNECT ) ) {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
                 blectl_set_event( BLECTL_DISCONNECT );
                 blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
@@ -449,7 +449,7 @@ void blectl_read_config( void ) {
 }
 
 bool blectl_send_msg( const char *msg ) {
-    if ( blectl_get_event( BLECTL_CONNECT ) || blectl_get_event( BLECTL_AUTHWAIT ) ) {
+    if ( blectl_get_event( BLECTL_CONNECT | BLECTL_AUTHWAIT ) ) {
         /*
          * Duplicate message
          */
