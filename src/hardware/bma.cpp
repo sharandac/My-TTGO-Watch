@@ -34,9 +34,12 @@
 volatile bool DRAM_ATTR bma_irq_flag = false;
 portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
-__NOINIT_ATTR uint32_t stepcounter_valid;
-__NOINIT_ATTR uint32_t stepcounter_before_reset;
-__NOINIT_ATTR uint32_t stepcounter;
+/**
+ * move internal stepcounter into noninit ram section
+ */
+__NOINIT_ATTR uint32_t stepcounter_valid;           /** @brief stepcount valid mask, if 0xa5a5a5a5 when stepcounter is valid after reset */
+__NOINIT_ATTR uint32_t stepcounter_before_reset;    /** @brief stepcounter before reset */
+__NOINIT_ATTR uint32_t stepcounter;                 /** @brief stepcounter */
 
 static struct tm bma_old_date;
 
@@ -54,27 +57,38 @@ static void bma_notify_stepcounter();
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-
+    /*
+     * check if stepcounter valid and reset if not valid
+     */
     if ( stepcounter_valid != 0xa5a5a5a5 ) {
       stepcounter = 0;
       stepcounter_before_reset = 0;
       stepcounter_valid = 0xa5a5a5a5;
       log_i("stepcounter not valid. reset");
     }
-
     stepcounter = stepcounter + stepcounter_before_reset;
-
+    /*
+     * load config from json
+     */
     bma_config.load();
-
+    /*
+     * init stepcounter
+     */
     ttgo->bma->begin();
     ttgo->bma->attachInterrupt();
     ttgo->bma->direction();
-
+    /*
+     * init stepcounter interrupt function
+     */
     pinMode( BMA423_INT1, INPUT );
     attachInterrupt( BMA423_INT1, bma_irq, RISING );
-
+    /*
+     * load config setting for tilt, stepcounter and wakeup to enabled interrupts
+     */
     bma_reload_settings();
-
+    /*
+     * register powermgm callback funtions
+     */
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "powermgm bma" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "powermgm bma loop" );
 }

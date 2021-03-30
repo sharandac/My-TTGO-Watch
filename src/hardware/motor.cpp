@@ -38,32 +38,59 @@ motor_config_t motor_config;
 bool motor_powermgm_event_cb( EventBits_t event, void *arg );
 
 void IRAM_ATTR onTimer() {
+    /*
+     * set critical section
+     */
     portENTER_CRITICAL_ISR(&timerMux);
+    /*
+     * check if timer counter > zero
+     */
     if ( motor_run_time_counter >0 ) {
+        /*
+         * decrement timer counter and enable motor
+         */
         motor_run_time_counter--;
         digitalWrite(GPIO_NUM_4, HIGH );
     }
     else {
+        /*
+         * disable motor
+         */
         digitalWrite(GPIO_NUM_4, LOW );
     }
+    /*
+     * leave critical section
+     */
     portEXIT_CRITICAL_ISR(&timerMux);
 }
 
 void motor_setup( void ) {
-    if ( motor_init == true )
+    /*
+     * check if motor already init
+     */
+    if ( motor_init == true ) {
         return;
-
+    }
+    /*
+     * load config from json
+     */
     motor_config.load();
-
+    /*
+     * setup motor gpio, timer interrupt and interrupt function
+     */
     pinMode(GPIO_NUM_4, OUTPUT);
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 10000, true);
     timerAlarmEnable(timer);
     motor_init = true;
-
+    /*
+     * register powermgm callback function
+     */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
-
+    /*
+     * vibe for success
+     */
     motor_vibe( 10 );
 }
 
@@ -90,12 +117,24 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void motor_vibe( int time, bool enforced ) {
-    if ( motor_init == false )
+    /*
+     * check if motor already init
+     */
+    if ( motor_init == false ) {
         return;
-
-    if ( motor_get_vibe_config() || enforced) {
+    }
+    /*
+     * if motor disabled or forced?
+     */
+    if ( motor_get_vibe_config() || enforced ) {
+        /*
+         * set critical section
+         */
         portENTER_CRITICAL(&timerMux);
         motor_run_time_counter = time;
+        /*
+         * leave critical section
+         */
         portEXIT_CRITICAL(&timerMux);
     }
 }

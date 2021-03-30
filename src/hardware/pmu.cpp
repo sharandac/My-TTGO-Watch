@@ -58,7 +58,11 @@ void pmu_setup( void ) {
      * Turn on the IRQ used
      */
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
+    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ
+                            | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ
+                            | AXP202_TIMER_TIMEOUT_IRQ
+                            | AXP202_BATT_REMOVED_IRQ | AXP202_BATT_CONNECT_IRQ
+                            , AXP202_ON );
     ttgo->power->clearIRQ();
     /*
      * delete old charge logfile
@@ -153,10 +157,11 @@ void pmu_loop( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     static uint64_t nextmillis = 0;
-    static int32_t percent = 0;
+    static int32_t percent = pmu_get_battery_percent();
     int32_t tmp_percent = 0;
     static bool plug = ttgo->power->isVBUSPlug();
     static bool charging = ttgo->power->isChargeing();
+    static bool battery = ttgo->power->isBatteryConnect();
 
     /*
      * handle IRQ event
@@ -204,6 +209,22 @@ void pmu_loop( void ) {
              */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             charging = false;
+        }
+        if ( ttgo->power->isBattPlugInIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to false
+             */
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            battery = true;
+        }
+        if ( ttgo->power->isBattRemoveIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to false
+             */
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            battery = false;
         }
         if ( ttgo->power->isPEKShortPressIRQ() ) {
             /*
@@ -287,25 +308,26 @@ void pmu_loop( void ) {
         }
 
     }
-
     /*
      * check if update flag is set
      */
     if ( pmu_update ) {
-        // Encode values on a single
-        // As percent is supposed to be <=100% it is encoded on a single byte
-        // We can use other bits to code the 2 booleans
-        int32_t msg = percent;
+        /*
+         * Encode values on a single
+         * As percent is supposed to be <=100% it is encoded on a single byte
+         * We can use other bits to code the 2 booleans
+         */
+        int32_t msg = percent < 0 ? 0 : percent;
         msg |= plug ? PMUCTL_STATUS_PLUG : 0;
         msg |= charging ? PMUCTL_STATUS_CHARGING : 0;
-
+        msg |= battery ? PMUCTL_STATUS_BATTERY : 0;
         /*
          * send updates via pmu event
          */
         pmu_send_cb( PMUCTL_STATUS, (void*)&msg );
-
+        log_i("battery state: %d%%, %s, %s, %s (0x%04x)", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg );
         /*
-         * clear update frag
+         * clear update flag
          */
         pmu_update = false;
     }

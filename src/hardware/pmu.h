@@ -36,9 +36,10 @@
     /**
      * PMU status mask
      */
-    #define PMUCTL_STATUS_PERCENT  0xFF
-    #define PMUCTL_STATUS_PLUG     0x100
-    #define PMUCTL_STATUS_CHARGING 0x200
+    #define PMUCTL_STATUS_PERCENT           0xFF                /** @brief pmu status percent mask */
+    #define PMUCTL_STATUS_PLUG              0x100               /** @brief pmu status plug flag mask */
+    #define PMUCTL_STATUS_CHARGING          0x200               /** @brief pmu status charging flag mask */
+    #define PMUCTL_STATUS_BATTERY           0x400               /** @brief pmu status battery flag mask */
 	/** 
      * pmu logging file names
      */
