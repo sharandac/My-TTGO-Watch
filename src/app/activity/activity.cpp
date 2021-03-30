@@ -5,6 +5,7 @@
 #include "activity.h"
 #include "gui/mainbar/mainbar.h"
 #include "hardware/bma.h"
+#include "hardware/blestepctl.h"
 
 // App icon must have an size of 64x64 pixel with an alpha channel
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
@@ -12,7 +13,7 @@ LV_IMG_DECLARE(move_64px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-static Application activityApp;
+static SynchronizedApplication activityApp;
 static JsonConfig config("activity.json");
 
 // Options
@@ -45,6 +46,14 @@ void activity_app_setup() {
     // Build and configure application
     build_main_page();
     build_settings();
+
+    // Executed when user click "refresh" button
+    activityApp.synchronizeActionHandler([](SyncRequestSource source) {
+        if ( blectl_get_event( BLECTL_ON ) )
+        {
+            blestepctl_update(true);
+        }
+    });
 
     refresh_main_page();
 }
