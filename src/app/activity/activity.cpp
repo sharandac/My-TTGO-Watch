@@ -6,6 +6,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "hardware/bma.h"
 #include "hardware/blestepctl.h"
+#include "hardware/motor.h"
 
 // App icon must have an size of 64x64 pixel with an alpha channel
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
@@ -53,6 +54,8 @@ void activity_app_setup() {
         {
             blestepctl_update(true);
         }
+        // Return feedback to user as nothing else changed
+        motor_vibe(20);
     });
 
     refresh_main_page();
