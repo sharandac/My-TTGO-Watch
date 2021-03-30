@@ -182,10 +182,11 @@ void pmu_loop( void ) {
             /*
              * set an wakeup request and
              * remove old discharging log file when unplug
-             * set variable plug to false
+             * set variable plug and chargingto false
              */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             SPIFFS.remove( PMU_DISCHARGE_LOG_FILENAME );
+            charging = false;
             plug = false;
         }
         if ( ttgo->power->isChargingIRQ() ) {
