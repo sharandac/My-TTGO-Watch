@@ -29,11 +29,11 @@ CharBuffer::CharBuffer( void ) : msg(NULL), capacity(0), size(0) {
 }
 
 void CharBuffer::append(char c) {
-    log_d("CharBuffer::append: size %d capacity %d", size, capacity);
+    log_v("CharBuffer::append: size %d capacity %d", size, capacity);
     if ( capacity == 0 )
         clear();
     if ( size + 2 > capacity ) {
-        log_d("CharBuffer::append realloc: size %d capacity %d", size, capacity);
+        log_v("CharBuffer::append realloc: size %d capacity %d", size, capacity);
         // Realloc
         char *new_msg = NULL;
         new_msg = (char *)REALLOC( msg, capacity + CHUNK_CAPACITY );
