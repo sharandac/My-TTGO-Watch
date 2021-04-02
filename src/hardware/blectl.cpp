@@ -123,14 +123,14 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
-                log_i("BLECLT pairing successful");
+                log_i("BLECTL pairing successful");
                 return;
             }
             if ( blectl_get_event( BLECTL_AUTHWAIT ) ) {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_DISCONNECT );
                 blectl_set_event( BLECTL_CONNECT );
                 blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
-                log_i("BLECLT authentication successful, client connected");
+                log_i("BLECTL authentication successful, client connected");
                 return;
             }
         }
@@ -138,7 +138,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
-                log_i("BLECLT pairing abort");
+                log_i("BLECTL pairing abort");
                 pServer->startAdvertising();
                 return;
             }
@@ -146,7 +146,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
                 blectl_set_event( BLECTL_DISCONNECT );
                 blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
-                log_i("BLECLT authentication unsuccessful, client disconnected");
+                log_i("BLECTL authentication unsuccessful, client disconnected");
                 pServer->startAdvertising();
                 return;
             }
