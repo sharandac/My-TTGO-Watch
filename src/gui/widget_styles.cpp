@@ -51,7 +51,10 @@ static void define_styles(){
     lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0);
 
     lv_style_init( &button_style );
-    lv_style_set_radius(&button_style, LV_STATE_DEFAULT, 4);
+    lv_style_set_radius( &button_style, LV_STATE_DEFAULT, 3 );
+    lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
+    lv_style_set_border_opa( &button_style, LV_STATE_DEFAULT, LV_OPA_70 );
+    lv_style_set_border_width( &button_style, LV_STATE_DEFAULT, 2 );
 
 
     lv_style_copy(&img_button_style, &mainbar_style);

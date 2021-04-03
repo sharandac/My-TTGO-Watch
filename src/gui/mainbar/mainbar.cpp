@@ -40,7 +40,6 @@
 #include "setup_tile/update/update.h"
 
 static lv_style_t mainbar_style;
-static lv_style_t mainbar_button_style;
 static lv_style_t mainbar_slider_style;
 // Arc has two parts
 static lv_style_t mainbar_arc_bg_style;
@@ -80,12 +79,6 @@ void mainbar_setup( void ) {
 
     lv_style_init( &mainbar_slider_style );
     lv_style_set_bg_color( &mainbar_slider_style, LV_STATE_DEFAULT, LV_COLOR_GREEN );
-
-    lv_style_init( &mainbar_button_style );
-    lv_style_set_radius( &mainbar_button_style, LV_STATE_DEFAULT, 3 );
-    lv_style_set_border_color( &mainbar_button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
-    lv_style_set_border_opa( &mainbar_button_style, LV_STATE_DEFAULT, LV_OPA_70 );
-    lv_style_set_border_width( &mainbar_button_style, LV_STATE_DEFAULT, 2 );
 
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
     lv_tileview_set_edge_flash( mainbar, false);
@@ -190,18 +183,6 @@ lv_style_t *mainbar_get_arc_bg_style( void ) {
     }
 
     return( &mainbar_arc_bg_style );
-}
-
-lv_style_t *mainbar_get_button_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_button_style );
 }
 
 lv_style_t *mainbar_get_slider_style( void ) {

@@ -28,6 +28,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/motor.h"
 #include "hardware/display.h"
@@ -98,7 +99,7 @@ void utilities_tile_setup( void ) {
     format_spiffs_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_event_cb( format_spiffs_btn, format_SPIFFS_utilities_event_cb );
     lv_obj_set_size( format_spiffs_btn, 80, 60);
-    lv_obj_add_style( format_spiffs_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( format_spiffs_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_CENTER, 0, -15);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format\nSPIFFS");
@@ -107,7 +108,7 @@ void utilities_tile_setup( void ) {
     reboot_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_size(reboot_btn, 70, 40);
     lv_obj_set_event_cb( reboot_btn, reboot_utilities_event_cb );
-    lv_obj_add_style( reboot_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( reboot_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
     lv_obj_t *reboot_btn_label = lv_label_create( reboot_btn, NULL );
     lv_label_set_text( reboot_btn_label, "Reboot");
@@ -117,7 +118,7 @@ void utilities_tile_setup( void ) {
     poweroff_btn = lv_btn_create( utilities_tile, NULL);
     lv_obj_set_size(poweroff_btn, 80, 40);
     lv_obj_set_event_cb( poweroff_btn, poweroff_utilities_event_cb );
-    lv_obj_add_style( poweroff_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( poweroff_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
     lv_obj_t *poweroff_btn_label = lv_label_create( poweroff_btn, NULL );
     lv_label_set_text( poweroff_btn_label, "Poweroff");

@@ -33,6 +33,7 @@
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
@@ -133,7 +134,7 @@ void update_tile_setup( void ) {
 
     update_btn = lv_btn_create( update_settings_tile, NULL);
     lv_obj_set_event_cb( update_btn, update_event_handler );
-    lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( update_btn, update_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     update_btn_label = lv_label_create( update_btn, NULL );
     lv_label_set_text( update_btn_label, "update");
