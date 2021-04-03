@@ -25,13 +25,13 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"
+#include "gui/widget_factory.h"
+#include "gui/widget_styles.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
 #include "hardware/rtcctl.h"
 #include "hardware/sound.h"
 #include "hardware/timesync.h"
-#include "widget_factory.h"
-#include "widget_styles.h"
 
 #define BEEP_TO_VIBE_DELAY 2
 #define BEEP_OFTEN_DELAY 5

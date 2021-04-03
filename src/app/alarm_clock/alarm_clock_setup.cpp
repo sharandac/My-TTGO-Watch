@@ -25,10 +25,8 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
-#include "widget_factory.h"
-
-#include "widget_factory.h"
-#include "widget_styles.h"
+#include "gui/widget_factory.h"
+#include "gui/widget_styles.h"
 
 lv_obj_t * vibe_switch = NULL;
 lv_obj_t * fade_switch = NULL;
