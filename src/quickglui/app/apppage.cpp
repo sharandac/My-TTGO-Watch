@@ -69,5 +69,5 @@ void AppPage::onChildAdded(Widget& child, const TypeInfo& type)
   //if (type.isLabel() || type.isWidget())
   //    target.style(pageStyle);
   //else if (type.isSwitch())
-  //    target.style(mainbar_get_switch_style(), LV_SWITCH_PART_INDIC);
+  //    target.style(ws_get_switch_style(), LV_SWITCH_PART_INDIC);
 }

@@ -28,6 +28,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_styles.h"
 
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
@@ -91,7 +92,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
 
     update_check_autosync_onoff = lv_switch_create( update_check_autosync_cont, NULL );
     lv_obj_add_protect( update_check_autosync_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( update_check_autosync_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( update_check_autosync_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( update_check_autosync_onoff, LV_ANIM_ON );
     lv_obj_align( update_check_autosync_onoff, update_check_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( update_check_autosync_onoff, update_check_autosync_onoff_event_handler );

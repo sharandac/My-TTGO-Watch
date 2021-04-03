@@ -27,6 +27,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 lv_obj_t *example_app_setup_tile = NULL;
 lv_style_t example_app_setup_style;
@@ -74,7 +75,7 @@ void example_app_setup_setup( uint32_t tile_num ) {
 
     example_app_foobar_switch = lv_switch_create( example_app_foobar_switch_cont, NULL );
     lv_obj_add_protect( example_app_foobar_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( example_app_foobar_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( example_app_foobar_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( example_app_foobar_switch, LV_ANIM_ON );
     lv_obj_align( example_app_foobar_switch, example_app_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( example_app_foobar_switch, example_app_foobar_switch_event_cb );

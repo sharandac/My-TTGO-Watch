@@ -40,7 +40,6 @@
 #include "setup_tile/update/update.h"
 
 static lv_style_t mainbar_style;
-static lv_style_t mainbar_switch_style;
 static lv_style_t mainbar_button_style;
 static lv_style_t mainbar_slider_style;
 // Arc has two parts
@@ -78,9 +77,6 @@ void mainbar_setup( void ) {
 
     lv_style_init( &mainbar_arc_style );
     lv_style_set_line_rounded( &mainbar_arc_style, LV_STATE_DEFAULT, false );
-
-    lv_style_init( &mainbar_switch_style );
-    lv_style_set_bg_color( &mainbar_switch_style, LV_STATE_CHECKED, LV_COLOR_GREEN );
 
     lv_style_init( &mainbar_slider_style );
     lv_style_set_bg_color( &mainbar_slider_style, LV_STATE_DEFAULT, LV_COLOR_GREEN );
@@ -194,18 +190,6 @@ lv_style_t *mainbar_get_arc_bg_style( void ) {
     }
 
     return( &mainbar_arc_bg_style );
-}
-
-lv_style_t *mainbar_get_switch_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_switch_style );
 }
 
 lv_style_t *mainbar_get_button_style( void ) {

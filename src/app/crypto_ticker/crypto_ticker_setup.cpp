@@ -29,7 +29,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
-
+#include "gui/widget_styles.h"
 
 lv_obj_t *crypto_ticker_setup_tile = NULL;
 lv_style_t crypto_ticker_setup_style;
@@ -101,7 +101,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
 
     crypto_ticker_autosync_switch = lv_switch_create( crypto_ticker_autosync_switch_cont, NULL );
     lv_obj_add_protect( crypto_ticker_autosync_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( crypto_ticker_autosync_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( crypto_ticker_autosync_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     crypto_ticker_config->autosync ? lv_switch_on( crypto_ticker_autosync_switch, LV_ANIM_ON ) : lv_switch_off( crypto_ticker_autosync_switch, LV_ANIM_ON );
     lv_obj_align( crypto_ticker_autosync_switch, crypto_ticker_autosync_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( crypto_ticker_autosync_switch, crypto_ticker_autosync_switch_event_cb );
@@ -117,7 +117,7 @@ void crypto_ticker_setup_setup( uint32_t tile_num ) {
     lv_obj_align( crypto_ticker_widget_cont, crypto_ticker_autosync_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *crypto_ticker_widget_onoff = lv_switch_create( crypto_ticker_widget_cont, NULL);
     lv_obj_add_protect( crypto_ticker_widget_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( crypto_ticker_widget_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( crypto_ticker_widget_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( crypto_ticker_widget_onoff, LV_ANIM_ON);
     lv_obj_align( crypto_ticker_widget_onoff, crypto_ticker_widget_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( crypto_ticker_widget_onoff, crypto_ticker_widget_onoff_event_handler);
