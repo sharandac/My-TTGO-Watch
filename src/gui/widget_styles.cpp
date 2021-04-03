@@ -34,6 +34,10 @@ static lv_style_t switch_style;
 static lv_style_t roller_bg_style;
 static lv_style_t roller_part_selected_style;
 static lv_style_t popup_style;
+static lv_style_t slider_style;
+// Arc has two parts
+static lv_style_t arc_bg_style;
+static lv_style_t arc_style;
 
 static void define_styles(){
     lv_style_init( &mainbar_style );
@@ -71,6 +75,16 @@ static void define_styles(){
     //the default roller color is red - may be it is the best one as default
     //lv_style_set_bg_color( &roller_part_selected_style, LV_STATE_DEFAULT, LV_COLOR_GRAY);
 
+    lv_style_init( &arc_bg_style );
+    lv_style_set_bg_opa( &arc_bg_style, LV_ARC_PART_BG, LV_OPA_TRANSP );
+    lv_style_set_border_width( &arc_bg_style, LV_OBJ_PART_MAIN, 0 );
+
+    lv_style_init( &arc_style );
+    lv_style_set_line_rounded( &arc_style, LV_STATE_DEFAULT, false );
+
+    lv_style_init( &slider_style );
+    lv_style_set_bg_color( &slider_style, LV_STATE_DEFAULT, LV_COLOR_GREEN );
+
     lv_style_copy( &popup_style, &mainbar_style );
     lv_style_set_bg_color( &popup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &popup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
@@ -105,7 +119,6 @@ lv_style_t *ws_get_img_button_style(){
     return &mainbar_style;
 }
 
-
 lv_style_t *ws_get_label_style(){
     if (!styles_defined){
          define_styles();
@@ -139,4 +152,28 @@ lv_style_t *ws_get_popup_style(){
          define_styles();
     }
     return &popup_style;
+}
+
+lv_style_t *ws_get_arc_style( void ) {
+    if (!styles_defined){
+         define_styles();
+    }
+
+    return( &arc_style );
+}
+
+lv_style_t *ws_get_arc_bg_style( void ) {
+    if (!styles_defined){
+         define_styles();
+    }
+
+    return( &arc_bg_style );
+}
+
+lv_style_t *ws_get_slider_style( void ) {
+    if (!styles_defined){
+         define_styles();
+    }
+
+    return( &slider_style );
 }

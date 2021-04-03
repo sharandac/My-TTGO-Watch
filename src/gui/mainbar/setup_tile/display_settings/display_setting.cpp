@@ -127,8 +127,8 @@ void display_settings_tile_setup( void ) {
     lv_obj_align( brightness_cont, display_settings_tile_1, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     display_brightness_slider = lv_slider_create( brightness_cont, NULL );
     lv_obj_add_protect( display_brightness_slider, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
-    lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
+    lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_INDIC, ws_get_slider_style() );
+    lv_obj_add_style( display_brightness_slider, LV_SLIDER_PART_KNOB, ws_get_slider_style() );
     lv_slider_set_range( display_brightness_slider, DISPLAY_MIN_BRIGHTNESS, DISPLAY_MAX_BRIGHTNESS );
     lv_obj_set_size( display_brightness_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( display_brightness_slider, brightness_cont, LV_ALIGN_IN_RIGHT_MID, -30, 0 );
@@ -143,8 +143,8 @@ void display_settings_tile_setup( void ) {
     lv_obj_align( timeout_cont, brightness_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     display_timeout_slider = lv_slider_create( timeout_cont, NULL );
     lv_obj_add_protect( display_timeout_slider, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
-    lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
+    lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_INDIC, ws_get_slider_style() );
+    lv_obj_add_style( display_timeout_slider, LV_SLIDER_PART_KNOB, ws_get_slider_style() );
     lv_slider_set_range( display_timeout_slider, DISPLAY_MIN_TIMEOUT, DISPLAY_MAX_TIMEOUT );
     lv_obj_set_size(display_timeout_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( display_timeout_slider, timeout_cont, LV_ALIGN_IN_TOP_RIGHT, -30, 10 );

@@ -48,6 +48,7 @@
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 #include "gui/mainbar/setup_tile/sound_settings/sound_settings.h"
 #include "gui/mainbar/setup_tile/display_settings/display_settings.h"
+#include "gui/widget_styles.h"
 
 static bool statusbar_init = false;
 static bool statusbar_refresh_update = false;
@@ -248,8 +249,8 @@ void statusbar_setup( void )
     lv_obj_set_size( statusbar_volume_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( statusbar_volume_slider, statusbar_volume_cont, LV_ALIGN_IN_RIGHT_MID, -30, 0 );
     lv_obj_add_protect( statusbar_volume_slider, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( statusbar_volume_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
-    lv_obj_add_style( statusbar_volume_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
+    lv_obj_add_style( statusbar_volume_slider, LV_SLIDER_PART_INDIC, ws_get_slider_style() );
+    lv_obj_add_style( statusbar_volume_slider, LV_SLIDER_PART_KNOB, ws_get_slider_style() );
     lv_slider_set_range( statusbar_volume_slider, 0, 100 );
     lv_obj_set_event_cb( statusbar_volume_slider, statusbar_volume_slider_event_handler_cb ) ;
     statusbar_sound_icon = lv_img_create( statusbar_volume_cont, NULL );
@@ -267,8 +268,8 @@ void statusbar_setup( void )
     lv_obj_align( statusbar_brightness_slider, statusbar_brightness_cont, LV_ALIGN_IN_RIGHT_MID, -30, 0 );
     lv_slider_set_range( statusbar_brightness_slider, DISPLAY_MIN_BRIGHTNESS, DISPLAY_MAX_BRIGHTNESS );
     lv_obj_add_protect( statusbar_brightness_slider, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
-    lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
+    lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_INDIC, ws_get_slider_style() );
+    lv_obj_add_style( statusbar_brightness_slider, LV_SLIDER_PART_KNOB, ws_get_slider_style() );
     lv_obj_set_event_cb( statusbar_brightness_slider, statusbar_brightness_slider_event_handler_cb ) ;
     statusbar_brightness_icon = lv_img_create( statusbar_brightness_cont, NULL );
     lv_obj_set_click( statusbar_brightness_icon, true );

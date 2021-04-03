@@ -4,6 +4,7 @@
 
 #include "activity.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/widget_styles.h"
 #include "hardware/bma.h"
 
 // App icon must have an size of 64x64 pixel with an alpha channel
@@ -62,8 +63,8 @@ void build_main_page()
 
     arcStepcounter = Arc(&screen, 0, 360);
     arcStepcounter.start(0).end(0).rotation(90)
-        .style(mainbar_get_arc_style(), LV_ARC_PART_INDIC, false )
-        .style(mainbar_get_arc_bg_style(), LV_ARC_PART_BG, false )
+        .style(ws_get_arc_style(), LV_ARC_PART_INDIC, false )
+        .style(ws_get_arc_bg_style(), LV_ARC_PART_BG, false )
         .size(120, 120)
         .alignInParentBottomLeft(0, -42);
 
@@ -79,8 +80,8 @@ void build_main_page()
     
     arcDistance = Arc(&screen, 0, 360);
     arcDistance.start(0).end(0).rotation(90)
-        .style(mainbar_get_arc_style(), LV_ARC_PART_INDIC, false )
-        .style(mainbar_get_arc_bg_style(), LV_ARC_PART_BG, false )
+        .style(ws_get_arc_style(), LV_ARC_PART_INDIC, false )
+        .style(ws_get_arc_bg_style(), LV_ARC_PART_BG, false )
         .size(120, 120)
         .alignInParentBottomRight(0, -42);
 

@@ -121,24 +121,6 @@
      */
     lv_style_t *mainbar_get_style( void );
     /**
-     * @brief get main tile arc style
-     * 
-     * @return  pointer to the lv_style_t object
-     */
-    lv_style_t *mainbar_get_arc_style( void );
-    /**
-     * @brief get main tile arc bg style
-     * 
-     * @return  pointer to the lv_style_t object
-     */
-    lv_style_t *mainbar_get_arc_bg_style( void );
-    /**
-     * @brief get main tile slider style
-     * 
-     * @return  pointer to the lv_style_t object
-     */
-    lv_style_t *mainbar_get_slider_style( void );
-    /**
      * @brief
      */
     lv_obj_t *mainbar_obj_create( lv_obj_t *parent );

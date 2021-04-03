@@ -122,8 +122,8 @@ void sound_settings_tile_setup( void ) {
     lv_obj_align( sound_volume_cont, sound_enable_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     sound_volume_slider = lv_slider_create( sound_volume_cont, NULL );
     lv_obj_add_protect( sound_volume_slider, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sound_volume_slider, LV_SLIDER_PART_INDIC, mainbar_get_slider_style() );
-    lv_obj_add_style( sound_volume_slider, LV_SLIDER_PART_KNOB, mainbar_get_slider_style() );
+    lv_obj_add_style( sound_volume_slider, LV_SLIDER_PART_INDIC, ws_get_slider_style() );
+    lv_obj_add_style( sound_volume_slider, LV_SLIDER_PART_KNOB, ws_get_slider_style() );
     lv_slider_set_range( sound_volume_slider, 1, 100 );
     lv_obj_set_size(sound_volume_slider, lv_disp_get_hor_res( NULL ) - 100 , 10 );
     lv_obj_align( sound_volume_slider, sound_volume_cont, LV_ALIGN_IN_TOP_RIGHT, -30, 10 );
