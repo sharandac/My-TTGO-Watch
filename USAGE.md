@@ -92,6 +92,15 @@ Click play to start.
 
 You can set an alarm, by setting time and day(s) of the week.
 
+The main switch controls if alarm is enabled or not.
+
+Next, select the day(s) of the week for the alarm.
+Note that if no days are select, it means an every day alarm.
+Finally, select the hour and minute for the alarm.
+
+In the settings, you can select the reminder: vibe, fade, beep.
+You can also have the next alarm displayed on the main face.
+
 ## ir-remote
 
 For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
