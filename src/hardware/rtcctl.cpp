@@ -60,12 +60,21 @@ bool rtcctl_send_event_cb( EventBits_t event ) {
     return( callback_send( rtcctl_callback, event, (void*)NULL ) );
 }
 
+static bool is_enabled( void ) {
+    return alarm_data.enabled;
+}
+
 bool is_any_day_enabled( void ) {
     for (int index = 0; index < DAYS_IN_WEEK; ++index){
         if (alarm_data.week_days[index])
             return true; 
     }
     return false;
+}
+
+static bool is_day_checked( int wday ) {
+    // No day checked mean ALL days
+    return alarm_data.week_days[wday] || !is_any_day_enabled();
 }
 
 time_t find_next_alarm_day( int day_of_week, time_t now ) {
@@ -78,7 +87,7 @@ time_t find_next_alarm_day( int day_of_week, time_t now ) {
         if (++wday_index == DAYS_IN_WEEK){
             wday_index = 0;
         } 
-        if (alarm_data.week_days[wday_index]){
+        if (is_day_checked( wday_index )){
             return ret_val;
         }        
     } while (wday_index != day_of_week);
@@ -89,7 +98,7 @@ time_t find_next_alarm_day( int day_of_week, time_t now ) {
 void set_next_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    if ( !is_any_day_enabled() ) {
+    if ( !is_enabled() ) {
         ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
         rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
         return;
@@ -107,7 +116,7 @@ void set_next_alarm( void ) {
     alarm_tm.tm_min = alarm_data.minute;
     alarm_time = mktime( &alarm_tm );
 
-    if ( !alarm_data.week_days[ alarm_tm.tm_wday ] || alarm_time <= now ) {
+    if ( alarm_time <= now  || !is_day_checked( alarm_tm.tm_wday ) ) {
         alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
         localtime_r( &alarm_time, &alarm_tm );
     }
@@ -237,7 +246,7 @@ rtcctl_alarm_t *rtcctl_get_alarm_data( void ) {
 }
 
 int rtcctl_get_next_alarm_week_day( void ) {
-    if (!is_any_day_enabled()){
+    if (!is_enabled()){
         return RTCCTL_ALARM_NOT_SET;
     }
     tm alarm_tm;
