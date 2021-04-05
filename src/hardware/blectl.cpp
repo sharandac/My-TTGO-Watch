@@ -529,8 +529,7 @@ static void blectl_send_chunk ( int32_t len ) {
     // Send
     pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], len );
     pTxCharacteristic->notify();
-#if ARDUHAL_LOG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO
-    // Log
+
     char chunk_msg[ 64 ] = "";
     for( int i = 0 ; i < len ; i++ ) {
         if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
@@ -541,8 +540,7 @@ static void blectl_send_chunk ( int32_t len ) {
         }
     }
     chunk_msg[ len ] = '\0';
-    log_i("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
-#endif
+    log_d("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
 }
 
 void blectl_loop ( void ) {
