@@ -123,14 +123,14 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
-                log_i("BLECLT pairing successful");
+                log_i("BLECTL pairing successful");
                 return;
             }
             if ( blectl_get_event( BLECTL_AUTHWAIT ) ) {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_DISCONNECT );
                 blectl_set_event( BLECTL_CONNECT );
                 blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
-                log_i("BLECLT authentication successful, client connected");
+                log_i("BLECTL authentication successful, client connected");
                 return;
             }
         }
@@ -138,7 +138,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
-                log_i("BLECLT pairing abort");
+                log_i("BLECTL pairing abort");
                 pServer->startAdvertising();
                 return;
             }
@@ -146,7 +146,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
                 blectl_set_event( BLECTL_DISCONNECT );
                 blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
-                log_i("BLECLT authentication unsuccessful, client disconnected");
+                log_i("BLECTL authentication unsuccessful, client disconnected");
                 pServer->startAdvertising();
                 return;
             }
@@ -529,7 +529,7 @@ static void blectl_send_chunk ( int32_t len ) {
     // Send
     pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], len );
     pTxCharacteristic->notify();
-    // Log
+
     char chunk_msg[ 64 ] = "";
     for( int i = 0 ; i < len ; i++ ) {
         if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
@@ -540,7 +540,7 @@ static void blectl_send_chunk ( int32_t len ) {
         }
     }
     chunk_msg[ len ] = '\0';
-    log_i("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
+    log_d("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
 }
 
 void blectl_loop ( void ) {
