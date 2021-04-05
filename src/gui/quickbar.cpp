@@ -167,9 +167,10 @@ void quickbar_setup( void ){
      * quickbar init complete
      */
     quickbar_init = true;
-
     quickbar_hide( true );
-
+    /*
+     * register pmu callback to detect long press and powermgm callback
+     */
     pmu_register_cb( PMUCTL_LONG_PRESS, quickbar_pmuctl_event_cb, "quickbar pmu event");
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, quickbar_powermgm_event_cb, "quickbar powermgm event" );
 

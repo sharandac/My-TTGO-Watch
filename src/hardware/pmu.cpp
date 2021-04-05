@@ -1,7 +1,27 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 #include "config.h"
 #include <TTGO.h>
 #include <soc/rtc.h>
-#include "json_psram_allocator.h"
 
 #include "display.h"
 #include "pmu.h"
@@ -27,11 +47,10 @@ bool pmu_send_cb( EventBits_t event, void *arg );
 void pmu_write_log( const char * filename );
 
 void pmu_setup( void ) {
-
     /*
      * read config from SPIFF
      */
-    pmu_read_config();
+    pmu_config.load();
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -39,7 +58,11 @@ void pmu_setup( void ) {
      * Turn on the IRQ used
      */
     ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
-    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ | AXP202_TIMER_TIMEOUT_IRQ, AXP202_ON );
+    ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ
+                            | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ
+                            | AXP202_TIMER_TIMEOUT_IRQ
+                            | AXP202_BATT_REMOVED_IRQ | AXP202_BATT_CONNECT_IRQ
+                            , AXP202_ON );
     ttgo->power->clearIRQ();
     /*
      * delete old charge logfile
@@ -134,10 +157,11 @@ void pmu_loop( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     static uint64_t nextmillis = 0;
-    static int32_t percent = 0;
+    static int32_t percent = pmu_get_battery_percent();
     int32_t tmp_percent = 0;
     static bool plug = ttgo->power->isVBUSPlug();
     static bool charging = ttgo->power->isChargeing();
+    static bool battery = ttgo->power->isBatteryConnect();
 
     /*
      * handle IRQ event
@@ -163,10 +187,11 @@ void pmu_loop( void ) {
             /*
              * set an wakeup request and
              * remove old discharging log file when unplug
-             * set variable plug to false
+             * set variable plug and chargingto false
              */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             SPIFFS.remove( PMU_DISCHARGE_LOG_FILENAME );
+            charging = false;
             plug = false;
         }
         if ( ttgo->power->isChargingIRQ() ) {
@@ -184,6 +209,22 @@ void pmu_loop( void ) {
              */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             charging = false;
+        }
+        if ( ttgo->power->isBattPlugInIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to false
+             */
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            battery = true;
+        }
+        if ( ttgo->power->isBattRemoveIRQ() ) {
+            /*
+             * set an wakeup request and
+             * set variable charging to false
+             */
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            battery = false;
         }
         if ( ttgo->power->isPEKShortPressIRQ() ) {
             /*
@@ -267,25 +308,26 @@ void pmu_loop( void ) {
         }
 
     }
-
     /*
      * check if update flag is set
      */
     if ( pmu_update ) {
-        // Encode values on a single
-        // As percent is supposed to be <=100% it is encoded on a single byte
-        // We can use other bits to code the 2 booleans
-        int32_t msg = percent;
+        /*
+         * Encode values on a single
+         * As percent is supposed to be <=100% it is encoded on a single byte
+         * We can use other bits to code the 2 booleans
+         */
+        int32_t msg = percent < 0 ? 0 : percent;
         msg |= plug ? PMUCTL_STATUS_PLUG : 0;
         msg |= charging ? PMUCTL_STATUS_CHARGING : 0;
-
+        msg |= battery ? PMUCTL_STATUS_BATTERY : 0;
         /*
          * send updates via pmu event
          */
         pmu_send_cb( PMUCTL_STATUS, (void*)&msg );
-
+        log_i("battery state: %d%%, %s, %s, %s (0x%04x)", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg );
         /*
-         * clear update frag
+         * clear update flag
          */
         pmu_update = false;
     }
@@ -390,66 +432,11 @@ void pmu_wakeup( void ) {
 }
 
 void pmu_save_config( void ) {
-    fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 3000 );
-
-        doc["silence_wakeup"] = pmu_config.silence_wakeup;
-        doc["silence_wakeup_interval"] = pmu_config.silence_wakeup_interval;
-        doc["silence_wakeup_interval_vbplug"] = pmu_config.silence_wakeup_interval_vbplug;
-        doc["experimental_power_save"] = pmu_config.experimental_power_save;
-        doc["normal_voltage"] = pmu_config.normal_voltage;
-        doc["normal_power_save_voltage"] = pmu_config.normal_power_save_voltage;
-        doc["experimental_normal_voltage"] = pmu_config.experimental_normal_voltage;
-        doc["experimental_power_save_voltage"] = pmu_config.experimental_power_save_voltage;
-        doc["compute_percent"] = pmu_config.compute_percent;
-        doc["high_charging_target_voltage"] = pmu_config.high_charging_target_voltage;
-        doc["designed_battery_cap"] = pmu_config.designed_battery_cap;
-        doc["pmu_logging"] = pmu_config.pmu_logging;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    pmu_config.save();
 }
 
 void pmu_read_config( void ) {
-    fs::File file = SPIFFS.open( PMU_JSON_CONFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", PMU_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            pmu_config.silence_wakeup = doc["silence_wakeup"] | false;
-            pmu_config.silence_wakeup_interval = doc["silence_wakeup_interval"] | SILENCEWAKEINTERVAL;
-            pmu_config.silence_wakeup_interval_vbplug = doc["silence_wakeup_interval_vbplug"] | SILENCEWAKEINTERVAL_PLUG;
-            pmu_config.experimental_power_save = doc["experimental_power_save"] | false;
-            pmu_config.compute_percent = doc["compute_percent"] | false;
-            pmu_config.high_charging_target_voltage = doc["high_charging_target_voltage"] | false;
-            pmu_config.designed_battery_cap = doc["designed_battery_cap"] | 300;
-            pmu_config.normal_voltage = doc["normal_voltage"] | NORMALVOLTAGE;
-            pmu_config.normal_power_save_voltage = doc["normal_power_save_voltage"] | NORMALPOWERSAVEVOLTAGE;
-            pmu_config.experimental_normal_voltage = doc["experimental_normal_voltage"] | EXPERIMENTALNORMALVOLTAGE;
-            pmu_config.experimental_power_save_voltage = doc["experimental_power_save_voltage"] | EXPERIMENTALPOWERSAVEVOLTAGE;
-            pmu_config.pmu_logging = doc["pmu_logging"] | false;
-        }        
-        doc.clear();
-    }
-    file.close();
+    pmu_config.load();
 }
 
 bool pmu_get_silence_wakeup( void ) {

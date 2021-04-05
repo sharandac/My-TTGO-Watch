@@ -27,8 +27,9 @@
 #include "timesync.h"
 #include "powermgm.h"
 #include "blectl.h"
-#include "json_psram_allocator.h"
 #include "callback.h"
+
+#include "hardware/config/timesyncconfig.h"
 
 EventGroupHandle_t time_event_handle = NULL;
 TaskHandle_t _timesync_Task;
@@ -43,36 +44,56 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg );
 bool timesync_send_event_cb( EventBits_t event, void *arg );
 
 void timesync_setup( void ) {
-
-    timesync_read_config();
+    /*
+     * load config from json
+     */
+    timesync_config.load();
+    /*
+     * create timesync event group
+     */
     time_event_handle = xEventGroupCreate();
-
+    /*
+     * register wigi, ble and powermgm callback function
+     */
     wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
     blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "powermgm timesync" );
-
+    /*
+     * sync time from rtc to system
+     */
     timesyncToSystem();
 }
 
 bool timesync_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+        /*
+     * check if an callback table exist, if not allocate a callback table
+     */
     if ( timesync_callback == NULL ) {
         timesync_callback = callback_init( "timesync" );
         if ( timesync_callback == NULL ) {
             log_e("timesync callback alloc failed");
             while(true);
         }
-    }    
+    }
+    /*
+     * register an callback entry and return them
+     */
     return( callback_register( timesync_callback, event, callback_func, id ) );
 }
 
 bool timesync_send_event_cb( EventBits_t event, void *arg ) {
+    /*
+     * call all callbacks with her event mask
+     */
     return( callback_send( timesync_callback, event, (void*)NULL ) );
 }
 
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          
-            // only update rtc time when an NTP timesync was success
+            /*
+             * only update rtc time when an NTP timesync was success
+             */
             if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_OK ) {
                 timesyncToRTC();
                 xEventGroupClearBits( time_event_handle, TIME_SYNC_OK );
@@ -83,10 +104,16 @@ bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
             }
             break;
         case POWERMGM_WAKEUP:           
+            /*
+             * sync time from rtc to system after wakeup
+             */
             log_i("go wakeup");
             timesyncToSystem();
             break;
         case POWERMGM_SILENCE_WAKEUP:   
+            /*
+             * sync time from rtc to system after silence wakeup
+             */
             log_i("go silence wakeup");
             timesyncToSystem();
             break;
@@ -96,22 +123,31 @@ bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
 
 bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
-        case WIFICTL_CONNECT:       
+        case WIFICTL_CONNECT:
+            /*
+             * sync time when autosync is enabled
+             */ 
             if ( timesync_config.timesync ) {
-            if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
-                break;
+                /*
+                 * check if another sync request is running
+                 */
+                if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {
+                    break;
+                }
+                else {
+                    /*
+                     * start timesync task
+                     */
+                    xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
+                    xTaskCreate(    timesync_Task,      /* Function to implement the task */
+                                    "timesync Task",    /* Name of the task */
+                                    2000,              /* Stack size in words */
+                                    NULL,               /* Task input parameter */
+                                    1,                  /* Priority of the task */
+                                    &_timesync_Task );  /* Task handle. */
+                }
             }
-            else {
-                xEventGroupSetBits( time_event_handle, TIME_SYNC_REQUEST );
-                xTaskCreate(  timesync_Task,      /* Function to implement the task */
-                            "timesync Task",    /* Name of the task */
-                            2000,              /* Stack size in words */
-                            NULL,               /* Task input parameter */
-                            1,                  /* Priority of the task */
-                            &_timesync_Task );  /* Task handle. */
-            }
-        }
-        break;
+            break;
     }
     return( true );
 }
@@ -143,59 +179,11 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
 }
 
 void timesync_save_config( void ) {
-    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["daylightsave"] = timesync_config.daylightsave;
-        doc["timesync"] = timesync_config.timesync;
-        doc["timezone"] = timesync_config.timezone;
-        doc["use_24hr_clock"] = timesync_config.use_24hr_clock;
-        doc["timezone_name"] = timesync_config.timezone_name;
-        doc["timezone_rule"] = timesync_config.timezone_rule;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    timesync_config.save();
 }
 
 void timesync_read_config( void ) {    
-    fs::File file = SPIFFS.open( TIMESYNC_JSON_CONFIG_FILE, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", TIMESYNC_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            timesync_config.daylightsave = doc["daylightsave"] | false;
-            timesync_config.timesync = doc["timesync"] | true;
-            timesync_config.timezone = doc["timezone"] | 0;
-            timesync_config.use_24hr_clock = doc["use_24hr_clock"] | true;
-            // todo: for upgrade, default name = Etc\GMTxxx based on timezone & daylightsave
-            // todo: for upgrade, default rule = GMT0 or <-xx>xx based on timezone & daylightsave
-            // todo: upgrade rtc clock to be in utc? (First sync will fix it.)
-            strlcpy( timesync_config.timezone_name, doc["timezone_name"] | TIMEZONE_NAME_DEFAULT, sizeof( timesync_config.timezone_name ) );
-            strlcpy( timesync_config.timezone_rule, doc["timezone_rule"] | TIMEZONE_RULE_DEFAULT, sizeof( timesync_config.timezone_rule ) );
-            setenv("TZ", timesync_config.timezone_rule, 1);
-            tzset();
-        }
-        doc.clear();
-    }
-    file.close();
+    timesync_config.load();
 }
 
 bool timesync_get_timesync( void ) {
@@ -277,19 +265,19 @@ void timesyncToRTC( void ) {
 void timesync_Task( void * pvParameters ) {
   log_i("start time sync task, heap: %d", ESP.getFreeHeap() );
 
-  if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) {   
-    struct tm info;
+    if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) { 
+        struct tm info;
 
-    configTzTime( timesync_config.timezone_rule, "pool.ntp.org" );
+        configTzTime( timesync_config.timezone_rule, "pool.ntp.org" );
 
-    if( !getLocalTime( &info ) ) {
-        log_e("Failed to obtain time" );
+        if( !getLocalTime( &info ) ) {
+            log_e("Failed to obtain time" );
+        }
+        else {
+            xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
+        }
     }
-    else {
-        xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
-    }
-  }
-  xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
-  log_i("finish time sync task, heap: %d", ESP.getFreeHeap() );
-  vTaskDelete( NULL );
+    xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
+    log_i("finish time sync task, heap: %d", ESP.getFreeHeap() );
+    vTaskDelete( NULL );
 }

@@ -11,19 +11,20 @@
 #include "lvgl/lvgl.h"
 #include "../widgets/widget.h"
 
-class WidgetHandle
-{
+class WidgetHandle {
+
 public:
-    bool IsFlagSet(uint16_t check)
-    {
+    bool IsFlagSet(uint16_t check) {
         return (flags & check) == check;
     }
-    void SetFlag(uint16_t id, bool val)
-    {
-        if (val)
+
+    void SetFlag(uint16_t id, bool val) {
+        if (val) {
             flags = flags | val;
-        else
+        }
+        else {
             flags = flags & (~val);
+        }
     }
 
     WidgetAction Action = NULL;

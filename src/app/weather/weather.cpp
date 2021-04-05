@@ -35,8 +35,9 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 
-#include "hardware/json_psram_allocator.h"
 #include "hardware/wifictl.h"
+
+#include "utils/json_psram_allocator.h"
 
 EventGroupHandle_t weather_widget_event_handle = NULL;
 TaskHandle_t _weather_widget_sync_Task;

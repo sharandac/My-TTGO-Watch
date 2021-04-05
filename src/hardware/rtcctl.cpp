@@ -28,21 +28,7 @@
 #include "callback.h"
 #include "timesync.h"
 
-#include "hardware/powermgm.h"
-#include "hardware/json_psram_allocator.h"
-
-#define VERSION_KEY "version"
-#define ENABLED_KEY "enabled"
-#define HOUR_KEY "hour"
-#define MINUTE_KEY "minute"
-#define WEEK_DAYS_KEY "week_days" 
-
-static rtcctl_alarm_t alarm_data = {
-    .enabled = false,
-    .hour = 0,
-    .minute = 0,
-    .week_days = { false, false, false, false, false, false, false }
-}; 
+static rtcctl_alarm_t alarm_data; 
 static time_t alarm_time = 0;
 
 volatile bool DRAM_ATTR rtc_irq_flag = false;
@@ -74,12 +60,21 @@ bool rtcctl_send_event_cb( EventBits_t event ) {
     return( callback_send( rtcctl_callback, event, (void*)NULL ) );
 }
 
+static bool is_enabled( void ) {
+    return alarm_data.enabled;
+}
+
 bool is_any_day_enabled( void ) {
     for (int index = 0; index < DAYS_IN_WEEK; ++index){
         if (alarm_data.week_days[index])
             return true; 
     }
     return false;
+}
+
+static bool is_day_checked( int wday ) {
+    // No day checked mean ALL days
+    return alarm_data.week_days[wday] || !is_any_day_enabled();
 }
 
 time_t find_next_alarm_day( int day_of_week, time_t now ) {
@@ -92,7 +87,7 @@ time_t find_next_alarm_day( int day_of_week, time_t now ) {
         if (++wday_index == DAYS_IN_WEEK){
             wday_index = 0;
         } 
-        if (alarm_data.week_days[wday_index]){
+        if (is_day_checked( wday_index )){
             return ret_val;
         }        
     } while (wday_index != day_of_week);
@@ -103,20 +98,11 @@ time_t find_next_alarm_day( int day_of_week, time_t now ) {
 void set_next_alarm( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    if ( !is_any_day_enabled() ) {
+    if ( !is_enabled() ) {
         ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
         rtcctl_send_event_cb( RTCCTL_ALARM_TERM_SET );
         return;
     } 
-
-    //trc and system must be synchronized, it is important when alarm has been raised and we want to set next concurency
-    //if the synchronisation is not done the time can be set to now again
-    //ttgo->rtc->syncToSystem();
-
-    //FIXME: for now would be better to synchronize to rtc because time zone setting is not finished yet (#124).
-    //Unfortunately, each synchToRtc without a NTP synchronization inacurate internal clock
-    //This issue is complex and should be solbed when timezone setting will be finished .
-    // timesyncToRTC();
 
     time_t now;
     time( &now );
@@ -130,7 +116,7 @@ void set_next_alarm( void ) {
     alarm_tm.tm_min = alarm_data.minute;
     alarm_time = mktime( &alarm_tm );
 
-    if ( !alarm_data.week_days[ alarm_tm.tm_wday ] || alarm_time <= now ) {
+    if ( alarm_time <= now  || !is_day_checked( alarm_tm.tm_wday ) ) {
         alarm_time = find_next_alarm_day( alarm_tm.tm_wday, alarm_time );
         localtime_r( &alarm_time, &alarm_tm );
     }
@@ -221,64 +207,13 @@ bool rtcctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
 }
 
 void rtcctl_load_data( void ) {
-    if (! SPIFFS.exists( CONFIG_FILE_PATH ) ) {
-        return; //wil be used default values set during theier creation
-    }
-
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_READ );
-
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("rtcctl config deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            rtcctl_alarm_t stored_data;
-            stored_data.enabled = doc[ENABLED_KEY].as<bool>();
-            stored_data.hour = doc[HOUR_KEY].as<uint8_t>();
-            stored_data.minute =  doc[MINUTE_KEY].as<uint8_t>();
-            uint8_t stored_week_days = doc[WEEK_DAYS_KEY].as<uint8_t>();
-            for (int index = 0; index < DAYS_IN_WEEK; ++index){
-                stored_data.week_days[index] = ((stored_week_days >> index) & 1) != 0;
-            }
-            rtcctl_set_alarm(&stored_data);
-            doc.clear();
-        }
-    }
-    file.close();
+    rtcctl_alarm_t stored_data;
+    stored_data.load();
+    rtcctl_set_alarm(&stored_data);
 }
 
 void rtcctl_store_data( void ) {
-    fs::File file = SPIFFS.open( CONFIG_FILE_PATH, FILE_WRITE );
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_FILE_PATH );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc[VERSION_KEY] = 1;
-        doc[ENABLED_KEY] = alarm_data.enabled;
-        doc[HOUR_KEY] = alarm_data.hour;
-        doc[MINUTE_KEY] = alarm_data.minute;
-
-        uint8_t week_days_to_store = 0;
-        for (int index = 0; index < DAYS_IN_WEEK; ++index){
-            week_days_to_store |= alarm_data.week_days[index] << index; 
-        }
-        doc[WEEK_DAYS_KEY] = week_days_to_store;
-        
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write rtcctl config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    alarm_data.save();
 }
 
 void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
@@ -311,7 +246,7 @@ rtcctl_alarm_t *rtcctl_get_alarm_data( void ) {
 }
 
 int rtcctl_get_next_alarm_week_day( void ) {
-    if (!is_any_day_enabled()){
+    if (!is_enabled()){
         return RTCCTL_ALARM_NOT_SET;
     }
     tm alarm_tm;

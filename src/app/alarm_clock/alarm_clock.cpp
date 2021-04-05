@@ -31,7 +31,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/widget.h"
-#include "hardware/json_psram_allocator.h"
+#include "utils/json_psram_allocator.h"
 #include "hardware/powermgm.h"
 #include "hardware/rtcctl.h"
 #include "hardware/timesync.h"

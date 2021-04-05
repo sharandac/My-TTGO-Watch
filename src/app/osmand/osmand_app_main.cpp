@@ -33,8 +33,9 @@
 
 #include "hardware/display.h"
 #include "hardware/blectl.h"
-#include "hardware/json_psram_allocator.h"
 #include "hardware/powermgm.h"
+
+#include "utils/json_psram_allocator.h"
 
 lv_obj_t *osmand_app_main_tile = NULL;
 lv_style_t osmand_app_main_style;

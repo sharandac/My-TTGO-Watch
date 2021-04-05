@@ -32,16 +32,23 @@
 
 class StepcounterBleUpdater : public BleUpdater<int32_t> {
     public:
-    // Update every 1800 as GadgetBidge uses such value by default
-    StepcounterBleUpdater() : BleUpdater(1000*1800){}
+    /*
+     * Update every 1800 as GadgetBidge uses such value by default
+     */
+    StepcounterBleUpdater() : BleUpdater(1800){}
     protected:
     bool notify(int32_t stepcounter) {
-        // Take care of daily reset
+        /*
+         * Take care of daily reset
+         */
         uint32_t delta = stepcounter < last_value ? stepcounter : stepcounter - last_value;
-        // Cf. https://www.espruino.com/Gadgetbridge
+        /*
+         * Cf. https://www.espruino.com/Gadgetbridge
+         */
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
         bool ret = blectl_send_msg( msg );
+        log_i("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
     }
 };
@@ -52,39 +59,52 @@ static int32_t stepcounter = 0;
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg );
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg);
 
-void blestepctl_setup() {
+void blestepctl_setup( void ) {
     bma_register_cb( BMACTL_STEPCOUNTER, blestepctl_bma_event_cb, "ble step counter");
-    blectl_register_cb( BLECTL_CONNECT|BLECTL_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
 }
 
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
+    bool retval = false;
+    
     switch( event ) {
         case BMACTL_STEPCOUNTER:
             stepcounter = *(int32_t*)arg;
             stepcounter_ble_updater.update( stepcounter );
+            retval = true;
             break;
     }
-    return( true );
+    return( retval );
 }
 
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
-    if (event == BLECTL_CONNECT) {
-        // Try to refresh step counter value on (re)connect
-        stepcounter_ble_updater.update( stepcounter );
-        return true;
-    }
-    if (event != BLECTL_MSG) return false; // Not supported
-
+    bool retval = false;
     auto msg = (const char*)arg;
-    BluetoothJsonRequest request(msg, strlen( msg ) * 4);
+    
+    switch( event ) {
+        case BLECTL_CONNECT: 
+                /*
+                 * Try to refresh step counter value on (re)connect
+                 */
+                stepcounter_ble_updater.update( stepcounter );
+                retval = true;
+                break;
+        case BLECTL_MSG:
+                BluetoothJsonRequest request(msg, strlen( msg ) * 4);
 
-    if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int"))
-    {
-        uint64_t timeout = request["int"].as<uint32_t>(); // Requested timeout, in seconds
-        log_i("RECEIVED timeout: %d seconds", timeout);
-        stepcounter_ble_updater.setTimeout(timeout*1000);
-        // TODO affect power loop rate
+                if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int")) {
+                    /*
+                     * get requested timeout, in seconds
+                     * TODO_ affect power loop rate
+                     */
+                    time_t timeout = request["int"].as<time_t>(); // Requested timeout, in seconds
+                    log_i("RECEIVED timeout: %d seconds", timeout);
+                    stepcounter_ble_updater.setTimeout(timeout);
+                }
+                retval = true;
+                break;
     }
 
-    return true;
+
+    return( retval );
 }

@@ -21,8 +21,8 @@
     #define _BLESTEPCTL_H
 
     /**
-     * @brief ble bat setup function
+     * @brief ble step setup function
      */
-    void blestepctl_setup( );
+    void blestepctl_setup( void );
 
 #endif // _BLESTEPCTL_H

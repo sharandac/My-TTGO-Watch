@@ -25,7 +25,8 @@
 
 #include "framebuffer.h"
 #include "powermgm.h"
-#include "alloc.h"
+
+#include "utils/alloc.h"
 
 lv_color_t *framebuffer1 = NULL;
 lv_color_t *framebuffer2 = NULL;
@@ -59,7 +60,9 @@ bool framebuffer_setup_nodma( bool doubleframebuffer  ) {
         log_e("framebuffer 1 malloc failed");
         return( false );
     }
-
+    /**
+     * if double buffer set, allocate the second one
+     */
     if ( doubleframebuffer ) {
         tmp_framebuffer2 = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
         if ( tmp_framebuffer2 == NULL ) {
@@ -120,7 +123,9 @@ bool framebuffer_setup_dma( bool doubleframebuffer  ) {
         log_e("framebuffer 1 malloc failed");
         return( false );
     }
-
+    /**
+     * if double buffer set, allocate the second one
+     */
     if ( doubleframebuffer ) {
         tmp_framebuffer2 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
         if ( tmp_framebuffer2 == NULL ) {
@@ -131,7 +136,6 @@ bool framebuffer_setup_dma( bool doubleframebuffer  ) {
             return( false );
         }
     }
-
     /*
      * free old framebuffer
      */

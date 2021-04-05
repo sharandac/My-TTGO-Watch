@@ -27,7 +27,8 @@
 #include "weather_forecast.h"
 
 #include "hardware/powermgm.h"
-#include "hardware/json_psram_allocator.h"
+
+#include "utils/json_psram_allocator.h"
 
 /* Utility function to convert numbers to directions */
 static void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree);

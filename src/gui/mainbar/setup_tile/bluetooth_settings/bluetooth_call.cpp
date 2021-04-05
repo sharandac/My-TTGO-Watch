@@ -28,7 +28,8 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
-#include "hardware/json_psram_allocator.h"
+
+#include "utils/json_psram_allocator.h"
 
 lv_obj_t *bluetooth_call_tile=NULL;
 lv_style_t bluetooth_call_style;
@@ -81,31 +82,43 @@ void bluetooth_call_tile_setup( void ) {
 
 bool bluetooth_call_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            bluetooth_call_msg_pharse( (const char*)arg );
-                                    break;
+        case BLECTL_MSG:            
+            bluetooth_call_msg_pharse( (const char*)arg );
+            break;
     }
     return( true );
 }
 
 static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
-                                        break;
+        case( LV_EVENT_CLICKED ):
+            mainbar_jump_to_maintile( LV_ANIM_OFF );
+            break;
     }
 }
 
 void bluetooth_call_msg_pharse( const char* msg ) {
     static bool standby = false;
-
+    /*
+     * allocate json memory and serialize msg
+     */
     SpiRamJsonDocument doc( strlen( msg ) * 4 );
-
     DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {
         log_e("bluetooth call deserializeJson() failed: %s", error.c_str() );
     }
     else {
+        /*
+         * check if type and cmd available
+         */
         if ( doc["t"] && doc["cmd"] ) {
+            /*
+             * check for an incoming call
+             */
             if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "accept" ) ) {
+                /*
+                 * hide statusbar and save current powerstate for later use after a call
+                 */
                 statusbar_hide( true );
                 if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
                     standby = true;
@@ -113,9 +126,14 @@ void bluetooth_call_msg_pharse( const char* msg ) {
                 else {
                     standby = false;
                 }
-                
+                /*
+                 * wake up and jup to call tile
+                 */
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 mainbar_jump_to_tilenumber( bluetooth_call_tile_num, LV_ANIM_OFF );
+                /*
+                 * set caller information
+                 */
                 if ( doc["number"] ) {
                     if ( doc["name"] ) {
                         lv_label_set_text( bluetooth_call_number_label, doc["name"] );
@@ -128,19 +146,18 @@ void bluetooth_call_msg_pharse( const char* msg ) {
                     lv_label_set_text( bluetooth_call_number_label, "n/a" );
                 }
                 lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
-                lv_obj_invalidate( lv_scr_act() );
                 motor_vibe(100);            
             }
-        }
-
-        if ( doc["t"] && doc["cmd"] ) {
-            if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
+            else if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
+                /*
+                 * restore last powerstate after call
+                 */
                 if ( standby == true ) {
                     powermgm_set_event( POWERMGM_STANDBY_REQUEST );
                 }
                 mainbar_jump_to_maintile( LV_ANIM_OFF );
-                lv_obj_invalidate( lv_scr_act() );
             }
+            lv_obj_invalidate( lv_scr_act() );
         }
     }        
     doc.clear();

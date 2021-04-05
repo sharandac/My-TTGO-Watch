@@ -26,6 +26,14 @@
     #define FRAMEBUFFER_BUFFER_H        ( 20 )
     #define FRAMEBUFFER_BUFFER_SIZE     ( FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H )
 
+    /**
+     * @brief setup framebuffer
+     * 
+     * @param dma   true enable DMA and false DMA memory transfers
+     * @param doubleframebuffer true enable framebuffer double buffering, false disabled double buffering
+     * 
+     * @note DMA and double buffering can enable/disable at any time with no restriction
+     */
     void framebuffer_setup( bool dma, bool doubleframebuffer );
     
 #endif // _FRAMEBUFFER_H

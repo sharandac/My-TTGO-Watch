@@ -28,21 +28,22 @@
 #include "bma.h"
 #include "powermgm.h"
 #include "callback.h"
-#include "json_psram_allocator.h"
-#include "alloc.h"
 
 #include "gui/statusbar.h"
 
 volatile bool DRAM_ATTR bma_irq_flag = false;
 portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
-__NOINIT_ATTR uint32_t stepcounter_valid;
-__NOINIT_ATTR uint32_t stepcounter_before_reset;
-__NOINIT_ATTR uint32_t stepcounter;
+/**
+ * move internal stepcounter into noninit ram section
+ */
+__NOINIT_ATTR uint32_t stepcounter_valid;           /** @brief stepcount valid mask, if 0xa5a5a5a5 when stepcounter is valid after reset */
+__NOINIT_ATTR uint32_t stepcounter_before_reset;    /** @brief stepcounter before reset */
+__NOINIT_ATTR uint32_t stepcounter;                 /** @brief stepcounter */
 
 static struct tm bma_old_date;
 
-bma_config_t bma_config[ BMA_CONFIG_NUM ];
+bma_config_t bma_config;
 callback_t *bma_callback = NULL;
 
 bool first_loop_run = true;
@@ -56,31 +57,38 @@ static void bma_notify_stepcounter();
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-
-    for ( int i = 0 ; i < BMA_CONFIG_NUM ; i++ ) {
-        bma_config[ i ].enable = true;
-    }
-
+    /*
+     * check if stepcounter valid and reset if not valid
+     */
     if ( stepcounter_valid != 0xa5a5a5a5 ) {
       stepcounter = 0;
       stepcounter_before_reset = 0;
       stepcounter_valid = 0xa5a5a5a5;
       log_i("stepcounter not valid. reset");
     }
-
     stepcounter = stepcounter + stepcounter_before_reset;
-
-    bma_read_config();
-
+    /*
+     * load config from json
+     */
+    bma_config.load();
+    /*
+     * init stepcounter
+     */
     ttgo->bma->begin();
     ttgo->bma->attachInterrupt();
     ttgo->bma->direction();
-
+    /*
+     * init stepcounter interrupt function
+     */
     pinMode( BMA423_INT1, INPUT );
     attachInterrupt( BMA423_INT1, bma_irq, RISING );
-
+    /*
+     * load config setting for tilt, stepcounter and wakeup to enabled interrupts
+     */
     bma_reload_settings();
-
+    /*
+     * register powermgm callback funtions
+     */
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , bma_powermgm_event_cb, "powermgm bma" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, bma_powermgm_loop_cb, "powermgm bma loop" );
 }
@@ -232,9 +240,9 @@ void bma_reload_settings( void ) {
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
-    ttgo->bma->enableStepCountInterrupt( bma_config[ BMA_STEPCOUNTER ].enable );
-    ttgo->bma->enableWakeupInterrupt( bma_config[ BMA_DOUBLECLICK ].enable );
-    ttgo->bma->enableTiltInterrupt( bma_config[ BMA_TILT ].enable );
+    ttgo->bma->enableStepCountInterrupt( bma_config.enable[ BMA_STEPCOUNTER ] );
+    ttgo->bma->enableWakeupInterrupt( bma_config.enable[ BMA_DOUBLECLICK ] );
+    ttgo->bma->enableTiltInterrupt( bma_config.enable[ BMA_TILT ] );
 }
 
 void IRAM_ATTR bma_irq( void ) {
@@ -259,64 +267,21 @@ bool bma_send_event_cb( EventBits_t event, void *arg ) {
 }
 
 void bma_save_config( void ) {
-    fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["stepcounter"] = bma_config[ BMA_STEPCOUNTER ].enable;
-        doc["doubleclick"] = bma_config[ BMA_DOUBLECLICK ].enable;
-        doc["tilt"] = bma_config[ BMA_TILT ].enable;
-        doc["daily_stepcounter"] = bma_config[ BMA_DAILY_STEPCOUNTER ].enable;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    bma_config.save();
 }
 
 void bma_read_config( void ) {
-    fs::File file = SPIFFS.open( BMA_JSON_COFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", BMA_JSON_COFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            bma_config[ BMA_STEPCOUNTER ].enable = doc["stepcounter"] | true;
-            bma_config[ BMA_DOUBLECLICK ].enable = doc["doubleclick"] | true;
-            bma_config[ BMA_TILT ].enable = doc["tilt"] | false;
-            bma_config[ BMA_DAILY_STEPCOUNTER ].enable = doc["daily_stepcounter"] | false;
-        }        
-        doc.clear();
-    }
-    file.close();
+    bma_config.load();
 }
 
 bool bma_get_config( int config ) {
-    if ( config < BMA_CONFIG_NUM ) {
-        return( bma_config[ config ].enable );
-    }
-    return false;
+    return bma_config.get_config(config);
 }
 
 void bma_set_config( int config, bool enable ) {
-    if ( config < BMA_CONFIG_NUM ) {
-        bma_config[ config ].enable = enable;
-        bma_save_config();
-        bma_reload_settings();
-    }
+    bma_config.bma_set_config( config, enable);
+    bma_config.save();
+    bma_reload_settings();
 }
 
 void bma_set_rotate_tilt( uint32_t rotation ) {

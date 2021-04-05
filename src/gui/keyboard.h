@@ -28,6 +28,9 @@
      * @brief setup onscreen keyboard
      */
     void keyboard_setup( void );
+    /**
+     * @brief setup numerical onscreen keyboard
+     */
     void num_keyboard_setup( void );
     /**
      * @brief   activate onscreen keyboard and set output to an lv_obj aka textarea
@@ -35,6 +38,11 @@
      * @param   textarea    point to an lv_obj
      */
     void keyboard_set_textarea( lv_obj_t *textarea );
+    /**
+     * @brief   activate numerical onscreen keyboard and set output to an lv_obj aka textarea
+     * 
+     * @param   textarea    point to an lv_obj
+     */
     void num_keyboard_set_textarea( lv_obj_t *textarea );
     /**
      * @brief   hide onscreen keyboard
@@ -44,6 +52,9 @@
      * @brief   show onscreen keyboard
      */
     void keyboard_show( void );
+    /**
+     * @brief   show numerical onscreen keyboard
+     */
     void num_keyboard_show( void );
 
 #endif // _KEYBOARD_H

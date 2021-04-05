@@ -38,8 +38,9 @@
 #include "hardware/blectl.h"
 #include "hardware/sound.h"
 #include "hardware/motor.h"
-#include "hardware/json_psram_allocator.h"
 #include "hardware/powermgm.h"
+
+#include "utils/json_psram_allocator.h"
 
 lv_obj_t *FindPhone_main_tile = NULL;
 lv_obj_t *FindPhone_main_iris = NULL;

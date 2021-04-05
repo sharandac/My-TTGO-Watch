@@ -23,26 +23,25 @@
  */
 #ifndef _CONFIG_H 
 
-    #define LILYGO_WATCH_LVGL                //To use LVGL, you need to enable the macro LVGL
-    #define TWATCH_USE_PSRAM_ALLOC_LVGL
-
-    /*
-    * Built-in applications
-    */
-    #define ENABLE_WEBSERVER  // To disable built-in webserver, comment this line
-    #define ENABLE_FTPSERVER  // To disable built-in ftpserver, comment this line
-
-    /*
-    * Enable non-latin languages support:
-    */
+    #define LILYGO_WATCH_LVGL                       /** @brief To use LVGL, you need to enable the macro LVGL */
+    #define TWATCH_USE_PSRAM_ALLOC_LVGL             /** @brief enabled lillygo-lib to use PSRAM */ 
+    /**
+     * Built-in applications
+     */
+    #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
+    #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+    /**
+     * Enable non-latin languages support
+     */
     #define USE_EXTENDED_CHARSET CHARSET_CYRILLIC
-
-    /*
-    * firmeware version string
-    */
-    #define __FIRMWARE__            "2021031601"
-
-    #ifdef __cplusplus // Allows to include config.h from C code
+    /**
+     * firmeware version string
+     */
+    #define __FIRMWARE__            "2021040501"
+    /**
+     * Allows to include config.h from C code
+     */
+    #ifdef __cplusplus
         #include <LilyGoWatch.h>
         #define _CONFIG_H 
     #endif

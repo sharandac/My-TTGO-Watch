@@ -21,10 +21,11 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include "json_psram_allocator.h"
 
 #include "motor.h"
 #include "powermgm.h"
+
+#include "hardware/config/motorconfig.h"
 
 volatile int DRAM_ATTR motor_run_time_counter=0;
 hw_timer_t * timer = NULL;
@@ -37,32 +38,59 @@ motor_config_t motor_config;
 bool motor_powermgm_event_cb( EventBits_t event, void *arg );
 
 void IRAM_ATTR onTimer() {
+    /*
+     * set critical section
+     */
     portENTER_CRITICAL_ISR(&timerMux);
+    /*
+     * check if timer counter > zero
+     */
     if ( motor_run_time_counter >0 ) {
+        /*
+         * decrement timer counter and enable motor
+         */
         motor_run_time_counter--;
         digitalWrite(GPIO_NUM_4, HIGH );
     }
     else {
+        /*
+         * disable motor
+         */
         digitalWrite(GPIO_NUM_4, LOW );
     }
+    /*
+     * leave critical section
+     */
     portEXIT_CRITICAL_ISR(&timerMux);
 }
 
 void motor_setup( void ) {
-    if ( motor_init == true )
+    /*
+     * check if motor already init
+     */
+    if ( motor_init == true ) {
         return;
-
-    motor_read_config();
-
+    }
+    /*
+     * load config from json
+     */
+    motor_config.load();
+    /*
+     * setup motor gpio, timer interrupt and interrupt function
+     */
     pinMode(GPIO_NUM_4, OUTPUT);
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 10000, true);
     timerAlarmEnable(timer);
     motor_init = true;
-
+    /*
+     * register powermgm callback function
+     */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
-
+    /*
+     * vibe for success
+     */
     motor_vibe( 10 );
 }
 
@@ -89,12 +117,24 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void motor_vibe( int time, bool enforced ) {
-    if ( motor_init == false )
+    /*
+     * check if motor already init
+     */
+    if ( motor_init == false ) {
         return;
-
-    if ( motor_get_vibe_config() || enforced) {
+    }
+    /*
+     * if motor disabled or forced?
+     */
+    if ( motor_get_vibe_config() || enforced ) {
+        /*
+         * set critical section
+         */
         portENTER_CRITICAL(&timerMux);
         motor_run_time_counter = time;
+        /*
+         * leave critical section
+         */
         portEXIT_CRITICAL(&timerMux);
     }
 }
@@ -105,45 +145,13 @@ bool motor_get_vibe_config( void ) {
 
 void motor_set_vibe_config( bool enable ) {
     motor_config.vibe = enable;
-    motor_save_config();
+    motor_config.save();
 }
 
 void motor_save_config( void ) {
-    fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["motor"] = motor_config.vibe;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    motor_config.save();
 }
 
 void motor_read_config( void ) {
-    fs::File file = SPIFFS.open( MOTOR_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", MOTOR_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            motor_config.vibe = doc["motor"].as<bool>();
-        }        
-        doc.clear();
-    }
-    file.close();
+    motor_config.load();
 }

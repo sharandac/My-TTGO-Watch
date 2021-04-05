@@ -32,7 +32,8 @@
 
 #include "hardware/blectl.h"
 #include "hardware/motor.h"
-#include "hardware/json_psram_allocator.h"
+
+#include "utils/json_psram_allocator.h"
 
 lv_obj_t *weather_setup_tile = NULL;
 lv_style_t weather_setup_style;

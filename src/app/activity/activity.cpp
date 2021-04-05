@@ -18,8 +18,8 @@ static JsonConfig config("activity.json");
 // Options
 static String size, length, goal_step, goal_dist;
 // Widgets
-static Label lblStep, lblStepcounter, lblStepachievement;
-static Label lblDist, lblDistance, lblDistachievement;
+static Label lblStepcounter, lblStepachievement;
+static Label lblDistance, lblDistachievement;
 static Arc arcStepcounter, arcDistance;
 
 static Style big, small;
@@ -60,51 +60,39 @@ void build_main_page()
 
     AppPage& screen = activityApp.mainPage(); // This is parent for all main screen widgets
 
-    lblStep = Label(&screen);
-    lblStep.text("Steps:")
-        .style(big, true)
-        .alignInParentTopLeft(0, 0);
+    arcStepcounter = Arc(&screen, 0, 360);
+    arcStepcounter.start(0).end(0).rotation(90)
+        .style(mainbar_get_arc_style(), LV_ARC_PART_INDIC, false )
+        .style(mainbar_get_arc_bg_style(), LV_ARC_PART_BG, false )
+        .size(120, 120)
+        .alignInParentBottomLeft(0, -42);
 
     lblStepcounter = Label(&screen);
     lblStepcounter.text("0")
-        .style(small, true)
-        .align(lblStep, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+        .style(big, true)
+        .align(arcStepcounter, LV_ALIGN_OUT_TOP_MID);
     
     lblStepachievement = Label(&screen);
     lblStepachievement.text("0%")
         .style(small, true)
-        .align(lblStepcounter, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
-
-    arcStepcounter = Arc(&screen, 0, 360);
-    arcStepcounter.start(0).end(0).rotation(90)
-        .style(mainbar_get_arc_style(), LV_ARC_PART_BG, false )
-        .size(100, 100)
-        .alignInParentTopRight(0, 0);
+        .alignOrig0(arcStepcounter, LV_ALIGN_CENTER);
     
-    lblDist = Label(&screen);
-    lblDist.text("Distance:")
-        .style(big, true)
-        .alignx(screen, LV_ALIGN_IN_LEFT_MID, 0)
-        .aligny(arcStepcounter, LV_ALIGN_OUT_BOTTOM_MID, 0);
+    arcDistance = Arc(&screen, 0, 360);
+    arcDistance.start(0).end(0).rotation(90)
+        .style(mainbar_get_arc_style(), LV_ARC_PART_INDIC, false )
+        .style(mainbar_get_arc_bg_style(), LV_ARC_PART_BG, false )
+        .size(120, 120)
+        .alignInParentBottomRight(0, -42);
 
     lblDistance = Label(&screen);
     lblDistance.text("0")
-        .alignText(LV_LABEL_ALIGN_CENTER)
-        .style(small, true)
-        .align(lblDist, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
+        .style(big, true)
+        .align(arcDistance, LV_ALIGN_OUT_TOP_MID);
     
     lblDistachievement = Label(&screen);
     lblDistachievement.text("0")
-        .alignText(LV_LABEL_ALIGN_CENTER)
         .style(small, true)
-        .align(lblDistance, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 2);
-
-    arcDistance = Arc(&screen, 0, 360);
-    arcDistance.start(0).end(0).rotation(90)
-        .style(mainbar_get_arc_style(), LV_ARC_PART_BG, false )
-        .size(100, 100)
-        .aligny(arcStepcounter, LV_ALIGN_OUT_BOTTOM_MID, 0)
-        .alignx(screen, LV_ALIGN_IN_RIGHT_MID, 0);
+        .alignOrig0(arcDistance, LV_ALIGN_CENTER);
 }
 
 void refresh_main_page()
@@ -118,18 +106,18 @@ void refresh_main_page()
     uint32_t dist = stp * length.toInt() / 100;
     log_i("Refresh activity: %d steps", stp);
     // Raw steps
-    snprintf( buff, sizeof( buff ), "Steps: %d", stp );
-    lblStepcounter.text(buff);
+    snprintf( buff, sizeof( buff ), "%d", stp );
+    lblStepcounter.text(buff).realign();
     // Achievement
-    snprintf( buff, sizeof( buff ), "Goal: %d%%", ach );
-    lblStepachievement.text(buff);
+    snprintf( buff, sizeof( buff ), "%d%%", ach );
+    lblStepachievement.text(buff).realign();
     arcStepcounter.end( gStep == 0 ? 0 : 360 * stp / gStep );
     // Distance
-    snprintf( buff, sizeof( buff ), "Dist: %d m", dist );
-    lblDistance.text(buff);
+    snprintf( buff, sizeof( buff ), "%d m", dist );
+    lblDistance.text(buff).realign();
     // Achievement
-    snprintf( buff, sizeof( buff ), "Goal: %d%%", gDist == 0 ? 0 : 100 * dist / gDist );
-    lblDistachievement.text(buff);
+    snprintf( buff, sizeof( buff ), "%d%%", gDist == 0 ? 0 : 100 * dist / gDist );
+    lblDistachievement.text(buff).realign();
     arcDistance.end( gDist == 0 ? 0 : 360 * dist / gDist );
 }
 

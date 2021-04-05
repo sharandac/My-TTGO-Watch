@@ -43,6 +43,12 @@ Enable:
 * tilt
 * display of step counter
 
+The stepcounter value is published to [gadgetbridge](https://gadgetbridge.org) automatically if bluetooth is enabled.
+The frequency of publication is driven by gadgetbridge.
+Initially, it is on a 30 minutes frequency.
+When the realtime tab of gadgetbridge is selected, the frequency is set to every 5 seconds.
+If the watch lost contact with gadgetbridge for more than 30 minutes, the stepcounter is also refreshed when bluetooth is reconnected.
+
 ## Bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime.
@@ -86,6 +92,15 @@ Click play to start.
 
 You can set an alarm, by setting time and day(s) of the week.
 
+The main switch controls if alarm is enabled or not.
+
+Next, select the day(s) of the week for the alarm.
+Note that if no days are select, it means an every day alarm.
+Finally, select the hour and minute for the alarm.
+
+In the settings, you can select the reminder: vibe, fade, beep.
+You can also have the next alarm displayed on the main face.
+
 ## ir-remote
 
 For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
@@ -97,6 +112,8 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
 
 ## Activity tracker
+
+![screenshot](images/screen12.png)
 
 The activity tracker let you check your activity.
 
@@ -112,9 +129,7 @@ In the settings, set your step length and your goals in step and meters.
 
 ![screenshot](images/screen8.png)
 
-In the display settings page 2 you can set what happens when the button is pressed for 2 seconds.
-This will normally takes you back to the main tile.
-If the option for a screenshot is activated, a screenshot is taken instead.
+Press the button for 2 seconds, after that an quickmenu appears. Here you can select the tiny camera icon to take a screenshot.
 This can be downloaded via the built-in FTP server (binary and passive mode, username: TTWatch and password: passord), if activated.
 The file name is screen.data.
 
@@ -122,8 +137,12 @@ Or the other way:
 
 The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
 ```bash
-wget x.x.x.x/shot ; wget x.x.x.x/screen.565
+wget x.x.x.x/shot ; wget x.x.x.x/screen.data
 ```
+
+Pro-tipp:
+
+[lgrossard](https://github.com/lgrossard)! made a little Python script to generate and download the screenshots from the t-watch [here](https://ludovic.grossard.fr/media/twatch_screenshot.py).
 
 ## how to change background?
 

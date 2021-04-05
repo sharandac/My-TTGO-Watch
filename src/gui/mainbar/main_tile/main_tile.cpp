@@ -30,7 +30,8 @@
 
 #include "hardware/timesync.h"
 #include "hardware/powermgm.h"
-#include "hardware/alloc.h"
+
+#include "utils/alloc.h"
 
 static bool maintile_init = false;
 
