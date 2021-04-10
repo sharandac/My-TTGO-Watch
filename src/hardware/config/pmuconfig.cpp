@@ -57,3 +57,7 @@ bool pmu_config_t::onLoad(JsonDocument& doc) {
     
     return true;
 }
+
+bool pmu_config_t::onDefault( void ) {
+    return true;
+}

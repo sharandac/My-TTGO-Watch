@@ -89,6 +89,11 @@ bool IRConfig::onSave(JsonDocument& document) {
   return true;
 }
 
+
+bool IRConfig::onDefault( void ) {
+    return true;
+}
+
 bool IRConfig::onLoad(JsonDocument& document) {
   JsonArray pages = document["pages"].as<JsonArray>();
   if (pages.isNull() || pages.size() < 1) return false;

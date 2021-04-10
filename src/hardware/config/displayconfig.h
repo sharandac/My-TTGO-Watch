@@ -52,6 +52,7 @@
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
+        virtual bool onDefault( void );
         virtual size_t getJsonBufferSize() { return 1000; }
     };
 #endif // _DISPLAY_CONFIG_H

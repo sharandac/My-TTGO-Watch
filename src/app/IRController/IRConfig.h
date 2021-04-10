@@ -30,6 +30,7 @@ public:
 protected:
   virtual bool onSave(JsonDocument& document);
   virtual bool onLoad(JsonDocument& document);
+  virtual bool onDefault( void );
   virtual size_t getJsonBufferSize() { return 16000; }
 
 protected:

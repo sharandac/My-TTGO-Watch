@@ -35,6 +35,7 @@ protected:
   ////////////// Available for overloading: //////////////
   virtual bool onSave(JsonDocument& document) = 0;
   virtual bool onLoad(JsonDocument& document) = 0;
+  virtual bool onDefault( void ) = 0;
   virtual size_t getJsonBufferSize() { return 4096; }
 
 protected:

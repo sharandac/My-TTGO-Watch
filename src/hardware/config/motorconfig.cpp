@@ -35,3 +35,7 @@ bool motor_config_t::onLoad(JsonDocument& doc) {
 
     return true;
 }
+
+bool motor_config_t::onDefault( void ) {
+    return true;
+}
