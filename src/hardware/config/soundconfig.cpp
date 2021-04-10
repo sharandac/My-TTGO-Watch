@@ -37,3 +37,10 @@ bool sound_config_t::onLoad(JsonDocument& doc) {
 
     return true;
 }
+
+bool sound_config_t::onDefault( void ) {
+    enable = false;
+    volume = 100;
+
+    return true;
+}

@@ -49,3 +49,7 @@ bool display_config_t::onLoad(JsonDocument& doc) {
 
     return true;
 }
+
+bool display_config_t::onDefault( void ) {
+    return true;
+}
