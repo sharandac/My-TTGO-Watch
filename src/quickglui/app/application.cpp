@@ -30,7 +30,7 @@ Application& Application::useConfig(JsonConfig& externalConfig, bool autoBuildSe
 
   if (autoBuildSettingsPage)
   {
-    log_i("AutoBuilding settings page for %s. Options count: %d", name.c_str(), configuration->totalCount());
+    log_d("AutoBuilding settings page for %s. Options count: %d", name.c_str(), configuration->totalCount());
     settingsPage().buildFromConfig(externalConfig);
   }
   return *this;

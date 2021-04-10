@@ -41,8 +41,6 @@ __NOINIT_ATTR uint32_t stepcounter_valid;           /** @brief stepcount valid m
 __NOINIT_ATTR uint32_t stepcounter_before_reset;    /** @brief stepcounter before reset */
 __NOINIT_ATTR uint32_t stepcounter;                 /** @brief stepcounter */
 
-static struct tm bma_old_date;
-
 bma_config_t bma_config;
 callback_t *bma_callback = NULL;
 
@@ -52,8 +50,7 @@ void IRAM_ATTR bma_irq( void );
 bool bma_send_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
-
-static void bma_notify_stepcounter();
+void bma_notify_stepcounter( void );
 
 void bma_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
@@ -61,10 +58,11 @@ void bma_setup( void ) {
      * check if stepcounter valid and reset if not valid
      */
     if ( stepcounter_valid != 0xa5a5a5a5 ) {
-      stepcounter = 0;
-      stepcounter_before_reset = 0;
-      stepcounter_valid = 0xa5a5a5a5;
-      log_i("stepcounter not valid. reset");
+        stepcounter = 0;
+        stepcounter_before_reset = 0;
+        stepcounter_valid = 0xa5a5a5a5;
+        bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
+        log_i("stepcounter not valid. reset");
     }
     stepcounter = stepcounter + stepcounter_before_reset;
     /*
@@ -112,6 +110,7 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
+    static bool first_powermgm_loop_cb = true;
     static bool BMA_tilt = false;
     static bool BMA_doubleclick = false;
     static bool BMA_stepcounter = false;
@@ -124,9 +123,8 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
     bool temp_bma_irq_flag = bma_irq_flag;
     bma_irq_flag = false;
     portEXIT_CRITICAL(&BMA_IRQ_Mux);
-
     /*
-     * check for the event
+     * check interrupts event source
      */
     if ( temp_bma_irq_flag ) {                
         while( !ttgo->bma->readInterrupt() );
@@ -145,7 +143,9 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             BMA_stepcounter = true;
         }
     }
-
+    /*
+     * check pmu event
+     */
     switch( event ) {
         case POWERMGM_WAKEUP:   {
             /*
@@ -167,42 +167,39 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             break;
         }
     }
-
     /*
-     *  force update statusbar after restart/boot
+     * if it the first powermgm loop cb call
+     * update stepcounter
      */
-    if ( first_loop_run ) {
-        first_loop_run = false;
+    if ( first_powermgm_loop_cb ) {
+        first_powermgm_loop_cb = false;
         bma_notify_stepcounter();
     }
     return( true );
 }
 
-static void bma_notify_stepcounter() {
-    static uint32_t last_val = 0;
+void bma_notify_stepcounter( void ) {
+    uint32_t val = 0;
     TTGOClass *ttgo = TTGOClass::getWatch();
-    stepcounter_before_reset = ttgo->bma->getCounter();
 
-    uint32_t delta = stepcounter + stepcounter_before_reset - last_val;
-    if (delta > 0) {
-        // New val
-        last_val = stepcounter + stepcounter_before_reset;
-        bma_send_event_cb( BMACTL_STEPCOUNTER, &last_val );
-    }
+    stepcounter_before_reset = ttgo->bma->getCounter();
+    val = stepcounter + stepcounter_before_reset;
+    bma_send_event_cb( BMACTL_STEPCOUNTER, &val );
 }
 
 void bma_standby( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-    time_t now;
-
     log_i("go standby");
-
-    if ( bma_get_config( BMA_STEPCOUNTER ) )
+    /*
+     * disable stepcounter interrupt to avoid
+     * wakeup in standby mode
+     */
+    if ( bma_get_config( BMA_STEPCOUNTER ) ) {
         ttgo->bma->enableStepCountInterrupt( false );
-
-    time( &now );
-    localtime_r( &now, &bma_old_date );
-
+    }
+    /*
+     * enable interrupt in ESP32 sleepmode
+     */
     gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
     esp_sleep_enable_gpio_wakeup ();
 }
@@ -211,29 +208,52 @@ void bma_wakeup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     log_i("go wakeup");
-
-    if ( bma_get_config( BMA_STEPCOUNTER ) )
+    /*
+     * enable stepcounter interrupt for updates
+     * when the user interacts with the watch
+     */
+    if ( bma_get_config( BMA_STEPCOUNTER ) ) {
         ttgo->bma->enableStepCountInterrupt( true );
-
+    }
     /*
      * check for a new day and reset stepcounter if configure
      */
     if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) ) {
+        static bool first_wakeup = true;
+        static struct tm old_info;
+        /**
+         * get local time
+         */
         time_t now;
         tm info;
         time( &now );
         localtime_r( &now, &info );
-        if ( info.tm_yday != bma_old_date.tm_yday ) {
-            log_i("reset setcounter: %d != %d", info.tm_yday, bma_old_date.tm_yday );
-            ttgo->bma->resetStepCounter();
-            localtime_r( &now, &bma_old_date );
+        /**
+         * on first wakeup, init old_info
+         */
+        if ( first_wakeup ) {
+            first_wakeup = false;
+            localtime_r( &now, &old_info );
         }
+        /**
+         * check if day has change
+         */
+        if ( info.tm_yday != old_info.tm_yday ) {
+            log_i("reset setcounter: %d != %d", info.tm_yday, old_info.tm_yday );
+            ttgo->bma->resetStepCounter();
+            stepcounter_before_reset = 0;
+            stepcounter = 0;
+            bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
+        }
+        /*
+         * store current time 
+         */
+        localtime_r( &now, &old_info );
     }
-
     /*
-     * force bma_powermgm_loop_cb update
+     * send bma stepcounter updates
      */
-    first_loop_run = true;
+    bma_notify_stepcounter();
 }
 
 void bma_reload_settings( void ) {

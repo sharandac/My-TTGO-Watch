@@ -325,7 +325,7 @@ void pmu_loop( void ) {
          * send updates via pmu event
          */
         pmu_send_cb( PMUCTL_STATUS, (void*)&msg );
-        log_i("battery state: %d%%, %s, %s, %s (0x%04x)", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg );
+        log_d("battery state: %d%%, %s, %s, %s (0x%04x)", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg );
         /*
          * clear update flag
          */
@@ -372,11 +372,11 @@ void pmu_standby( void ) {
     if ( pmu_get_silence_wakeup() ) {
         if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
             ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
-            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
+            log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
         }
         else {
             ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
-            log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
+            log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
         }
     }
 
@@ -385,11 +385,11 @@ void pmu_standby( void ) {
      */
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( pmu_config.experimental_power_save_voltage );
-        log_i("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
+        log_d("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
     } 
     else {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
-        log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
+        log_d("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
     }
     /*
      * disable LD02, sound?
@@ -410,11 +410,11 @@ void pmu_wakeup( void ) {
      */
     if ( pmu_get_experimental_power_save() ) {
         ttgo->power->setDCDC3Voltage( pmu_config.experimental_normal_voltage );
-        log_i("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
+        log_d("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
     } 
     else {
         ttgo->power->setDCDC3Voltage( pmu_config.normal_voltage );
-        log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
+        log_d("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
     }
     /*
      * clear timer
@@ -453,7 +453,7 @@ void pmu_set_high_charging_target_voltage( bool value ) {
     pmu_config.high_charging_target_voltage = value;
 
     if ( pmu_config.high_charging_target_voltage ) {
-        log_i("set target voltage to 4.36V");
+        log_d("set target voltage to 4.36V");
         if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
             log_e("target voltage 4.36V set failed!");
     }
@@ -497,7 +497,7 @@ void pmu_set_safe_voltage_for_update( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     
     ttgo->power->setDCDC3Voltage( NORMALVOLTAGE + 100 );
-    log_i("set %dmV voltage", NORMALVOLTAGE );
+    log_d("set %dmV voltage", NORMALVOLTAGE );
 
     vTaskDelay(250);
 }

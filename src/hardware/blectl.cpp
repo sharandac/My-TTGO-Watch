@@ -131,6 +131,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 blectl_set_event( BLECTL_CONNECT );
                 blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
                 log_i("BLECTL authentication successful, client connected");
+                blectl_send_msg("%c\r\n{}\r\n" );
                 return;
             }
         }

@@ -24,7 +24,7 @@ WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj) {
     lv_obj_type_t buf;
     lv_obj_get_type(obj, &buf);
     auto type = buf.type[0] != NULL ? buf.type[0] : "lv_obj";
-    log_i("WidgetHandle allocated for %s. Total count: %d", type, ++current);
+    log_d("WidgetHandle allocated for %s. Total count: %d", type, ++current);
     
     auto addr = MALLOC(sizeof(WidgetHandle));
     return new(addr) WidgetHandle();
@@ -35,7 +35,7 @@ void WidgetManager::Free(lv_obj_t* obj) {
     lv_obj_set_user_data(obj, NULL);
     free(handle);
     current--;
-    log_i("WidgetHandle was destroyed. Total count: %d", current);
+    log_d("WidgetHandle was destroyed. Total count: %d", current);
 }
 
 WidgetHandle* WidgetManager::GetIfExists(lv_obj_t* obj) {

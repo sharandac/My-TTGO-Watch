@@ -43,6 +43,7 @@
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
+#include "app/corona_app_detector/corona_app_detector.h"
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
@@ -100,6 +101,7 @@ void setup()
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
+    corona_app_detector_setup();
     activity_app_setup();
     crypto_ticker_setup();
     example_app_setup();

@@ -104,7 +104,7 @@ void refresh_main_page()
     uint32_t stp = bma_get_stepcounter();
     uint32_t ach = gStep == 0 ? 0 : 100 * stp / gStep;
     uint32_t dist = stp * length.toInt() / 100;
-    log_i("Refresh activity: %d steps", stp);
+    log_d("Refresh activity: %d steps", stp);
     // Raw steps
     snprintf( buff, sizeof( buff ), "%d", stp );
     lblStepcounter.text(buff).realign();

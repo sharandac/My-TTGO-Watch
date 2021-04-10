@@ -41,9 +41,9 @@ void callback_print( void ) {
      */
     callback_t *callback_counter = callback_head;
     do {
-        log_i(" |--%s", callback_counter->name, callback_counter );
+        log_d(" |--%s", callback_counter->name, callback_counter );
         for( int32_t i = 0 ; i < callback_counter->entrys ; i++ ) {
-            log_i(" |  |--id:%s, event mask:%04x", callback_counter->table[ i ].id, callback_counter->table[ i ].event );
+            log_d(" |  |--id:%s, event mask:%04x", callback_counter->table[ i ].id, callback_counter->table[ i ].event );
         }
         callback_counter = callback_counter->next_callback_t;
     }
@@ -133,7 +133,7 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     callback->table[ callback->entrys - 1 ].id = id;
     callback->table[ callback->entrys - 1 ].counter = 0;
     if ( callback->debug ) {
-        log_i("register callback_func for %s success (%p:%s)", callback->name, callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
+        log_d("register callback_func for %s success (%p:%s)", callback->name, callback->table[ callback->entrys - 1 ].callback_func, callback->table[ callback->entrys - 1 ].id );
     }
     return( retval );
 }
