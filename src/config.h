@@ -23,6 +23,10 @@
  */
 #ifndef _CONFIG_H 
 
+    #if !defined( LILYGO_WATCH_2020_V1 ) && !defined( LILYGO_WATCH_2020_V3 )
+        #error "no ttgo t-watch version defined"
+    #endif
+
     #define LILYGO_WATCH_LVGL                       /** @brief To use LVGL, you need to enable the macro LVGL */
     #define TWATCH_USE_PSRAM_ALLOC_LVGL             /** @brief enabled lillygo-lib to use PSRAM */ 
     /**

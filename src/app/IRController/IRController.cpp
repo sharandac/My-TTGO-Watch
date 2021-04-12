@@ -38,7 +38,7 @@ LV_IMG_DECLARE(IRController_64px);
 
 IRConfig irConfig;
 Application irController;
-IRsend irsend(13);
+IRsend irsend(TWATCH_2020_IR_PIN);
 Style irDeskStyle;
 
 /*
@@ -91,8 +91,8 @@ void IRController_build_UI(IRControlSettingsAction settingsAction)
 }
 
 void execute_ir_cmd(InfraButton* config) {
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW); // No Current Limiting so keep it off (!!!)
+    pinMode(TWATCH_2020_IR_PIN, OUTPUT);
+    digitalWrite(TWATCH_2020_IR_PIN, LOW); // No Current Limiting so keep it off (!!!)
 
     switch (config->mode)
     {
@@ -125,7 +125,7 @@ void execute_ir_cmd(InfraButton* config) {
     }
 
     delay(50);
-    digitalWrite(13, LOW); // No Current Limiting so keep it off (!!!)
+    digitalWrite(TWATCH_2020_IR_PIN, LOW); // No Current Limiting so keep it off (!!!)
     log_i("IR button clicked: %s", config->name);
 }
 

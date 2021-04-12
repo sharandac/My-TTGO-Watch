@@ -50,13 +50,13 @@ void IRAM_ATTR onTimer() {
          * decrement timer counter and enable motor
          */
         motor_run_time_counter--;
-        digitalWrite(GPIO_NUM_4, HIGH );
+        digitalWrite(MOTOR_PIN, HIGH );
     }
     else {
         /*
          * disable motor
          */
-        digitalWrite(GPIO_NUM_4, LOW );
+        digitalWrite(MOTOR_PIN, LOW );
     }
     /*
      * leave critical section
@@ -78,7 +78,7 @@ void motor_setup( void ) {
     /*
      * setup motor gpio, timer interrupt and interrupt function
      */
-    pinMode(GPIO_NUM_4, OUTPUT);
+    pinMode(MOTOR_PIN, OUTPUT);
     timer = timerBegin(0, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
     timerAlarmWrite(timer, 10000, true);
@@ -98,12 +98,12 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
                                         motor_run_time_counter = 0;
-                                        digitalWrite( GPIO_NUM_4 , LOW );
+                                        digitalWrite( MOTOR_PIN , LOW );
                                         portEXIT_CRITICAL(&timerMux);
                                         break;
         case POWERMGM_STANDBY:          portENTER_CRITICAL(&timerMux);
                                         motor_run_time_counter = 0;
-                                        digitalWrite( GPIO_NUM_4 , LOW );
+                                        digitalWrite( MOTOR_PIN , LOW );
                                         portEXIT_CRITICAL(&timerMux);
                                         break;
         case POWERMGM_ENABLE_INTERRUPTS:

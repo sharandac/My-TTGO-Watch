@@ -74,39 +74,40 @@ bool BaseJsonConfig::load() {
 }
 
 bool BaseJsonConfig::save() {
-  bool result = false;
-  fs::File file = SPIFFS.open(fileName, FILE_WRITE );
+    bool result = false;
+    fs::File file = SPIFFS.open(fileName, FILE_WRITE );
 
-  if (!file) {
-      log_e("Can't open file: %s!", fileName);
-  }
-  else {
-      auto size = getJsonBufferSize();
-      SpiRamJsonDocument doc(size);
-      result = onSave(doc);
-      
-      size_t outSize = 0;
-      if (prettyJson)
+    if (!file) {
+        log_e("Can't open file: %s!", fileName);
+    }
+    else {
+        auto size = getJsonBufferSize();
+        SpiRamJsonDocument doc(size);
+        result = onSave(doc);
+        
+        size_t outSize = 0;
+        if (prettyJson)
         outSize = serializeJsonPretty(doc, file);
-      else
+        else
         outSize = serializeJson(doc, file);
 
-      if (result == true && outSize == 0) {
-          log_e("Failed to write config file %s", fileName);
-          result = false;
-      }
-      
-      doc.clear();
-  }
-  file.close();
-  
-  return result;
+        if (result == true && outSize == 0) {
+            log_e("Failed to write config file %s", fileName);
+            result = false;
+        }
+        
+        doc.clear();
+    }
+    file.close();
+
+    return result;
 }
 
 void BaseJsonConfig::debugPrint() {
-  auto size = getJsonBufferSize();
-  SpiRamJsonDocument doc(size);
-  bool result = onSave(doc);
-  if (result)
-    serializeJsonPretty(doc, Serial);
+    auto size = getJsonBufferSize();
+    SpiRamJsonDocument doc(size);
+    bool result = onSave(doc);
+    if ( result ) {
+        serializeJsonPretty(doc, Serial);
+    }
 }
