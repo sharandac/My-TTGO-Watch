@@ -45,8 +45,6 @@ lv_obj_t *osmand_app_direction_img = NULL;
 lv_obj_t *osmand_app_distance_label = NULL;
 lv_obj_t *osmand_app_info_label = NULL;
 
-lv_task_t * _osmand_app_task;
-
 static bool osmand_active = false;
 static bool osmand_block_return_maintile = false;
 
@@ -104,7 +102,6 @@ void osmand_bluetooth_message_msg_pharse( const char* msg );
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg );
 void osmand_activate_cb( void );
 void osmand_hibernate_cb( void );
-void osmand_app_task( lv_task_t * task );
 
 void osmand_app_main_setup( uint32_t tile_num ) {
 
@@ -238,16 +235,10 @@ void osmand_activate_cb( void ) {
     bluetooth_message_disable();
     osmand_block_return_maintile = display_get_block_return_maintile();
     display_set_block_return_maintile( true );
-    _osmand_app_task = lv_task_create(osmand_app_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
 }
 
 void osmand_hibernate_cb( void ) {
     osmand_active = false;
     bluetooth_message_enable();
     display_set_block_return_maintile( osmand_block_return_maintile );
-    lv_task_del( _osmand_app_task );
-}
-
-void osmand_app_task( lv_task_t * task ) {
-    // put your code her
 }
