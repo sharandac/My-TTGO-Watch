@@ -49,6 +49,11 @@
      */
     void sound_setup( void );
     /**
+     * @brief check if sound available
+     * @return true if available
+     */
+    bool sound_get_available( void );
+    /**
      * @brief put sound output to standby (disable)
      */
     void sound_standby( void );

@@ -111,15 +111,13 @@ void setup()
     powermeter_app_setup();
 	FindPhone_setup();
   	/*
-     *
+     * post init: setup wifi, blectl and sound
      */
-    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) )
+    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
         wifictl_on();
-
+    }
     blectl_setup();
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-        sound_setup();
-    #endif
+    sound_setup();
 
     display_set_brightness( display_get_brightness() );
 
@@ -131,7 +129,6 @@ void setup()
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
 
     disableCore0WDT();
-    callback_print();
 }
 
 void loop() {
