@@ -41,6 +41,11 @@ static SemaphoreHandle_t xSemaphores = NULL;
 
 void touch_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
+
+    #if defined( LILYGO_WATCH_2020_V2 )
+        ttgo->touchWakup();
+    #endif    
+
     /*
      * This changes to polling mode.
      * The touch sensor holds the line low for the duration of the touch.
