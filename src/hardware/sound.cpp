@@ -73,27 +73,33 @@ void sound_setup( void ) {
     /*
      * config sound driver and interface
      */
-    out = new AudioOutputI2S();
-    out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
-    sound_set_volume_config( sound_config.volume );
-    mp3 = new AudioGeneratorMP3();
-    wav = new AudioGeneratorWAV();
-    sam = new ESP8266SAM;
-    sam->SetVoice(sam->VOICE_SAM);
-    /*
-     * register all powermgm callback functions
-     */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
-    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
-    /*
-     * enable sound
-     */
-    sound_set_enabled( sound_config.enable );
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        out = new AudioOutputI2S();
+        out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
+        sound_set_volume_config( sound_config.volume );
+        mp3 = new AudioGeneratorMP3();
+        wav = new AudioGeneratorWAV();
+        sam = new ESP8266SAM;
+        sam->SetVoice(sam->VOICE_SAM);
+        /*
+        * register all powermgm callback functions
+        */
+        powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
+        powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
+        /*
+        * enable sound
+        */
+        sound_set_enabled( sound_config.enable );
 
-    sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
-    sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+        sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
+        sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+        sound_init = true;
+    #elif defined( LILYGO_WATCH_2020_V2 )
+        sound_set_enabled( false );
+        sound_init = false;
+    #endif
 
-    sound_init = true;
+    
 }
 
 bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
