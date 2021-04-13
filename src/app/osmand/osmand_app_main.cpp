@@ -196,7 +196,10 @@ void osmand_bluetooth_message_msg_pharse( const char* msg ) {
     }
     else  {
         if ( doc["t"] && doc["src"] && doc["title"] ) {
-            if ( !strcmp( doc["t"], "notify" ) && !strcmp( doc["src"], "OsmAnd" ) ) {
+            /*
+            * React to messages from "OsmAnd" and "OsmAnd~"
+            */
+            if ( !strcmp( doc["t"], "notify" ) && !strncmp( doc["src"], "OsmAnd", 6 ) ) {
                 if ( strstr( doc["title"], "?") ) {
                     const char * distance = doc["title"];
                     char * direction = strstr( doc["title"], "?");

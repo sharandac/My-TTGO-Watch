@@ -5,14 +5,20 @@
 #include "activity.h"
 #include "gui/mainbar/mainbar.h"
 #include "hardware/bma.h"
+#include "hardware/blestepctl.h"
+#include "hardware/motor.h"
 
 // App icon must have an size of 64x64 pixel with an alpha channel
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
 LV_IMG_DECLARE(move_64px);
+LV_IMG_DECLARE(trash_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-static Application activityApp;
+#define YES "Yes"
+#define NO  "No"
+
+static SynchronizedApplication activityApp;
 static JsonConfig config("activity.json");
 
 // Options
@@ -24,12 +30,15 @@ static Arc arcStepcounter, arcDistance;
 
 static Style big, small;
 
+/* Default message box callback */
+static lv_event_cb_t default_msgbox_cb;
 
 static void build_main_page();
 static void refresh_main_page();
 static void build_settings();
 
 static void activity_activate_cb();
+static void activity_reset_cb(lv_obj_t * obj, lv_event_t event);
 
 /*
  * setup routine for application
@@ -46,6 +55,30 @@ void activity_app_setup() {
     build_main_page();
     build_settings();
 
+    // Executed when user click "refresh" button
+    activityApp.synchronizeActionHandler([](SyncRequestSource source) {
+        if ( blectl_get_event( BLECTL_ON ) )
+        {
+            blestepctl_update(true);
+        }
+        // Return feedback to user as nothing else changed
+        motor_vibe(20);
+    });
+
+    // Add a trash button to reset counter
+    activityApp.mainPage().addAppButton(trash_32px, [](Widget btn) {
+        static const char * btns[] ={YES, NO, ""};
+
+        lv_obj_t * mbox1 = lv_msgbox_create(lv_scr_act(), NULL);
+        lv_msgbox_set_text(mbox1, "Reset step counter?");
+        lv_msgbox_add_btns(mbox1, btns);
+        lv_obj_set_width(mbox1, 200);
+        // Save default callback
+        default_msgbox_cb = lv_obj_get_event_cb(mbox1);
+        lv_obj_set_event_cb(mbox1, activity_reset_cb);
+        lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0);
+    });
+    
     refresh_main_page();
 }
 
@@ -124,6 +157,21 @@ void refresh_main_page()
 void activity_activate_cb()
 {
     refresh_main_page();
+}
+
+static void activity_reset_cb(lv_obj_t * obj, lv_event_t event)
+{
+    if(event == LV_EVENT_VALUE_CHANGED) {
+        const char *answer = lv_msgbox_get_active_btn_text(obj);
+        if ( strcmp( answer, YES) == 0 ) {
+            /* Reset counter */
+            bma_reset_stepcounter();
+            /* Refresh display immediately for user feedback */
+            refresh_main_page();
+        }
+    }
+    /* Call the default callback to retrieve the default behavior */
+    default_msgbox_cb(obj, event);
 }
 
 void build_settings()
