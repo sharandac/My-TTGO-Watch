@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A smartwatch based on ESP32 from LilyGo. Currently under development.
+A smartwatch based on ESP32 from LilyGo. Currently supoort for T-Watch2020 V1. T-Watch2020 V3 is added, but untested for lack of a watch.
 
 # Telegram chatgroup
 
