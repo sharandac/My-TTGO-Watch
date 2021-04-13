@@ -117,7 +117,9 @@ void setup()
         wifictl_on();
 
     blectl_setup();
-    sound_setup();
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        sound_setup();
+    #endif
 
     display_set_brightness( display_get_brightness() );
 
