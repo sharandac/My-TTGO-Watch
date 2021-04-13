@@ -319,9 +319,13 @@ void bma_reset_stepcounter( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
     log_i("reset step counter");
     ttgo->bma->resetStepCounter();
-    // FIXME why not required during daily reset?
+    /**
+     * FIXME: why not required during daily reset?
+     */
     stepcounter = 0;
     stepcounter_before_reset = 0;
-    // Announce forced change
+    /*
+     * Announce forced change
+     */
     bma_notify_stepcounter();
 }
