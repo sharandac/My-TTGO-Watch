@@ -95,11 +95,11 @@ void sound_setup( void ) {
         sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
         sound_init = true;
     #elif defined( LILYGO_WATCH_2020_V2 )
-        sound_set_enabled( false );
-        sound_init = false;
+        log_i("V2 watch has no sound. Disable it.");
+        sound_config.enable = false;
+        sound_config.save();
+        sound_init = true;
     #endif
-
-    
 }
 
 bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -225,6 +225,7 @@ bool sound_get_enabled_config( void ) {
 }
 
 void sound_set_enabled_config( bool enable ) {
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
     sound_config.enable = enable;
     if ( sound_config.enable) {
         sound_set_enabled( true );
@@ -233,6 +234,11 @@ void sound_set_enabled_config( bool enable ) {
         sound_set_enabled( false );
     }
     sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable ); 
+    #elif defined( LILYGO_WATCH_2020_V2 )
+        sound_config.enable = false;
+        //dont turn on sound and avoid calling sound_set_enabled function
+    #endif  
+
 }
 
 uint8_t sound_get_volume_config( void ) {

@@ -114,7 +114,6 @@ void sound_settings_tile_setup( void ) {
     lv_label_set_text( sound_enable_label, "enable sound");
     lv_obj_align( sound_enable_label, sound_enable_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
-
     lv_obj_t *sound_volume_cont = lv_obj_create( sound_settings_tile, NULL );
     lv_obj_set_size( sound_volume_cont, lv_disp_get_hor_res( NULL ) , 58 );
     lv_obj_add_style( sound_volume_cont, LV_OBJ_PART_MAIN, &sound_settings_style  );
