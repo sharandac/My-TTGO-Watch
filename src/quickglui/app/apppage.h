@@ -22,6 +22,7 @@ public:
     AppPage& init(lv_obj_t* handle, bool defaultExitBtn = true);
     AppPage& addSettingsButton(WidgetAction onSettingsBtnClick);
     AppPage& addRefreshButton(WidgetAction onRefreshBtnClick);
+    AppPage& addAppButton(const lv_img_dsc_t& image, WidgetAction onBtnClick);
 
     virtual Container& createChildContainer(lv_layout_t autoLayoutOptios);
     bool hasChildContainer() { return childContainer.handle() != nullptr; }
@@ -33,6 +34,7 @@ protected:
     Widget btnExit;
     Widget btnSettings;
     Widget btnRefresh;
+    Widget btnApp;
     Container childContainer;
 };
 

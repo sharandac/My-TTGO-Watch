@@ -108,3 +108,7 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
 
     return( retval );
 }
+
+void blestepctl_update(bool force) {
+    stepcounter_ble_updater.update( stepcounter, force );
+}

@@ -90,5 +90,9 @@
      * @return steps from the stepcounter as uint32_t value
      */
     uint32_t bma_get_stepcounter( void );
+    /**
+     * @brief reset the stepcounter value
+     */
+    void bma_reset_stepcounter( void );
     
 #endif // _BMA_H
