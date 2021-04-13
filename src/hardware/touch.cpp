@@ -94,7 +94,11 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         }
                                         break;
         case POWERMGM_WAKEUP:           log_i("go wakeup");
+
                                         if ( touch_lock_take() ) {
+                                            #if defined( LILYGO_WATCH_2020_V2 )
+                                                ttgo->touchWakup();
+                                            #endif    
                                             ttgo->touchToMonitor();
                                             touch_lock_give();
                                         }
