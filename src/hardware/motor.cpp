@@ -113,7 +113,7 @@ void motor_setup( void ) {
      * register powermgm callback function
      */
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-        owermgm_register_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
+        powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS, &motor_powermgm_event_cb, "powermgm motor");
     #endif
     /*
      * vibe for success
