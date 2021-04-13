@@ -41,11 +41,12 @@ static SemaphoreHandle_t xSemaphores = NULL;
 
 void touch_setup( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
-
-    #if defined( LILYGO_WATCH_2020_V2 )
+    /*
+     * reset/wakeup touch controller
+     */
+    #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         ttgo->touchWakup();
     #endif    
-
     /*
      * This changes to polling mode.
      * The touch sensor holds the line low for the duration of the touch.
@@ -96,7 +97,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_WAKEUP:           log_i("go wakeup");
 
                                         if ( touch_lock_take() ) {
-                                            #if defined( LILYGO_WATCH_2020_V2 )
+                                            #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 ttgo->touchWakup();
                                             #endif    
                                             ttgo->touchToMonitor();
