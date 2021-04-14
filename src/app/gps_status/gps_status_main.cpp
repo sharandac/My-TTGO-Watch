@@ -39,7 +39,6 @@ lv_style_t gps_status_value_style;
 lv_obj_t *pos_longlat_label = NULL;
 lv_obj_t *pos_longlat_value = NULL;
 static TTGOClass *ttgo = nullptr;
-bool gps_active = FALSE;
 lv_task_t *_gps_status_task;
 
 //V2 specific objects. check define to avoid compile errors on V1/V3 variants
@@ -135,20 +134,26 @@ static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event)
         break;
     }
 }
-//4603937
+
 void gps_status_task(lv_task_t *task)
 {
-#if defined(LILYGO_WATCH_2020_V2)
-    if (gps_active && gps != nullptr)
+#if defined(LILYGO_WATCH_2020_V2)    
+    if (gps != nullptr)
     {
+        //get/process data
+        while (ttgo->hwSerial->available()) {
+            int r = ttgo->hwSerial->read();
+            ttgo->gps->encode(r);
+        }
+        
+        //view data
         if (gps->location.isUpdated())
         {
             char temp[16] = "";
             snprintf(temp, sizeof(temp), "%3.3f/%3.3f", gps->location.lat(), gps->location.lng());
             lv_label_set_text(pos_longlat_value, temp);
         }
-
-        log_i("charsProcessed=%d, sentencesWithFix=%d, failedChecksum=%d, passedChecksum=%d,", gps->charsProcessed(), gps->sentencesWithFix(), gps->failedChecksum(), gps->passedChecksum());
+        log_i("num satellites: %d", gps->satellites.value());
     }
 #endif
 }
@@ -161,7 +166,6 @@ void gps_status_hibernate_cb(void)
 #if defined(LILYGO_WATCH_2020_V2)
     ttgo->turnOffGPS();
 #endif
-    gps_active = FALSE;
 }
 
 void gps_status_activate_cb(void)
@@ -170,7 +174,6 @@ void gps_status_activate_cb(void)
 #if defined(LILYGO_WATCH_2020_V2)
     ttgo->trunOnGPS();
 #endif
-    gps_active = TRUE;
 
     // create an task that runs every secound
     _gps_status_task = lv_task_create(gps_status_task, 1000, LV_TASK_PRIO_MID, NULL);
