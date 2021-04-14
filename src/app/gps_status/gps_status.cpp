@@ -88,9 +88,9 @@ uint32_t gps_status_get_app_setup_tile_num( void ) {
  */
 static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
+        case( LV_EVENT_CLICKED ):       //statusbar_hide( true );
                                         app_hide_indicator( gps_status );
-                                        mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_OFF );
+                                        mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_ON );
                                         break;
     }    
 }
