@@ -43,6 +43,7 @@
 #include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 #include "mainbar/setup_tile/sound_settings/sound_settings.h"
+#include "mainbar/setup_tile/gps_settings/gps_settings.h"
 
 #include "mainbar/setup_tile/utilities/utilities.h"
 
@@ -89,6 +90,7 @@ void gui_setup( void )
     wlan_settings_tile_setup();
     bluetooth_settings_tile_setup();
     time_settings_tile_setup();
+    gps_settings_tile_setup();
     update_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();

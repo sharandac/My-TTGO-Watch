@@ -39,8 +39,10 @@
 #include "display.h"
 #include "rtcctl.h"
 #include "sound.h"
+#include "gpsctl.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "utils/fakegps.h"
 
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
@@ -63,8 +65,10 @@ void powermgm_setup( void ) {
     touch_setup();
     timesync_setup();
     rtcctl_setup();
+    gpsctl_setup();
     blectl_read_config();
     sound_read_config();
+    fakegps_setup();
     
     powermgm_set_event( POWERMGM_WAKEUP );
 }
