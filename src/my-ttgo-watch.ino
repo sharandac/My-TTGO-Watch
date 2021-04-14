@@ -53,6 +53,9 @@
 #include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
+#if defined( LILYGO_WATCH_2020_V2 )
+    #include "app/gps_status/gps_status.h"
+#endif
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -110,6 +113,9 @@ void setup()
     fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
+    #if defined( LILYGO_WATCH_2020_V2 )
+        gps_status_setup();
+    #endif
   	/*
      * post init: setup wifi, blectl and sound
      */
