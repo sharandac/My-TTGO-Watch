@@ -58,6 +58,7 @@ void gpsctl_setup( void ) {
         /*
          * init tinygps
          */
+        TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->trunOnGPS();
         ttgo->gps_begin();
         gps = ttgo->gps;
