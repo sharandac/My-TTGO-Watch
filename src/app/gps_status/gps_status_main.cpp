@@ -31,11 +31,17 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 
+#include "hardware/gpsctl.h"
+
+/*
+ * tile  and style objects
+ */
 lv_obj_t *gps_status_main_tile = NULL;
 lv_style_t gps_status_main_style;
 lv_style_t gps_status_value_style;
-
-//objects
+/*
+ * objects
+ */
 static lv_style_t style_led_green;
 static lv_style_t style_led_red;
 lv_obj_t *satfix_label = NULL;
@@ -49,29 +55,23 @@ lv_obj_t *altitude_label = NULL;
 lv_obj_t *altitude_value = NULL;
 lv_obj_t *speed_label = NULL;
 lv_obj_t *speed_value = NULL;
-static TTGOClass *ttgo = nullptr;
-lv_task_t *_gps_status_task;
-
-//V2 specific objects. check define to avoid compile errors on V1/V3 variants
-#if defined(LILYGO_WATCH_2020_V2)
-static TinyGPSPlus *gps = nullptr;
-#endif
-
+/*
+ * images
+ */
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
+bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg );
 static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event);
 static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event);
 void gps_status_task(lv_task_t *task);
 void gps_status_hibernate_cb(void);
 void gps_status_activate_cb(void);
 
-void gps_status_main_setup(uint32_t tile_num)
-{
-
+void gps_status_main_setup(uint32_t tile_num) {
     gps_status_main_tile = mainbar_get_tile_obj(tile_num);
     lv_style_copy(&gps_status_main_style, mainbar_get_style());
 
@@ -99,8 +99,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_style_set_bg_opa(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_OPA_50);
     lv_style_set_border_width(&gps_status_value_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font(&gps_status_value_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-
-    //led style
+    /*
+     * led style
+     */
     lv_style_init(&style_led_green);
     lv_style_set_bg_color(&style_led_green, LV_STATE_DEFAULT, lv_color_hex(0x00d000));
     lv_style_set_border_color(&style_led_green, LV_STATE_DEFAULT, lv_color_hex(0x00d000));
@@ -111,10 +112,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_style_set_border_color(&style_led_red, LV_STATE_DEFAULT, lv_color_hex(0x900000));
     lv_style_set_shadow_color(&style_led_red, LV_STATE_DEFAULT, lv_color_hex(0x900000));
     lv_style_set_shadow_spread(&style_led_red, LV_STATE_DEFAULT, 4);
-
-//gps status
-#define STATUS_HEIGHT 25
-    //num satfix
+    /*
+     * num satfix
+     */
     satfix_label = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(satfix_label, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(satfix_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
@@ -135,7 +135,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_obj_align(satfix_value_off, satfix_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_led_on(satfix_value_off);
     lv_obj_set_hidden(satfix_value_off, false);
-    //num satellites
+    /*
+     * num satellites
+     */
     num_satellites_label = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(num_satellites_label, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(num_satellites_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
@@ -148,7 +150,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_obj_add_style(num_satellites_value, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(num_satellites_value, "n/a");
     lv_obj_align(num_satellites_value, num_satellites_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-    //altitude
+    /*
+     * altitude
+     */
     altitude_label = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(altitude_label, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(altitude_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
@@ -161,7 +165,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_obj_add_style(altitude_value, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(altitude_value, "n/a");
     lv_obj_align(altitude_value, altitude_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-    //long lat
+    /*
+     * long lat
+     */
     pos_longlat_label = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(pos_longlat_label, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(pos_longlat_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
@@ -174,7 +180,9 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_obj_add_style(pos_longlat_value, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(pos_longlat_value, "n/a");
     lv_obj_align(pos_longlat_value, pos_longlat_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-    //speed
+    /*
+     * speed
+     */
     speed_label = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(speed_label, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(speed_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
@@ -187,124 +195,80 @@ void gps_status_main_setup(uint32_t tile_num)
     lv_obj_add_style(speed_value, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(speed_value, "n/a");
     lv_obj_align(speed_value, speed_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-
-    //init gps pointer, when on V2 variant
-    ttgo = TTGOClass::getWatch();
-#if defined(LILYGO_WATCH_2020_V2)
-    ttgo->gps_begin();
-    gps = ttgo->gps;
-#endif
-
-    //create callback
-    mainbar_add_tile_activate_cb(tile_num, gps_status_activate_cb);
-    mainbar_add_tile_hibernate_cb(tile_num, gps_status_hibernate_cb);
+    /*
+     * create callback
+     */
+    gpsctl_register_cb(     GPSCTL_FIX 
+                          | GPSCTL_NOFIX
+                          | GPSCTL_UPDATE_LOCATION
+                          | GPSCTL_UPDATE_SATELLITE
+                          | GPSCTL_UPDATE_SPEED
+                          | GPSCTL_UPDATE_ALTITUDE
+                          , gpsctl_gps_status_event_cb
+                          , "gpsctl gps status" );
 }
 
-static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        statusbar_hide(true);
-        mainbar_jump_to_tilenumber(gps_status_get_app_setup_tile_num(), LV_ANIM_ON);
-        break;
+static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {
+    
+    switch (event) {
+        case (LV_EVENT_CLICKED):
+            statusbar_hide(true);
+            mainbar_jump_to_tilenumber(gps_status_get_app_setup_tile_num(), LV_ANIM_ON);
+            break;
     }
 }
 
-static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        mainbar_jump_to_maintile(LV_ANIM_OFF);
-        break;
+static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event) {
+    switch (event) {
+        case (LV_EVENT_CLICKED):
+            mainbar_jump_to_maintile(LV_ANIM_OFF);
+            break;
     }
 }
 
-void gps_status_task(lv_task_t *task)
-{
-#if defined(LILYGO_WATCH_2020_V2)
-    if (gps != nullptr)
-    {
-        //get/process data
-        ttgo->gpsHandler();
+bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {
+    char temp[20] = "";
+    gps_data_t *gps_data = (gps_data_t*)arg;
 
-        //view data
-        if (gps->location.isValid())
-        {
+    switch( event ) {
+        case GPSCTL_DISABLE:
+            break;
+        case GPSCTL_ENABLE:
+            break;
+        case GPSCTL_FIX:
             lv_obj_set_hidden(satfix_value_on, false);
             lv_obj_set_hidden(satfix_value_off, true);
-        }
-        else
-        {
+            break;
+        case GPSCTL_NOFIX:
             lv_obj_set_hidden(satfix_value_on, true);
             lv_obj_set_hidden(satfix_value_off, false);
-        }
-        if (gps->location.isUpdated())
-        {
-            char temp[20] = "";
-            snprintf(temp, sizeof(temp), "%.4f/%.4f", gps->location.lat(), gps->location.lng());
-            lv_label_set_text(pos_longlat_value, temp);
-        }
-        if (!gps->location.isValid())
-        {
             lv_label_set_text(pos_longlat_value, "n/a");
-        }
-        if (gps->satellites.isUpdated())
-        {
-            char temp[10] = "";
-            snprintf(temp, sizeof(temp), "%d", gps->satellites.value());
-            lv_label_set_text(num_satellites_value, temp);
-        }
-        if (!gps->satellites.isValid())
-        {
             lv_label_set_text(num_satellites_value, "n/a");
-        }
-        if (gps->altitude.isUpdated())
-        {
-            char temp[20] = "";
-            snprintf(temp, sizeof(temp), "%.1fm", gps->altitude.meters());
-            lv_label_set_text(altitude_value, temp);
-        }
-        if (!gps->altitude.isValid())
-        {
             lv_label_set_text(altitude_value, "n/a");
-        }
-        if (gps->speed.isUpdated())
-        {
-            char temp[20] = "";
-            snprintf(temp, sizeof(temp), "%.2fkm/h", gps->speed.kmph());
-            lv_label_set_text(speed_value, temp);
-        }
-        if (!gps->speed.isValid())
-        {
             lv_label_set_text(speed_value, "n/a");
-        }
-        lv_obj_align(num_satellites_value, num_satellites_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-        lv_obj_align(altitude_value, altitude_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-        lv_obj_align(pos_longlat_value, pos_longlat_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-        lv_obj_align(speed_value, speed_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+            break;
+        case GPSCTL_UPDATE_LOCATION:
+            snprintf(temp, sizeof(temp), "%.4f/%.4f", gps_data->lat, gps_data->lon );
+            lv_label_set_text(pos_longlat_value, temp);
+            break;
+        case GPSCTL_UPDATE_SATELLITE:
+            snprintf(temp, sizeof(temp), "%d", gps_data->satellites );
+            lv_label_set_text(num_satellites_value, temp);
+            break;
+        case GPSCTL_UPDATE_SPEED:
+            snprintf(temp, sizeof(temp), "%.2fkm/h", gps_data->speed_kmh );
+            lv_label_set_text(speed_value, temp);
+            break;
+        case GPSCTL_UPDATE_ALTITUDE:
+            snprintf(temp, sizeof(temp), "%.1fm", gps_data->altitude_meters );
+            lv_label_set_text(altitude_value, temp);
+            break;
     }
-#endif
-}
 
-void gps_status_hibernate_cb(void)
-{
-    //del task
-    lv_task_del(_gps_status_task);
-    log_i("turn off GPS");
-#if defined(LILYGO_WATCH_2020_V2)
-    ttgo->turnOffGPS();
-#endif
-}
+    lv_obj_align(pos_longlat_value, pos_longlat_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_align(num_satellites_value, num_satellites_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_align(speed_value, speed_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_align(altitude_value, altitude_label, LV_ALIGN_IN_RIGHT_MID, -5, 0);
 
-void gps_status_activate_cb(void)
-{
-    log_i("turn on GPS");
-#if defined(LILYGO_WATCH_2020_V2)
-    ttgo->trunOnGPS();
-#endif
-
-    // create an task that runs every secound
-    _gps_status_task = lv_task_create(gps_status_task, 1000, LV_TASK_PRIO_MID, NULL);
+    return( true );
 }

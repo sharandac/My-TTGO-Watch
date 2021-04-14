@@ -28,10 +28,10 @@
 
     #define GPSCTL_INTERVAL             1000
 
-    #define GPSCTL_ENABLE               _BV(0)         /** @brief event mask for GPS enabled/disable, callback arg is (bool*) */
-    #define GPSCTL_DISABLE              _BV(1)         /** @brief event mask for GPS enabled/disable, callback arg is (bool*) */
-    #define GPSCTL_FIX                  _BV(2)         /** @brief event mask for GPS enabled/disable, callback arg is (bool*) */
-    #define GPSCTL_NOFIX                _BV(3)         /** @brief event mask for GPS enabled/disable, callback arg is (bool*) */
+    #define GPSCTL_ENABLE               _BV(0)         /** @brief event mask for GPS enabled */
+    #define GPSCTL_DISABLE              _BV(1)         /** @brief event mask for GPS disable */
+    #define GPSCTL_FIX                  _BV(2)         /** @brief event mask for GPS has an fix */
+    #define GPSCTL_NOFIX                _BV(3)         /** @brief event mask for GPS has no fix */
     #define GPSCTL_UPDATE_LOCATION      _BV(4)         /** @brief event mask for GPS location update */
     #define GPSCTL_UPDATE_DATE          _BV(5)         /** @brief event mask for GPS date update */
     #define GPSCTL_UPDATE_TIME          _BV(6)         /** @brief event mask for GPS time update*/

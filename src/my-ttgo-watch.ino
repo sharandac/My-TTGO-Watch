@@ -53,17 +53,7 @@
 #include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
-#if defined( LILYGO_WATCH_2020_V2 )
-    #include "app/gps_status/gps_status.h"
-#endif
-
-#if defined( LILYGO_WATCH_2020_V1 )
-    #define WATCH_VERSION_NAME  "V1"
-#elif defined( LILYGO_WATCH_2020_V2 )
-    #define WATCH_VERSION_NAME  "V2"
-#elif defined( LILYGO_WATCH_2020_V3 )
-    #define WATCH_VERSION_NAME  "V3"
-#endif
+#include "app/gps_status/gps_status.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -112,18 +102,17 @@ void setup()
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
-    corona_app_detector_setup();
     activity_app_setup();
+    gps_status_setup();
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
     IRController_setup();
     fxrates_app_setup();
+    corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-#if defined(LILYGO_WATCH_2020_V2)
     gps_status_setup();
-#endif
     /*
      * post init: setup wifi, blectl and sound
      */
