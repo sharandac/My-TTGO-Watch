@@ -112,7 +112,6 @@ void setup()
     corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-    gps_status_setup();
     /*
      * post init: setup wifi, blectl and sound
      */
