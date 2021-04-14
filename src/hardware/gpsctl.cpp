@@ -58,6 +58,9 @@ void gpsctl_setup( void ) {
         /*
          * init tinygps
          */
+        ttgo->trunOnGPS();
+        ttgo->gps_begin();
+        gps = ttgo->gps;
         gpsctl_autoon_on();
     #endif
 
@@ -202,8 +205,6 @@ void gpsctl_on( void ) {
     #if defined( LILYGO_WATCH_HAS_GPS )
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->trunOnGPS();
-        ttgo->gps_begin();
-        gps = ttgo->gps;
     #endif
     gps_data.valid = false;
     gpsctl_config.autoon = true;
@@ -229,8 +230,6 @@ void gpsctl_autoon_on( void ) {
         #if defined( LILYGO_WATCH_HAS_GPS )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->trunOnGPS();
-            ttgo->gps_begin();
-            gps = ttgo->gps;
         #endif
         gps_data.valid = false;
         gpsctl_send_cb( GPSCTL_ENABLE, NULL );

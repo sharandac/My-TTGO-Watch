@@ -231,11 +231,13 @@ bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
                                     break;
         case WIFICTL_OFF_REQUEST:
         case WIFICTL_OFF:
-        case WIFICTL_DISCONNECT:    log_i("disconnect from mqtt server %s", powermeter_config->server );
-                                    powermeter_mqtt_client.disconnect();
-                                    app_hide_indicator( powermeter_get_app_icon() );
-                                    widget_hide_indicator( powermeter_get_widget_icon() );
-                                    widget_set_label( powermeter_get_widget_icon(), "n/a" );
+        case WIFICTL_DISCONNECT:    if ( powermeter_mqtt_client.connected() ) {
+                                        log_i("disconnect from mqtt server %s", powermeter_config->server );
+                                        powermeter_mqtt_client.disconnect();
+                                        app_hide_indicator( powermeter_get_app_icon() );
+                                        widget_hide_indicator( powermeter_get_widget_icon() );
+                                        widget_set_label( powermeter_get_widget_icon(), "n/a" );
+                                    }
                                     break;
     }
     return( true );
