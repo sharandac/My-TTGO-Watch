@@ -35,6 +35,7 @@ uint32_t gps_tile_num;
 
 lv_obj_t *autoon_onoff = NULL;
 lv_obj_t *enable_on_standby_onoff = NULL;
+lv_obj_t *app_use_gps_onoff = NULL;
 lv_obj_t *fakegps_onoff = NULL;
 lv_obj_t *gps_latlon_label = NULL;
 
@@ -45,6 +46,7 @@ static void enter_gps_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_gps_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void autoon_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void enable_on_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void app_use_gps_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void fakegps_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 bool gps_settings_latlon_update_cb( EventBits_t event, void *arg );
 
@@ -76,7 +78,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *autoon_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( autoon_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( autoon_cont, gps_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     autoon_onoff = lv_switch_create( autoon_cont, NULL );
@@ -91,7 +93,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( autoon_label, autoon_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *enable_on_standby_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(enable_on_standby_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size(enable_on_standby_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( enable_on_standby_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     enable_on_standby_onoff = lv_switch_create( enable_on_standby_cont, NULL );
@@ -105,10 +107,25 @@ void gps_settings_tile_setup( void ) {
     lv_label_set_text( enable_on_standby_label, "enable on standby");
     lv_obj_align( enable_on_standby_label, enable_on_standby_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
+    lv_obj_t *app_use_gps_cont = lv_obj_create( gps_settings_tile, NULL );
+    lv_obj_set_size(app_use_gps_cont, lv_disp_get_hor_res( NULL ) , 35);
+    lv_obj_add_style( app_use_gps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
+    lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    app_use_gps_onoff = lv_switch_create( app_use_gps_cont, NULL );
+    lv_obj_add_protect( app_use_gps_onoff, LV_PROTECT_CLICK_FOCUS);
+    lv_obj_add_style( app_use_gps_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_switch_off( app_use_gps_onoff, LV_ANIM_ON );
+    lv_obj_align( app_use_gps_onoff, app_use_gps_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( app_use_gps_onoff, app_use_gps_onoff_event_handler );
+    lv_obj_t *app_use_gps_label = lv_label_create( app_use_gps_cont, NULL);
+    lv_obj_add_style( app_use_gps_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
+    lv_label_set_text( app_use_gps_label, "apps use gps");
+    lv_obj_align( app_use_gps_label, app_use_gps_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
     lv_obj_t *fakegps_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(fakegps_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_set_size(fakegps_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( fakegps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( fakegps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     fakegps_onoff = lv_switch_create( fakegps_cont, NULL );
     lv_obj_add_protect( fakegps_onoff, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( fakegps_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
@@ -135,6 +152,11 @@ void gps_settings_tile_setup( void ) {
     else
         lv_switch_off( enable_on_standby_onoff, LV_ANIM_OFF );
 
+    if ( gpsctl_get_app_use_gps() )
+        lv_switch_on( app_use_gps_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( app_use_gps_onoff, LV_ANIM_OFF );
+
     if ( gpsctl_get_gps_over_ip() )
         lv_switch_on( fakegps_onoff, LV_ANIM_OFF );
     else
@@ -143,7 +165,6 @@ void gps_settings_tile_setup( void ) {
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_UPDATE_LOCATION, gps_settings_latlon_update_cb, "gps settings" );
 
 }
-
 
 bool gps_settings_latlon_update_cb( EventBits_t event, void *arg ) {
     static bool gpsfix = false;
@@ -195,6 +216,12 @@ static void autoon_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
 static void enable_on_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED):  gpsctl_set_enable_on_standby( lv_switch_get_state( obj ) );
+    }
+}
+
+static void app_use_gps_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED):  gpsctl_set_app_use_gps( lv_switch_get_state( obj ) );
     }
 }
 

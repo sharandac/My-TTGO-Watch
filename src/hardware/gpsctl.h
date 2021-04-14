@@ -32,13 +32,14 @@
     #define GPSCTL_DISABLE              _BV(1)         /** @brief event mask for GPS disable */
     #define GPSCTL_FIX                  _BV(2)         /** @brief event mask for GPS has an fix */
     #define GPSCTL_NOFIX                _BV(3)         /** @brief event mask for GPS has no fix */
-    #define GPSCTL_UPDATE_LOCATION      _BV(4)         /** @brief event mask for GPS location update */
-    #define GPSCTL_UPDATE_DATE          _BV(5)         /** @brief event mask for GPS date update */
-    #define GPSCTL_UPDATE_TIME          _BV(6)         /** @brief event mask for GPS time update*/
-    #define GPSCTL_UPDATE_SPEED         _BV(7)         /** @brief event mask for GPS speed update*/
-    #define GPSCTL_UPDATE_ALTITUDE      _BV(8)         /** @brief event mask for GPS altitude update*/
-    #define GPSCTL_UPDATE_SATELLITE     _BV(9)         /** @brief event mask for GPS satellite update*/
-    #define GPSCTL_UPDATE_HDOP          _BV(10)        /** @brief event mask for GPS hdop update*/
+    #define GPSCTL_SET_APP_LOCATION     _BV(4)         /** @brief event mask for GPS has no fix */
+    #define GPSCTL_UPDATE_LOCATION      _BV(5)         /** @brief event mask for GPS location update */
+    #define GPSCTL_UPDATE_DATE          _BV(6)         /** @brief event mask for GPS date update */
+    #define GPSCTL_UPDATE_TIME          _BV(7)         /** @brief event mask for GPS time update*/
+    #define GPSCTL_UPDATE_SPEED         _BV(8)         /** @brief event mask for GPS speed update*/
+    #define GPSCTL_UPDATE_ALTITUDE      _BV(9)         /** @brief event mask for GPS altitude update*/
+    #define GPSCTL_UPDATE_SATELLITE     _BV(10)         /** @brief event mask for GPS satellite update*/
+    #define GPSCTL_UPDATE_HDOP          _BV(11)        /** @brief event mask for GPS hdop update*/
 
     /**
      * @brief gps data structure
@@ -114,6 +115,18 @@
      * @param enable_on_standby true enable, false disable
      */
     void gpsctl_set_enable_on_standby( bool enable_on_standby );
+    /**
+     * @brief get app_use_gps config
+     * 
+     * @return true if use or false if not
+     */
+    bool gpsctl_get_app_use_gps( void );
+    /**
+     * @brief set app_use_gps
+     * 
+     * @param app_use_gps   true if use or false if not
+     */
+    void gpsctl_set_app_use_gps( bool app_use_gps );
     /**
      * @brief set a new location
      * 

@@ -100,6 +100,11 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 if ( !gpsfix ) {
                     gpsfix = true;
                     gpsctl_send_cb( GPSCTL_FIX, NULL );
+                    if ( gpsctl_get_app_use_gps() ) {
+                        gps_data.lat = gps->location.lat();
+                        gps_data.lon = gps->location.lng();
+                        gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
+                    }
                 }
 
                 if ( gps->location.isUpdated() ) {
@@ -134,6 +139,9 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 if( !gpsfix ) {
                     gpsfix = true;
                     gpsctl_send_cb( GPSCTL_FIX, NULL );
+                    if ( gpsctl_get_app_use_gps() ) {
+                        gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
+                    }
                 }
                 gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
             }
@@ -251,6 +259,15 @@ void gpsctl_autoon_off( void ) {
     gps_data.valid = false;
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+}
+
+bool gpsctl_get_app_use_gps( void ) {
+    return( gpsctl_config.app_use_gps );
+}
+
+void gpsctl_set_app_use_gps( bool app_use_gps ) {
+    gpsctl_config.app_use_gps = app_use_gps;
+    gpsctl_config.save();
 }
 
 bool gpsctl_get_autoon( void ) {
