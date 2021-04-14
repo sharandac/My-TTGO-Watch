@@ -227,11 +227,7 @@ void gps_status_task(lv_task_t *task)
     if (gps != nullptr)
     {
         //get/process data
-        while (ttgo->hwSerial->available())
-        {
-            int r = ttgo->hwSerial->read();
-            ttgo->gps->encode(r);
-        }
+        ttgo->gpsHandler();
 
         //view data
         if (gps->location.isValid())
