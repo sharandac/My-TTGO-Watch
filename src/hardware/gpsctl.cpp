@@ -89,65 +89,103 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     static uint64_t lastmillis = millis();
 
     if ( millis() - lastmillis > GPSCTL_INTERVAL ) {
-        lastmillis = millis();
-        static bool gpsfix = false;
+        /*
+         * check if the last update is more than 2 times away
+         * to avoid callback bombing
+         */
+        if ( ( millis() - lastmillis ) > GPSCTL_INTERVAL * 2 ) {
+            lastmillis = millis();
+        }
+        else {
+            lastmillis =+ GPSCTL_INTERVAL;
+        }
 
         #if defined( LILYGO_WATCH_HAS_GPS )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->gpsHandler();
-
-            if ( gps->location.isValid() ) {
-                if ( !gpsfix ) {
-                    gpsfix = true;
+            /*
+             * store valid state
+             */
+            gps_data.valid_location = gps->location.isValid();
+            gps_data.valid_speed = gps->speed.isValid();
+            gps_data.valid_satellite = gps->satellites.isValid();
+            gps_data.valid_altitude = gps->altitude.isValid();
+            /*
+             * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
+             */
+            if ( gps_data.valid_location != gps_data.gpsfix ) {
+                gps_data.gpsfix = gps_data.valid_location;
+                if ( gps_data.gpsfix ) {
+                    /*
+                     * send FIX and SET_APP_LOCATION event 
+                     */
                     gpsctl_send_cb( GPSCTL_FIX, NULL );
                     if ( gpsctl_get_app_use_gps() ) {
                         gps_data.lat = gps->location.lat();
                         gps_data.lon = gps->location.lng();
                         gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
                     }
+                    gpsctl_send_cb( GPSCTL_UPDATE_SOURCE, (void*)&gps_data );
                 }
-
-                if ( gps->location.isUpdated() ) {
-                    gps_data.lat = gps->location.lat();
-                    gps_data.lon = gps->location.lng();
-                    gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
-                }
-                if ( gps->speed.isUpdated() ) {
-                    gps_data.speed_mph = gps->speed.mph();
-                    gps_data.speed_mps = gps->speed.mps();
-                    gps_data.speed_kmh = gps->speed.kmph();
-                    gpsctl_send_cb( GPSCTL_UPDATE_SPEED, (void*)&gps_data );
-                }
-                if ( gps->altitude.isUpdated()) {
-                    gps_data.altitude_feed = gps->altitude.feet();
-                    gps_data.altitude_meters = gps->altitude.meters();
-                    gpsctl_send_cb( GPSCTL_UPDATE_ALTITUDE, (void*)&gps_data );
-                }
-                if ( gps->satellites.isUpdated() ) {
-                    gps_data.satellites = gps->satellites.value();
-                    gpsctl_send_cb( GPSCTL_UPDATE_SATELLITE, (void*)&gps_data );
-                }
-            }
-            else {
-                if ( gpsfix ) {
-                    gpsfix = false;
+                else {
+                    /*
+                     * send NOFIX event
+                     */
                     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
                 }
             }
+            /*
+             * check for data updates
+             */
+            if ( gps->location.isUpdated() ) {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.lat = gps->location.lat();
+                gps_data.lon = gps->location.lng();
+                gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
+            }
+            if ( gps->speed.isUpdated() ) {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.speed_mph = gps->speed.mph();
+                gps_data.speed_mps = gps->speed.mps();
+                gps_data.speed_kmh = gps->speed.kmph();
+                gpsctl_send_cb( GPSCTL_UPDATE_SPEED, (void*)&gps_data );
+            }
+            if ( gps->altitude.isUpdated()) {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.altitude_feed = gps->altitude.feet();
+                gps_data.altitude_meters = gps->altitude.meters();
+                gpsctl_send_cb( GPSCTL_UPDATE_ALTITUDE, (void*)&gps_data );
+            }
+            if ( gps->satellites.isUpdated() ) {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.satellites = gps->satellites.value();
+                gpsctl_send_cb( GPSCTL_UPDATE_SATELLITE, (void*)&gps_data );
+            }
+
         #else
-            if ( gps_data.valid ) {
-                if( !gpsfix ) {
-                    gpsfix = true;
+            /*
+             * send only when valid_location and gpsfix not equal
+             */
+            if ( gps_data.valid_location != gps_data.gpsfix ) {
+                gps_data.gpsfix = gps_data.valid_location;
+                if ( gps_data.gpsfix ) {
+                    /*
+                     * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
+                     */
                     gpsctl_send_cb( GPSCTL_FIX, NULL );
+                    gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
+                    gpsctl_send_cb( GPSCTL_UPDATE_SOURCE, (void*)&gps_data );
+                    /*
+                     * send SET_APP_LOCATION if enabled
+                     */
                     if ( gpsctl_get_app_use_gps() ) {
                         gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
                     }
                 }
-                gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
-            }
-            else {
-                if ( gpsfix ) {
-                    gpsfix = false;
+                else {
+                    /*
+                     * send NOFIX event
+                     */
                     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
                 }
             }
@@ -215,7 +253,11 @@ void gpsctl_on( void ) {
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->trunOnGPS();
     #endif
-    gps_data.valid = false;
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
     gpsctl_config.autoon = true;
     gpsctl_config.save();
     gpsctl_send_cb( GPSCTL_ENABLE, NULL );
@@ -227,7 +269,11 @@ void gpsctl_off( void ) {
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->turnOffGPS();
     #endif
-    gps_data.valid = false;
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
     gpsctl_config.autoon = false;
     gpsctl_config.save();
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
@@ -240,12 +286,20 @@ void gpsctl_autoon_on( void ) {
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->trunOnGPS();
         #endif
-        gps_data.valid = false;
+        gps_data.gpsfix = false;
+        gps_data.valid_location = false;
+        gps_data.valid_speed = false;
+        gps_data.valid_altitude = false;
+        gps_data.valid_satellite = false;
         gpsctl_send_cb( GPSCTL_ENABLE, NULL );
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     }
     else {
-        gps_data.valid = false;
+        gps_data.gpsfix = false;
+        gps_data.valid_location = false;
+        gps_data.valid_speed = false;
+        gps_data.valid_altitude = false;
+        gps_data.valid_satellite = false;
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
         gpsctl_send_cb( GPSCTL_DISABLE, NULL );
     }
@@ -256,7 +310,11 @@ void gpsctl_autoon_off( void ) {
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->turnOffGPS();
     #endif
-    gps_data.valid = false;
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     gpsctl_send_cb( GPSCTL_DISABLE, NULL );
 }
@@ -297,10 +355,54 @@ void gpsctl_set_enable_on_standby( bool enable_on_standby ) {
     gpsctl_config.save();
 }
 
-void gpsctl_set_location( double lat, double lon ) {
-    gps_data.valid = true;
+void gpsctl_set_location( double lat, double lon, gps_source_t gps_source ) {
+    /*
+     * setup gps_data structure and send events
+     */
+    gps_data.gps_source = gps_source;
+    gps_data.gpsfix = false;
+    gps_data.valid_location = true;
+    gps_data.valid_speed = false;
+    gps_data.valid_satellite = false;
+    gps_data.valid_altitude = false;
     gps_data.lat = lat;
     gps_data.lon = lon;
+    /*
+     * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
+     */
     gpsctl_send_cb( GPSCTL_FIX, NULL );
     gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
+    gpsctl_send_cb( GPSCTL_UPDATE_SOURCE, (void*)&gps_data );
+    /*
+     * send SET_APP_LOCATION if enabled
+     */
+    if ( gpsctl_get_app_use_gps() ) {
+        gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
+    }
+}
+
+const char *gpsctl_get_source_str( gps_source_t gps_source ) {
+    const char *ret_val = NULL;
+
+    switch( gps_source ) {
+        case GPS_SOURCE_UNKNOWN:
+            ret_val = "unknown gps";
+            break;
+        case GPS_SOURCE_FAKE:
+            ret_val = "fake gps";
+            break;
+        case GPS_SOURCE_IP:
+            ret_val = "ip location";
+            break;
+        case GPS_SOURCE_USER:
+            ret_val = "user gps";
+            break;
+        case GPS_SOURCE_GPS:
+            ret_val = "gps receiver";
+            break;
+        default:
+            ret_val = "no source";
+    }
+
+    return( ret_val );
 }

@@ -26,37 +26,50 @@
     #include "callback.h"
     #include "hardware/config/gpsctlconfig.h"
 
-    #define GPSCTL_INTERVAL             1000
+    #define GPSCTL_INTERVAL             1000           /** @brief gps data intervall in milliseconds */
 
     #define GPSCTL_ENABLE               _BV(0)         /** @brief event mask for GPS enabled */
     #define GPSCTL_DISABLE              _BV(1)         /** @brief event mask for GPS disable */
     #define GPSCTL_FIX                  _BV(2)         /** @brief event mask for GPS has an fix */
     #define GPSCTL_NOFIX                _BV(3)         /** @brief event mask for GPS has no fix */
-    #define GPSCTL_SET_APP_LOCATION     _BV(4)         /** @brief event mask for GPS has no fix */
+    #define GPSCTL_SET_APP_LOCATION     _BV(4)         /** @brief event mask for GPS set location for user application like weather-app */
     #define GPSCTL_UPDATE_LOCATION      _BV(5)         /** @brief event mask for GPS location update */
     #define GPSCTL_UPDATE_DATE          _BV(6)         /** @brief event mask for GPS date update */
     #define GPSCTL_UPDATE_TIME          _BV(7)         /** @brief event mask for GPS time update*/
     #define GPSCTL_UPDATE_SPEED         _BV(8)         /** @brief event mask for GPS speed update*/
     #define GPSCTL_UPDATE_ALTITUDE      _BV(9)         /** @brief event mask for GPS altitude update*/
-    #define GPSCTL_UPDATE_SATELLITE     _BV(10)         /** @brief event mask for GPS satellite update*/
-    #define GPSCTL_UPDATE_HDOP          _BV(11)        /** @brief event mask for GPS hdop update*/
-
+    #define GPSCTL_UPDATE_SATELLITE     _BV(10)        /** @brief event mask for GPS satellite update*/
+    #define GPSCTL_UPDATE_SOURCE        _BV(11)        /** @brief event mask for GPS source update*/
+    /**
+     * @brief gps source types
+     */
+    typedef enum {
+        GPS_SOURCE_UNKNOWN = 0,                         /** @brief unknown source */
+        GPS_SOURCE_FAKE,                                /** @brief fake gps source */
+        GPS_SOURCE_IP,                                  /** @brief fake gps source from geoip service */
+        GPS_SOURCE_USER,                                /** @brief fake gps source from user */
+        GPS_SOURCE_GPS,                                 /** @brief gps source */
+        GPS_SOURCE_NUM
+    } gps_source_t;
     /**
      * @brief gps data structure
      */
     typedef struct {
-        bool valid = false;
-        double lat = 0;
-        double lon = 0;
-        double speed_mph = 0;
-        double speed_mps = 0;
-        double speed_kmh = 0;
-        double altitude_feed = 0;
-        double altitude_meters = 0;
-        uint32_t satellites = 0;
-        uint32_t hdop = 0;
+        gps_source_t gps_source = GPS_SOURCE_UNKNOWN;   /** @brief gps source */
+        bool gpsfix = false;                            /** @brief gps fix flag for internal use */
+        bool valid_location = false;                    /** @brief true if location valid */
+        bool valid_speed = false;                       /** @brief true if speed valid */
+        bool valid_altitude = false;                    /** @brief true if altitude valid */
+        bool valid_satellite = false;                   /** @brief true if satellite valid */
+        double lat = 0;                                 /** @brief gps latitude */
+        double lon = 0;                                 /** @brief gps longitude */
+        double speed_mph = 0;                           /** @brief speed in miles per hour */
+        double speed_mps = 0;                           /** @brief speed in meter per second */
+        double speed_kmh = 0;                           /** @brief speed in kilometers per hour */
+        double altitude_feed = 0;                       /** @brief altitude in feed */
+        double altitude_meters = 0;                     /** @brief altitude in meter */
+        uint32_t satellites = 0;                        /** @brief number of seen satellites */
     } gps_data_t;
-
     /**
      * @brief setup gps
      */
@@ -132,7 +145,14 @@
      * 
      * @param   lat set lat
      * @param   lon set lon
+     * @param   gps_source gps data source
      */
-    void gpsctl_set_location( double lat, double lon );
+    void gpsctl_set_location( double lat, double lon, gps_source_t gps_source );
+    /**
+     * @brief get gps source string
+     * 
+     * @param gps_source gps source enum
+     */
+    const char *gpsctl_get_source_str( gps_source_t gps_source );
 
 #endif // _GPSCTL_H

@@ -90,7 +90,7 @@ static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       //statusbar_hide( true );
                                         app_hide_indicator( gps_status );
-                                        mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_ON );
+                                        mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }
