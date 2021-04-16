@@ -30,6 +30,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/display.h"
 #include "hardware/blectl.h"
@@ -110,7 +111,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
 
     osmand_app_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &osmand_app_main_style, mainbar_get_style() );
+    lv_style_copy( &osmand_app_main_style, ws_get_mainbar_style() );
     lv_style_set_bg_color( &osmand_app_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &osmand_app_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &osmand_app_main_style, LV_OBJ_PART_MAIN, 0);

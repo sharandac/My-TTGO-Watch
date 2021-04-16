@@ -52,10 +52,10 @@ void activity_app_setup() {
 
 void build_main_page()
 {
-    big = Style::Create(mainbar_get_style(), true);
+    big = Style::Create(ws_get_mainbar_style(), true);
     big.textFont(&Ubuntu_32px)
       .textOpacity(LV_OPA_80);
-    small = Style::Create(mainbar_get_style(), true);
+    small = Style::Create(ws_get_mainbar_style(), true);
     small.textFont(&Ubuntu_16px)
       .textOpacity(LV_OPA_80);
 

@@ -91,6 +91,13 @@ static void define_styles(){
     lv_style_set_border_width( &popup_style, LV_OBJ_PART_MAIN, 0);
 }
 
+lv_style_t *ws_get_mainbar_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &mainbar_style;
+}
+
 lv_style_t *ws_get_container_style(){
     if (!styles_defined){
          define_styles();

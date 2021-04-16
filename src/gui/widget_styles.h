@@ -24,6 +24,11 @@
 #include "config.h"
 
 /**
+ * @brief   returns a common mainbar style
+ */
+lv_style_t *ws_get_mainbar_style();
+
+/**
  * @brief   returns a common container style
  */
 lv_style_t *ws_get_container_style();

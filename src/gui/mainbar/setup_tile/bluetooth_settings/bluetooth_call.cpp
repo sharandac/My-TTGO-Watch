@@ -25,6 +25,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
@@ -52,7 +53,7 @@ void bluetooth_call_tile_setup( void ) {
     bluetooth_call_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth call" );
     bluetooth_call_tile = mainbar_get_tile_obj( bluetooth_call_tile_num );
 
-    lv_style_copy( &bluetooth_call_style, mainbar_get_style() );
+    lv_style_copy( &bluetooth_call_style, ws_get_mainbar_style() );
     lv_style_set_bg_color( &bluetooth_call_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &bluetooth_call_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &bluetooth_call_style, LV_OBJ_PART_MAIN, 0);

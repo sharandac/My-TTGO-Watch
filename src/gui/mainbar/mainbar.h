@@ -115,12 +115,6 @@
      */
     bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb );
     /**
-     * @brief get main tile style
-     * 
-     * @return  pointer to the lv_style_t object
-     */
-    lv_style_t *mainbar_get_style( void );
-    /**
      * @brief
      */
     lv_obj_t *mainbar_obj_create( lv_obj_t *parent );

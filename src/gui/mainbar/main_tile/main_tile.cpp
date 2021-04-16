@@ -27,6 +27,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/time_settings/time_settings.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/timesync.h"
 #include "hardware/powermgm.h"
@@ -68,7 +69,7 @@ void main_tile_setup( void ) {
 
     main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
     main_cont = mainbar_get_tile_obj( main_tile_num );
-    style = mainbar_get_style();
+    style = ws_get_mainbar_style();
 
     lv_style_copy( &timestyle, style);
     lv_style_set_text_font( &timestyle, LV_STATE_DEFAULT, &Ubuntu_72px);

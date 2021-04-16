@@ -29,6 +29,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 long stopwatch_milliseconds = 0;
 time_t prev_time;
@@ -58,7 +59,7 @@ void stopwatch_app_task( lv_task_t * task );
 void stopwatch_app_main_setup( uint32_t tile_num ) {
 
     stopwatch_app_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &stopwatch_app_main_style, mainbar_get_style());
+    lv_style_copy( &stopwatch_app_main_style, ws_get_mainbar_style());
 
     lv_style_copy( &stopwatch_app_main_stopwatchstyle, &stopwatch_app_main_style);
     lv_style_set_text_font( &stopwatch_app_main_stopwatchstyle, LV_STATE_DEFAULT, &Ubuntu_72px);
