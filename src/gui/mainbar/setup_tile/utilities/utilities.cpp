@@ -67,10 +67,7 @@ void utilities_tile_setup( void ) {
     // get an app tile and copy mainstyle
     utilities_tile_num = mainbar_add_app_tile( 1, 1, "Utilities setup" );
     utilities_tile = mainbar_get_tile_obj( utilities_tile_num );
-    lv_style_copy( &utilities_style, mainbar_get_style() );
-    lv_style_set_bg_color( &utilities_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &utilities_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &utilities_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &utilities_style, ws_get_setup_tile_style() );
     lv_obj_add_style( utilities_tile, LV_OBJ_PART_MAIN, &utilities_style );
 
     icon_t *utilities_setup_icon = setup_register( "Utilities", &utilities_64px, enter_utilities_event_cb );

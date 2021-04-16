@@ -63,10 +63,7 @@ void battery_settings_tile_setup( void ) {
 
     battery_view_tile_setup( battery_settings_tile_num );
 
-    lv_style_copy( &battery_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &battery_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &battery_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &battery_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &battery_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_settings_tile, LV_OBJ_PART_MAIN, &battery_settings_style );
 
     battery_setup_icon = setup_register( "battery", &battery_icon_64px, enter_battery_setup_event_cb );

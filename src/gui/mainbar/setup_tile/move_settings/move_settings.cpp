@@ -54,10 +54,7 @@ void move_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     move_tile_num = mainbar_add_app_tile( 1, 1, "move settings" );
     move_settings_tile = mainbar_get_tile_obj( move_tile_num );
-    lv_style_copy( &move_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &move_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &move_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &move_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &move_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( move_settings_tile, LV_OBJ_PART_MAIN, &move_settings_style );
 
     icon_t *move_setup_icon = setup_register( "move", &move_64px, enter_move_setup_event_cb );

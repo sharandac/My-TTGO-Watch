@@ -62,10 +62,7 @@ void sound_settings_tile_setup( void ) {
     sound_tile_num = mainbar_add_app_tile( 1, 2, "sound setup" );
     sound_settings_tile = mainbar_get_tile_obj( sound_tile_num );
 
-    lv_style_copy( &sound_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &sound_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &sound_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &sound_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &sound_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( sound_settings_tile, LV_OBJ_PART_MAIN, &sound_settings_style );
 
     sound_setup_icon = setup_register( "sound", &sound_64px, enter_sound_setup_event_cb );

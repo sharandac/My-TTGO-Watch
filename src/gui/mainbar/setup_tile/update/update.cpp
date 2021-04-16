@@ -87,10 +87,7 @@ void update_tile_setup( void ) {
 
     update_setup_tile_setup( update_tile_num + 1 );
 
-    lv_style_copy( &update_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &update_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &update_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &update_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &update_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, &update_settings_style );
 
     update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );

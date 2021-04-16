@@ -65,10 +65,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     update_setup_tile_num = tile_num;
     update_setup_tile = mainbar_get_tile_obj( update_setup_tile_num );
 
-    lv_style_copy( &update_setup_style, mainbar_get_style() );
-    lv_style_set_bg_color( &update_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &update_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &update_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &update_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, &update_setup_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( update_setup_tile, NULL);

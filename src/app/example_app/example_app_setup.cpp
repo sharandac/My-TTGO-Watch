@@ -42,11 +42,7 @@ static void example_app_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event
 void example_app_setup_setup( uint32_t tile_num ) {
 
     example_app_setup_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &example_app_setup_style, mainbar_get_style() );
-
-    lv_style_set_bg_color( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &example_app_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &example_app_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &example_app_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( example_app_setup_tile, LV_OBJ_PART_MAIN, &example_app_setup_style );
 
     lv_obj_t *exit_cont = lv_obj_create( example_app_setup_tile, NULL );

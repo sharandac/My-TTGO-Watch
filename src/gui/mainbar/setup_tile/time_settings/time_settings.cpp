@@ -215,10 +215,7 @@ void time_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     time_tile_num = mainbar_add_app_tile( 1, 1, "time setup" );
     time_settings_tile = mainbar_get_tile_obj( time_tile_num );
-    lv_style_copy( &time_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &time_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &time_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &time_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &time_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( time_settings_tile, LV_OBJ_PART_MAIN, &time_settings_style );
 
     icon_t *time_setup_icon = setup_register( "time", &time_64px, enter_time_setup_event_cb );

@@ -70,10 +70,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     weather_setup_tile_num = tile_num;
     weather_setup_tile = mainbar_get_tile_obj( weather_setup_tile_num );
 
-    lv_style_copy( &weather_setup_style, mainbar_get_style() );
-    lv_style_set_bg_color( &weather_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &weather_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &weather_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &weather_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( weather_setup_tile, LV_OBJ_PART_MAIN, &weather_setup_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( weather_setup_tile, NULL);

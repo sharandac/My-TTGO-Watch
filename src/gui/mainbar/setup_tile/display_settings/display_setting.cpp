@@ -79,10 +79,7 @@ void display_settings_tile_setup( void ) {
     display_settings_tile_1 = mainbar_get_tile_obj( display_tile_num_1 );
     display_settings_tile_2 = mainbar_get_tile_obj( display_tile_num_2 );
 
-    lv_style_copy( &display_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &display_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &display_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &display_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &display_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( display_settings_tile_1, LV_OBJ_PART_MAIN, &display_settings_style );
     lv_obj_add_style( display_settings_tile_2, LV_OBJ_PART_MAIN, &display_settings_style );
 

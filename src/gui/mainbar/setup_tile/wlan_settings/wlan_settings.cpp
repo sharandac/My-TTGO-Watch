@@ -87,10 +87,7 @@ void wlan_settings_tile_setup( void ) {
     wifi_setup_tile_num = wifi_settings_tile_num + 2;
 
     wifi_settings_tile = mainbar_get_tile_obj( wifi_settings_tile_num );
-    lv_style_copy( &wifi_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
-    lv_style_set_bg_opa( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_settings_tile, LV_OBJ_PART_MAIN, &wifi_settings_style );
 
     wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
@@ -214,10 +211,7 @@ static void delete_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event );
 void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_password_tile = mainbar_get_tile_obj( wifi_password_tile_num );
-    lv_style_copy( &wifi_password_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_password_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &wifi_password_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_password_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_password_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_password_tile, LV_OBJ_PART_MAIN, &wifi_password_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( wifi_password_tile, NULL);
@@ -324,10 +318,7 @@ bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg );
 void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_setup_tile = mainbar_get_tile_obj( wifi_setup_tile_num );
-    lv_style_copy( &wifi_setup_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &wifi_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_setup_tile, LV_OBJ_PART_MAIN, &wifi_setup_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( wifi_setup_tile, NULL);
