@@ -47,6 +47,7 @@
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
+#include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
