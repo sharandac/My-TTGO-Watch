@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*

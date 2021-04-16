@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*
@@ -50,7 +50,7 @@ static void enter_sailing_event_cb( lv_obj_t * obj, lv_event_t event );
  */
 void sailing_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    sailing_main_tile_num = mainbar_add_app_tile( 1, 2, "sailing" );
+    sailing_main_tile_num = mainbar_add_app_tile( 1, 2, "Sailing" );
     sailing_setup_tile_num = sailing_main_tile_num + 1;
 
     // register app icon on the app tile
@@ -58,7 +58,7 @@ void sailing_setup( void ) {
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    sailing = app_register( "mysailing", &sailing_64px, enter_sailing_event_cb );
+    sailing = app_register( "Sailing", &sailing_64px, enter_sailing_event_cb );
     app_set_indicator( sailing, ICON_INDICATOR_OK );
 
     // init main and setup tile, see sailing_main.cpp and sailing_setup.cpp
@@ -85,7 +85,7 @@ uint32_t sailing_get_app_setup_tile_num( void ) {
  */
 static void enter_sailing_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
+        case( LV_EVENT_CLICKED ):       statusbar_hide( false );
                                         app_hide_indicator( sailing );
                                         mainbar_jump_to_tilenumber( sailing_main_tile_num, LV_ANIM_OFF );
                                         break;

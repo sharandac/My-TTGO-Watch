@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*
@@ -21,6 +21,8 @@
  */
 #include "config.h"
 #include <TTGO.h>
+#include <WiFi.h>
+#include <AsyncUDP.h>
 
 #include "sailing.h"
 #include "sailing_main.h"
@@ -29,16 +31,34 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/app.h"
+
+#include "hardware/wifictl.h"
+
+AsyncUDP udp;
+
+struct pack {
+  String heading;
+  String gspeed;
+  String vmg;
+  String distance;
+};
+pack attuale;
 
 lv_obj_t *sailing_main_tile = NULL;
 lv_style_t sailing_main_style;
+
+lv_obj_t * heading_label = NULL;
+lv_obj_t * gspeed_label = NULL;
+lv_obj_t * vmg_label = NULL;
 
 lv_task_t * _sailing_task;
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
-LV_FONT_DECLARE(Ubuntu_72px);
+LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_48px);
 
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -48,6 +68,11 @@ void sailing_main_setup( uint32_t tile_num ) {
 
     sailing_main_tile = mainbar_get_tile_obj( tile_num );
     lv_style_copy( &sailing_main_style, mainbar_get_style() );
+    lv_style_set_bg_color( &sailing_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &sailing_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &sailing_main_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font( &sailing_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
+    lv_obj_add_style( sailing_main_tile, LV_OBJ_PART_MAIN, &sailing_main_style );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( sailing_main_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -67,17 +92,38 @@ void sailing_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, sailing_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, enter_sailing_setup_event_cb );
 
-    // uncomment the following block of code to remove the "myapp" label in background
-    lv_style_set_text_opa( &sailing_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
-    lv_style_set_text_font( &sailing_main_style, LV_STATE_DEFAULT, &Ubuntu_72px);
-    lv_obj_t *app_label = lv_label_create( sailing_main_tile, NULL);
-    lv_label_set_text( app_label, "mysailing");
-    lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &sailing_main_style );
-    lv_obj_align( app_label, sailing_main_tile, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t * heading_info_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( heading_info_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( heading_info_label, "H =" );
+    lv_obj_align( heading_info_label, sailing_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 20 );
+    heading_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( heading_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( heading_label, "0°" );
+    lv_obj_align( heading_label, sailing_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 20 );
+
+    lv_obj_t * gspeed_info_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( gspeed_info_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( gspeed_info_label, "Gs =" );
+    lv_obj_align( gspeed_info_label, sailing_main_tile, LV_ALIGN_IN_LEFT_MID, 0, -20 );
+    gspeed_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( gspeed_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( gspeed_label, "0kt" );
+    lv_obj_align( gspeed_label, sailing_main_tile, LV_ALIGN_IN_RIGHT_MID, 0, -20 );
+
+    lv_obj_t * vmg_info_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( vmg_info_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( vmg_info_label, "Vmg =" );
+    lv_obj_align( vmg_info_label, sailing_main_tile, LV_ALIGN_IN_LEFT_MID, 0, 30 );
+    vmg_label = lv_label_create( sailing_main_tile, NULL );
+    lv_obj_add_style( vmg_label, LV_OBJ_PART_MAIN, &sailing_main_style );
+    lv_label_set_text( vmg_label, "0kt" );
+    lv_obj_align( vmg_label, sailing_main_tile, LV_ALIGN_IN_RIGHT_MID, 0, 30 );
 
     // create an task that runs every secound
     _sailing_task = lv_task_create( sailing_task, 1000, LV_TASK_PRIO_MID, NULL );
+
+    //udp listening
+    //if(udp.listen(1234))
 }
 
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -95,6 +141,17 @@ static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
+static void sailing_main_update_label()
+{
+    float dgr = 105.4367;
+    char heading[10];
+    sprintf(heading,"%.2f °", dgr);
+
+    lv_label_set_text( heading_label, heading);
+    lv_obj_align( heading_label, sailing_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 20 );
+}
+
 void sailing_task( lv_task_t * task ) {
     // put your code her
+    sailing_main_update_label();
 }

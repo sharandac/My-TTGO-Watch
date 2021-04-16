@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*
@@ -24,6 +24,8 @@
 
 #include "sailing.h"
 #include "sailing_setup.h"
+
+#include "hardware/display.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -64,7 +66,7 @@ void sailing_setup_setup( uint32_t tile_num ) {
     
     lv_obj_t *exit_label = lv_label_create( exit_cont, NULL);
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_label_set_text( exit_label, "my sailing app setup");
+    lv_label_set_text( exit_label, "Exit setup");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *sailing_foobar_switch_cont = lv_obj_create( sailing_setup_tile, NULL );
@@ -81,13 +83,15 @@ void sailing_setup_setup( uint32_t tile_num ) {
 
     lv_obj_t *sailing_foobar_switch_label = lv_label_create( sailing_foobar_switch_cont, NULL);
     lv_obj_add_style( sailing_foobar_switch_label, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_label_set_text( sailing_foobar_switch_label, "foo bar");
+    lv_label_set_text( sailing_foobar_switch_label, "Always on display");
     lv_obj_align( sailing_foobar_switch_label, sailing_foobar_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 }
 
 static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): Serial.printf( "switch value = %d\r\n", lv_switch_get_state( obj ) );
+                                        if( lv_switch_get_state( obj ) == 1 ) display_set_timeout( 300 );
+                                        else display_set_timeout( 15 );
                                         break;
     }
 }
@@ -95,6 +99,7 @@ static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( sailing_get_app_main_tile_num(), LV_ANIM_ON );
+                                        statusbar_hide( false );
                                         break;
     }
 }
