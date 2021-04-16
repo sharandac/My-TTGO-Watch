@@ -116,17 +116,29 @@
      */
     void gpsctl_set_enable_on_standby( bool enable_on_standby );
     /**
-     * @brief get app_use_gps config
+     * @brief get app_use_permission config
      * 
      * @return true if use or false if not
      */
     bool gpsctl_get_app_use_gps( void );
     /**
-     * @brief set app_use_gps
+     * @brief set app_use_permission
      * 
-     * @param app_use_gps   true if use or false if not
+     * @param app_use_permission   true if use or false if not
      */
-    void gpsctl_set_app_use_gps( bool app_use_gps );
+    void gpsctl_set_app_use_gps( bool app_use_permission );
+    /**
+     * @brief get app_control_permission config
+     * 
+     * @return true if control is alowed or false if not
+     */
+    bool gpsctl_get_app_control_gps( void );
+    /**
+     * @brief set app_control_permission
+     * 
+     * @param app_control_permission   true if control is alowed or false if not
+     */
+    void gpsctl_set_app_control_gps( bool app_control_permission );
     /**
      * @brief set a new location
      * 

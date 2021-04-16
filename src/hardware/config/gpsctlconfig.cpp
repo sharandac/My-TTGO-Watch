@@ -28,7 +28,8 @@ bool gpsctl_config_t::onSave(JsonDocument& doc) {
     doc["autoon"] = autoon;
     doc["enable_on_standby"] = enable_on_standby;
     doc["gps_over_ip"] = gps_over_ip;
-    doc["app_use_gps"] = app_use_gps;
+    doc["app_use_permission"] = app_use_permission;
+    doc["app_control_permission"] = app_control_permission;   
 
     return true;
 }
@@ -37,7 +38,8 @@ bool gpsctl_config_t::onLoad(JsonDocument& doc) {
     autoon = doc["autoon"] | false;
     enable_on_standby = doc["enable_on_standby"] | false;
     gps_over_ip = doc["gps_over_ip"] | false;
-    app_use_gps = doc["app_use_gps"] | false;
+    app_use_permission = doc["app_use_permission"] | false;
+    app_control_permission = doc["app_control_permission"] | false;
 
     return true;
 }
@@ -46,6 +48,7 @@ bool gpsctl_config_t::onDefault( void ) {
     autoon = false;
     enable_on_standby = false;
     gps_over_ip = false;
-    app_use_gps = false;
+    app_use_permission = false;
+    app_control_permission = false;
     return true;
 }

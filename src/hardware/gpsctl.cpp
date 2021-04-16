@@ -31,6 +31,7 @@ static bool gpsctl_init = false;
 gpsctl_config_t gpsctl_config;
 callback_t *gpsctl_callback = NULL;
 gps_data_t gps_data;
+TTGOClass *ttgo_ptr = nullptr;
 
 #if defined( LILYGO_WATCH_HAS_GPS )
     TinyGPSPlus *gps = nullptr;
@@ -58,10 +59,10 @@ void gpsctl_setup( void ) {
         /*
          * init tinygps
          */
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->trunOnGPS();
-        ttgo->gps_begin();
-        gps = ttgo->gps;
+        ttgo_ptr = TTGOClass::getWatch();
+        ttgo_ptr->trunOnGPS();
+        ttgo_ptr->gps_begin();
+        gps = ttgo_ptr->gps;
         gpsctl_autoon_on();
     #endif
 
@@ -93,8 +94,12 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
         static bool gpsfix = false;
 
         #if defined( LILYGO_WATCH_HAS_GPS )
-            TTGOClass *ttgo = TTGOClass::getWatch();
-            ttgo->gpsHandler();
+            ttgo_ptr->gpsHandler();
+            static uint32_t charsProcessed = 0;
+            static uint32_t passedChecksum = 0;
+            log_i("num sat: %d, charsProcessed: %d, passedChecksum: %d", gps->satellites.value(), gps->charsProcessed() - charsProcessed, gps->passedChecksum() - passedChecksum);
+            charsProcessed = gps->charsProcessed();
+            passedChecksum = gps->passedChecksum();
 
             if ( gps->location.isValid() ) {
                 if ( !gpsfix ) {
@@ -211,34 +216,36 @@ bool gpsctl_send_cb( EventBits_t event, void *arg ) {
 }
 
 void gpsctl_on( void ) {
-    #if defined( LILYGO_WATCH_HAS_GPS )
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->trunOnGPS();
-    #endif
-    gps_data.valid = false;
-    gpsctl_config.autoon = true;
-    gpsctl_config.save();
-    gpsctl_send_cb( GPSCTL_ENABLE, NULL );
-    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+    if ( gpsctl_config.app_control_permission ) {
+        #if defined( LILYGO_WATCH_HAS_GPS )
+            ttgo_ptr->trunOnGPS();
+        #endif
+        gps_data.valid = false;
+        gpsctl_send_cb( GPSCTL_ENABLE, NULL );
+        gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+    }
+    else {
+        gps_data.valid = false;
+        gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+        gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    }
 }
 
 void gpsctl_off( void ) {
-    #if defined( LILYGO_WATCH_HAS_GPS )
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->turnOffGPS();
-    #endif
-    gps_data.valid = false;
-    gpsctl_config.autoon = false;
-    gpsctl_config.save();
-    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
-    gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    if ( gpsctl_config.app_control_permission ) {
+        #if defined( LILYGO_WATCH_HAS_GPS )
+            ttgo_ptr->turnOffGPS();
+        #endif
+        gps_data.valid = false;
+        gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+        gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    }
 }
 
 void gpsctl_autoon_on( void ) {
     if ( gpsctl_config.autoon ) {
         #if defined( LILYGO_WATCH_HAS_GPS )
-            TTGOClass *ttgo = TTGOClass::getWatch();
-            ttgo->trunOnGPS();
+            ttgo_ptr->trunOnGPS();
         #endif
         gps_data.valid = false;
         gpsctl_send_cb( GPSCTL_ENABLE, NULL );
@@ -253,8 +260,7 @@ void gpsctl_autoon_on( void ) {
 
 void gpsctl_autoon_off( void ) {
     #if defined( LILYGO_WATCH_HAS_GPS )
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->turnOffGPS();
+        ttgo_ptr->turnOffGPS();
     #endif
     gps_data.valid = false;
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
@@ -262,11 +268,20 @@ void gpsctl_autoon_off( void ) {
 }
 
 bool gpsctl_get_app_use_gps( void ) {
-    return( gpsctl_config.app_use_gps );
+    return( gpsctl_config.app_use_permission );
 }
 
-void gpsctl_set_app_use_gps( bool app_use_gps ) {
-    gpsctl_config.app_use_gps = app_use_gps;
+bool gpsctl_get_app_control_gps( void ) {
+    return( gpsctl_config.app_control_permission );
+}
+
+void gpsctl_set_app_use_gps( bool app_use_permission ) {
+    gpsctl_config.app_use_permission = app_use_permission;
+    gpsctl_config.save();
+}
+
+void gpsctl_set_app_control_gps( bool app_control_permission ) {
+    gpsctl_config.app_control_permission = app_control_permission;
     gpsctl_config.save();
 }
 
