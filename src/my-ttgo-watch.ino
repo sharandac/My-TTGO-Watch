@@ -53,7 +53,9 @@
 #include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
+#if defined( LILYGO_WATCH_HAS_GPS )
 #include "app/gps_status/gps_status.h"
+#endif
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -103,7 +105,9 @@ void setup()
     stopwatch_app_setup();
     alarm_clock_setup();
     activity_app_setup();
+#if defined( LILYGO_WATCH_HAS_GPS )
     gps_status_setup();
+#endif
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
