@@ -187,7 +187,6 @@ void statusbar_setup( void )
     }
 
     static lv_style_t style;
-    lv_style_init(&style);
     lv_style_copy( &style, &statusbarstyle[ STATUSBAR_STYLE_GRAY ] );
 
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_RELEASED, LV_OPA_100 );
