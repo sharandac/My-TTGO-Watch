@@ -176,6 +176,11 @@ void gps_settings_tile_setup( void ) {
     else
         lv_switch_off( app_use_gps_onoff, LV_ANIM_OFF );
 
+    if ( gpsctl_get_app_control_gps() )
+        lv_switch_on( app_control_permission_onoff, LV_ANIM_OFF );
+    else
+        lv_switch_off( app_control_permission_onoff, LV_ANIM_OFF );
+
     if ( gpsctl_get_gps_over_ip() )
         lv_switch_on( fakegps_onoff, LV_ANIM_OFF );
     else

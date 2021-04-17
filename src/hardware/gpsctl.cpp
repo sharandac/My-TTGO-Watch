@@ -103,12 +103,6 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
         #if defined( LILYGO_WATCH_HAS_GPS )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->gpsHandler();
-            static uint32_t charsProcessed = 0;
-            static uint32_t passedChecksum = 0;
-            log_i("num sat: %d, charsProcessed: %d, passedChecksum: %d", gps->satellites.value(), gps->charsProcessed() - charsProcessed, gps->passedChecksum() - passedChecksum);
-            charsProcessed = gps->charsProcessed();
-            passedChecksum = gps->passedChecksum();
-            
             /*
              * store valid state
              */
