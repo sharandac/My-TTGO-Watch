@@ -95,7 +95,6 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_style_set_border_width(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_style_set_text_color(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-    lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
 
     bluetooth_FindPhone_img = lv_img_create(bluetooth_FindPhone_tile, NULL);
     lv_img_set_src(bluetooth_FindPhone_img, &eye_200px);
