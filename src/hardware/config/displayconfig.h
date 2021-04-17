@@ -44,7 +44,7 @@
         uint32_t rotation = 0;                          /** @brief display rotation */
         bool block_return_maintile = false;             /** @brief block back to main tile on standby */
         bool use_dma = true;                            /** @brief use dma framebuffer */
-        bool use_double_buffering = false;              /** @brief use double framebuffer */
+        bool use_double_buffering = true;               /** @brief use double framebuffer */
         bool vibe = true;                               /** @brief vibe for touch feedback */
         uint32_t background_image = 2;                  /** @brief background image */
 
@@ -52,6 +52,7 @@
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
+        virtual bool onDefault( void );
         virtual size_t getJsonBufferSize() { return 1000; }
     };
 #endif // _DISPLAY_CONFIG_H

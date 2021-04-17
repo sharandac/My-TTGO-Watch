@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A smartwatch based on ESP32 from LilyGo. Currently under development.
+A smartwatch based on ESP32 from LilyGo. Currently supoort for T-Watch2020 V1. T-Watch2020 V3 and V2 is added, but untested and not complete for lack of a watch.
 
 # Telegram chatgroup
 
@@ -20,8 +20,6 @@ https://t.me/TTGO_Watch
 
 * the webserver crashes the ESP32 really often
 * the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
-* from time to time the esp32 crashes accidentally
-* and some other small things
 
 # how to use
 

@@ -91,9 +91,9 @@ static void time_setting_set_region_location( const char *timezone ) {
     location = location_tmp;
     region = region_tmp;
     free( timezone_tmp );
-    log_i("timezone = %s", timezone );
-    log_i("region = %s", region.c_str() );
-    log_i("location = %s", location.c_str() );
+    log_d("timezone = %s", timezone );
+    log_d("region = %s", region.c_str() );
+    log_d("location = %s", location.c_str() );
 }
 
 int32_t time_settings_create_regionlist( const char* selected_region ) {
@@ -131,7 +131,7 @@ int32_t time_settings_create_regionlist( const char* selected_region ) {
         }        
     }
     doc.clear();
-    log_i("selected region entry = %d", selected_entry );
+    log_d("selected region entry = %d", selected_entry );
     return( selected_entry );
 }
 
@@ -172,7 +172,7 @@ int32_t time_settings_create_locationlist( const char* selected_region, const ch
         }        
     }
     doc.clear();
-    log_i("selected location entry = %d", selected_entry );
+    log_d("selected location entry = %d", selected_entry );
     return( selected_entry );
 }
 

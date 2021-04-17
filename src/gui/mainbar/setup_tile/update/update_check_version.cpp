@@ -79,7 +79,7 @@ int64_t update_check_new_version( char *url ) {
             firmwarehost = tmp_firmwarehost;
         }
         strcpy( firmwarehost, doc["host"] );
-        log_i("firmwarehost: %s", firmwarehost );
+        log_d("firmwarehost: %s", firmwarehost );
     }
 
     if ( doc["file"] ) {
@@ -99,7 +99,7 @@ int64_t update_check_new_version( char *url ) {
             firmwarefile = tmp_firmwarefile;
         }
         strcpy( firmwarefile, doc["file"] );
-        log_i("firmwarefile: %s", firmwarefile );
+        log_d("firmwarefile: %s", firmwarefile );
     }
 
     if ( doc["gzipfile"] ) {
@@ -119,7 +119,7 @@ int64_t update_check_new_version( char *url ) {
             firmwarefile = tmp_firmwarefile;
         }
         strcpy( firmwarefile, doc["gzipfile"] );
-        log_i("firmwarefile: %s", firmwarefile );
+        log_d("firmwarefile: %s", firmwarefile );
     }
 
     if ( firmwarehost != NULL && firmwarefile != NULL ) {
@@ -139,17 +139,17 @@ int64_t update_check_new_version( char *url ) {
             firmwareurl = tmp_firmwareurl;            
         }
         snprintf( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5, "%s/%s", firmwarehost, firmwarefile );
-        log_i("firmwareurl: %s", firmwareurl );
+        log_d("firmwareurl: %s", firmwareurl );
     }
 
     if ( doc["version"] ) {
         firmwareversion = atoll( doc["version"] );
-        log_i("firmwareversion: %d", firmwareversion );
+        log_d("firmwareversion: %d", firmwareversion );
     }
 
     if ( doc["size"] ) {
         firmwaresize = atoi( doc["size"] );
-        log_i("firmwaresize: %d", firmwaresize );
+        log_d("firmwaresize: %d", firmwaresize );
     }
 
     if ( doc["md5"] ) {
@@ -169,7 +169,7 @@ int64_t update_check_new_version( char *url ) {
             firmwaremd5 = tmp_firmwaremd5;
         }
         strcpy( firmwaremd5, doc["md5"] );
-        log_i("md5: %s", firmwaremd5 );
+        log_d("md5: %s", firmwaremd5 );
     }
 
     if ( doc["comment"] ) {
@@ -189,7 +189,7 @@ int64_t update_check_new_version( char *url ) {
             firmwarecomment = tmp_firmwarecomment;
         }
         strcpy( firmwarecomment, doc["comment"] );
-        log_i("comment: %s", firmwarecomment );
+        log_d("comment: %s", firmwarecomment );
     }
 
     doc.clear();

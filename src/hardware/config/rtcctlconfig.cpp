@@ -56,3 +56,7 @@ bool rtcctl_alarm_t::onLoad(JsonDocument& doc) {
 
     return true;
 }
+
+bool rtcctl_alarm_t::onDefault( void ) {
+    return true;
+}

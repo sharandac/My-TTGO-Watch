@@ -27,7 +27,19 @@
     #define UPDATE_CONFIG_FILE             "/update.cfg"
     #define UPDATE_JSON_CONFIG_FILE        "/update.json"
 
-    #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.version.json"
+    #if defined( LILYGO_WATCH_2020_V1 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.version.json"
+    #endif
+    #if defined( LILYGO_WATCH_2020_V2 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v2.version.json"
+    #endif
+    #if defined( LILYGO_WATCH_2020_V3 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"
+    #endif
+
+    #if !defined( FIRMWARE_UPDATE_URL )
+        #error "no ttgo t-watch version defined"
+    #endif
 
     typedef struct {
         bool autosync = true;

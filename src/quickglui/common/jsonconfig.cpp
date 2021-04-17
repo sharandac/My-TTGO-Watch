@@ -68,6 +68,7 @@ bool JsonConfig::onSave(JsonDocument& document) {
 
   return true;
 }
+
 bool JsonConfig::onLoad(JsonDocument& document) {
   for (int i = 0; i < count; i++) {
     options[i]->load(document);
@@ -76,6 +77,10 @@ bool JsonConfig::onLoad(JsonDocument& document) {
   if (processHandler != nullptr)
     processHandler(*this);
   
+  return true;
+}
+
+bool JsonConfig::onDefault( void ) {
   return true;
 }
 

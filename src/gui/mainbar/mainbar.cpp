@@ -121,7 +121,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
-    log_i("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
+    log_d("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
 
     return( tile_entrys - 1 );
 }
@@ -237,16 +237,16 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
     }
 
     if ( tile_number < tile_entrys ) {
-        log_i("jump to tile %d from tile %d", tile_number, current_tile );
+        log_d("jump to tile %d from tile %d", tile_number, current_tile );
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
         // call hibernate callback for the current tile if exist
         if ( tile[ current_tile ].hibernate_cb != NULL ) {
-            log_i("call hibernate cb for tile: %d", current_tile );
+            log_d("call hibernate cb for tile: %d", current_tile );
             tile[ current_tile ].hibernate_cb();
         }
         // call activate callback for the new tile if exist
         if ( tile[ tile_number ].activate_cb != NULL ) { 
-            log_i("call activate cb for tile: %d", tile_number );
+            log_d("call activate cb for tile: %d", tile_number );
             tile[ tile_number ].activate_cb();
         }
         current_tile = tile_number;

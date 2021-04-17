@@ -73,30 +73,51 @@ void sound_setup( void ) {
     /*
      * config sound driver and interface
      */
-    out = new AudioOutputI2S();
-    out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
-    sound_set_volume_config( sound_config.volume );
-    mp3 = new AudioGeneratorMP3();
-    wav = new AudioGeneratorWAV();
-    sam = new ESP8266SAM;
-    sam->SetVoice(sam->VOICE_SAM);
-    /*
-     * register all powermgm callback functions
-     */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
-    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
-    /*
-     * enable sound
-     */
-    sound_set_enabled( sound_config.enable );
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        out = new AudioOutputI2S();
+        out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
+        sound_set_volume_config( sound_config.volume );
+        mp3 = new AudioGeneratorMP3();
+        wav = new AudioGeneratorWAV();
+        sam = new ESP8266SAM;
+        sam->SetVoice(sam->VOICE_SAM);
+        /*
+        * register all powermgm callback functions
+        */
+        powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
+        powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
+        /*
+        * enable sound
+        */
+        sound_set_enabled( sound_config.enable );
 
-    sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
-    sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+        sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
+        sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+        sound_init = true;
+    #elif defined( LILYGO_WATCH_2020_V2 )
+        sound_set_enabled( false );
+        sound_init = false;
+    #endif
 
-    sound_init = true;
+    
+}
+
+bool sound_get_available( void ) {
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        return( true );
+    #else
+        return( false );
+    #endif
 }
 
 bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( true );
+    }
+
     switch( event ) {
         case POWERMGM_STANDBY:          sound_set_enabled( false );
                                         log_i("go standby");
@@ -112,6 +133,13 @@ bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( true );
+    }
+
     if ( sound_config.enable && sound_init ) {
         // we call sound_set_enabled(false) to ensure the PMU stops all power
         if ( mp3->isRunning() && !mp3->loop() ) {
@@ -127,6 +155,13 @@ bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
 }
 
 bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( true );
+    }
+
     /*
      * check if an callback table exist, if not allocate a callback table
      */
@@ -144,6 +179,12 @@ bool sound_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const ch
 }
 
 bool sound_send_event_cb( EventBits_t event, void *arg ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( true );
+    }
     /*
      * call all callbacks with her event mask
      */
@@ -155,6 +196,13 @@ bool sound_send_event_cb( EventBits_t event, void *arg ) {
  * depending on the current value of: sound_config.enable
  */
 void sound_set_enabled( bool enabled ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( enabled ) {
@@ -173,6 +221,13 @@ void sound_set_enabled( bool enabled ) {
 }
 
 void sound_play_spiffs_mp3( const char *filename ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     if ( sound_config.enable && sound_init ) {
         log_i("playing file %s from SPIFFS", filename);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
@@ -184,6 +239,13 @@ void sound_play_spiffs_mp3( const char *filename ) {
 }
 
 void sound_play_progmem_wav( const void *data, uint32_t len ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     if ( sound_config.enable && sound_init ) {
         log_i("playing audio (size %d) from PROGMEM ", len );
         progmem_file = new AudioFileSourcePROGMEM( data, len );
@@ -193,8 +255,14 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
     }
 }
 
-void sound_speak( const char *str )
-{
+void sound_speak( const char *str ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     if ( sound_config.enable ) {
         log_i("Speaking text", str);
         is_speaking = true;
@@ -207,18 +275,46 @@ void sound_speak( const char *str )
 }
 
 void sound_save_config( void ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     sound_config.save();
 }
 
 void sound_read_config( void ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     sound_config.load();
 }
 
 bool sound_get_enabled_config( void ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( false );
+    }
+
     return sound_config.enable;
 }
 
 void sound_set_enabled_config( bool enable ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     sound_config.enable = enable;
     if ( sound_config.enable) {
         sound_set_enabled( true );
@@ -230,10 +326,24 @@ void sound_set_enabled_config( bool enable ) {
 }
 
 uint8_t sound_get_volume_config( void ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return( 0 );
+    }
+
     return( sound_config.volume );
 }
 
 void sound_set_volume_config( uint8_t volume ) {
+    /**
+     * check if sound available
+     */
+    if( !sound_get_available() ) {
+        return;
+    }
+
     sound_config.volume = volume;
         
     if ( sound_config.enable && sound_init ) {

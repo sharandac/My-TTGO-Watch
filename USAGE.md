@@ -119,6 +119,13 @@ The activity tracker let you check your activity.
 
 In the settings, set your step length and your goals in step and meters.
 
+When associated to Gadgetbrige, activity is reported regularly.
+If you need to ensure a synchronization, for example at the beginning of an activity or at the end, you can use the refresh button.
+It will force a synchronization.
+
+The trash can button allows to reset step counter.
+Useful when starting a new activity an keeping exact track of it.
+
 # Updates
 
 ![screenshot](images/screen11.png)

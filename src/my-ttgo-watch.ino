@@ -43,6 +43,7 @@
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
+#include "app/corona_app_detector/corona_app_detector.h"
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
 #include "app/example_app/example_app.h"
@@ -52,13 +53,14 @@
 #include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
+#include "app/gps_status/gps_status.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
 void setup()
 {
     Serial.begin(115200);
-    Serial.printf("starting t-watch V1, version: " __FIRMWARE__ " core: %d\r\n", xPortGetCoreID() );
+    Serial.printf("starting t-watch %s, version: " __FIRMWARE__ " core: %d\r\n", WATCH_VERSION_NAME, xPortGetCoreID() );
     Serial.printf("Configure watchdog to 30s: %d\r\n", esp_task_wdt_init( 30, true ) );
 
     ttgo->begin();
@@ -101,19 +103,21 @@ void setup()
     stopwatch_app_setup();
     alarm_clock_setup();
     activity_app_setup();
+    gps_status_setup();
     crypto_ticker_setup();
     example_app_setup();
     osmand_app_setup();
     IRController_setup();
     fxrates_app_setup();
+    corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-  	/*
-     *
+    /*
+     * post init: setup wifi, blectl and sound
      */
-    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) )
+    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
         wifictl_on();
-
+    }
     blectl_setup();
     sound_setup();
 
@@ -127,7 +131,6 @@ void setup()
     Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
 
     disableCore0WDT();
-    callback_print();
 }
 
 void loop() {

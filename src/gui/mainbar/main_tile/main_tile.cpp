@@ -255,31 +255,41 @@ void main_tile_update_time( void ) {
     static time_t last = 0;
     struct tm  info, last_info;
     char time_str[64]="";
-
+    /*
+     * copy current time into now and convert it local time info
+     */
     time( &now );
-    
     localtime_r( &now, &info );
-    if ( last != 0 )
+    /*
+     * convert last time_t into tm from
+     * last check if last equal zero (first run condition)
+     */
+    if ( last != 0 ) {
         localtime_r( &last, &last_info );
-
-    // Date
-    // only update while date changes
-    if ( last == 0 || info.tm_yday != last_info.tm_yday ) {
-        strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
-        log_i("renew date: %s", time_str );
-        lv_label_set_text( datelabel, time_str );
-        lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     }
-
-    // Time
-    // only update while time changes
-    // Display has a minute resolution
+    /*
+     * Time:
+     * only update while time changes
+     * Display has a minute resolution
+     */
     if ( last == 0 || info.tm_min != last_info.tm_min || info.tm_hour != last_info.tm_hour ) {
         main_tile_format_time( time_str, sizeof(time_str), &info );
-        log_i("renew time: %s", time_str );
+        log_d("renew time: %s", time_str );
         lv_label_set_text( timelabel, time_str );
         lv_obj_align( timelabel, clock_cont, LV_ALIGN_CENTER, 0, 0 );
-        // Save for next loop
+        /*
+         * Date:
+         * only update while date changes
+         */
+        if ( last == 0 || info.tm_yday != last_info.tm_yday ) {
+            strftime( time_str, sizeof(time_str), "%a %d.%b %Y", &info );
+            log_d("renew date: %s", time_str );
+            lv_label_set_text( datelabel, time_str );
+            lv_obj_align( datelabel, clock_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+        }
+        /*
+         * Save for next loop
+         */
         last = now;
     }
 }

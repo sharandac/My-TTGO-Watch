@@ -46,6 +46,15 @@ AppPage& AppPage::addRefreshButton(WidgetAction onRefreshBtnClick)
   return *this;
 }
 
+AppPage& AppPage::addAppButton(const lv_img_dsc_t& image, WidgetAction onBtnClick)
+{
+  log_d("New button");
+  btnApp = Button(this, image, onBtnClick);
+  btnApp.align(*this, LV_ALIGN_IN_BOTTOM_MID, 0, -10);
+
+  return *this;
+}
+
 Container& AppPage::createChildContainer(lv_layout_t autoLayoutOptios) {
   if (!hasChildContainer()) {
     childContainer = Container(this);

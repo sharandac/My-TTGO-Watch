@@ -31,8 +31,8 @@ bool display_config_t::onSave(JsonDocument& doc) {
     doc["block_return_maintile"] = block_return_maintile;
     doc["background_image"] = background_image;
     doc["use_dma"] = use_dma;
-    doc["vibe"] = vibe;
     doc["use_double_buffering"] = use_double_buffering;
+    doc["vibe"] = vibe;
 
     return true;
 }
@@ -44,8 +44,12 @@ bool display_config_t::onLoad(JsonDocument& doc) {
     block_return_maintile = doc["block_return_maintile"] | false;
     background_image = doc["background_image"] | 2;
     use_dma = doc["use_dma"] | true;
+    use_double_buffering = doc["use_double_buffering"] | true;
     vibe = doc["vibe"] | true;
-    use_double_buffering = doc["use_double_buffering"] | false;
 
+    return true;
+}
+
+bool display_config_t::onDefault( void ) {
     return true;
 }

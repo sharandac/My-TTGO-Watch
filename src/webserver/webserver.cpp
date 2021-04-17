@@ -445,11 +445,11 @@ void asyncwebserver_start(void){
 
   asyncserver.begin();
 
-  log_i("enable webserver and ssdp");
+  log_d("enable webserver and ssdp");
 }
 
 void asyncwebserver_end(void) {
   SSDP.end();
   asyncserver.end();
-  log_i("disable webserver and ssdp");
+  log_d("disable webserver and ssdp");
 }

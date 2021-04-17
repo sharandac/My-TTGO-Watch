@@ -42,6 +42,7 @@
 #include "hardware/pmu.h"
 #include "hardware/sound.h"
 #include "hardware/display.h"
+#include "hardware/gpsctl.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/wlan_settings/wlan_settings.h"
@@ -79,6 +80,7 @@ lv_status_bar_t statusicon[ STATUSBAR_NUM ] =
     { NULL, LV_SYMBOL_BLUETOOTH, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_WIFI, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_VOLUME_MAX, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
+    { NULL, LV_SYMBOL_GPS, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BELL, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_WARNING, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BELL , LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
@@ -91,6 +93,7 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event );
 void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event );
 void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event );
 void statusbar_volume_slider_event_handler_cb( lv_obj_t *sound_slider, lv_event_t event );
+bool statusbar_gpsctl_event_cb( EventBits_t event, void *arg );
 void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event );
 void statusbar_display_event_cb( lv_obj_t *display, lv_event_t event );
 void statusbar_brightness_slider_event_handler_cb( lv_obj_t *brightness_slider, lv_event_t event );
@@ -289,6 +292,7 @@ void statusbar_setup( void )
     statusbar_hide_icon( STATUSBAR_WIFI );
     statusbar_hide_icon( STATUSBAR_BLUETOOTH );
     statusbar_hide_icon( STATUSBAR_VOLUME );
+    statusbar_hide_icon( STATUSBAR_GPS );
 
     if ( rtcctl_get_alarm_data()->enabled ) {
         statusbar_show_icon( STATUSBAR_ALARM );
@@ -304,10 +308,17 @@ void statusbar_setup( void )
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bmactl_event_cb, "statusbar stepcounter" );
     pmu_register_cb( PMUCTL_STATUS, statusbar_pmuctl_event_cb, "statusbar pmu");
-    sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, statusbar_soundctl_event_cb, "statusbar sound");
     display_register_cb( DISPLAYCTL_BRIGHTNESS, statusbar_displayctl_event_cb, "statusbar display" );
+    gpsctl_register_cb( GPSCTL_ENABLE | GPSCTL_DISABLE | GPSCTL_FIX | GPSCTL_NOFIX, statusbar_gpsctl_event_cb, "statusbar gps" );
 
     statusbar_task = lv_task_create( statusbar_update_task, 250, LV_TASK_PRIO_MID, NULL );
+
+    if( sound_get_available() ) {
+        sound_register_cb( SOUNDCTL_ENABLED | SOUNDCTL_VOLUME, statusbar_soundctl_event_cb, "statusbar sound");
+    }
+    else {
+        lv_obj_set_hidden( statusbar_volume_cont, true );
+    }
 }
 
 void statusbar_update_task( lv_task_t * task ) {
@@ -323,6 +334,37 @@ void statusbar_update_task( lv_task_t * task ) {
         statusbar_refresh();
         statusbar_refresh_update = false;
     }
+}
+
+bool statusbar_gpsctl_event_cb( EventBits_t event, void *arg ) {
+    /*
+     * check if statusbar ready
+     */
+    if ( !statusbar_init ) {
+        log_e("statusbar not initialized");
+        return( true );
+    }
+
+    switch( event ) {
+        case GPSCTL_DISABLE:  
+            statusbar_hide_icon( STATUSBAR_GPS );
+            statusbar_style_icon( STATUSBAR_GPS, STATUSBAR_STYLE_GRAY );
+            break;
+        case GPSCTL_ENABLE:  
+            statusbar_show_icon( STATUSBAR_GPS );
+            statusbar_style_icon( STATUSBAR_GPS, STATUSBAR_STYLE_GRAY );
+            break;
+        case GPSCTL_FIX:  
+            statusbar_show_icon( STATUSBAR_GPS );
+            statusbar_style_icon( STATUSBAR_GPS, STATUSBAR_STYLE_WHITE );
+            break;
+        case GPSCTL_NOFIX:  
+            statusbar_show_icon( STATUSBAR_GPS );
+            statusbar_style_icon( STATUSBAR_GPS, STATUSBAR_STYLE_GRAY );
+            break;
+    }
+    return( true );
+
 }
 
 bool statusbar_soundctl_event_cb( EventBits_t event, void *arg ) {

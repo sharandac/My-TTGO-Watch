@@ -102,3 +102,41 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
 
     return true;
 }
+
+bool wifictl_config_t::onDefault( void ) {
+    /*
+     * allocate networklist if needed
+     */
+    if ( networklist == NULL ) {
+        networklist = ( wifictl_networklist* )CALLOC( sizeof( wifictl_networklist ) * NETWORKLIST_ENTRYS, 1 );
+        if( !networklist ) {
+            log_e("wifictl_networklist calloc faild");
+            while(true);
+        }
+    }
+    /*
+     * clean networklist
+     */
+    for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+      networklist[ entry ].ssid[ 0 ] = '\0';
+      networklist[ entry ].password[ 0 ] = '\0';
+    }
+
+    /*
+     * read values from json
+     */
+    autoon = true;
+    enable_on_standby = false;
+
+    #ifdef ENABLE_WEBSERVER
+        webserver = false;
+    #endif
+
+    #ifdef ENABLE_FTPSERVER
+        ftpserver = false;
+        strlcpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
+        strlcpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
+    #endif
+
+    return( true );
+}

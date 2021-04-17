@@ -47,3 +47,15 @@ bool timesync_config_t::onLoad(JsonDocument& doc) {
     
     return true;
 }
+
+bool timesync_config_t::onDefault( void ) {
+    daylightsave = false;
+    timesync = true;
+    timezone = 0;
+    use_24hr_clock = true;
+    strlcpy( timezone_name, TIMEZONE_NAME_DEFAULT, sizeof( timezone_name ) );
+    strlcpy( timezone_rule, TIMEZONE_RULE_DEFAULT, sizeof( timezone_rule ) );
+    setenv("TZ", timezone_rule, 1);
+    tzset();
+    return true;
+}

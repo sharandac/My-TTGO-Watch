@@ -46,14 +46,11 @@ lv_obj_t *osmand_app_direction_img = NULL;
 lv_obj_t *osmand_app_distance_label = NULL;
 lv_obj_t *osmand_app_info_label = NULL;
 
-lv_task_t * _osmand_app_task;
-
 static bool osmand_active = false;
 static bool osmand_block_return_maintile = false;
 
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(ahead_128px);
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(turn_left_128px);
 LV_IMG_DECLARE(turn_right_128px);
 LV_IMG_DECLARE(slightly_left_128px);
@@ -105,7 +102,6 @@ void osmand_bluetooth_message_msg_pharse( const char* msg );
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg );
 void osmand_activate_cb( void );
 void osmand_hibernate_cb( void );
-void osmand_app_task( lv_task_t * task );
 
 void osmand_app_main_setup( uint32_t tile_num ) {
 
@@ -126,15 +122,6 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &osmand_app_main_style );
     lv_obj_align( exit_btn, osmand_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
     lv_obj_set_event_cb( exit_btn, exit_osmand_app_main_event_cb );
-
-    lv_obj_t * setup_btn = lv_imgbtn_create( osmand_app_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &osmand_app_main_style );
-    lv_obj_align(setup_btn, osmand_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
-//    lv_obj_set_event_cb( setup_btn, enter_example_app_setup_event_cb );
 
     osmand_app_direction_img = lv_img_create( osmand_app_main_tile, NULL );
     lv_img_set_src( osmand_app_direction_img, &ahead_128px );
@@ -194,7 +181,10 @@ void osmand_bluetooth_message_msg_pharse( const char* msg ) {
     }
     else  {
         if ( doc["t"] && doc["src"] && doc["title"] ) {
-            if ( !strcmp( doc["t"], "notify" ) && !strcmp( doc["src"], "OsmAnd" ) ) {
+            /*
+            * React to messages from "OsmAnd" and "OsmAnd~"
+            */
+            if ( !strcmp( doc["t"], "notify" ) && !strncmp( doc["src"], "OsmAnd", 6 ) ) {
                 if ( strstr( doc["title"], "?") ) {
                     const char * distance = doc["title"];
                     char * direction = strstr( doc["title"], "?");
@@ -233,16 +223,10 @@ void osmand_activate_cb( void ) {
     bluetooth_message_disable();
     osmand_block_return_maintile = display_get_block_return_maintile();
     display_set_block_return_maintile( true );
-    _osmand_app_task = lv_task_create(osmand_app_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
 }
 
 void osmand_hibernate_cb( void ) {
     osmand_active = false;
     bluetooth_message_enable();
     display_set_block_return_maintile( osmand_block_return_maintile );
-    lv_task_del( _osmand_app_task );
-}
-
-void osmand_app_task( lv_task_t * task ) {
-    // put your code her
 }
