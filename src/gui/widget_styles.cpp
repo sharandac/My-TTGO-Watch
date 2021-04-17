@@ -49,7 +49,7 @@ static void define_styles(){
     lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     //lv_style_set_bg_opa( &mainbar_style, LV_OBJ_PART_MAIN, LV_OPA_30);
 
-    lv_style_init( &setup_tile_style );
+    lv_style_copy( &setup_tile_style, &mainbar_style );
     lv_style_set_bg_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &setup_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0);
@@ -123,7 +123,7 @@ lv_style_t *ws_get_img_button_style(){
     if (!styles_defined){
          define_styles();
     }
-    return &mainbar_style;
+    return &img_button_style;
 }
 
 lv_style_t *ws_get_label_style(){
