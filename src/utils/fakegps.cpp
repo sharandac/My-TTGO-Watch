@@ -88,7 +88,7 @@ void fakegps_get_location_Task( void * pvParameters ) {
             lat = doc["lat"].as<float>();
             lon = doc["lon"].as<float>();
             log_i("lat: %f, lon:%f", lat, lon );
-            gpsctl_set_location( lat, lon );
+            gpsctl_set_location( lat, lon, GPS_SOURCE_IP );
         }
     }
 

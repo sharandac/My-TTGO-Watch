@@ -23,16 +23,14 @@
  */
 #ifndef _CONFIG_H 
 
-    #if !defined( LILYGO_WATCH_2020_V1 ) && !defined( LILYGO_WATCH_2020_V3 ) && !defined( LILYGO_WATCH_2020_V2 )
-        #error "no ttgo t-watch version defined"
-    #endif
-
     #if defined( LILYGO_WATCH_2020_V1 )
         #define WATCH_VERSION_NAME  "V1"
     #elif defined( LILYGO_WATCH_2020_V2 )
         #define WATCH_VERSION_NAME  "V2"
     #elif defined( LILYGO_WATCH_2020_V3 )
         #define WATCH_VERSION_NAME  "V3"
+    #else
+        #error "no ttgo t-watch 2020 version defined"
     #endif
 
 
@@ -50,7 +48,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021041501"
+    #define __FIRMWARE__            "2021041502"
     /**
      * Allows to include config.h from C code
      */
