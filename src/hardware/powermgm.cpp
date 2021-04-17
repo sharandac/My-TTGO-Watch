@@ -39,10 +39,14 @@
 #include "display.h"
 #include "rtcctl.h"
 #include "sound.h"
+#if defined( LILYGO_WATCH_HAS_GPS )
 #include "gpsctl.h"
+#endif
 
 #include "gui/mainbar/mainbar.h"
+#if defined( LILYGO_WATCH_HAS_GPS )
 #include "utils/fakegps.h"
+#endif
 
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
@@ -65,10 +69,14 @@ void powermgm_setup( void ) {
     touch_setup();
     timesync_setup();
     rtcctl_setup();
+#if defined( LILYGO_WATCH_HAS_GPS )
     gpsctl_setup();
+#endif
     blectl_read_config();
     sound_read_config();
+#if defined( LILYGO_WATCH_HAS_GPS )
     fakegps_setup();
+#endif
     
     powermgm_set_event( POWERMGM_WAKEUP );
 }
