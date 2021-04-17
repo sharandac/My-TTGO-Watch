@@ -121,17 +121,11 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
 
     powermeter_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &powermeter_main_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &powermeter_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &powermeter_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &powermeter_main_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &powermeter_main_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &powermeter_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_obj_add_style( powermeter_main_tile, LV_OBJ_PART_MAIN, &powermeter_main_style );
 
-    lv_style_copy( &powermeter_id_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &powermeter_id_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &powermeter_id_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &powermeter_id_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &powermeter_id_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
 
     lv_obj_t * exit_btn = lv_imgbtn_create( powermeter_main_tile, NULL);

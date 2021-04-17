@@ -29,6 +29,12 @@
 lv_style_t *ws_get_mainbar_style();
 
 /**
+ * @brief   returns a common opaque application style
+ * (opaque background)
+ */
+lv_style_t *ws_get_app_opa_style();
+
+/**
  * @brief   returns a common container style
  */
 lv_style_t *ws_get_container_style();

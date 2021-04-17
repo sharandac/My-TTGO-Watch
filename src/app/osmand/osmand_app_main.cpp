@@ -111,10 +111,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
 
     osmand_app_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &osmand_app_main_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &osmand_app_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &osmand_app_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &osmand_app_main_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &osmand_app_main_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &osmand_app_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( osmand_app_main_tile, LV_OBJ_PART_MAIN, &osmand_app_main_style );
 
