@@ -34,6 +34,7 @@
 #include "gui/app.h"
 
 #include "hardware/wifictl.h"
+#include "hardware/display.h"
 
 AsyncUDP udp;
 
