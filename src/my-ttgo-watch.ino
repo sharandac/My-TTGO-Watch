@@ -112,25 +112,8 @@ void setup()
     corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-    /*
-     * post init: setup wifi, blectl and sound
-     */
-    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
-        wifictl_on();
-    }
-    blectl_setup();
-    sound_setup();
 
-    display_set_brightness( display_get_brightness() );
-
-    delay(500);
-
-    Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
-    Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
-    Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
-    Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
-
-    disableCore0WDT();
+    powermgm_post_setup();
 }
 
 void loop() {

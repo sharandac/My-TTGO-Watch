@@ -48,6 +48,7 @@ static void autoon_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void enable_on_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void app_use_gps_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void fakegps_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+bool gps_settings_config_update_cb( EventBits_t event, void *arg );
 bool gps_settings_latlon_update_cb( EventBits_t event, void *arg );
 
 void gps_settings_tile_setup( void ) {
@@ -163,7 +164,35 @@ void gps_settings_tile_setup( void ) {
         lv_switch_off( fakegps_onoff, LV_ANIM_OFF );
 
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_UPDATE_LOCATION, gps_settings_latlon_update_cb, "gps settings" );
+    gpsctl_register_cb( GPSCTL_UPDATE_CONFIG, gps_settings_config_update_cb, "gps settings" );
+}
 
+bool gps_settings_config_update_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case GPSCTL_UPDATE_CONFIG:
+            if ( gpsctl_get_autoon() )
+                lv_switch_on( autoon_onoff, LV_ANIM_OFF );
+            else
+                lv_switch_off( autoon_onoff, LV_ANIM_OFF );
+
+            if ( gpsctl_get_enable_on_standby() )
+                lv_switch_on( enable_on_standby_onoff, LV_ANIM_OFF );
+            else
+                lv_switch_off( enable_on_standby_onoff, LV_ANIM_OFF );
+
+            if ( gpsctl_get_app_use_gps() )
+                lv_switch_on( app_use_gps_onoff, LV_ANIM_OFF );
+            else
+                lv_switch_off( app_use_gps_onoff, LV_ANIM_OFF );
+
+            if ( gpsctl_get_gps_over_ip() )
+                lv_switch_on( fakegps_onoff, LV_ANIM_OFF );
+            else
+                lv_switch_off( fakegps_onoff, LV_ANIM_OFF );
+            
+            break;
+    }
+    return( true );
 }
 
 bool gps_settings_latlon_update_cb( EventBits_t event, void *arg ) {
@@ -229,4 +258,8 @@ static void fakegps_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED):  gpsctl_set_gps_over_ip( lv_switch_get_state( obj ) );
     }
+}
+
+uint32_t gps_get_setup_tile_num( void ) {
+    return( gps_tile_num );
 }

@@ -25,5 +25,11 @@
     #include <TTGO.h>
 
     void gps_settings_tile_setup( void );
+    /**
+     * @brief get the gps setup tile number
+     * 
+     * @return  tile number
+     */
+    uint32_t gps_get_setup_tile_num( void );
 
 #endif // _GPS_SETTINGS_H
