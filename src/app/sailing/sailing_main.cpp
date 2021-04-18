@@ -194,6 +194,7 @@ static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        display_set_timeout( 15 );
                                         break;
     }
 }
