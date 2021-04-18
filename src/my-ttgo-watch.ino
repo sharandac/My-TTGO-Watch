@@ -54,6 +54,7 @@
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
+#include "app/example_app/example_app.h"
 
 TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -112,6 +113,7 @@ void setup()
     corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
+    example_app_setup();
 
     powermgm_post_setup();
 }
