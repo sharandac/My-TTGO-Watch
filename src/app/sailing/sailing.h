@@ -24,10 +24,8 @@
 
     #include <TTGO.h>
 
-//    #define EXAMPLE_WIDGET    // uncomment if an widget need
-
-    void sailing_setup( void );
+void sailing_setup( void );
     uint32_t sailing_get_app_setup_tile_num( void );
     uint32_t sailing_get_app_main_tile_num( void );
 
-#endif // _EXAMPLE_APP_H
+#endif // _SAILING_H
