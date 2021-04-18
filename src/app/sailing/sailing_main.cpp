@@ -204,10 +204,10 @@ static void sailing_main_update_label()
     char gspeed[10];
     char vmg[10];
     char distance[10];
-    sprintf(heading,"%.1f°", attuale.heading);
-    sprintf(gspeed,"%.1fkt", attuale.gspeed);
-    sprintf(vmg,"%.1fkt", attuale.vmg);
-    sprintf(distance,"%.1fnm", attuale.distance);
+    snprintf(heading, sizeof( heading ), "%.1f°", attuale.heading);
+    snprintf(gspeed, sizeof( gspeed ), "%.1fkt", attuale.gspeed);
+    snprintf(vmg, sizeof( vmg ), "%.1fkt", attuale.vmg);
+    snprintf(distance, sizeof( distance ), "%.1fnm", attuale.distance);
 
     lv_label_set_text( heading_label, heading);
     lv_obj_align( heading_label, sailing_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 20 );
