@@ -26,4 +26,4 @@
 
     void sailing_main_setup( uint32_t tile_num );
 
-#endif // _sailing_MAIN_H
+#endif // _SAILING_MAIN_H
