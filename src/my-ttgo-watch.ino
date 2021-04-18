@@ -46,7 +46,7 @@
 #include "app/corona_app_detector/corona_app_detector.h"
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/crypto_ticker/crypto_ticker.h"
-#include "app/example_app/example_app.h"
+#include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
@@ -105,7 +105,7 @@ void setup()
     activity_app_setup();
     gps_status_setup();
     crypto_ticker_setup();
-    example_app_setup();
+    sailing_setup();
     osmand_app_setup();
     IRController_setup();
     fxrates_app_setup();

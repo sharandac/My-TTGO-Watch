@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*
@@ -19,11 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _EXAMPLE_APP_SETUP_H
-    #define _EXAMPLE_APP_SETUP_H
+#ifndef _SAILING_SETUP_H
+    #define _SAILING_SETUP_H
 
     #include <TTGO.h>
 
-    void example_app_setup_setup( uint32_t tile_num );
+    void sailing_setup_setup( uint32_t tile_num );
 
-#endif // _EXAMPLE_APP_SETUP_H
+#endif // _SAILING_SETUP_H
