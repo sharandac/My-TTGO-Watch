@@ -175,7 +175,7 @@ bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
                                             // Serial.println(String(buf));
 
                                             if(String(buf).startsWith("$ECRMB")) rmb(buf);
-                                            if(String(buf).startsWith("$ECRMC")) rmc(buf);
+                                            if(String(buf).startsWith("$GPRMC")) rmc(buf);
                                             if(String(buf).startsWith("$ECAPB")) apb(buf);
                                         });
                                     }
