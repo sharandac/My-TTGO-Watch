@@ -41,9 +41,6 @@
 #include "sound.h"
 #include "gpsctl.h"
 
-#include "gui/mainbar/mainbar.h"
-#include "utils/fakegps.h"
-
 EventGroupHandle_t powermgm_status = NULL;
 portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -56,42 +53,8 @@ bool powermgm_send_event_cb( EventBits_t event );
 bool powermgm_send_loop_event_cb( EventBits_t event );
 
 void powermgm_setup( void ) {
-
     powermgm_status = xEventGroupCreate();
-
-    pmu_setup();
-    bma_setup();
-    wifictl_setup();
-    touch_setup();
-    timesync_setup();
-    rtcctl_setup();
-    blectl_read_config();
-    sound_read_config();
-    fakegps_setup();
-
     powermgm_set_event( POWERMGM_WAKEUP );
-}
-
-void powermgm_post_setup( void ) {
-    if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
-        wifictl_on();
-    }
-    blectl_setup();
-    sound_setup();
-    gpsctl_setup();
-
-    powermgm_set_event( POWERMGM_WAKEUP );
-
-    display_set_brightness( display_get_brightness() );
-
-    delay(500);
-
-    Serial.printf("Total heap: %d\r\n", ESP.getHeapSize());
-    Serial.printf("Free heap: %d\r\n", ESP.getFreeHeap());
-    Serial.printf("Total PSRAM: %d\r\n", ESP.getPsramSize());
-    Serial.printf("Free PSRAM: %d\r\n", ESP.getFreePsram());
-
-    disableCore0WDT();
 }
 
 void powermgm_loop( void ) {

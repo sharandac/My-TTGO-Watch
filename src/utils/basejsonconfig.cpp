@@ -66,7 +66,7 @@ bool BaseJsonConfig::load() {
      * check if read from json is failed
      */
     if ( !result ) {
-        log_i("reading json failed, call defaults");
+        log_i("reading json failed, call defaults, file: %s", fileName );
         result = onDefault();
     }
 

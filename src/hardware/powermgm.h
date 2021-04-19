@@ -42,6 +42,10 @@
      */
     void powermgm_setup( void );
     /**
+     * @brief post pre managment setup
+     */
+    void powermgm_pre_setup( void );
+    /**
      * @brief post power managment setup
      */
     void powermgm_post_setup( void );
