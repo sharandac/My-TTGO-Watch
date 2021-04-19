@@ -32,6 +32,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/wifictl.h"
 #include "hardware/display.h"
@@ -83,7 +84,7 @@ void sailing_main_setup( uint32_t tile_num ) {
     attuale.distance = 0.0;
 
     sailing_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &sailing_main_style, mainbar_get_style() );
+    lv_style_copy( &sailing_main_style, ws_get_mainbar_style() );
     lv_style_set_bg_color( &sailing_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &sailing_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &sailing_main_style, LV_OBJ_PART_MAIN, 0);
@@ -91,7 +92,7 @@ void sailing_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( sailing_main_tile, LV_OBJ_PART_MAIN, &sailing_main_style );
 
     // heading style
-    lv_style_copy( &heading_main_style, mainbar_get_style() );
+    lv_style_copy( &heading_main_style, ws_get_mainbar_style() );
     lv_style_set_bg_color( &heading_main_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &heading_main_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &heading_main_style, LV_OBJ_PART_MAIN, 0);
