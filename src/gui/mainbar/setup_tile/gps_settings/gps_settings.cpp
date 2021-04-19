@@ -189,6 +189,7 @@ void gps_settings_tile_setup( void ) {
 
     //gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_UPDATE_LOCATION, gps_settings_latlon_update_cb, "gps settings" );
     gpsctl_register_cb( GPSCTL_UPDATE_CONFIG, gps_settings_config_update_cb, "gps settings" );
+}
 
 bool gps_settings_config_update_cb( EventBits_t event, void *arg ) {
     switch( event ) {
