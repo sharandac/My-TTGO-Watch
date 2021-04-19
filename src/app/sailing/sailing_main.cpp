@@ -215,7 +215,7 @@ static void sailing_main_update_label()
     snprintf(vmg, sizeof( vmg ), "%.1fkt", attuale.vmg);
     snprintf(distance, sizeof( distance ), "%.1fnm", attuale.distance);
 
-    // Insert here contition when to display track instead of heading
+    // done
     if( tracking ) {
       lv_label_set_text( heading_info_label, "T =" );
       lv_label_set_text( heading_label, track );
