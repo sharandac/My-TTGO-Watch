@@ -42,6 +42,14 @@
      */
     void powermgm_setup( void );
     /**
+     * @brief post pre managment setup
+     */
+    void powermgm_pre_setup( void );
+    /**
+     * @brief post power managment setup
+     */
+    void powermgm_post_setup( void );
+    /**
      * @brief power managment loop routine, call from loop. not for user use
      */
     void powermgm_loop( void );

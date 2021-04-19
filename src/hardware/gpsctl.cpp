@@ -62,13 +62,15 @@ void gpsctl_setup( void ) {
         ttgo->trunOnGPS();
         ttgo->gps_begin();
         gps = ttgo->gps;
-        gpsctl_autoon_on();
     #endif
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, gpsctl_powermgm_event_cb, "powermgm gpsctl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, gpsctl_powermgm_loop_cb, "powermgm gpsctl loop" );
 
     gpsctl_init = true;
+
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
+    gpsctl_autoon_on();
 }
 
 bool gpsctl_get_available( void ) {
@@ -336,6 +338,7 @@ void gpsctl_set_app_use_gps( bool app_use_permission ) {
 void gpsctl_set_app_control_gps( bool app_control_permission ) {
     gpsctl_config.app_control_permission = app_control_permission;
     gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 bool gpsctl_get_autoon( void ) {
@@ -345,6 +348,7 @@ bool gpsctl_get_autoon( void ) {
 void gpsctl_set_autoon( bool autoon ) {
     gpsctl_config.autoon = autoon;
     gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 bool gpsctl_get_gps_over_ip( void ) {
@@ -354,6 +358,7 @@ bool gpsctl_get_gps_over_ip( void ) {
 void gpsctl_set_gps_over_ip( bool gps_over_ip ) {
     gpsctl_config.gps_over_ip = gps_over_ip;
     gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 bool gpsctl_get_enable_on_standby( void ) {
@@ -363,6 +368,7 @@ bool gpsctl_get_enable_on_standby( void ) {
 void gpsctl_set_enable_on_standby( bool enable_on_standby ) {
     gpsctl_config.enable_on_standby = enable_on_standby;
     gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 void gpsctl_set_location( double lat, double lon, gps_source_t gps_source ) {

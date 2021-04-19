@@ -31,10 +31,10 @@
 #include "config/wifictlconfig.h"
 
 #ifdef ENABLE_WEBSERVER
-    #include "webserver/webserver.h"
+    #include "utils/webserver/webserver.h"
 #endif
 #ifdef ENABLE_FTPSERVER
-    #include "ftpserver/ftpserver.h"
+    #include "utils/ftpserver/ftpserver.h"
 #endif
 
 bool wifi_init = false;

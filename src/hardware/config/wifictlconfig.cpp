@@ -22,7 +22,12 @@
 
 #include "config.h"
 #include "wifictlconfig.h"
-#include "ftpserver/ftpserver.h"
+#ifdef ENABLE_WEBSERVER
+    #include "utils/webserver/webserver.h"
+#endif
+#ifdef ENABLE_FTPSERVER
+    #include "utils/ftpserver/ftpserver.h"
+#endif
 #include "utils/alloc.h"
 
 wifictl_config_t::wifictl_config_t() : BaseJsonConfig( WIFICTL_JSON_CONFIG_FILE ) {}

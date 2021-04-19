@@ -40,6 +40,7 @@
     #define GPSCTL_UPDATE_ALTITUDE      _BV(9)         /** @brief event mask for GPS altitude update*/
     #define GPSCTL_UPDATE_SATELLITE     _BV(10)        /** @brief event mask for GPS satellite update*/
     #define GPSCTL_UPDATE_SOURCE        _BV(11)        /** @brief event mask for GPS source update*/
+    #define GPSCTL_UPDATE_CONFIG        _BV(12)        /** @brief event mask for GPS configuration*/
     /**
      * @brief gps source types
      */
