@@ -29,6 +29,7 @@
 #include "app_tile/app_tile.h"
 #include "gui/keyboard.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 #include "utils/alloc.h"
 
@@ -38,14 +39,6 @@
 #include "setup_tile/display_settings/display_settings.h"
 #include "setup_tile/time_settings/time_settings.h"
 #include "setup_tile/update/update.h"
-
-static lv_style_t mainbar_style;
-static lv_style_t mainbar_switch_style;
-static lv_style_t mainbar_button_style;
-static lv_style_t mainbar_slider_style;
-// Arc has two parts
-static lv_style_t mainbar_arc_bg_style;
-static lv_style_t mainbar_arc_style;
 
 static lv_obj_t *mainbar = NULL;
 
@@ -64,36 +57,9 @@ void mainbar_setup( void ) {
         return;
     }
 
-    lv_style_init( &mainbar_style );
-    lv_style_set_radius( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
-    lv_style_set_bg_opa( &mainbar_style, LV_OBJ_PART_MAIN, LV_OPA_0 );
-    lv_style_set_border_width( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-
-    lv_style_init( &mainbar_arc_bg_style );
-    lv_style_set_bg_opa( &mainbar_arc_bg_style, LV_ARC_PART_BG, LV_OPA_TRANSP );
-    lv_style_set_border_width( &mainbar_arc_bg_style, LV_OBJ_PART_MAIN, 0 );
-
-    lv_style_init( &mainbar_arc_style );
-    lv_style_set_line_rounded( &mainbar_arc_style, LV_STATE_DEFAULT, false );
-
-    lv_style_init( &mainbar_switch_style );
-    lv_style_set_bg_color( &mainbar_switch_style, LV_STATE_CHECKED, LV_COLOR_GREEN );
-
-    lv_style_init( &mainbar_slider_style );
-    lv_style_set_bg_color( &mainbar_slider_style, LV_STATE_DEFAULT, LV_COLOR_GREEN );
-
-    lv_style_init( &mainbar_button_style );
-    lv_style_set_radius( &mainbar_button_style, LV_STATE_DEFAULT, 3 );
-    lv_style_set_border_color( &mainbar_button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
-    lv_style_set_border_opa( &mainbar_button_style, LV_STATE_DEFAULT, LV_OPA_70 );
-    lv_style_set_border_width( &mainbar_button_style, LV_STATE_DEFAULT, 2 );
-
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
     lv_tileview_set_edge_flash( mainbar, false);
-    lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, &mainbar_style );
+    lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
 }
 
@@ -151,85 +117,13 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     tile[ tile_entrys - 1 ].id = id;
     lv_obj_set_size( tile[ tile_entrys - 1 ].tile, lv_disp_get_hor_res( NULL ), LV_VER_RES);
     //lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, &mainbar_style );
+    lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
     log_d("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
 
     return( tile_entrys - 1 );
-}
-
-lv_style_t *mainbar_get_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_style );
-}
-
-lv_style_t *mainbar_get_arc_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_arc_style );
-}
-
-lv_style_t *mainbar_get_arc_bg_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_arc_bg_style );
-}
-
-lv_style_t *mainbar_get_switch_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_switch_style );
-}
-
-lv_style_t *mainbar_get_button_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_button_style );
-}
-
-lv_style_t *mainbar_get_slider_style( void ) {
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
-    return( &mainbar_slider_style );
 }
 
 bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC hibernate_cb ) {

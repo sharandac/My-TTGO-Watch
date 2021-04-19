@@ -28,6 +28,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 lv_obj_t *gps_status_setup_tile = NULL;
 lv_style_t gps_status_setup_style;
@@ -42,11 +43,7 @@ static void gps_status_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event 
 void gps_status_setup_setup( uint32_t tile_num ) {
 
     gps_status_setup_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &gps_status_setup_style, mainbar_get_style() );
-
-    lv_style_set_bg_color( &gps_status_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &gps_status_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &gps_status_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &gps_status_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( gps_status_setup_tile, LV_OBJ_PART_MAIN, &gps_status_setup_style );
 
     lv_obj_t *exit_cont = lv_obj_create( gps_status_setup_tile, NULL );
@@ -75,7 +72,7 @@ void gps_status_setup_setup( uint32_t tile_num ) {
 
     gps_status_foobar_switch = lv_switch_create( gps_status_foobar_switch_cont, NULL );
     lv_obj_add_protect( gps_status_foobar_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( gps_status_foobar_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( gps_status_foobar_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( gps_status_foobar_switch, LV_ANIM_ON );
     lv_obj_align( gps_status_foobar_switch, gps_status_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( gps_status_foobar_switch, gps_status_foobar_switch_event_cb );

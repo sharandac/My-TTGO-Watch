@@ -26,6 +26,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/bma.h"
 #include "hardware/motor.h"
@@ -53,10 +54,7 @@ void move_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     move_tile_num = mainbar_add_app_tile( 1, 1, "move settings" );
     move_settings_tile = mainbar_get_tile_obj( move_tile_num );
-    lv_style_copy( &move_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &move_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &move_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &move_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &move_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( move_settings_tile, LV_OBJ_PART_MAIN, &move_settings_style );
 
     icon_t *move_setup_icon = setup_register( "move", &move_64px, enter_move_setup_event_cb );
@@ -82,7 +80,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( stepcounter_cont, move_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     stepcounter_onoff = lv_switch_create( stepcounter_cont, NULL );
     lv_obj_add_protect( stepcounter_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( stepcounter_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( stepcounter_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( stepcounter_onoff, LV_ANIM_ON );
     lv_obj_align( stepcounter_onoff, stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( stepcounter_onoff, stepcounter_onoff_event_handler );
@@ -97,7 +95,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( doubleclick_cont, stepcounter_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     doubleclick_onoff = lv_switch_create( doubleclick_cont, NULL );
     lv_obj_add_protect( doubleclick_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( doubleclick_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( doubleclick_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( doubleclick_onoff, LV_ANIM_ON );
     lv_obj_align( doubleclick_onoff, doubleclick_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( doubleclick_onoff, doubleclick_onoff_event_handler );
@@ -112,7 +110,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( tilt_cont, doubleclick_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     tilt_onoff = lv_switch_create( tilt_cont, NULL );
     lv_obj_add_protect( tilt_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( tilt_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( tilt_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( tilt_onoff, LV_ANIM_ON );
     lv_obj_align( tilt_onoff, tilt_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( tilt_onoff, tilt_onoff_event_handler );
@@ -127,7 +125,7 @@ void move_settings_tile_setup( void ) {
     lv_obj_align( daily_stepcounter_cont, tilt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     daily_stepcounter_onoff = lv_switch_create( daily_stepcounter_cont, NULL );
     lv_obj_add_protect( daily_stepcounter_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( daily_stepcounter_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( daily_stepcounter_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( daily_stepcounter_onoff, LV_ANIM_ON );
     lv_obj_align( daily_stepcounter_onoff, daily_stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( daily_stepcounter_onoff, daily_stepcounter_onoff_event_handler );

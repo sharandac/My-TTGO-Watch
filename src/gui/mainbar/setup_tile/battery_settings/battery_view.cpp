@@ -26,6 +26,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 #include "hardware/pmu.h"
 #include "hardware/motor.h"
 
@@ -55,10 +56,7 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     battery_view_tile_num = tile_num;
     battery_view_tile = mainbar_get_tile_obj( battery_view_tile_num );
 
-    lv_style_copy( &battery_view_style, mainbar_get_style() );
-    lv_style_set_bg_color( &battery_view_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &battery_view_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &battery_view_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &battery_view_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_view_tile, LV_OBJ_PART_MAIN, &battery_view_style );
 
     // create the battery settings */

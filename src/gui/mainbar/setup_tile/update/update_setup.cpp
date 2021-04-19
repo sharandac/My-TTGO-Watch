@@ -28,6 +28,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_styles.h"
 
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
@@ -64,10 +65,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     update_setup_tile_num = tile_num;
     update_setup_tile = mainbar_get_tile_obj( update_setup_tile_num );
 
-    lv_style_copy( &update_setup_style, mainbar_get_style() );
-    lv_style_set_bg_color( &update_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &update_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &update_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &update_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, &update_setup_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( update_setup_tile, NULL);
@@ -91,7 +89,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
 
     update_check_autosync_onoff = lv_switch_create( update_check_autosync_cont, NULL );
     lv_obj_add_protect( update_check_autosync_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( update_check_autosync_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( update_check_autosync_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( update_check_autosync_onoff, LV_ANIM_ON );
     lv_obj_align( update_check_autosync_onoff, update_check_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( update_check_autosync_onoff, update_check_autosync_onoff_event_handler );
@@ -119,7 +117,7 @@ void update_setup_tile_setup( uint32_t tile_num ) {
 
     lv_obj_t *update_reset_url_btn = lv_btn_create( update_setup_tile, NULL);
     lv_obj_set_event_cb( update_reset_url_btn, update_reset_url_event_cb );
-    lv_obj_add_style( update_reset_url_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( update_reset_url_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( update_reset_url_btn, update_check_url_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_obj_t *update_reset_url_label = lv_label_create( update_reset_url_btn, NULL );
     lv_label_set_text( update_reset_url_label, "set default url");

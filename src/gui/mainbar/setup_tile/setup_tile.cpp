@@ -24,6 +24,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/icon.h"
+#include "gui/widget_styles.h"
 #include "hardware/motor.h"
 
 static bool setuptile_init = false;
@@ -48,7 +49,7 @@ void setup_tile_setup( void ) {
         setup_cont[ tiles ] = mainbar_get_tile_obj( setup_tile_num[ tiles ] );
     }
 
-    lv_style_copy( &setup_style, mainbar_get_style() );
+    lv_style_copy( &setup_style, ws_get_mainbar_style() );
 
     for ( int setup = 0 ; setup < MAX_SETUP_ICON ; setup++ ) {
         // set x, y and mark it as inactive

@@ -4,6 +4,7 @@
 
 #include "fx_rates.h"
 #include "gui/mainbar/mainbar.h"
+#include "gui/widget_styles.h"
 #include "hardware/wifictl.h"
 
 // App icon must have an size of 64x64 pixel with an alpha channel
@@ -70,7 +71,7 @@ bool fxrates_wifictl_event_cb(EventBits_t event, void *arg) {
 
 void build_main_page()
 {
-    big = Style::Create(mainbar_get_style(), true);
+    big = Style::Create(ws_get_mainbar_style(), true);
     big.textFont(&Ubuntu_48px)
       .textOpacity(LV_OPA_80);
 

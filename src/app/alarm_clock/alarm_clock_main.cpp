@@ -28,9 +28,8 @@
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
-
-#include "widget_factory.h"
-#include "widget_styles.h"
+#include "gui/widget_factory.h"
+#include "gui/widget_styles.h"
 #include "hardware/rtcctl.h"
 
 lv_obj_t *alarm_enabled_switch = NULL;

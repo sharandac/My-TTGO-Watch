@@ -29,6 +29,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 lv_obj_t *corona_app_detector_main_tile = NULL;
 lv_style_t corona_app_detector_main_style;
@@ -47,7 +48,7 @@ void corona_app_detector_task( lv_task_t * task );
 void corona_app_detector_main_setup( uint32_t tile_num ) {
 
     corona_app_detector_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &corona_app_detector_main_style, mainbar_get_style() );
+    lv_style_copy( &corona_app_detector_main_style, ws_get_mainbar_style() );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( corona_app_detector_main_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);

@@ -9,6 +9,7 @@
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>
+#include <gui/widget_styles.h>
 
 void Page::init(lv_obj_t* handle) {
   assign(handle);
@@ -25,7 +26,7 @@ void Page::onChildAdded(Widget& child, const TypeInfo& type) {
 void Page::assign(lv_obj_t* newHandle) {  
     native = newHandle;
 
-    pageStyle = Style(mainbar_get_style(), true);
+    pageStyle = Style(ws_get_mainbar_style(), true);
     onInitializing();
 
     //onChildAddedHandler(std::bind(&Page::onChildAdded, this, std::placeholders::_1, std::placeholders::_2));

@@ -34,6 +34,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/blectl.h"
 #include "hardware/sound.h"
@@ -80,7 +81,7 @@ void bluetooth_FindPhone_tile_setup(void)
     bluetooth_FindPhone_tile_num = mainbar_add_app_tile(1, 1, "bluetooth FindPhone");
     bluetooth_FindPhone_tile = mainbar_get_tile_obj(bluetooth_FindPhone_tile_num);
 
-    lv_style_copy(&bluetooth_FindPhone_style, mainbar_get_style());
+    lv_style_copy(&bluetooth_FindPhone_style, ws_get_mainbar_style());
     lv_style_set_bg_color(&bluetooth_FindPhone_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
     lv_style_set_bg_opa(&bluetooth_FindPhone_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width(&bluetooth_FindPhone_style, LV_OBJ_PART_MAIN, 0);
@@ -88,13 +89,12 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_style_set_text_color(&bluetooth_FindPhone_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
 
-    lv_style_copy(&bluetooth_FindPhone_exit_btn_style, mainbar_get_style());
+    lv_style_copy(&bluetooth_FindPhone_exit_btn_style, ws_get_mainbar_style());
     lv_style_set_bg_color(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
     lv_style_set_bg_opa(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_style_set_text_color(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-    lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
 
     bluetooth_FindPhone_img = lv_img_create(bluetooth_FindPhone_tile, NULL);
     lv_img_set_src(bluetooth_FindPhone_img, &eye_200px);
@@ -119,7 +119,7 @@ static void FindPhone_search_task( lv_task_t * task );
 void FindPhone_main_setup( uint32_t tile_num ) {
 
     FindPhone_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &FindPhone_main_style, mainbar_get_style() );
+    lv_style_copy( &FindPhone_main_style, ws_get_mainbar_style() );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( FindPhone_main_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px );

@@ -31,6 +31,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
@@ -75,7 +76,7 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     weather_forecast_tile_num = tile_num;
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
-    lv_style_copy( &weather_forecast_style, mainbar_get_style() );
+    lv_style_copy( &weather_forecast_style, ws_get_mainbar_style() );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
