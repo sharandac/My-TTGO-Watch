@@ -1,15 +1,8 @@
-<p align="center">
-<img src="https://img.shields.io/github/last-commit/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
-&nbsp;
-<img src="https://img.shields.io/github/license/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
-&nbsp;
-<a href="https://www.buymeacoffee.com/sharandac" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%82%AC5-orange?style=for-the-badge&logo=buy-me-a-coffee" /></a>
-</p>
-<hr/>
-
-# My-TTGO-Watch
+# Sailor-TTGO-Watch
 
 A smartwatch based on ESP32 from LilyGo. Currently supoort for T-Watch2020 V1. T-Watch2020 V3 and V2 is added, but untested and not complete for lack of a watch.
+
+This is a fork from [sharandac](https://github.com/sharandac/My-TTGO-Watch) 's repository, i plan on adding more sailing-related features that will work with [OpenPlotter](https://openmarine.net/openplotter).
 
 # Telegram chatgroup
 
@@ -84,7 +77,3 @@ and the following projects:
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>
-If you want to donate to the author then you can buy me a coffee.
-<br/><br/>
-<a href="https://www.buymeacoffee.com/sharandac" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%82%AC5-orange?style=for-the-badge&logo=buy-me-a-coffee" /></a>
-</p>
