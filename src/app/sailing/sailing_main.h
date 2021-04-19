@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 17 00:28:11 2021
+ *   Copyright  2021  Federico Liuzzi
+ *   Email: f.liuzzi02@gmail.com
  ****************************************************************************/
  
 /*
@@ -19,17 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _GPS_SETTINGS_H
-    #define _GPS_SETTINGS_H
+#ifndef _SAILING_MAIN_H
+    #define _SAILING_MAIN_H
 
     #include <TTGO.h>
 
-    void gps_settings_tile_setup( void );
-    /**
-     * @brief get the gps setup tile number
-     * 
-     * @return  tile number
-     */
-    uint32_t gps_get_setup_tile_num( void );
+    void sailing_main_setup( uint32_t tile_num );
 
-#endif // _GPS_SETTINGS_H
+#endif // _SAILING_MAIN_H

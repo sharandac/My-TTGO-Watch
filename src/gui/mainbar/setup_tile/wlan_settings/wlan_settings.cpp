@@ -35,8 +35,12 @@
 #include "hardware/blectl.h"
 
 #ifdef ENABLE_WEBSERVER
-    #include "webserver/webserver.h"
+    #include "utils/webserver/webserver.h"
 #endif
+#ifdef ENABLE_FTPSERVER
+    #include "utils/ftpserver/ftpserver.h"
+#endif
+
 
 #include "utils/json_psram_allocator.h"
 

@@ -21,6 +21,7 @@
     #define _FAKEGPS_H
 
     #define   GEOIP_URL     "http://ip-api.com/json/"
+    #define   FAKEGPS_SYNC_REQUEST      _BV(1)
 
     /**
      * @brief get gps via ip-api.com and set it in gpsctl to fake gps

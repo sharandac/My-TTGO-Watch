@@ -25,7 +25,12 @@
 
     #include "config.h"
     #include "utils/basejsonconfig.h"
-    #include "ftpserver/ftpserver.h"
+    #ifdef ENABLE_WEBSERVER
+        #include "utils/webserver/webserver.h"
+    #endif
+    #ifdef ENABLE_FTPSERVER
+        #include "utils/ftpserver/ftpserver.h"
+    #endif
 
     #define NETWORKLIST_ENTRYS          20
     #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"

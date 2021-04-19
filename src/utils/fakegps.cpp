@@ -30,12 +30,18 @@
 static float lat = 0;
 static float lon = 0;
 
-TaskHandle_t _fakegps_get_location_Task;
+EventGroupHandle_t fakegps_event_handle = NULL;
+TaskHandle_t _fakegps_get_location_Task = NULL;
+
 void fakegps_get_location_Task( void * pvParameters );
-bool fakegps_powermgm_event_cb( EventBits_t event, void *arg );
+bool fakegps_wifictl_event_cb( EventBits_t event, void *arg );
+bool fakegps_gpsctl_event_cb( EventBits_t event, void *arg );
+void fakegps_start_task( void );
 
 void fakegps_setup( void ) {
-    wifictl_register_cb( WIFICTL_CONNECT_IP, fakegps_powermgm_event_cb, "powermgm fakegps");
+    fakegps_event_handle = xEventGroupCreate();
+    wifictl_register_cb( WIFICTL_CONNECT_IP, fakegps_wifictl_event_cb, "wifictl fakegps");
+    gpsctl_register_cb( GPSCTL_ENABLE, fakegps_gpsctl_event_cb, "gpsctl fakegps");
 }
 
 double fakegps_get_last_lat( void ) {
@@ -46,23 +52,44 @@ double fakegps_get_last_lon( void ) {
     return( lon );
 }
 
-bool fakegps_powermgm_event_cb( EventBits_t event, void *arg ) {
+bool fakegps_gpsctl_event_cb( EventBits_t event, void *arg ) {
+    switch ( event ) {
+        case GPSCTL_ENABLE:
+            fakegps_start_task();
+            break;        
+    }
+    return( true );
+}
+
+bool fakegps_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT_IP:
-            if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
-                xTaskCreate(    fakegps_get_location_Task,
-                                "fakegps update Task",
-                                5000,
-                                NULL,
-                                1,
-                                &_fakegps_get_location_Task );
-            }
+            fakegps_start_task();
             break;
     }
     return( true );
 }
 
+void fakegps_start_task( void ) {
+    if ( xEventGroupGetBits( fakegps_event_handle ) & FAKEGPS_SYNC_REQUEST ) {
+        return;
+    }
+    else {
+        if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
+            xEventGroupSetBits( fakegps_event_handle, FAKEGPS_SYNC_REQUEST );
+            xTaskCreate(    fakegps_get_location_Task,
+                            "fakegps update Task",
+                            5000,
+                            NULL,
+                            1,
+                            &_fakegps_get_location_Task );
+        }
+    }
+}
+
 void fakegps_get_location_Task( void * pvParameters ) {
+    log_i("start fakegps task, heap: %d", ESP.getFreeHeap() );
+
     int httpcode = -1;
 
     HTTPClient fakegps_client;
@@ -73,27 +100,28 @@ void fakegps_get_location_Task( void * pvParameters ) {
 
     if ( httpcode != 200 ) {
         log_e("HTTPClient error %d", httpcode );
-        fakegps_client.end();
-        vTaskDelete( NULL );
-    }
-
-    SpiRamJsonDocument doc( fakegps_client.getSize() * 4 );
-
-    DeserializationError error = deserializeJson( doc, fakegps_client.getStream() );
-    if (error) {
-        log_e("fakegps deserializeJson() failed: %s", error.c_str() );
     }
     else {
-        if ( doc["lat"] && doc["lon"] ) {
-            lat = doc["lat"].as<float>();
-            lon = doc["lon"].as<float>();
-            log_i("lat: %f, lon:%f", lat, lon );
-            gpsctl_set_location( lat, lon, GPS_SOURCE_IP );
-        }
-    }
+        SpiRamJsonDocument doc( fakegps_client.getSize() * 4 );
 
-    doc.clear();
+        DeserializationError error = deserializeJson( doc, fakegps_client.getStream() );
+        if (error) {
+            log_e("fakegps deserializeJson() failed: %s", error.c_str() );
+        }
+        else {
+            if ( doc["lat"] && doc["lon"] ) {
+                lat = doc["lat"].as<float>();
+                lon = doc["lon"].as<float>();
+                log_i("lat: %f, lon:%f", lat, lon );
+                gpsctl_set_location( lat, lon, GPS_SOURCE_IP );
+            }
+        }
+
+        doc.clear();
+    }
     fakegps_client.end();
+    xEventGroupClearBits( fakegps_event_handle, FAKEGPS_SYNC_REQUEST );
+    log_i("finish fakegps task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 }
     

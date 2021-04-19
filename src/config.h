@@ -21,7 +21,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CONFIG_H 
+#ifndef _CONFIG_H
 
     #if defined( LILYGO_WATCH_2020_V1 )
         #define WATCH_VERSION_NAME  "V1"
@@ -48,7 +48,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021041502"
+    #define __FIRMWARE__            "2021041801"
     /**
      * Allows to include config.h from C code
      */
