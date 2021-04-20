@@ -30,7 +30,8 @@ static bool apptile_init = false;
 icon_t app_entry[ MAX_APPS_ICON ];
 lv_obj_t *app_cont[ MAX_APPS_TILES ];
 uint32_t app_tile_num[ MAX_APPS_TILES ];
-static lv_style_t app_style;
+static lv_style_t app_icon_style;
+static lv_style_t app_label_style;
 
 void app_tile_setup( void ) {
     /*
@@ -40,33 +41,50 @@ void app_tile_setup( void ) {
         log_e("apptile already initialized");
         return;
     }
-
+    /**
+     * add tiles to to main tile
+     */
     for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 0, "app tile" );
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
     }
-
-    lv_style_copy( &app_style, ws_get_mainbar_style() );
-
+    /**
+     * copy mainbar style
+     */
+    lv_style_copy( &app_label_style, ws_get_mainbar_style() );
+    lv_style_copy( &app_icon_style, ws_get_mainbar_style() );
+    lv_style_set_radius( &app_icon_style, LV_OBJ_PART_MAIN, 20 );
+    lv_style_set_bg_color( &app_icon_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
+    lv_style_set_bg_opa( &app_icon_style, LV_OBJ_PART_MAIN, LV_OPA_20 );
+    lv_style_set_border_width( &app_icon_style, LV_OBJ_PART_MAIN, 0 );
+    /**
+     * init all app icons
+     */
     for ( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
-        // set x, y and mark it as inactive
+        /*
+         * set x, y and mark it as inactive
+         */
         app_entry[ app ].x = APP_FIRST_X_POS + ( ( app % MAX_APPS_ICON_HORZ ) * ( APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE ) );
         app_entry[ app ].y = APP_FIRST_Y_POS + ( ( ( app % ( MAX_APPS_ICON_VERT * MAX_APPS_ICON_HORZ  ) ) / MAX_APPS_ICON_HORZ ) * ( APP_ICON_Y_SIZE + APP_ICON_Y_CLEARENCE ) );
         app_entry[ app ].active = false;
-        // create app icon container
+        /*
+         * create app icon container
+         */
         app_entry[ app ].icon_cont = lv_obj_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
         mainbar_add_slide_element( app_entry[ app ].icon_cont);
         lv_obj_reset_style_list( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN, &app_style );
+        lv_obj_add_style( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN, &app_icon_style );
         lv_obj_set_size( app_entry[ app ].icon_cont, APP_ICON_X_SIZE, APP_ICON_Y_SIZE );
         lv_obj_align( app_entry[ app ].icon_cont , app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], LV_ALIGN_IN_TOP_LEFT, app_entry[ app ].x, app_entry[ app ].y );
-        // create app label
+        /*
+         * create app label
+         */
         app_entry[ app ].label = lv_label_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
         mainbar_add_slide_element(app_entry[ app ].label);
         lv_obj_reset_style_list( app_entry[ app ].label, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, &app_style );
+        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, &app_label_style );
         lv_obj_set_size( app_entry[ app ].label, APP_LABEL_X_SIZE, APP_LABEL_Y_SIZE );
-        lv_obj_align( app_entry[ app ].label , app_entry[ app ].icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+        lv_obj_align( app_entry[ app ].label , app_entry[ app ].icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 3, 0 );
         lv_obj_set_hidden( app_entry[ app ].icon_cont, true );
         lv_obj_set_hidden( app_entry[ app ].label, true );
 
@@ -83,7 +101,9 @@ lv_obj_t *app_tile_register_app( const char* appname ) {
         log_e("apptile not initialized");
         while( true );
     }
-
+    /**
+     * search for the next free app icon and use them
+     */
     for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         if ( app_entry[ app ].active == false ) {
             app_entry[ app ].active = true;
@@ -106,7 +126,9 @@ icon_t *app_tile_get_free_app_icon( void ) {
         log_e("apptile not initialized");
         while( true );
     }
-
+    /**
+     * search for the next free app icon
+     */
     for( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         if ( app_entry[ app ].active == false ) {
             return( &app_entry[ app ] );

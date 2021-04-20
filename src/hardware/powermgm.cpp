@@ -54,7 +54,6 @@ bool powermgm_send_loop_event_cb( EventBits_t event );
 
 void powermgm_setup( void ) {
     powermgm_status = xEventGroupCreate();
-    powermgm_set_event( POWERMGM_WAKEUP );
 }
 
 void powermgm_loop( void ) {

@@ -54,6 +54,7 @@
 
 lv_obj_t *img_bin;
 static volatile bool interact = false;
+static volatile bool first_run = true;
 
 bool gui_touch_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
@@ -222,6 +223,14 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
     
     switch ( event ) {
         case POWERMGM_WAKEUP:           /**
+                                         * prevent fast timeout on first run after start or reboot
+                                         */
+                                        if ( first_run ) {
+                                            first_run = false;
+                                            interact = true;
+                                            log_i("set normal timeout on first run");
+                                        }
+                                        /**
                                          * an first interaction after wakeup use normal timeout
                                          * otherwise use 5sec timeout to save energy
                                          */

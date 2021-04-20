@@ -208,39 +208,44 @@ int32_t timesync_get_timezone( void ) {
     return( timesync_config.timezone );
 }
 
-void timesync_set_timezone( int32_t timezone ) {
-    timesync_config.timezone = timezone;
-    timesync_save_config();
-}
-
 char* timesync_get_timezone_name( void ) {
     return( timesync_config.timezone_name );
-}
-
-void timesync_set_timezone_name( char * timezone_name ) {
-    strlcpy( timesync_config.timezone_name, timezone_name, sizeof( timesync_config.timezone_name ) );
-    timesync_save_config();
 }
 
 char* timesync_get_timezone_rule( void ) {
     return( timesync_config.timezone_rule );
 }
 
+bool timesync_get_24hr(void) {
+    return (timesync_config.use_24hr_clock);
+}
+
+void timesync_set_timezone( int32_t timezone ) {
+    timesync_config.timezone = timezone;
+    timesyncToSystem();
+    timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
+    timesync_save_config();
+}
+
+void timesync_set_timezone_name( char * timezone_name ) {
+    strlcpy( timesync_config.timezone_name, timezone_name, sizeof( timesync_config.timezone_name ) );
+    timesyncToSystem();
+    timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
+    timesync_save_config();
+}
+
 void timesync_set_timezone_rule( const char * timezone_rule ) {
     strlcpy( timesync_config.timezone_rule, timezone_rule, sizeof( timesync_config.timezone_rule ) );
-    setenv("TZ", timesync_config.timezone_rule, 1);
-    tzset();
+    timesyncToSystem();
+    timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
     timesync_save_config();
-    timesync_send_event_cb( TIME_SYNC_OK, (void *)NULL );
 }
 
 void timesync_set_24hr( bool use24 ) {
     timesync_config.use_24hr_clock = use24;
+    timesyncToSystem();
+    timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
     timesync_save_config();
-}
-
-bool timesync_get_24hr(void) {
-    return (timesync_config.use_24hr_clock);
 }
 
 void timesyncToSystem( void ) {
@@ -260,6 +265,7 @@ void timesyncToRTC( void ) {
     setenv("TZ", timesync_config.timezone_rule, 1);
     tzset();
     timesync_send_event_cb( TIME_SYNC_OK, (void *)NULL );
+    timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
 }
 
 void timesync_Task( void * pvParameters ) {

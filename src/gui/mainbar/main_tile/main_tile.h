@@ -59,7 +59,9 @@
     uint32_t main_tile_get_tile_num( void );
     /**
      * @brief update main tile time
+     * 
+     * @param force will force main tile time update
      */
-    void main_tile_update_time( void );
+    void main_tile_update_time( bool force );
 
 #endif // _MAIL_TILE_H
