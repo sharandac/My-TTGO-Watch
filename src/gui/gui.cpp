@@ -50,9 +50,12 @@
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
+#include "hardware/touch.h"
 
 lv_obj_t *img_bin;
+static volatile bool interact = false;
 
+bool gui_touch_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
@@ -107,6 +110,16 @@ void gui_setup( void )
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
+    touch_register_cb( TOUCH_UPDATE, gui_touch_event_cb, "gui touch" );
+}
+
+bool gui_touch_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case TOUCH_UPDATE:
+            interact = true;
+            break;
+    }
+    return( true );
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -129,6 +142,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
+                                        interact = false;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   /*
                                          * resume all LVGL activitys and tasks
@@ -204,13 +218,27 @@ void gui_set_background_image ( uint32_t background_image ) {
 }
 
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
+    uint32_t timeout = 0;
+    
     switch ( event ) {
-        case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+        case POWERMGM_WAKEUP:           /**
+                                         * an first interaction after wakeup use normal timeout
+                                         * otherwise use 5sec timeout to save energy
+                                         */
+                                        if ( interact ) {
+                                            timeout = display_get_timeout() * 1000;
+                                        }
+                                        else {
+                                            timeout = 5000;
+                                        }
+
+                                        if ( lv_disp_get_inactive_time( NULL ) < timeout  || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
                                             lv_task_handler();
                                         }
                                         else {
                                             powermgm_set_event( POWERMGM_STANDBY_REQUEST );
                                         }
+
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
                                             lv_task_handler();
