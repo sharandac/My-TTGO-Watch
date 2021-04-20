@@ -33,6 +33,7 @@
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
@@ -86,10 +87,7 @@ void update_tile_setup( void ) {
 
     update_setup_tile_setup( update_tile_num + 1 );
 
-    lv_style_copy( &update_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &update_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &update_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &update_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &update_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, &update_settings_style );
 
     update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );
@@ -133,7 +131,7 @@ void update_tile_setup( void ) {
 
     update_btn = lv_btn_create( update_settings_tile, NULL);
     lv_obj_set_event_cb( update_btn, update_event_handler );
-    lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, mainbar_get_button_style() );
+    lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_align( update_btn, update_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     update_btn_label = lv_label_create( update_btn, NULL );
     lv_label_set_text( update_btn_label, "update");

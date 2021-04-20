@@ -24,10 +24,12 @@
 #include "powermgm.h"
 #include "motor.h"
 #include "display.h"
+#include "callback.h"
 
 volatile bool DRAM_ATTR touch_irq_flag = false;
 portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 void IRAM_ATTR touch_irq( void );
+callback_t *touch_callback = NULL;
 
 bool touched = false;
 
@@ -36,6 +38,7 @@ lv_indev_t *touch_indev = NULL;
 static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data);
 static bool touch_getXY( int16_t &x, int16_t &y );
 bool touch_powermgm_event_cb( EventBits_t event, void *arg );
+bool touch_send_event_cb( EventBits_t event, void *arg );
 
 static SemaphoreHandle_t xSemaphores = NULL;
 
@@ -64,7 +67,7 @@ void touch_setup( void ) {
      * This is supposed to control how often the sensor checks for touch while in monitor mode
      * The units is ms between checks, so 250 checks only 4 times a second. 
      */
-    ttgo->touch->setMonitorPeriod(250);
+    ttgo->touch->setMonitorPeriod(125);
     /*
      * create semaphore and register interrupt function
      */
@@ -76,6 +79,30 @@ void touch_setup( void ) {
      * register powermgm callback function
      */
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , touch_powermgm_event_cb, "touch" );
+}
+
+bool touch_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+  /*
+    * check if an callback table exist, if not allocate a callback table
+    */
+  if ( touch_callback == NULL ) {
+      touch_callback = callback_init( "touch" );
+      if ( touch_callback == NULL ) {
+          log_e("touch callback alloc failed");
+          while(true);
+      }
+  }
+  /*
+    * register an callback entry and return them
+    */
+  return( callback_register( touch_callback, event, callback_func, id ) );
+}
+
+bool touch_send_event_cb( EventBits_t event, void *arg ) {
+  /*
+    * call all callbacks with her event mask
+    */
+  return( callback_send( touch_callback, event, arg ) );
 }
 
 bool touch_lock_take( void ) {
@@ -199,6 +226,14 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
                 touch_lock_give();
             }
         }
+        /**
+         * send touch event
+         */
+        touch_t touch;
+        touch.touched = touched;
+        touch.x_coor = data->point.x;
+        touch.y_coor = data->point.y;
+        touch_send_event_cb( TOUCH_UPDATE, (void*)&touch );
     }
     else {
         data->state = LV_INDEV_STATE_REL;

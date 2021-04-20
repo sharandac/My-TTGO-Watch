@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/widget_styles.h"
 #include "app_tile.h"
 
 static bool apptile_init = false;
@@ -45,7 +46,7 @@ void app_tile_setup( void ) {
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
     }
 
-    lv_style_copy( &app_style, mainbar_get_style() );
+    lv_style_copy( &app_style, ws_get_mainbar_style() );
 
     for ( int app = 0 ; app < MAX_APPS_ICON ; app++ ) {
         // set x, y and mark it as inactive

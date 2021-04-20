@@ -28,6 +28,7 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
@@ -90,10 +91,7 @@ void wlan_settings_tile_setup( void ) {
     wifi_setup_tile_num = wifi_settings_tile_num + 2;
 
     wifi_settings_tile = mainbar_get_tile_obj( wifi_settings_tile_num );
-    lv_style_copy( &wifi_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
-    lv_style_set_bg_opa( &wifi_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_settings_tile, LV_OBJ_PART_MAIN, &wifi_settings_style );
 
     wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
@@ -125,7 +123,7 @@ void wlan_settings_tile_setup( void ) {
     /*Copy the first switch and turn it ON*/    
     wifi_onoff = lv_switch_create( wifi_settings_tile, NULL );
     lv_obj_add_protect( wifi_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style()  );
+    lv_obj_add_style( wifi_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style()  );
     lv_switch_off( wifi_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_onoff, setup_btn, LV_ALIGN_OUT_LEFT_MID, -10, 0 );
     lv_obj_set_event_cb( wifi_onoff, wifi_onoff_event_handler);
@@ -217,10 +215,7 @@ static void delete_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event );
 void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_password_tile = mainbar_get_tile_obj( wifi_password_tile_num );
-    lv_style_copy( &wifi_password_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_password_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &wifi_password_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_password_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_password_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_password_tile, LV_OBJ_PART_MAIN, &wifi_password_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( wifi_password_tile, NULL);
@@ -327,10 +322,7 @@ bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg );
 void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_setup_tile = mainbar_get_tile_obj( wifi_setup_tile_num );
-    lv_style_copy( &wifi_setup_style, mainbar_get_style() );
-    lv_style_set_bg_color( &wifi_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &wifi_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &wifi_setup_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &wifi_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_setup_tile, LV_OBJ_PART_MAIN, &wifi_setup_style );
 
     lv_obj_t *exit_btn = lv_imgbtn_create( wifi_setup_tile, NULL);
@@ -353,7 +345,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_obj_align( wifi_autoon_onoff_cont, wifi_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     wifi_autoon_onoff = lv_switch_create( wifi_setup_tile, NULL );
     lv_obj_add_protect( wifi_autoon_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_autoon_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( wifi_autoon_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( wifi_autoon_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_autoon_onoff, wifi_autoon_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_autoon_onoff, wifi_autoon_onoff_event_handler );
@@ -369,7 +361,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_obj_align( wifi_webserver_onoff_cont, wifi_autoon_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     wifi_webserver_onoff = lv_switch_create( wifi_webserver_onoff_cont, NULL );
     lv_obj_add_protect( wifi_webserver_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_webserver_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( wifi_webserver_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( wifi_webserver_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_webserver_onoff, wifi_webserver_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_webserver_onoff, wifi_webserver_onoff_event_handler );
@@ -390,7 +382,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     #endif
     wifi_ftpserver_onoff = lv_switch_create( wifi_ftpserver_onoff_cont, NULL );
     lv_obj_add_protect( wifi_ftpserver_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_ftpserver_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( wifi_ftpserver_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( wifi_ftpserver_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_ftpserver_onoff, wifi_ftpserver_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_ftpserver_onoff, wifi_ftpserver_onoff_event_handler );
@@ -414,7 +406,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     #endif
     wifi_enabled_on_standby_onoff = lv_switch_create( wifi_enabled_on_standby_onoff_cont, NULL );
     lv_obj_add_protect( wifi_enabled_on_standby_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_enabled_on_standby_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( wifi_enabled_on_standby_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( wifi_enabled_on_standby_onoff, LV_ANIM_ON );
     lv_obj_align( wifi_enabled_on_standby_onoff, wifi_enabled_on_standby_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_enabled_on_standby_onoff, wifi_enabled_on_standby_onoff_event_handler );

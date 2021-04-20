@@ -9,6 +9,7 @@
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>
+#include <gui/widget_styles.h>
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -66,7 +67,7 @@ Container& AppPage::createChildContainer(lv_layout_t autoLayoutOptios) {
     }
     // Auto-align child widgets on it
     childContainer.autoLayout(autoLayoutOptios);
-    childContainer.style(mainbar_get_style());
+    childContainer.style(ws_get_mainbar_style());
   }
   return childContainer;
 }
@@ -78,5 +79,5 @@ void AppPage::onChildAdded(Widget& child, const TypeInfo& type)
   //if (type.isLabel() || type.isWidget())
   //    target.style(pageStyle);
   //else if (type.isSwitch())
-  //    target.style(mainbar_get_switch_style(), LV_SWITCH_PART_INDIC);
+  //    target.style(ws_get_switch_style(), LV_SWITCH_PART_INDIC);
 }

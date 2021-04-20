@@ -24,6 +24,17 @@
 #include "config.h"
 
 /**
+ * @brief   returns a common mainbar style
+ */
+lv_style_t *ws_get_mainbar_style();
+
+/**
+ * @brief   returns a common opaque application style
+ * (opaque background)
+ */
+lv_style_t *ws_get_app_opa_style();
+
+/**
  * @brief   returns a common container style
  */
 lv_style_t *ws_get_container_style();
@@ -67,3 +78,24 @@ lv_style_t *ws_get_roller_part_selected_style();
  * @brief   returns a common style for popup tile
  */
 lv_style_t *ws_get_popup_style();
+
+/**
+ * @brief get main tile arc style
+ * 
+ * @return  pointer to the lv_style_t object
+ */
+lv_style_t *ws_get_arc_style( void );
+
+/**
+ * @brief get main tile arc bg style
+ * 
+ * @return  pointer to the lv_style_t object
+ */
+lv_style_t *ws_get_arc_bg_style( void );
+
+/**
+ * @brief get main tile slider style
+ * 
+ * @return  pointer to the lv_style_t object
+ */
+lv_style_t *ws_get_slider_style( void );

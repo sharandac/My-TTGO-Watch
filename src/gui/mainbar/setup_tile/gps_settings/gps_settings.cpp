@@ -26,6 +26,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/gpsctl.h"
 
@@ -57,7 +58,7 @@ void gps_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     gps_tile_num = mainbar_add_app_tile( 1, 1, "gps settings" );
     gps_settings_tile = mainbar_get_tile_obj( gps_tile_num );
-    lv_style_copy( &gps_settings_style, mainbar_get_style() );
+    lv_style_copy( &gps_settings_style, ws_get_mainbar_style() );
     lv_style_set_bg_color( &gps_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &gps_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &gps_settings_style, LV_OBJ_PART_MAIN, 0);
@@ -86,7 +87,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( autoon_cont, gps_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     autoon_onoff = lv_switch_create( autoon_cont, NULL );
     lv_obj_add_protect( autoon_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( autoon_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( autoon_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( autoon_onoff, LV_ANIM_ON );
     lv_obj_align( autoon_onoff, autoon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( autoon_onoff, autoon_onoff_event_handler );
@@ -101,7 +102,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     enable_on_standby_onoff = lv_switch_create( enable_on_standby_cont, NULL );
     lv_obj_add_protect( enable_on_standby_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( enable_on_standby_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( enable_on_standby_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( enable_on_standby_onoff, LV_ANIM_ON );
     lv_obj_align( enable_on_standby_onoff, enable_on_standby_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( enable_on_standby_onoff, enable_on_standby_onoff_event_handler );
@@ -116,7 +117,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     app_use_gps_onoff = lv_switch_create( app_use_gps_cont, NULL );
     lv_obj_add_protect( app_use_gps_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( app_use_gps_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( app_use_gps_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( app_use_gps_onoff, LV_ANIM_ON );
     lv_obj_align( app_use_gps_onoff, app_use_gps_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( app_use_gps_onoff, app_use_gps_onoff_event_handler );
@@ -146,7 +147,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( fakegps_cont, app_control_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     fakegps_onoff = lv_switch_create( fakegps_cont, NULL );
     lv_obj_add_protect( fakegps_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( fakegps_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( fakegps_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( fakegps_onoff, LV_ANIM_ON );
     lv_obj_align( fakegps_onoff, fakegps_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( fakegps_onoff, fakegps_onoff_event_handler );

@@ -11,6 +11,7 @@
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>
+#include <gui/widget_styles.h>
 
 LV_IMG_DECLARE(exit_32px);
 
@@ -57,7 +58,7 @@ void SettingsPage::onChildAdded(Widget& child, const TypeInfo& type)
   if (type.isLabel() || type.isWidget())
       child.style(pageStyle);
   else if (type.isSwitch())
-      child.style(mainbar_get_switch_style(), LV_SWITCH_PART_INDIC);
+      child.style(ws_get_switch_style(), LV_SWITCH_PART_INDIC);
 }
 
 void SettingsPage::buildFromConfig(JsonConfig& config)

@@ -30,6 +30,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/blectl.h"
 
@@ -63,10 +64,7 @@ void bluetooth_settings_tile_setup( void ) {
     bluetooth_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth setup" );
     bluetooth_settings_tile = mainbar_get_tile_obj( bluetooth_tile_num );
 
-    lv_style_copy( &bluetooth_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &bluetooth_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &bluetooth_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &bluetooth_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &bluetooth_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( bluetooth_settings_tile, LV_OBJ_PART_MAIN, &bluetooth_settings_style );
 
     bluettoth_setup_icon = setup_register( "bluetooth", &bluetooth_64px, enter_bluetooth_setup_event_cb );
@@ -92,7 +90,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_enable_cont, bluetooth_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     bluetooth_enable_onoff = lv_switch_create( bluetooth_enable_cont, NULL );
     lv_obj_add_protect( bluetooth_enable_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( bluetooth_enable_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( bluetooth_enable_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( bluetooth_enable_onoff, LV_ANIM_ON );
     lv_obj_align( bluetooth_enable_onoff, bluetooth_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( bluetooth_enable_onoff, bluetooth_enable_onoff_event_handler );
@@ -107,7 +105,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_advertising_cont, bluetooth_enable_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_advertising_onoff = lv_switch_create( bluetooth_advertising_cont, NULL );
     lv_obj_add_protect( bluetooth_advertising_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( bluetooth_advertising_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( bluetooth_advertising_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( bluetooth_advertising_onoff, LV_ANIM_ON );
     lv_obj_align( bluetooth_advertising_onoff, bluetooth_advertising_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( bluetooth_advertising_onoff, bluetooth_advertising_onoff_event_handler );
@@ -122,7 +120,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_standby_cont, bluetooth_advertising_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_standby_onoff = lv_switch_create( bluetooth_standby_cont, NULL );
     lv_obj_add_protect( bluetooth_standby_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( bluetooth_standby_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( bluetooth_standby_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( bluetooth_standby_onoff, LV_ANIM_ON );
     lv_obj_align( bluetooth_standby_onoff, bluetooth_standby_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( bluetooth_standby_onoff, bluetooth_standby_onoff_event_handler );
@@ -137,7 +135,7 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_show_notifications_cont, bluetooth_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_show_notifications_onoff = lv_switch_create( bluetooth_show_notifications_cont, NULL );
     lv_obj_add_protect( bluetooth_show_notifications_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( bluetooth_show_notifications_onoff, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( bluetooth_show_notifications_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( bluetooth_show_notifications_onoff, LV_ANIM_ON );
     lv_obj_align( bluetooth_show_notifications_onoff, bluetooth_show_notifications_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( bluetooth_show_notifications_onoff, bluetooth_show_notifications_onoff_event_handler );

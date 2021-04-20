@@ -30,6 +30,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/gpsctl.h"
 
@@ -69,7 +70,7 @@ void gps_status_activate_cb(void);
 
 void gps_status_main_setup(uint32_t tile_num) {
     gps_status_main_tile = mainbar_get_tile_obj(tile_num);
-    lv_style_copy(&gps_status_main_style, mainbar_get_style());
+    lv_style_copy(&gps_status_main_style, ws_get_mainbar_style());
 
     lv_obj_t *exit_btn = lv_imgbtn_create(gps_status_main_tile, NULL);
     lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -90,7 +91,7 @@ void gps_status_main_setup(uint32_t tile_num) {
     lv_obj_set_event_cb(setup_btn, enter_gps_status_setup_event_cb);
     lv_obj_set_hidden(setup_btn, true);
 
-    lv_style_copy(&gps_status_value_style, mainbar_get_style());
+    lv_style_copy(&gps_status_value_style, ws_get_mainbar_style());
     lv_style_set_bg_color(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
     lv_style_set_bg_opa(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_OPA_50);
     lv_style_set_border_width(&gps_status_value_style, LV_OBJ_PART_MAIN, 0);

@@ -26,6 +26,7 @@
 #include "quickglui/quickglui.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/widget_styles.h"
 #include "hardware/blectl.h"
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
@@ -62,7 +63,7 @@ void IRController_build_UI(IRControlSettingsAction settingsAction)
     // It also will auto-align child buttons on it:
     Container& desk = main.createChildContainer(LV_LAYOUT_PRETTY_MID);
     
-    irDeskStyle = Style::Create(mainbar_get_style(), true);
+    irDeskStyle = Style::Create(ws_get_mainbar_style(), true);
     irDeskStyle.paddingInner(irConfig.defSpacing);
     irDeskStyle.padding(7, 16, 7, 16);
     desk.style(irDeskStyle);

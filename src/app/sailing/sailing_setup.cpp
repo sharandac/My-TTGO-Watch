@@ -29,6 +29,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_styles.h"
 
 lv_obj_t *sailing_setup_tile = NULL;
 lv_style_t sailing_setup_style;
@@ -43,7 +44,7 @@ static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 void sailing_setup_setup( uint32_t tile_num ) {
 
     sailing_setup_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &sailing_setup_style, mainbar_get_style() );
+    lv_style_copy( &sailing_setup_style, ws_get_mainbar_style() );
 
     lv_style_set_bg_color( &sailing_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &sailing_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
@@ -76,7 +77,7 @@ void sailing_setup_setup( uint32_t tile_num ) {
 
     sailing_foobar_switch = lv_switch_create( sailing_foobar_switch_cont, NULL );
     lv_obj_add_protect( sailing_foobar_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sailing_foobar_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( sailing_foobar_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( sailing_foobar_switch, LV_ANIM_ON );
     lv_obj_align( sailing_foobar_switch, sailing_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sailing_foobar_switch, sailing_foobar_switch_event_cb );

@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/widget_styles.h"
 #include "note_tile.h"
 
 static lv_obj_t *note_cont = NULL;
@@ -36,7 +37,7 @@ LV_FONT_DECLARE(Ubuntu_16px);
 void note_tile_setup( void ) {
 
     note_cont = mainbar_get_tile_obj( mainbar_add_tile( 0, 1, "note tile" ) );
-    style = mainbar_get_style();
+    style = ws_get_mainbar_style();
 
     lv_style_copy( &notestyle, style);
     lv_style_set_text_opa( &notestyle, LV_OBJ_PART_MAIN, LV_OPA_30);

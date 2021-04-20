@@ -27,6 +27,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/display.h"
 #include "hardware/motor.h"
@@ -62,10 +63,7 @@ void battery_settings_tile_setup( void ) {
 
     battery_view_tile_setup( battery_settings_tile_num );
 
-    lv_style_copy( &battery_settings_style, mainbar_get_style() );
-    lv_style_set_bg_color( &battery_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &battery_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &battery_settings_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_copy( &battery_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_settings_tile, LV_OBJ_PART_MAIN, &battery_settings_style );
 
     battery_setup_icon = setup_register( "battery", &battery_icon_64px, enter_battery_setup_event_cb );
@@ -91,7 +89,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_align( battery_silence_wakeup_switch_cont, battery_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     battery_silence_wakeup_switch = lv_switch_create( battery_silence_wakeup_switch_cont, NULL );
     lv_obj_add_protect( battery_silence_wakeup_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( battery_silence_wakeup_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( battery_silence_wakeup_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( battery_silence_wakeup_switch, LV_ANIM_ON );
     lv_obj_align( battery_silence_wakeup_switch, battery_silence_wakeup_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( battery_silence_wakeup_switch, battery_silence_wakeup_switch_event_handler );
@@ -115,7 +113,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_align( battery_percent_switch_cont, battery_setup_label_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_percent_switch = lv_switch_create( battery_percent_switch_cont, NULL );
     lv_obj_add_protect( battery_percent_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( battery_percent_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( battery_percent_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( battery_percent_switch, LV_ANIM_ON );
     lv_obj_align( battery_percent_switch, battery_percent_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( battery_percent_switch, battery_percent_switch_event_handler );
@@ -130,7 +128,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_align( battery_experimental_switch_cont, battery_percent_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_experimental_switch = lv_switch_create( battery_experimental_switch_cont, NULL );
     lv_obj_add_protect( battery_experimental_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( battery_experimental_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( battery_experimental_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( battery_experimental_switch, LV_ANIM_ON );
     lv_obj_align( battery_experimental_switch, battery_experimental_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( battery_experimental_switch, battery_experimental_switch_event_handler );
@@ -145,7 +143,7 @@ void battery_settings_tile_setup( void ) {
     lv_obj_align( battery_high_voltage_switch_cont, battery_experimental_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_high_voltage_switch = lv_switch_create( battery_high_voltage_switch_cont, NULL );
     lv_obj_add_protect( battery_high_voltage_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( battery_high_voltage_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( battery_high_voltage_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( battery_high_voltage_switch, LV_ANIM_ON );
     lv_obj_align( battery_high_voltage_switch, battery_high_voltage_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( battery_high_voltage_switch, battery_high_voltage_switch_event_handler );
