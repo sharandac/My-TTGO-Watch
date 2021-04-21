@@ -251,13 +251,10 @@ bool gpsctl_send_cb( EventBits_t event, void *arg ) {
 }
 
 void gpsctl_on( void ) {
-    if ( gpsctl_config.app_control_permission ) {
         #if defined( LILYGO_WATCH_HAS_GPS )
 	        TTGOClass *ttgo = TTGOClass::getWatch();
 	        ttgo->trunOnGPS();
         #endif
-
-    }
         gps_data.gpsfix = false;
 	    gps_data.valid_location = false;
 	    gps_data.valid_speed = false;
@@ -268,7 +265,6 @@ void gpsctl_on( void ) {
 }
 
 void gpsctl_off( void ) {
-    if ( gpsctl_config.app_control_permission ) {
         #if defined( LILYGO_WATCH_HAS_GPS )
 	        TTGOClass *ttgo = TTGOClass::getWatch();
 	        ttgo->turnOffGPS();
@@ -280,7 +276,6 @@ void gpsctl_off( void ) {
 	    gps_data.valid_satellite = false;
 	    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
 	    gpsctl_send_cb( GPSCTL_DISABLE, NULL );
-    }
 }
 
 void gpsctl_autoon_on( void ) {
@@ -323,22 +318,12 @@ void gpsctl_autoon_off( void ) {
 }
 
 bool gpsctl_get_app_use_gps( void ) {
-    return( gpsctl_config.app_use_permission );
+    return( gpsctl_config.app_use_gps );
 }
 
-bool gpsctl_get_app_control_gps( void ) {
-    return( gpsctl_config.app_control_permission );
-}
-
-void gpsctl_set_app_use_gps( bool app_use_permission ) {
-    gpsctl_config.app_use_permission = app_use_permission;
+void gpsctl_set_app_use_gps( bool app_use_gps ) {
+    gpsctl_config.app_use_gps = app_use_gps;
     gpsctl_config.save();
-}
-
-void gpsctl_set_app_control_gps( bool app_control_permission ) {
-    gpsctl_config.app_control_permission = app_control_permission;
-    gpsctl_config.save();
-    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 bool gpsctl_get_autoon( void ) {
