@@ -112,7 +112,7 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
             gps_data.valid_speed = gps->speed.isValid();
             gps_data.valid_satellite = gps->satellites.isValid();
             gps_data.valid_altitude = gps->altitude.isValid();
-             /*
+            /*
              * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
              */
             if ( gps_data.valid_location != gps_data.gpsfix ) {
@@ -251,31 +251,37 @@ bool gpsctl_send_cb( EventBits_t event, void *arg ) {
 }
 
 void gpsctl_on( void ) {
-        #if defined( LILYGO_WATCH_HAS_GPS )
-	        TTGOClass *ttgo = TTGOClass::getWatch();
-	        ttgo->trunOnGPS();
-        #endif
-        gps_data.gpsfix = false;
-	    gps_data.valid_location = false;
-	    gps_data.valid_speed = false;
-	    gps_data.valid_altitude = false;
-	    gps_data.valid_satellite = false;
-	    gpsctl_send_cb( GPSCTL_ENABLE, NULL );
-	    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+    #if defined( LILYGO_WATCH_HAS_GPS )
+        TTGOClass *ttgo = TTGOClass::getWatch();
+        ttgo->trunOnGPS();
+    #endif
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
+    gpsctl_config.autoon = true;
+    gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
+    gpsctl_send_cb( GPSCTL_ENABLE, NULL );
+    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
 }
 
 void gpsctl_off( void ) {
-        #if defined( LILYGO_WATCH_HAS_GPS )
-	        TTGOClass *ttgo = TTGOClass::getWatch();
-	        ttgo->turnOffGPS();
-        #endif
-	    gps_data.gpsfix = false;
-	    gps_data.valid_location = false;
-	    gps_data.valid_speed = false;
-	    gps_data.valid_altitude = false;
-	    gps_data.valid_satellite = false;
-	    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
-	    gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    #if defined( LILYGO_WATCH_HAS_GPS )
+        TTGOClass *ttgo = TTGOClass::getWatch();
+        ttgo->turnOffGPS();
+    #endif
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
+    gpsctl_config.autoon = false;
+    gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
+    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+    gpsctl_send_cb( GPSCTL_DISABLE, NULL );
 }
 
 void gpsctl_autoon_on( void ) {
@@ -324,6 +330,7 @@ bool gpsctl_get_app_use_gps( void ) {
 void gpsctl_set_app_use_gps( bool app_use_gps ) {
     gpsctl_config.app_use_gps = app_use_gps;
     gpsctl_config.save();
+    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
 bool gpsctl_get_autoon( void ) {

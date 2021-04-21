@@ -80,7 +80,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *autoon_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 32);
+    lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( autoon_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( autoon_cont, gps_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
     autoon_onoff = lv_switch_create( autoon_cont, NULL );
@@ -95,7 +95,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( autoon_label, autoon_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *enable_on_standby_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(enable_on_standby_cont, lv_disp_get_hor_res( NULL ) , 32);
+    lv_obj_set_size(enable_on_standby_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( enable_on_standby_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     enable_on_standby_onoff = lv_switch_create( enable_on_standby_cont, NULL );
@@ -110,7 +110,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( enable_on_standby_label, enable_on_standby_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *app_use_gps_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(app_use_gps_cont, lv_disp_get_hor_res( NULL ) , 32);
+    lv_obj_set_size(app_use_gps_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( app_use_gps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     app_use_gps_onoff = lv_switch_create( app_use_gps_cont, NULL );
@@ -125,7 +125,7 @@ void gps_settings_tile_setup( void ) {
     lv_obj_align( app_use_gps_label, app_use_gps_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *fakegps_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(fakegps_cont, lv_disp_get_hor_res( NULL ) , 32);
+    lv_obj_set_size(fakegps_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( fakegps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     fakegps_onoff = lv_switch_create( fakegps_cont, NULL );
