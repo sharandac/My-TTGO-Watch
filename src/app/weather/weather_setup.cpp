@@ -35,7 +35,7 @@
 #include "hardware/motor.h"
 #include "hardware/gpsctl.h"
 
-#include "utils/json_psram_allocator.h"
+#include "quickglui/common/bluejsonrequest.h"
 
 lv_obj_t *weather_setup_tile = NULL;
 lv_style_t weather_setup_style;
@@ -63,7 +63,7 @@ static void weather_widget_onoff_event_handler(lv_obj_t *obj, lv_event_t event);
 
 bool weather_gpsctl_app_use_location_event_cb( EventBits_t event, void *arg );
 bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg );
-static void weather_bluetooth_message_msg_pharse( const char* msg );
+static void weather_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc );
 
 void weather_setup_tile_setup( uint32_t tile_num ) {
 
@@ -221,7 +221,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     else
         lv_switch_off( weather_widget_onoff, LV_ANIM_OFF );
 
-    blectl_register_cb( BLECTL_MSG, weather_bluetooth_message_event_cb, "weather setup" );
+    blectl_register_cb( BLECTL_MSG_JSON, weather_bluetooth_message_event_cb, "weather setup" );
     gpsctl_register_cb( GPSCTL_SET_APP_LOCATION, weather_gpsctl_app_use_location_event_cb, "gpsctl weather");
 }
 
@@ -290,40 +290,30 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
 
 bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            weather_bluetooth_message_msg_pharse( (const char*)arg );
+        case BLECTL_MSG_JSON:       weather_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
                                     break;
     }
     return( true );
 }
 
-void weather_bluetooth_message_msg_pharse( const char* msg ) {
+void weather_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
+    if( !strcmp( doc["t"], "conf" ) ) {
+        if ( !strcmp( doc["app"], "weather" ) ) {
 
-    SpiRamJsonDocument doc( strlen( msg ) * 4 );
+            weather_config_t *weather_config = weather_get_config();
+            strlcpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
+            strlcpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
+            strlcpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
+            weather_save_config();
 
-    DeserializationError error = deserializeJson( doc, msg );
-    if ( error ) {
-        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
-    }
-    else {
-        if( !strcmp( doc["t"], "conf" ) ) {
-            if ( !strcmp( doc["app"], "weather" ) ) {
+            lv_textarea_set_text( weather_apikey_textfield, weather_config->apikey );
+            lv_textarea_set_text( weather_lat_textfield, weather_config->lat );
+            lv_textarea_set_text( weather_lon_textfield, weather_config->lon );
 
-                weather_config_t *weather_config = weather_get_config();
-                strlcpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
-                strlcpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
-                strlcpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
-                weather_save_config();
-
-                lv_textarea_set_text( weather_apikey_textfield, weather_config->apikey );
-                lv_textarea_set_text( weather_lat_textfield, weather_config->lat );
-                lv_textarea_set_text( weather_lon_textfield, weather_config->lon );
-
-                motor_vibe(100);
-            }
-
+            motor_vibe(100);
         }
-    }        
-    doc.clear();
+
+    }
 }
 
 bool weather_gpsctl_app_use_location_event_cb( EventBits_t event, void *arg ) {

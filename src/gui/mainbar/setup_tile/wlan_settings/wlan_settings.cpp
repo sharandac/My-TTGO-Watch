@@ -42,7 +42,7 @@
 #endif
 
 
-#include "utils/json_psram_allocator.h"
+#include "quickglui/common/bluejsonrequest.h"
 
 LV_IMG_DECLARE(exit_32px);
 
@@ -74,7 +74,7 @@ void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event );
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg );
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg );
-static void wifi_setup_bluetooth_message_msg_pharse( const char* msg );
+static void wifi_setup_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc );
 
 LV_IMG_DECLARE(lock_16px);
 LV_IMG_DECLARE(unlock_16px);
@@ -455,7 +455,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
         setup_hide_indicator( wifi_setup_icon );
     }
 
-    blectl_register_cb( BLECTL_MSG, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
+    blectl_register_cb( BLECTL_MSG_JSON, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
     wifictl_register_cb( WIFICTL_AUTOON, wifi_setup_autoon_event_cb, "wifi setup");
 }
 
@@ -540,30 +540,20 @@ bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg ) {
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            wifi_setup_bluetooth_message_msg_pharse( (const char*)arg );
+        case BLECTL_MSG_JSON:       wifi_setup_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
                                     break;
     }
     return( true );
 }
 
-void wifi_setup_bluetooth_message_msg_pharse( const char* msg ) {
+void wifi_setup_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
+    if( !strcmp( doc["t"], "conf" ) ) {
+            if ( !strcmp( doc["app"], "settings" ) ) {
+            if ( !strcmp( doc["settings"], "wlan" ) ) {
+                motor_vibe(100);
+                wifictl_insert_network(  doc["ssid"] |"" , doc["key"] |"" );
+            }
+            }
 
-    SpiRamJsonDocument doc( strlen( msg ) * 4 );
-
-    DeserializationError error = deserializeJson( doc, msg );
-    if ( error ) {
-        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
     }
-    else {
-        if( !strcmp( doc["t"], "conf" ) ) {
-             if ( !strcmp( doc["app"], "settings" ) ) {
-                if ( !strcmp( doc["settings"], "wlan" ) ) {
-                    motor_vibe(100);
-                    wifictl_insert_network(  doc["ssid"] |"" , doc["key"] |"" );
-                }
-             }
-
-        }
-    }        
-    doc.clear();
 }
