@@ -548,12 +548,11 @@ bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
 
 void wifi_setup_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
     if( !strcmp( doc["t"], "conf" ) ) {
-            if ( !strcmp( doc["app"], "settings" ) ) {
+        if ( !strcmp( doc["app"], "settings" ) ) {
             if ( !strcmp( doc["settings"], "wlan" ) ) {
                 motor_vibe(100);
                 wifictl_insert_network(  doc["ssid"] |"" , doc["key"] |"" );
             }
-            }
-
+        }
     }
 }
