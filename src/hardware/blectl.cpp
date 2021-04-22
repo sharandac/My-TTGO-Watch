@@ -131,7 +131,6 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 blectl_set_event( BLECTL_CONNECT );
                 blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
                 log_i("BLECTL authentication successful, client connected");
-                blectl_send_msg("%c\r\n{}\r\n" );
                 return;
             }
         }
@@ -139,7 +138,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
             if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                 blectl_clear_event( BLECTL_PIN_AUTH );
                 blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
-                log_i("BLECTL pairing abort");
+                log_i("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
                 pServer->startAdvertising();
                 return;
             }
@@ -147,7 +146,7 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
                 blectl_set_event( BLECTL_DISCONNECT );
                 blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
-                log_i("BLECTL authentication unsuccessful, client disconnected");
+                log_i("BLECTL authentication unsuccessful, client disconnected, reason: %02x", cmpl.fail_reason );
                 pServer->startAdvertising();
                 return;
             }
@@ -541,7 +540,7 @@ static void blectl_send_chunk ( int32_t len ) {
         }
     }
     chunk_msg[ len ] = '\0';
-    log_d("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
+    log_i("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
 }
 
 void blectl_loop ( void ) {
