@@ -32,10 +32,10 @@
     class gpsctl_config_t : public BaseJsonConfig {
         public:
         gpsctl_config_t();
-        bool autoon = true;                 /** @brief autoon config item, true if autoon enabled, false if disabled */
-        bool enable_on_standby = false;     /** @brief enable on standby on/off */
-        bool app_use_gps = false;            /** @brief enable on standby on/off */
-        bool gps_over_ip = false;            /** @brief enable on standby on/off */
+        bool autoon = true;                     /** @brief autoon config item, true if autoon enabled, false if disabled */        
+        bool enable_on_standby = false;         /** @brief enable on standby on/off */
+        bool app_use_gps = false;               /** @brief permission for apps, to get gps location */
+        bool gps_over_ip = false;               /** @brief enable gps over ip */
 
         protected:
         ////////////// Available for overloading: //////////////

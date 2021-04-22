@@ -33,6 +33,8 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/gpsctl.h"
+#include "hardware/display.h"
+#include "gui/mainbar/mainbar.h"
 
 /*
  * tile  and style objects
@@ -52,6 +54,7 @@ lv_obj_t *pos_longlat_value = NULL;
 lv_obj_t *altitude_value = NULL;
 lv_obj_t *speed_value = NULL;
 lv_obj_t *source_value = NULL;
+static bool gps_status_block_return_maintile = false;
 /*
  * images
  */
@@ -219,6 +222,10 @@ void gps_status_main_setup(uint32_t tile_num) {
                           | GPSCTL_UPDATE_SOURCE
                           , gpsctl_gps_status_event_cb
                           , "gpsctl gps status" );
+    /** register avtivate and hibernate callback function */
+    gps_status_block_return_maintile = display_get_block_return_maintile();
+    mainbar_add_tile_activate_cb( tile_num, gps_status_activate_cb );
+    mainbar_add_tile_hibernate_cb( tile_num, gps_status_hibernate_cb );
 }
 
 static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {
@@ -297,4 +304,17 @@ bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {
     lv_obj_align( source_value, lv_obj_get_parent( source_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
 
     return( true );
+}
+
+void gps_status_hibernate_cb(void)
+{
+    /** restore old "block the maintile value */
+    display_set_block_return_maintile( gps_status_block_return_maintile );
+}
+void gps_status_activate_cb(void)
+{
+    /** save "block the maintile" value */
+    gps_status_block_return_maintile = display_get_block_return_maintile();
+    /** overwrite "block the maintile" value */
+    display_set_block_return_maintile( true );
 }
