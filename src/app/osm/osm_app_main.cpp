@@ -130,6 +130,9 @@ void osm_app_main_setup( uint32_t tile_num ) {
     osm_map_data[0] = NULL;
     osm_map_data[1] = NULL;
 
+    osm_location.tilex_dest_px_res = lv_disp_get_hor_res( NULL ) ;
+    osm_location.tiley_dest_px_res = lv_disp_get_ver_res( NULL );
+
     osm_map_event_handle = xEventGroupCreate();
 }
 
@@ -258,7 +261,7 @@ static void zoom_out_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
             /**
              * decrease zoom level
              */
-            if ( osm_location.zoom > 0 ) {
+            if ( osm_location.zoom > 4 ) {
                 osm_location.zoom--;
                 osm_map_update_request();
             }

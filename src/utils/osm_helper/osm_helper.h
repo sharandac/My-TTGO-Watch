@@ -25,6 +25,8 @@
         double tiley_res = 0;
         double tilex_px_res = 0;
         double tiley_px_res = 0;
+        double tilex_dest_px_res = 240;
+        double tiley_dest_px_res = 240;
         uint16_t tilex_pos = 0;
         uint16_t tiley_pos = 0;
     } osm_location_t;
