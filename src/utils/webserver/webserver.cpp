@@ -315,7 +315,7 @@ void asyncwebserver_start(void){
   });
 
   //start FsEditor with SPIFFS
-  setFsEditorFilesystem(SD);
+  setFsEditorFilesystem(SPIFFS);
 
   asyncserver.rewrite("/", "/index.htm");
   asyncserver.serveStatic("/", SPIFFS, "/");
