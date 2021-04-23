@@ -154,6 +154,7 @@ void osm_map_main_tile_update_task( lv_task_t * task ) {
             lv_obj_set_hidden( zoom_in_btn, true );
             lv_obj_set_hidden( zoom_out_btn, true );
             statusbar_hide( true );
+            statusbar_expand( false );
         }
         else {
             lv_obj_set_hidden( exit_btn, false );
@@ -332,6 +333,6 @@ void osm_hibernate_cb( void ) {
     /**
      * set osm app inactive
      */
-    osm_app_active = true;
+    osm_app_active = false;
     statusbar_hide( false );
 }
