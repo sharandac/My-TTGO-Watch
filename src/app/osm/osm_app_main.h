@@ -24,6 +24,8 @@
 
     #include <TTGO.h>
 
+    #define OSM_APP_DOWNLOAD_REQUEST            _BV(0)
+
     void osm_app_main_setup( uint32_t tile_num );
 
 #endif // _OSM_APP_MAIN_H

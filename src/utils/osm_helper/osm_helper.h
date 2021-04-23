@@ -9,6 +9,7 @@
      * @brief osm tile calculation structure
      */
     typedef struct {
+        bool zoom_valid = false;        /** @brief osm zoom level */
         uint32_t zoom = 0;              /** @brief osm zoom level */
         bool lonlat_update = false;     /** @brief lon/lat update flag */
         double lon = 0;                 /** @brief lon for update calculation*/
