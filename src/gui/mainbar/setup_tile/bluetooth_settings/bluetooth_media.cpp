@@ -31,7 +31,7 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 
-#include "utils/json_psram_allocator.h"
+#include "quickglui/common/bluejsonrequest.h"
 
 static bool bluetooth_media_play_state = false;
 
@@ -64,7 +64,7 @@ static void exit_bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event
 static void exit_bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event );
-bool bluetooth_media_queue_msg( const char *msg );
+static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc );
 
 void bluetooth_media_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -151,7 +151,7 @@ void bluetooth_media_tile_setup( void ) {
     lv_obj_align( bluetooth_media_volume_up, bluetooth_media_speaker, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
     lv_obj_set_event_cb( bluetooth_media_volume_up, exit_bluetooth_media_volume_up_event_cb );
 
-    blectl_register_cb( BLECTL_MSG, bluetooth_media_event_cb, "bluetooth media" );
+    blectl_register_cb( BLECTL_MSG_JSON, bluetooth_media_event_cb, "bluetooth media" );
 }
 
 
@@ -219,61 +219,53 @@ static void exit_bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 bool bluetooth_media_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            
-            bluetooth_media_queue_msg( (const char*)arg );
+        case BLECTL_MSG_JSON:            
+            bluetooth_media_queue_msg( *(BluetoothJsonRequest*)arg );
             break;
     }
     return( true );
 }
 
-bool bluetooth_media_queue_msg( const char *msg ) {
+bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
     bool retval = false;
     
-    SpiRamJsonDocument doc( strlen( msg ) * 4 );
-
-    DeserializationError error = deserializeJson( doc, msg );
-    if ( error ) {
-        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
+    if( !strcmp( doc["t"], "musicstate" ) ) {
+        if( doc["state"] ) {
+            if( !strcmp( doc["state"], "pause" ) ) {
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_RELEASED, &play_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_PRESSED, &play_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_RELEASED, &play_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_PRESSED, &play_64px);
+                bluetooth_media_play_state = false;
+            }
+            if( !strcmp( doc["state"], "play" ) ) {
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_RELEASED, &pause_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_PRESSED, &pause_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_RELEASED, &pause_64px);
+                lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_PRESSED, &pause_64px);                    
+                bluetooth_media_play_state = true;
+            }
+        }
+        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+        statusbar_hide( true );
+        mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF );
+        retval = true;
     }
-    else {
-        if( !strcmp( doc["t"], "musicstate" ) ) {
-            if( doc["state"] ) {
-                if( !strcmp( doc["state"], "pause" ) ) {
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_RELEASED, &play_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_PRESSED, &play_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_RELEASED, &play_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_PRESSED, &play_64px);
-                    bluetooth_media_play_state = false;
-                }
-                if( !strcmp( doc["state"], "play" ) ) {
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_RELEASED, &pause_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_PRESSED, &pause_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_RELEASED, &pause_64px);
-                    lv_imgbtn_set_src( bluetooth_media_play, LV_BTN_STATE_CHECKED_PRESSED, &pause_64px);                    
-                    bluetooth_media_play_state = true;
-                }
-            }
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            statusbar_hide( true );
-            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF );
-            retval = true;
+    if( !strcmp( doc["t"], "musicinfo" ) ) {
+        if ( doc["track"] ) {
+            lv_label_set_text( bluetooth_media_title, doc["track"] );
+            lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
         }
-        if( !strcmp( doc["t"], "musicinfo" ) ) {
-            if ( doc["track"] ) {
-                lv_label_set_text( bluetooth_media_title, doc["track"] );
-                lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
-            }
-            
-            if ( doc["artist"] ) {
-                lv_label_set_text( bluetooth_media_artist, doc["artist"] );
-                lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
-            }
+        
+        if ( doc["artist"] ) {
+            lv_label_set_text( bluetooth_media_artist, doc["artist"] );
+            lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+        }
 
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            statusbar_hide( true );
-            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF );
-            retval = true;
-        }
+        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+        statusbar_hide( true );
+        mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF );
+        retval = true;
     }
     return( retval );
 }

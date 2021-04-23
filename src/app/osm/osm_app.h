@@ -19,21 +19,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _IRCONTROLLER_H
-    #define _IRCONTROLLER_H
+#ifndef _OSM_APP_H
+    #define _OSM_APP_H
 
     #include <TTGO.h>
 
-    enum IRControlSettingsAction {
-        Ignore,
-        Load,
-        Save
-    };
+    void osm_app_setup( void );
+    void osm_app_hide_app_icon_info( bool show );
+    void osm_app_hide_widget_icon_info( bool show );
+    uint32_t osm_app_get_app_setup_tile_num( void );
+    uint32_t osm_app_get_app_main_tile_num( void );
 
-    struct InfraButton;
-
-    void IRController_setup( void );
-    void IRController_build_UI(IRControlSettingsAction settingsAction);
-    void execute_ir_cmd(InfraButton* config);
-
-#endif // _IRCONTROLLER_H
+#endif // _OSM_APP_H

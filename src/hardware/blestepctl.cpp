@@ -61,7 +61,7 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg);
 
 void blestepctl_setup( void ) {
     bma_register_cb( BMACTL_STEPCOUNTER, blestepctl_bma_event_cb, "ble step counter");
-    blectl_register_cb( BLECTL_CONNECT | BLECTL_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_MSG_JSON, blestepctl_bluetooth_event_cb, "ble step counter" );
 }
 
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
@@ -79,7 +79,6 @@ static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
 
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
     bool retval = false;
-    auto msg = (const char*)arg;
     
     switch( event ) {
         case BLECTL_CONNECT: 
@@ -89,8 +88,8 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
                 stepcounter_ble_updater.update( stepcounter );
                 retval = true;
                 break;
-        case BLECTL_MSG:
-                BluetoothJsonRequest request(msg, strlen( msg ) * 4);
+        case BLECTL_MSG_JSON:
+                BluetoothJsonRequest &request = *(BluetoothJsonRequest*)arg;
 
                 if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int")) {
                     /*

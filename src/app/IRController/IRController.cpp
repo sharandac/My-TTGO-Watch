@@ -37,6 +37,8 @@
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
 LV_IMG_DECLARE(IRController_64px);
 
+static bool IRController_bluetooth_event_cb(EventBits_t event, void *arg);
+
 IRConfig irConfig;
 Application irController;
 IRsend irsend(TWATCH_2020_IR_PIN);
@@ -50,7 +52,7 @@ void IRController_setup( void ) {
     // Load config and build user interface
     IRController_build_UI(IRControlSettingsAction::Load);
 
-    blectl_register_cb(BLECTL_MSG, IRController_bluetooth_event_cb, "ir-remote setup");
+    blectl_register_cb(BLECTL_MSG_JSON, IRController_bluetooth_event_cb, "ir-remote setup");
 }
 
 void IRController_build_UI(IRControlSettingsAction settingsAction)
@@ -131,17 +133,16 @@ void execute_ir_cmd(InfraButton* config) {
 }
 
 bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
-    if (event != BLECTL_MSG) return false; // Not supported
+    if (event != BLECTL_MSG_JSON) return false; // Not supported
 
-    auto msg = (const char*)arg;
     InfraButton* btn = nullptr;
-    BluetoothJsonRequest request(msg, strlen( msg ) * 4);
+    BluetoothJsonRequest &request = *(BluetoothJsonRequest *)arg;
 
     if (request.isRequest() && request.isForApplication("ir"))
     {
         BluetoothJsonResponse response(request);
         String cmd = request.command(); // Requested command
-        log_i("RECEIVED cmd: %s, msg: %s", cmd.c_str(), msg);
+        log_i("RECEIVED cmd: %s", cmd.c_str());
         if (cmd == "list") {
             irConfig.sendListNames(response);
         } else if (cmd == "edit" || cmd == "save") {

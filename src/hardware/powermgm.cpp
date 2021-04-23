@@ -54,7 +54,6 @@ bool powermgm_send_loop_event_cb( EventBits_t event );
 
 void powermgm_setup( void ) {
     powermgm_status = xEventGroupCreate();
-    powermgm_set_event( POWERMGM_WAKEUP );
 }
 
 void powermgm_loop( void ) {
@@ -214,10 +213,10 @@ void powermgm_loop( void ) {
                  * total standby time is 15h with a 350mAh battery
                  */
                 pm_config.max_freq_mhz = 80;
-                pm_config.min_freq_mhz = 10;
+                pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = true;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/10MHz with light sleep");
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz with light sleep");
             #else
                 /*
                  * from here, the consumption is round about 28mA with ble

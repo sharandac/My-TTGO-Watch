@@ -54,6 +54,7 @@
 
 static bool statusbar_init = false;
 static bool statusbar_refresh_update = false;
+static bool force_dark_mode = false;
 
 static lv_obj_t *statusbar = NULL;
 static lv_obj_t *statusbar_wifi = NULL;
@@ -113,6 +114,7 @@ void statusbar_wifi_set_state( bool state, const char *wifiname );
 void statusbar_wifi_set_ip_state( bool state, const char *ip );
 void statusbar_bluetooth_set_state( bool state );
 void statusbar_gps_event_cb( lv_obj_t *gps, lv_event_t event );
+void statusbar_set_dark( bool dark_mode );
 
 lv_task_t * statusbar_task;
 void statusbar_update_task( lv_task_t * task );
@@ -922,6 +924,8 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
 
     static bool expand = false;
 
+    log_i("statusbar event");
+
     switch( event ) {
         case LV_EVENT_PRESSED:
             if ( expand ) {
@@ -937,6 +941,42 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 }
 
+void statusbar_set_force_dark( bool dark_mode ) {
+    if( dark_mode ) {
+        force_dark_mode = true;
+    }
+    else {
+        force_dark_mode = false;
+    }
+    statusbar_refresh_update = true;
+}
+
+bool statusbar_get_force_dark( void ) {
+    return( force_dark_mode );
+}
+
+
+void statusbar_set_dark( bool dark_mode ) {
+    if ( dark_mode || force_dark_mode ) {
+        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_90);
+        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+
+        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    }
+    else {
+        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
+        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
+        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
+
+        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    }
+}
+
 void statusbar_expand( bool expand ) {
     /*
      * check if statusbar ready
@@ -948,23 +988,11 @@ void statusbar_expand( bool expand ) {
 
     if ( expand ) {
         lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
-        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_90);
-        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-
-        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        statusbar_set_dark( true );
     } 
     else {
         lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
-        lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
-        lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
-
-        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        statusbar_set_dark( false );
         //Save config here if anything has changed
         if( should_save_brightness_config ){
             display_save_config();

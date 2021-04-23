@@ -24,7 +24,7 @@
 #include "splashscreen.h"
 
 #include "hardware/display.h"
-#include "gui/png_decoder/png_decoder.h"
+#include "gui/png_decoder/lv_png.h"
 #include "gui/sjpg_decoder/lv_sjpg.h"
 
 lv_obj_t *logo = NULL;
@@ -39,7 +39,7 @@ void splash_screen_stage_one( void ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     lv_split_jpeg_init();
-    png_decoder_init();
+    lv_png_init();
     lv_img_cache_set_size(100);
 
     lv_style_init( &style );

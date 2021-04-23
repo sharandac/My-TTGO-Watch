@@ -36,7 +36,7 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 
-#include "utils/json_psram_allocator.h"
+#include "quickglui/common/bluejsonrequest.h"
 
 lv_obj_t *osmand_app_main_tile = NULL;
 lv_style_t osmand_app_main_style;
@@ -98,7 +98,7 @@ struct direction_t direction[] = {
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg );
-void osmand_bluetooth_message_msg_pharse( const char* msg );
+static void osmand_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc );
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg );
 void osmand_activate_cb( void );
 void osmand_hibernate_cb( void );
@@ -140,7 +140,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_activate_cb( tile_num, osmand_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmand_hibernate_cb );
 
-    blectl_register_cb( BLECTL_MSG | BLECTL_CONNECT | BLECTL_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
+    blectl_register_cb( BLECTL_MSG_JSON | BLECTL_CONNECT | BLECTL_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
 }
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -153,8 +153,8 @@ static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG:            
-            osmand_bluetooth_message_msg_pharse( (const char*)arg );
+        case BLECTL_MSG_JSON:            
+            osmand_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
             break;
         case BLECTL_CONNECT:
             lv_label_set_text( osmand_app_info_label, "wait for OsmAnd msg");
@@ -168,44 +168,35 @@ bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-void osmand_bluetooth_message_msg_pharse( const char* msg ) {
+void osmand_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
     if ( osmand_active == false ) {
         return;
     }
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
-
-    DeserializationError error = deserializeJson( doc, msg );
-    if ( error ) {
-        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
-    }
-    else  {
-        if ( doc["t"] && doc["src"] && doc["title"] ) {
-            /*
-            * React to messages from "OsmAnd" and "OsmAnd~"
-            */
-            if ( !strcmp( doc["t"], "notify" ) && !strncmp( doc["src"], "OsmAnd", 6 ) ) {
-                if ( strstr( doc["title"], "?") ) {
-                    const char * distance = doc["title"];
-                    char * direction = strstr( doc["title"], "?");
-                    *direction = '\0';
-                    direction++;
-                    lv_img_set_src( osmand_app_direction_img, osmand_find_direction_img( (const char*)direction ) );
-                    lv_obj_align( osmand_app_direction_img, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 32 );
-                    lv_label_set_text( osmand_app_distance_label, distance );
-                    lv_obj_align( osmand_app_distance_label, osmand_app_direction_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
-                }
-                else {
-                    lv_label_set_text( osmand_app_info_label, doc["title"] );
-                    lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
-                }
+    if ( doc["t"] && doc["src"] && doc["title"] ) {
+        /*
+         * React to messages from "OsmAnd" and "OsmAnd~"
+         */
+        if ( !strcmp( doc["t"], "notify" ) && !strncmp( doc["src"], "OsmAnd", 6 ) ) {
+            if ( strstr( doc["title"], "?") ) {
+                const char * distance = doc["title"];
+                char * direction = strstr( doc["title"], "?");
+                *direction = '\0';
+                direction++;
+                lv_img_set_src( osmand_app_direction_img, osmand_find_direction_img( (const char*)direction ) );
+                lv_obj_align( osmand_app_direction_img, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 32 );
+                lv_label_set_text( osmand_app_distance_label, distance );
+                lv_obj_align( osmand_app_distance_label, osmand_app_direction_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             }
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            else {
+                lv_label_set_text( osmand_app_info_label, doc["title"] );
+                lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            }
         }
-
+        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
     }
+
     lv_obj_invalidate( lv_scr_act() );
-    doc.clear();
 }
 
 const lv_img_dsc_t *osmand_find_direction_img( const char * msg ) {

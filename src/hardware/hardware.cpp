@@ -75,11 +75,10 @@ void hardware_post_setup( void ) {
     if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
         wifictl_on();
     }
-    blectl_setup();
     sound_setup();
     gpsctl_setup();
-
     powermgm_set_event( POWERMGM_WAKEUP );
+    blectl_setup();
 
     display_set_brightness( display_get_brightness() );
 

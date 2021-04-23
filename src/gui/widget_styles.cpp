@@ -26,6 +26,7 @@
 static bool styles_defined = false;
 
 static lv_style_t mainbar_style;
+static lv_style_t app_style;
 static lv_style_t app_opa_style;
 static lv_style_t setup_tile_style;
 static lv_style_t button_style;
@@ -49,6 +50,14 @@ static void define_styles(){
     lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     //lv_style_set_bg_opa( &mainbar_style, LV_OBJ_PART_MAIN, LV_OPA_30);
+
+    lv_style_init( &app_style );
+    lv_style_set_radius( &app_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_bg_color( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &app_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+    lv_style_set_border_width( &app_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_text_color( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_style_set_image_recolor( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
 
     lv_style_copy( &app_opa_style, &mainbar_style );
     lv_style_set_bg_color( &app_opa_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
@@ -104,6 +113,12 @@ lv_style_t *ws_get_mainbar_style(){
     return &mainbar_style;
 }
 
+lv_style_t *ws_get_app_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &app_style;
+}
 lv_style_t *ws_get_app_opa_style(){
     if (!styles_defined){
          define_styles();

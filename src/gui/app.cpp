@@ -50,7 +50,7 @@ icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb
     lv_imgbtn_set_src( app->icon_img, LV_BTN_STATE_CHECKED_RELEASED, icon);
     lv_imgbtn_set_src( app->icon_img, LV_BTN_STATE_CHECKED_PRESSED, icon);
     lv_obj_reset_style_list( app->icon_img, LV_OBJ_PART_MAIN );
-    lv_obj_align( app->icon_img , app->icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+    lv_obj_align( app->icon_img , app->icon_cont, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( app->icon_img, event_cb );
     // setup icon indicator
     app->icon_indicator = lv_img_create( app->icon_cont, NULL );

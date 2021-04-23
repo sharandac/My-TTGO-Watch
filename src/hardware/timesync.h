@@ -28,6 +28,7 @@
 
     #define TIME_SYNC_REQUEST       _BV(0)
     #define TIME_SYNC_OK            _BV(1)
+    #define TIME_SYNC_UPDATE        _BV(2)
 
     /**
      * @brief setup display
