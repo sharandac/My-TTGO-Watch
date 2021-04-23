@@ -220,13 +220,9 @@ void osm_map_update_request( void ) {
 }
 
 void osm_map_update_Task( void * pvParameters ) {
-    log_i("start osm map uupdate Task, heap: %d", ESP.getFreeHeap() );
-
     osm_update_map( &osm_location, osm_location.lon, osm_location.lat, osm_location.zoom );
     lv_obj_align( osm_app_pos_img, lv_obj_get_parent( osm_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osm_location.tilex_pos - 8, osm_location.tiley_pos - 8 );
     lv_obj_set_hidden( osm_app_pos_img, false );
-
-    log_i("finsh osm map uupdate Task, heap: %d", ESP.getFreeHeap() );
     xEventGroupClearBits( osm_map_event_handle, OSM_APP_DOWNLOAD_REQUEST );
     vTaskDelete( NULL );    
 }
