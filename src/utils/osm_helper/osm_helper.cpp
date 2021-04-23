@@ -86,7 +86,7 @@ lv_img_dsc_t *osm_helper_get_tile_image( osm_location_t *osm_location, lv_img_ds
     HTTPClient osm_client;                          /** @brief http download client */
 
     /**
-     * alloc lv_img_dsc_t structure
+     * alloc lv_img_dsc_t structure if not exist
      */
     if ( !osm_map_data ) {
         osm_map_data = (lv_img_dsc_t *)CALLOC( sizeof( lv_img_dsc_t ), 1 );
@@ -102,7 +102,7 @@ lv_img_dsc_t *osm_helper_get_tile_image( osm_location_t *osm_location, lv_img_ds
         osm_map_data->data = NULL;
     }
     /**
-     * setupup http connection
+     * setup http connection
      */
     snprintf( url, sizeof( url ), "%s/%d/%d/%d.png", OSM_TILE_SERVER, osm_location->zoom, osm_location->tilex, osm_location->tiley );
     log_i("tile url: %s", url );
@@ -168,6 +168,9 @@ lv_img_dsc_t *osm_helper_get_tile_image( osm_location_t *osm_location, lv_img_ds
         log_i("downloaded tile size: %d bytes", downloaded_len );
     }
     else {
+        /**
+         * clear old osm_map_data strcuture
+         */
         if ( osm_map_data->data )
             free( (void*)osm_map_data->data );
         free( (void*)osm_map_data );

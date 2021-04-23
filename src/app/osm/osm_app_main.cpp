@@ -24,8 +24,6 @@
 
 #include "osm_app.h"
 #include "osm_app_main.h"
-#include "osm_helper.h"
-#include "app/osm/images/bg.h"
 
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 #include "gui/mainbar/app_tile/app_tile.h"
@@ -37,13 +35,14 @@
 #include "hardware/display.h"
 #include "hardware/gpsctl.h"
 
-#include "utils/json_psram_allocator.h"
+#include "utils/osm_helper/osm_helper.h"
 
 lv_obj_t *osm_app_main_tile = NULL;
 lv_obj_t *osm_app_direction_img = NULL;
 lv_style_t osm_app_main_style;
 
 static bool osm_block_return_maintile = false;
+static bool osm_statusbar_force_dark_mode = false;
 osm_location_t osm_location;
 
 lv_img_dsc_t *osm_map_data[2];
@@ -78,7 +77,6 @@ void osm_app_main_setup( uint32_t tile_num ) {
     osm_app_direction_img = lv_img_create( osm_cont, NULL );
     lv_obj_set_width( osm_app_direction_img, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( osm_app_direction_img, lv_disp_get_ver_res( NULL ) );
-//    lv_img_set_auto_size( osm_app_direction_img, true );
     lv_img_set_src( osm_app_direction_img, &osm_64px );
     lv_obj_align( osm_app_direction_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
 
@@ -97,7 +95,7 @@ void osm_app_main_setup( uint32_t tile_num ) {
     lv_imgbtn_set_src( zoom_in_btn, LV_BTN_STATE_CHECKED_RELEASED, &zoom_in_dark_48px);
     lv_imgbtn_set_src( zoom_in_btn, LV_BTN_STATE_CHECKED_PRESSED, &zoom_in_dark_48px);
     lv_obj_add_style( zoom_in_btn, LV_IMGBTN_PART_MAIN, &osm_app_main_style );
-    lv_obj_align( zoom_in_btn, osm_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_align( zoom_in_btn, osm_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 + STATUSBAR_HEIGHT );
     lv_obj_set_event_cb( zoom_in_btn, zoom_in_osm_app_main_event_cb );
 
     lv_obj_t * zoom_out_btn = lv_imgbtn_create( osm_cont, NULL);
@@ -186,11 +184,16 @@ static void zoom_out_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 void osm_activate_cb( void ) {
     osm_block_return_maintile = display_get_block_return_maintile();
     display_set_block_return_maintile( true );
+    osm_statusbar_force_dark_mode = statusbar_get_force_dark();
+    statusbar_set_force_dark( true );
     lv_img_cache_invalidate_src( osm_map_data[ 0 ] );
     lv_img_cache_invalidate_src( osm_map_data[ 1 ] );
     lv_obj_invalidate( lv_scr_act() );
+    statusbar_expand( true );
+    statusbar_expand( false );
 }
 
 void osm_hibernate_cb( void ) {
     display_set_block_return_maintile( osm_block_return_maintile );
+    statusbar_set_force_dark( osm_statusbar_force_dark_mode );
 }

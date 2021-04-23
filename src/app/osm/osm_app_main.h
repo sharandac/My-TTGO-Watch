@@ -23,7 +23,7 @@
     #define _OSM_APP_MAIN_H
 
     #include <TTGO.h>
-    
+
     void osm_app_main_setup( uint32_t tile_num );
 
 #endif // _OSM_APP_MAIN_H
