@@ -9,6 +9,7 @@
      * @brief osm tile calculation structure
      */
     typedef struct {
+        bool zoom_valid = false;        /** @brief osm zoom level */
         uint32_t zoom = 0;              /** @brief osm zoom level */
         bool lonlat_update = false;     /** @brief lon/lat update flag */
         double lon = 0;                 /** @brief lon for update calculation*/
@@ -16,6 +17,16 @@
         bool tile_update = false;       /** @brief tile update flag */
         uint32_t tilex = 0;             /** @brief corresponding osm tilex from long */
         uint32_t tiley = 0;             /** @brief corresponding osm tilex from lat */
+        double tilex_left_top_edge = 0;
+        double tiley_left_top_edge = 0;
+        double tilex_right_bottom_edge = 0;
+        double tiley_right_bottom_edge = 0;
+        double tilex_res = 0;
+        double tiley_res = 0;
+        double tilex_px_res = 0;
+        double tiley_px_res = 0;
+        uint16_t tilex_pos = 0;
+        uint16_t tiley_pos = 0;
     } osm_location_t;
 
     /**
