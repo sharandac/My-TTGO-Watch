@@ -44,6 +44,7 @@
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
 #include "app/example_app/example_app.h"
+#include "app/osm/osm_app.h"
 
 void setup() {
     /**
@@ -75,6 +76,7 @@ void setup() {
     crypto_ticker_setup();
     sailing_setup();
     osmand_app_setup();
+    osm_app_setup();
     IRController_setup();
     fxrates_app_setup();
     corona_app_detector_setup();
