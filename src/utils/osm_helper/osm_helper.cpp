@@ -60,17 +60,34 @@ bool osm_helper_location_update( osm_location_t *osm_location, double lon, doubl
      * check if osm tile change
      */
     osm_location->tile_update = false;
+
     if ( osm_location->tilex != osm_helper_long2tilex( lon, osm_location->zoom ) ) {
         osm_location->tilex = osm_helper_long2tilex( lon, osm_location->zoom );
         osm_location->tile_update = true;
     }
+
     if ( osm_location->tiley != osm_helper_lat2tiley( lat, osm_location->zoom ) ) {
         osm_location->tiley = osm_helper_lat2tiley( lat, osm_location->zoom );
         osm_location->tile_update = true;
     }
+
     if ( osm_location->tile_update ) {
-        log_i("tile update: %s/%d/%d/%d.png", OSM_TILE_SERVER, osm_location->zoom, osm_location->tilex, osm_location->tiley );
+        log_d("tile update: %s/%d/%d/%d.png", OSM_TILE_SERVER, osm_location->zoom, osm_location->tilex, osm_location->tiley );
     }
+
+    osm_location->tiley_left_top_edge = osm_helper_tiley2lat( osm_location->tiley, osm_location->zoom );
+    osm_location->tilex_left_top_edge = osm_helper_tilex2long( osm_location->tilex, osm_location->zoom );
+    osm_location->tiley_right_bottom_edge = osm_helper_tiley2lat( osm_location->tiley + 1, osm_location->zoom );
+    osm_location->tilex_right_bottom_edge = osm_helper_tilex2long( osm_location->tilex + 1, osm_location->zoom );
+    osm_location->tiley_res = abs( osm_helper_tiley2lat( osm_location->tiley, osm_location->zoom ) - osm_helper_tiley2lat( osm_location->tiley + 1, osm_location->zoom ) );
+    osm_location->tilex_res = abs( osm_helper_tiley2lat( osm_location->tilex, osm_location->zoom ) - osm_helper_tiley2lat( osm_location->tilex + 1, osm_location->zoom ) );
+    osm_location->tiley_px_res = osm_location->tiley_res / 240;
+    osm_location->tilex_px_res = osm_location->tilex_res / 240;
+    osm_location->tiley_pos = abs( osm_location->tiley_left_top_edge - osm_location->lat ) / osm_location->tiley_px_res;
+    osm_location->tilex_pos = abs( osm_location->tilex_left_top_edge - osm_location->lon ) / osm_location->tilex_px_res;
+    log_d("tile resolution: %f°/%f°", osm_location->tiley_res, osm_location->tilex_res );
+    log_d("pixel resolution: %f°/%f°", osm_location->tiley_px_res, osm_location->tilex_px_res );
+    log_d("pixel pos: x%d/y%d", osm_location->tiley_pos, osm_location->tilex_pos );
 
     return( osm_location->tile_update );
 }

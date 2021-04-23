@@ -42,6 +42,7 @@ TaskHandle_t _osm_map_download_Task;
 
 lv_obj_t *osm_app_main_tile = NULL;
 lv_obj_t *osm_app_direction_img = NULL;
+lv_obj_t *osm_app_pos_img = NULL;
 lv_style_t osm_app_main_style;
 
 static bool osm_app_active = false;
@@ -55,6 +56,7 @@ LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(zoom_in_dark_48px);
 LV_IMG_DECLARE(zoom_out_dark_48px);
 LV_IMG_DECLARE(osm_64px);
+LV_IMG_DECLARE(info_fail_16px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
@@ -84,7 +86,13 @@ void osm_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_width( osm_app_direction_img, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( osm_app_direction_img, lv_disp_get_ver_res( NULL ) );
     lv_img_set_src( osm_app_direction_img, &osm_64px );
+    lv_img_set_zoom( osm_app_direction_img, 240 );
     lv_obj_align( osm_app_direction_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
+
+    osm_app_pos_img = lv_img_create( osm_cont, NULL );
+    lv_img_set_src( osm_app_pos_img, &info_fail_16px );
+    lv_obj_align( osm_app_pos_img, osm_cont, LV_ALIGN_IN_TOP_LEFT, 120, 120 );
+    lv_obj_set_hidden( osm_app_pos_img, true );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( osm_cont, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_dark_48px);
@@ -183,6 +191,8 @@ void osm_map_update_Task( void * pvParameters ) {
     log_i("start osm map uupdate Task, heap: %d", ESP.getFreeHeap() );
 
     osm_update_map( &osm_location, osm_location.lon, osm_location.lat, osm_location.zoom );
+    lv_obj_align( osm_app_pos_img, lv_obj_get_parent( osm_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osm_location.tilex_pos - 8, osm_location.tiley_pos - 8 );
+    lv_obj_set_hidden( osm_app_pos_img, false );
 
     log_i("finsh osm map uupdate Task, heap: %d", ESP.getFreeHeap() );
     xEventGroupClearBits( osm_map_event_handle, OSM_APP_DOWNLOAD_REQUEST );
@@ -279,6 +289,7 @@ void osm_activate_cb( void ) {
      * set osm app active
      */
     osm_app_active = true;
+    osm_map_update_request();
 }
 
 void osm_hibernate_cb( void ) {
