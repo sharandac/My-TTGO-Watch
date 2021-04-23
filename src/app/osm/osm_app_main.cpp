@@ -34,6 +34,7 @@
 
 #include "hardware/display.h"
 #include "hardware/gpsctl.h"
+#include "hardware/blectl.h"
 
 #include "utils/osm_helper/osm_helper.h"
 
@@ -52,6 +53,7 @@ lv_style_t osm_app_main_style;
 
 static bool osm_app_active = false;
 static bool osm_block_return_maintile = false;
+static bool osm_block_show_messages = false;
 static bool osm_statusbar_force_dark_mode = false;
 osm_location_t osm_location;
 
@@ -296,6 +298,10 @@ static void zoom_out_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 void osm_activate_cb( void ) {
     /**
+     * save block show messages state
+     */
+    osm_block_show_messages = blectl_get_show_notification();
+    /**
      * save black return to maintile state
      */
     osm_block_return_maintile = display_get_block_return_maintile();
@@ -324,6 +330,7 @@ void osm_hibernate_cb( void ) {
     /**
      * restore back to maintile and status force dark mode
      */
+    blectl_set_show_notification( osm_block_show_messages );
     display_set_block_return_maintile( osm_block_return_maintile );
     statusbar_set_force_dark( osm_statusbar_force_dark_mode );
     /**
