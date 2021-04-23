@@ -41,7 +41,7 @@
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
 
-#include "utils/json_psram_allocator.h"
+#include "quickglui/common/bluejsonrequest.h"
 
 lv_obj_t *FindPhone_main_tile = NULL;
 lv_obj_t *FindPhone_main_iris = NULL;
@@ -73,7 +73,7 @@ static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void go_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event);
 bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg);
-static void bluetooth_FindPhone_msg_pharse(const char *msg);
+static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc);
 
 void bluetooth_FindPhone_tile_setup(void)
 {
@@ -112,7 +112,7 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_obj_align(exit_btn, bluetooth_FindPhone_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
     lv_obj_set_event_cb(exit_btn, exit_bluetooth_FindPhone_event_cb);
 
-    blectl_register_cb(BLECTL_MSG, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
+    blectl_register_cb(BLECTL_MSG_JSON, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
 }
 static void FindPhone_search_task( lv_task_t * task );
 
@@ -234,8 +234,8 @@ bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg)
 {
     switch (event)
     {
-    case BLECTL_MSG:
-        bluetooth_FindPhone_msg_pharse((const char *)arg);
+    case BLECTL_MSG_JSON:
+        bluetooth_FindPhone_msg_pharse(*(BluetoothJsonRequest *)arg);
         break;
     }
     return (true);
@@ -251,28 +251,17 @@ static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event)
     }
 }
 
-void bluetooth_FindPhone_msg_pharse(const char *msg)
+static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
 {
-    SpiRamJsonDocument doc(strlen(msg) * 4);
-    DeserializationError error = deserializeJson(doc, msg);
-    if (error)
+    if ( !strcmp( doc["t"], "find" )  )
     {
-        log_e("bluetooth FindPhone deserializeJson() failed: %s", error.c_str());
+        statusbar_hide(true);
+        powermgm_get_event(POWERMGM_STANDBY);          
+        powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
+        mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF);
+        lv_label_set_text(bluetooth_FindPhone_label, "Looking for me?");
+        sound_play_progmem_wav( piep_wav, piep_wav_len );
+        lv_obj_invalidate(lv_scr_act());
+        motor_vibe(100);            
     }
-    else
-    {
-        if ( !strcmp( doc["t"], "find" )  )
-		{
-            statusbar_hide(true);
-            powermgm_get_event(POWERMGM_STANDBY);          
-            powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
-            mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF);
-            lv_label_set_text(bluetooth_FindPhone_label, "Looking for me?");
-            sound_play_progmem_wav( piep_wav, piep_wav_len );
-            lv_obj_invalidate(lv_scr_act());
-            motor_vibe(100);            
-        }
-										
-    }
-    doc.clear();
 }

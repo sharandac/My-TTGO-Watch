@@ -33,7 +33,6 @@
     struct InfraButton;
 
     void IRController_setup( void );
-    bool IRController_bluetooth_event_cb(EventBits_t event, void *arg);
     void IRController_build_UI(IRControlSettingsAction settingsAction);
     void execute_ir_cmd(InfraButton* config);
 

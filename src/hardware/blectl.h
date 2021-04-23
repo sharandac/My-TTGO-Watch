@@ -51,6 +51,7 @@
     #define BLECTL_MSG                   _BV(10)        /** @brief event mask for blectl msg */
     #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
     #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
+    #define BLECTL_MSG_JSON              _BV(13)        /** @brief event mask for blectl JSON msg */
     /**
      *  See the following for generating UUIDs:
      * https://www.uuidgenerator.net/

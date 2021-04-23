@@ -44,6 +44,8 @@
 
 #include "gui/statusbar.h"
 
+#include "quickglui/common/bluejsonrequest.h"
+
 EventGroupHandle_t blectl_status = NULL;
 portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -175,13 +177,23 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                 case LineFeed:          {
                                             log_i("attention, message complete");
                                             const char *gbmsg = gadgetbridge_msg.c_str();
+                                            log_i( "msg: %s", gbmsg );
                                             if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
                                                 log_i("gadgetbridge message identified, cut down to json");
                                                 gadgetbridge_msg.erase( gadgetbridge_msg.length() - 1 );
                                                 gbmsg += 3;
+                                                BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
+                                                if ( request.isValid() ) {
+                                                    blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
+                                                }
+                                                else {
+                                                    blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
+                                                }        
+                                                request.clear();
                                             }
-                                            log_i("msg: %s", gbmsg );
-                                            blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
+                                            else {
+                                                blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
+                                            }
                                             break;
                                         }
                 default:                gadgetbridge_msg.append( msg[ i ] );
