@@ -92,7 +92,7 @@ void osm_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_width( osm_app_direction_img, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( osm_app_direction_img, lv_disp_get_ver_res( NULL ) );
     lv_img_set_src( osm_app_direction_img, &osm_64px );
-    lv_img_set_zoom( osm_app_direction_img, 240 );
+//    lv_img_set_zoom( osm_app_direction_img, 240 );
     lv_obj_align( osm_app_direction_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
 
     osm_app_pos_img = lv_img_create( osm_cont, NULL );
@@ -136,7 +136,7 @@ void osm_app_main_setup( uint32_t tile_num ) {
     osm_map_data[0] = NULL;
     osm_map_data[1] = NULL;
 
-    osm_location.tilex_dest_px_res = lv_disp_get_hor_res( NULL ) ;
+    osm_location.tilex_dest_px_res = lv_disp_get_hor_res( NULL );
     osm_location.tiley_dest_px_res = lv_disp_get_ver_res( NULL );
 
     osm_map_event_handle = xEventGroupCreate();
@@ -149,7 +149,7 @@ void osm_map_main_tile_update_task( lv_task_t * task ) {
      * check if maintile alread initialized
      */
     if ( osm_app_active ) {
-        if ( lv_disp_get_inactive_time( NULL ) > 2000 ) {
+        if ( lv_disp_get_inactive_time( NULL ) > 5000 ) {
             lv_obj_set_hidden( exit_btn, true );
             lv_obj_set_hidden( zoom_in_btn, true );
             lv_obj_set_hidden( zoom_out_btn, true );
