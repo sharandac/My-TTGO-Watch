@@ -28,6 +28,7 @@
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "gui/setup.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/wifictl.h"
@@ -121,10 +122,7 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_set_event_cb( setup_btn, enter_wifi_setup_event_cb );
 
     /*Copy the first switch and turn it ON*/    
-    wifi_onoff = lv_switch_create( wifi_settings_tile, NULL );
-    lv_obj_add_protect( wifi_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style()  );
-    lv_switch_off( wifi_onoff, LV_ANIM_ON );
+    wifi_onoff = wf_add_switch( wifi_settings_tile, false );
     lv_obj_align( wifi_onoff, setup_btn, LV_ALIGN_OUT_LEFT_MID, -10, 0 );
     lv_obj_set_event_cb( wifi_onoff, wifi_onoff_event_handler);
 
@@ -343,10 +341,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_obj_set_size(wifi_autoon_onoff_cont, lv_disp_get_hor_res( NULL ) , 30);
     lv_obj_add_style( wifi_autoon_onoff_cont, LV_OBJ_PART_MAIN, &wifi_setup_style  );
     lv_obj_align( wifi_autoon_onoff_cont, wifi_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
-    wifi_autoon_onoff = lv_switch_create( wifi_setup_tile, NULL );
-    lv_obj_add_protect( wifi_autoon_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_autoon_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( wifi_autoon_onoff, LV_ANIM_ON );
+    wifi_autoon_onoff = wf_add_switch( wifi_setup_tile, false );
     lv_obj_align( wifi_autoon_onoff, wifi_autoon_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_autoon_onoff, wifi_autoon_onoff_event_handler );
     lv_obj_t *wifi_autoon_label = lv_label_create( wifi_autoon_onoff_cont, NULL);
@@ -359,10 +354,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_obj_set_size(wifi_webserver_onoff_cont, lv_disp_get_hor_res( NULL ) , 30);
     lv_obj_add_style( wifi_webserver_onoff_cont, LV_OBJ_PART_MAIN, &wifi_setup_style  );
     lv_obj_align( wifi_webserver_onoff_cont, wifi_autoon_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    wifi_webserver_onoff = lv_switch_create( wifi_webserver_onoff_cont, NULL );
-    lv_obj_add_protect( wifi_webserver_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_webserver_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( wifi_webserver_onoff, LV_ANIM_ON );
+    wifi_webserver_onoff = wf_add_switch( wifi_webserver_onoff_cont, false );
     lv_obj_align( wifi_webserver_onoff, wifi_webserver_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_webserver_onoff, wifi_webserver_onoff_event_handler );
     lv_obj_t *wifi_webserver_label = lv_label_create( wifi_webserver_onoff_cont, NULL);
@@ -380,10 +372,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     #else
     lv_obj_align( wifi_ftpserver_onoff_cont, wifi_autoon_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     #endif
-    wifi_ftpserver_onoff = lv_switch_create( wifi_ftpserver_onoff_cont, NULL );
-    lv_obj_add_protect( wifi_ftpserver_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_ftpserver_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( wifi_ftpserver_onoff, LV_ANIM_ON );
+    wifi_ftpserver_onoff = wf_add_switch( wifi_ftpserver_onoff_cont, false );
     lv_obj_align( wifi_ftpserver_onoff, wifi_ftpserver_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_ftpserver_onoff, wifi_ftpserver_onoff_event_handler );
     lv_obj_t *wifi_ftpserver_label = lv_label_create( wifi_ftpserver_onoff_cont, NULL);
@@ -404,10 +393,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     #else
     lv_obj_align( wifi_enabled_on_standby_onoff_cont, wifi_autoon_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     #endif
-    wifi_enabled_on_standby_onoff = lv_switch_create( wifi_enabled_on_standby_onoff_cont, NULL );
-    lv_obj_add_protect( wifi_enabled_on_standby_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( wifi_enabled_on_standby_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( wifi_enabled_on_standby_onoff, LV_ANIM_ON );
+    wifi_enabled_on_standby_onoff = wf_add_switch( wifi_enabled_on_standby_onoff_cont, false );
     lv_obj_align( wifi_enabled_on_standby_onoff, wifi_enabled_on_standby_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifi_enabled_on_standby_onoff, wifi_enabled_on_standby_onoff_event_handler );
     lv_obj_t *wifi_enabled_on_standby_label = lv_label_create( wifi_enabled_on_standby_onoff_cont, NULL);

@@ -26,6 +26,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/sound.h"
@@ -89,10 +90,7 @@ void sound_settings_tile_setup( void ) {
     lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( vibe_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
     lv_obj_align( vibe_cont, sound_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
-    sound_vibe_onoff = lv_switch_create( vibe_cont, NULL );
-    lv_obj_add_protect( sound_vibe_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sound_vibe_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( sound_vibe_onoff, LV_ANIM_ON );
+    sound_vibe_onoff = wf_add_switch( vibe_cont, false );
     lv_obj_align( sound_vibe_onoff, vibe_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sound_vibe_onoff, sound_vibe_setup_event_cb );
     lv_obj_t *display_vibe_label = lv_label_create( vibe_cont, NULL);
@@ -104,10 +102,7 @@ void sound_settings_tile_setup( void ) {
     lv_obj_set_size(sound_enable_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( sound_enable_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
     lv_obj_align( sound_enable_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    sound_enable = lv_switch_create( sound_enable_cont, NULL );
-    lv_obj_add_protect( sound_enable, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sound_enable, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( sound_enable, LV_ANIM_ON );
+    sound_enable = wf_add_switch( sound_enable_cont, false );
     lv_obj_align( sound_enable, sound_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sound_enable, sound_enable_setup_event_cb );
     lv_obj_t *sound_enable_label = lv_label_create( sound_enable_cont, NULL);

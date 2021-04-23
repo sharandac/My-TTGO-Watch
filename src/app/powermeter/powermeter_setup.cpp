@@ -28,6 +28,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 lv_obj_t *powermeter_setup_tile = NULL;
@@ -174,10 +175,7 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( powermeter_autoconnect_onoff_cont, lv_disp_get_hor_res( NULL ), 32);
     lv_obj_add_style( powermeter_autoconnect_onoff_cont, LV_OBJ_PART_MAIN, &powermeter_setup_style );
     lv_obj_align( powermeter_autoconnect_onoff_cont, powermeter_setup_tile_2, LV_ALIGN_IN_TOP_MID, 0, 49 );
-    powermeter_autoconnect_onoff = lv_switch_create( powermeter_autoconnect_onoff_cont, NULL);
-    lv_obj_add_protect( powermeter_autoconnect_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( powermeter_autoconnect_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( powermeter_autoconnect_onoff, LV_ANIM_ON);
+    powermeter_autoconnect_onoff = wf_add_switch( powermeter_autoconnect_onoff_cont, false);
     lv_obj_align( powermeter_autoconnect_onoff, powermeter_autoconnect_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( powermeter_autoconnect_onoff, powermeter_autoconnect_onoff_event_handler );
     lv_obj_t *powermeter_autoconnect_label = lv_label_create(powermeter_autoconnect_onoff_cont, NULL);
@@ -189,10 +187,7 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( powermeter_widget_onoff_cont, lv_disp_get_hor_res( NULL ), 32);
     lv_obj_add_style( powermeter_widget_onoff_cont, LV_OBJ_PART_MAIN, &powermeter_setup_style );
     lv_obj_align( powermeter_widget_onoff_cont, powermeter_autoconnect_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    powermeter_widget_onoff = lv_switch_create( powermeter_widget_onoff_cont, NULL);
-    lv_obj_add_protect( powermeter_widget_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( powermeter_widget_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( powermeter_widget_onoff, LV_ANIM_ON);
+    powermeter_widget_onoff = wf_add_switch( powermeter_widget_onoff_cont, false);
     lv_obj_align( powermeter_widget_onoff, powermeter_widget_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( powermeter_widget_onoff, powermeter_widget_onoff_event_handler );
     lv_obj_t *powermeter_widget_onoff_label = lv_label_create( powermeter_widget_onoff_cont, NULL);
