@@ -80,12 +80,16 @@ lv_obj_t * wf_add_roller(lv_obj_t *parent, char const * data, lv_roller_mode_t m
 
 }
 
-lv_obj_t * wf_add_switch(lv_obj_t *parent){
+lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on){
     lv_obj_t *_switch = lv_switch_create( parent, NULL );
     //TODO: must it be here?
     lv_obj_add_protect( _switch, LV_PROTECT_CLICK_FOCUS);
 
-    lv_switch_off( _switch, LV_ANIM_OFF );
+    if (on) {
+        lv_switch_on( _switch, LV_ANIM_OFF );
+    } else {
+        lv_switch_off( _switch, LV_ANIM_OFF );
+    }
 
     lv_obj_add_style( _switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
 

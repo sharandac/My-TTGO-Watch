@@ -29,6 +29,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 lv_obj_t *sailing_setup_tile = NULL;
@@ -75,10 +76,7 @@ void sailing_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( sailing_foobar_switch_cont, LV_OBJ_PART_MAIN, &sailing_setup_style  );
     lv_obj_align( sailing_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
-    sailing_foobar_switch = lv_switch_create( sailing_foobar_switch_cont, NULL );
-    lv_obj_add_protect( sailing_foobar_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sailing_foobar_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( sailing_foobar_switch, LV_ANIM_ON );
+    sailing_foobar_switch = wf_add_switch( sailing_foobar_switch_cont, false );
     lv_obj_align( sailing_foobar_switch, sailing_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sailing_foobar_switch, sailing_foobar_switch_event_cb );
 

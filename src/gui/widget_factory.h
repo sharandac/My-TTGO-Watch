@@ -82,10 +82,11 @@ lv_obj_t * wf_add_roller(lv_obj_t *parent, char const * data, lv_roller_mode_t m
  * @brief   Creates and adds a switch object to a container
  *
  * @param   parent  pointer to a parent container
+ * @param   on      default value
  *
  * @return  returns pointer to the added object
  */
-lv_obj_t * wf_add_switch(lv_obj_t *parent);
+lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on = false);
 
 /**
  * @brief   Creates and adds a container with a label and a switch to a container

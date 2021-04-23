@@ -29,6 +29,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/blectl.h"
@@ -145,10 +146,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( weather_autosync_cont, lv_disp_get_hor_res( NULL ) , 30);
     lv_obj_add_style( weather_autosync_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_obj_align( weather_autosync_cont, weather_lat_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
-    weather_autosync_onoff = lv_switch_create( weather_autosync_cont, NULL );
-    lv_obj_add_protect( weather_autosync_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( weather_autosync_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( weather_autosync_onoff, LV_ANIM_ON );
+    weather_autosync_onoff = wf_add_switch( weather_autosync_cont, false );
     lv_obj_align( weather_autosync_onoff, weather_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( weather_autosync_onoff, weather_autosync_onoff_event_handler );
     lv_obj_t *weather_autosync_label = lv_label_create( weather_autosync_cont, NULL);
@@ -160,10 +158,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( weather_wind_cont, lv_disp_get_hor_res( NULL ), 30);
     lv_obj_add_style( weather_wind_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_obj_align( weather_wind_cont, weather_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    weather_wind_onoff = lv_switch_create( weather_wind_cont, NULL);
-    lv_obj_add_protect( weather_wind_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( weather_wind_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( weather_wind_onoff, LV_ANIM_ON);
+    weather_wind_onoff = wf_add_switch( weather_wind_cont, false );
     lv_obj_align( weather_wind_onoff, weather_wind_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( weather_wind_onoff, weather_wind_onoff_event_handler);
     lv_obj_t *weather_wind_label = lv_label_create(weather_wind_cont, NULL);
@@ -175,10 +170,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( weather_imperial_cont, lv_disp_get_hor_res( NULL ), 30);
     lv_obj_add_style( weather_imperial_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_obj_align( weather_imperial_cont, weather_wind_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    weather_imperial_onoff = lv_switch_create( weather_imperial_cont, NULL);
-    lv_obj_add_protect( weather_imperial_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( weather_imperial_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( weather_imperial_onoff, LV_ANIM_ON);
+    weather_imperial_onoff = wf_add_switch( weather_imperial_cont, false );
     lv_obj_align( weather_imperial_onoff, weather_imperial_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( weather_imperial_onoff, weather_imperial_onoff_event_handler);
     lv_obj_t *weather_imperial_label = lv_label_create(weather_imperial_cont, NULL);
@@ -190,10 +182,7 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( weather_widget_cont, lv_disp_get_hor_res( NULL ), 30);
     lv_obj_add_style( weather_widget_cont, LV_OBJ_PART_MAIN, &weather_setup_style );
     lv_obj_align( weather_widget_cont, weather_imperial_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    weather_widget_onoff = lv_switch_create( weather_widget_cont, NULL);
-    lv_obj_add_protect( weather_widget_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( weather_widget_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( weather_widget_onoff, LV_ANIM_ON);
+    weather_widget_onoff = wf_add_switch( weather_widget_cont, false );
     lv_obj_align( weather_widget_onoff, weather_widget_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( weather_widget_onoff, weather_widget_onoff_event_handler);
     lv_obj_t *weather_widget_label = lv_label_create( weather_widget_cont, NULL);

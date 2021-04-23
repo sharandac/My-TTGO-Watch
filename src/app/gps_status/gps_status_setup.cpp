@@ -28,6 +28,7 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 lv_obj_t *gps_status_setup_tile = NULL;
@@ -70,7 +71,7 @@ void gps_status_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( gps_status_foobar_switch_cont, LV_OBJ_PART_MAIN, &gps_status_setup_style  );
     lv_obj_align( gps_status_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
-    gps_status_foobar_switch = lv_switch_create( gps_status_foobar_switch_cont, NULL );
+    gps_status_foobar_switch = wf_add_switch( gps_status_foobar_switch_cont, false );
     lv_obj_add_protect( gps_status_foobar_switch, LV_PROTECT_CLICK_FOCUS);
     lv_obj_add_style( gps_status_foobar_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( gps_status_foobar_switch, LV_ANIM_ON );

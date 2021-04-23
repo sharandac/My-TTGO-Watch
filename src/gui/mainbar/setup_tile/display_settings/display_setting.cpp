@@ -27,6 +27,7 @@
 #include "gui/statusbar.h"
 #include "gui/setup.h"
 #include "gui/gui.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/display.h"
@@ -172,10 +173,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( vibe_cont, LV_OBJ_PART_MAIN, &display_settings_style );
     lv_obj_align( vibe_cont, display_settings_tile_2, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
-    display_vibe_onoff = lv_switch_create( vibe_cont, NULL );
-    lv_obj_add_protect( display_vibe_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( display_vibe_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( display_vibe_onoff, LV_ANIM_ON );
+    display_vibe_onoff = wf_add_switch( vibe_cont, false );
     lv_obj_align( display_vibe_onoff, vibe_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( display_vibe_onoff, display_vibe_setup_event_cb );
     lv_obj_t *display_vibe_label = lv_label_create( vibe_cont, NULL);
@@ -187,10 +185,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_set_size(block_return_maintile_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( block_return_maintile_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( block_return_maintile_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    display_block_return_maintile_onoff = lv_switch_create( block_return_maintile_cont, NULL );
-    lv_obj_add_protect( display_block_return_maintile_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( display_block_return_maintile_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( display_block_return_maintile_onoff, LV_ANIM_ON );
+    display_block_return_maintile_onoff = wf_add_switch( block_return_maintile_cont, false );
     lv_obj_align( display_block_return_maintile_onoff, block_return_maintile_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( display_block_return_maintile_onoff, display_block_return_maintile_setup_event_cb );    
     lv_obj_t *display_block_return_maintile_label = lv_label_create( block_return_maintile_cont, NULL );
@@ -202,10 +197,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_set_size( display_use_dma_cont, lv_disp_get_hor_res( NULL ) , 40 );
     lv_obj_add_style( display_use_dma_cont, LV_OBJ_PART_MAIN, &display_settings_style  );
     lv_obj_align( display_use_dma_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    display_use_dma_cont_onoff = lv_switch_create( display_use_dma_cont, NULL );
-    lv_obj_add_protect( display_use_dma_cont_onoff, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( display_use_dma_cont_onoff, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
-    lv_switch_off( display_use_dma_cont_onoff, LV_ANIM_ON );
+    display_use_dma_cont_onoff = wf_add_switch( display_use_dma_cont, false );
     lv_obj_align( display_use_dma_cont_onoff, display_use_dma_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( display_use_dma_cont_onoff, display_use_dma_setup_event_cb );    
     lv_obj_t *display_use_dma_cont_label = lv_label_create( display_use_dma_cont, NULL );
