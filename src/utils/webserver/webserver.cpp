@@ -36,6 +36,8 @@
 
 AsyncWebServer asyncserver( WEBSERVERPORT );
 TaskHandle_t _WEBSERVER_Task;
+AsyncWebHandler mHandler_SPIFFSEditor;
+SPIFFSEditor * mSPIFFSEditor = nullptr;
 
 
   static const char* serverIndex =
@@ -312,7 +314,9 @@ void asyncwebserver_start(void){
     screenshot_save();
   });
 
-  asyncserver.addHandler(new SPIFFSEditor(SPIFFS));
+  //start FsEditor with SPIFFS
+  setFsEditorFilesystem(SD);
+
   asyncserver.rewrite("/", "/index.htm");
   asyncserver.serveStatic("/", SPIFFS, "/");
 
@@ -452,4 +456,15 @@ void asyncwebserver_end(void) {
   SSDP.end();
   asyncserver.end();
   log_d("disable webserver and ssdp");
+}
+
+void setFsEditorFilesystem(const fs::FS& fs)
+{
+    log_d("asyncserver.removeHandler");
+    asyncserver.removeHandler(&mHandler_SPIFFSEditor);
+    if(mSPIFFSEditor!=nullptr)
+      delete mSPIFFSEditor;  
+    mSPIFFSEditor = new SPIFFSEditor(fs);
+    log_d("asyncserver.addHandler");
+    mHandler_SPIFFSEditor = asyncserver.addHandler(mSPIFFSEditor);
 }
