@@ -164,7 +164,7 @@ static void exit_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void zoom_in_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):   
-            if ( osm_location.zoom < 17 ) {
+            if ( osm_location.zoom < 18 ) {
                 osm_location.zoom++;
                 osm_update_map( &osm_location, osm_location.lon , osm_location.lat, osm_location.zoom );
             }

@@ -80,8 +80,8 @@ lv_img_dsc_t *osm_helper_get_tile_image( osm_location_t *osm_location, lv_img_ds
     char buffer[1024];                              /** @brief http stream buffer for downloading */
     uint32_t len = 0;                               /** @brief http file size */
     uint32_t downloaded_len = 0;                    /** @brief http downloaded file size */
+
     uint8_t *image = NULL;                          /** @brief pointer to the raw file data */
-    uint8_t *old_image = image;                     /** @brief pointer to the raw file data */
     uint8_t *image_write_p = NULL;                  /** @brief write pointer for the raw file download */
     HTTPClient osm_client;                          /** @brief http download client */
 
@@ -157,14 +157,21 @@ lv_img_dsc_t *osm_helper_get_tile_image( osm_location_t *osm_location, lv_img_ds
          * setup lv_img_dsc_t structure
          */
         osm_map_data->header.always_zero = 0;
+        osm_map_data->header.cf = LV_IMG_CF_RAW_ALPHA;
         osm_map_data->header.w = 256;
         osm_map_data->header.h = 256;
-        osm_map_data->data_size = downloaded_len;
-        osm_map_data->header.cf = LV_IMG_CF_RAW_ALPHA;
+        if ( osm_map_data->data )
+            free( (void*)osm_map_data->data );
         osm_map_data->data = image;
-        free( old_image );
+        osm_map_data->data_size = downloaded_len;
         lv_img_cache_invalidate_src( osm_map_data );
         log_i("downloaded tile size: %d bytes", downloaded_len );
+    }
+    else {
+        if ( osm_map_data->data )
+            free( (void*)osm_map_data->data );
+        free( (void*)osm_map_data );
+        osm_map_data = NULL;
     }
     osm_client.end();
 
