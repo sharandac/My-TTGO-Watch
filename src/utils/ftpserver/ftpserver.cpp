@@ -20,26 +20,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include <Arduino.h>
-#include <ESP8266FtpServer.h>
-
+#include "config.h"
+#include <TTGO.h>
+#include <ESP-FTP-Server-Lib.h>
 #include "hardware/powermgm.h"
 
-FtpServer ftpSrv;   //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
+FTPServer ftpSrv;   //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg );
 
 void ftpserver_start( const char *user, const char *pass ) {
-    ftpSrv.begin( user, pass );
+    ftpSrv.addUser(user, pass);
     log_i("use ftp user/password: %s/%s", user, pass );
+    ftpSrv.addFilesystem("SPIFFS", &SPIFFS);
+    log_i("add SPIFFS to ftp server");
+    #if defined( LILYGO_WATCH_HAS_SDCARD )
+        ftpSrv.addFilesystem("SD", &SD);
+        log_i("add SPIFFS to ftp server");
+    #endif
+    ftpSrv.begin();
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, ftpserver_powermgm_event_loop_cb, "handle ftp" );
 }
 
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_SILENCE_WAKEUP:
-            ftpSrv.handleFTP();
+            ftpSrv.handle();
             break;
         case POWERMGM_WAKEUP:
-            ftpSrv.handleFTP();
+            ftpSrv.handle();
             break;
     }
     return( true );

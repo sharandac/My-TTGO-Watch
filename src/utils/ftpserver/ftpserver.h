@@ -21,7 +21,6 @@
  */
 
 #ifndef _FTPSERVER_H
-
     #define _FTPSERVER_H
 
     #define FTPSERVER_USER      "TTWatch"
