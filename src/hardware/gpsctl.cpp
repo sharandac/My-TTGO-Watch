@@ -363,7 +363,7 @@ void gpsctl_set_enable_on_standby( bool enable_on_standby ) {
     gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
-void gpsctl_set_location( double lat, double lon, gps_source_t gps_source ) {
+void gpsctl_set_location( double lat, double lon, double altitude, gps_source_t gps_source , bool app_location ) {
     /*
      * setup gps_data structure and send events
      */
@@ -372,19 +372,21 @@ void gpsctl_set_location( double lat, double lon, gps_source_t gps_source ) {
     gps_data.valid_location = true;
     gps_data.valid_speed = false;
     gps_data.valid_satellite = false;
-    gps_data.valid_altitude = false;
+    gps_data.valid_altitude = true;
     gps_data.lat = lat;
     gps_data.lon = lon;
+    gps_data.altitude_meters = altitude;
     /*
      * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
      */
     gpsctl_send_cb( GPSCTL_FIX, NULL );
     gpsctl_send_cb( GPSCTL_UPDATE_LOCATION, (void*)&gps_data );
+    gpsctl_send_cb( GPSCTL_UPDATE_ALTITUDE, (void*)&gps_data );
     gpsctl_send_cb( GPSCTL_UPDATE_SOURCE, (void*)&gps_data );
     /*
      * send SET_APP_LOCATION if enabled
      */
-    if ( gpsctl_get_app_use_gps() ) {
+    if ( gpsctl_get_app_use_gps() && app_location ) {
         gpsctl_send_cb( GPSCTL_SET_APP_LOCATION, (void*)&gps_data );
     }
 }
