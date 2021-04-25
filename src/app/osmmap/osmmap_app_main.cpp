@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include <TTGO.h>
+#include "quickglui/quickglui.h"
 
 #include "osmmap_app.h"
 #include "osmmap_app_main.h"
@@ -37,29 +38,36 @@
 #include "hardware/blectl.h"
 
 #include "utils/osm_map/osm_map.h"
+#include "utils/json_psram_allocator.h"
+
+extern const uint8_t osm_server_json_start[] asm("_binary_src_utils_osm_map_osmtileserver_json_start");
+extern const uint8_t osm_server_json_end[] asm("_binary_src_utils_osm_map_osmtileserver_json_end");
 
 EventGroupHandle_t osmmap_event_handle = NULL;     /** @brief osm tile image update event queue */
 TaskHandle_t _osmmap_download_Task;                /** @brief osm tile image update Task */
 lv_task_t *osmmap_main_tile_task;                  /** @brief osm active/inactive task for show/hide user interface */
 
-lv_obj_t *osmmap_app_main_tile = NULL;                 /** @brief osm main tile obj */
-lv_obj_t *osmmap_app_tile_img = NULL;                  /** @brief osm tile image obj */
-lv_obj_t *osmmap_app_pos_img = NULL;                   /** @brief osm position point obj */
-lv_obj_t *osmmap_lonlat_label = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_app_main_tile = NULL;              /** @brief osm main tile obj */
+lv_obj_t *osmmap_app_tile_img = NULL;               /** @brief osm tile image obj */
+lv_obj_t *osmmap_app_pos_img = NULL;                /** @brief osm position point obj */
+lv_obj_t *osmmap_lonlat_label = NULL;               /** @brief osm exit icon/button obj */
+lv_obj_t *layers_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *layers_list = NULL;                       /** @brief osm style list box */
 lv_obj_t *exit_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *zoom_in_btn = NULL;                       /** @brief osm zoom in icon/button obj */
 lv_obj_t *zoom_out_btn = NULL;                      /** @brief osm zoom out icon/button obj */
 
-lv_style_t osmmap_app_main_style;                      /** @brief osm main styte obj */
-lv_style_t osmmap_app_label_style;                      /** @brief osm main styte obj */
+lv_style_t osmmap_app_main_style;                   /** @brief osm main styte obj */
+lv_style_t osmmap_app_label_style;                  /** @brief osm main styte obj */
 
-static bool osmmap_app_active = false;                 /** @brief osm app active/inactive flag, true means active */
-static bool osmmap_block_return_maintile = false;      /** @brief osm block to maintile state store */
-static bool osmmap_block_show_messages = false;        /** @brief osm show messages state store */
+static bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
+static bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
+static bool osmmap_block_show_messages = false;     /** @brief osm show messages state store */
 static bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
 
-osm_location_t *osmmap_location = NULL;                       /** @brief osm location obj */
+osm_location_t *osmmap_location = NULL;             /** @brief osm location obj */
 
+LV_IMG_DECLARE(layers_dark_48px);
 LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(zoom_in_dark_48px);
 LV_IMG_DECLARE(zoom_out_dark_48px);
@@ -75,8 +83,11 @@ void osmmap_update_Task( void * pvParameters );
 static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event );
+static void layers_btn_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 void osmmap_update_map( osm_location_t *osmmap_location, double lon, double lat, uint32_t zoom );
 bool osmmap_gpsctl_event_cb( EventBits_t event, void *arg );
+void osmmap_add_tile_server_list( lv_obj_t *layers_list );
 void osmmap_activate_cb( void );
 void osmmap_hibernate_cb( void );
 
@@ -112,6 +123,15 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( osmmap_lonlat_label, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 3, 0 );
     lv_label_set_text( osmmap_lonlat_label, "0 / 0" );
 
+    layers_btn = lv_imgbtn_create( osmmap_cont, NULL);
+    lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_RELEASED, &layers_dark_48px);
+    lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_PRESSED, &layers_dark_48px);
+    lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_CHECKED_RELEASED, &layers_dark_48px);
+    lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_CHECKED_PRESSED, &layers_dark_48px);
+    lv_obj_add_style( layers_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
+    lv_obj_align( layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 + STATUSBAR_HEIGHT );
+    lv_obj_set_event_cb( layers_btn, layers_btn_app_main_event_cb );
+
     exit_btn = lv_imgbtn_create( osmmap_cont, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_dark_48px);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_dark_48px);
@@ -139,6 +159,12 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( zoom_out_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( zoom_out_btn, zoom_out_osmmap_app_main_event_cb );
 
+    layers_list = lv_list_create( osmmap_cont, NULL );
+    lv_obj_set_size( layers_list, 160, 160 );
+    lv_obj_align( layers_list, NULL, LV_ALIGN_CENTER, 0, 0);
+    osmmap_add_tile_server_list( layers_list );
+    lv_obj_set_hidden( layers_list, true );
+
     mainbar_add_tile_activate_cb( tile_num, osmmap_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmmap_hibernate_cb );
     gpsctl_register_cb( GPSCTL_SET_APP_LOCATION | GPSCTL_UPDATE_LOCATION, osmmap_gpsctl_event_cb, "osm" );
@@ -158,6 +184,7 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
      */
     if ( osmmap_app_active ) {
         if ( lv_disp_get_inactive_time( NULL ) > 5000 ) {
+            lv_obj_set_hidden( layers_btn, true );
             lv_obj_set_hidden( exit_btn, true );
             lv_obj_set_hidden( zoom_in_btn, true );
             lv_obj_set_hidden( zoom_out_btn, true );
@@ -165,6 +192,7 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
             statusbar_expand( false );
         }
         else {
+            lv_obj_set_hidden( layers_btn, false );
             lv_obj_set_hidden( exit_btn, false );
             lv_obj_set_hidden( zoom_in_btn, false );
             lv_obj_set_hidden( zoom_out_btn, false );
@@ -296,6 +324,56 @@ static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
     }
 }
 
+static void layers_btn_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):   
+            lv_obj_set_hidden( layers_list, false );
+            break;
+    }
+}
+
+static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case LV_EVENT_CLICKED:
+            SpiRamJsonDocument doc( strlen( (const char*)osm_server_json_start ) * 2 );
+            DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
+
+            if ( error ) {
+                log_e("osm server list deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                const char *tile_server = doc[ lv_list_get_btn_text( obj ) ];
+                log_i("new tile server url: %s", tile_server );
+                osm_map_set_tile_server( osmmap_location, tile_server );
+                osmmap_update_request();
+            }
+            doc.clear();
+            lv_obj_set_hidden( layers_list, true );            
+            // lv_list_get_btn_text( obj );
+            break;
+    }
+}
+
+void osmmap_add_tile_server_list( lv_obj_t *layers_list ) {
+    lv_obj_t * list_btn;
+
+    SpiRamJsonDocument doc( strlen( (const char*)osm_server_json_start ) * 2 );
+    DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
+
+    if ( error ) {
+        log_e("osm server list deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        JsonObject obj = doc.as<JsonObject>();
+        for ( JsonPair p : obj ) {
+            log_i("server: %s", p.key().c_str() );
+            list_btn = lv_list_add_btn( layers_list, NULL, p.key().c_str() );
+            lv_obj_set_event_cb( list_btn, osmmap_tile_server_event_cb );
+        }        
+    }
+    doc.clear();
+}
+
 void osmmap_activate_cb( void ) {
     /**
      * save block show messages state
@@ -333,6 +411,7 @@ void osmmap_activate_cb( void ) {
 
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
+    log_i("osm layer list size: %d", strlen( (const char*)osm_server_json_start ) );
 }
 
 void osmmap_hibernate_cb( void ) {

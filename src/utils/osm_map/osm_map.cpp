@@ -29,13 +29,19 @@
 #include "utils/alloc.h"
 #include "utils/http_download/http_download.h"
 
+/**
+ * @brief osm_map default tile image
+ */
 LV_IMG_DECLARE(osm_no_data_240px);
-
+/**
+ * @brief osm tile server list
+ */
 uint32_t osm_map_long2tilex(double lon, uint32_t z);
 uint32_t osm_map_lat2tiley(double lat, uint32_t z);
 double osm_map_tilex2long(int x, uint32_t z);
 double osm_map_tiley2lat(int y, uint32_t z);
 osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location );
+void osm_map_gen_url( osm_location_t *osm_location );
 
 osm_location_t *osm_map_create_location_obj( void ) {
     /**
@@ -62,7 +68,10 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->tilex_dest_px_res = 240;         
         osm_location->tiley_dest_px_res = 240;         
         osm_location->tilex_pos = 0;                 
-        osm_location->tiley_pos = 0;        
+        osm_location->tiley_pos = 0;    
+        osm_location->tile_server_source_update = false;    
+        osm_location->tile_server = NULL;
+        osm_location->current_tile_url = NULL;
         osm_location->osm_map_data.header.always_zero = 0;
         osm_location->osm_map_data.header.cf = LV_IMG_CF_RAW_ALPHA;
         osm_location->osm_map_data.header.w = 256;
@@ -147,7 +156,9 @@ bool osm_map_update( osm_location_t *osm_location ) {
     /**
      * if tile change, update tile image
      */
-    if ( tile_update ) {
+    if ( tile_update || osm_location->tile_server_source_update ) {
+        osm_location->tile_server_source_update = false;
+        tile_update = true;
         osm_location = osm_map_update_tile_image( osm_location );
     }
     /**
@@ -175,13 +186,11 @@ bool osm_map_update( osm_location_t *osm_location ) {
  * @return  updated lv_img_dsc structure
  */
 osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
-    char url[128] = "";     /** @brief url buffer */
     /**
      * download file into RAM
      */
-    snprintf( url, sizeof( url ), "%s/%d/%d/%d.png", DEFAULT_OSM_TILE_SERVER, osm_location->zoom, osm_location->tilex, osm_location->tiley );
-    log_d("download tile: %s", url );
-    http_download_dsc_t *http_download_dsc = http_download_to_ram( (const char*)url );
+    osm_map_gen_url( osm_location );
+    http_download_dsc_t *http_download_dsc = http_download_to_ram( (const char*)osm_location->current_tile_url );
     /**
      * check if download was success
      */
@@ -201,4 +210,100 @@ osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
         http_download_free_without_data( http_download_dsc );
     }
     return( osm_location );
+}
+
+void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_server ) {
+    /**
+     * free old tile server entry
+     */
+    if( osm_location->tile_server ) {
+        free( (void *)osm_location->tile_server );
+        osm_location->tile_server = NULL;
+    }
+    /**
+     * allocate new memory and copy new tile server
+     */
+    osm_location->tile_server = (char *)MALLOC( strlen( tile_server ) + 1 );
+    if ( osm_location->tile_server ) {
+        strcpy( osm_location->tile_server, tile_server );
+        log_i("osm_location->tile_server: %s", osm_location->tile_server );
+    }
+    osm_location->tile_server_source_update = true;
+}
+
+void osm_map_gen_url( osm_location_t *osm_location ) {
+    char *tile_server_p = NULL;
+    char *current_tile_url_p = NULL;
+    char temp_str[32] = "";
+    char *temp_str_p = NULL;
+    /**
+     * is a tile server set?
+     */
+    if ( !osm_location->tile_server ) {
+        log_i("set default osm tile server");
+        osm_location->tile_server = (char*)MALLOC( sizeof( DEFAULT_OSM_TILE_SERVER ) );
+        if ( !osm_location->tile_server ) {
+            log_e("osm_location->tile_server: alloc failed");
+            while(1);
+        }
+        log_d("osm_location->tile_server: alloc %d bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
+        strcpy( osm_location->tile_server, DEFAULT_OSM_TILE_SERVER );
+    }
+    /**
+     * alloc current tile url
+     */
+    if ( !osm_location->current_tile_url ) {
+        osm_location->current_tile_url = (char *)MALLOC( MAX_CURRENT_TILE_URL_LEN );
+        if ( !osm_location->current_tile_url ) {
+            log_e("osm_location->current_tile_url: alloc failed");
+            while(1);
+        }
+        log_d("osm_location->current_tile_url: alloc %d bytes at %p", MAX_CURRENT_TILE_URL_LEN, osm_location->current_tile_url );
+        *osm_location->current_tile_url = '\0';
+    }
+    /**
+     * generate current tile url from tile server
+     */
+    tile_server_p = osm_location->tile_server;
+    current_tile_url_p = osm_location->current_tile_url;
+
+    while( *tile_server_p ) {
+        if ( *tile_server_p == '$' ) {
+            tile_server_p++;
+            switch ( *tile_server_p ) {
+                case 'z':
+                    snprintf( temp_str, sizeof( temp_str ), "%d", osm_location->zoom );
+                    break;
+                case 'x':
+                    snprintf( temp_str, sizeof( temp_str ), "%d", osm_location->tilex );
+                    break;
+                case 'y':
+                    snprintf( temp_str, sizeof( temp_str ), "%d", osm_location->tiley );
+                    break;
+                default:
+                    snprintf( temp_str, sizeof( temp_str ), "$%c", *tile_server_p );
+                    break;
+            }
+            temp_str_p = temp_str;
+            while( *temp_str_p ) {
+                *current_tile_url_p = *temp_str_p;
+                current_tile_url_p++;
+                temp_str_p++;
+            }
+        }
+        else {
+            *current_tile_url_p = *tile_server_p;
+            current_tile_url_p++;
+        }
+        tile_server_p++;
+        *current_tile_url_p = '\0';
+        if ( strlen( osm_location->current_tile_url ) >= MAX_CURRENT_TILE_URL_LEN ) {
+            log_e("osm_location->current_tile_url: MAX_CURRENT_TILE_URL_LEN reached");
+            *osm_location->current_tile_url = '\0';
+            break;
+        }
+        log_d("current url: %s", osm_location->current_tile_url );
+    }
+    log_d("tile server: %s", osm_location->tile_server );
+    log_d("current url: %s", osm_location->current_tile_url );
 }

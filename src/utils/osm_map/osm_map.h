@@ -3,8 +3,9 @@
 
     #include "utils/http_download/http_download.h"
 
+    #define MAX_CURRENT_TILE_URL_LEN    256
     #define DEFAULT_OSM_CACHE_SIZE      4
-    #define DEFAULT_OSM_TILE_SERVER     "http://c.tile.openstreetmap.org"   /** @brief osm tile map server */
+    #define DEFAULT_OSM_TILE_SERVER     "http://a.tile.openstreetmap.org/$z/$x/$y.png"   /** @brief osm tile map server */
 
     /**
      * @brief osm tile calculation structure
@@ -27,6 +28,9 @@
         double tiley_dest_px_res = 256;                 /** @brief tile y resolution in px */
         uint16_t tilex_pos = 0;                         /** @brief x location on image in px */
         uint16_t tiley_pos = 0;                         /** @brief y location on image in px */
+        bool tile_server_source_update = false;
+        char *tile_server = NULL;
+        char *current_tile_url = NULL;
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         bool cache = false;
         http_download_dsc_t *http_download_dsc[ DEFAULT_OSM_CACHE_SIZE * DEFAULT_OSM_CACHE_SIZE ];
@@ -96,4 +100,5 @@
      */
     bool osm_map_update( osm_location_t *osm_location );
 
+    void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_server );
 #endif // _OSM_HELPER_H

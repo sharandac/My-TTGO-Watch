@@ -30,6 +30,7 @@ void http_download_set_filename_from_url( http_download_dsc_t *http_download, co
 void http_download_set_url_from_url( http_download_dsc_t *http_download, const char *url );
 
 http_download_dsc_t *http_download_to_ram( const char *url ) {
+    log_i("download file from: %s", url );
     /**
      * alloc http_download_dsc structure
      */
