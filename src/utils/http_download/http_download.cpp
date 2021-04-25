@@ -31,8 +31,8 @@ http_download_dsc_t *http_download_to_ram( const char *url ) {
     /**
      * alloc http_download_dsc structure
      */
-    http_download_dsc_t *http_download_dsc = (http_download_dsc_t *)CALLOC( sizeof( http_download_dsc_t ), 1 );
-    log_d("http_download_dsc: alloc %d bytes at %p-%p", sizeof( http_download_dsc_t), http_download_dsc, http_download_dsc + sizeof( http_download_dsc_t) );
+    http_download_dsc_t *http_download_dsc = (http_download_dsc_t *)MALLOC( sizeof( http_download_dsc_t) );
+    log_d("http_download_dsc: alloc %d bytes at %p", sizeof( http_download_dsc_t ), http_download_dsc );
     /**
      * check if alloc was failed
      */
@@ -55,8 +55,8 @@ http_download_dsc_t *http_download_to_ram( const char *url ) {
              * get file size and alloc memory for the file
              */
             http_download_dsc->size = download_client.getSize();
-            http_download_dsc->data = (uint8_t*)CALLOC( http_download_dsc->size , 1 );
-            log_d("http_download_dsc->data: alloc %d bytes at %p-%p", http_download_dsc->size, http_download_dsc->data, http_download_dsc->data + http_download_dsc->size );
+            http_download_dsc->data = (uint8_t*)MALLOC( http_download_dsc->size );
+            log_d("http_download_dsc->data: alloc %d bytes at %p", http_download_dsc->size, http_download_dsc->data );
             /**
              * check if alloc success
              */
@@ -192,12 +192,12 @@ void http_download_get_filename_from_url( http_download_dsc_t *http_download, co
             /**
              * alloc filename momory
              */
-            http_download->filename = (char *)CALLOC( strlen( filename_from_url ) + 2 , 1 );
+            http_download->filename = (char *)MALLOC( strlen( filename_from_url ) + 2 );
             if ( http_download->filename ) {
                 /**
                  * copy filename into alloc mamory
                  */
-                log_d("http_download_dsc->filename: alloc %d bytes at %p-%p", strlen( filename_from_url ), http_download->filename, http_download->filename + strlen( filename_from_url ) );
+                log_d("http_download_dsc->filename: alloc %d bytes at %p", strlen( filename_from_url ), http_download->filename );
                 strncpy( http_download->filename, filename_from_url, strlen( filename_from_url ) );
             }
             else {

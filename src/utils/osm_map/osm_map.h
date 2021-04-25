@@ -24,7 +24,7 @@
         double tiley_dest_px_res = 256;         /** @brief tile y resolution in px */
         uint16_t tilex_pos = 0;                 /** @brief x location on image in px */
         uint16_t tiley_pos = 0;                 /** @brief y location on image in px */
-        lv_img_dsc_t osm_map_data;          /** @brief pointer to an lv_img_dsc for lvgl use */
+        lv_img_dsc_t osm_map_data;              /** @brief pointer to an lv_img_dsc for lvgl use */
     } osm_location_t;
 
     /**

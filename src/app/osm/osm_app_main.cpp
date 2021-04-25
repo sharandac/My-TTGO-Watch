@@ -56,7 +56,7 @@ static bool osm_block_return_maintile = false;      /** @brief osm block to main
 static bool osm_block_show_messages = false;        /** @brief osm show messages state store */
 static bool osm_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
 
-osm_location_t *osm_location;                       /** @brief osm location obj */
+osm_location_t *osm_location = NULL;                       /** @brief osm location obj */
 
 LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(zoom_in_dark_48px);

@@ -41,7 +41,7 @@ osm_location_t *osm_map_create_location_obj( void ) {
     /**
      * allocate osm_location structure
      */
-    osm_location_t *osm_location = (osm_location_t*)CALLOC( sizeof( osm_location_t), 1 );
+    osm_location_t *osm_location = (osm_location_t*)MALLOC( sizeof( osm_location_t ) );
     /**
      * if allocation was successfull, set to default
      */
@@ -70,6 +70,8 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->osm_map_data.data = NULL;
         osm_location->osm_map_data.data_size = 0;
     }
+
+    log_d("osm_location: alloc %d bytes at %p", sizeof( osm_location_t ), osm_location );
 
     return( osm_location );
 }
