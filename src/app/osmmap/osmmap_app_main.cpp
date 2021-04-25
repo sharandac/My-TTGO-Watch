@@ -277,6 +277,8 @@ static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
              * increase zoom level
              */
             osm_map_zoom_in( osmmap_location );
+            if ( osmmap_app_active )
+                osmmap_update_request();
             break;
     }
 }
@@ -288,6 +290,8 @@ static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
              * decrease zoom level
              */
             osm_map_zoom_out( osmmap_location );
+            if ( osmmap_app_active )
+                osmmap_update_request();
             break;
     }
 }
