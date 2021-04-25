@@ -24,7 +24,8 @@
 
     #include <TTGO.h>
 
-    #define OSM_APP_DOWNLOAD_REQUEST            _BV(0)
+    #define OSM_APP_TILE_IMAGE_REQUEST          _BV(0)      /** @brief set tile image update flag */
+    #define OSM_APP_TASK_EXIT_REQUEST           _BV(1)      /** @brief set task exit flag */
 
     void osm_app_main_setup( uint32_t tile_num );
 

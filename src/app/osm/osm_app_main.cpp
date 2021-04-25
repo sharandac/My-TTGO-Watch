@@ -36,28 +36,27 @@
 #include "hardware/gpsctl.h"
 #include "hardware/blectl.h"
 
-#include "utils/osm_helper/osm_helper.h"
+#include "utils/osm_map/osm_map.h"
 
-EventGroupHandle_t osm_map_event_handle = NULL;
-TaskHandle_t _osm_map_download_Task;
-lv_task_t * osm_map_main_tile_task;
+EventGroupHandle_t osm_map_event_handle = NULL;     /** @brief osm tile image update event queue */
+TaskHandle_t _osm_map_download_Task;                /** @brief osm tile image update Task */
+lv_task_t *osm_map_main_tile_task;                  /** @brief osm active/inactive task for show/hide user interface */
 
-lv_obj_t *osm_app_main_tile = NULL;
-lv_obj_t *osm_app_direction_img = NULL;
-lv_obj_t *osm_app_pos_img = NULL;
-lv_obj_t * exit_btn = NULL;
-lv_obj_t * zoom_in_btn = NULL;
-lv_obj_t * zoom_out_btn = NULL;
+lv_obj_t *osm_app_main_tile = NULL;                 /** @brief osm main tile obj */
+lv_obj_t *osm_app_tile_img = NULL;                  /** @brief osm tile image obj */
+lv_obj_t *osm_app_pos_img = NULL;                   /** @brief osm position point obj */
+lv_obj_t *exit_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *zoom_in_btn = NULL;                       /** @brief osm zoom in icon/button obj */
+lv_obj_t *zoom_out_btn = NULL;                      /** @brief osm zoom out icon/button obj */
 
-lv_style_t osm_app_main_style;
+lv_style_t osm_app_main_style;                      /** @brief osm main styte obj */
 
-static bool osm_app_active = false;
-static bool osm_block_return_maintile = false;
-static bool osm_block_show_messages = false;
-static bool osm_statusbar_force_dark_mode = false;
-osm_location_t osm_location;
+static bool osm_app_active = false;                 /** @brief osm app active/inactive flag, true means active */
+static bool osm_block_return_maintile = false;      /** @brief osm block to maintile state store */
+static bool osm_block_show_messages = false;        /** @brief osm show messages state store */
+static bool osm_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
 
-lv_img_dsc_t *osm_map_data[2];
+osm_location_t *osm_location;                       /** @brief osm location obj */
 
 LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(zoom_in_dark_48px);
@@ -86,16 +85,15 @@ void osm_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( osm_app_main_tile, LV_OBJ_PART_MAIN, &osm_app_main_style );
 
     lv_obj_t *osm_cont = lv_obj_create( osm_app_main_tile, NULL );
-    lv_obj_set_size(osm_cont, lv_disp_get_hor_res( NULL ) , lv_disp_get_ver_res( NULL ) );
+    lv_obj_set_size(osm_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
     lv_obj_add_style( osm_cont, LV_OBJ_PART_MAIN, &osm_app_main_style );
     lv_obj_align( osm_cont, osm_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
 
-    osm_app_direction_img = lv_img_create( osm_cont, NULL );
-    lv_obj_set_width( osm_app_direction_img, lv_disp_get_hor_res( NULL ) );
-    lv_obj_set_height( osm_app_direction_img, lv_disp_get_ver_res( NULL ) );
-    lv_img_set_src( osm_app_direction_img, &osm_64px );
-//    lv_img_set_zoom( osm_app_direction_img, 240 );
-    lv_obj_align( osm_app_direction_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
+    osm_app_tile_img = lv_img_create( osm_cont, NULL );
+    lv_obj_set_width( osm_app_tile_img, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_height( osm_app_tile_img, lv_disp_get_ver_res( NULL ) );
+    lv_img_set_src( osm_app_tile_img, &osm_64px );
+    lv_obj_align( osm_app_tile_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
 
     osm_app_pos_img = lv_img_create( osm_cont, NULL );
     lv_img_set_src( osm_app_pos_img, &info_fail_16px );
@@ -133,19 +131,15 @@ void osm_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_hibernate_cb( tile_num, osm_hibernate_cb );
     gpsctl_register_cb( GPSCTL_SET_APP_LOCATION | GPSCTL_UPDATE_LOCATION, osm_gpsctl_event_cb, "osm" );
 
-    osm_helper_location_update( &osm_location, osm_location.lon , osm_location.lat, osm_location.zoom );
-
-    osm_map_data[0] = NULL;
-    osm_map_data[1] = NULL;
-
-    osm_location.tilex_dest_px_res = lv_disp_get_hor_res( NULL );
-    osm_location.tiley_dest_px_res = lv_disp_get_ver_res( NULL );
-
+    osm_location = osm_map_create_location_obj();
     osm_map_event_handle = xEventGroupCreate();
-
     osm_map_main_tile_task = lv_task_create( osm_map_main_tile_update_task, 250, LV_TASK_PRIO_MID, NULL );
 }
 
+/**
+ * @brief when osm is active, this task get the use inactive time and hide
+ * the statusbar and icon.
+ */
 void osm_map_main_tile_update_task( lv_task_t * task ) {
     /*
      * check if maintile alread initialized
@@ -176,12 +170,7 @@ bool osm_gpsctl_event_cb( EventBits_t event, void *arg ) {
              * update location and tile map image on new location
              */
             gps_data = ( gps_data_t *)arg;
-            osm_location.lon = gps_data->lon;
-            osm_location.lat = gps_data->lat;
-            if( !osm_location.zoom_valid ) {
-                osm_location.zoom = 16;
-                osm_location.zoom_valid = true;
-            }
+            osm_map_set_lon_lat( osm_location, gps_data->lon, gps_data->lat );
             if ( osm_app_active )
                 osm_map_update_request();
             break;
@@ -190,8 +179,7 @@ bool osm_gpsctl_event_cb( EventBits_t event, void *arg ) {
              * update location and tile map image on new location
              */
             gps_data = ( gps_data_t *)arg;
-            osm_location.lon = gps_data->lon;
-            osm_location.lat = gps_data->lat;
+            osm_map_set_lon_lat( osm_location, gps_data->lon, gps_data->lat );
             if ( osm_app_active )
                 osm_map_update_request();
             break;
@@ -204,57 +192,54 @@ void osm_map_update_request( void ) {
     /**
      * check if another osm tile image update is running
      */
-    if ( xEventGroupGetBits( osm_map_event_handle ) & OSM_APP_DOWNLOAD_REQUEST ) {
+    if ( xEventGroupGetBits( osm_map_event_handle ) & OSM_APP_TILE_IMAGE_REQUEST ) {
         return;
     }
     else {
-        /**
-         * start separate osm tile image update Task
-         */
-        xEventGroupSetBits( osm_map_event_handle, OSM_APP_DOWNLOAD_REQUEST );
-        xTaskCreate(    osm_map_update_Task,      /* Function to implement the task */
-                        "osm map uupdate Task",    /* Name of the task */
-                        5000,                            /* Stack size in words */
-                        NULL,                            /* Task input parameter */
-                        1,                               /* Priority of the task */
-                        &_osm_map_download_Task );  /* Task handle. */ 
+        xEventGroupSetBits( osm_map_event_handle, OSM_APP_TILE_IMAGE_REQUEST );
     }
 }
 
 void osm_map_update_Task( void * pvParameters ) {
-    osm_update_map( &osm_location, osm_location.lon, osm_location.lat, osm_location.zoom );
-    lv_obj_align( osm_app_pos_img, lv_obj_get_parent( osm_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osm_location.tilex_pos - 8, osm_location.tiley_pos - 8 );
-    lv_obj_set_hidden( osm_app_pos_img, false );
-    xEventGroupClearBits( osm_map_event_handle, OSM_APP_DOWNLOAD_REQUEST );
-    vTaskDelete( NULL );    
-}
-
-
-void osm_update_map( osm_location_t *osm_location, double lon, double lat, uint32_t zoom ) {
-    static uint8_t osm_map_data_index = 0;
-    /**
-     * check if an tile map update necessitate
-     */
-    if ( osm_helper_location_update( osm_location, lon , lat, zoom ) ) {
+    log_i("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    while( 1 ) {
         /**
-         * use next lv_img_dsc
-         */ 
-        osm_map_data_index++;
-        osm_map_data_index %= 2;
-        /**
-         * update osm tile map image
+         * check if a tile image update is requested
          */
-        osm_map_data[ osm_map_data_index ] = osm_helper_get_tile_image( osm_location, osm_map_data[ osm_map_data_index ] );
-        /**
-         * if an image update was successfull, update img_src
-         */
-        if ( osm_map_data[ osm_map_data_index ] ) {
-            lv_img_set_src( osm_app_direction_img, osm_map_data[ osm_map_data_index ] );
-            lv_obj_align( osm_app_direction_img, osm_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
-            lv_obj_invalidate( lv_scr_act() );
+        if ( xEventGroupGetBits( osm_map_event_handle ) & OSM_APP_TILE_IMAGE_REQUEST ) {
+            /**
+             * check if a tile image update is required and update them
+             */
+            if( osm_map_update( osm_location ) ) {
+                if ( osm_map_get_tile_image( osm_location ) ) {
+                    lv_img_set_src( osm_app_tile_img, osm_map_get_tile_image( osm_location ) );
+                }
+                lv_obj_align( osm_app_tile_img, lv_obj_get_parent( osm_app_tile_img ), LV_ALIGN_CENTER, 0 , 0 );
+            }
+            /**
+             * update postion point on the tile image
+             */
+            lv_obj_align( osm_app_pos_img, lv_obj_get_parent( osm_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osm_location->tilex_pos - 8 , osm_location->tiley_pos - 8 );
+            lv_obj_set_hidden( osm_app_pos_img, false );
+            /**
+             * clear update request flag
+             */
+            xEventGroupClearBits( osm_map_event_handle, OSM_APP_TILE_IMAGE_REQUEST );
         }
+        /**
+         * check if for a task exit request
+         */
+        if ( xEventGroupGetBits( osm_map_event_handle ) & OSM_APP_TASK_EXIT_REQUEST ) {
+            xEventGroupClearBits( osm_map_event_handle, OSM_APP_TASK_EXIT_REQUEST );
+            break;
+        }
+        /**
+         * block this task for 125ms
+         */
+        vTaskDelay( 125 );
     }
-
+    log_i("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    vTaskDelete( NULL );    
 }
 
 static void exit_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -274,10 +259,7 @@ static void zoom_in_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
             /**
              * increase zoom level
              */
-            if ( osm_location.zoom < 18 ) {
-                osm_location.zoom++;
-                osm_map_update_request();
-            }
+            osm_map_zoom_in( osm_location );
             break;
     }
 }
@@ -288,10 +270,7 @@ static void zoom_out_osm_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
             /**
              * decrease zoom level
              */
-            if ( osm_location.zoom > 4 ) {
-                osm_location.zoom--;
-                osm_map_update_request();
-            }
+            osm_map_zoom_out( osm_location );
             break;
     }
 }
@@ -314,8 +293,6 @@ void osm_activate_cb( void ) {
     /**
      * force redraw screen
      */
-    lv_img_cache_invalidate_src( osm_map_data[ 0 ] );
-    lv_img_cache_invalidate_src( osm_map_data[ 1 ] );
     lv_obj_invalidate( lv_scr_act() );
     statusbar_expand( true );
     statusbar_expand( false );
@@ -323,6 +300,16 @@ void osm_activate_cb( void ) {
      * set osm app active
      */
     osm_app_active = true;
+    /**
+     * start background osm tile image update Task
+     */
+    xTaskCreate(    osm_map_update_Task,      /* Function to implement the task */
+                    "osm map update Task",    /* Name of the task */
+                    10000,                            /* Stack size in words */
+                    NULL,                            /* Task input parameter */
+                    1,                               /* Priority of the task */
+                    &_osm_map_download_Task );  /* Task handle. */
+
     osm_map_update_request();
 }
 
@@ -338,4 +325,8 @@ void osm_hibernate_cb( void ) {
      */
     osm_app_active = false;
     statusbar_hide( false );
+    /**
+     * stop background osm tile image update Task
+     */
+    xEventGroupSetBits( osm_map_event_handle, OSM_APP_TASK_EXIT_REQUEST );
 }
