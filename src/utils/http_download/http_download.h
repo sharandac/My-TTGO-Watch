@@ -24,7 +24,9 @@
 
     typedef struct {
         char *filename;         /** @brief pointer to the downloaded filename */
+        char *url;              /** @brief pointer to the downloaded filename */
         uint32_t size;          /** @brief filesize in bytes */
+        uint64_t timestamp;     /** @brief download timestamp */
         uint8_t *data;          /** @brief pointer to the downloaded data */
     } http_download_dsc_t;
     
@@ -48,6 +50,12 @@
      * @param http_download pointer to a http_download_dsc structure
      */
     void http_download_free_name( http_download_dsc_t *http_download );
+    /**
+     * @brief delete the url from the http_download_dsc structure and free their allocated memory
+     * 
+     * @param http_download pointer to a http_download_dsc structure
+     */
+    void http_download_free_url( http_download_dsc_t *http_download );
     /**
      * @brief delete the data from the http_download_dsc structure and free their allocated memory
      * 

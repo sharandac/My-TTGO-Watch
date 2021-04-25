@@ -1,30 +1,35 @@
 #ifndef _OSM_HELPER_H
     #define _OSM_HELPER_H
 
+    #include "utils/http_download/http_download.h"
+
+    #define DEFAULT_OSM_CACHE_SIZE      4
     #define DEFAULT_OSM_TILE_SERVER     "http://c.tile.openstreetmap.org"   /** @brief osm tile map server */
 
     /**
      * @brief osm tile calculation structure
      */
     typedef struct {
-        uint32_t zoom = 16;                     /** @brief osm zoom level */
-        double lon = 0;                         /** @brief lon for update calculation*/
-        double lat = 0;                         /** @brief lat for update calculation*/
-        uint32_t tilex = 0;                     /** @brief corresponding osm tilex from long */
-        uint32_t tiley = 0;                     /** @brief corresponding osm tilex from lat */
-        double tilex_left_top_edge = 0;         /** @brief max lon position left */
-        double tiley_left_top_edge = 0;         /** @brief max lat position top */
-        double tilex_right_bottom_edge = 0;     /** @brief max lon position right */
-        double tiley_right_bottom_edge = 0;     /** @brief max lat position bottom */
-        double tilex_res = 0;                   /** @brief lon range in degree per tile */
-        double tiley_res = 0;                   /** @brief lat range in degree per tile  */
-        double tilex_px_res = 0;                /** @brief lon range in degree per px */
-        double tiley_px_res = 0;                /** @brief lat range in degree per px */
-        double tilex_dest_px_res = 256;         /** @brief tile x resolution in px */
-        double tiley_dest_px_res = 256;         /** @brief tile y resolution in px */
-        uint16_t tilex_pos = 0;                 /** @brief x location on image in px */
-        uint16_t tiley_pos = 0;                 /** @brief y location on image in px */
-        lv_img_dsc_t osm_map_data;              /** @brief pointer to an lv_img_dsc for lvgl use */
+        uint32_t zoom = 16;                             /** @brief osm zoom level */
+        double lon = 0;                                 /** @brief lon for update calculation*/
+        double lat = 0;                                 /** @brief lat for update calculation*/
+        uint32_t tilex = 0;                             /** @brief corresponding osm tilex from long */
+        uint32_t tiley = 0;                             /** @brief corresponding osm tilex from lat */
+        double tilex_left_top_edge = 0;                 /** @brief max lon position left */
+        double tiley_left_top_edge = 0;                 /** @brief max lat position top */
+        double tilex_right_bottom_edge = 0;             /** @brief max lon position right */
+        double tiley_right_bottom_edge = 0;             /** @brief max lat position bottom */
+        double tilex_res = 0;                           /** @brief lon range in degree per tile */
+        double tiley_res = 0;                           /** @brief lat range in degree per tile  */
+        double tilex_px_res = 0;                        /** @brief lon range in degree per px */
+        double tiley_px_res = 0;                        /** @brief lat range in degree per px */
+        double tilex_dest_px_res = 256;                 /** @brief tile x resolution in px */
+        double tiley_dest_px_res = 256;                 /** @brief tile y resolution in px */
+        uint16_t tilex_pos = 0;                         /** @brief x location on image in px */
+        uint16_t tiley_pos = 0;                         /** @brief y location on image in px */
+        lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
+        bool cache = false;
+        http_download_dsc_t *http_download_dsc[ DEFAULT_OSM_CACHE_SIZE * DEFAULT_OSM_CACHE_SIZE ];
     } osm_location_t;
 
     /**

@@ -25,7 +25,8 @@
 #include "http_download.h"
 #include "utils/alloc.h"
 
-void http_download_get_filename_from_url( http_download_dsc_t *http_download, const char *url );
+void http_download_set_filename_from_url( http_download_dsc_t *http_download, const char *url );
+void http_download_set_url_from_url( http_download_dsc_t *http_download, const char *url );
 
 http_download_dsc_t *http_download_to_ram( const char *url ) {
     /**
@@ -38,9 +39,17 @@ http_download_dsc_t *http_download_to_ram( const char *url ) {
      */
     if ( http_download_dsc ) {
         /**
+         * set download timestamp
+         */
+        http_download_dsc->timestamp = millis();
+        /**
          * set filename in the http_download_dsc
          */
-        http_download_get_filename_from_url( http_download_dsc, url );
+        http_download_set_filename_from_url( http_download_dsc, url );
+        /**
+         * set filename in the http_download_dsc
+         */
+        http_download_set_url_from_url( http_download_dsc, url );
         /**
          * open http connection
          */
@@ -120,6 +129,10 @@ void http_download_free_all( http_download_dsc_t *http_download ) {
          */
         http_download_free_name( http_download );
         /**
+         * free url momory
+         */
+        http_download_free_url( http_download );
+        /**
          * free data momory
          */
         http_download_free_data( http_download );
@@ -135,6 +148,14 @@ void http_download_free_name( http_download_dsc_t *http_download ) {
         log_d("free: %p", http_download->filename );
         free( http_download->filename );
         http_download->filename = NULL;
+    }
+}
+
+void http_download_free_url( http_download_dsc_t *http_download ) {
+    if ( http_download->url ) {
+        log_d("free: %p", http_download->url );
+        free( http_download->url );
+        http_download->url = NULL;
     }
 }
 
@@ -163,13 +184,17 @@ void http_download_free_without_data( http_download_dsc_t *http_download ) {
          */
         http_download_free_name( http_download );
         /**
+         * free url momory
+         */
+        http_download_free_url( http_download );
+        /**
          * free http_download_dsc memory
          */
         http_download_free_dsc( http_download );
     }
 }
 
-void http_download_get_filename_from_url( http_download_dsc_t *http_download, const char *url ) {
+void http_download_set_filename_from_url( http_download_dsc_t *http_download, const char *url ) {
     const char *filename_from_url = NULL;
     const char *tld = NULL;
     const char index[] = "index.html";
@@ -203,6 +228,28 @@ void http_download_get_filename_from_url( http_download_dsc_t *http_download, co
             else {
                 log_e("http_download->filename: alloc failed");
             }
+        }
+    }
+}
+
+void http_download_set_url_from_url( http_download_dsc_t *http_download, const char *url ) {
+    /**
+     * check for http or https url
+     */
+    if ( http_download ) {
+        /**
+         * alloc url momory
+         */
+        http_download->url = (char *)MALLOC( strlen( url ) + 2 );
+        if ( http_download->url ) {
+            /**
+             * copy url into alloc mamory
+             */
+            log_d("http_download_dsc->url: alloc %d bytes at %p", strlen( url ), http_download->url );
+            strncpy( http_download->url, url, strlen( url ) );
+        }
+        else {
+            log_e("http_download->url: alloc failed");
         }
     }
 }

@@ -44,7 +44,7 @@
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
 #include "app/example_app/example_app.h"
-#include "app/osm/osm_app.h"
+#include "app/osmmap/osmmap_app.h"
 
 void setup() {
     /**
@@ -68,7 +68,7 @@ void setup() {
      * inlude your header file
      * and call your app setup
      */
-    osm_app_setup();
+    osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
