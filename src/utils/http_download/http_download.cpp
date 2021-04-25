@@ -25,6 +25,7 @@
 #include "http_download.h"
 #include "utils/alloc.h"
 
+http_download_dsc_t *http_download_create_dsc( void );
 void http_download_set_filename_from_url( http_download_dsc_t *http_download, const char *url );
 void http_download_set_url_from_url( http_download_dsc_t *http_download, const char *url );
 
@@ -32,7 +33,7 @@ http_download_dsc_t *http_download_to_ram( const char *url ) {
     /**
      * alloc http_download_dsc structure
      */
-    http_download_dsc_t *http_download_dsc = (http_download_dsc_t *)MALLOC( sizeof( http_download_dsc_t) );
+    http_download_dsc_t *http_download_dsc = http_download_create_dsc();
     log_d("http_download_dsc: alloc %d bytes at %p", sizeof( http_download_dsc_t ), http_download_dsc );
     /**
      * check if alloc was failed
@@ -118,6 +119,20 @@ http_download_dsc_t *http_download_to_ram( const char *url ) {
     }
     else {
         log_e("http_download_dsc alloc failed");
+    }
+    return( http_download_dsc );
+}
+
+http_download_dsc_t *http_download_create_dsc( void ) {
+    http_download_dsc_t *http_download_dsc = (http_download_dsc_t *)MALLOC( sizeof( http_download_dsc_t) );
+    /**
+     * if alloc was success, init structure
+     */
+    if( http_download_dsc ) {
+        http_download_dsc->data = NULL;
+        http_download_dsc->filename = NULL;
+        http_download_dsc->url = NULL;
+        http_download_dsc->size = 0;
     }
     return( http_download_dsc );
 }
