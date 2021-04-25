@@ -92,7 +92,7 @@ void osm_app_main_setup( uint32_t tile_num ) {
     osm_app_tile_img = lv_img_create( osm_cont, NULL );
     lv_obj_set_width( osm_app_tile_img, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( osm_app_tile_img, lv_disp_get_ver_res( NULL ) );
-    lv_img_set_src( osm_app_tile_img, &osm_64px );
+    lv_img_set_src( osm_app_tile_img, osm_map_get_no_data_image() );
     lv_obj_align( osm_app_tile_img, osm_cont, LV_ALIGN_CENTER, 0, 0 );
 
     osm_app_pos_img = lv_img_create( osm_cont, NULL );

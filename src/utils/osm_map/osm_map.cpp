@@ -29,6 +29,8 @@
 #include "utils/alloc.h"
 #include "utils/http_download/http_download.h"
 
+LV_IMG_DECLARE(osm_no_data_240px);
+
 uint32_t osm_map_long2tilex(double lon, uint32_t z);
 uint32_t osm_map_lat2tiley(double lat, uint32_t z);
 double osm_map_tilex2long(int x, uint32_t z);
@@ -119,8 +121,12 @@ lv_img_dsc_t *osm_map_get_tile_image( osm_location_t *osm_location ) {
         return( &osm_location->osm_map_data );
     }
     else {
-        return( NULL );
+        return( (lv_img_dsc_t*)&osm_no_data_240px );
     }
+}
+
+lv_img_dsc_t *osm_map_get_no_data_image( void ) {
+    return( (lv_img_dsc_t*)&osm_no_data_240px );
 }
 
 bool osm_map_update( osm_location_t *osm_location ) {

@@ -35,16 +35,21 @@
 #include "hardware/display.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
+#include "hardware/timesync.h"
 
 #include "quickglui/common/bluejsonrequest.h"
 
+lv_task_t *osmand_app_main_tile_task;
+
 lv_obj_t *osmand_app_main_tile = NULL;
 lv_style_t osmand_app_main_style;
+lv_style_t osmand_app_time_style;
 lv_style_t osmand_app_distance_style;
 
 lv_obj_t *osmand_app_direction_img = NULL;
 lv_obj_t *osmand_app_distance_label = NULL;
 lv_obj_t *osmand_app_info_label = NULL;
+lv_obj_t *osmand_app_time_label = NULL;
 
 static bool osmand_active = false;
 static bool osmand_block_return_maintile = false;
@@ -96,6 +101,7 @@ struct direction_t direction[] = {
     { "", "", NULL }
 };
 
+void osmand_app_main_tile_time_update_task( lv_task_t * task );
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg );
 static void osmand_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc );
@@ -113,6 +119,15 @@ void osmand_app_main_setup( uint32_t tile_num ) {
 
     lv_style_copy( &osmand_app_distance_style, &osmand_app_main_style );
     lv_style_set_text_font( &osmand_app_distance_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+
+    lv_style_copy( &osmand_app_time_style, &osmand_app_main_style);
+    lv_style_set_text_font( &osmand_app_time_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+
+    osmand_app_time_label = lv_label_create( osmand_app_main_tile , NULL);
+    lv_label_set_text(osmand_app_time_label, "00:00");
+    lv_obj_reset_style_list( osmand_app_time_label, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( osmand_app_time_label, LV_OBJ_PART_MAIN, &osmand_app_time_style );
+    lv_obj_align( osmand_app_time_label, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 5 );
 
     lv_obj_t * exit_btn = lv_imgbtn_create( osmand_app_main_tile, NULL);
     lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
@@ -141,6 +156,17 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_hibernate_cb( tile_num, osmand_hibernate_cb );
 
     blectl_register_cb( BLECTL_MSG_JSON | BLECTL_CONNECT | BLECTL_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
+
+    osmand_app_main_tile_task = lv_task_create( osmand_app_main_tile_time_update_task, 1000, LV_TASK_PRIO_MID, NULL );
+}
+
+void osmand_app_main_tile_time_update_task( lv_task_t * task ) {
+    if ( osmand_active ) {
+        char time_str[64]="";
+        timesync_get_current_timestring( time_str, sizeof( time_str ) );
+        lv_label_set_text(osmand_app_time_label, time_str );
+        lv_obj_align( osmand_app_time_label, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 5 );
+    }
 }
 
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {

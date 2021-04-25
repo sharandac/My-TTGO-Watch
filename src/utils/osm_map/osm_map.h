@@ -42,6 +42,12 @@
      */
     lv_img_dsc_t *osm_map_get_tile_image( osm_location_t *osm_location );
     /**
+     * @brief get the default 'no data'
+     * 
+     * @return lv_img_dsc_t for use with lvgl, NULL mean no tile image available
+     */
+    lv_img_dsc_t *osm_map_get_no_data_image( void );
+    /**
      * @brief set a new lon/lat location
      * 
      * @param osm_location  pointer to the osm_location structure
