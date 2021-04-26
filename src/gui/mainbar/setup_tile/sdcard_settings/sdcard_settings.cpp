@@ -38,9 +38,6 @@ lv_style_t sdcard_settings_style;
 uint32_t sdcard_settings_tile_num;
 lv_obj_t *sdcard_fs_browser_onoff = NULL;
 
-//to avoid compile errors on V1/V3 variants
-extern fs::SDFS SD;
-
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(sdcard_settings_64px);
 
@@ -112,6 +109,7 @@ void sdcard_settings_tile_setup(void)
     lv_label_set_text(sd_size_label, "SD card size:");
     lv_obj_align(sd_size_label, sd_size_cont, LV_ALIGN_IN_LEFT_MID, 0, 0);
 
+#ifdef LILYGO_WATCH_HAS_SDCARD
     //get SD type
     uint8_t cardType = SD.cardType();
     String sdCardType;
@@ -145,6 +143,7 @@ void sdcard_settings_tile_setup(void)
     lv_obj_add_style(sd_size_val, LV_OBJ_PART_MAIN, &sdcard_settings_style);
     lv_label_set_text(sd_size_val, sdCardSize);
     lv_obj_align(sd_size_val, sd_size_cont, LV_ALIGN_IN_RIGHT_MID, -5, 8);
+#endif
 }
 
 static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event)
@@ -173,8 +172,10 @@ static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t even
     {
         if (lv_switch_get_state(obj))
         {
+#ifdef LILYGO_WATCH_HAS_SDCARD
             log_d("enable SD");
             setFsEditorFilesystem(SD);
+#endif
         }
         else
         {
