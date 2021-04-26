@@ -67,12 +67,15 @@ static bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar 
 
 osm_location_t *osmmap_location = NULL;             /** @brief osm location obj */
 
+
 LV_IMG_DECLARE(layers_dark_48px);
 LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(zoom_in_dark_48px);
 LV_IMG_DECLARE(zoom_out_dark_48px);
 LV_IMG_DECLARE(osm_64px);
 LV_IMG_DECLARE(info_fail_16px);
+LV_IMG_DECLARE(checked_dark_16px);
+LV_IMG_DECLARE(unchecked_dark_16px);
 LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
@@ -160,8 +163,8 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( zoom_out_btn, zoom_out_osmmap_app_main_event_cb );
 
     layers_list = lv_list_create( osmmap_cont, NULL );
-    lv_obj_set_size( layers_list, 160, 160 );
-    lv_obj_align( layers_list, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size( layers_list, 160, 180 );
+    lv_obj_align( layers_list, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
     osmmap_add_tile_server_list( layers_list );
     lv_obj_set_hidden( layers_list, true );
 
@@ -326,15 +329,20 @@ static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
 
 static void layers_btn_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):   
-            lv_obj_set_hidden( layers_list, false );
+        case( LV_EVENT_CLICKED ):
+            if ( lv_obj_get_hidden( layers_list ) ) {
+                lv_obj_set_hidden( layers_list, false );
+            }
+            else {
+                lv_obj_set_hidden( layers_list, true );
+            }
             break;
     }
 }
 
 static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case LV_EVENT_CLICKED:
+        case LV_EVENT_CLICKED: {
             SpiRamJsonDocument doc( strlen( (const char*)osm_server_json_start ) * 2 );
             DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
 
@@ -349,8 +357,8 @@ static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
             }
             doc.clear();
             lv_obj_set_hidden( layers_list, true );            
-            // lv_list_get_btn_text( obj );
             break;
+        }
     }
 }
 
