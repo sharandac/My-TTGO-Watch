@@ -92,8 +92,11 @@ void motor_setup( void ) {
             TTGOClass * ttgo = TTGOClass::getWatch(); 
             ttgo->enableDrv2650(true);
             drv = ttgo->drv;            
+            drv->setMode(DRV2605_MODE_INTTRIG); // default, internal trigger when sending GO command
             drv->selectLibrary(1);
-            drv->setMode(DRV2605_MODE_INTTRIG);            
+            drv->setWaveform(0, 84); // ramp up medium 1, see datasheet part 11.2
+            drv->setWaveform(1, 1);  // strong click 100%, see datasheet part 11.2
+            drv->setWaveform(2, 0);  // end of waveforms        
         }
         else
         {
@@ -168,9 +171,7 @@ void motor_vibe( int time, bool enforced ) {
             portEXIT_CRITICAL(&timerMux);
         #elif defined( LILYGO_WATCH_2020_V2 )
             if (drv!=NULL) {
-                // set the effect to play
-                drv->setWaveform(0, 75);  // play effect
-                drv->setWaveform(1, 0);       // end waveform
+
                 // play the effect!
                 drv->go();
             }
