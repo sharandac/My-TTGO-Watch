@@ -132,5 +132,18 @@
      * @return  true if success, false if failed
      */
     bool timesync_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
-
+    /**
+     * @brief get the right formated time string
+     * 
+     * @param buf pointer to an string buffer
+     * @param buf_len size of the string buffer
+     */
+    void timesync_get_current_timestring( char * buf, size_t buf_len );
+    /**
+     * @brief get the right formated date string
+     * 
+     * @param buf pointer to an string buffer
+     * @param buf_len size of the string buffer
+     */    
+    void timesync_get_current_datestring( char * buf, size_t buf_len );
 #endif // _TIME_SYNC_H

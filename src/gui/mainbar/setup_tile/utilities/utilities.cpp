@@ -354,12 +354,10 @@ void gps_test_data_task( lv_task_t * task ) {
                 gps_data++;
             }
             /**
-             * check abort condition
+             * check abort condition, restart
              */
             if ( *gps_data == '\0' ) {
-                task_is_running = false;
-                gps_data = NULL;
-                lv_label_set_text( gps_test_data_btn_label, "send GPS\ntest data");
+                gps_data = (uint8_t*)gps_test_data_csv;
             }
             else {
                 gps_data++;

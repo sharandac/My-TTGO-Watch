@@ -19,13 +19,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _OSM_APP_MAIN_H
-    #define _OSM_APP_MAIN_H
+#ifndef _OSM_APP_H
+    #define _OSM_APP_H
 
     #include <TTGO.h>
 
-    #define OSM_APP_DOWNLOAD_REQUEST            _BV(0)
+    void osmmap_app_setup( void );
+    void osmmap_app_hide_app_icon_info( bool show );
+    void osmmap_app_hide_widget_icon_info( bool show );
+    uint32_t osmmap_app_get_app_setup_tile_num( void );
+    uint32_t osmmap_app_get_app_main_tile_num( void );
 
-    void osm_app_main_setup( uint32_t tile_num );
-
-#endif // _OSM_APP_MAIN_H
+#endif // _OSM_APP_H
