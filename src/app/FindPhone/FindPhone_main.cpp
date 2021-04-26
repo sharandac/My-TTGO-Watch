@@ -252,9 +252,10 @@ static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event)
 }
 
 static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
-{
-    if ( !strcmp( doc["t"], "find" )  )
+{    
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", true) )
     {
+        log_i("FindPhone screen active");
         statusbar_hide(true);
         powermgm_get_event(POWERMGM_STANDBY);          
         powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
@@ -263,5 +264,12 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
         sound_play_progmem_wav( piep_wav, piep_wav_len );
         lv_obj_invalidate(lv_scr_act());
         motor_vibe(100);            
+    }
+
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", false) )
+    {
+        log_i("FindPhone screen closed");
+        statusbar_hide(false);
+        mainbar_jump_to_maintile(LV_ANIM_OFF);          
     }
 }
