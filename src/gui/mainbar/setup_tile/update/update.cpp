@@ -323,6 +323,10 @@ void update_Task( void * pvParameters ) {
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                 lv_label_set_text( update_btn_label, "restart");
             }
+            else {
+                reset = false;
+                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            }
             progress = 0;
             lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );
             display_set_timeout( display_timeout );
