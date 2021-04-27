@@ -29,8 +29,7 @@
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
 
-#define DEST_FS_USES_SPIFFS
-#include <ESP32-targz.h>
+#include "utils/ESP32-targz/ESP32-targz.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
