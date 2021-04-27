@@ -34,6 +34,9 @@ gps_data_t gps_data;
 
 #if defined( LILYGO_WATCH_HAS_GPS )
     TinyGPSPlus *gps = nullptr;
+    TinyGPSCustom TGC_sats_in_view_gps;
+    TinyGPSCustom TGC_sats_in_view_glonass;
+    TinyGPSCustom TGC_sats_in_view_baidou;
 #endif
 
 bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg );
@@ -62,6 +65,9 @@ void gpsctl_setup( void ) {
         ttgo->trunOnGPS();
         ttgo->gps_begin();
         gps = ttgo->gps;
+        TGC_sats_in_view_gps.begin(*gps, "GPGSV", 3);
+        TGC_sats_in_view_glonass.begin(*gps, "GNGSV", 3);
+        TGC_sats_in_view_baidou.begin(*gps, "BDGSV", 3);
     #endif
 
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, gpsctl_powermgm_event_cb, "powermgm gpsctl" );
@@ -163,8 +169,28 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 gps_data.satellites = gps->satellites.value();
                 gpsctl_send_cb( GPSCTL_UPDATE_SATELLITE, (void*)&gps_data );
             }
-
-        #else
+            /*
+             * Update Custom GNSS values
+             */
+            if (TGC_sats_in_view_gps.isUpdated())
+            {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.satellite_types.gps_satellites = atoi(TGC_sats_in_view_gps.value());
+                gpsctl_send_cb(GPSCTL_UPDATE_SATELLITE_TYPE, (void *)&gps_data);
+            }
+            if (TGC_sats_in_view_glonass.isUpdated())
+            {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.satellite_types.glonass_satellites = atoi(TGC_sats_in_view_glonass.value());
+                gpsctl_send_cb(GPSCTL_UPDATE_SATELLITE_TYPE, (void *)&gps_data);
+            }
+            if (TGC_sats_in_view_baidou.isUpdated())
+            {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.satellite_types.gbaidou_satellites = atoi(TGC_sats_in_view_baidou.value());
+                gpsctl_send_cb(GPSCTL_UPDATE_SATELLITE_TYPE, (void *)&gps_data);
+            }
+            #else
             /*
              * send only when valid_location and gpsfix not equal
              */

@@ -28,19 +28,20 @@
 
     #define GPSCTL_INTERVAL             1000           /** @brief gps data intervall in milliseconds */
 
-    #define GPSCTL_ENABLE               _BV(0)         /** @brief event mask for GPS enabled */
-    #define GPSCTL_DISABLE              _BV(1)         /** @brief event mask for GPS disable */
-    #define GPSCTL_FIX                  _BV(2)         /** @brief event mask for GPS has an fix */
-    #define GPSCTL_NOFIX                _BV(3)         /** @brief event mask for GPS has no fix */
-    #define GPSCTL_SET_APP_LOCATION     _BV(4)         /** @brief event mask for GPS set location for user application like weather-app */
-    #define GPSCTL_UPDATE_LOCATION      _BV(5)         /** @brief event mask for GPS location update */
-    #define GPSCTL_UPDATE_DATE          _BV(6)         /** @brief event mask for GPS date update */
-    #define GPSCTL_UPDATE_TIME          _BV(7)         /** @brief event mask for GPS time update*/
-    #define GPSCTL_UPDATE_SPEED         _BV(8)         /** @brief event mask for GPS speed update*/
-    #define GPSCTL_UPDATE_ALTITUDE      _BV(9)         /** @brief event mask for GPS altitude update*/
-    #define GPSCTL_UPDATE_SATELLITE     _BV(10)        /** @brief event mask for GPS satellite update*/
-    #define GPSCTL_UPDATE_SOURCE        _BV(11)        /** @brief event mask for GPS source update*/
-    #define GPSCTL_UPDATE_CONFIG        _BV(12)        /** @brief event mask for GPS configuration*/
+    #define GPSCTL_ENABLE                   _BV(0)         /** @brief event mask for GPS enabled */
+    #define GPSCTL_DISABLE                  _BV(1)         /** @brief event mask for GPS disable */
+    #define GPSCTL_FIX                      _BV(2)         /** @brief event mask for GPS has an fix */
+    #define GPSCTL_NOFIX                    _BV(3)         /** @brief event mask for GPS has no fix */
+    #define GPSCTL_SET_APP_LOCATION         _BV(4)         /** @brief event mask for GPS set location for user application like weather-app */
+    #define GPSCTL_UPDATE_LOCATION          _BV(5)         /** @brief event mask for GPS location update */
+    #define GPSCTL_UPDATE_DATE              _BV(6)         /** @brief event mask for GPS date update */
+    #define GPSCTL_UPDATE_TIME              _BV(7)         /** @brief event mask for GPS time update*/
+    #define GPSCTL_UPDATE_SPEED             _BV(8)         /** @brief event mask for GPS speed update*/
+    #define GPSCTL_UPDATE_ALTITUDE          _BV(9)         /** @brief event mask for GPS altitude update*/
+    #define GPSCTL_UPDATE_SATELLITE         _BV(10)        /** @brief event mask for GPS satellite update*/
+    #define GPSCTL_UPDATE_SATELLITE_TYPE    _BV(11)        /** @brief event mask for GPS satellite type update*/
+    #define GPSCTL_UPDATE_SOURCE            _BV(12)        /** @brief event mask for GPS source update*/
+    #define GPSCTL_UPDATE_CONFIG            _BV(13)        /** @brief event mask for GPS configuration*/
     /**
      * @brief gps source types
      */
@@ -70,6 +71,12 @@
         double altitude_feed = 0;                       /** @brief altitude in feed */
         double altitude_meters = 0;                     /** @brief altitude in meter */
         uint32_t satellites = 0;                        /** @brief number of seen satellites */
+        struct
+        {
+            uint32_t gps_satellites = 0; 
+            uint32_t glonass_satellites = 0; 
+            uint32_t gbaidou_satellites = 0; 
+        }satellite_types;
     } gps_data_t;
     /**
      * @brief setup gps
