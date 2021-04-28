@@ -35,5 +35,11 @@
      */
     void asyncwebserver_start(void);
     void asyncwebserver_end(void);
+    
+    /*
+     *  @brief set a new filesystem for the SPIFFSEditor
+     */
+    void setFsEditorFilesystem(const fs::FS& fs);
+
 
 #endif // _ASYNCWEBSERVER_H

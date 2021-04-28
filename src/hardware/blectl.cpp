@@ -214,8 +214,8 @@ void blectl_setup( void ) {
     esp_bt_controller_enable( ESP_BT_MODE_BLE );
     esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
     esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
-    esp_bt_controller_mem_release( ESP_BT_MODE_IDLE );
-    esp_bt_mem_release( ESP_BT_MODE_IDLE );
+//    esp_bt_controller_mem_release( ESP_BT_MODE_IDLE );
+//    esp_bt_mem_release( ESP_BT_MODE_IDLE );
 
     blectl_msg.active = false;
     blectl_msg.msg = NULL;

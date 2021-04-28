@@ -35,6 +35,9 @@ void hardware_setup( void ) {
     ttgo->begin();
     ttgo->lvgl_begin();
     SPIFFS.begin();
+    #if defined( LILYGO_WATCH_HAS_SDCARD )
+        ttgo->sdcard_begin();
+    #endif
     motor_setup();
     display_setup();
     screenshot_setup();

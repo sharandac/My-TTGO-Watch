@@ -5,8 +5,8 @@ Clone this repository and open it with platformIO. Build and upload. On a termin
 ```bash
 pio run -t upload
 ```
-
-or simple press "build and upload" in platformIO.
+or simple press "build and upload" in platformIO, 
+or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from ShotokuTech[ShotokuTech](https://github.com/ShotokuTech).
 
 ## Applications
 

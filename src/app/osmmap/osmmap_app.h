@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
+ *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,16 +19,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#ifndef _OSM_APP_H
+    #define _OSM_APP_H
 
-#ifndef _FTPSERVER_H
-    #define _FTPSERVER_H
+    #include <TTGO.h>
 
-    #define FTPSERVER_USER      "TTWatch"
-    #define FTPSERVER_PASSWORD  "password"
+    void osmmap_app_setup( void );
+    void osmmap_app_hide_app_icon_info( bool show );
+    void osmmap_app_hide_widget_icon_info( bool show );
+    uint32_t osmmap_app_get_app_setup_tile_num( void );
+    uint32_t osmmap_app_get_app_main_tile_num( void );
 
-    /**
-     *  @brief setup builtin ftpserver, call after first wifi-connection. otherwise esp32 will crash
-     */
-    void ftpserver_start( const char *user, const char *pass );
-
-#endif // _FTPSERVER_H
+#endif // _OSM_APP_H

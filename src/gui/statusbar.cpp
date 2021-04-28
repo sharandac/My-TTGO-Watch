@@ -924,8 +924,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
 
     static bool expand = false;
 
-    log_i("statusbar event");
-
     switch( event ) {
         case LV_EVENT_PRESSED:
             if ( expand ) {
