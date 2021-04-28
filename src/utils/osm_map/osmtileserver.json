@@ -7,5 +7,5 @@
 	"thunderforest":"http://tile.thunderforest.com/transport/$z/$x/$y.png",
     "memomaps":"http://tile.memomaps.de/tilegen/$z/$x/$y.png",
     "offline from sdcard":"file:///sdcard/osmmap/$z/$x/$y.png",
-    "neo-guerillaz test":"http://www.neo-guerillaz.de/tiles/$z/$x/$y.png"
+    "neo-guerillaz test":"http://www.neo-guerillaz.de/osmmap/$z/$x/$y.png"
 }
