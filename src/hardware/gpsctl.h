@@ -75,7 +75,7 @@
         {
             uint32_t gps_satellites = 0; 
             uint32_t glonass_satellites = 0; 
-            uint32_t gbaidou_satellites = 0; 
+            uint32_t baidou_satellites = 0; 
         }satellite_types;
     } gps_data_t;
     /**

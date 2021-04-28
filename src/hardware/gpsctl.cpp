@@ -187,7 +187,7 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
             if (TGC_sats_in_view_baidou.isUpdated())
             {
                 gps_data.gps_source = GPS_SOURCE_GPS;
-                gps_data.satellite_types.gbaidou_satellites = atoi(TGC_sats_in_view_baidou.value());
+                gps_data.satellite_types.baidou_satellites = atoi(TGC_sats_in_view_baidou.value());
                 gpsctl_send_cb(GPSCTL_UPDATE_SATELLITE_TYPE, (void *)&gps_data);
             }
             #else

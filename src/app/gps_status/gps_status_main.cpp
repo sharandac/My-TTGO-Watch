@@ -50,6 +50,7 @@ static lv_style_t style_led_red;
 lv_obj_t *satfix_value_on = NULL;
 lv_obj_t *satfix_value_off = NULL;
 lv_obj_t *num_satellites_value = NULL;
+lv_obj_t *satellite_type = NULL;
 lv_obj_t *pos_longlat_value = NULL;
 lv_obj_t *altitude_value = NULL;
 lv_obj_t *speed_value = NULL;
@@ -151,12 +152,27 @@ void gps_status_main_setup(uint32_t tile_num) {
     lv_label_set_text(num_satellites_value, "n/a");
     lv_obj_align(num_satellites_value, num_satellites_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     /*
+     * satellite type
+     */
+    lv_obj_t *satellite_type_cont = lv_obj_create(gps_status_main_tile, NULL);
+    lv_obj_set_size(satellite_type_cont, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
+    lv_obj_add_style(satellite_type_cont, LV_OBJ_PART_MAIN, &gps_status_value_style);
+    lv_obj_align(satellite_type_cont, num_satellites_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_obj_t *satellite_type_label = lv_label_create(satellite_type_cont, NULL);
+    lv_obj_add_style(satellite_type_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
+    lv_label_set_text(satellite_type_label, "Sat type:");
+    lv_obj_align(satellite_type_label, satellite_type_cont, LV_ALIGN_IN_LEFT_MID, 5, 0);
+    satellite_type = lv_label_create(satellite_type_cont, NULL);
+    lv_obj_add_style(satellite_type, LV_OBJ_PART_MAIN, &gps_status_value_style);
+    lv_label_set_text(satellite_type, "n/a");
+    lv_obj_align(satellite_type, satellite_type_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    /*
      * altitude
      */
     lv_obj_t *altitude_cont = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(altitude_cont, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(altitude_cont, LV_OBJ_PART_MAIN, &gps_status_value_style);
-    lv_obj_align(altitude_cont, num_satellites_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
+    lv_obj_align(altitude_cont, satellite_type_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0);
     lv_obj_t *altitude_info_label = lv_label_create(altitude_cont, NULL);
     lv_obj_add_style(altitude_info_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(altitude_info_label, "Altitude");
@@ -217,6 +233,7 @@ void gps_status_main_setup(uint32_t tile_num) {
                           | GPSCTL_NOFIX
                           | GPSCTL_UPDATE_LOCATION
                           | GPSCTL_UPDATE_SATELLITE
+                          | GPSCTL_UPDATE_SATELLITE_TYPE
                           | GPSCTL_UPDATE_SPEED
                           | GPSCTL_UPDATE_ALTITUDE
                           | GPSCTL_UPDATE_SOURCE
@@ -247,7 +264,7 @@ static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event) {
 }
 
 bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {
-    char temp[20] = "";
+    char temp[30] = "";
     gps_data_t *gps_data = (gps_data_t*)arg;
 
     switch( event ) {
@@ -278,6 +295,12 @@ bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {
                 snprintf( temp, sizeof( temp ), "n/a" );
             lv_label_set_text( num_satellites_value, temp );
             break;
+        case GPSCTL_UPDATE_SATELLITE_TYPE:
+            snprintf( temp, sizeof( temp ), "GP %d, GL %d, BD %d", gps_data->satellite_types.gps_satellites,
+                                                                   gps_data->satellite_types.glonass_satellites,
+                                                                   gps_data->satellite_types.baidou_satellites );
+            lv_label_set_text( satellite_type, temp );
+            break;
         case GPSCTL_UPDATE_SPEED:
             if ( gps_data->valid_speed )
                 snprintf( temp, sizeof( temp ), "%.2fkm/h", gps_data->speed_kmh );
@@ -299,6 +322,7 @@ bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {
 
     lv_obj_align( pos_longlat_value, lv_obj_get_parent( pos_longlat_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_align( num_satellites_value, lv_obj_get_parent( num_satellites_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
+    lv_obj_align( satellite_type, lv_obj_get_parent( satellite_type ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_align( speed_value, lv_obj_get_parent( speed_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_align( altitude_value, lv_obj_get_parent( altitude_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_align( source_value, lv_obj_get_parent( source_value ), LV_ALIGN_IN_RIGHT_MID, -5, 0);
