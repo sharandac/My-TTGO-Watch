@@ -27,7 +27,7 @@
 
 #include "osm_map.h"
 #include "utils/alloc.h"
-#include "utils/http_download/http_download.h"
+#include "utils/uri_load/uri_load.h"
 
 /**
  * @brief osm_map default tile image
@@ -78,6 +78,9 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->osm_map_data.header.h = 256;
         osm_location->osm_map_data.data = NULL;
         osm_location->osm_map_data.data_size = 0;
+        for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+            osm_location->uri_load_dsc[ i ] = NULL;
+        }
     }
 
     log_d("osm_location: alloc %d bytes at %p", sizeof( osm_location_t ), osm_location );
@@ -175,6 +178,9 @@ bool osm_map_update( osm_location_t *osm_location ) {
     osm_location->tiley_pos = abs( osm_location->tiley_left_top_edge - osm_location->lat ) / osm_location->tiley_px_res;
     osm_location->tilex_pos = abs( osm_location->tilex_left_top_edge - osm_location->lon ) / osm_location->tilex_px_res;
 
+    log_d("left/top: %f / %f", osm_location->tiley_left_top_edge, osm_location->tilex_left_top_edge );
+    log_d("right/bottom: %f / %f", osm_location->tiley_right_bottom_edge, osm_location->tilex_right_bottom_edge );
+
     return( tile_update );
 }
 
@@ -186,30 +192,103 @@ bool osm_map_update( osm_location_t *osm_location ) {
  * @return  updated lv_img_dsc structure
  */
 osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
+    uri_load_dsc_t *uri_load_dsc = NULL;
     /**
      * download file into RAM
      */
-    osm_map_gen_url( osm_location );
-    http_download_dsc_t *http_download_dsc = http_download_to_ram( (const char*)osm_location->current_tile_url );
+    uri_load_dsc = osm_map_get_cache_tile_image( osm_location );
     /**
      * check if download was success
      */
-    if ( http_download_dsc ) {
+    if ( uri_load_dsc ) {
         /**
-         * free old image data
+         * set new image data
          */
-        if( osm_location->osm_map_data.data ) {
-            free( (void*)osm_location->osm_map_data.data );
-        }
-        osm_location->osm_map_data.data = http_download_dsc->data;
-        osm_location->osm_map_data.data_size = http_download_dsc->size;
+        osm_location->osm_map_data.data = uri_load_dsc->data;
+        osm_location->osm_map_data.data_size = uri_load_dsc->size;
         lv_img_cache_invalidate_src( &osm_location->osm_map_data );
+    }
+    else {
         /**
-         * free http_download_dsc structure and leave data
+         * set default no data image
          */
-        http_download_free_without_data( http_download_dsc );
+        osm_location->osm_map_data.data = osm_no_data_240px.data;
+        osm_location->osm_map_data.data_size = osm_no_data_240px.data_size;
+        lv_img_cache_invalidate_src( &osm_location->osm_map_data );
     }
     return( osm_location );
+}
+
+uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
+    size_t tile = -1;
+    size_t free_tile = -1;
+    size_t cachesize = 0;
+    size_t cachefile = 0;
+    uint64_t timestamp = millis();
+    uri_load_dsc_t *uri_load_dsc = NULL;
+    /**
+     * generate tile image utl/uri
+     */
+    osm_map_gen_url( osm_location );
+    /**
+     * check if tile image exist
+     */
+    for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+        if ( osm_location->uri_load_dsc[ i ] ) {
+            if ( !strcmp( osm_location->current_tile_url, osm_location->uri_load_dsc[ i ]->uri ) ) {
+                tile = i;
+                break;
+            }
+        }
+        else {
+            free_tile = i;
+        }
+    }
+    /**
+     * check for a cache hit
+     */
+    if ( tile != -1 ) {
+        log_i("url cache hit: %s", osm_location->uri_load_dsc[ tile ]->uri );
+        uri_load_dsc = osm_location->uri_load_dsc[ tile ];
+        uri_load_dsc->timestamp = millis();
+    }
+    else {
+        /**
+         * 1. check for a free tile
+         */
+        log_d("url cache miss for %s", osm_location->current_tile_url );
+        if ( free_tile == -1 ) {
+            /**
+             * search the oldest one
+             */
+            for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+                if ( osm_location->uri_load_dsc[ i ]->timestamp <= timestamp && osm_location->uri_load_dsc[ i ] ) {
+                    timestamp = osm_location->uri_load_dsc[ i ]->timestamp;
+                    free_tile = i;
+                }
+            }
+            /**
+             * delete the oldest one
+             */
+            log_d("cache full, delete the oldest: %s", osm_location->uri_load_dsc[ free_tile ]->uri );
+            uri_load_free_all( osm_location->uri_load_dsc[ free_tile ] );
+            osm_location->uri_load_dsc[ free_tile ] = NULL;
+        }
+        log_d("use tile cache %d", free_tile );
+        osm_location->uri_load_dsc[ free_tile ] = uri_load_to_ram( (const char*)osm_location->current_tile_url );
+        uri_load_dsc = osm_location->uri_load_dsc[ free_tile ];
+        /**
+         * get cache size
+         */
+        for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+            if ( osm_location->uri_load_dsc[ i ] ) {
+                cachesize += osm_location->uri_load_dsc[ i ]->size;
+                cachefile++;
+            }
+        }
+        log_i("cached files: %d, cachesize = %d bytes", cachefile, cachesize );
+    }
+    return( uri_load_dsc );
 }
 
 void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_server ) {
