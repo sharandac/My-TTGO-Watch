@@ -31,8 +31,7 @@
 #include "hardware/display.h"
 
 #define DEST_FS_USES_SPIFFS
-// #include <ESP32-targz.h>
-#include "utils/ESP32-targz/ESP32-targz.h"
+#include <ESP32-targz.h>
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -46,13 +45,6 @@ void http_ota_progress_cb( uint8_t progress ) {
 
 bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
     bool retval = false;
-
-/*
-    if ( ESP.getFreeHeap() <= ( 80*1024 ) ) {
-        http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Error ... need more IRAM!" );
-        return( false );
-    }
-*/
     /*
      * disable ble and set esp32 voltage to 3.3V to
      * prevent some issues

@@ -32,7 +32,7 @@
 /**
  * @brief osm_map default tile image
  */
-LV_IMG_DECLARE(osm_no_data_240px);
+LV_IMG_DECLARE(osm_no_data_256px);
 /**
  * @brief osm tile server list
  */
@@ -135,12 +135,12 @@ lv_img_dsc_t *osm_map_get_tile_image( osm_location_t *osm_location ) {
         return( &osm_location->osm_map_data );
     }
     else {
-        return( (lv_img_dsc_t*)&osm_no_data_240px );
+        return( (lv_img_dsc_t*)&osm_no_data_256px );
     }
 }
 
 lv_img_dsc_t *osm_map_get_no_data_image( void ) {
-    return( (lv_img_dsc_t*)&osm_no_data_240px );
+    return( (lv_img_dsc_t*)&osm_no_data_256px );
 }
 
 bool osm_map_update( osm_location_t *osm_location ) {
@@ -212,8 +212,8 @@ osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
         /**
          * set default no data image
          */
-        osm_location->osm_map_data.data = osm_no_data_240px.data;
-        osm_location->osm_map_data.data_size = osm_no_data_240px.data_size;
+        osm_location->osm_map_data.data = osm_no_data_256px.data;
+        osm_location->osm_map_data.data_size = osm_no_data_256px.data_size;
         lv_img_cache_invalidate_src( &osm_location->osm_map_data );
     }
     return( osm_location );
