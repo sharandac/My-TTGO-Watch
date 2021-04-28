@@ -66,7 +66,7 @@ void gpsctl_setup( void ) {
         ttgo->gps_begin();
         gps = ttgo->gps;
         TGC_sats_in_view_gps.begin(*gps, "GPGSV", 3);
-        TGC_sats_in_view_glonass.begin(*gps, "GNGSV", 3);
+        TGC_sats_in_view_glonass.begin(*gps, "GLGSV", 3);
         TGC_sats_in_view_baidou.begin(*gps, "BDGSV", 3);
     #endif
 
