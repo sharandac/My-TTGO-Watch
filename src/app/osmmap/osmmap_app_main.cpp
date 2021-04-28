@@ -53,12 +53,18 @@ lv_obj_t *osmmap_app_pos_img = NULL;                /** @brief osm position poin
 lv_obj_t *osmmap_lonlat_label = NULL;               /** @brief osm exit icon/button obj */
 lv_obj_t *layers_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *layers_list = NULL;                       /** @brief osm style list box */
+lv_obj_t *north_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *south_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *west_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *center_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *east_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *exit_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *zoom_in_btn = NULL;                       /** @brief osm zoom in icon/button obj */
 lv_obj_t *zoom_out_btn = NULL;                      /** @brief osm zoom out icon/button obj */
 
 lv_style_t osmmap_app_main_style;                   /** @brief osm main styte obj */
 lv_style_t osmmap_app_label_style;                  /** @brief osm main styte obj */
+lv_style_t osmmap_app_nav_style;                  /** @brief osm main styte obj */
 
 static bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
 static bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
@@ -83,6 +89,11 @@ LV_FONT_DECLARE(Ubuntu_32px);
 void osmmap_main_tile_update_task( lv_task_t * task );
 void osmmap_update_request( void );
 void osmmap_update_Task( void * pvParameters );
+static void nav_north_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void nav_south_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void nav_west_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void nav_east_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -100,6 +111,10 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
 
     lv_style_copy( &osmmap_app_main_style, ws_get_mainbar_style() );
     lv_obj_add_style( osmmap_app_main_tile, LV_OBJ_PART_MAIN, &osmmap_app_main_style );
+
+    lv_style_copy( &osmmap_app_nav_style, ws_get_mainbar_style() );
+    lv_style_set_radius( &osmmap_app_nav_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_bg_color( &osmmap_app_nav_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
     lv_style_copy( &osmmap_app_label_style, ws_get_mainbar_style() );
     lv_style_set_text_font( &osmmap_app_label_style, LV_OBJ_PART_MAIN, &Ubuntu_12px );
@@ -132,7 +147,7 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_CHECKED_RELEASED, &layers_dark_48px);
     lv_imgbtn_set_src( layers_btn, LV_BTN_STATE_CHECKED_PRESSED, &layers_dark_48px);
     lv_obj_add_style( layers_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
-    lv_obj_align( layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 + STATUSBAR_HEIGHT );
+    lv_obj_align( layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
     lv_obj_set_event_cb( layers_btn, layers_btn_app_main_event_cb );
 
     exit_btn = lv_imgbtn_create( osmmap_cont, NULL);
@@ -150,7 +165,7 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_imgbtn_set_src( zoom_in_btn, LV_BTN_STATE_CHECKED_RELEASED, &zoom_in_dark_48px);
     lv_imgbtn_set_src( zoom_in_btn, LV_BTN_STATE_CHECKED_PRESSED, &zoom_in_dark_48px);
     lv_obj_add_style( zoom_in_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
-    lv_obj_align( zoom_in_btn, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 + STATUSBAR_HEIGHT );
+    lv_obj_align( zoom_in_btn, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
     lv_obj_set_event_cb( zoom_in_btn, zoom_in_osmmap_app_main_event_cb );
 
     zoom_out_btn = lv_imgbtn_create( osmmap_cont, NULL);
@@ -161,6 +176,46 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( zoom_out_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
     lv_obj_align( zoom_out_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( zoom_out_btn, zoom_out_osmmap_app_main_event_cb );
+
+    north_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( north_btn, 80 );
+    lv_obj_set_height( north_btn, 80 );
+    lv_obj_add_protect( north_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( north_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( north_btn, osmmap_cont, LV_ALIGN_IN_TOP_MID, 8, 0 );
+    lv_obj_set_event_cb( north_btn, nav_north_osmmap_app_main_event_cb );
+
+    south_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( south_btn, 80 );
+    lv_obj_set_height( south_btn, 80 );
+    lv_obj_add_protect( south_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( south_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( south_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_MID, 8, 0 );
+    lv_obj_set_event_cb( south_btn, nav_south_osmmap_app_main_event_cb );
+
+    west_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( west_btn, 80 );
+    lv_obj_set_height( west_btn, 80 );
+    lv_obj_add_protect( west_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( west_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( west_btn, osmmap_cont, LV_ALIGN_IN_LEFT_MID, 8, 0 );
+    lv_obj_set_event_cb( west_btn, nav_west_osmmap_app_main_event_cb );
+
+    east_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( east_btn, 80 );
+    lv_obj_set_height( east_btn, 80 );
+    lv_obj_add_protect( east_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( east_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( east_btn, osmmap_cont, LV_ALIGN_IN_RIGHT_MID, 8, 0 );
+    lv_obj_set_event_cb( east_btn, nav_east_osmmap_app_main_event_cb );
+
+    center_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( center_btn, 80 );
+    lv_obj_set_height( center_btn, 80 );
+    lv_obj_add_protect( center_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( center_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( center_btn, osmmap_cont, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_event_cb( center_btn, nav_center_osmmap_app_main_event_cb );
 
     layers_list = lv_list_create( osmmap_cont, NULL );
     lv_obj_set_size( layers_list, 160, 180 );
@@ -191,15 +246,15 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
             lv_obj_set_hidden( exit_btn, true );
             lv_obj_set_hidden( zoom_in_btn, true );
             lv_obj_set_hidden( zoom_out_btn, true );
-            statusbar_hide( true );
-            statusbar_expand( false );
+//            statusbar_hide( true );
+//            statusbar_expand( false );
         }
         else {
             lv_obj_set_hidden( layers_btn, false );
             lv_obj_set_hidden( exit_btn, false );
             lv_obj_set_hidden( zoom_in_btn, false );
             lv_obj_set_hidden( zoom_out_btn, false );
-            statusbar_hide( false );
+//            statusbar_hide( false );
         }
     }
 }
@@ -297,6 +352,47 @@ static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
              * exit to mainbar
              */
             mainbar_jump_to_maintile( LV_ANIM_OFF );
+            break;
+    }
+}
+
+
+static void nav_north_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            log_i("nav north");
+            break;
+    }
+}
+
+static void nav_south_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            log_i("nav south");
+            break;
+    }
+}
+
+static void nav_west_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            log_i("nav west");
+            break;
+    }
+}
+
+static void nav_east_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            log_i("nav east");
+            break;
+    }
+}
+
+static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_LONG_PRESSED ):
+            log_i("nav center");
             break;
     }
 }
@@ -401,8 +497,9 @@ void osmmap_activate_cb( void ) {
      * force redraw screen
      */
     lv_obj_invalidate( lv_scr_act() );
-    statusbar_expand( true );
-    statusbar_expand( false );
+//    statusbar_expand( true );
+//    statusbar_expand( false );
+    statusbar_hide( true );
     /**
      * set osm app active
      */
