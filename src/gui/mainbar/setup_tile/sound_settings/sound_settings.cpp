@@ -46,7 +46,6 @@ lv_obj_t *sound_icon = NULL;
 lv_obj_t *sound_vibe_onoff = NULL;
 
 LV_IMG_DECLARE(sound_64px);
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(sound_32px);
 LV_IMG_DECLARE(sound_mute_32px);
 
@@ -72,19 +71,8 @@ void sound_settings_tile_setup( void ) {
     sound_setup_icon = setup_register( "sound", &sound_64px, enter_sound_setup_event_cb );
     setup_hide_indicator( sound_setup_icon );
 
-    lv_obj_t *exit_btn_1 = lv_imgbtn_create( sound_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn_1, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn_1, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn_1, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn_1, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn_1, LV_IMGBTN_PART_MAIN, &sound_settings_style );
-    lv_obj_align( exit_btn_1, sound_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn_1, exit_sound_setup_event_cb );
-    
-    lv_obj_t *exit_label_1 = lv_label_create( sound_settings_tile, NULL );
-    lv_obj_add_style( exit_label_1, LV_OBJ_PART_MAIN, &sound_settings_style  );
-    lv_label_set_text( exit_label_1, "sound settings");
-    lv_obj_align( exit_label_1, exit_btn_1, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( sound_settings_tile, "sound settings", exit_sound_setup_event_cb );
+    //lv_obj_align( header, sound_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *vibe_cont = lv_obj_create( sound_settings_tile, NULL );
     lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);

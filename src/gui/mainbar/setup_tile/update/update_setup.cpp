@@ -43,7 +43,6 @@ uint32_t update_setup_tile_num;
 lv_obj_t *update_check_autosync_onoff = NULL;
 lv_obj_t *update_check_url_textfield = NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -69,19 +68,8 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_style_copy( &update_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, &update_setup_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( update_setup_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &update_setup_style );
-    lv_obj_align( exit_btn, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_update_check_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( update_setup_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &update_setup_style  );
-    lv_label_set_text( exit_label, "update settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( update_setup_tile, "update settings", exit_update_check_setup_event_cb );
+    //lv_obj_align( header, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *update_check_autosync_cont = lv_obj_create( update_setup_tile, NULL );
     lv_obj_set_size(update_check_autosync_cont, lv_disp_get_hor_res( NULL ) , 40);

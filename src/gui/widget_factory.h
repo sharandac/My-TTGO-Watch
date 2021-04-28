@@ -102,13 +102,14 @@ lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t *
 /**
  * @brief   Creates and adds an image button to a container
  *
- * @param   parent  pointer to a parent container
- * @param   image reference to image description
- * @param   event_cb    the button click event function
+ * @param   parent   pointer to a parent container
+ * @param   image    reference to image description
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
  *
  * @return  returns pointer to the added object
  */
-lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb);
+lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style=NULL);
 
 /**
  * @brief   Creates and adds an labeled button to a container
@@ -133,6 +134,8 @@ lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int he
  * @return  returns pointer to the added container
  */
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn);
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event_cb_t event_cb);
+lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent);
 
 /**
  * @brief   Creates and adds an image to a container

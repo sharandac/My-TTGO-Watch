@@ -45,7 +45,6 @@ lv_obj_t *battery_percent_switch = NULL;
 lv_obj_t *battery_experimental_switch = NULL;
 lv_obj_t *battery_high_voltage_switch = NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(battery_icon_64px);
 LV_IMG_DECLARE(info_update_16px);
 
@@ -70,19 +69,8 @@ void battery_settings_tile_setup( void ) {
     battery_setup_icon = setup_register( "battery", &battery_icon_64px, enter_battery_setup_event_cb );
     setup_hide_indicator( battery_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( battery_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &battery_settings_style );
-    lv_obj_align( exit_btn, battery_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_battery_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( battery_settings_tile, NULL );
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &battery_settings_style  );
-    lv_label_set_text( exit_label, "energy settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( battery_settings_tile, "energy settings", exit_battery_setup_event_cb );
+    //lv_obj_align( header, battery_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *battery_silence_wakeup_switch_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size(battery_silence_wakeup_switch_cont, lv_disp_get_hor_res( NULL ) , 32);

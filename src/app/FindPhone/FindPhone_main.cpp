@@ -34,6 +34,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/blectl.h"
@@ -53,7 +54,6 @@ uint32_t bluetooth_FindPhone_tile_num;
 
 lv_obj_t *bluetooth_FindPhone_img = NULL;
 lv_obj_t *bluetooth_FindPhone_label = NULL;										   
-LV_IMG_DECLARE(cancel_32px);
 
 lv_task_t * _FindPhone_search_task; 
 LV_IMG_DECLARE(eye_200px);
@@ -103,14 +103,8 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_obj_add_style(bluetooth_FindPhone_label, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
     lv_obj_align(bluetooth_FindPhone_label, bluetooth_FindPhone_tile, LV_ALIGN_IN_LEFT_MID, 5, 0);
 
-    lv_obj_t *exit_btn = lv_imgbtn_create(bluetooth_FindPhone_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_FindPhone_style);
-    lv_obj_align(exit_btn, bluetooth_FindPhone_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
-    lv_obj_set_event_cb(exit_btn, exit_bluetooth_FindPhone_event_cb);
+    lv_obj_t *header = wf_add_settings_header( bluetooth_FindPhone_tile, NULL, exit_bluetooth_FindPhone_event_cb );
+    lv_obj_align(header, bluetooth_FindPhone_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
 
     blectl_register_cb(BLECTL_MSG_JSON, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
 }

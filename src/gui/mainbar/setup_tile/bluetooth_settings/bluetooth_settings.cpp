@@ -47,7 +47,6 @@ lv_obj_t *bluetooth_advertising_onoff = NULL;
 lv_obj_t *bluetooth_show_notifications_onoff = NULL;
 lv_obj_t *txpower_list = NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(bluetooth_64px);
 LV_IMG_DECLARE(info_fail_16px);
 
@@ -71,19 +70,8 @@ void bluetooth_settings_tile_setup( void ) {
     bluettoth_setup_icon = setup_register( "bluetooth", &bluetooth_64px, enter_bluetooth_setup_event_cb );
     setup_hide_indicator( bluettoth_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_settings_style );
-    lv_obj_align( exit_btn, bluetooth_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_bluetooth_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( bluetooth_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
-    lv_label_set_text( exit_label, "bluetooth settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( bluetooth_settings_tile, "bluetooth settings", exit_bluetooth_setup_event_cb );
+    //lv_obj_align( header, bluetooth_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *bluetooth_enable_cont = lv_obj_create( bluetooth_settings_tile, NULL );
     lv_obj_set_size( bluetooth_enable_cont, lv_disp_get_hor_res( NULL ) , 32);

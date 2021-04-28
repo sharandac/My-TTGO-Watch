@@ -56,7 +56,6 @@ lv_obj_t *location_list = NULL;
 lv_obj_t *wifisync_onoff = NULL;
 lv_obj_t *clock_fmt_onoff = NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(time_32px);
 LV_IMG_DECLARE(time_64px);
 
@@ -222,19 +221,8 @@ void time_settings_tile_setup( void ) {
     icon_t *time_setup_icon = setup_register( "time", &time_64px, enter_time_setup_event_cb );
     setup_hide_indicator( time_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( time_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &time_settings_style );
-    lv_obj_align( exit_btn, time_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_time_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( time_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_label_set_text( exit_label, "time settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( time_settings_tile, "time settings", exit_time_setup_event_cb );
+    //lv_obj_align( header, time_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *wifisync_cont = lv_obj_create( time_settings_tile, NULL );
     lv_obj_set_size(wifisync_cont, lv_disp_get_hor_res( NULL ) , 40);

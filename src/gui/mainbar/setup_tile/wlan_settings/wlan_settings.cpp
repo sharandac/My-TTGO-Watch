@@ -45,8 +45,6 @@
 
 #include "quickglui/common/bluejsonrequest.h"
 
-LV_IMG_DECLARE(exit_32px);
-
 lv_obj_t *wifi_settings_tile=NULL;
 lv_style_t wifi_settings_style;
 lv_style_t wifi_list_style;
@@ -80,7 +78,6 @@ static void wifi_setup_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc )
 LV_IMG_DECLARE(lock_16px);
 LV_IMG_DECLARE(unlock_16px);
 LV_IMG_DECLARE(check_32px);
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(trash_32px);
 LV_IMG_DECLARE(wifi_64px);
 LV_IMG_DECLARE(setup_32px);
@@ -98,19 +95,8 @@ void wlan_settings_tile_setup( void ) {
     wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
     setup_hide_indicator( wifi_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( wifi_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &wifi_settings_style );
-    lv_obj_align( exit_btn, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_wifi_settings_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( wifi_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &wifi_settings_style );
-    lv_label_set_text( exit_label, "wlan");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan", exit_wifi_settings_event_cb );
+    //lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *setup_btn = lv_imgbtn_create( wifi_settings_tile, NULL);
     lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
@@ -216,19 +202,10 @@ void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     lv_style_copy( &wifi_password_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_password_tile, LV_OBJ_PART_MAIN, &wifi_password_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( wifi_password_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &wifi_password_style );
-    lv_obj_align( exit_btn, wifi_password_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_wifi_password_event_cb );
+    lv_obj_t *header = wf_add_settings_header( wifi_password_tile, "wlan setting", exit_wifi_password_event_cb );
+    //lv_obj_align( header, wifi_password_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     
-    wifi_password_name_label = lv_label_create( wifi_password_tile, NULL);
-    lv_obj_add_style( wifi_password_name_label, LV_OBJ_PART_MAIN, &wifi_password_style  );
-    lv_label_set_text( wifi_password_name_label, "wlan setting");
-    lv_obj_align( wifi_password_name_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    wifi_password_name_label = wf_get_settings_header_title(header);
 
     wifi_password_pass_textfield = lv_textarea_create( wifi_password_tile, NULL);
     lv_textarea_set_text( wifi_password_pass_textfield, "");
@@ -323,19 +300,8 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_style_copy( &wifi_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_setup_tile, LV_OBJ_PART_MAIN, &wifi_setup_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( wifi_setup_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &wifi_setup_style );
-    lv_obj_align( exit_btn, wifi_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_wifi_setup_event_cb );
-
-    lv_obj_t *exit_label = lv_label_create( wifi_setup_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &wifi_setup_style );
-    lv_label_set_text( exit_label, "wlan settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( wifi_setup_tile, "wlan settings", exit_wifi_setup_event_cb );
+    //lv_obj_align( header, wifi_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *wifi_autoon_onoff_cont = lv_obj_create( wifi_setup_tile, NULL );
     lv_obj_set_size(wifi_autoon_onoff_cont, lv_disp_get_hor_res( NULL ) , 30);
