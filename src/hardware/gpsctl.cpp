@@ -286,6 +286,9 @@ void gpsctl_on( void ) {
     gps_data.valid_speed = false;
     gps_data.valid_altitude = false;
     gps_data.valid_satellite = false;
+    gps_data.satellite_types.gps_satellites = 0;
+    gps_data.satellite_types.glonass_satellites = 0;
+    gps_data.satellite_types.baidou_satellites = 0;
     gpsctl_config.autoon = true;
     gpsctl_config.save();
     gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
@@ -303,6 +306,9 @@ void gpsctl_off( void ) {
     gps_data.valid_speed = false;
     gps_data.valid_altitude = false;
     gps_data.valid_satellite = false;
+    gps_data.satellite_types.gps_satellites = 0;
+    gps_data.satellite_types.glonass_satellites = 0;
+    gps_data.satellite_types.baidou_satellites = 0;
     gpsctl_config.autoon = false;
     gpsctl_config.save();
     gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
@@ -321,6 +327,9 @@ void gpsctl_autoon_on( void ) {
         gps_data.valid_speed = false;
         gps_data.valid_altitude = false;
         gps_data.valid_satellite = false;
+        gps_data.satellite_types.gps_satellites = 0;
+        gps_data.satellite_types.glonass_satellites = 0;
+        gps_data.satellite_types.baidou_satellites = 0;
         gpsctl_send_cb( GPSCTL_ENABLE, NULL );
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     }
@@ -330,6 +339,9 @@ void gpsctl_autoon_on( void ) {
         gps_data.valid_speed = false;
         gps_data.valid_altitude = false;
         gps_data.valid_satellite = false;
+        gps_data.satellite_types.gps_satellites = 0;
+        gps_data.satellite_types.glonass_satellites = 0;
+        gps_data.satellite_types.baidou_satellites = 0;
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
         gpsctl_send_cb( GPSCTL_DISABLE, NULL );
     }
@@ -345,6 +357,9 @@ void gpsctl_autoon_off( void ) {
     gps_data.valid_speed = false;
     gps_data.valid_altitude = false;
     gps_data.valid_satellite = false;
+    gps_data.satellite_types.gps_satellites = 0;
+    gps_data.satellite_types.glonass_satellites = 0;
+    gps_data.satellite_types.baidou_satellites = 0;
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     gpsctl_send_cb( GPSCTL_DISABLE, NULL );
 }
