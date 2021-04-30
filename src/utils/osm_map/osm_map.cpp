@@ -82,6 +82,7 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->osm_map_data.header.h = 256;
         osm_location->osm_map_data.data = NULL;
         osm_location->osm_map_data.data_size = 0;
+        osm_location->load_ahead = false;
         for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
             osm_location->uri_load_dsc[ i ] = NULL;
         }
@@ -327,6 +328,59 @@ osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
         lv_img_cache_invalidate_src( &osm_location->osm_map_data );
     }
     return( osm_location );
+}
+
+bool osm_map_load_tiles_ahead( osm_location_t *osm_location ) {
+    static uint32_t tilex = 0, tiley = 0;
+    static uint32_t load_ahead_progress = 0;
+    static bool load_ahead_in_progress = false;
+
+    if ( osm_location->load_ahead ) {
+        /**
+         * check if viewed tile has change
+         */
+        if ( tilex != osm_location->tilex || tiley != osm_location->tiley ) {
+            tilex = osm_location->tilex;
+            tiley = osm_location->tiley;
+            load_ahead_in_progress = true;
+            load_ahead_progress = 0;
+            OSM_MAP_LOG("load 4 tiles ahead");
+        }
+        /**
+         * if a load ahead need?
+         */
+        if ( load_ahead_in_progress ) {
+            log_i("load tile %d ahead", load_ahead_progress );
+            switch( load_ahead_progress ) {
+                case 0:
+                    osm_location->tiley = tiley;
+                    osm_location->tilex = tilex - 1;
+                    break;
+                case 1:
+                    osm_location->tiley = tiley;
+                    osm_location->tilex = tilex + 1;
+                    break;
+                case 2:
+                    osm_location->tilex = tilex;
+                    osm_location->tiley = tiley - 1;
+                    break;
+                case 3:
+                    osm_location->tilex = tilex;
+                    osm_location->tiley = tiley + 1;
+                    break;
+                default:
+                    load_ahead_in_progress = false;
+            }
+            if ( load_ahead_in_progress ) {
+                load_ahead_progress++;
+                osm_map_gen_url( osm_location );
+                osm_map_get_cache_tile_image( osm_location );
+            }
+            osm_location->tilex = tilex;
+            osm_location->tiley = tiley;
+        }
+    }
+    return( load_ahead_in_progress );
 }
 
 uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {

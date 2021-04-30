@@ -352,6 +352,12 @@ void osmmap_update_Task( void * pvParameters ) {
              */
             xEventGroupClearBits( osmmap_event_handle, OSM_APP_TILE_IMAGE_REQUEST );
         }
+        else {
+            /**
+             * check if load ahead need or finsh
+             */
+            osm_map_load_tiles_ahead( osmmap_location );
+        }
         /**
          * check if for a task exit request
          */

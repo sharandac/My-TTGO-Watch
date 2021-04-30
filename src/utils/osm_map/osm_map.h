@@ -39,6 +39,7 @@
         bool tile_server_source_update = false;         /** @brief indicates a tile server uri has change */
         char *tile_server = NULL;                       /** @brief the current tile server uri */
         char *current_tile_url = NULL;                  /** @brief the current tile image uri */
+        bool load_ahead = false;
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
     } osm_location_t;
@@ -139,4 +140,6 @@
      * @param osm_location  pointer to the osm_location structure
      */
     void osm_map_center_location( osm_location_t *osm_location );
+    bool osm_map_load_tiles_ahead( osm_location_t *osm_location );
+
 #endif // _OSM_HELPER_H

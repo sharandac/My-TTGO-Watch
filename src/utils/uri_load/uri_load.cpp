@@ -86,6 +86,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          * open http connection
          */
         HTTPClient download_client;                     /** @brief http download client */
+        download_client.setTimeout( 1500 );
         download_client.begin( uri_load_dsc->uri );
         int httpCode = download_client.GET();
         /**
