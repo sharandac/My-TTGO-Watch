@@ -22,6 +22,9 @@
 #ifndef _URI_LOAD__H
     #define _URI_LOAD__H
 
+    #define URI_LOAD_LOG        log_d
+    #define URI_LOAD_ERROR_LOG  log_e
+
     typedef struct {
         char *filename;         /** @brief pointer to the downloaded filename */
         char *uri;              /** @brief pointer to the downloaded filename */
@@ -33,7 +36,7 @@
     /**
      * @brief doenload a file from a webserver into ram
      * 
-     * @param   url requested url to get a file from
+     * @param   uri requested url to get a file from
      * 
      * @return  uri_load_dsc structure
      */
@@ -41,38 +44,38 @@
     /**
      * @brief delete the complete uri_load_dsc structure and free all allocated memory
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_all( uri_load_dsc_t *uri_load_dsc );
     /**
      * @brief delete the filename from the uri_load_dsc structure and free their allocated memory
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_name( uri_load_dsc_t *uri_load_dsc );
     /**
      * @brief delete the url from the uri_load_dsc structure and free their allocated memory
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_url( uri_load_dsc_t *uri_load_dsc );
     /**
      * @brief delete the data from the uri_load_dsc structure and free their allocated memory
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_data( uri_load_dsc_t *uri_load_dsc );
     /**
      * @brief delete the uri_load_dsc structure and leave data in allocated
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_without_data( uri_load_dsc_t *uri_load_dsc );
     /**
      * @brief delete only the allocated uri_load_sdc structure and leave the name/data memory allocated
      * for later use
      * 
-     * @param uri_load pointer to a uri_load_dsc structure
+     * @param uri_load_dsc pointer to a uri_load_dsc structure
      */
     void uri_load_free_dsc( uri_load_dsc_t *uri_load_dsc );
 

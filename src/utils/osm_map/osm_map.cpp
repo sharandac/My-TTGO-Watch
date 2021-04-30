@@ -33,14 +33,13 @@
  * @brief osm_map default tile image
  */
 LV_IMG_DECLARE(osm_no_data_256px);
-/**
- * @brief osm tile server list
- */
+
 uint32_t osm_map_long2tilex(double lon, uint32_t z);
 uint32_t osm_map_lat2tiley(double lat, uint32_t z);
 double osm_map_tilex2long(int x, uint32_t z);
 double osm_map_tiley2lat(int y, uint32_t z);
 osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location );
+uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location );
 void osm_map_gen_url( osm_location_t *osm_location );
 
 osm_location_t *osm_map_create_location_obj( void ) {
@@ -56,7 +55,11 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->lon = 0;                         
         osm_location->lat = 0;                         
         osm_location->tilex = 0;                     
-        osm_location->tiley = 0;                     
+        osm_location->tiley = 0;
+        osm_location->manual_nav = false;
+        osm_location->manual_nav_update = false;
+        osm_location->tilex_manual_nav = 0;                     
+        osm_location->tiley_manual_nav = 0;
         osm_location->tilex_left_top_edge = 0;         
         osm_location->tiley_left_top_edge = 0;         
         osm_location->tilex_right_bottom_edge = 0;     
@@ -66,7 +69,8 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->tilex_px_res = 0;                
         osm_location->tiley_px_res = 0;                
         osm_location->tilex_dest_px_res = 240;         
-        osm_location->tiley_dest_px_res = 240;         
+        osm_location->tiley_dest_px_res = 240;
+        osm_location->tilexy_pos_valid = false;
         osm_location->tilex_pos = 0;                 
         osm_location->tiley_pos = 0;    
         osm_location->tile_server_source_update = false;    
@@ -83,7 +87,7 @@ osm_location_t *osm_map_create_location_obj( void ) {
         }
     }
 
-    log_d("osm_location: alloc %d bytes at %p", sizeof( osm_location_t ), osm_location );
+    OSM_MAP_LOG("osm_location: alloc %d bytes at %p", sizeof( osm_location_t ), osm_location );
 
     return( osm_location );
 }
@@ -117,13 +121,32 @@ uint32_t osm_map_get_zoom( osm_location_t *osm_location ) {
     return( osm_location->zoom );
 }
 
-void osm_map_zoom_in( osm_location_t *osm_location ) {
-    if ( osm_location->zoom < 18 )
+bool osm_map_zoom_in( osm_location_t *osm_location ) {
+    bool retval = false;
+    
+    if ( osm_location->zoom < 18 ) {
         osm_location->zoom++;
+        if ( osm_location->manual_nav ) {
+            osm_location->tilex_manual_nav = osm_location->tilex_manual_nav * 2;
+            osm_location->tiley_manual_nav = osm_location->tiley_manual_nav * 2;
+            osm_location->manual_nav_update = true;
+        }
+        retval = true;
+    }
+    return( retval );
 }
-void osm_map_zoom_out( osm_location_t *osm_location ) {
-    if ( osm_location->zoom > 2 )
+bool osm_map_zoom_out( osm_location_t *osm_location ) {
+    bool retval = false;
+    if ( osm_location->zoom > 2 ) {
         osm_location->zoom--;
+        if ( osm_location->manual_nav ) {
+            osm_location->tilex_manual_nav = osm_location->tilex_manual_nav / 2;
+            osm_location->tiley_manual_nav = osm_location->tiley_manual_nav / 2;
+            osm_location->manual_nav_update = true;
+        }
+        retval = true;
+    }
+    return( retval );
 }
 
 void osm_map_set_zoom( osm_location_t *osm_location, uint32_t zoom ) {
@@ -143,25 +166,101 @@ lv_img_dsc_t *osm_map_get_no_data_image( void ) {
     return( (lv_img_dsc_t*)&osm_no_data_256px );
 }
 
+void osm_map_center_location( osm_location_t *osm_location ) {
+    osm_location->manual_nav = false;
+    osm_location->zoom = 16;
+}
+void osm_map_nav_direction( osm_location_t *osm_location, osm_map_nav_direction_t direction ) {
+    /**
+     * if we are not in manual nav, set current tile
+     */
+    if ( !osm_location->manual_nav ) {
+        osm_location->tiley_manual_nav = osm_location->tiley;
+        osm_location->tilex_manual_nav = osm_location->tilex;
+        osm_location->manual_nav = true;
+    }
+    /**
+     * move tilex/tilex
+     */
+    switch( direction ) {
+        case( north ):
+            OSM_MAP_LOG("move one tile north");
+            osm_location->tiley_manual_nav--;
+            osm_location->manual_nav_update = true;
+            break;
+        case( south ):
+            OSM_MAP_LOG("move one tile south");
+            osm_location->tiley_manual_nav++;
+            osm_location->manual_nav_update = true;
+            break;
+        case( west ):
+            OSM_MAP_LOG("move one tile west");
+            osm_location->tilex_manual_nav--;
+            osm_location->manual_nav_update = true;
+            break;
+        case( east ):
+            OSM_MAP_LOG("move one tile east");
+            osm_location->tilex_manual_nav++;
+            osm_location->manual_nav_update = true;
+            break;
+        case( zoom_northwest ):
+            OSM_MAP_LOG("zoom into northwest");
+            osm_map_zoom_in( osm_location );
+            break;
+        case( zoom_northeast ):
+            OSM_MAP_LOG("zoom into northeast");
+            if ( osm_map_zoom_in( osm_location ) ) {
+                osm_location->tilex_manual_nav++;
+            }
+            break;
+        case( zoom_southwest ):
+            OSM_MAP_LOG("zoom into southwest");
+            if ( osm_map_zoom_in( osm_location ) ) {
+                osm_location->tiley_manual_nav++;
+            }
+            break;
+        case( zoom_southeast ):
+            OSM_MAP_LOG("zoom into southeast");
+            if ( osm_map_zoom_in( osm_location ) ) {
+                osm_location->tilex_manual_nav++;
+                osm_location->tiley_manual_nav++;
+            }
+            break;
+    }
+
+    /**
+     * check for tile wraping
+     */
+    osm_location->tilex_manual_nav &= ( 1 << osm_location->zoom ) - 1;
+    osm_location->tiley_manual_nav &= ( 1 << osm_location->zoom ) - 1;
+}
+
 bool osm_map_update( osm_location_t *osm_location ) {
     bool tile_update = false;
     /**
-     * check if osm tile change
+     * check if the user set manual navigation
      */
-    if ( osm_location->tilex != osm_helper_long2tilex( osm_location->lon, osm_location->zoom ) ) {
-        osm_location->tilex = osm_helper_long2tilex( osm_location->lon, osm_location->zoom );
-        tile_update = true;
+    if ( !osm_location->manual_nav ) {
+        if ( osm_location->tilex != osm_helper_long2tilex( osm_location->lon, osm_location->zoom ) ) {
+            osm_location->tilex = osm_helper_long2tilex( osm_location->lon, osm_location->zoom );
+            tile_update = true;
+        }
+        if ( osm_location->tiley != osm_helper_lat2tiley( osm_location->lat, osm_location->zoom ) ) {
+            osm_location->tiley = osm_helper_lat2tiley( osm_location->lat, osm_location->zoom );
+            tile_update = true;
+        }
     }
-    if ( osm_location->tiley != osm_helper_lat2tiley( osm_location->lat, osm_location->zoom ) ) {
-        osm_location->tiley = osm_helper_lat2tiley( osm_location->lat, osm_location->zoom );
-        tile_update = true;
+    else {
+        osm_location->tiley = osm_location->tiley_manual_nav;
+        osm_location->tilex = osm_location->tilex_manual_nav;
     }
     /**
-     * if tile change, update tile image
+     * if tile, source or nav change -> update tile image
      */
-    if ( tile_update || osm_location->tile_server_source_update ) {
-        osm_location->tile_server_source_update = false;
+    if ( tile_update || osm_location->tile_server_source_update || osm_location->manual_nav_update ) {
         tile_update = true;
+        osm_location->tile_server_source_update = false;
+        osm_location->manual_nav_update = false;
         osm_location = osm_map_update_tile_image( osm_location );
     }
     /**
@@ -175,12 +274,23 @@ bool osm_map_update( osm_location_t *osm_location ) {
     osm_location->tilex_res = abs( osm_helper_tiley2lat( osm_location->tilex, osm_location->zoom ) - osm_helper_tiley2lat( osm_location->tilex + 1, osm_location->zoom ) );
     osm_location->tiley_px_res = osm_location->tiley_res / osm_location->tiley_dest_px_res;
     osm_location->tilex_px_res = osm_location->tilex_res / osm_location->tilex_dest_px_res;
-    osm_location->tiley_pos = abs( osm_location->tiley_left_top_edge - osm_location->lat ) / osm_location->tiley_px_res;
-    osm_location->tilex_pos = abs( osm_location->tilex_left_top_edge - osm_location->lon ) / osm_location->tilex_px_res;
-
-    log_d("left/top: %f / %f", osm_location->tiley_left_top_edge, osm_location->tilex_left_top_edge );
-    log_d("right/bottom: %f / %f", osm_location->tiley_right_bottom_edge, osm_location->tilex_right_bottom_edge );
-
+    OSM_MAP_LOG("left/top: %f / %f", osm_location->tiley_left_top_edge, osm_location->tilex_left_top_edge );
+    OSM_MAP_LOG("right/bottom: %f / %f", osm_location->tiley_right_bottom_edge, osm_location->tilex_right_bottom_edge );
+    OSM_MAP_LOG("tilex/tiley resolution in degree: %f° / %f°", osm_location->tilex_res, osm_location->tiley_res );
+    OSM_MAP_LOG("tilex/tiley pixel resultion in degree: %f° /%f°", osm_location->tilex_px_res, osm_location->tiley_px_res );
+    /**
+     * check if current lon/lat on tile
+     */
+    if ( osm_location->tiley == osm_helper_lat2tiley( osm_location->lat, osm_location->zoom ) && osm_location->tilex == osm_helper_long2tilex( osm_location->lon, osm_location->zoom ) ) {
+        OSM_MAP_LOG("current lon/lat is in view");
+        osm_location->tilexy_pos_valid = true;
+        osm_location->tiley_pos = abs( osm_location->tiley_left_top_edge - osm_location->lat ) / osm_location->tiley_px_res;
+        osm_location->tilex_pos = abs( osm_location->tilex_left_top_edge - osm_location->lon ) / osm_location->tilex_px_res;
+    }
+    else {
+        OSM_MAP_LOG("current lon/lat is not in view");
+        osm_location->tilexy_pos_valid = false;
+    }
     return( tile_update );
 }
 
@@ -248,7 +358,7 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
      * check for a cache hit
      */
     if ( tile != -1 ) {
-        log_i("url cache hit: %s", osm_location->uri_load_dsc[ tile ]->uri );
+        OSM_MAP_LOG("url cache hit: %s", osm_location->uri_load_dsc[ tile ]->uri );
         uri_load_dsc = osm_location->uri_load_dsc[ tile ];
         uri_load_dsc->timestamp = millis();
     }
@@ -256,7 +366,7 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
         /**
          * 1. check for a free tile
          */
-        log_d("url cache miss for %s", osm_location->current_tile_url );
+        OSM_MAP_LOG("url cache miss for %s", osm_location->current_tile_url );
         if ( free_tile == -1 ) {
             /**
              * search the oldest one
@@ -270,11 +380,11 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
             /**
              * delete the oldest one
              */
-            log_d("cache full, delete the oldest: %s", osm_location->uri_load_dsc[ free_tile ]->uri );
+            OSM_MAP_LOG("cache full, delete the oldest: %s", osm_location->uri_load_dsc[ free_tile ]->uri );
             uri_load_free_all( osm_location->uri_load_dsc[ free_tile ] );
             osm_location->uri_load_dsc[ free_tile ] = NULL;
         }
-        log_d("use tile cache %d", free_tile );
+        OSM_MAP_LOG("use tile cache %d", free_tile );
         osm_location->uri_load_dsc[ free_tile ] = uri_load_to_ram( (const char*)osm_location->current_tile_url );
         uri_load_dsc = osm_location->uri_load_dsc[ free_tile ];
         /**
@@ -286,7 +396,7 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
                 cachefile++;
             }
         }
-        log_i("cached files: %d, cachesize = %d bytes", cachefile, cachesize );
+        OSM_MAP_LOG("cached files: %d, cachesize = %d bytes", cachefile, cachesize );
     }
     return( uri_load_dsc );
 }
@@ -305,7 +415,7 @@ void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_ser
     osm_location->tile_server = (char *)MALLOC( strlen( tile_server ) + 1 );
     if ( osm_location->tile_server ) {
         strcpy( osm_location->tile_server, tile_server );
-        log_i("osm_location->tile_server: %s", osm_location->tile_server );
+        OSM_MAP_LOG("osm_location->tile_server: %s", osm_location->tile_server );
     }
     osm_location->tile_server_source_update = true;
 }
@@ -319,13 +429,13 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
      * is a tile server set?
      */
     if ( !osm_location->tile_server ) {
-        log_i("set default osm tile server");
+        OSM_MAP_LOG("set default osm tile server");
         osm_location->tile_server = (char*)MALLOC( sizeof( DEFAULT_OSM_TILE_SERVER ) );
         if ( !osm_location->tile_server ) {
-            log_e("osm_location->tile_server: alloc failed");
+            OSM_MAP_ERROR_LOG("osm_location->tile_server: alloc failed");
             while(1);
         }
-        log_d("osm_location->tile_server: alloc %d bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
+        OSM_MAP_LOG("osm_location->tile_server: alloc %d bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
         strcpy( osm_location->tile_server, DEFAULT_OSM_TILE_SERVER );
     }
     /**
@@ -334,10 +444,10 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
     if ( !osm_location->current_tile_url ) {
         osm_location->current_tile_url = (char *)MALLOC( MAX_CURRENT_TILE_URL_LEN );
         if ( !osm_location->current_tile_url ) {
-            log_e("osm_location->current_tile_url: alloc failed");
+            OSM_MAP_ERROR_LOG("osm_location->current_tile_url: alloc failed");
             while(1);
         }
-        log_d("osm_location->current_tile_url: alloc %d bytes at %p", MAX_CURRENT_TILE_URL_LEN, osm_location->current_tile_url );
+        OSM_MAP_LOG("osm_location->current_tile_url: alloc %d bytes at %p", MAX_CURRENT_TILE_URL_LEN, osm_location->current_tile_url );
         *osm_location->current_tile_url = '\0';
     }
     /**
@@ -377,12 +487,11 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
         tile_server_p++;
         *current_tile_url_p = '\0';
         if ( strlen( osm_location->current_tile_url ) >= MAX_CURRENT_TILE_URL_LEN ) {
-            log_e("osm_location->current_tile_url: MAX_CURRENT_TILE_URL_LEN reached");
+            OSM_MAP_ERROR_LOG("osm_location->current_tile_url: MAX_CURRENT_TILE_URL_LEN reached");
             *osm_location->current_tile_url = '\0';
             break;
         }
         log_d("current url: %s", osm_location->current_tile_url );
     }
-    log_d("tile server: %s", osm_location->tile_server );
-    log_d("current url: %s", osm_location->current_tile_url );
+    OSM_MAP_LOG("tile server: %s -> %s", osm_location->tile_server, osm_location->current_tile_url );
 }

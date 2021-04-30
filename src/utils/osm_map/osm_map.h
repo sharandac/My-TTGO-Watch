@@ -3,8 +3,11 @@
 
     #include "utils/uri_load/uri_load.h"
 
+    #define OSM_MAP_LOG                 log_d
+    #define OSM_MAP_ERROR_LOG           log_e
+
     #define MAX_CURRENT_TILE_URL_LEN    256
-    #define DEFAULT_OSM_CACHE_SIZE      64
+    #define DEFAULT_OSM_CACHE_SIZE      32
     #define DEFAULT_OSM_TILE_SERVER     "http://a.tile.openstreetmap.org/$z/$x/$y.png"   /** @brief osm tile map server */
 
     /**
@@ -16,6 +19,10 @@
         double lat = 0;                                 /** @brief lat for update calculation*/
         uint32_t tilex = 0;                             /** @brief corresponding osm tilex from long */
         uint32_t tiley = 0;                             /** @brief corresponding osm tilex from lat */
+        bool manual_nav = false;                        /** @brief flag to inform if we are in manual nav mode */
+        bool manual_nav_update = false;                 /** @brief manual nav update flag */
+        uint32_t tilex_manual_nav = 0;                  /** @brief current osm tilex from manual nav */
+        uint32_t tiley_manual_nav = 0;                  /** @brief current osm tiley from manual nav */
         double tilex_left_top_edge = 0;                 /** @brief max lon position left */
         double tiley_left_top_edge = 0;                 /** @brief max lat position top */
         double tilex_right_bottom_edge = 0;             /** @brief max lon position right */
@@ -26,14 +33,29 @@
         double tiley_px_res = 0;                        /** @brief lat range in degree per px */
         double tilex_dest_px_res = 256;                 /** @brief tile x resolution in px */
         double tiley_dest_px_res = 256;                 /** @brief tile y resolution in px */
+        bool tilexy_pos_valid = false;                  /** @brief indicates if the current lon/lat in view of the current tile image */
         uint16_t tilex_pos = 0;                         /** @brief x location on image in px */
         uint16_t tiley_pos = 0;                         /** @brief y location on image in px */
-        bool tile_server_source_update = false;
-        char *tile_server = NULL;
-        char *current_tile_url = NULL;
+        bool tile_server_source_update = false;         /** @brief indicates a tile server uri has change */
+        char *tile_server = NULL;                       /** @brief the current tile server uri */
+        char *current_tile_url = NULL;                  /** @brief the current tile image uri */
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
     } osm_location_t;
+
+    /**
+     * @brief the possible move direction in manual nav
+     */
+    typedef enum {
+        north = 0,
+        south,
+        west,
+        east,
+        zoom_northwest,
+        zoom_northeast,
+        zoom_southwest,
+        zoom_southeast
+    } osm_map_nav_direction_t;
 
     /**
      * @brief create an osm_location object
@@ -83,13 +105,13 @@
      * 
      * @param osm_location  pointer to the osm_location structure
      */
-    void osm_map_zoom_in( osm_location_t *osm_location );
+    bool osm_map_zoom_in( osm_location_t *osm_location );
     /**
      * @brief decrease the zoom level by one
      * 
      * @param osm_location  pointer to the osm_location structure
      */
-    void osm_map_zoom_out( osm_location_t *osm_location );
+    bool osm_map_zoom_out( osm_location_t *osm_location );
     /**
      * @brief update all infomations and the tile image if required
      * 
@@ -98,6 +120,23 @@
      * @return true if the tile image was updated
      */
     bool osm_map_update( osm_location_t *osm_location );
-    uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location );
+    /**
+     * @brief set a custom tile server
+     * 
+     * @param tile_server pointer t a tile server uri
+     */ 
     void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_server );
+    /**
+     * @brief navigate the current tile view one step in a direction
+     * 
+     * @param osm_location  pointer to the osm_location structure
+     * @param direction direction to move
+     */
+    void osm_map_nav_direction( osm_location_t *osm_location, osm_map_nav_direction_t direction );
+    /**
+     * @brief center the current view to the current lon/lat location
+     * 
+     * @param osm_location  pointer to the osm_location structure
+     */
+    void osm_map_center_location( osm_location_t *osm_location );
 #endif // _OSM_HELPER_H

@@ -24,6 +24,9 @@
 
     #include <TTGO.h>
 
+    #define OSMMAP_APP_LOG          log_d
+    #define OSMMAP_APP_ERROR_LOG    log_e
+
     void osmmap_app_setup( void );
     void osmmap_app_hide_app_icon_info( bool show );
     void osmmap_app_hide_widget_icon_info( bool show );

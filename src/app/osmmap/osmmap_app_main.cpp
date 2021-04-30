@@ -56,7 +56,10 @@ lv_obj_t *layers_list = NULL;                       /** @brief osm style list bo
 lv_obj_t *north_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *south_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *west_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *center_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *zoom_northwest_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *zoom_northeast_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *zoom_southwest_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *zoom_southeast_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *east_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *exit_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *zoom_in_btn = NULL;                       /** @brief osm zoom in icon/button obj */
@@ -89,10 +92,7 @@ LV_FONT_DECLARE(Ubuntu_32px);
 void osmmap_main_tile_update_task( lv_task_t * task );
 void osmmap_update_request( void );
 void osmmap_update_Task( void * pvParameters );
-static void nav_north_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
-static void nav_south_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
-static void nav_west_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
-static void nav_east_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void nav_direction_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_out_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -179,43 +179,48 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
 
     north_btn = lv_btn_create( osmmap_cont, NULL );
     lv_obj_set_width( north_btn, 80 );
-    lv_obj_set_height( north_btn, 80 );
+    lv_obj_set_height( north_btn, 48 );
     lv_obj_add_protect( north_btn, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( north_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
-    lv_obj_align( north_btn, osmmap_cont, LV_ALIGN_IN_TOP_MID, 8, 0 );
-    lv_obj_set_event_cb( north_btn, nav_north_osmmap_app_main_event_cb );
+    lv_obj_align( north_btn, osmmap_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_set_event_cb( north_btn, nav_direction_osmmap_app_main_event_cb );
 
-    south_btn = lv_btn_create( osmmap_cont, NULL );
-    lv_obj_set_width( south_btn, 80 );
-    lv_obj_set_height( south_btn, 80 );
-    lv_obj_add_protect( south_btn, LV_PROTECT_CLICK_FOCUS );
-    lv_obj_add_style( south_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
-    lv_obj_align( south_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_MID, 8, 0 );
-    lv_obj_set_event_cb( south_btn, nav_south_osmmap_app_main_event_cb );
+    south_btn = lv_btn_create( osmmap_cont, north_btn );
+    lv_obj_align( south_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_set_event_cb( south_btn, nav_direction_osmmap_app_main_event_cb );
 
     west_btn = lv_btn_create( osmmap_cont, NULL );
-    lv_obj_set_width( west_btn, 80 );
+    lv_obj_set_width( west_btn, 48 );
     lv_obj_set_height( west_btn, 80 );
     lv_obj_add_protect( west_btn, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( west_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
-    lv_obj_align( west_btn, osmmap_cont, LV_ALIGN_IN_LEFT_MID, 8, 0 );
-    lv_obj_set_event_cb( west_btn, nav_west_osmmap_app_main_event_cb );
+    lv_obj_align( west_btn, osmmap_cont, LV_ALIGN_IN_LEFT_MID, 0, 0 );
+    lv_obj_set_event_cb( west_btn, nav_direction_osmmap_app_main_event_cb );
 
-    east_btn = lv_btn_create( osmmap_cont, NULL );
-    lv_obj_set_width( east_btn, 80 );
-    lv_obj_set_height( east_btn, 80 );
-    lv_obj_add_protect( east_btn, LV_PROTECT_CLICK_FOCUS );
-    lv_obj_add_style( east_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
-    lv_obj_align( east_btn, osmmap_cont, LV_ALIGN_IN_RIGHT_MID, 8, 0 );
-    lv_obj_set_event_cb( east_btn, nav_east_osmmap_app_main_event_cb );
+    east_btn = lv_btn_create( osmmap_cont, west_btn );
+    lv_obj_align( east_btn, osmmap_cont, LV_ALIGN_IN_RIGHT_MID, 0, 0 );
+    lv_obj_set_event_cb( east_btn, nav_direction_osmmap_app_main_event_cb );
 
-    center_btn = lv_btn_create( osmmap_cont, NULL );
-    lv_obj_set_width( center_btn, 80 );
-    lv_obj_set_height( center_btn, 80 );
-    lv_obj_add_protect( center_btn, LV_PROTECT_CLICK_FOCUS );
-    lv_obj_add_style( center_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
-    lv_obj_align( center_btn, osmmap_cont, LV_ALIGN_CENTER, 0, 0 );
-    lv_obj_set_event_cb( center_btn, nav_center_osmmap_app_main_event_cb );
+    zoom_northwest_btn = lv_btn_create( osmmap_cont, NULL );
+    lv_obj_set_width( zoom_northwest_btn, 72 );
+    lv_obj_set_height( zoom_northwest_btn, 72 );
+    lv_obj_add_protect( zoom_northwest_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_imgbtn_set_checkable( zoom_northwest_btn, true );
+    lv_obj_add_style( zoom_northwest_btn, LV_BTN_PART_MAIN, &osmmap_app_nav_style );
+    lv_obj_align( zoom_northwest_btn, osmmap_cont, LV_ALIGN_CENTER, -36, -36 );
+    lv_obj_set_event_cb( zoom_northwest_btn, nav_center_osmmap_app_main_event_cb );
+
+    zoom_northeast_btn = lv_btn_create( osmmap_cont, zoom_northwest_btn );
+    lv_obj_align( zoom_northeast_btn, osmmap_cont, LV_ALIGN_CENTER, 36, -36 );
+    lv_obj_set_event_cb( zoom_northeast_btn, nav_center_osmmap_app_main_event_cb );
+
+    zoom_southwest_btn = lv_btn_create( osmmap_cont, zoom_northwest_btn );
+    lv_obj_align( zoom_southwest_btn, osmmap_cont, LV_ALIGN_CENTER, -36, 36 );
+    lv_obj_set_event_cb( zoom_southwest_btn, nav_center_osmmap_app_main_event_cb );
+
+    zoom_southeast_btn = lv_btn_create( osmmap_cont, zoom_northwest_btn );
+    lv_obj_align( zoom_southeast_btn, osmmap_cont, LV_ALIGN_CENTER, 36, 36 );
+    lv_obj_set_event_cb( zoom_southeast_btn, nav_center_osmmap_app_main_event_cb );
 
     layers_list = lv_list_create( osmmap_cont, NULL );
     lv_obj_set_size( layers_list, 160, 180 );
@@ -246,15 +251,28 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
             lv_obj_set_hidden( exit_btn, true );
             lv_obj_set_hidden( zoom_in_btn, true );
             lv_obj_set_hidden( zoom_out_btn, true );
-//            statusbar_hide( true );
-//            statusbar_expand( false );
+            lv_obj_set_hidden( zoom_northwest_btn, true );
+            lv_obj_set_hidden( zoom_northeast_btn, true );
+            lv_obj_set_hidden( zoom_southwest_btn, true );
+            lv_obj_set_hidden( zoom_southeast_btn, true );
+            lv_obj_set_hidden( north_btn, true );
+            lv_obj_set_hidden( south_btn, true );
+            lv_obj_set_hidden( west_btn, true );
+            lv_obj_set_hidden( east_btn, true );
         }
         else {
             lv_obj_set_hidden( layers_btn, false );
             lv_obj_set_hidden( exit_btn, false );
             lv_obj_set_hidden( zoom_in_btn, false );
             lv_obj_set_hidden( zoom_out_btn, false );
-//            statusbar_hide( false );
+            lv_obj_set_hidden( zoom_northwest_btn, false );
+            lv_obj_set_hidden( zoom_northeast_btn, false );
+            lv_obj_set_hidden( zoom_southwest_btn, false );
+            lv_obj_set_hidden( zoom_southeast_btn, false );
+            lv_obj_set_hidden( north_btn, false );
+            lv_obj_set_hidden( south_btn, false );
+            lv_obj_set_hidden( west_btn, false );
+            lv_obj_set_hidden( east_btn, false );
         }
     }
 }
@@ -304,7 +322,7 @@ void osmmap_update_request( void ) {
 }
 
 void osmmap_update_Task( void * pvParameters ) {
-    log_i("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    OSMMAP_APP_LOG("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     while( 1 ) {
         /**
          * check if a tile image update is requested
@@ -320,10 +338,15 @@ void osmmap_update_Task( void * pvParameters ) {
                 lv_obj_align( osmmap_app_tile_img, lv_obj_get_parent( osmmap_app_tile_img ), LV_ALIGN_CENTER, 0 , 0 );
             }
             /**
-             * update postion point on the tile image
+             * update postion point on the tile image when is valid
              */
-            lv_obj_align( osmmap_app_pos_img, lv_obj_get_parent( osmmap_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osmmap_location->tilex_pos - 8 , osmmap_location->tiley_pos - 8 );
-            lv_obj_set_hidden( osmmap_app_pos_img, false );
+            if ( osmmap_location->tilexy_pos_valid ) {
+                lv_obj_align( osmmap_app_pos_img, lv_obj_get_parent( osmmap_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osmmap_location->tilex_pos - 8 , osmmap_location->tiley_pos - 8 );
+                lv_obj_set_hidden( osmmap_app_pos_img, false );
+            }
+            else {
+                lv_obj_set_hidden( osmmap_app_pos_img, true );
+            }
             /**
              * clear update request flag
              */
@@ -341,7 +364,7 @@ void osmmap_update_Task( void * pvParameters ) {
          */
         vTaskDelay( 125 );
     }
-    log_i("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    OSMMAP_APP_LOG("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );    
 }
 
@@ -356,43 +379,81 @@ static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
-
-static void nav_north_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void nav_direction_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            log_i("nav north");
+        /**
+         * long press event for center
+         */
+        case( LV_EVENT_LONG_PRESSED ):
+            OSMMAP_APP_LOG("center map to pos");
+            osm_map_center_location( osmmap_location );
+            osmmap_update_request();
             break;
-    }
-}
-
-static void nav_south_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            log_i("nav south");
-            break;
-    }
-}
-
-static void nav_west_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            log_i("nav west");
-            break;
-    }
-}
-
-static void nav_east_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            log_i("nav east");
+        /**
+         * short press event to move
+         */   
+        case( LV_EVENT_SHORT_CLICKED ):
+            if ( obj == north_btn ) {
+                OSMMAP_APP_LOG("nav north direction");
+                osm_map_nav_direction( osmmap_location, north );
+            }
+            else if ( obj == south_btn ) {
+                OSMMAP_APP_LOG("nav south direction");
+                osm_map_nav_direction( osmmap_location, south );
+            }
+            else if ( obj == west_btn ) {
+                OSMMAP_APP_LOG("nav west direction");
+                osm_map_nav_direction( osmmap_location, west );
+            }
+            else if ( obj == east_btn ) {
+                OSMMAP_APP_LOG("nav east direction");
+                osm_map_nav_direction( osmmap_location, east );
+            }
+            else {
+                OSMMAP_APP_LOG("direction source unknown");
+            }
+            if ( osmmap_app_active )
+                osmmap_update_request();
             break;
     }
 }
 
 static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
+        /**
+         * long press event for center
+         */
         case( LV_EVENT_LONG_PRESSED ):
-            log_i("nav center");
+            OSMMAP_APP_LOG("center map to pos");
+            osm_map_center_location( osmmap_location );
+            osmmap_update_request();
+            break;
+        /**
+         * short press event to zoom in
+         */
+        case( LV_EVENT_SHORT_CLICKED ):
+            if ( obj == zoom_northwest_btn ) {
+                OSMMAP_APP_LOG("nav northwest center");
+                osm_map_nav_direction( osmmap_location, zoom_northwest );
+            }
+            else if ( obj == zoom_northeast_btn ) {
+                OSMMAP_APP_LOG("nav northeast center");
+                osm_map_nav_direction( osmmap_location, zoom_northeast );
+            }
+            else if ( obj == zoom_southwest_btn ) {
+                OSMMAP_APP_LOG("nav southwest center");
+                osm_map_nav_direction( osmmap_location, zoom_southwest );
+            }
+            else if ( obj == zoom_southeast_btn ) {
+                OSMMAP_APP_LOG("nav southeast center");
+                osm_map_nav_direction( osmmap_location, zoom_southeast );
+            }
+            else {
+                OSMMAP_APP_LOG("zoom source unknown");
+                osm_map_nav_direction( osmmap_location, east );
+            }
+            if ( osmmap_app_active )
+                osmmap_update_request();
             break;
     }
 }
@@ -443,11 +504,11 @@ static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
             DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
 
             if ( error ) {
-                log_e("osm server list deserializeJson() failed: %s", error.c_str() );
+                OSMMAP_APP_ERROR_LOG("osm server list deserializeJson() failed: %s", error.c_str() );
             }
             else {
                 const char *tile_server = doc[ lv_list_get_btn_text( obj ) ];
-                log_i("new tile server url: %s", tile_server );
+                OSMMAP_APP_LOG("new tile server url: %s", tile_server );
                 osm_map_set_tile_server( osmmap_location, tile_server );
                 osmmap_update_request();
             }
@@ -465,12 +526,12 @@ void osmmap_add_tile_server_list( lv_obj_t *layers_list ) {
     DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
 
     if ( error ) {
-        log_e("osm server list deserializeJson() failed: %s", error.c_str() );
+        OSMMAP_APP_ERROR_LOG("osm server list deserializeJson() failed: %s", error.c_str() );
     }
     else {
         JsonObject obj = doc.as<JsonObject>();
         for ( JsonPair p : obj ) {
-            log_i("server: %s", p.key().c_str() );
+            OSMMAP_APP_LOG("server: %s", p.key().c_str() );
             list_btn = lv_list_add_btn( layers_list, NULL, p.key().c_str() );
             lv_obj_set_event_cb( list_btn, osmmap_tile_server_event_cb );
         }        
@@ -516,7 +577,7 @@ void osmmap_activate_cb( void ) {
 
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
-    log_i("osm layer list size: %d", strlen( (const char*)osm_server_json_start ) );
+    OSMMAP_APP_LOG("osm layer list size: %d", strlen( (const char*)osm_server_json_start ) );
 }
 
 void osmmap_hibernate_cb( void ) {

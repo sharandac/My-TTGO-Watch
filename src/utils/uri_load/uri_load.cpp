@@ -40,7 +40,7 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
      * 
      */
     if ( uri_load_dsc ) {
-        log_d("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+        URI_LOAD_LOG("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
         /**
          * set download timestamp
          */
@@ -57,21 +57,21 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
          * check for uri file source
          */
         if ( strstr( uri, "http://" ) || strstr( uri, "https://" ) ) {
-            log_d("http/s source");
+            URI_LOAD_LOG("http/s source");
             uri_load_dsc = uri_load_http_to_ram( uri_load_dsc );
         }
         else if ( strstr( uri, "file://" ) ) {
-            log_d("local files source");
+            URI_LOAD_LOG("local files source");
             uri_load_dsc = uri_load_file_to_ram( uri_load_dsc );
         }
         else {
-            log_e("uri not supported");
+            URI_LOAD_ERROR_LOG("uri not supported");
             uri_load_free_all( uri_load_dsc );
             uri_load_dsc = NULL;
         }
     }
     else {
-        log_e("uri_load_dsc: alloc failed");
+        URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
     return( uri_load_dsc );
 }
@@ -81,7 +81,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
      * check if alloc was failed
      */
     if ( uri_load_dsc ) {
-        log_i("load file from: %s", uri_load_dsc->uri );
+        URI_LOAD_LOG("load file from: %s", uri_load_dsc->uri );
         /**
          * open http connection
          */
@@ -97,7 +97,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
              */
             uri_load_dsc->size = download_client.getSize();
             uri_load_dsc->data = (uint8_t*)MALLOC( uri_load_dsc->size );
-            log_d("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
+            URI_LOAD_LOG("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
             /**
              * check if alloc success
              */
@@ -124,21 +124,21 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                     }
                 }
                 if ( bytes_left != 0 ) {
-                    log_e("download failed");
+                    URI_LOAD_ERROR_LOG("download failed");
                     download_client.end();
                     uri_load_free_all( uri_load_dsc );
                     return( NULL );
                 }
             }
             else {
-                log_e("data alloc failed");
+                URI_LOAD_ERROR_LOG("data alloc failed");
                 download_client.end();
                 uri_load_free_all( uri_load_dsc );
                 return( NULL );
             }
         }
         else {
-            log_e("http connection abort");
+            URI_LOAD_ERROR_LOG("http connection abort");
             download_client.end();
             uri_load_free_all( uri_load_dsc );
             return( NULL );
@@ -149,7 +149,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         download_client.end();
     }
     else {
-        log_e("uri_load_dsc: alloc failed");
+        URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
     return( uri_load_dsc );
 }
@@ -159,17 +159,17 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc ) {
      * check if alloc was failed
      */
     if ( uri_load_dsc ) {
-        log_i("load file from: %s", uri_load_dsc->uri );
+        URI_LOAD_LOG("load file from: %s", uri_load_dsc->uri );
         /**
          * try to open file
          */
         const char *filepath = strstr( uri_load_dsc->uri, "://" ) + 3;
-        log_d("open file from %s", filepath );
+        URI_LOAD_LOG("open file from %s", filepath );
         FILE* file;
         file = fopen( filepath, "rb" );
 
         if ( file ) {
-            log_i("file open success");
+            URI_LOAD_LOG("file open success");
             /**
              * get file len
              */
@@ -185,20 +185,20 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 uri_load_dsc->timestamp = millis();
             }
             else {
-                log_e("uri_load_dsc->data: alloc failed");
+                URI_LOAD_ERROR_LOG("uri_load_dsc->data: alloc failed");
                 uri_load_free_all( uri_load_dsc );
                 uri_load_dsc = NULL;
             }
         }
         else {
-            log_e("file open failed");
+            URI_LOAD_ERROR_LOG("file open failed");
             uri_load_free_all( uri_load_dsc );
             uri_load_dsc = NULL;
         }
         fclose( file );
     }
     else {
-        log_e("uri_load_dsc: alloc failed");
+        URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
     return( uri_load_dsc );
 }
@@ -218,75 +218,75 @@ uri_load_dsc_t *uri_load_create_dsc( void ) {
     return( uri_load_dsc );
 }
 
-void uri_load_free_all( uri_load_dsc_t *uri_load ) {
-    if ( uri_load ) {
+void uri_load_free_all( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc ) {
         /**
          * free name momory
          */
-        uri_load_free_name( uri_load );
+        uri_load_free_name( uri_load_dsc );
         /**
          * free url momory
          */
-        uri_load_free_url( uri_load );
+        uri_load_free_url( uri_load_dsc );
         /**
          * free data momory
          */
-        uri_load_free_data( uri_load );
+        uri_load_free_data( uri_load_dsc );
         /**
          * free uri_load_dsc memory
          */
-        uri_load_free_dsc( uri_load );
+        uri_load_free_dsc( uri_load_dsc );
     }
 }
 
-void uri_load_free_name( uri_load_dsc_t *uri_load ) {
-    if ( uri_load->filename ) {
-        log_d("free: %p", uri_load->filename );
-        free( uri_load->filename );
-        uri_load->filename = NULL;
+void uri_load_free_name( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc->filename ) {
+        URI_LOAD_LOG("free uri_load->filename: %p", uri_load_dsc->filename );
+        free( uri_load_dsc->filename );
+        uri_load_dsc->filename = NULL;
     }
 }
 
-void uri_load_free_url( uri_load_dsc_t *uri_load ) {
-    if ( uri_load->uri ) {
-        log_d("free: %p", uri_load->url );
-        free( uri_load->uri );
-        uri_load->uri = NULL;
+void uri_load_free_url( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc->uri ) {
+        URI_LOAD_LOG("free uri_load->uri: %p", uri_load_dsc->uri );
+        free( uri_load_dsc->uri );
+        uri_load_dsc->uri = NULL;
     }
 }
 
-void uri_load_free_data( uri_load_dsc_t *uri_load ) {
-    if ( uri_load->data ) {
-        log_d("free: %p", uri_load->data );
-        free( uri_load->data );
-        uri_load->data = NULL;
+void uri_load_free_data( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc->data ) {
+        URI_LOAD_LOG("free uri_load->data: %p", uri_load_dsc->data );
+        free( uri_load_dsc->data );
+        uri_load_dsc->data = NULL;
     }
 }
 
-void uri_load_free_dsc( uri_load_dsc_t *uri_load ) {
-    if ( uri_load ) {
+void uri_load_free_dsc( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc ) {
         /**
          * free uri_load_dsc memory
          */
-        log_d("free: %p", uri_load );
-        free( uri_load );
+        URI_LOAD_LOG("free: %p", uri_load_dsc );
+        free( uri_load_dsc );
     }
 }
 
-void uri_load_free_without_data( uri_load_dsc_t *uri_load ) {
-    if ( uri_load ) {
+void uri_load_free_without_data( uri_load_dsc_t *uri_load_dsc ) {
+    if ( uri_load_dsc ) {
         /**
          * free name momory
          */
-        uri_load_free_name( uri_load );
+        uri_load_free_name( uri_load_dsc );
         /**
          * free url momory
          */
-        uri_load_free_url( uri_load );
+        uri_load_free_url( uri_load_dsc );
         /**
          * free uri_load_dsc memory
          */
-        uri_load_free_dsc( uri_load );
+        uri_load_free_dsc( uri_load_dsc );
     }
 }
 
@@ -318,11 +318,11 @@ void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *u
                 /**
                  * copy filename into alloc mamory
                  */
-                log_d("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+                URI_LOAD_LOG("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
                 strncpy( uri_load_dsc->filename, filename_from_uri, strlen( filename_from_uri ) + 2 );
             }
             else {
-                log_e("uri_load_dsc->filename: alloc failed");
+                URI_LOAD_ERROR_LOG("uri_load_dsc->filename: alloc failed");
             }
         }
         else if ( strstr( uri, "file://" ) ) {
@@ -335,11 +335,11 @@ void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *u
                 /**
                  * copy filename into alloc mamory
                  */
-                log_d("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+                URI_LOAD_LOG("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
                 strncpy( uri_load_dsc->filename, filename_from_uri, strlen( filename_from_uri ) + 2 );
             }
             else {
-                log_e("uri_load_dsc->filename: alloc failed");
+                URI_LOAD_ERROR_LOG("uri_load_dsc->filename: alloc failed");
             }
         }
     }
@@ -358,11 +358,11 @@ void uri_load_set_url_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri ) 
             /**
              * copy url into alloc mamory
              */
-            log_d("uri_load_dsc->uri: alloc %d bytes at %p", strlen( uri ), uri_load_dsc->uri );
+            URI_LOAD_LOG("uri_load_dsc->uri: alloc %d bytes at %p", strlen( uri ), uri_load_dsc->uri );
             strncpy( uri_load_dsc->uri, uri, strlen( uri )  + 2 );
         }
         else {
-            log_e("uri_load->uri: alloc failed");
+            URI_LOAD_ERROR_LOG("uri_load->uri: alloc failed");
         }
     }
 }
