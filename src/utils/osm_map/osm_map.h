@@ -39,7 +39,7 @@
         bool tile_server_source_update = false;         /** @brief indicates a tile server uri has change */
         char *tile_server = NULL;                       /** @brief the current tile server uri */
         char *current_tile_url = NULL;                  /** @brief the current tile image uri */
-        bool load_ahead = false;
+        bool load_ahead = false;                        /** @brief enable load ahead feature */
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
     } osm_location_t;

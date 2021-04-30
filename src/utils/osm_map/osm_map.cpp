@@ -350,7 +350,7 @@ bool osm_map_load_tiles_ahead( osm_location_t *osm_location ) {
          * if a load ahead need?
          */
         if ( load_ahead_in_progress ) {
-            log_i("load tile %d ahead", load_ahead_progress );
+            OSM_MAP_LOG("load tile %d ahead", load_ahead_progress );
             switch( load_ahead_progress ) {
                 case 0:
                     osm_location->tiley = tiley;

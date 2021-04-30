@@ -280,23 +280,19 @@ static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             if ( !strcmp( lv_list_get_btn_text( obj ), "OSM maps") ) {
-                log_i("clicked: %s", lv_list_get_btn_text( obj ) );
                 lv_obj_set_hidden( sub_menu_setting, true );
                 lv_obj_set_hidden( sub_menu_layers, false );
 
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "load ahead" ) ) {
-                log_i("clicked: %s", lv_list_get_btn_text( obj ) );
                 osmmap_config.load_ahead = !osmmap_config.load_ahead;
                 osmmap_location->load_ahead = osmmap_config.load_ahead;
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart gps" ) ) {
-                log_i("clicked: %s", lv_list_get_btn_text( obj ) );
                 osmmap_config.gps_autoon = !osmmap_config.gps_autoon;
                 gpsctl_set_autoon( osmmap_config.gps_autoon );
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart wifi" ) ) {
-                log_i("clicked: %s", lv_list_get_btn_text( obj ) );
                 osmmap_config.wifi_autoon = !osmmap_config.wifi_autoon;
                 wifictl_set_autoon( osmmap_config.load_ahead );
             }
