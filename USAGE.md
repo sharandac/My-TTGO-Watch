@@ -26,10 +26,6 @@ A subset of settings can be accessed via a swipe from the top of the screen.
 
 Once a setting is selected, you can leave the form with the exit button.
 
-## Battery
-
-![screenshot](images/screen9.png)
-
 ## Display
 
 Set color, background, touch feedback with vibrations...
@@ -68,11 +64,16 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Format
 * Reboot
 * Poweroff
+* GPS injection
 
 ## Sound 
 
 * Enable sound
 * Set volume
+
+# GPS
+
+![screenshot](images/screen11.png)
 
 # Applications
 
@@ -104,6 +105,13 @@ You can also have the next alarm displayed on the main face.
 ## ir-remote
 
 For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
+
+## OSMmap
+
+![screenshot](images/screen9.png)
+![navigation](images/osmmap_navigation.png)
+
+A long press in the middle centers the map to the current gps position.
 
 ## OSMAnd
 
@@ -141,7 +149,7 @@ Some improvements might come in the future.
 
 # Updates
 
-![screenshot](images/screen11.png)
+It is possible to update over the air.
 
 # FAQ
 
