@@ -83,6 +83,8 @@ osm_location_t *osm_map_create_location_obj( void ) {
         osm_location->osm_map_data.data = NULL;
         osm_location->osm_map_data.data_size = 0;
         osm_location->load_ahead = false;
+        osm_location->cache_size = 0;
+        osm_location->cached_fies = 0;
         for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
             osm_location->uri_load_dsc[ i ] = NULL;
         }
@@ -114,17 +116,37 @@ double osm_helper_tiley2lat(uint32_t y, uint32_t z) {
 }
 
 void osm_map_set_lon_lat( osm_location_t *osm_location, double lon, double lat ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
+    
     osm_location->lat = lat;
     osm_location->lon = lon;
 }
 
 uint32_t osm_map_get_zoom( osm_location_t *osm_location ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( 4 );
+    }
+    
     return( osm_location->zoom );
 }
 
 bool osm_map_zoom_in( osm_location_t *osm_location ) {
     bool retval = false;
-    
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( retval );
+    }
+
     if ( osm_location->zoom < 18 ) {
         osm_location->zoom++;
         if ( osm_location->manual_nav ) {
@@ -138,6 +160,13 @@ bool osm_map_zoom_in( osm_location_t *osm_location ) {
 }
 bool osm_map_zoom_out( osm_location_t *osm_location ) {
     bool retval = false;
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( retval );
+    }
+
     if ( osm_location->zoom > 2 ) {
         osm_location->zoom--;
         if ( osm_location->manual_nav ) {
@@ -151,10 +180,23 @@ bool osm_map_zoom_out( osm_location_t *osm_location ) {
 }
 
 void osm_map_set_zoom( osm_location_t *osm_location, uint32_t zoom ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
     osm_location->zoom = zoom;
 }
 
 lv_img_dsc_t *osm_map_get_tile_image( osm_location_t *osm_location ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( NULL );
+    }
+
     if ( osm_location->osm_map_data.data ) {
         return( &osm_location->osm_map_data );
     }
@@ -168,10 +210,22 @@ lv_img_dsc_t *osm_map_get_no_data_image( void ) {
 }
 
 void osm_map_center_location( osm_location_t *osm_location ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
     osm_location->manual_nav = false;
-    osm_location->zoom = 16;
 }
+
 void osm_map_nav_direction( osm_location_t *osm_location, osm_map_nav_direction_t direction ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
     /**
      * if we are not in manual nav, set current tile
      */
@@ -239,6 +293,12 @@ void osm_map_nav_direction( osm_location_t *osm_location, osm_map_nav_direction_
 bool osm_map_update( osm_location_t *osm_location ) {
     bool tile_update = false;
     /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( false );
+    }
+    /**
      * check if the user set manual navigation
      */
     if ( !osm_location->manual_nav ) {
@@ -305,6 +365,12 @@ bool osm_map_update( osm_location_t *osm_location ) {
 osm_location_t *osm_map_update_tile_image( osm_location_t *osm_location ) {
     uri_load_dsc_t *uri_load_dsc = NULL;
     /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( NULL );
+    }
+    /**
      * download file into RAM
      */
     uri_load_dsc = osm_map_get_cache_tile_image( osm_location );
@@ -334,6 +400,13 @@ bool osm_map_load_tiles_ahead( osm_location_t *osm_location ) {
     static uint32_t tilex = 0, tiley = 0;
     static uint32_t load_ahead_progress = 0;
     static bool load_ahead_in_progress = false;
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( false );
+    }
+
 
     if ( osm_location->load_ahead ) {
         /**
@@ -383,13 +456,100 @@ bool osm_map_load_tiles_ahead( osm_location_t *osm_location ) {
     return( load_ahead_in_progress );
 }
 
+uint32_t osm_map_get_used_cache_size( osm_location_t *osm_location ) {
+    uint32_t cache_size = 0;
+    if ( osm_location )
+        cache_size = osm_location->cache_size;
+    
+    return( cache_size );
+}
+
+uint32_t osm_map_get_cache_files( osm_location_t *osm_location ) {
+    uint32_t cached_file = 0;
+    if ( osm_location )
+        cached_file = osm_location->cached_fies;
+    
+    return( cached_file );
+}
+
+bool osm_map_get_load_ahead( osm_location_t *osm_location ) {
+    bool load_ahead = false;
+    
+    if ( osm_location )
+        load_ahead = osm_location->load_ahead;
+
+    return( load_ahead );
+}
+
+void osm_map_set_load_ahead( osm_location_t *osm_location, bool load_ahead ) {
+    if ( osm_location )
+        osm_location->load_ahead = load_ahead;
+}
+
+char *osm_map_get_current_uri( osm_location_t *osm_location ) {
+    char *uri = NULL;
+    
+    if ( osm_location )
+        uri = osm_location->tile_server;
+
+    return( uri );
+}
+
+char *osm_map_get_current_tile_uri( osm_location_t *osm_location ) {
+    char *uri = NULL;
+    
+    if ( osm_location )
+        uri = osm_location->current_tile_url;
+
+    return( uri );
+}
+
+void osm_map_clear_cache( osm_location_t *osm_location ) {
+    uint32_t cache_size = 0;
+    uint32_t cache_files = 0;
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
+    /**
+     * clear cache
+     * leave the current used tile image in memory
+     */
+    for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+        if ( osm_location->uri_load_dsc[ i ] ) {
+            if ( osm_location->uri_load_dsc[ i ]->data != osm_location->osm_map_data.data ) {
+                uri_load_free_all( osm_location->uri_load_dsc[ i ] );
+            }
+        }
+    }
+    /**
+     * get cache size
+     */
+    for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+        if ( osm_location->uri_load_dsc[ i ] ) {
+            cache_size += osm_location->uri_load_dsc[ i ]->size;
+            cache_files++;
+        }
+    }
+    osm_location->cache_size = cache_size;
+    osm_location->cached_fies = cache_files;
+}
+
 uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
     size_t tile = -1;
     size_t free_tile = -1;
-    size_t cachesize = 0;
-    size_t cachefile = 0;
+    size_t cache_size = 0;
+    size_t cache_file = 0;
     uint64_t timestamp = millis();
     uri_load_dsc_t *uri_load_dsc = NULL;
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return( NULL );
+    }
     /**
      * generate tile image utl/uri
      */
@@ -446,16 +606,24 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
          */
         for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
             if ( osm_location->uri_load_dsc[ i ] ) {
-                cachesize += osm_location->uri_load_dsc[ i ]->size;
-                cachefile++;
+                cache_size += osm_location->uri_load_dsc[ i ]->size;
+                cache_file++;
             }
         }
-        OSM_MAP_LOG("cached files: %d, cachesize = %d bytes", cachefile, cachesize );
+        osm_location->cache_size = cache_size;
+        osm_location->cached_fies = cache_file;
+        OSM_MAP_LOG("cached files: %d, cachesize = %d bytes", cache_file, cache_size );
     }
     return( uri_load_dsc );
 }
 
 void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_server ) {
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
     /**
      * free old tile server entry
      */
@@ -479,6 +647,12 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
     char *current_tile_url_p = NULL;
     char temp_str[32] = "";
     char *temp_str_p = NULL;
+    /**
+     * check if osm_location set
+     */
+    if ( !osm_location ) {
+        return;
+    }
     /**
      * is a tile server set?
      */

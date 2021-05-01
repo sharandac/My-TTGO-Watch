@@ -40,6 +40,8 @@
         char *tile_server = NULL;                       /** @brief the current tile server uri */
         char *current_tile_url = NULL;                  /** @brief the current tile image uri */
         bool load_ahead = false;                        /** @brief enable load ahead feature */
+        uint32_t cache_size = 0;
+        uint32_t cached_fies = 0;
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
     } osm_location_t;
@@ -141,5 +143,49 @@
      */
     void osm_map_center_location( osm_location_t *osm_location );
     bool osm_map_load_tiles_ahead( osm_location_t *osm_location );
+    /**
+     * @brief get the numbers of bytes in the cache
+     * 
+     * @param osm_location  pointer to the osm_location structure
+     * 
+     * @return number of bytes in the cache
+     */
+    uint32_t osm_map_get_used_cache_size( osm_location_t *osm_location );
+    /**
+     * @brief get the numbers of tile image are cached
+     * 
+     * @param osm_location  pointer to the osm_location structure
+     * 
+     * @return number of cached tile images
+     */
+    uint32_t osm_map_get_cache_files( osm_location_t *osm_location );
+    /**
+     * @brief get the load ahead config flag
+     * 
+     * @return true if load ahead enable
+     */
+    bool osm_map_get_load_ahead( osm_location_t *osm_location );
+    /**
+     * @brief set the load ahead config flag, enabled/disable tile image load ahead
+     * 
+     * @param pointer pointer to the osm_location_t structure
+     */
+    void osm_map_set_load_ahead( osm_location_t *osm_location, bool load_ahead );
+    /**
+     * @brief get the current tile image source uri
+     * 
+     * @param pointer pointer to the osm_location_t structure
+     * 
+     * @return pointer the to uri string
+     */
+    char *osm_map_get_current_uri( osm_location_t *osm_location );
+    /**
+     * @brief get the current tile image uri
+     * 
+     * @param pointer pointer to the osm_location_t structure
+     * 
+     * @return pointer the to uri string
+     */
+    char *osm_map_get_current_tile_uri( osm_location_t *osm_location );
 
 #endif // _OSM_HELPER_H

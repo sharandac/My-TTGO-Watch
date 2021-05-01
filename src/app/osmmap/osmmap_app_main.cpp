@@ -38,6 +38,7 @@
 #include "hardware/gpsctl.h"
 #include "hardware/blectl.h"
 #include "hardware/wifictl.h"
+#include "hardware/touch.h"
 
 #include "utils/osm_map/osm_map.h"
 #include "utils/json_psram_allocator.h"
@@ -80,6 +81,7 @@ static bool osmmap_block_show_messages = false;     /** @brief osm show messages
 static bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
 static bool osmmap_gps_state = false;
 static bool osmmap_wifi_state = false;
+static uint64_t last_touch = 0;
 osm_location_t *osmmap_location = NULL;             /** @brief osm location obj */
 osmmap_config_t osmmap_config;
 
@@ -100,6 +102,7 @@ void osmmap_update_request( void );
 void osmmap_update_Task( void * pvParameters );
 static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event );
 void osmmap_app_set_setting_menu( lv_obj_t *menu );
+bool osmmap_app_touch_event_cb( EventBits_t event, void *arg );
 static void nav_direction_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -114,9 +117,15 @@ void osmmap_activate_cb( void );
 void osmmap_hibernate_cb( void );
 
 void osmmap_app_main_setup( uint32_t tile_num ) {
-
+    /**
+     * load config
+     */
     osmmap_config.load();
-
+    osmmap_location = osm_map_create_location_obj();
+    osmmap_location->load_ahead = osmmap_config.load_ahead;
+    /**
+     * geht app tile
+     */
     osmmap_app_main_tile = mainbar_get_tile_obj( tile_num );
 
     lv_style_copy( &osmmap_app_main_style, ws_get_mainbar_style() );
@@ -231,31 +240,43 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     zoom_southeast_btn = lv_btn_create( osmmap_cont, zoom_northwest_btn );
     lv_obj_align( zoom_southeast_btn, osmmap_cont, LV_ALIGN_CENTER, 36, 36 );
     lv_obj_set_event_cb( zoom_southeast_btn, nav_center_osmmap_app_main_event_cb );
-
+    /**
+     * setup menu
+     */
     sub_menu_layers = lv_list_create( osmmap_cont, NULL );
-    lv_obj_set_size( sub_menu_layers, 160, 180 );
+    lv_obj_set_size( sub_menu_layers, 160, 200 );
     lv_obj_align( sub_menu_layers, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
     osmmap_add_tile_server_list( sub_menu_layers );
     lv_obj_set_hidden( sub_menu_layers, true );
 
     sub_menu_setting = lv_list_create( osmmap_cont, NULL );
-    lv_obj_set_size( sub_menu_setting, 160, 180 );
+    lv_obj_set_size( sub_menu_setting, 160, 200 );
     lv_obj_align( sub_menu_setting, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
     osmmap_app_set_setting_menu( sub_menu_setting );
     lv_obj_set_hidden( sub_menu_setting, true );
-
+    /**
+     * setup event callback and background Task
+     */
     mainbar_add_tile_activate_cb( tile_num, osmmap_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmmap_hibernate_cb );
     gpsctl_register_cb( GPSCTL_SET_APP_LOCATION | GPSCTL_UPDATE_LOCATION, osmmap_gpsctl_event_cb, "osm" );
-
-    osmmap_location = osm_map_create_location_obj();
-    osmmap_location->load_ahead = osmmap_config.load_ahead;
+    touch_register_cb( TOUCH_UPDATE , osmmap_app_touch_event_cb, "osm touch" );
     osmmap_event_handle = xEventGroupCreate();
     osmmap_main_tile_task = lv_task_create( osmmap_main_tile_update_task, 250, LV_TASK_PRIO_MID, NULL );
 }
 
+bool osmmap_app_touch_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case( TOUCH_UPDATE ):
+            last_touch = millis();
+            break;
+    }
+    return( true );
+}
+
 void osmmap_app_set_setting_menu( lv_obj_t *menu ) {
     lv_obj_t * menu_entry;
+    char cachestring[32] = "";
 
     if ( menu ) {
         /**
@@ -272,6 +293,9 @@ void osmmap_app_set_setting_menu( lv_obj_t *menu ) {
         menu_entry = lv_list_add_btn( menu, osmmap_config.wifi_autoon ? &checked_dark_16px : &unchecked_dark_16px, "autostart wifi" );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
         menu_entry = lv_list_add_btn( menu, osmmap_config.load_ahead ? &checked_dark_16px : &unchecked_dark_16px, "load ahead" );
+        lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
+        snprintf( cachestring, sizeof( cachestring ), "%dkB cached", osm_map_get_used_cache_size( osmmap_location ) / 1024 );
+        menu_entry = lv_list_add_btn( menu, NULL, cachestring );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
     }
 }
@@ -310,7 +334,7 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
      * check if maintile alread initialized
      */
     if ( osmmap_app_active ) {
-        if ( lv_disp_get_inactive_time( NULL ) > 5000 ) {
+        if ( last_touch + 5000 < millis() ) {
             lv_obj_set_hidden( layers_btn, true );
             lv_obj_set_hidden( exit_btn, true );
             lv_obj_set_hidden( zoom_in_btn, true );
@@ -323,6 +347,8 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
             lv_obj_set_hidden( south_btn, true );
             lv_obj_set_hidden( west_btn, true );
             lv_obj_set_hidden( east_btn, true );
+            lv_obj_set_hidden( sub_menu_layers, true );
+            lv_obj_set_hidden( sub_menu_setting, true );
         }
         else {
             lv_obj_set_hidden( layers_btn, false );
@@ -432,7 +458,7 @@ void osmmap_update_Task( void * pvParameters ) {
         /**
          * block this task for 125ms
          */
-        vTaskDelay( 125 );
+        vTaskDelay( 25 );
     }
     OSMMAP_APP_LOG("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );    
@@ -558,6 +584,7 @@ static void layers_btn_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             if ( lv_obj_get_hidden( sub_menu_setting ) ) {
+                osmmap_app_set_setting_menu( sub_menu_setting );
                 lv_obj_set_hidden( sub_menu_setting, false );
             }
             else {
@@ -579,8 +606,10 @@ static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
             }
             else {
                 const char *tile_server = doc[ lv_list_get_btn_text( obj ) ];
-                OSMMAP_APP_LOG("new tile server url: %s", tile_server );
+                OSMMAP_APP_INFO_LOG("new tile server url: %s", tile_server );
                 osm_map_set_tile_server( osmmap_location, tile_server );
+                strncpy( osmmap_config.osmmap, lv_list_get_btn_text( obj ), sizeof( osmmap_config.osmmap ) );
+                osmmap_add_tile_server_list( sub_menu_layers );
                 osmmap_update_request();
             }
             doc.clear();
@@ -601,11 +630,17 @@ void osmmap_add_tile_server_list( lv_obj_t *layers_list ) {
         OSMMAP_APP_ERROR_LOG("osm server list deserializeJson() failed: %s", error.c_str() );
     }
     else {
+        while ( lv_list_remove( layers_list, 0 ) );
         JsonObject obj = doc.as<JsonObject>();
         for ( JsonPair p : obj ) {
             OSMMAP_APP_LOG("server: %s", p.key().c_str() );
-            list_btn = lv_list_add_btn( layers_list, NULL, p.key().c_str() );
+            list_btn = lv_list_add_btn( layers_list, !strcmp( osmmap_config.osmmap, p.key().c_str() ) ? &checked_dark_16px : &unchecked_dark_16px, p.key().c_str() );
             lv_obj_set_event_cb( list_btn, osmmap_tile_server_event_cb );
+            if ( !strcmp( osmmap_config.osmmap, p.key().c_str() ) ) {
+                const char *osmmap_url = doc[ p.key().c_str() ];
+                OSMMAP_APP_INFO_LOG("set osmmap url: %s, %s", p.key().c_str(), osmmap_url );
+                osm_map_set_tile_server( osmmap_location, osmmap_url );
+            }
         }        
     }
     doc.clear();
@@ -662,7 +697,6 @@ void osmmap_activate_cb( void ) {
 
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
-    OSMMAP_APP_LOG("osm layer list size: %d", strlen( (const char*)osm_server_json_start ) );
 }
 
 void osmmap_hibernate_cb( void ) {
@@ -672,8 +706,8 @@ void osmmap_hibernate_cb( void ) {
     blectl_set_show_notification( osmmap_block_show_messages );
     display_set_block_return_maintile( osmmap_block_return_maintile );
     statusbar_set_force_dark( osmmap_statusbar_force_dark_mode );
-    gpsctl_set_autoon( osmmap_config.gps_autoon );
-    wifictl_set_autoon( osmmap_config.wifi_autoon );
+    gpsctl_set_autoon( osmmap_gps_state );
+    wifictl_set_autoon( osmmap_wifi_state );
     /**
      * set osm app inactive
      */

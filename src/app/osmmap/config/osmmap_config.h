@@ -32,9 +32,10 @@
     class osmmap_config_t : public BaseJsonConfig {
         public:
         osmmap_config_t();
-        bool gps_autoon = true;             /** @brief auto on/off */
-        bool wifi_autoon = true;             /** @brief auto on/off */
-        bool load_ahead = false;             /** @brief auto on/off */
+        bool gps_autoon = true;             /** @brief gps auto on/off */
+        bool wifi_autoon = true;            /** @brief wifi auto on/off */
+        bool load_ahead = false;            /** @brief load ahead on/off */
+        char osmmap[128] = "";                   /** @brief osm map name */
 
         protected:
         ////////////// Available for overloading: //////////////
