@@ -44,6 +44,7 @@
         uint32_t cached_fies = 0;
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
+        SemaphoreHandle_t xSemaphoreMutex;
     } osm_location_t;
 
     /**

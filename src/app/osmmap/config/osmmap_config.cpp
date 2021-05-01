@@ -28,6 +28,7 @@ bool osmmap_config_t::onSave(JsonDocument& doc) {
     doc["gps_autoon"] = gps_autoon;
     doc["wifi_autoon"] = wifi_autoon;
     doc["load_ahead"] = load_ahead;
+    doc["left_right_hand"] = left_right_hand;
     doc["osmmap"] = osmmap;
     return true;
 }
@@ -36,14 +37,16 @@ bool osmmap_config_t::onLoad(JsonDocument& doc) {
     gps_autoon = doc["gps_autoon"] | true;
     wifi_autoon = doc["wifi_autoon"] | true;
     load_ahead = doc["load_ahead"] | false;
+    left_right_hand = doc["left_right_hand"] | false;
     strncpy( osmmap, doc["osmmap"] | "OSM Standard", sizeof( osmmap ) );
     return true;
 }
 
 bool osmmap_config_t::onDefault( void ) {
-    bool gps_autoon = true;
-    bool wifi_autoon = true;
-    bool load_ahead = false;
+    gps_autoon = true;
+    wifi_autoon = true;
+    load_ahead = false;
+    left_right_hand = false;
     strncpy( osmmap, "OSM Standard", sizeof( osmmap ) );
     return true;
 }

@@ -35,7 +35,8 @@
         bool gps_autoon = true;             /** @brief gps auto on/off */
         bool wifi_autoon = true;            /** @brief wifi auto on/off */
         bool load_ahead = false;            /** @brief load ahead on/off */
-        char osmmap[128] = "";                   /** @brief osm map name */
+        bool left_right_hand = false;       /** @brief left/right hand icons, false mean left hand */
+        char osmmap[128] = "";              /** @brief osm map name */
 
         protected:
         ////////////// Available for overloading: //////////////

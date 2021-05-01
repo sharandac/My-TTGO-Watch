@@ -103,6 +103,7 @@ void osmmap_update_Task( void * pvParameters );
 static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event );
 void osmmap_app_set_setting_menu( lv_obj_t *menu );
 bool osmmap_app_touch_event_cb( EventBits_t event, void *arg );
+void osmmap_app_set_left_right_hand( bool left_right_hand );
 static void nav_direction_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void nav_center_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void zoom_in_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -245,15 +246,19 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
      */
     sub_menu_layers = lv_list_create( osmmap_cont, NULL );
     lv_obj_set_size( sub_menu_layers, 160, 200 );
-    lv_obj_align( sub_menu_layers, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
+    lv_obj_align( sub_menu_layers, osmmap_cont, LV_ALIGN_IN_RIGHT_MID, 0, 0);
     osmmap_add_tile_server_list( sub_menu_layers );
     lv_obj_set_hidden( sub_menu_layers, true );
 
     sub_menu_setting = lv_list_create( osmmap_cont, NULL );
     lv_obj_set_size( sub_menu_setting, 160, 200 );
-    lv_obj_align( sub_menu_setting, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
+    lv_obj_align( sub_menu_setting, osmmap_cont, LV_ALIGN_IN_RIGHT_MID, 0, 0);
     osmmap_app_set_setting_menu( sub_menu_setting );
     lv_obj_set_hidden( sub_menu_setting, true );
+    /**
+     * set left/right hand mode
+     */
+    osmmap_app_set_left_right_hand( osmmap_config.left_right_hand );
     /**
      * setup event callback and background Task
      */
@@ -274,6 +279,25 @@ bool osmmap_app_touch_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
+void osmmap_app_set_left_right_hand( bool left_right_hand ) {
+    if ( left_right_hand ) {
+        lv_obj_align( layers_btn, lv_obj_get_parent( layers_btn ), LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+        lv_obj_align( exit_btn, lv_obj_get_parent( exit_btn ), LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+        lv_obj_align( zoom_in_btn, lv_obj_get_parent( zoom_in_btn ), LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+        lv_obj_align( zoom_out_btn, lv_obj_get_parent( zoom_out_btn ), LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+        lv_obj_align( sub_menu_layers, lv_obj_get_parent( sub_menu_layers ), LV_ALIGN_IN_LEFT_MID, 0, 0);
+        lv_obj_align( sub_menu_setting, lv_obj_get_parent( sub_menu_setting ), LV_ALIGN_IN_LEFT_MID, 0, 0);
+    }
+    else {
+        lv_obj_align( layers_btn, lv_obj_get_parent( layers_btn ), LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+        lv_obj_align( exit_btn, lv_obj_get_parent( exit_btn ), LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+        lv_obj_align( zoom_in_btn, lv_obj_get_parent( zoom_in_btn ), LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+        lv_obj_align( zoom_out_btn, lv_obj_get_parent( zoom_out_btn ), LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+        lv_obj_align( sub_menu_layers, lv_obj_get_parent( sub_menu_layers ), LV_ALIGN_IN_RIGHT_MID, 0, 0);
+        lv_obj_align( sub_menu_setting, lv_obj_get_parent( sub_menu_setting ), LV_ALIGN_IN_RIGHT_MID, 0, 0);
+    }
+}
+
 void osmmap_app_set_setting_menu( lv_obj_t *menu ) {
     lv_obj_t * menu_entry;
     char cachestring[32] = "";
@@ -287,6 +311,8 @@ void osmmap_app_set_setting_menu( lv_obj_t *menu ) {
          * add menu entry
          */
         menu_entry = lv_list_add_btn( menu, NULL, "OSM maps" );
+        lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
+        menu_entry = lv_list_add_btn( menu, NULL, "left/right hand" );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
         menu_entry = lv_list_add_btn( menu, osmmap_config.gps_autoon ? &checked_dark_16px : &unchecked_dark_16px, "autostart gps" );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
@@ -306,19 +332,26 @@ static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event ) {
             if ( !strcmp( lv_list_get_btn_text( obj ), "OSM maps") ) {
                 lv_obj_set_hidden( sub_menu_setting, true );
                 lv_obj_set_hidden( sub_menu_layers, false );
-
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "load ahead" ) ) {
                 osmmap_config.load_ahead = !osmmap_config.load_ahead;
                 osmmap_location->load_ahead = osmmap_config.load_ahead;
+                osmmap_config.save();
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart gps" ) ) {
                 osmmap_config.gps_autoon = !osmmap_config.gps_autoon;
                 gpsctl_set_autoon( osmmap_config.gps_autoon );
+                osmmap_config.save();
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart wifi" ) ) {
                 osmmap_config.wifi_autoon = !osmmap_config.wifi_autoon;
                 wifictl_set_autoon( osmmap_config.load_ahead );
+                osmmap_config.save();
+            }
+            else if ( !strcmp( lv_list_get_btn_text( obj ), "left/right hand" ) ) {
+                osmmap_config.left_right_hand = !osmmap_config.left_right_hand;
+                osmmap_app_set_left_right_hand( osmmap_config.left_right_hand );
+                osmmap_config.save();
             }
             osmmap_app_set_setting_menu( sub_menu_setting );
             break;
@@ -376,6 +409,7 @@ bool osmmap_gpsctl_event_cb( EventBits_t event, void *arg ) {
             /**
              * update location and tile map image on new location
              */
+            OSMMAP_APP_LOG("get new gps coor.");
             gps_data = ( gps_data_t *)arg;
             osm_map_set_lon_lat( osmmap_location, gps_data->lon, gps_data->lat );
             snprintf( lonlat, sizeof( lonlat ), "%f° / %f°", gps_data->lat, gps_data->lon );
@@ -387,6 +421,7 @@ bool osmmap_gpsctl_event_cb( EventBits_t event, void *arg ) {
             /**
              * update location and tile map image on new location
              */
+            OSMMAP_APP_LOG("get new gps coor.");
             gps_data = ( gps_data_t *)arg;
             osm_map_set_lon_lat( osmmap_location, gps_data->lon, gps_data->lat );
             snprintf( lonlat, sizeof( lonlat ), "%f° / %f°", gps_data->lat, gps_data->lon );
@@ -412,7 +447,7 @@ void osmmap_update_request( void ) {
 }
 
 void osmmap_update_Task( void * pvParameters ) {
-    OSMMAP_APP_LOG("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    OSMMAP_APP_INFO_LOG("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     while( 1 ) {
         /**
          * check if a tile image update is requested
@@ -421,6 +456,7 @@ void osmmap_update_Task( void * pvParameters ) {
             /**
              * check if a tile image update is required and update them
              */
+            OSMMAP_APP_LOG("start osm map update");
             if( osm_map_update( osmmap_location ) ) {
                 if ( osm_map_get_tile_image( osmmap_location ) ) {
                     lv_img_set_src( osmmap_app_tile_img, osm_map_get_tile_image( osmmap_location ) );
@@ -446,12 +482,14 @@ void osmmap_update_Task( void * pvParameters ) {
             /**
              * check if load ahead need or finsh
              */
+            OSMMAP_APP_LOG("start load ahead update handler");
             osm_map_load_tiles_ahead( osmmap_location );
         }
         /**
          * check if for a task exit request
          */
         if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_TASK_EXIT_REQUEST ) {
+            OSMMAP_APP_INFO_LOG("stop osm map update task");
             xEventGroupClearBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
             break;
         }
@@ -460,7 +498,7 @@ void osmmap_update_Task( void * pvParameters ) {
          */
         vTaskDelay( 25 );
     }
-    OSMMAP_APP_LOG("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
+    OSMMAP_APP_INFO_LOG("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );    
 }
 
@@ -717,5 +755,4 @@ void osmmap_hibernate_cb( void ) {
      * stop background osm tile image update Task
      */
     xEventGroupSetBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
-    osmmap_config.save();
 }
