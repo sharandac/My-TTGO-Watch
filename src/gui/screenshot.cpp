@@ -24,12 +24,12 @@
 
 #include "utils/alloc.h"
 
-uint16_t *png;
+static uint8_t *png;
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
 
 void screenshot_setup( void ) {
-    png = (uint16_t*)MALLOC( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
+    png = (uint8_t*)MALLOC( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
     if ( png == NULL ) {
         log_e("screenshot malloc failed");
         while(1);
@@ -51,17 +51,20 @@ void screenshot_take( void ) {
 }
 
 void screenshot_save( void ) {
-	if (SPIFFS.exists( SCREENSHOT_FILE_NAME )) {
-	    SPIFFS.remove( SCREENSHOT_FILE_NAME );
-	}
+    uint8_t *data_p = png;
 
-    fs::File file = SPIFFS.open( SCREENSHOT_FILE_NAME, FILE_WRITE );
-    
-    file.write( (uint8_t *)png, lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * 2 );
-    file.flush();
-    file.close();
+    remove( SCREENSHOT_FILE_NAME );
+    FILE *file = fopen( SCREENSHOT_FILE_NAME, "wb" );
 
-    log_i("save screenshot");
+    if ( file ) {
+        fwrite( (const void*)data_p, 1, 240 * 240 *2, file );
+        log_i("save screenshot");
+    }
+    else {
+        log_e("error while open file");
+    }
+    fflush( file );
+    fclose( file );
 }
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {

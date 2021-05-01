@@ -640,6 +640,7 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
     size_t free_tile = -1;
     size_t cache_size = 0;
     size_t cache_file = 0;
+    char* uri = NULL;
     uint64_t timestamp = millis();
     uri_load_dsc_t *uri_load_dsc = NULL;
     /**
@@ -701,8 +702,15 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
             osm_location->uri_load_dsc[ free_tile ] = NULL;
         }
         OSM_MAP_LOG("use tile cache %d", free_tile );
-        osm_location->uri_load_dsc[ free_tile ] = uri_load_to_ram( (const char*)osm_location->current_tile_url );
-        uri_load_dsc = osm_location->uri_load_dsc[ free_tile ];
+        uri = (char*)MALLOC( strlen( osm_location->current_tile_url ) + 1 );
+        if ( uri ) {
+            strncpy( uri, osm_location->current_tile_url, strlen( osm_location->current_tile_url ) + 1 );
+            osm_map_give( osm_location );
+            uri_load_dsc = uri_load_to_ram( (const char*)uri );
+            osm_map_take( osm_location );
+            free( uri );
+            osm_location->uri_load_dsc[ free_tile ] = uri_load_dsc;
+        }
         /**
          * get cache size
          */
