@@ -37,8 +37,6 @@ lv_style_t sailing_setup_style;
 
 lv_obj_t *sailing_foobar_switch = NULL;
 
-LV_IMG_DECLARE(exit_32px);
-
 static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -52,29 +50,13 @@ void sailing_setup_setup( uint32_t tile_num ) {
     lv_style_set_border_width( &sailing_setup_style, LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( sailing_setup_tile, LV_OBJ_PART_MAIN, &sailing_setup_style );
 
-    lv_obj_t *exit_cont = lv_obj_create( sailing_setup_tile, NULL );
-    lv_obj_set_size( exit_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( exit_cont, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_obj_align( exit_cont, sailing_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
-
-    lv_obj_t *exit_btn = lv_imgbtn_create( exit_cont, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &sailing_setup_style );
-    lv_obj_align( exit_btn, exit_cont, LV_ALIGN_IN_TOP_LEFT, 10, 0 );
-    lv_obj_set_event_cb( exit_btn, exit_sailing_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( exit_cont, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_label_set_text( exit_label, "Exit setup");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( sailing_setup_tile, "Exit setup", exit_sailing_setup_event_cb );
+    //lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
     lv_obj_t *sailing_foobar_switch_cont = lv_obj_create( sailing_setup_tile, NULL );
     lv_obj_set_size( sailing_foobar_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( sailing_foobar_switch_cont, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_obj_align( sailing_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+    lv_obj_align( sailing_foobar_switch_cont, header, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
     sailing_foobar_switch = wf_add_switch( sailing_foobar_switch_cont, false );
     lv_obj_align( sailing_foobar_switch, sailing_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
