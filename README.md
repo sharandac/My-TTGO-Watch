@@ -11,6 +11,11 @@
 
 A smartwatch based on ESP32 from LilyGo. Currently supoort for T-Watch2020 V1. T-Watch2020 V3 and V2 is added, but untested and not complete for lack of a watch.
 
+## Install
+
+Clone this repository and open it with platformIO. Select the right env and then build and upload.
+Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from ShotokuTech[ShotokuTech](https://github.com/ShotokuTech).
+
 # Telegram chatgroup
 
 Telegram chatgroup is here:

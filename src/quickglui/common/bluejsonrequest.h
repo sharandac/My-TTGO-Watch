@@ -41,6 +41,7 @@ public:
     String command() { return (*this)["r"]; } // What requested
 
     bool isEqualKeyValue(const char* key, const char* value) { return isValid() && containsKey(key) && strcmp((*this)[key], value) == 0; }
+    bool isEqualKeyValue(const char* key, bool value) { return isValid() && containsKey(key) && (*this)[key] == value; }
   
 protected:
     DeserializationError dsError;

@@ -28,8 +28,10 @@
 #include "hardware/callback.h"
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
+#include "hardware/display.h"
 
-#include "utils/ESP32-targz/ESP32-targz.h"
+#define DEST_FS_USES_SPIFFS
+#include <ESP32-targz.h>
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -61,7 +63,6 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
         http_ota_send_event_cb( HTTP_OTA_START, (void*)"get uncompressed firmware ..." );
         retval = http_ota_start_uncompressed( url, md5 );
     }
-
     return( retval );
 }
 
@@ -87,6 +88,8 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
          */
         GzUnpacker *GZUnpacker = new GzUnpacker();
         GZUnpacker->setGzProgressCallback( http_ota_progress_cb );
+        GZUnpacker->setPsram( true );
+        http_ota_send_event_cb( HTTP_OTA_START, (void*)"start flashing ..." );
         /**
          * if firmware size known set the right value
          */

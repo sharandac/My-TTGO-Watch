@@ -62,7 +62,6 @@ void gps_status_setup( void ) {
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
     gps_status = app_register( "gps status", &gps_status_64px, enter_gps_status_event_cb );
-    app_set_indicator( gps_status, ICON_INDICATOR_OK );
 
     // init main and setup tile, see gps_status_main.cpp and gps_status_setup.cpp
     gps_status_main_setup( gps_status_main_tile_num );
@@ -88,9 +87,7 @@ uint32_t gps_status_get_app_setup_tile_num( void ) {
  */
 static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       //statusbar_hide( true );
-                                        app_hide_indicator( gps_status );
-                                        mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( gps_status_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    
 }

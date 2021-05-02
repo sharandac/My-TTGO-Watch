@@ -1,7 +1,8 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   Apr 23 14:17:11 2021
+ *   Copyright  2021  Cornelius Wild
+ *   Email: tt-watch-code@dervomsee.de
+ *   Based on the work of Dirk Brosswick,  sharandac / My-TTGO-Watch"
  ****************************************************************************/
  
 /*
@@ -19,16 +20,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#ifndef _SDCARD_SETTINGS_H
+    #define _SDCARD_SETTINGS_H
 
-#ifndef _FTPSERVER_H
-    #define _FTPSERVER_H
+    #include <TTGO.h>
 
-    #define FTPSERVER_USER      "TTWatch"
-    #define FTPSERVER_PASSWORD  "password"
+    void sdcard_settings_tile_setup( void );
 
-    /**
-     *  @brief setup builtin ftpserver, call after first wifi-connection. otherwise esp32 will crash
-     */
-    void ftpserver_start( const char *user, const char *pass );
-
-#endif // _FTPSERVER_H
+#endif // _SDCARD_SETTINGS_H

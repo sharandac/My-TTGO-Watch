@@ -32,9 +32,7 @@
 
 #include "app/weather/weather.h"
 #include "app/stopwatch/stopwatch_app.h"
-#include "app/corona_app_detector/corona_app_detector.h"
 #include "app/alarm_clock/alarm_clock.h"
-#include "app/crypto_ticker/crypto_ticker.h"
 #include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
@@ -43,8 +41,7 @@
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
-#include "app/example_app/example_app.h"
-#include "app/osm/osm_app.h"
+#include "app/osmmap/osmmap_app.h"
 
 void setup() {
     /**
@@ -68,21 +65,18 @@ void setup() {
      * inlude your header file
      * and call your app setup
      */
-    osm_app_setup();
+    osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
     activity_app_setup();
     gps_status_setup();
-    crypto_ticker_setup();
     sailing_setup();
     osmand_app_setup();
     IRController_setup();
     fxrates_app_setup();
-    corona_app_detector_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-    example_app_setup();
     /**
      * post hardware setup
      * 

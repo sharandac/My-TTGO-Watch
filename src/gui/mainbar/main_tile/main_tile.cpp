@@ -55,7 +55,6 @@ lv_task_t * main_tile_task;
 
 void main_tile_update_task( lv_task_t * task );
 void main_tile_align_widgets( void );
-void main_tile_format_time( char *, size_t, struct tm * );
 bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
 bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg );
 
@@ -284,7 +283,7 @@ void main_tile_update_time( bool force ) {
      * Display has a minute resolution
      */
     if ( last == 0 || info.tm_min != last_info.tm_min || info.tm_hour != last_info.tm_hour || force ) {
-        main_tile_format_time( time_str, sizeof(time_str), &info );
+        timesync_get_current_timestring( time_str, sizeof(time_str) );
         log_d("renew time: %s", time_str );
         lv_label_set_text( timelabel, time_str );
         lv_obj_align( timelabel, clock_cont, LV_ALIGN_CENTER, 0, 0 );
@@ -315,18 +314,4 @@ void main_tile_update_task( lv_task_t * task ) {
     }
 
     main_tile_update_time( false );
-}
-
-void main_tile_format_time( char * buf, size_t buf_len, struct tm * info ) {
-    int h = info->tm_hour;
-    int m = info->tm_min;
-
-    if ( timesync_get_24hr() ) {
-        snprintf( buf, buf_len, "%02d:%02d", h, m );
-    }
-    else {
-        if (h == 0) h = 12;
-        if (h > 12) h -= 12;
-        snprintf( buf, buf_len, "%d:%02d", h, m );
-    }
 }

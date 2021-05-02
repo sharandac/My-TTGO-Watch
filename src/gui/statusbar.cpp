@@ -645,7 +645,7 @@ void statusbar_brightness_slider_event_handler_cb(lv_obj_t *brightness_slider, l
     }
 
     if(event == LV_EVENT_VALUE_CHANGED) {
-        log_i("Brightness value: %d\n", lv_slider_get_value( brightness_slider ));
+        log_d("Brightness value: %d\n", lv_slider_get_value( brightness_slider ));
         display_set_brightness( lv_slider_get_value( brightness_slider ));
         should_save_brightness_config = true;
     }
@@ -923,8 +923,6 @@ void statusbar_event( lv_obj_t * statusbar, lv_event_t event ) {
     }
 
     static bool expand = false;
-
-    log_i("statusbar event");
 
     switch( event ) {
         case LV_EVENT_PRESSED:

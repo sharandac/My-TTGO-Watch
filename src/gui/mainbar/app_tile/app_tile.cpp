@@ -55,7 +55,7 @@ void app_tile_setup( void ) {
     lv_style_copy( &app_icon_style, ws_get_mainbar_style() );
     lv_style_set_radius( &app_icon_style, LV_OBJ_PART_MAIN, 20 );
     lv_style_set_bg_color( &app_icon_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
-    lv_style_set_bg_opa( &app_icon_style, LV_OBJ_PART_MAIN, LV_OPA_20 );
+    lv_style_set_bg_opa( &app_icon_style, LV_OBJ_PART_MAIN, LV_OPA_40 );
     lv_style_set_border_width( &app_icon_style, LV_OBJ_PART_MAIN, 0 );
     /**
      * init all app icons

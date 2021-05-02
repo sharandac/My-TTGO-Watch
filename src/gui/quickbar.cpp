@@ -30,10 +30,12 @@
 #include "hardware/pmu.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
+#include "hardware/timesync.h"
 
 static bool quickbar_init = false;
 
 static lv_obj_t *quickbar = NULL;
+static lv_obj_t *quickbar_time_label = NULL;
 static lv_obj_t *quickbar_maintile_img = NULL;
 static lv_obj_t *quickbar_setup_img = NULL;
 static lv_obj_t *quickbar_screenshot_img = NULL;
@@ -47,6 +49,7 @@ static lv_style_t quickbarstyle[ QUICKBAR_STYLE_NUM ];
 LV_IMG_DECLARE(maintile_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(camera_32px);
+LV_FONT_DECLARE(Ubuntu_48px);
 
 lv_task_t * quickbar_task;
 static uint32_t quickbar_counter = 0;
@@ -69,6 +72,7 @@ void quickbar_setup( void ){
 
     /*Copy a built-in style to initialize the new style*/
     lv_style_init( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ] );
+    lv_style_set_text_font( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ], LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_style_set_radius( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_bg_opa( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_80 );
@@ -78,6 +82,7 @@ void quickbar_setup( void ){
     lv_style_set_image_recolor( &quickbarstyle[ QUICKBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
 
     lv_style_init( &quickbarstyle[ QUICKBAR_STYLE_LIGHT ] );
+    lv_style_set_text_font( &quickbarstyle[ QUICKBAR_STYLE_LIGHT ], LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_style_set_radius( &quickbarstyle[ QUICKBAR_STYLE_LIGHT ], LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &quickbarstyle[ QUICKBAR_STYLE_LIGHT ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_bg_opa( &quickbarstyle[ QUICKBAR_STYLE_LIGHT ], LV_OBJ_PART_MAIN, LV_OPA_0 );
@@ -88,6 +93,7 @@ void quickbar_setup( void ){
     lv_style_set_image_recolor_opa( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_IMGBTN_PART_MAIN, LV_OPA_COVER );
 
     lv_style_init( &quickbarstyle[ QUICKBAR_STYLE_DARK ] );
+    lv_style_set_text_font( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_style_set_radius( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_OBJ_PART_MAIN, LV_OPA_0 );
@@ -98,6 +104,7 @@ void quickbar_setup( void ){
     lv_style_set_image_recolor_opa( &quickbarstyle[ QUICKBAR_STYLE_DARK ], LV_IMGBTN_PART_MAIN, LV_OPA_COVER );
 
     lv_style_init( &quickbarstyle[ QUICKBAR_STYLE_TRANS ] );
+    lv_style_set_text_font( &quickbarstyle[ QUICKBAR_STYLE_TRANS ], LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_style_set_radius( &quickbarstyle[ QUICKBAR_STYLE_TRANS ], LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &quickbarstyle[ QUICKBAR_STYLE_TRANS ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &quickbarstyle[ QUICKBAR_STYLE_TRANS ], LV_OBJ_PART_MAIN, LV_OPA_TRANSP );
@@ -107,17 +114,23 @@ void quickbar_setup( void ){
 
     quickbar = lv_cont_create( lv_scr_act(), NULL );
     lv_obj_set_width( quickbar, 48 * 3 );
-    lv_obj_set_height( quickbar, 48 );
+    lv_obj_set_height( quickbar, 48 * 2 );
     lv_obj_reset_style_list( quickbar, LV_OBJ_PART_MAIN );
     lv_obj_add_style( quickbar, LV_OBJ_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_NORMAL ] );
     lv_obj_align( quickbar, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+
+    quickbar_time_label = lv_label_create( quickbar , NULL);
+    lv_label_set_text( quickbar_time_label, "00:00");
+    lv_obj_reset_style_list( quickbar_time_label, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( quickbar_time_label, LV_OBJ_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_DARK ]  );
+    lv_obj_align( quickbar_time_label, NULL, LV_ALIGN_IN_TOP_MID, 8, 0);
 
     lv_obj_t *quickbar_maintile = lv_btn_create( quickbar, NULL );
     lv_obj_set_width( quickbar_maintile, 48 );
     lv_obj_set_height( quickbar_maintile, 48 );
     lv_obj_add_protect( quickbar_maintile, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( quickbar_maintile, LV_BTN_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_TRANS ] );
-    lv_obj_align( quickbar_maintile, quickbar, LV_ALIGN_IN_LEFT_MID, 8, 0 );
+    lv_obj_align( quickbar_maintile, quickbar, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0 );
     lv_obj_set_event_cb( quickbar_maintile, quickbar_maintile_event_cb );
     quickbar_maintile_img = lv_img_create( quickbar_maintile, NULL );
     lv_img_set_src( quickbar_maintile_img, &maintile_32px );
@@ -130,7 +143,7 @@ void quickbar_setup( void ){
     lv_obj_set_height( quickbar_setup, 48 );
     lv_obj_add_protect( quickbar_setup, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( quickbar_setup, LV_BTN_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_TRANS ] );
-    lv_obj_align( quickbar_setup, quickbar, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_align( quickbar_setup, quickbar, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_set_event_cb( quickbar_setup, quickbar_setup_event_cb );
     quickbar_setup_img = lv_img_create( quickbar_setup, NULL );
     lv_img_set_src( quickbar_setup_img, &setup_32px );
@@ -143,7 +156,7 @@ void quickbar_setup( void ){
     lv_obj_set_height( quickbar_screenshot, 48 );
     lv_obj_add_protect( quickbar_screenshot, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( quickbar_screenshot, LV_BTN_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_TRANS ] );
-    lv_obj_align( quickbar_screenshot, quickbar, LV_ALIGN_IN_RIGHT_MID, -8, 0 );
+    lv_obj_align( quickbar_screenshot, quickbar, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0 );
     lv_obj_set_event_cb( quickbar_screenshot, quickbar_screenshot_event_cb );
     quickbar_screenshot_img = lv_img_create( quickbar_screenshot, NULL );
     lv_img_set_src( quickbar_screenshot_img, &camera_32px );
@@ -212,12 +225,16 @@ bool quickbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
     }
     
     bool retval = true;
+    char time[32] = "";
     
     switch ( event ) {
         case PMUCTL_LONG_PRESS:
             motor_vibe(3);
             lv_disp_trig_activity( NULL );
             if( lv_obj_get_hidden( quickbar ) ) {
+                timesync_get_current_timestring( time, sizeof( time ) );
+                lv_label_set_text( quickbar_time_label, time );
+                lv_obj_align( quickbar_time_label, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
                 quickbar_hide( false );
             }
             else {

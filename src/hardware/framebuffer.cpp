@@ -39,6 +39,13 @@ bool framebuffer_setup_nodma( bool doubleframebuffer  );
 static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
 
 void framebuffer_setup( bool dma, bool doubleframebuffer ) {
+    /**
+     * see issue #227
+     */
+    #if defined( LILYGO_WATCH_2020_V3 )
+        dma = false;
+    #endif
+
     if ( dma ) {
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->tft->initDMA();

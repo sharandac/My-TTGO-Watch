@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
+ *   Aug 11 17:13:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,16 +19,34 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include "osmmap_config.h"
 
-#ifndef _FTPSERVER_H
-    #define _FTPSERVER_H
+osmmap_config_t::osmmap_config_t() : BaseJsonConfig( OSMMAP_JSON_COFIG_FILE ) {
+}
 
-    #define FTPSERVER_USER      "TTWatch"
-    #define FTPSERVER_PASSWORD  "password"
+bool osmmap_config_t::onSave(JsonDocument& doc) {
+    doc["gps_autoon"] = gps_autoon;
+    doc["wifi_autoon"] = wifi_autoon;
+    doc["load_ahead"] = load_ahead;
+    doc["left_right_hand"] = left_right_hand;
+    doc["osmmap"] = osmmap;
+    return true;
+}
 
-    /**
-     *  @brief setup builtin ftpserver, call after first wifi-connection. otherwise esp32 will crash
-     */
-    void ftpserver_start( const char *user, const char *pass );
+bool osmmap_config_t::onLoad(JsonDocument& doc) {
+    gps_autoon = doc["gps_autoon"] | true;
+    wifi_autoon = doc["wifi_autoon"] | true;
+    load_ahead = doc["load_ahead"] | false;
+    left_right_hand = doc["left_right_hand"] | false;
+    strncpy( osmmap, doc["osmmap"] | "OSM Standard", sizeof( osmmap ) );
+    return true;
+}
 
-#endif // _FTPSERVER_H
+bool osmmap_config_t::onDefault( void ) {
+    gps_autoon = true;
+    wifi_autoon = true;
+    load_ahead = false;
+    left_right_hand = false;
+    strncpy( osmmap, "OSM Standard", sizeof( osmmap ) );
+    return true;
+}

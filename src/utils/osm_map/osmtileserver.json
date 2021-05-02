@@ -1,0 +1,10 @@
+{
+	"OSM Standard":"http://a.tile.openstreetmap.org/$z/$x/$y.png",
+	"OSM France":"http://a.tile.openstreetmap.fr/osmfr/$z/$x/$y.png",
+    "Humanitarian":"http://a.tile.openstreetmap.fr/hot/$z/$x/$y.png",
+    "Dark Matter":"http://cartodb-basemaps-d.global.ssl.fastly.net/dark_all/$z/$x/$y.png",
+	"Stamen Toner":"http://a.tile.stamen.com/toner/$z/$x/$y.png",
+	"thunderforest":"http://tile.thunderforest.com/transport/$z/$x/$y.png",
+    "memomaps":"http://tile.memomaps.de/tilegen/$z/$x/$y.png",
+    "offline from sd":"file:///sd/osmmap/$z/$x/$y.png"
+}

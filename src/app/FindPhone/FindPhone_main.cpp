@@ -55,7 +55,8 @@ uint32_t bluetooth_FindPhone_tile_num;
 lv_obj_t *bluetooth_FindPhone_img = NULL;
 lv_obj_t *bluetooth_FindPhone_label = NULL;										   
 
-lv_task_t * _FindPhone_search_task; 
+lv_task_t * _FindPhone_PhoneSearch_task; 
+lv_task_t * _FindPhone_WatchFind_task = nullptr;
 LV_IMG_DECLARE(eye_200px);
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
@@ -66,14 +67,15 @@ LV_FONT_DECLARE(Ubuntu_32px);
 
 int rem_iris_x = 0;
 int rem_iris_y = 0;
-static bool searching = false;
+static bool searching_phone = false;
 
 static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event );
-
 static void go_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event);
 bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg);
 static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc);
+static void FindPhone_PhoneSearch_task( lv_task_t * task );
+static void FindPhone_WatchFind_task( lv_task_t * task );
 
 void bluetooth_FindPhone_tile_setup(void)
 {
@@ -108,7 +110,6 @@ void bluetooth_FindPhone_tile_setup(void)
 
     blectl_register_cb(BLECTL_MSG_JSON, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
 }
-static void FindPhone_search_task( lv_task_t * task );
 
 void FindPhone_main_setup( uint32_t tile_num ) {
 
@@ -184,14 +185,14 @@ static void REM (bool val)
 
 static void toggle_searching ()
 {
-	if (searching) 
+	if (searching_phone) 
 	{
 		REM(false);
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
-		searching = false;
+		searching_phone = false;
 	}else {
-	    _FindPhone_search_task = lv_task_create( FindPhone_search_task, 1000, LV_TASK_PRIO_MID, NULL );
-		searching = true;
+	    _FindPhone_PhoneSearch_task = lv_task_create( FindPhone_PhoneSearch_task, 1000, LV_TASK_PRIO_MID, NULL );
+		searching_phone = true;
 	}		
 }
 
@@ -213,17 +214,24 @@ static void go_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event )
     }
 }
 
-static void FindPhone_search_task( lv_task_t * task )
+static void FindPhone_PhoneSearch_task( lv_task_t * task )
 { 
-	if (searching) 
+	if (searching_phone) 
 	{
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"true\"}\r\n" );
 		REM(true);
 	} else {
 		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 	}
-    lv_task_del( _FindPhone_search_task );
+    lv_task_del( _FindPhone_PhoneSearch_task );
 }
+
+static void FindPhone_WatchFind_task( lv_task_t * task )
+{
+    sound_play_progmem_wav( piep_wav, piep_wav_len ); 
+	motor_vibe(100); 
+}
+
 bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg)
 {
     switch (event)
@@ -246,16 +254,28 @@ static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event)
 }
 
 static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
-{
-    if ( !strcmp( doc["t"], "find" )  )
+{    
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", true) )
     {
+        log_i("FindPhone screen active");
         statusbar_hide(true);
         powermgm_get_event(POWERMGM_STANDBY);          
         powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
         mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF);
         lv_label_set_text(bluetooth_FindPhone_label, "Looking for me?");
-        sound_play_progmem_wav( piep_wav, piep_wav_len );
         lv_obj_invalidate(lv_scr_act());
-        motor_vibe(100);            
+        _FindPhone_WatchFind_task = lv_task_create( FindPhone_WatchFind_task, 1500, LV_TASK_PRIO_MID, NULL );           
+    }
+
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", false) )
+    {
+        log_i("FindPhone screen closed");
+        if( _FindPhone_WatchFind_task!=nullptr)
+        {
+            lv_task_del( _FindPhone_WatchFind_task );
+            _FindPhone_WatchFind_task = nullptr;
+        }            
+        statusbar_hide(false);
+        mainbar_jump_to_maintile(LV_ANIM_OFF);          
     }
 }

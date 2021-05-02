@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Tu May 22 21:23:51 2020
+ *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,16 +19,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#ifndef _OSM_APP_MAIN_H
+    #define _OSM_APP_MAIN_H
 
-#ifndef _FTPSERVER_H
-    #define _FTPSERVER_H
+    #include <TTGO.h>
 
-    #define FTPSERVER_USER      "TTWatch"
-    #define FTPSERVER_PASSWORD  "password"
+    #define OSM_APP_TILE_IMAGE_REQUEST          _BV(0)      /** @brief set tile image update flag */
+    #define OSM_APP_TASK_EXIT_REQUEST           _BV(1)      /** @brief set task exit flag */
 
-    /**
-     *  @brief setup builtin ftpserver, call after first wifi-connection. otherwise esp32 will crash
-     */
-    void ftpserver_start( const char *user, const char *pass );
+    void osmmap_app_main_setup( uint32_t tile_num );
 
-#endif // _FTPSERVER_H
+#endif // _OSM_APP_MAIN_H
