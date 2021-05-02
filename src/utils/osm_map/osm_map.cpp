@@ -637,10 +637,8 @@ void osm_map_clear_cache( osm_location_t *osm_location ) {
 
 uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
     size_t tile = -1;
-    size_t free_tile = -1;
     size_t cache_size = 0;
     size_t cache_file = 0;
-    char* uri = NULL;
     uint64_t timestamp = millis();
     uri_load_dsc_t *uri_load_dsc = NULL;
     /**
@@ -667,9 +665,6 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
                 break;
             }
         }
-        else {
-            free_tile = i;
-        }
     }
     /**
      * check for a cache hit
@@ -681,36 +676,55 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
     }
     else {
         /**
-         * 1. check for a free tile
+         * multi threading optimizing
+         * -
+         * 1st stage
+         * load file into ram ahead
+         * and give semaphore away in the time to download
+         * and take it back after that
          */
-        OSM_MAP_LOG("url cache miss for %s", osm_location->current_tile_url );
-        if ( free_tile == -1 ) {
-            /**
-             * search the oldest one
-             */
-            for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
-                if ( osm_location->uri_load_dsc[ i ]->timestamp <= timestamp && osm_location->uri_load_dsc[ i ] ) {
-                    timestamp = osm_location->uri_load_dsc[ i ]->timestamp;
-                    free_tile = i;
-                }
-            }
-            /**
-             * delete the oldest one
-             */
-            OSM_MAP_LOG("cache full, delete the oldest: %s", osm_location->uri_load_dsc[ free_tile ]->uri );
-            uri_load_free_all( osm_location->uri_load_dsc[ free_tile ] );
-            osm_location->uri_load_dsc[ free_tile ] = NULL;
-        }
-        OSM_MAP_LOG("use tile cache %d", free_tile );
-        uri = (char*)MALLOC( strlen( osm_location->current_tile_url ) + 1 );
+        char *uri = (char*)MALLOC( strlen( osm_location->current_tile_url ) + 1 );
         if ( uri ) {
             strncpy( uri, osm_location->current_tile_url, strlen( osm_location->current_tile_url ) + 1 );
             osm_map_give( osm_location );
             uri_load_dsc = uri_load_to_ram( (const char*)uri );
             osm_map_take( osm_location );
             free( uri );
-            osm_location->uri_load_dsc[ free_tile ] = uri_load_dsc;
         }
+        /**
+         * 2nd stage
+         * seek for a free tile cache
+         */
+        tile = -1;
+        for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+            if ( !osm_location->uri_load_dsc[ i ] ) {
+                tile = i;
+                break;
+            }
+        }
+        /**
+         * 3rd stage
+         * if ne free tile, search for the oldest tile
+         */
+        if ( tile == -1 ) {
+            /**
+             * search the oldest one
+             */
+            for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
+                if ( osm_location->uri_load_dsc[ i ]->timestamp <= timestamp && osm_location->uri_load_dsc[ i ] ) {
+                    timestamp = osm_location->uri_load_dsc[ i ]->timestamp;
+                    tile = i;
+                }
+            }
+            /**
+             * delete the oldest one
+             */
+            OSM_MAP_LOG("cache full, delete the oldest: %s", osm_location->uri_load_dsc[ tile ]->uri );
+            uri_load_free_all( osm_location->uri_load_dsc[ tile ] );
+            osm_location->uri_load_dsc[ tile ] = NULL;
+        }
+        osm_location->uri_load_dsc[ tile ] = uri_load_dsc;
+        OSM_MAP_LOG("use tile cache %d", tile );
         /**
          * get cache size
          */
