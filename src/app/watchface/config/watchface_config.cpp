@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
+ *   Aug 11 17:13:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,17 +19,21 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _OSM_APP_MAIN_H
-    #define _OSM_APP_MAIN_H
+#include "watchface_config.h"
 
-    #include <TTGO.h>
+watchface_config_t::watchface_config_t() : BaseJsonConfig( WATCHFACE_JSON_COFIG_FILE ) {}
 
-    #define OSMMAP_TASK_STACK_SIZE              5000
+bool watchface_config_t::onSave(JsonDocument& doc) {
+    doc["watchface_enable"] = watchface_enable;
+    return true;
+}
 
-    #define OSM_APP_UPDATE_REQUEST              _BV(0)      /** @brief set tile image update flag */
-    #define OSM_APP_LOAD_AHEAD_REQUEST          _BV(1)      /** @brief set tile image update flag */
-    #define OSM_APP_TASK_EXIT_REQUEST           _BV(2)      /** @brief set task exit flag */
+bool watchface_config_t::onLoad(JsonDocument& doc) {
+    watchface_enable = doc["watchface_enable"] | false;
+    return true;
+}
 
-    void osmmap_app_main_setup( uint32_t tile_num );
-
-#endif // _OSM_APP_MAIN_H
+bool watchface_config_t::onDefault( void ) {
+    watchface_enable = true;
+    return true;
+}

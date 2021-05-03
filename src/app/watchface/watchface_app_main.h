@@ -19,17 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _OSM_APP_MAIN_H
-    #define _OSM_APP_MAIN_H
+#ifndef _WATCHFACE_APP_MAIN_H
+    #define _WATCHFACE_APP_MAIN_H
 
     #include <TTGO.h>
 
-    #define OSMMAP_TASK_STACK_SIZE              5000
+    void watchface_app_main_setup( uint32_t tile_num );
 
-    #define OSM_APP_UPDATE_REQUEST              _BV(0)      /** @brief set tile image update flag */
-    #define OSM_APP_LOAD_AHEAD_REQUEST          _BV(1)      /** @brief set tile image update flag */
-    #define OSM_APP_TASK_EXIT_REQUEST           _BV(2)      /** @brief set task exit flag */
-
-    void osmmap_app_main_setup( uint32_t tile_num );
-
-#endif // _OSM_APP_MAIN_H
+#endif // _WATCHFACE_APP_MAIN_H
