@@ -32,9 +32,11 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/powermgm.h"
+#include "hardware/display.h"
 
 lv_task_t *watchface_tile_task;
-bool watchface_active = false;
+volatile bool watchface_active = false;
+volatile bool watchface_enable_after_wakeup = false;
 
 uint32_t watchface_app_tile_num;
 lv_obj_t *watchface_app_tile = NULL;
@@ -57,6 +59,7 @@ LV_IMG_DECLARE(swiss_min_s_240px);
 LV_IMG_DECLARE(swiss_sec_s_240px);
 
 void watchface_app_tile_update_task( lv_task_t *task );
+bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event );
 void watchface_avtivate_cb( void );
 void watchface_hibernate_cb( void );
@@ -120,13 +123,24 @@ void watchface_app_tile_setup( void ) {
     lv_obj_align( watchface_btn, watchface_cont, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( watchface_btn, exit_watchface_app_tile_event_cb );
 
-    mainbar_set_custom_tile_after_wakeup( watchface_app_tile_num );
-    mainbar_enable_custom_tile_after_wakeup( true );
-
     mainbar_add_tile_activate_cb( watchface_app_tile_num, watchface_avtivate_cb );
     mainbar_add_tile_hibernate_cb( watchface_app_tile_num, watchface_hibernate_cb );
 
+    powermgm_register_cb( POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
+
     watchface_tile_task = lv_task_create( watchface_app_tile_update_task, 1000, LV_TASK_PRIO_MID, NULL );
+}
+
+bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
+    switch ( event ) {
+        case POWERMGM_WAKEUP:
+            if ( !display_get_block_return_maintile() ) {
+                if ( watchface_enable_after_wakeup ) {
+                    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
+                }
+            }
+    }
+    return( true );
 }
 
 void watchface_avtivate_cb( void ) {
@@ -168,6 +182,10 @@ void watchface_app_tile_update_task( lv_task_t *task ) {
         lv_img_set_angle( watchface_min_s_img, Angle_M );
         lv_img_set_angle( watchface_sec_s_img, Angle_S );
     }
+}
+
+void watchface_enable_tile_after_wakeup( bool enable ) {
+    watchface_enable_after_wakeup = enable;
 }
 
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {

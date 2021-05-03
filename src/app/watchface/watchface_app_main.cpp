@@ -25,6 +25,7 @@
 
 #include "watchface_app.h"
 #include "watchface_app_main.h"
+#include "watchface_app_tile.h"
 #include "app/watchface/config/watchface_config.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -83,12 +84,12 @@ void watchface_app_main_setup( uint32_t tile_num ) {
     else
         lv_switch_off( watchface_onoff, LV_ANIM_OFF );
 
-    mainbar_enable_custom_tile_after_wakeup( lv_switch_get_state( watchface_onoff ) );
+    watchface_enable_tile_after_wakeup( lv_switch_get_state( watchface_onoff ) );
 }
 
 static void watchface_enable_event_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ):     mainbar_enable_custom_tile_after_wakeup( lv_switch_get_state( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ):     watchface_enable_tile_after_wakeup( lv_switch_get_state( obj ) );
                                             watchface_config.watchface_enable = lv_switch_get_state( obj );
                                             watchface_config.save();
                                             break;

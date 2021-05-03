@@ -55,13 +55,6 @@
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
     /**
-     * @brief override back to main tile after wakup with an custom tile
-     * 
-     * @param tile_number custom tile number
-     */
-    void mainbar_set_custom_tile_after_wakeup( uint32_t tile_number );
-    void mainbar_enable_custom_tile_after_wakeup( bool enable );
-    /**
      * @brief jumps direct to the maintile
      * 
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch

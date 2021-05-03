@@ -29,11 +29,11 @@ bool watchface_config_t::onSave(JsonDocument& doc) {
 }
 
 bool watchface_config_t::onLoad(JsonDocument& doc) {
-    watchface_enable = doc["watchface_enable"] | true;
+    watchface_enable = doc["watchface_enable"] | false;
     return true;
 }
 
 bool watchface_config_t::onDefault( void ) {
-    watchface_enable = true;
+    watchface_enable = false;
     return true;
 }

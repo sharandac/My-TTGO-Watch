@@ -51,9 +51,6 @@ static uint32_t current_tile = 0;
 static uint32_t tile_entrys = 0;
 static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
 
-static uint32_t mainbar_custom_tile_after_wakeup = 0;
-static bool mainbar_custom_tile_after_wakeup_enable = false;
-
 bool mainbar_powermgm_event_cb( EventBits_t event, void *arg );
 
 void mainbar_setup( void ) {
@@ -76,23 +73,11 @@ bool mainbar_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_WAKEUP:
                                         if ( !display_get_block_return_maintile() ) {
-                                            if ( mainbar_custom_tile_after_wakeup_enable ) {
-                                                mainbar_jump_to_tilenumber( mainbar_custom_tile_after_wakeup, LV_ANIM_OFF );
-                                            }
-                                            else {
-                                                mainbar_jump_to_maintile( LV_ANIM_OFF );
-                                            }
+                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         }
                                         break;
     }
     return( true );
-}
-
-void mainbar_set_custom_tile_after_wakeup( uint32_t tile_number ) {
-    mainbar_custom_tile_after_wakeup = tile_number;
-}
-void mainbar_enable_custom_tile_after_wakeup( bool enable ) {
-    mainbar_custom_tile_after_wakeup_enable = enable;
 }
 
 uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {

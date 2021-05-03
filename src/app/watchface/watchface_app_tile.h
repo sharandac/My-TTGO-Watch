@@ -25,5 +25,6 @@
     #include <TTGO.h>
 
     void watchface_app_tile_setup( void );
+    void watchface_enable_tile_after_wakeup( bool enable );
 
 #endif // _WATCHFACE_APP_TILE_H
