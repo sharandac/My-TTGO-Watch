@@ -24,6 +24,7 @@
 
 #include "watchface_app.h"
 #include "watchface_app_main.h"
+#include "watchface_app_tile.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -58,6 +59,7 @@ void watchface_app_setup( void ) {
     /*
      * init main tile, see example_app_main.cpp and example_app_setup.cpp
      */
+    watchface_app_tile_setup();
     watchface_app_main_setup( watchface_app_main_tile_num );
 }
 

@@ -39,6 +39,7 @@
 #include "hardware/blectl.h"
 #include "hardware/wifictl.h"
 #include "hardware/touch.h"
+#include "hardware/powermgm.h"
 
 #include "utils/osm_map/osm_map.h"
 #include "utils/json_psram_allocator.h"
@@ -773,6 +774,7 @@ void osmmap_activate_cb( void ) {
 
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
+    powermgm_set_perf_mode();
 }
 
 void osmmap_hibernate_cb( void ) {
@@ -793,4 +795,6 @@ void osmmap_hibernate_cb( void ) {
      * stop background osm tile image update Task
      */
     xEventGroupSetBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
+    powermgm_set_normal_mode();
+
 }

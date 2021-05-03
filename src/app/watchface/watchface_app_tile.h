@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 11 17:13:51 2020
+ *   Aug 3 12:17:11 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,21 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "watchface_config.h"
+#ifndef _WATCHFACE_APP_TILE_H
+    #define _WATCHFACE_APP_TILE_H
 
-watchface_config_t::watchface_config_t() : BaseJsonConfig( WATCHFACE_JSON_COFIG_FILE ) {}
+    #include <TTGO.h>
 
-bool watchface_config_t::onSave(JsonDocument& doc) {
-    doc["watchface_enable"] = watchface_enable;
-    return true;
-}
+    void watchface_app_tile_setup( void );
 
-bool watchface_config_t::onLoad(JsonDocument& doc) {
-    watchface_enable = doc["watchface_enable"] | true;
-    return true;
-}
-
-bool watchface_config_t::onDefault( void ) {
-    watchface_enable = true;
-    return true;
-}
+#endif // _WATCHFACE_APP_TILE_H

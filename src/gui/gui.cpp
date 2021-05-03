@@ -135,10 +135,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                          * get back to maintile if configure and
                                          * stop all LVGL activitys and tasks
                                          */
-                                        log_i("go standby");
-                                        if ( !display_get_block_return_maintile() ) {
-                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
-                                        }                               
+                                        log_i("go standby");                             
                                         ttgo->stopLvglTick();
                                         break;
         case POWERMGM_WAKEUP:           /*
@@ -147,7 +144,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
-                                        interact = false;
+                                        interact = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   /*
                                          * resume all LVGL activitys and tasks

@@ -32,7 +32,7 @@
     class watchface_config_t : public BaseJsonConfig {
         public:
         watchface_config_t();
-        bool watchface_enable = false;             /** @brief gps auto on/off */
+        bool watchface_enable = true;             /** @brief gps auto on/off */
 
         protected:
         ////////////// Available for overloading: //////////////

@@ -261,6 +261,32 @@ void powermgm_reset( void ) {
     ESP.restart();
 }
 
+void powermgm_set_perf_mode( void ) {
+    #if CONFIG_PM_ENABLE
+        pm_config.max_freq_mhz = 240;
+        pm_config.min_freq_mhz = 240;
+        pm_config.light_sleep_enable = false;
+        ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+        log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 240/80MHz with light sleep");
+    #else
+        setCpuFrequencyMhz(240);
+        log_i("CPU speed = 240MHz");
+    #endif
+}
+
+void powermgm_set_normal_mode( void ) {
+    #if CONFIG_PM_ENABLE
+        pm_config.max_freq_mhz = 240;
+        pm_config.min_freq_mhz = 80;
+        pm_config.light_sleep_enable = false;
+        ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
+        log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 240/80MHz with light sleep");
+    #else
+        setCpuFrequencyMhz(240);
+        log_i("CPU speed = 240MHz");
+    #endif
+}
+
 void powermgm_set_event( EventBits_t bits ) {
     portENTER_CRITICAL(&powermgmMux);
     xEventGroupSetBits( powermgm_status, bits );
