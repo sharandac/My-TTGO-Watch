@@ -47,7 +47,8 @@ extern const uint8_t osm_server_json_start[] asm("_binary_src_utils_osm_map_osmt
 extern const uint8_t osm_server_json_end[] asm("_binary_src_utils_osm_map_osmtileserver_json_end");
 
 EventGroupHandle_t osmmap_event_handle = NULL;     /** @brief osm tile image update event queue */
-TaskHandle_t _osmmap_download_Task;                /** @brief osm tile image update Task */
+TaskHandle_t _osmmap_update_Task;                /** @brief osm tile image update Task */
+TaskHandle_t _osmmap_load_ahead_Task;                /** @brief osm tile image update Task */
 lv_task_t *osmmap_main_tile_task;                  /** @brief osm active/inactive task for show/hide user interface */
 
 lv_obj_t *osmmap_app_main_tile = NULL;              /** @brief osm main tile obj */
@@ -100,6 +101,7 @@ LV_FONT_DECLARE(Ubuntu_32px);
 void osmmap_main_tile_update_task( lv_task_t * task );
 void osmmap_update_request( void );
 void osmmap_update_Task( void * pvParameters );
+void osmmap_load_ahead_Task( void * pvParameters );
 static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event );
 void osmmap_app_set_setting_menu( lv_obj_t *menu );
 bool osmmap_app_touch_event_cb( EventBits_t event, void *arg );
@@ -438,21 +440,55 @@ void osmmap_update_request( void ) {
     /**
      * check if another osm tile image update is running
      */
-    if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_TILE_IMAGE_REQUEST ) {
+    if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_UPDATE_REQUEST ) {
         return;
     }
     else {
-        xEventGroupSetBits( osmmap_event_handle, OSM_APP_TILE_IMAGE_REQUEST );
+        xEventGroupSetBits( osmmap_event_handle, OSM_APP_UPDATE_REQUEST );
     }
+}
+
+void osmmap_load_ahead_Task( void * pvParameters ) {
+    OSMMAP_APP_INFO_LOG("start osm map load ahead background task, heap: %d", ESP.getFreeHeap() );
+    while( true ) {
+        /**
+         * check for  load ahead request
+         */
+        if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_LOAD_AHEAD_REQUEST ) {
+            /**
+             * check if load ahead need or finsh
+             */
+            OSMMAP_APP_LOG("start load ahead update handler");
+            xEventGroupClearBits( osmmap_event_handle, OSM_APP_LOAD_AHEAD_REQUEST );
+            while ( osm_map_load_tiles_ahead( osmmap_location ) ) {
+                /**
+                 * block this task for 125ms
+                 */
+                vTaskDelay( 25 );
+            }
+        }
+        /**
+         * check if for a task exit request
+         */
+        if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_TASK_EXIT_REQUEST ) {
+            break;
+        }
+        /**
+         * block this task for 125ms
+         */
+        vTaskDelay( 25 );
+    }
+    OSMMAP_APP_INFO_LOG("finsh osm map load ahead background task, heap: %d", ESP.getFreeHeap() );
+    vTaskDelete( NULL );    
 }
 
 void osmmap_update_Task( void * pvParameters ) {
     OSMMAP_APP_INFO_LOG("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
-    while( 1 ) {
+    while( true ) {
         /**
          * check if a tile image update is requested
          */
-        if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_TILE_IMAGE_REQUEST ) {
+        if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_UPDATE_REQUEST ) {
             /**
              * check if a tile image update is required and update them
              */
@@ -462,6 +498,7 @@ void osmmap_update_Task( void * pvParameters ) {
                     lv_img_set_src( osmmap_app_tile_img, osm_map_get_tile_image( osmmap_location ) );
                 }
                 lv_obj_align( osmmap_app_tile_img, lv_obj_get_parent( osmmap_app_tile_img ), LV_ALIGN_CENTER, 0 , 0 );
+                xEventGroupSetBits( osmmap_event_handle, OSM_APP_LOAD_AHEAD_REQUEST );
             }
             /**
              * update postion point on the tile image when is valid
@@ -476,21 +513,13 @@ void osmmap_update_Task( void * pvParameters ) {
             /**
              * clear update request flag
              */
-            xEventGroupClearBits( osmmap_event_handle, OSM_APP_TILE_IMAGE_REQUEST );
-        }
-        else {
-            /**
-             * check if load ahead need or finsh
-             */
-            OSMMAP_APP_LOG("start load ahead update handler");
-            osm_map_load_tiles_ahead( osmmap_location );
+            xEventGroupClearBits( osmmap_event_handle, OSM_APP_UPDATE_REQUEST );
         }
         /**
          * check if for a task exit request
          */
         if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_TASK_EXIT_REQUEST ) {
             OSMMAP_APP_INFO_LOG("stop osm map update task");
-            xEventGroupClearBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
             break;
         }
         /**
@@ -726,12 +755,20 @@ void osmmap_activate_cb( void ) {
     /**
      * start background osm tile image update Task
      */
+    xEventGroupClearBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
     xTaskCreate(    osmmap_update_Task,      /* Function to implement the task */
                     "osmmap update Task",    /* Name of the task */
                     5000,                            /* Stack size in words */
                     NULL,                            /* Task input parameter */
                     1,                               /* Priority of the task */
-                    &_osmmap_download_Task );  /* Task handle. */
+                    &_osmmap_update_Task );  /* Task handle. */
+
+    xTaskCreate(    osmmap_load_ahead_Task,      /* Function to implement the task */
+                    "osmmap load ahead Task",    /* Name of the task */
+                    5000,                            /* Stack size in words */
+                    NULL,                            /* Task input parameter */
+                    1,                               /* Priority of the task */
+                    &_osmmap_load_ahead_Task );  /* Task handle. */
 
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
