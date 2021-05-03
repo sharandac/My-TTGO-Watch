@@ -144,7 +144,6 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go wakeup");
                                         ttgo->startLvglTick();
                                         lv_disp_trig_activity( NULL );
-                                        interact = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   /*
                                          * resume all LVGL activitys and tasks
@@ -223,26 +222,7 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
     uint32_t timeout = 0;
     
     switch ( event ) {
-        case POWERMGM_WAKEUP:           /**
-                                         * prevent fast timeout on first run after start or reboot
-                                         */
-                                        if ( first_run ) {
-                                            first_run = false;
-                                            interact = true;
-                                            log_i("set normal timeout on first run");
-                                        }
-                                        /**
-                                         * an first interaction after wakeup use normal timeout
-                                         * otherwise use 5sec timeout to save energy
-                                         */
-                                        if ( interact ) {
-                                            timeout = display_get_timeout() * 1000;
-                                        }
-                                        else {
-                                            timeout = 5000;
-                                        }
-
-                                        if ( lv_disp_get_inactive_time( NULL ) < timeout  || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
+        case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000  || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
                                             lv_task_handler();
                                         }
                                         else {
