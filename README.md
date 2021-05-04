@@ -1,179 +1,96 @@
-# Main screen
+<p align="center">
+<img src="https://img.shields.io/github/last-commit/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
+&nbsp;
+<img src="https://img.shields.io/github/license/sharandac/My-TTGO-Watch.svg?style=for-the-badge" />
+&nbsp;
+<a href="https://www.buymeacoffee.com/sharandac" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%82%AC5-orange?style=for-the-badge&logo=buy-me-a-coffee" /></a>
+</p>
+<hr/>
+
+# My-TTGO-Watch
+
+A smartwatch based on ESP32 from LilyGo. Currently supoort for T-Watch2020 V1. T-Watch2020 V3 and V2 is added, but untested and not complete for lack of a watch.
+
+## Install
+
+Clone this repository and open it with platformIO. Select the right env and then build and upload.
+Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from ShotokuTech[ShotokuTech](https://github.com/ShotokuTech).
+
+# Telegram chatgroup
+
+Telegram chatgroup is here:
+https://t.me/TTGO_Watch
+
+# known issues
+
+* the webserver crashes the ESP32 really often
+* the battery indicator is not accurate, rather a problem with the power management unit ( axp202 )
+
+# how to use
+
+Cf. [Usage](USAGE.md)
+
+# Forks that are recommended
+
+[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
+[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
+[linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
+
+# for the programmers
+
+Cf. [contribution guide](CONTRIBUTING.md)
+
+# Interface
 
 ![screenshot](images/screen1.png)
-
-On startup you see the main screen (time tile). It show the time and widgets.
-
-Widgets are:
-
-* the current weather (if correctly configured).
-* the notifications.
-
-# Screen Navigation
-
- You can swipe with you fingers up, down, left and right between the four main screens. The four screens are organized in time, apps, note and setup tile.
-
-# Quick Settings
-
 ![screenshot](images/screen2.png)
-
-A subset of settings can be accessed via a swipe from the top of the screen.
-
-# Settings
-
 ![screenshot](images/screen3.png)
 ![screenshot](images/screen4.png)
-
-Once a setting is selected, you can leave the form with the exit button.
-
-## Display
-
-Set color, background, touch feedback with vibrations...
-
-## Move
-
-Enable:
-
-* step counter
-* double click
-* tilt
-* display of step counter
-
-The stepcounter value is published to [gadgetbridge](https://gadgetbridge.org) automatically if bluetooth is enabled.
-The frequency of publication is driven by gadgetbridge.
-Initially, it is on a 30 minutes frequency.
-When the realtime tab of gadgetbridge is selected, the frequency is set to every 5 seconds.
-If the watch lost contact with gadgetbridge for more than 30 minutes, the stepcounter is also refreshed when bluetooth is reconnected.
-
-## Bluetooth
-
-The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime.
-
-## WiFi
-
 ![screenshot](images/screen5.png)
-
-## Time
-
-* Enable synchronisation when connect
-* Display 12/24 hours
-* Select region and location
-
-## Utilities
-
-* Format
-* Reboot
-* Poweroff
-* GPS injection
-
-## Sound 
-
-* Enable sound
-* Set volume
-
-# GPS
-
-![screenshot](images/screen11.png)
-
-# Applications
-
-![screenshot](images/screen7.png)
-
-## weather app
-
-![screenshot](images/screen10.png)
-
-For the weather app you need an openweather.com api-id. http://openweathermap.org/appid is a good starting point.
-
-## Stopwatch
-
-Click play to start.
-
-## Alarm
-
-You can set an alarm, by setting time and day(s) of the week.
-
-The main switch controls if alarm is enabled or not.
-
-Next, select the day(s) of the week for the alarm.
-Note that if no days are select, it means an every day alarm.
-Finally, select the hour and minute for the alarm.
-
-In the settings, you can select the reminder: vibe, fade, beep.
-You can also have the next alarm displayed on the main face.
-
-## ir-remote
-
-For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
-
-## OSMmap
-
-![screenshot](images/screen9.png)
-![navigation](images/osmmap_navigation.png)
-
-A long press in the middle centers the map to the current gps position.
-
-## OSMAnd
-
 ![screenshot](images/screen6.png)
-
-In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
-
-## Activity tracker
-
+![screenshot](images/screen7.png)
+![screenshot](images/screen8.png)
+![screenshot](images/screen9.png)
+![screenshot](images/screen10.png)
+![screenshot](images/screen11.png)
 ![screenshot](images/screen12.png)
 
-The activity tracker let you check your activity.
 
-In the settings, set your step length and your goals in step and meters.
+# Contributors
 
-When associated to Gadgetbrige, activity is reported regularly.
-If you need to ensure a synchronization, for example at the beginning of an activity or at the end, you can use the refresh button.
-It will force a synchronization.
+Special thanks to the following people for their help:
 
-The trash can button allows to reset step counter.
-Useful when starting a new activity an keeping exact track of it.
+[5tormChild](https://github.com/5tormChild)<br>
+[bwagstaff](https://github.com/bwagstaff)<br>
+[chrismcna](https://github.com/chrismcna)<br>
+[datacute](https://github.com/datacute)<br>
+[guyou](https://github.com/guyou)<br>
+[jakub-vesely](https://github.com/jakub-vesely)<br>
+[joshvito](https://github.com/joshvito)<br>
+[JoanMCD](https://github.com/JoanMCD)<br>
+[NorthernDIY](https://github.com/NorthernDIY)<br>
+[Neuroplant](https://github.com/Neuroplant)<br>
+[rnisthal](https://github.com/rnisthal)<br>
+[paulstueber](https://github.com/paulstueber)<br>
+[ssspeq](https://github.com/ssspeq)<br>
+[fliuzzi02](https://github.com/fliuzzi02)<br>
 
-## Sailing
+and the following projects:
 
-This app connects to your [OpenPlotter](https://openmarine.net/openplotter) and shows some of your boat stats.
+[ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br>
+[AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br>
+[ESP32SSDP](https://github.com/luc-github/ESP32SSDP)<br>
+[ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br>
+[LVGL](https://github.com/lvgl)<br>
+[TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
+[TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
+[ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
+[pubsubclient](https://github.com/knolleary/pubsubclient)<br>
+[ESP32-targz](https://github.com/tobozo/ESP32-targz)<br>
 
-In order to make it work you have to configure your OpenCPN plotter in the connections tab as follows:
-
-![screenshot](images/openplotter.png)
-
-Set "Output filtering" to trasmit the sentences: RMB,RMC,APB
-
-Contact [fliuzzi02](https://github.com/fliuzzi02) for further info and help.
-Some improvements might come in the future.
-
-# Updates
-
-It is possible to update over the air.
-
-# FAQ
-
-## how to make a screenshot?
-
-![screenshot](images/screen8.png)
-
-Press the button for 2 seconds, after that an quickmenu appears. Here you can select the tiny camera icon to take a screenshot.
-This can be downloaded via the built-in FTP server (binary and passive mode, username: TTWatch and password: passord), if activated.
-The file name is screen.data.
-
-Or the other way:
-
-The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
-```bash
-wget x.x.x.x/shot ; wget x.x.x.x/screen.data
-```
-
-Pro-tipp:
-
-[lgrossard](https://github.com/lgrossard)! made a little Python script to generate and download the screenshots from the t-watch [here](https://ludovic.grossard.fr/media/twatch_screenshot.py).
-
-## how to change background?
-
-You can change background in the display settings.
-
-If you want to use your own background image, simply upload a PNG with a resolution of 240x240 pixels via ftp to the Watch and name it bg.png and set it in the display settings page 2.
+Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
+<p>
+If you want to donate to the author then you can buy me a coffee.
+<br/><br/>
+<a href="https://www.buymeacoffee.com/sharandac" target="_blank"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-%E2%82%AC5-orange?style=for-the-badge&logo=buy-me-a-coffee" /></a>
+</p>
