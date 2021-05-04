@@ -32,6 +32,7 @@ static float lon = 0;
 
 EventGroupHandle_t fakegps_event_handle = NULL;
 TaskHandle_t _fakegps_get_location_Task = NULL;
+static volatile bool fakegps_wifi_enable = false;
 
 void fakegps_get_location_Task( void * pvParameters );
 bool fakegps_wifictl_event_cb( EventBits_t event, void *arg );
@@ -40,7 +41,8 @@ void fakegps_start_task( void );
 
 void fakegps_setup( void ) {
     fakegps_event_handle = xEventGroupCreate();
-    wifictl_register_cb( WIFICTL_CONNECT_IP, fakegps_wifictl_event_cb, "wifictl fakegps");
+    fakegps_wifi_enable = false;
+    wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_DISCONNECT, fakegps_wifictl_event_cb, "wifictl fakegps");
     gpsctl_register_cb( GPSCTL_ENABLE, fakegps_gpsctl_event_cb, "gpsctl fakegps");
 }
 
@@ -55,7 +57,9 @@ double fakegps_get_last_lon( void ) {
 bool fakegps_gpsctl_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
         case GPSCTL_ENABLE:
-            fakegps_start_task();
+            if( fakegps_wifi_enable ) {
+                fakegps_start_task();
+            }
             break;        
     }
     return( true );
@@ -64,6 +68,11 @@ bool fakegps_gpsctl_event_cb( EventBits_t event, void *arg ) {
 bool fakegps_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT_IP:
+            fakegps_wifi_enable = true;
+            fakegps_start_task();
+            break;
+        case WIFICTL_DISCONNECT:
+            fakegps_wifi_enable = false;
             fakegps_start_task();
             break;
     }

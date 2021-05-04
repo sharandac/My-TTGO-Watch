@@ -58,10 +58,6 @@ lv_obj_t * distance_label = NULL;
 
 lv_task_t * _sailing_task;
 
-static volatile bool sailing_active = false;
-static volatile bool sailing_wifi_active = false;
-static volatile uint32_t sailing_display_state = false;
-
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
@@ -74,8 +70,7 @@ void rmb(char dati[]);
 void apb(char dati[]);
 
 bool sailing_wifictl_event_cb( EventBits_t event, void *arg );
-void sailing_hibernate_event_cb( void );
-void sailing_activate_event_cb( void );
+
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void sailing_task( lv_task_t * task );
@@ -161,85 +156,31 @@ void sailing_main_setup( uint32_t tile_num ) {
     _sailing_task = lv_task_create( sailing_task, 1000, LV_TASK_PRIO_MID, NULL );
 
     //udp listening
-    wifictl_register_cb( WIFICTL_DISCONNECT | WIFICTL_CONNECT, sailing_wifictl_event_cb, "sailing data" );
-    mainbar_add_tile_hibernate_cb( tile_num, sailing_hibernate_event_cb );
-    mainbar_add_tile_activate_cb( tile_num, sailing_activate_event_cb );
-
-    sailing_active = false;
-    sailing_wifi_active = false;
-}
-
-void sailing_hibernate_event_cb( void ) {
-    /**
-     * clear sailing app inactive flag
-     */
-    sailing_active = false;
-    /**
-     * close UDP listner
-     */
-    log_i("close UDP listner");
-    udp.close();
-    /**
-     * restore display timeout
-     */
-    display_set_timeout( sailing_display_state );
-}
-
-void sailing_activate_event_cb( void ) {
-    /**
-     * save display timeout
-     */
-    if ( !sailing_active ) {
-        sailing_display_state = display_get_timeout();
-    }
-    /**
-     * set sailing app avtive flag
-     */
-    sailing_active = true;
-    /**
-     * active UDP listner when wifi active on enter the sailing app
-     */
-    if ( sailing_wifi_active ) {
-        if( udp.listen(1234) ) {
-            log_i("UDP Listening on IP: %s", WiFi.localIP().toString().c_str() );
-            udp.onPacket([](AsyncUDPPacket packet) {
-                char buf[packet.length()];
-                
-                for (int i=0;i<packet.length();i++){
-                    buf[i]= (char)*(packet.data()+i);
-                }
-                if(String(buf).startsWith("$ECRMB")) rmb(buf);
-                if(String(buf).startsWith("$ECRMC")) rmc(buf);
-                if(String(buf).startsWith("$ECAPB")) apb(buf);
-            });
-        }
-    }
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, sailing_wifictl_event_cb, "sailing data" );
+    
 }
 
 bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case WIFICTL_CONNECT: 
-            /**
-             * set wifi active flasg
-             */      
-            sailing_wifi_active = true;
-            /**
-             * when sailing app is active, setup UDP listner
-             */
-            if ( sailing_active ) {
-                sailing_activate_event_cb();
-            }
-            break;
-        case WIFICTL_DISCONNECT:       
-            /**
-             * clear wifi active flag
-             */
-            sailing_wifi_active = false;
-            /**
-             * disable UDP listner on tile change/exit
-             */
-            sailing_hibernate_event_cb();
-            break;
+        case WIFICTL_CONNECT:       
+                                if(udp.listen(1234)) {
+                                        Serial.print("[I] UDP Listening on IP: ");
+                                        Serial.println(WiFi.localIP());
+                                        udp.onPacket([](AsyncUDPPacket packet) {
+                                            char buf[packet.length()];
+                                            
+                                            for (int i=0;i<packet.length();i++){
+                                                buf[i]= (char)*(packet.data()+i);
+                                            }
+
+                                            // Serial.println(String(buf));
+
+                                            if(String(buf).startsWith("$ECRMB")) rmb(buf);
+                                            if(String(buf).startsWith("$ECRMC")) rmc(buf);
+                                            if(String(buf).startsWith("$ECAPB")) apb(buf);
+                                        });
+                                    }
+                                    break;
     }
     return(true);
 }
@@ -255,6 +196,7 @@ static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        display_set_timeout( 15 );
                                         break;
     }
 }

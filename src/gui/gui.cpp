@@ -54,10 +54,7 @@
 #include "hardware/touch.h"
 
 lv_obj_t *img_bin;
-static volatile bool interact = false;
-static volatile bool first_run = true;
 
-bool gui_touch_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
@@ -115,16 +112,6 @@ void gui_setup( void )
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
-    touch_register_cb( TOUCH_UPDATE, gui_touch_event_cb, "gui touch" );
-}
-
-bool gui_touch_event_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
-        case TOUCH_UPDATE:
-            interact = true;
-            break;
-    }
-    return( true );
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
@@ -219,8 +206,6 @@ void gui_set_background_image ( uint32_t background_image ) {
 }
 
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
-    uint32_t timeout = 0;
-    
     switch ( event ) {
         case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000  || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
                                             lv_task_handler();
