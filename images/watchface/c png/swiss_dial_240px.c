@@ -2391,7 +2391,7 @@ const lv_img_dsc_t swiss_dial_240px = {
   .header.w = 240,
   .header.h = 240,
   .data_size = 37991,
-  .header.cf = LV_IMG_CF_RAW,
+  .header.cf = LV_IMG_CF_RAW_ALPHA,
   .data = swiss_dial_240px_map,
 };
 
