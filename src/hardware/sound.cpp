@@ -192,7 +192,7 @@ bool sound_send_event_cb( EventBits_t event, void *arg ) {
 }
 
 /**
- * @brief enable or disable the power output for AXP202_LDO3
+ * @brief enable or disable the power output for AXP202_LDO3 or AXP202_LDO4
  * depending on the current value of: sound_config.enable
  */
 void sound_set_enabled( bool enabled ) {
@@ -206,17 +206,14 @@ void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( enabled ) {
-        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-        ttgo->power->setLDO3Voltage( 3000 );
-        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
+        ttgo->enableAudio();
     }
     else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
+        ttgo->disableAudio();
     }
 }
 
