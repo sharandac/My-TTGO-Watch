@@ -80,13 +80,13 @@ and the following projects:
 [ArduinoJson](https://github.com/bblanchon/ArduinoJson)<br>
 [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)<br>
 [ESP32SSDP](https://github.com/luc-github/ESP32SSDP)<br>
+[ESP32-targz](https://github.com/tobozo/ESP32-targz)<br>
+[ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br>
 [LVGL](https://github.com/lvgl)<br>
+[pubsubclient](https://github.com/knolleary/pubsubclient)<br>
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
-[ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
-[pubsubclient](https://github.com/knolleary/pubsubclient)<br>
-[ESP32-targz](https://github.com/tobozo/ESP32-targz)<br>
 
 Every Contribution to this repository is highly welcome! Don't fear to create pull requests which enhance or fix the project, you are going to help everybody.
 <p>
