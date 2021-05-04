@@ -233,7 +233,12 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
         touch.touched = touched;
         touch.x_coor = data->point.x;
         touch.y_coor = data->point.y;
-        touch_send_event_cb( TOUCH_UPDATE, (void*)&touch );
+        /**
+         * discard when callback return true
+         */
+        if ( touch_send_event_cb( TOUCH_UPDATE, (void*)&touch ) ) {
+            data->state = LV_INDEV_STATE_REL;
+        }
     }
     else {
         data->state = LV_INDEV_STATE_REL;

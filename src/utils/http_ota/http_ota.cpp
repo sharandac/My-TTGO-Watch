@@ -107,6 +107,9 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
             retval = true;
         }
     }
+    else {
+        http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"http error ..." );        
+    }
     http.end();
 
     return( retval );
