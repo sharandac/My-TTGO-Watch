@@ -100,7 +100,7 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
          */
         if( !GZUnpacker->gzStreamUpdater( http.getStreamPtr(), size, 0, false ) ) {
             log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
-            http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"Flashing ... failed!" );
+            http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"error ... weak wifi?" );
         }
         else {
             http_ota_send_event_cb( HTTP_OTA_FINISH, (void*)"Flashing ... done!" );
@@ -108,7 +108,7 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
         }
     }
     else {
-        http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"http error ..." );        
+        http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"http error ... weak wifi?" );        
     }
     http.end();
 

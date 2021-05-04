@@ -292,7 +292,7 @@ void watchface_app_tile_update_task( lv_task_t *task ) {
 
         //Angle calculation for Hands
         int Angle_S = (int)((info.tm_sec % 60) * 60 );
-        int Angle_M = (int)((info.tm_min % 60) * 60 ) + (int)(info.tm_sec % 60);
+        int Angle_M = (int)((info.tm_min % 60) * 60 ) + ( watchface_theme_config.dial.min.smooth ? (int)(info.tm_sec % 60) : 0 );
         int Angle_H = (int)((info.tm_hour % 12 ) * 300 ) + (int)((info.tm_min % 60 ) * 5);
 
         while (Angle_S >= 3600)

@@ -28,6 +28,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc) {
     doc["hour"]["x_offset"] = dial.hour.x_offset;
     doc["hour"]["y_offset"] = dial.hour.y_offset;
     doc["min"]["enable"] = dial.min.enable;
+    doc["min"]["smooth"] = dial.min.smooth;
     doc["min"]["x_offset"] = dial.min.x_offset;
     doc["min"]["y_offset"] = dial.min.y_offset;
     doc["sec"]["enable"] = dial.sec.enable;;
@@ -35,13 +36,13 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc) {
     doc["sec"]["y_offset"] = dial.sec.y_offset;
 
     doc["hour_shadow"]["enable"] = dial.hour_shadow.enable;
-    doc["hour_shadow"]["x_offset"] = dial.hour_shadow.x_offset;;
-    doc["hour_shadow"]["y_offset"] = dial.hour_shadow.y_offset;;
+    doc["hour_shadow"]["x_offset"] = dial.hour_shadow.x_offset;
+    doc["hour_shadow"]["y_offset"] = dial.hour_shadow.y_offset;
     doc["min_shadow"]["enable"] = dial.min_shadow.enable;
-    doc["min_shadow"]["x_offset"] = dial.min_shadow.x_offset;;
-    doc["min_shadow"]["y_offset"] = dial.min_shadow.y_offset;;
+    doc["min_shadow"]["x_offset"] = dial.min_shadow.x_offset;
+    doc["min_shadow"]["y_offset"] = dial.min_shadow.y_offset;
     doc["sec_shadow"]["enable"] = dial.sec_shadow.enable;
-    doc["sec_shadow"]["x_offset"] = dial.sec_shadow.x_offset;;
+    doc["sec_shadow"]["x_offset"] = dial.sec_shadow.x_offset;
     doc["sec_shadow"]["y_offset"] = dial.sec_shadow.y_offset;
     return true;
 }
@@ -51,6 +52,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
     dial.hour.x_offset = doc["hour"]["x_offset"] | 0;
     dial.hour.y_offset = doc["hour"]["y_offset"] | 0;
     dial.min.enable = doc["min"]["enable"] | true;
+    dial.min.smooth = doc["min"]["smooth"] | true;
     dial.min.x_offset = doc["min"]["x_offset"] | 0;
     dial.min.y_offset = doc["min"]["y_offset"] | 0;
     dial.sec.enable = doc["sec"]["enable"] | true;
@@ -74,6 +76,7 @@ bool watchface_theme_config_t::onDefault( void ) {
     dial.hour.x_offset = 0;
     dial.hour.y_offset = 0;
     dial.min.enable = true;
+    dial.min.smooth = true;
     dial.min.x_offset = 0;
     dial.min.y_offset = 0;
     dial.sec.enable = true;

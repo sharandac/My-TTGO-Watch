@@ -28,6 +28,7 @@
 
     typedef struct {
         bool enable = true;
+        bool smooth = true;
         int32_t x_offset = 0;
         int32_t y_offset = 0;
     } watchface_index_t;
