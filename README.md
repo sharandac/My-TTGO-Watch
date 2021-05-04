@@ -64,6 +64,7 @@ Special thanks to the following people for their help:
 [bwagstaff](https://github.com/bwagstaff)<br>
 [chrismcna](https://github.com/chrismcna)<br>
 [datacute](https://github.com/datacute)<br>
+[fliuzzi02](https://github.com/fliuzzi02)<br>
 [guyou](https://github.com/guyou)<br>
 [jakub-vesely](https://github.com/jakub-vesely)<br>
 [joshvito](https://github.com/joshvito)<br>
@@ -73,7 +74,6 @@ Special thanks to the following people for their help:
 [rnisthal](https://github.com/rnisthal)<br>
 [paulstueber](https://github.com/paulstueber)<br>
 [ssspeq](https://github.com/ssspeq)<br>
-[fliuzzi02](https://github.com/fliuzzi02)<br>
 
 and the following projects:
 
