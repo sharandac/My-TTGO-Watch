@@ -29,3 +29,5 @@ void sailing_setup( void );
     uint32_t sailing_get_app_main_tile_num( void );
 
 #endif // _SAILING_H
+
+extern bool tracking;

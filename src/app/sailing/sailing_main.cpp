@@ -41,6 +41,7 @@ AsyncUDP udp;
 
 struct pack {
   float heading;
+  float track;
   float gspeed;
   float vmg;
   float distance;
@@ -51,6 +52,7 @@ lv_obj_t *sailing_main_tile = NULL;
 lv_style_t sailing_main_style;
 lv_style_t heading_main_style;
 
+lv_obj_t * heading_info_label = NULL;
 lv_obj_t * heading_label = NULL;
 lv_obj_t * gspeed_label = NULL;
 lv_obj_t * vmg_label = NULL;
@@ -116,7 +118,7 @@ void sailing_main_setup( uint32_t tile_num ) {
     lv_obj_align(setup_btn, sailing_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     lv_obj_set_event_cb( setup_btn, enter_sailing_setup_event_cb );
 
-    lv_obj_t * heading_info_label = lv_label_create( sailing_main_tile, NULL );
+    heading_info_label = lv_label_create( sailing_main_tile, NULL );
     lv_obj_add_style( heading_info_label, LV_OBJ_PART_MAIN, &heading_main_style );
     lv_label_set_text( heading_info_label, "H =" );
     lv_obj_align( heading_info_label, sailing_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 20 );
@@ -176,7 +178,7 @@ bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
                                             // Serial.println(String(buf));
 
                                             if(String(buf).startsWith("$ECRMB")) rmb(buf);
-                                            if(String(buf).startsWith("$ECRMC")) rmc(buf);
+                                            if(String(buf).startsWith("$GPRMC")) rmc(buf);
                                             if(String(buf).startsWith("$ECAPB")) apb(buf);
                                         });
                                     }
@@ -204,15 +206,25 @@ static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void sailing_main_update_label()
 {
     char heading[10];
+    char track[10];
     char gspeed[10];
     char vmg[10];
     char distance[10];
     snprintf(heading, sizeof( heading ), "%.1f°", attuale.heading);
+    snprintf(track, sizeof( track ), "%.1f°", attuale.track);
     snprintf(gspeed, sizeof( gspeed ), "%.1fkt", attuale.gspeed);
     snprintf(vmg, sizeof( vmg ), "%.1fkt", attuale.vmg);
     snprintf(distance, sizeof( distance ), "%.1fnm", attuale.distance);
 
-    lv_label_set_text( heading_label, heading);
+    if( tracking ) {
+      lv_label_set_text( heading_info_label, "T =" );
+      lv_label_set_text( heading_label, track );
+    }
+    else {
+      lv_label_set_text( heading_info_label, "H =" );
+      lv_label_set_text( heading_label, heading );
+    }
+    lv_obj_align( heading_info_label, sailing_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 20 );
     lv_obj_align( heading_label, sailing_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 20 );
 
     lv_label_set_text( gspeed_label, gspeed );
@@ -247,6 +259,7 @@ void rmc(char dati[]){
 
   //passing RMC info to global struct
   attuale.gspeed = info[7].toFloat();
+  attuale.heading = info[8].toFloat();
   // Serial.println(attuale.gspeed);
 }
 
@@ -287,5 +300,5 @@ void apb(char dati[]){
   }
 
   //passing APB info to global struct
-  attuale.heading = info[13].toFloat();
+  attuale.track = info[13].toFloat();
 }

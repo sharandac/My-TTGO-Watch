@@ -64,6 +64,7 @@ Special thanks to the following people for their help:
 [bwagstaff](https://github.com/bwagstaff)<br>
 [chrismcna](https://github.com/chrismcna)<br>
 [datacute](https://github.com/datacute)<br>
+[fliuzzi02](https://github.com/fliuzzi02)<br>
 [guyou](https://github.com/guyou)<br>
 [jakub-vesely](https://github.com/jakub-vesely)<br>
 [joshvito](https://github.com/joshvito)<br>
