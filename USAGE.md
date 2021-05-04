@@ -106,6 +106,18 @@ You can also have the next alarm displayed on the main face.
 
 For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
 
+## watchface
+
+If you want to customize your own watchface. Copy some .png like in /images/watchface to your watch. And rememder, rotation point is the center of the image.
+
+![dial](images/watchface/watchface_dial.png)
+![hour](images/watchface/watchface_hour.png)
+![min](images/watchface/watchface_min.png)
+![sec](images/watchface/watchface_sec.png)
+![hour shadow](images/watchface/watchface_hour_s.png)
+![min shadow](images/watchface/watchface_min_s.png)
+![sec shadow](images/watchface/watchface_sec_s.png)
+
 ## OSMmap
 
 ![screenshot](images/screen9.png)
