@@ -91,7 +91,7 @@ void sailing_setup_setup( uint32_t tile_num ) {
 
     sailing_track_switch = lv_switch_create( sailing_setup_tile, NULL );
     lv_obj_add_protect( sailing_track_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( sailing_track_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
+    lv_obj_add_style( sailing_track_switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
     lv_switch_off( sailing_track_switch, LV_ANIM_ON );
     lv_obj_align( sailing_track_switch, sailing_foobar_switch, LV_ALIGN_IN_RIGHT_MID, 0, 30 );
     lv_obj_set_event_cb( sailing_track_switch, sailing_track_switch_event_cb );
