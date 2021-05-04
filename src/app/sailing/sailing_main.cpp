@@ -166,17 +166,13 @@ bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       
                                 if(udp.listen(1234)) {
-                                        Serial.print("[I] UDP Listening on IP: ");
-                                        Serial.println(WiFi.localIP());
+                                        SAILING_INFO_LOG("UDP Listening on IP: %s", WiFi.localIP().toString().c_str() );
                                         udp.onPacket([](AsyncUDPPacket packet) {
                                             char buf[packet.length()];
                                             
                                             for (int i=0;i<packet.length();i++){
                                                 buf[i]= (char)*(packet.data()+i);
                                             }
-
-                                            // Serial.println(String(buf));
-
                                             if(String(buf).startsWith("$ECRMB")) rmb(buf);
                                             if(String(buf).startsWith("$GPRMC")) rmc(buf);
                                             if(String(buf).startsWith("$ECAPB")) apb(buf);
