@@ -36,6 +36,7 @@
 
     void watchface_app_tile_setup( void );
     void watchface_enable_tile_after_wakeup( bool enable );
-    void watchface_reload_images( void );
+    void watchface_reload_theme( void );
+    void watchface_reload_and_test( uint32_t return_tile );
 
 #endif // _WATCHFACE_APP_TILE_H

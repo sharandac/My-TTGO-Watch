@@ -32,14 +32,15 @@
 #include "gui/widget_styles.h"
 #include "gui/widget_factory.h"
 
-
 lv_obj_t *watchface_app_main_tile = NULL;              /** @brief osm main tile obj */
 lv_style_t watchface_app_main_style;
+lv_style_t watchface_app_button_style;
 lv_obj_t *watchface_exit_btn = NULL;                          /** @brief osm exit icon/button obj */
 lv_obj_t *watchface_onoff = NULL;
 watchface_config_t watchface_config;
 
 LV_IMG_DECLARE(exit_32px);
+static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_enable_event_cb( lv_obj_t *obj, lv_event_t event );
 static void exit_watchface_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -57,6 +58,7 @@ void watchface_app_main_setup( uint32_t tile_num ) {
      */
     lv_style_copy( &watchface_app_main_style, ws_get_mainbar_style() );
     lv_obj_add_style( watchface_app_main_tile, LV_OBJ_PART_MAIN, &watchface_app_main_style );
+    lv_style_copy( &watchface_app_button_style, ws_get_button_style() );
 
     watchface_exit_btn = lv_imgbtn_create( watchface_app_main_tile, NULL);
     lv_imgbtn_set_src( watchface_exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
@@ -70,14 +72,21 @@ void watchface_app_main_setup( uint32_t tile_num ) {
     lv_obj_t *watchface_onoff_cont = lv_obj_create( watchface_app_main_tile, NULL );
     lv_obj_set_size( watchface_onoff_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( watchface_onoff_cont, LV_OBJ_PART_MAIN, &watchface_app_main_style );
-    lv_obj_align( watchface_onoff_cont, watchface_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
-    watchface_onoff = wf_add_switch( watchface_app_main_tile, false );
-    lv_obj_align( watchface_onoff, watchface_app_main_tile, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_align( watchface_onoff_cont, watchface_app_main_tile, LV_ALIGN_IN_TOP_MID, 0,35 );
+    watchface_onoff = wf_add_switch( watchface_onoff_cont, false );
+    lv_obj_align( watchface_onoff, watchface_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( watchface_onoff, watchface_enable_event_cb );
-    lv_obj_t *watchface_onoff_label = lv_label_create( watchface_app_main_tile, NULL);
+    lv_obj_t *watchface_onoff_label = lv_label_create( watchface_onoff_cont, NULL);
     lv_obj_add_style( watchface_onoff_label, LV_OBJ_PART_MAIN, &watchface_app_main_style );
     lv_label_set_text( watchface_onoff_label, "enable watchface");
-    lv_obj_align( watchface_onoff_label, watchface_app_main_tile, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_align( watchface_onoff_label, watchface_onoff_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
+    lv_obj_t *watchface_reload_and_test_btn = lv_btn_create( watchface_app_main_tile, NULL );
+    lv_obj_align( watchface_reload_and_test_btn, watchface_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_event_cb( watchface_reload_and_test_btn, watchface_app_reload_and_test_cb );
+    lv_obj_add_style( watchface_reload_and_test_btn, LV_OBJ_PART_MAIN, &watchface_app_button_style );
+    lv_obj_t *watchface_reload_and_test_btn_label = lv_label_create( watchface_reload_and_test_btn, NULL );
+    lv_label_set_text( watchface_reload_and_test_btn_label, "reload and test");
 
     if ( watchface_config.watchface_enable )
         lv_switch_on( watchface_onoff, LV_ANIM_OFF );
@@ -85,6 +94,14 @@ void watchface_app_main_setup( uint32_t tile_num ) {
         lv_switch_off( watchface_onoff, LV_ANIM_OFF );
 
     watchface_enable_tile_after_wakeup( lv_switch_get_state( watchface_onoff ) );
+}
+
+static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event ) {
+    switch( event ) {
+        case LV_EVENT_CLICKED:
+            watchface_reload_and_test( watchface_app_get_app_main_tile_num() );
+            break;
+    }
 }
 
 static void watchface_enable_event_cb( lv_obj_t *obj, lv_event_t event ) {

@@ -22,9 +22,12 @@
 #ifndef _WATCHFACE_THEME_CONFIG_H
     #define _WATCHFACE_THEME_CONFIG_H
 
+    #include <TTGO.h>
+    #include "config.h"
     #include "utils/basejsonconfig.h"
 
     #define WATCHFACE_THEME_JSON_COFIG_FILE         "/watchface_theme.json"   /** @brief defines json config file name */
+    #define WATCHFACE_LABEL_NUM                     3
 
     typedef struct {
         bool enable = true;
@@ -34,12 +37,26 @@
     } watchface_index_t;
 
     typedef struct {
+        bool enable = true;
+        char type[32] = "";
+        char label[32] = "";
+        char font_color[32] = "";
+        char align[32] = "";
+        int32_t font_size = 0;
+        int32_t x_offset = 0;
+        int32_t y_offset = 0;
+        int32_t x_size = 0;
+        int32_t y_size = 0;
+    } watchface_label_t;
+
+    typedef struct {
         watchface_index_t hour;
         watchface_index_t min;
         watchface_index_t sec;
         watchface_index_t hour_shadow;
         watchface_index_t min_shadow;
         watchface_index_t sec_shadow;
+        watchface_label_t label[3];
     } watchface_dial_t;
 
     /**
