@@ -373,8 +373,10 @@ void watchface_reload_theme( void ) {
         lv_obj_add_style( watchface_label[ i ], LV_OBJ_PART_MAIN, watchface_app_label_style[ i ] );
         lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
     }
-
-    watchface_theme_config.save();
+    /**
+     * write clear json back
+     */
+    watchface_theme_config.save( 32000 );
 }
 
 lv_font_t *watchface_get_font( int32_t font_size ) {

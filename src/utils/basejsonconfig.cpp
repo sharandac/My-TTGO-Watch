@@ -73,6 +73,40 @@ bool BaseJsonConfig::load() {
     return result;
 }
 
+
+bool BaseJsonConfig::save( uint32_t size ) {
+    bool result = false;
+    fs::File file = SPIFFS.open(fileName, FILE_WRITE );
+
+    if (!file) {
+        log_e("Can't open file: %s!", fileName);
+    }
+    else {
+        SpiRamJsonDocument doc( size );
+        result = onSave(doc);
+
+        if ( doc.overflowed() ) {
+            log_e("json to large, some value are missing. use another size");
+        }
+        
+        size_t outSize = 0;
+        if (prettyJson)
+        outSize = serializeJsonPretty(doc, file);
+        else
+        outSize = serializeJson(doc, file);
+
+        if (result == true && outSize == 0) {
+            log_e("Failed to write config file %s", fileName);
+            result = false;
+        }
+        
+        doc.clear();
+    }
+    file.close();
+
+    return result;
+}
+
 bool BaseJsonConfig::save() {
     bool result = false;
     fs::File file = SPIFFS.open(fileName, FILE_WRITE );
@@ -82,8 +116,12 @@ bool BaseJsonConfig::save() {
     }
     else {
         auto size = getJsonBufferSize();
-        SpiRamJsonDocument doc(size);
+        SpiRamJsonDocument doc( size );
         result = onSave(doc);
+
+        if ( doc.overflowed() ) {
+            log_e("json to large, some value are missing. use doc.save( uint32_t size )");
+        }
         
         size_t outSize = 0;
         if (prettyJson)

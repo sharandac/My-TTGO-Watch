@@ -23,7 +23,7 @@
 
 watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_COFIG_FILE ) {}
 
-bool watchface_theme_config_t::onSave(JsonDocument& doc) {
+bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
     doc["dial"]["enable"] = dial.dial.enable;
     doc["dial"]["x_offset"] = dial.dial.x_offset;
     doc["dial"]["y_offset"] = dial.dial.y_offset;
@@ -61,7 +61,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc) {
         doc["label"][i]["x_size"] = dial.label[ i ].x_size;
         doc["label"][i]["y_size"] = dial.label[ i ].y_size;
     }
-
+    
     return true;
 }
 
@@ -69,7 +69,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
     dial.dial.enable = doc["dial"]["enable"] | true;
     dial.dial.x_offset = doc["dial"]["x_offset"] | 0;
     dial.dial.y_offset = doc["dial"]["y_offset"] | 0;
-    
+
     dial.hour.enable = doc["hour"]["enable"] | true;
     dial.hour.x_offset = doc["hour"]["x_offset"] | 0;
     dial.hour.y_offset = doc["hour"]["y_offset"] | 0;
@@ -100,8 +100,8 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         dial.label[ i ].font_size = doc["label"][i]["font_size"] | 12;
         dial.label[ i ].x_offset = doc["label"][i]["x_offset"] | 0;
         dial.label[ i ].y_offset = doc["label"][i]["y_offset"] | 0;
-        dial.label[ i ].x_size = doc["label"][i]["x_size"] | 64;
-        dial.label[ i ].y_size = doc["label"][i]["y_size"] | 16;
+        dial.label[ i ].x_size = doc["label"][i]["x_size"] | 0;
+        dial.label[ i ].y_size = doc["label"][i]["y_size"] | 0;
     }
     return true;
 }
@@ -150,8 +150,8 @@ bool watchface_theme_config_t::onDefault( void ) {
         dial.label[ i ].font_size = 12;
         dial.label[ i ].x_offset = 0;
         dial.label[ i ].y_offset = 0;
-        dial.label[ i ].x_size = 64;
-        dial.label[ i ].y_size = 16;
+        dial.label[ i ].x_size = 0;
+        dial.label[ i ].y_size = 0;
     }
     /**
      * setup default date label

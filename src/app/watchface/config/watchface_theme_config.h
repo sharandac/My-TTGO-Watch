@@ -27,7 +27,7 @@
     #include "utils/basejsonconfig.h"
 
     #define WATCHFACE_THEME_JSON_COFIG_FILE         "/watchface_theme.json"   /** @brief defines json config file name */
-    #define WATCHFACE_LABEL_NUM                     3
+    #define WATCHFACE_LABEL_NUM                     5
 
     typedef struct {
         bool enable = true;
@@ -63,7 +63,7 @@
         watchface_index_t hour_shadow;
         watchface_index_t min_shadow;
         watchface_index_t sec_shadow;
-        watchface_label_t label[3];
+        watchface_label_t label[ WATCHFACE_LABEL_NUM ];
     } watchface_t;
 
     /**
