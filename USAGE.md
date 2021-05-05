@@ -108,7 +108,9 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 
 ## watchface
 
-If you want to customize your own watchface. Copy some .png like in /images/watchface to your watch. And rememder, rotation point is the center of the image.
+If you want to customize your own watchface. Copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and undompress it with the watchface app.
+
+A watchface.tar.gz includes the follow file and a extra watchface_theme.json. Some example:
 
 ![dial](images/watchface/watchface_dial.png)
 ![hour](images/watchface/watchface_hour.png)
@@ -117,6 +119,12 @@ If you want to customize your own watchface. Copy some .png like in /images/watc
 ![hour shadow](images/watchface/watchface_hour_s.png)
 ![min shadow](images/watchface/watchface_min_s.png)
 ![sec shadow](images/watchface/watchface_sec_s.png)
+
+Here you can find some finish watchface packetes:
+
+![swiss clock](images/watchface/swiss/watchface.tar.gz)
+![undone clock](images/watchface/undone/watchface.tar.gz)
+![star trek clock](images/watchface/startrek/watchface.tar.gz)
 
 ## OSMmap
 
