@@ -30,8 +30,7 @@
 #include "hardware/pmu.h"
 #include "hardware/display.h"
 
-#define DEST_FS_USES_SPIFFS
-#include <ESP32-targz.h>
+#include "utils/decompress/decompress.h"
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -68,7 +67,6 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
 
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize ) {
     bool retval = false;
-    int32_t size = UPDATE_SIZE_UNKNOWN;
 
     HTTPClient http;
     /**
@@ -86,20 +84,7 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
         /**
          * start an unpacker instance, reister progress callback and put the stream in
          */
-        GzUnpacker *GZUnpacker = new GzUnpacker();
-        GZUnpacker->setGzProgressCallback( http_ota_progress_cb );
-        GZUnpacker->setPsram( true );
-        http_ota_send_event_cb( HTTP_OTA_START, (void*)"start flashing ..." );
-        /**
-         * if firmware size known set the right value
-         */
-        if ( firmwaresize != 0 )
-            size = firmwaresize;
-        /**
-         * progress the stream
-         */
-        if( !GZUnpacker->gzStreamUpdater( http.getStreamPtr(), size, 0, false ) ) {
-            log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
+        if( decompress_stream_into_flash( http.getStreamPtr(), md5, firmwaresize, http_ota_progress_cb ) ) {
             http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"error ... weak wifi?" );
         }
         else {

@@ -32,6 +32,8 @@
 #include "gui/widget_styles.h"
 #include "gui/widget_factory.h"
 
+#include "utils/decompress/decompress.h"
+
 lv_obj_t *watchface_app_main_tile = NULL;              /** @brief osm main tile obj */
 lv_style_t watchface_app_main_style;
 lv_style_t watchface_app_button_style;
@@ -43,6 +45,7 @@ LV_IMG_DECLARE(exit_32px);
 static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_enable_event_cb( lv_obj_t *obj, lv_event_t event );
 static void exit_watchface_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
+static void watchface_app_decompress_cb( lv_obj_t *obj, lv_event_t event );
 
 void watchface_app_main_setup( uint32_t tile_num ) {
     /**
@@ -82,11 +85,18 @@ void watchface_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( watchface_onoff_label, watchface_onoff_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 
     lv_obj_t *watchface_reload_and_test_btn = lv_btn_create( watchface_app_main_tile, NULL );
-    lv_obj_align( watchface_reload_and_test_btn, watchface_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_align( watchface_reload_and_test_btn, watchface_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 10 );
     lv_obj_set_event_cb( watchface_reload_and_test_btn, watchface_app_reload_and_test_cb );
     lv_obj_add_style( watchface_reload_and_test_btn, LV_OBJ_PART_MAIN, &watchface_app_button_style );
     lv_obj_t *watchface_reload_and_test_btn_label = lv_label_create( watchface_reload_and_test_btn, NULL );
     lv_label_set_text( watchface_reload_and_test_btn_label, "reload and test");
+
+    lv_obj_t *watchface_decompress_btn = lv_btn_create( watchface_app_main_tile, NULL );
+    lv_obj_align( watchface_decompress_btn, watchface_reload_and_test_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 10 );
+    lv_obj_set_event_cb( watchface_decompress_btn, watchface_app_decompress_cb );
+    lv_obj_add_style( watchface_decompress_btn, LV_OBJ_PART_MAIN, &watchface_app_button_style );
+    lv_obj_t *watchface_decompress_btn_label = lv_label_create( watchface_decompress_btn, NULL );
+    lv_label_set_text( watchface_decompress_btn_label, "decompress\nwatchface.tar.gz");
 
     if ( watchface_config.watchface_enable )
         lv_switch_on( watchface_onoff, LV_ANIM_OFF );
@@ -94,6 +104,14 @@ void watchface_app_main_setup( uint32_t tile_num ) {
         lv_switch_off( watchface_onoff, LV_ANIM_OFF );
 
     watchface_enable_tile_after_wakeup( lv_switch_get_state( watchface_onoff ) );
+}
+
+static void watchface_app_decompress_cb( lv_obj_t *obj, lv_event_t event ) {
+    switch( event ) {
+        case LV_EVENT_CLICKED:
+            watchface_decompress_theme( watchface_app_get_app_main_tile_num() );
+            break;
+    }
 }
 
 static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event ) {

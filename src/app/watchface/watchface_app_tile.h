@@ -26,17 +26,20 @@
 
     #define WATCHFACE_LOG                       log_i
 
-    #define WATCHFACE_DIAL_IMAGE_FILE           "/spiffs/watchface_dial.png"
-    #define WATCHFACE_HOUR_IMAGE_FILE           "/spiffs/watchface_hour.png"
-    #define WATCHFACE_MIN_IMAGE_FILE            "/spiffs/watchface_min.png"
-    #define WATCHFACE_SEC_IMAGE_FILE            "/spiffs/watchface_sec.png"
-    #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface_hour_s.png"
-    #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface_min_s.png"
-    #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface_sec_s.png"
+    #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
+
+    #define WATCHFACE_DIAL_IMAGE_FILE           "/spiffs/watchface/watchface_dial.png"
+    #define WATCHFACE_HOUR_IMAGE_FILE           "/spiffs/watchface/watchface_hour.png"
+    #define WATCHFACE_MIN_IMAGE_FILE            "/spiffs/watchface/watchface_min.png"
+    #define WATCHFACE_SEC_IMAGE_FILE            "/spiffs/watchface/watchface_sec.png"
+    #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface/watchface_hour_s.png"
+    #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
+    #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
 
     void watchface_app_tile_setup( void );
     void watchface_enable_tile_after_wakeup( bool enable );
     void watchface_reload_theme( void );
     void watchface_reload_and_test( uint32_t return_tile );
+    void watchface_decompress_theme( uint32_t return_tile );
 
 #endif // _WATCHFACE_APP_TILE_H

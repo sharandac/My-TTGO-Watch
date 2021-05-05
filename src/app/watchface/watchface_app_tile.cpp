@@ -38,6 +38,7 @@
 #include "hardware/touch.h"
 #include "hardware/pmu.h"
 
+#include "utils/decompress/decompress.h"
 /**
  * watchface task and states
  */
@@ -86,6 +87,7 @@ LV_FONT_DECLARE(Ubuntu_48px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
 void watchface_app_tile_update( void );
+static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event );
 void watchface_app_tile_update_task( lv_task_t *task );
 bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
 bool watchface_touch_event_cb( EventBits_t event, void *arg );
@@ -104,12 +106,17 @@ void watchface_app_tile_setup( void ) {
     lv_style_copy( &watchface_app_tile_style, ws_get_mainbar_style() );
     lv_style_set_radius( &watchface_app_tile_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &watchface_app_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+
+    lv_obj_t *watchface_cont = lv_obj_create( watchface_app_tile, NULL );
+    lv_obj_set_size( watchface_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
+    lv_obj_add_style( watchface_cont, LV_OBJ_PART_MAIN, &watchface_app_tile_style );
+    lv_obj_align( watchface_cont, watchface_app_tile, LV_ALIGN_CENTER, 0, 0 );
     /**
      * alloc default dial
      */
-    watchface_dial_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_dial_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_dial_img, &swiss_dial_240px );
-    lv_obj_align( watchface_dial_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.dial.x_offset, watchface_theme_config.dial.dial.y_offset );
+    lv_obj_align( watchface_dial_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.dial.x_offset, watchface_theme_config.dial.dial.y_offset );
     /**
      * alloc labels and set to defauts
      */
@@ -127,7 +134,7 @@ void watchface_app_tile_setup( void ) {
         /**
          * alloc and setup label container
          */
-        lv_obj_t *watchface_label_cont = lv_cont_create( watchface_app_tile, NULL );
+        lv_obj_t *watchface_label_cont = lv_cont_create( watchface_cont, NULL );
         lv_obj_set_width( watchface_label_cont, watchface_theme_config.dial.label[ i ].x_size );
         lv_obj_set_height( watchface_label_cont, watchface_theme_config.dial.label[ i ].y_size );
         lv_obj_set_pos( watchface_label_cont, watchface_theme_config.dial.label[ i ].x_offset, watchface_theme_config.dial.label[ i ].y_offset );
@@ -144,33 +151,45 @@ void watchface_app_tile_setup( void ) {
     /**
      * alloc default index shadows
      */
-    watchface_hour_s_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_hour_s_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_hour_s_img, &swiss_hour_s_240px );
-    lv_obj_align( watchface_hour_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.hour_shadow.x_offset, watchface_theme_config.dial.hour_shadow.y_offset );
+    lv_obj_align( watchface_hour_s_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.hour_shadow.x_offset, watchface_theme_config.dial.hour_shadow.y_offset );
     lv_img_set_angle( watchface_hour_s_img, 0 );
-    watchface_min_s_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_min_s_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_min_s_img, &swiss_min_s_240px );
-    lv_obj_align( watchface_min_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.min_shadow.x_offset, watchface_theme_config.dial.min_shadow.y_offset );
+    lv_obj_align( watchface_min_s_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.min_shadow.x_offset, watchface_theme_config.dial.min_shadow.y_offset );
     lv_img_set_angle( watchface_min_s_img, 0 );
-    watchface_sec_s_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_sec_s_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_sec_s_img, &swiss_sec_s_240px );
-    lv_obj_align( watchface_sec_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.sec_shadow.x_offset, watchface_theme_config.dial.sec_shadow.y_offset );
+    lv_obj_align( watchface_sec_s_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.sec_shadow.x_offset, watchface_theme_config.dial.sec_shadow.y_offset );
     lv_img_set_angle( watchface_sec_s_img, 0 );
     /**
      * alloc default index
      */
-    watchface_hour_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_hour_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_hour_img, &swiss_hour_240px );
-    lv_obj_align( watchface_hour_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.hour.x_offset, watchface_theme_config.dial.hour.y_offset );
+    lv_obj_align( watchface_hour_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.hour.x_offset, watchface_theme_config.dial.hour.y_offset );
     lv_img_set_angle( watchface_hour_img, 0 );
-    watchface_min_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_min_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_min_img, &swiss_min_240px );
-    lv_obj_align( watchface_min_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.min.x_offset, watchface_theme_config.dial.min.y_offset );
+    lv_obj_align( watchface_min_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.min.x_offset, watchface_theme_config.dial.min.y_offset );
     lv_img_set_angle( watchface_hour_img, 0 );
-    watchface_sec_img = lv_img_create( watchface_app_tile, NULL );
+    watchface_sec_img = lv_img_create( watchface_cont, NULL );
     lv_img_set_src( watchface_sec_img, &swiss_sec_240px );
-    lv_obj_align( watchface_sec_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.sec.x_offset, watchface_theme_config.dial.sec.y_offset );
+    lv_obj_align( watchface_sec_img, watchface_cont, LV_ALIGN_CENTER, watchface_theme_config.dial.sec.x_offset, watchface_theme_config.dial.sec.y_offset );
     lv_img_set_angle( watchface_hour_img, 0 );
+    /**
+     * watchface exit on touch
+     */
+/*
+    watchface_btn = lv_btn_create( watchface_cont, NULL );
+    lv_obj_set_width( watchface_btn, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_height( watchface_btn, lv_disp_get_ver_res( NULL ) );
+    lv_obj_add_protect( watchface_btn, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( watchface_btn, LV_OBJ_PART_MAIN, &watchface_app_tile_style );
+    lv_obj_align( watchface_btn, watchface_cont, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_event_cb( watchface_btn, exit_watchface_app_tile_event_cb );
+*/
     /**
      * setup activate and hibernate callback function
      */
@@ -191,6 +210,32 @@ void watchface_app_tile_setup( void ) {
     watchface_reload_theme();
 }
 
+void watchface_decompress_theme( uint32_t return_tile ) {
+    watchface_return_tile = return_tile;
+    watchface_test = true;
+    
+    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
+    watchface_reload_theme();
+
+    FILE *file = fopen( "/spiffs" WATCHFACE_THEME_FILE, "rb" );
+    if ( file ) {
+        fclose( file );
+        remove( WATCHFACE_THEME_FILE );
+        remove( WATCHFACE_DIAL_IMAGE_FILE );
+        remove( WATCHFACE_HOUR_IMAGE_FILE );
+        remove( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
+        remove( WATCHFACE_MIN_IMAGE_FILE );
+        remove( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
+        remove( WATCHFACE_SEC_IMAGE_FILE );
+        remove( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
+    }
+
+    watchface_reload_theme();
+
+    decompress_file_into_spiffs( "/watchface.tar.gz", "/watchface", NULL );
+    watchface_reload_theme();
+}
+
 void watchface_reload_and_test( uint32_t return_tile ) {
     /**
      * set return tile and test flag
@@ -206,6 +251,26 @@ void watchface_reload_and_test( uint32_t return_tile ) {
      */
     mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
     watchface_app_tile_update();
+}
+
+static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    log_i("event");
+    
+    switch( event ) {
+        case( LV_EVENT_SHORT_CLICKED ): if ( watchface_test ) {
+                                            mainbar_jump_to_tilenumber( watchface_return_tile, LV_ANIM_OFF );
+                                        }
+                                        else {
+                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        }
+                                        watchface_test = false;
+                                        watchface_return_tile = 0;
+                                        break;
+        case( LV_EVENT_LONG_PRESSED ):  mainbar_jump_to_tilenumber( watchface_app_get_app_main_tile_num(), LV_ANIM_OFF );
+                                        watchface_test = false;
+                                        watchface_return_tile = 0;
+                                        break;
+    }    
 }
 
 bool watchface_touch_event_cb( EventBits_t event, void *arg ) {
@@ -230,7 +295,11 @@ bool watchface_touch_event_cb( EventBits_t event, void *arg ) {
 }
 
 void watchface_reload_theme( void ) {
+    /**
+     * reload theme config
+     */
     watchface_theme_config.load();
+    lv_img_cache_set_size(0);
     FILE* file;
     /**
      * load dial image
@@ -240,15 +309,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_dial_img, WATCHFACE_DIAL_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_DIAL_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface dial from %s", WATCHFACE_DIAL_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_dial_img, &swiss_dial_240px );
+        lv_img_cache_invalidate_src( &swiss_dial_240px  );
         WATCHFACE_LOG("load standard watchface dial");
     }
     lv_obj_align( watchface_dial_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.dial.x_offset, watchface_theme_config.dial.dial.y_offset );
     lv_obj_set_hidden( watchface_dial_img, !watchface_theme_config.dial.dial.enable );
-    lv_img_cache_invalidate_src( watchface_dial_img );
+    lv_obj_invalidate( watchface_dial_img );
     /**
      * load hour shadow image
      * 40x240px, center x=20, y=120
@@ -257,15 +328,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_hour_s_img, WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface hour shadow from %s", WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_hour_s_img, &swiss_hour_s_240px );
+        lv_img_cache_invalidate_src( &swiss_hour_s_240px );
         WATCHFACE_LOG("load standard watchface hour shadow");
     }
     lv_obj_align( watchface_hour_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.hour_shadow.x_offset, watchface_theme_config.dial.hour_shadow.y_offset );
     lv_obj_set_hidden( watchface_hour_s_img, !watchface_theme_config.dial.hour_shadow.enable );
-    lv_img_cache_invalidate_src( watchface_hour_s_img );
+    lv_obj_invalidate( watchface_hour_s_img );
     /**
      * load min shadow image
      * 40x240px, center x=20, y=120
@@ -274,15 +347,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_min_s_img, WATCHFACE_MIN_SHADOW_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface min shadow from %s", WATCHFACE_MIN_SHADOW_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_min_s_img, &swiss_min_s_240px );
+        lv_img_cache_invalidate_src( &swiss_min_s_240px );
         WATCHFACE_LOG("load standard watchface min shadow");
     }
     lv_obj_align( watchface_min_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.min_shadow.x_offset, watchface_theme_config.dial.min_shadow.y_offset );
     lv_obj_set_hidden( watchface_min_s_img, !watchface_theme_config.dial.min_shadow.enable );
-    lv_img_cache_invalidate_src( watchface_min_s_img );
+    lv_obj_invalidate( watchface_min_s_img );
     /**
      * load sec shadow image
      * 40x240px, center x=20, y=120
@@ -291,15 +366,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_sec_s_img, WATCHFACE_SEC_SHADOW_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface sec shadow from %s", WATCHFACE_SEC_SHADOW_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_sec_s_img, &swiss_sec_s_240px );
+        lv_img_cache_invalidate_src( &swiss_sec_s_240px );
         WATCHFACE_LOG("load standard watchface sec shadow");
     }
     lv_obj_align( watchface_sec_s_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.sec_shadow.x_offset, watchface_theme_config.dial.sec_shadow.y_offset );       
     lv_obj_set_hidden( watchface_sec_s_img, !watchface_theme_config.dial.sec_shadow.enable );
-    lv_img_cache_invalidate_src( watchface_sec_s_img );
+    lv_obj_invalidate( watchface_sec_s_img );
     /**
      * load hour image
      * 40x240px, center x=20, y=120
@@ -308,15 +385,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_hour_img, WATCHFACE_HOUR_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_HOUR_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface hour from %s", WATCHFACE_HOUR_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_hour_img, &swiss_hour_240px );
+        lv_img_cache_invalidate_src( &swiss_hour_240px );
         WATCHFACE_LOG("load standard watchface hour");
     }
     lv_obj_align( watchface_hour_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.hour.x_offset, watchface_theme_config.dial.hour.y_offset );        
     lv_obj_set_hidden( watchface_hour_img, !watchface_theme_config.dial.hour.enable );
-    lv_img_cache_invalidate_src( watchface_hour_img );
+    lv_obj_invalidate( watchface_hour_img );
     /**
      * load min image
      * 40x240px, center x=20, y=120
@@ -325,15 +404,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_min_img, WATCHFACE_MIN_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_MIN_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface min from %s", WATCHFACE_MIN_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_min_img, &swiss_min_240px );
+        lv_img_cache_invalidate_src( &swiss_min_240px );
         WATCHFACE_LOG("load standard watchface min");
     }
     lv_obj_align( watchface_min_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.min.x_offset, watchface_theme_config.dial.min.y_offset );       
     lv_obj_set_hidden( watchface_min_img, !watchface_theme_config.dial.min.enable );
-    lv_img_cache_invalidate_src( watchface_min_img );
+    lv_obj_invalidate( watchface_min_img );
     /**
      * load sec image
      * 40x240px, center x=20, y=120
@@ -342,15 +423,17 @@ void watchface_reload_theme( void ) {
     if ( file ) {
         fclose( file );
         lv_img_set_src( watchface_sec_img, WATCHFACE_SEC_IMAGE_FILE );
+        lv_img_cache_invalidate_src( WATCHFACE_SEC_IMAGE_FILE );
         WATCHFACE_LOG("load custom watchface sec from %s", WATCHFACE_SEC_IMAGE_FILE );
     }
     else {
         lv_img_set_src( watchface_sec_img, &swiss_sec_240px );
+        lv_img_cache_invalidate_src( &swiss_sec_240px );
         WATCHFACE_LOG("load standard watchface sec");
     }
     lv_obj_align( watchface_sec_img, watchface_app_tile, LV_ALIGN_CENTER, watchface_theme_config.dial.sec.x_offset, watchface_theme_config.dial.sec.y_offset );        
     lv_obj_set_hidden( watchface_sec_img, !watchface_theme_config.dial.sec.enable );
-    lv_img_cache_invalidate_src( watchface_sec_img );
+    lv_obj_invalidate( watchface_sec_img );
     /**
      * alloc labels and set to defauts
      */
@@ -377,6 +460,9 @@ void watchface_reload_theme( void ) {
      * write clear json back
      */
     watchface_theme_config.save( 32000 );
+    lv_img_cache_set_size(250);
+    lv_obj_invalidate( lv_scr_act() );
+    lv_refr_now( NULL );
 }
 
 lv_font_t *watchface_get_font( int32_t font_size ) {

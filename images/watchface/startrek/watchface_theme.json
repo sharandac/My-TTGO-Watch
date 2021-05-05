@@ -1,0 +1,101 @@
+{
+  "dial": {
+    "enable": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "hour": {
+    "enable": false,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "min": {
+    "enable": false,
+    "smooth": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "sec": {
+    "enable": false,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "hour_shadow": {
+    "enable": false,
+    "x_offset": 5,
+    "y_offset": 5
+  },
+  "min_shadow": {
+    "enable": false,
+    "x_offset": 5,
+    "y_offset": 5
+  },
+  "sec_shadow": {
+    "enable": false,
+    "x_offset": 5,
+    "y_offset": 5
+  },
+  "label": [
+    {
+      "enable": true,
+      "type": "date",
+      "label": "%H:%M",
+      "font_color": "#f7cc94",
+      "align": "center",
+      "font_size": 48,
+      "x_offset": 64,
+      "y_offset": 100,
+      "x_size": 145,
+      "y_size": 78
+    },
+    {
+      "enable": true,
+      "type": "date",
+      "label": "%Y.%m",
+      "font_color": "#9e99ed",
+      "align": "center",
+      "font_size": 32,
+      "x_offset": 50,
+      "y_offset": 24,
+      "x_size": 120,
+      "y_size": 36
+    },
+    {
+      "enable": true,
+      "type": "date",
+      "label": "%d",
+      "font_color": "#9e99ed",
+      "align": "center",
+      "font_size": 32,
+      "x_offset": 198,
+      "y_offset": 24,
+      "x_size": 36,
+      "y_size": 36
+    },
+    {
+      "enable": true,
+      "type": "date",
+      "label": "%a",
+      "font_color": "#9e99ed",
+      "align": "center",
+      "font_size": 32,
+      "x_offset": 136,
+      "y_offset": 188,
+      "x_size": 85,
+      "y_size": 32
+    },
+    {
+      "enable": true,
+      "type": "battery_percent",
+      "label": "%d%%",
+      "font_color": "#000000",
+      "align": "center",
+      "font_size": 12,
+      "x_offset": 94,
+      "y_offset": 198,
+      "x_size": 40,
+      "y_size": 16
+    }
+  ]
+}
+

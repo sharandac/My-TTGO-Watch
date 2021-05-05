@@ -26,7 +26,7 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_THEME_JSON_COFIG_FILE         "/watchface_theme.json"   /** @brief defines json config file name */
+    #define WATCHFACE_THEME_JSON_COFIG_FILE         "/watchface/watchface_theme.json"   /** @brief defines json config file name */
     #define WATCHFACE_LABEL_NUM                     5
 
     typedef struct {
