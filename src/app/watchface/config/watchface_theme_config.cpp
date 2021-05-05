@@ -24,6 +24,10 @@
 watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_COFIG_FILE ) {}
 
 bool watchface_theme_config_t::onSave(JsonDocument& doc) {
+    doc["dial"]["enable"] = dial.dial.enable;
+    doc["dial"]["x_offset"] = dial.dial.x_offset;
+    doc["dial"]["y_offset"] = dial.dial.y_offset;
+
     doc["hour"]["enable"] = dial.hour.enable;
     doc["hour"]["x_offset"] = dial.hour.x_offset;
     doc["hour"]["y_offset"] = dial.hour.y_offset;
@@ -62,6 +66,10 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc) {
 }
 
 bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
+    dial.dial.enable = doc["dial"]["enable"] | true;
+    dial.dial.x_offset = doc["dial"]["x_offset"] | 0;
+    dial.dial.y_offset = doc["dial"]["y_offset"] | 0;
+    
     dial.hour.enable = doc["hour"]["enable"] | true;
     dial.hour.x_offset = doc["hour"]["x_offset"] | 0;
     dial.hour.y_offset = doc["hour"]["y_offset"] | 0;
@@ -99,6 +107,12 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
 }
 
 bool watchface_theme_config_t::onDefault( void ) {
+    /**
+     * set default dial
+     */
+    dial.dial.enable = true;
+    dial.dial.x_offset = 0;
+    dial.dial.y_offset = 0;
     /**
      * set default index
      */

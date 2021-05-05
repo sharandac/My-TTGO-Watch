@@ -31,6 +31,12 @@
 
     typedef struct {
         bool enable = true;
+        int32_t x_offset = 0;
+        int32_t y_offset = 0;
+    } watchface_dial_t;
+
+    typedef struct {
+        bool enable = true;
         bool smooth = true;
         int32_t x_offset = 0;
         int32_t y_offset = 0;
@@ -50,6 +56,7 @@
     } watchface_label_t;
 
     typedef struct {
+        watchface_dial_t dial;
         watchface_index_t hour;
         watchface_index_t min;
         watchface_index_t sec;
@@ -57,7 +64,7 @@
         watchface_index_t min_shadow;
         watchface_index_t sec_shadow;
         watchface_label_t label[3];
-    } watchface_dial_t;
+    } watchface_t;
 
     /**
      * @brief blectl config structure
@@ -65,7 +72,7 @@
     class watchface_theme_config_t : public BaseJsonConfig {
         public:
         watchface_theme_config_t();
-        watchface_dial_t dial;
+        watchface_t dial;
 
         protected:
         ////////////// Available for overloading: //////////////
