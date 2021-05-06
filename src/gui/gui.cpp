@@ -74,7 +74,7 @@ void gui_setup( void )
      */
     main_tile_setup();
     app_tile_setup();
-    note_tile_setup();
+    //note_tile_setup();
     setup_tile_setup();
     /*
      * add input and status
