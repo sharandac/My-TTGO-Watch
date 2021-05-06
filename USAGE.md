@@ -135,6 +135,8 @@ Here you can find some finish watchface packages:
 ## OSMmap
 
 ![screenshot](images/screen9.png)
+![maps](images/osmmap_maps.png)
+![menu](images/osmmap_menu.png)
 ![navigation](images/osmmap_navigation.png)
 
 A long press in the middle centers the map to the current gps position.
