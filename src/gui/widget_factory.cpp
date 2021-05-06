@@ -142,12 +142,6 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
     return button;
 }
 
-    typedef enum {
-        SETTINGS_HEADER_EXIT = 0,
-        SETTINGS_HEADER_TITLE
-    } settings_header_part_t;
-
-
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
     lv_obj_t *exit_btn = wf_add_image_button(container, exit_32px, NULL);
