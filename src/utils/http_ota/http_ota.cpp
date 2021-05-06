@@ -84,7 +84,7 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
         /**
          * start an unpacker instance, reister progress callback and put the stream in
          */
-        if( decompress_stream_into_flash( http.getStreamPtr(), md5, firmwaresize, http_ota_progress_cb ) ) {
+        if( !decompress_stream_into_flash( http.getStreamPtr(), md5, firmwaresize, http_ota_progress_cb ) ) {
             http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"error ... weak wifi?" );
         }
         else {
