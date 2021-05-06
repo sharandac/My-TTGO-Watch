@@ -61,7 +61,6 @@ lv_obj_t * distance_label = NULL;
 
 lv_task_t * _sailing_task;
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_48px);
@@ -103,14 +102,8 @@ void sailing_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( sailing_main_tile, exit_sailing_main_event_cb, &sailing_main_style );
     lv_obj_align(exit_btn, sailing_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( sailing_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &sailing_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( sailing_main_tile, enter_sailing_setup_event_cb, &sailing_main_style );
     lv_obj_align(setup_btn, sailing_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, enter_sailing_setup_event_cb );
 
     heading_info_label = lv_label_create( sailing_main_tile, NULL );
     lv_obj_add_style( heading_info_label, LV_OBJ_PART_MAIN, &heading_main_style );

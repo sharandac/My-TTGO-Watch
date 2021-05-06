@@ -23,6 +23,7 @@
 #include "widget_styles.h"
 
 LV_IMG_DECLARE(exit_32px);
+LV_IMG_DECLARE(setup_32px);
 #define CLICKABLE_PADDING 6
 #define CONTAINER_INNER_PADDING CLICKABLE_PADDING * 2
 
@@ -144,6 +145,10 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
 
 lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
     return wf_add_image_button(parent, exit_32px, event_cb, style);
+}
+
+lv_obj_t * wf_add_setup_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, setup_32px, event_cb, style);
 }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){

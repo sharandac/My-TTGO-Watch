@@ -58,7 +58,6 @@ static weather_forcast_t *weather_forecast = NULL;
 void weather_forecast_sync_Task( void * pvParameters );
 bool weather_forecast_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_IMG_DECLARE(owm_01d_64px);
 
@@ -81,14 +80,8 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, &weather_forecast_style );
     lv_obj_align(exit_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &weather_forecast_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( weather_forecast_tile, setup_weather_widget_event_cb, &weather_forecast_style );
     lv_obj_align(setup_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, setup_weather_widget_event_cb );
 
     lv_obj_t * reload_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_RELEASED, &refresh_32px);

@@ -60,7 +60,6 @@ static bool gps_status_block_return_maintile = false;
 /*
  * images
  */
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -79,14 +78,8 @@ void gps_status_main_setup(uint32_t tile_num) {
     lv_obj_t * exit_btn = wf_add_exit_button( gps_status_main_tile, exit_gps_status_main_event_cb, &gps_status_main_style );
     lv_obj_align(exit_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
 
-    lv_obj_t *setup_btn = lv_imgbtn_create(gps_status_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &gps_status_main_style);
+    lv_obj_t *setup_btn = wf_add_setup_button(gps_status_main_tile, enter_gps_status_setup_event_cb, &gps_status_main_style);
     lv_obj_align(setup_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
-    lv_obj_set_event_cb(setup_btn, enter_gps_status_setup_event_cb);
     lv_obj_set_hidden(setup_btn, true);
 
     lv_style_copy(&gps_status_value_style, ws_get_mainbar_style());

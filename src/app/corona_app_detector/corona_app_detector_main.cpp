@@ -37,7 +37,6 @@ lv_style_t corona_app_detector_main_style;
 
 lv_task_t * _corona_app_detector_task;
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
@@ -53,14 +52,8 @@ void corona_app_detector_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( corona_app_detector_main_tile, exit_corona_app_detector_main_event_cb, &corona_app_detector_main_style );
     lv_obj_align(exit_btn, corona_app_detector_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( corona_app_detector_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &corona_app_detector_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( corona_app_detector_main_tile, enter_corona_app_detector_setup_event_cb, &corona_app_detector_main_style );
     lv_obj_align(setup_btn, corona_app_detector_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, enter_corona_app_detector_setup_event_cb );
 
     // create an task that runs every secound
     _corona_app_detector_task = lv_task_create( corona_app_detector_task, 1000, LV_TASK_PRIO_MID, NULL );

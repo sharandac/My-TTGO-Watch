@@ -123,6 +123,17 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
 lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style=NULL);
 
 /**
+ * @brief   Creates and adds an setup button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_setup_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style=NULL);
+
+/**
  * @brief   Creates and adds an labeled button to a container
  *
  * @param   parent  pointer to a parent container

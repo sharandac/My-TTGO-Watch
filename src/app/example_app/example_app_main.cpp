@@ -37,7 +37,6 @@ lv_style_t example_app_main_style;
 
 lv_task_t * _example_app_task;
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
@@ -53,14 +52,8 @@ void example_app_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( example_app_main_tile, exit_example_app_main_event_cb, &example_app_main_style );
     lv_obj_align(exit_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( example_app_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &example_app_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( example_app_main_tile, enter_example_app_setup_event_cb, &example_app_main_style );
     lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, enter_example_app_setup_event_cb );
 
     // uncomment the following block of code to remove the "myapp" label in background
     lv_style_set_text_opa( &example_app_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);

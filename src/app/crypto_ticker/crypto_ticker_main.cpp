@@ -54,7 +54,6 @@ crypto_ticker_main_data_t crypto_ticker_main_data;
 void crypto_ticker_main_sync_Task( void * pvParameters );
 bool crypto_ticker_main_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
@@ -77,16 +76,9 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_PRESSED, &refresh_32px);
     lv_obj_add_style(reload_btn, LV_IMGBTN_PART_MAIN, &crypto_ticker_main_style );
     lv_obj_align(reload_btn, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , 10 );
-    lv_obj_set_event_cb( reload_btn, refresh_crypto_ticker_main_event_cb );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &crypto_ticker_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( crypto_ticker_main_tile, enter_crypto_ticker_setup_event_cb, &crypto_ticker_main_style );
     lv_obj_align(setup_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, enter_crypto_ticker_setup_event_cb );
 
     crypto_ticker_main_update_label = lv_label_create( crypto_ticker_main_tile , NULL);
     lv_label_set_text( crypto_ticker_main_update_label, "");
