@@ -25,6 +25,7 @@
 
 #include "watchface_app.h"
 #include "watchface_app_tile.h"
+#include "watchface_app_main.h"
 #include "app/watchface/config/watchface_theme_config.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -37,6 +38,8 @@
 #include "hardware/display.h"
 #include "hardware/touch.h"
 #include "hardware/pmu.h"
+#include "hardware/bma.h"
+#include "hardware/wifictl.h"
 
 #include "utils/decompress/decompress.h"
 /**
@@ -93,6 +96,7 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
 bool watchface_touch_event_cb( EventBits_t event, void *arg );
 void watchface_avtivate_cb( void );
 void watchface_hibernate_cb( void );
+void watchface_remove_theme_files ( void );
 lv_font_t *watchface_get_font( int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
@@ -181,15 +185,13 @@ void watchface_app_tile_setup( void ) {
     /**
      * watchface exit on touch
      */
-/*
-    watchface_btn = lv_btn_create( watchface_cont, NULL );
+    watchface_btn = lv_btn_create( watchface_app_tile, NULL );
     lv_obj_set_width( watchface_btn, lv_disp_get_hor_res( NULL ) );
     lv_obj_set_height( watchface_btn, lv_disp_get_ver_res( NULL ) );
     lv_obj_add_protect( watchface_btn, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( watchface_btn, LV_OBJ_PART_MAIN, &watchface_app_tile_style );
-    lv_obj_align( watchface_btn, watchface_cont, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_align( watchface_btn, watchface_app_tile, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( watchface_btn, exit_watchface_app_tile_event_cb );
-*/
     /**
      * setup activate and hibernate callback function
      */
@@ -199,7 +201,7 @@ void watchface_app_tile_setup( void ) {
      * setup powermgm and touch callback function
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
-    touch_register_cb( TOUCH_UPDATE, watchface_touch_event_cb, "touch watchface" );
+//    touch_register_cb( TOUCH_UPDATE, watchface_touch_event_cb, "touch watchface" );
     /**
      * setup watchface background task
      */
@@ -214,26 +216,43 @@ void watchface_decompress_theme( uint32_t return_tile ) {
     watchface_return_tile = return_tile;
     watchface_test = true;
     
-    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
-    watchface_reload_theme();
 
     FILE *file = fopen( "/spiffs" WATCHFACE_THEME_FILE, "rb" );
     if ( file ) {
         fclose( file );
-        remove( WATCHFACE_THEME_FILE );
-        remove( WATCHFACE_DIAL_IMAGE_FILE );
-        remove( WATCHFACE_HOUR_IMAGE_FILE );
-        remove( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
-        remove( WATCHFACE_MIN_IMAGE_FILE );
-        remove( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
-        remove( WATCHFACE_SEC_IMAGE_FILE );
-        remove( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
+        watchface_app_set_info_label( "clear watchface theme, wait ..." );
+        watchface_remove_theme_files();
+        watchface_app_set_info_label( "unzip watchface theme, wait ..." );
+        decompress_file_into_spiffs( WATCHFACE_THEME_FILE, "/watchface", NULL );
+        watchface_app_set_info_label( "done!" );
+        mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
     }
-
+    else {
+        watchface_app_set_info_label( "no /watchface.tar.gz found" );
+    }
     watchface_reload_theme();
+}
 
-    decompress_file_into_spiffs( "/watchface.tar.gz", "/watchface", NULL );
+void watchface_default_theme( uint32_t return_tile ) {
+    watchface_return_tile = return_tile;
+    watchface_test = true;
+    
+    watchface_app_set_info_label( "clear watchface theme, wait ..." );
+    watchface_remove_theme_files();
     watchface_reload_theme();
+    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
+    watchface_app_set_info_label( "done!" );
+}
+
+void watchface_remove_theme_files ( void ) {
+    remove( "/spiffs" WATCHFACE_THEME_JSON_CONFIG_FILE );
+    remove( WATCHFACE_DIAL_IMAGE_FILE );
+    remove( WATCHFACE_HOUR_IMAGE_FILE );
+    remove( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
+    remove( WATCHFACE_MIN_IMAGE_FILE );
+    remove( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
+    remove( WATCHFACE_SEC_IMAGE_FILE );
+    remove( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
 }
 
 void watchface_reload_and_test( uint32_t return_tile ) {
@@ -250,12 +269,9 @@ void watchface_reload_and_test( uint32_t return_tile ) {
      * jump the watchface
      */
     mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
-    watchface_app_tile_update();
 }
 
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    log_i("event");
-    
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ): if ( watchface_test ) {
                                             mainbar_jump_to_tilenumber( watchface_return_tile, LV_ANIM_OFF );
@@ -460,6 +476,7 @@ void watchface_reload_theme( void ) {
      * write clear json back
      */
     watchface_theme_config.save( 32000 );
+    watchface_app_tile_update();
     lv_img_cache_set_size(250);
     lv_obj_invalidate( lv_scr_act() );
     lv_refr_now( NULL );
@@ -620,6 +637,9 @@ void watchface_app_tile_update( void ) {
                 }
                 else if ( !strcmp( "battery_voltage", watchface_theme_config.dial.label[ i ].type ) ) {
                     snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_voltage() / 1000 );
+                }
+                else if ( !strcmp( "steps", watchface_theme_config.dial.label[ i ].type ) ) {
+                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bma_get_stepcounter() );
                 }
                 else {
                     snprintf( temp_str, sizeof( temp_str ), "n/a" );

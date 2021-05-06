@@ -21,7 +21,7 @@
  */
 #include "watchface_theme_config.h"
 
-watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_COFIG_FILE ) {}
+watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_CONFIG_FILE ) {}
 
 bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
     doc["dial"]["enable"] = dial.dial.enable;
@@ -66,28 +66,28 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
 }
 
 bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
-    dial.dial.enable = doc["dial"]["enable"] | true;
+    dial.dial.enable = doc["dial"]["enable"] | false;
     dial.dial.x_offset = doc["dial"]["x_offset"] | 0;
     dial.dial.y_offset = doc["dial"]["y_offset"] | 0;
 
-    dial.hour.enable = doc["hour"]["enable"] | true;
+    dial.hour.enable = doc["hour"]["enable"] | false;
     dial.hour.x_offset = doc["hour"]["x_offset"] | 0;
     dial.hour.y_offset = doc["hour"]["y_offset"] | 0;
-    dial.min.enable = doc["min"]["enable"] | true;
-    dial.min.smooth = doc["min"]["smooth"] | true;
+    dial.min.enable = doc["min"]["enable"] | false;
+    dial.min.smooth = doc["min"]["smooth"] | false;
     dial.min.x_offset = doc["min"]["x_offset"] | 0;
     dial.min.y_offset = doc["min"]["y_offset"] | 0;
-    dial.sec.enable = doc["sec"]["enable"] | true;
+    dial.sec.enable = doc["sec"]["enable"] | false;
     dial.sec.x_offset = doc["sec"]["x_offset"] | 0;
     dial.sec.y_offset = doc["sec"]["y_offset"] | 0;
 
-    dial.hour_shadow.enable = doc["hour_shadow"]["enable"] | true;
+    dial.hour_shadow.enable = doc["hour_shadow"]["enable"] | false;
     dial.hour_shadow.x_offset = doc["hour_shadow"]["x_offset"] | 5;
     dial.hour_shadow.y_offset = doc["hour_shadow"]["y_offset"] | 5;
-    dial.min_shadow.enable = doc["min_shadow"]["enable"] | true;
+    dial.min_shadow.enable = doc["min_shadow"]["enable"] | false;
     dial.min_shadow.x_offset = doc["min_shadow"]["x_offset"] | 5;
     dial.min_shadow.y_offset = doc["min_shadow"]["y_offset"] | 5;
-    dial.sec_shadow.enable = doc["sec_shadow"]["enable"] | true;
+    dial.sec_shadow.enable = doc["sec_shadow"]["enable"] | false;
     dial.sec_shadow.x_offset = doc["sec_shadow"]["x_offset"] | 5;
     dial.sec_shadow.y_offset = doc["sec_shadow"]["y_offset"] | 5;
 

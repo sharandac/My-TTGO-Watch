@@ -4,37 +4,6 @@
     "x_offset": 0,
     "y_offset": 0
   },
-  "hour": {
-    "enable": false,
-    "x_offset": 0,
-    "y_offset": 0
-  },
-  "min": {
-    "enable": false,
-    "smooth": true,
-    "x_offset": 0,
-    "y_offset": 0
-  },
-  "sec": {
-    "enable": false,
-    "x_offset": 0,
-    "y_offset": 0
-  },
-  "hour_shadow": {
-    "enable": false,
-    "x_offset": 5,
-    "y_offset": 5
-  },
-  "min_shadow": {
-    "enable": false,
-    "x_offset": 5,
-    "y_offset": 5
-  },
-  "sec_shadow": {
-    "enable": false,
-    "x_offset": 5,
-    "y_offset": 5
-  },
   "label": [
     {
       "enable": true,

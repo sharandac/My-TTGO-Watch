@@ -77,13 +77,13 @@ lv_style_t osmmap_app_main_style;                   /** @brief osm main styte ob
 lv_style_t osmmap_app_label_style;                  /** @brief osm main styte obj */
 lv_style_t osmmap_app_nav_style;                  /** @brief osm main styte obj */
 
-static bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
-static bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
-static bool osmmap_block_show_messages = false;     /** @brief osm show messages state store */
-static bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
-static bool osmmap_gps_state = false;
-static bool osmmap_wifi_state = false;
-static uint64_t last_touch = 0;
+static volatile bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
+static volatile bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
+static volatile bool osmmap_block_show_messages = false;     /** @brief osm show messages state store */
+static volatile bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
+static volatile bool osmmap_gps_state = false;
+static volatile bool osmmap_wifi_state = false;
+static volatile uint64_t last_touch = 0;
 osm_location_t *osmmap_location = NULL;             /** @brief osm location obj */
 osmmap_config_t osmmap_config;
 
@@ -274,12 +274,14 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
 }
 
 bool osmmap_app_touch_event_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
+        switch( event ) {
         case( TOUCH_UPDATE ):
-            last_touch = millis();
+            if ( osmmap_app_active ) {
+                last_touch = millis();
+            }
             break;
     }
-    return( true );
+    return( false );
 }
 
 void osmmap_app_set_left_right_hand( bool left_right_hand ) {
@@ -754,6 +756,7 @@ void osmmap_activate_cb( void ) {
      * set osm app active
      */
     osmmap_app_active = true;
+    last_touch = millis();
     /**
      * start background osm tile image update Task
      */

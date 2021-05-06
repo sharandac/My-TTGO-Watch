@@ -26,44 +26,55 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_THEME_JSON_COFIG_FILE         "/watchface/watchface_theme.json"   /** @brief defines json config file name */
+    #define WATCHFACE_THEME_JSON_CONFIG_FILE        "/watchface/watchface_theme.json"   /** @brief defines json config file name */
     #define WATCHFACE_LABEL_NUM                     5
 
+    /**
+     * @brief dial image control structure
+     */
     typedef struct {
-        bool enable = true;
-        int32_t x_offset = 0;
-        int32_t y_offset = 0;
+        bool enable = true;                             /** @brief enable image */
+        int32_t x_offset = 0;                           /** @brief x offset of the image relative to the center */
+        int32_t y_offset = 0;                           /** @brief x offset of the image relative to the center */
     } watchface_dial_t;
 
+    /**
+     * @brief index image control structure
+     */
     typedef struct {
-        bool enable = true;
-        bool smooth = true;
-        int32_t x_offset = 0;
-        int32_t y_offset = 0;
+        bool enable = true;                             /** @brief enable image */
+        bool smooth = true;                             /** @brief smoothing the move between two min */
+        int32_t x_offset = 0;                           /** @brief x offset of the image relative to the center */
+        int32_t y_offset = 0;                           /** @brief x offset of the image relative to the center */
     } watchface_index_t;
 
+    /**
+     * @brief label control structure
+     */
     typedef struct {
-        bool enable = true;
-        char type[32] = "";
-        char label[32] = "";
-        char font_color[32] = "";
-        char align[32] = "";
-        int32_t font_size = 0;
-        int32_t x_offset = 0;
-        int32_t y_offset = 0;
-        int32_t x_size = 0;
-        int32_t y_size = 0;
+        bool enable = true;                             /** @brief enable the label */
+        char type[32] = "";                             /** @brief type of the label */
+        char label[32] = "";                            /** @brief text for the label */
+        char font_color[32] = "";                       /** @brief label color in format '#000000' */
+        char align[32] = "";                            /** @brief align the label, default is 'center' */
+        int32_t font_size = 0;                          /** @brief font size: 12,16,32,48 and 72 */
+        int32_t x_offset = 0;                           /** @brief x offset for the label*/
+        int32_t y_offset = 0;                           /** @brief y offset for the label*/
+        int32_t x_size = 0;                             /** @brief x size for the label*/
+        int32_t y_size = 0;                             /** @brief y size for the label*/
     } watchface_label_t;
-
+    /**
+     * @brief watchface theme control structure
+     */
     typedef struct {
-        watchface_dial_t dial;
-        watchface_index_t hour;
-        watchface_index_t min;
-        watchface_index_t sec;
-        watchface_index_t hour_shadow;
-        watchface_index_t min_shadow;
-        watchface_index_t sec_shadow;
-        watchface_label_t label[ WATCHFACE_LABEL_NUM ];
+        watchface_dial_t dial;                          /** @brief dial image struct */
+        watchface_index_t hour;                         /** @brief hour image struct */
+        watchface_index_t min;                          /** @brief min image struct */
+        watchface_index_t sec;                          /** @brief sec image struct */
+        watchface_index_t hour_shadow;                  /** @brief hour image shadow struct */
+        watchface_index_t min_shadow;                   /** @brief min image shadow struct */
+        watchface_index_t sec_shadow;                   /** @brief sec image shadow struct */
+        watchface_label_t label[ WATCHFACE_LABEL_NUM ]; /** @brief label struct */
     } watchface_t;
 
     /**
@@ -72,6 +83,9 @@
     class watchface_theme_config_t : public BaseJsonConfig {
         public:
         watchface_theme_config_t();
+        /**
+         * @brief watchface theme config
+         */
         watchface_t dial;
 
         protected:

@@ -25,5 +25,6 @@
     #include <TTGO.h>
 
     void watchface_app_main_setup( uint32_t tile_num );
+    void watchface_app_set_info_label( const char *text );
 
 #endif // _WATCHFACE_APP_MAIN_H

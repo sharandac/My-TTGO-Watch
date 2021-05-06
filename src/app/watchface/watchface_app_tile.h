@@ -24,7 +24,7 @@
 
     #include <TTGO.h>
 
-    #define WATCHFACE_LOG                       log_i
+    #define WATCHFACE_LOG                       log_d
 
     #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
 
@@ -35,11 +35,39 @@
     #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface/watchface_hour_s.png"
     #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
     #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
-
+    /**
+     * @brief watchface tile setup
+     */
     void watchface_app_tile_setup( void );
+    /**
+     * @brief watchface enable after wakeup config
+     * 
+     * @param enable    true enable jump into watchface after wakeup
+     */
     void watchface_enable_tile_after_wakeup( bool enable );
+    /**
+     * @brief reload watchface theme from /spiffs or setup default if no
+     * watchface_theme.json founf in /watchface/
+     */
     void watchface_reload_theme( void );
+    /**
+     * @brief clear watchface theme to default
+     * 
+     * @param return_tile   return tile after preview
+     */
+    void watchface_default_theme( uint32_t return_tile );
+    /**
+     * @brief reload watchface theme and show a preview
+     * 
+     * @param return_tile   return tile after preview
+     */
     void watchface_reload_and_test( uint32_t return_tile );
+    /**
+     * @brief unzip watchface.tar.gz from /spiffs, install theme
+     * and show a preview
+     * 
+     * @param   return_tile return tile after preview
+     */
     void watchface_decompress_theme( uint32_t return_tile );
 
 #endif // _WATCHFACE_APP_TILE_H

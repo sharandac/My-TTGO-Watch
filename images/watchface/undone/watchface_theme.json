@@ -47,54 +47,6 @@
       "y_offset": 113,
       "x_size": 20,
       "y_size": 13
-    },
-    {
-      "enable": false,
-      "type": "text",
-      "label": "n/a",
-      "font_color": "#000000",
-      "align": "center",
-      "font_size": 12,
-      "x_offset": 0,
-      "y_offset": 0,
-      "x_size": 64,
-      "y_size": 16
-    },
-    {
-      "enable": false,
-      "type": "text",
-      "label": "n/a",
-      "font_color": "#000000",
-      "align": "center",
-      "font_size": 12,
-      "x_offset": 0,
-      "y_offset": 0,
-      "x_size": 64,
-      "y_size": 16
-    },
-    {
-      "enable": false,
-      "type": "text",
-      "label": "",
-      "font_color": "#ffffff",
-      "align": "center",
-      "font_size": 12,
-      "x_offset": 0,
-      "y_offset": 0,
-      "x_size": 64,
-      "y_size": 16
-    },
-    {
-      "enable": false,
-      "type": "text",
-      "label": "",
-      "font_color": "#ffffff",
-      "align": "center",
-      "font_size": 12,
-      "x_offset": 0,
-      "y_offset": 0,
-      "x_size": 64,
-      "y_size": 16
     }
   ]
 }

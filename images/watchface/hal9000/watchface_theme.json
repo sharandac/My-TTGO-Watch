@@ -1,0 +1,22 @@
+{
+  "dial": {
+    "enable": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "label": [
+    {
+      "enable": true,
+      "type": "date",
+      "label": "%H:%M",
+      "font_color": "#8c040d",
+      "align": "center",
+      "font_size": 72,
+      "x_offset": 29,
+      "y_offset": 136,
+      "x_size": 187,
+      "y_size": 82
+    }
+  ]
+}
+
