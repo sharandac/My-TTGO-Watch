@@ -122,9 +122,15 @@ A watchface.tar.gz includes the following files and a extra watchface_theme.json
 
 Here you can find some finish watchface packages:
 
+![swiss clock](images/watchface/swiss/watchface.tar.gz)
+![swiss clock](images/watchface/undone/watchface.tar.gz)
+![swiss clock](images/watchface/startrek/watchface.tar.gz)
+![swiss clock](images/watchface/hal9000/watchface.tar.gz)
+
 ![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
 ![undone clock](images/watchface/undone/watchface.tar.gz)<br>
 ![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
+![hal9000](images/watchface/hal9000/watchface.tar.gz)<br>
 
 ## OSMmap
 
