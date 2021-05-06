@@ -179,13 +179,13 @@ It is possible to update over the air.
 
 Press the button for 2 seconds, after that an quickmenu appears. Here you can select the tiny camera icon to take a screenshot.
 This can be downloaded via the built-in FTP server (binary and passive mode, username: TTWatch and password: passord), if activated.
-The file name is screen.data.
+The file name is screen.png.
 
 Or the other way:
 
-The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
+The firmware has an integrated webserver. Over this a screenshot can be triggered. The image store as png and can be read with gimp. From bash it look like this
 ```bash
-wget x.x.x.x/shot ; wget x.x.x.x/screen.data
+wget x.x.x.x/shot ; wget x.x.x.x/screen.png
 ```
 
 Pro-tipp:

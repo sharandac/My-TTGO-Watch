@@ -651,8 +651,6 @@ void watchface_app_tile_update( void ) {
                 lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
             }
         }
-        lv_obj_invalidate( lv_scr_act() );
-        lv_refr_now( NULL );
     }
 }
 
