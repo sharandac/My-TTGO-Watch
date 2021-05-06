@@ -61,7 +61,7 @@ void sdcard_settings_tile_setup(void)
     lv_obj_t *sdcard_fs_browser_enable_cont = lv_obj_create(sdcard_settings_tile, NULL);
     lv_obj_set_size(sdcard_fs_browser_enable_cont, lv_disp_get_hor_res(NULL), 32);
     lv_obj_add_style(sdcard_fs_browser_enable_cont, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_obj_align(sdcard_fs_browser_enable_cont, sdcard_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75);
+    lv_obj_align(sdcard_fs_browser_enable_cont, header, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
     sdcard_fs_browser_onoff = wf_add_switch(sdcard_fs_browser_enable_cont, false);
     lv_obj_align(sdcard_fs_browser_onoff, sdcard_fs_browser_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb(sdcard_fs_browser_onoff, sdcard_fs_browser_onoff_event_handler);

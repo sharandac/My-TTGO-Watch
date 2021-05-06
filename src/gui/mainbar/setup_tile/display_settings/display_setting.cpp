@@ -87,7 +87,7 @@ void display_settings_tile_setup( void ) {
     setup_hide_indicator( display_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( display_settings_tile_1, "display settings", exit_display_setup_event_cb );
-    //lv_obj_align( header, display_settings_tile_1, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, display_settings_tile_1, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     
     lv_obj_t *down_btn_1 = lv_imgbtn_create( display_settings_tile_1, NULL);
     lv_imgbtn_set_src( down_btn_1, LV_BTN_STATE_RELEASED, &down_32px);

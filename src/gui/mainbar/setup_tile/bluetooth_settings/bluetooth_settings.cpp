@@ -71,12 +71,12 @@ void bluetooth_settings_tile_setup( void ) {
     setup_hide_indicator( bluettoth_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( bluetooth_settings_tile, "bluetooth settings", exit_bluetooth_setup_event_cb );
-    //lv_obj_align( header, bluetooth_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, bluetooth_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *bluetooth_enable_cont = lv_obj_create( bluetooth_settings_tile, NULL );
     lv_obj_set_size( bluetooth_enable_cont, lv_disp_get_hor_res( NULL ) , 32);
     lv_obj_add_style( bluetooth_enable_cont, LV_OBJ_PART_MAIN, &bluetooth_settings_style  );
-    lv_obj_align( bluetooth_enable_cont, bluetooth_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( bluetooth_enable_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     bluetooth_enable_onoff = wf_add_switch( bluetooth_enable_cont, false );
     lv_obj_align( bluetooth_enable_onoff, bluetooth_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( bluetooth_enable_onoff, bluetooth_enable_onoff_event_handler );

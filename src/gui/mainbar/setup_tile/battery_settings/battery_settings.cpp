@@ -70,12 +70,12 @@ void battery_settings_tile_setup( void ) {
     setup_hide_indicator( battery_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( battery_settings_tile, "energy settings", exit_battery_setup_event_cb );
-    //lv_obj_align( header, battery_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, battery_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *battery_silence_wakeup_switch_cont = lv_obj_create( battery_settings_tile, NULL );
     lv_obj_set_size(battery_silence_wakeup_switch_cont, lv_disp_get_hor_res( NULL ) , 32);
     lv_obj_add_style( battery_silence_wakeup_switch_cont, LV_OBJ_PART_MAIN, &battery_settings_style  );
-    lv_obj_align( battery_silence_wakeup_switch_cont, battery_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( battery_silence_wakeup_switch_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     battery_silence_wakeup_switch = wf_add_switch( battery_silence_wakeup_switch_cont, false );
     lv_obj_align( battery_silence_wakeup_switch, battery_silence_wakeup_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( battery_silence_wakeup_switch, battery_silence_wakeup_switch_event_handler );

@@ -222,12 +222,12 @@ void time_settings_tile_setup( void ) {
     setup_hide_indicator( time_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( time_settings_tile, "time settings", exit_time_setup_event_cb );
-    //lv_obj_align( header, time_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, time_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *wifisync_cont = lv_obj_create( time_settings_tile, NULL );
     lv_obj_set_size(wifisync_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( wifisync_cont, LV_OBJ_PART_MAIN, &time_settings_style  );
-    lv_obj_align( wifisync_cont, time_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( wifisync_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     wifisync_onoff = wf_add_switch( wifisync_cont, false );
     lv_obj_align( wifisync_onoff, wifisync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( wifisync_onoff, wifisync_onoff_event_handler );

@@ -96,7 +96,7 @@ void wlan_settings_tile_setup( void ) {
     setup_hide_indicator( wifi_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan", exit_wifi_settings_event_cb );
-    //lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *setup_btn = lv_imgbtn_create( wifi_settings_tile, NULL);
     lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);

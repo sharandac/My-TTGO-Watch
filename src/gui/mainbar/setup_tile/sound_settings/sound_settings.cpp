@@ -72,12 +72,12 @@ void sound_settings_tile_setup( void ) {
     setup_hide_indicator( sound_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( sound_settings_tile, "sound settings", exit_sound_setup_event_cb );
-    //lv_obj_align( header, sound_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, sound_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *vibe_cont = lv_obj_create( sound_settings_tile, NULL );
     lv_obj_set_size(vibe_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( vibe_cont, LV_OBJ_PART_MAIN, &sound_settings_style );
-    lv_obj_align( vibe_cont, sound_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( vibe_cont, header, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
     sound_vibe_onoff = wf_add_switch( vibe_cont, false );
     lv_obj_align( sound_vibe_onoff, vibe_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sound_vibe_onoff, sound_vibe_setup_event_cb );

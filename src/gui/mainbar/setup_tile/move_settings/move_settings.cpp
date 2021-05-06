@@ -61,12 +61,12 @@ void move_settings_tile_setup( void ) {
     setup_hide_indicator( move_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( move_settings_tile, "movement settings", exit_move_setup_event_cb );
-    //lv_obj_align( header, move_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, move_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *stepcounter_cont = lv_obj_create( move_settings_tile, NULL );
     lv_obj_set_size(stepcounter_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( stepcounter_cont, move_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( stepcounter_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     stepcounter_onoff = wf_add_switch( stepcounter_cont, false );
     lv_obj_align( stepcounter_onoff, stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( stepcounter_onoff, stepcounter_onoff_event_handler );

@@ -66,12 +66,12 @@ void gps_settings_tile_setup( void ) {
     setup_hide_indicator( gps_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( gps_settings_tile, "gps settings", exit_gps_setup_event_cb );
-    //lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
+    lv_obj_align( header, gps_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *autoon_cont = lv_obj_create( gps_settings_tile, NULL );
     lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( autoon_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( autoon_cont, gps_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     autoon_onoff = wf_add_switch( autoon_cont, false );
     lv_obj_align( autoon_onoff, autoon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( autoon_onoff, autoon_onoff_event_handler );

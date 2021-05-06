@@ -69,12 +69,12 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, &update_setup_style );
 
     lv_obj_t *header = wf_add_settings_header( update_setup_tile, "update settings", exit_update_check_setup_event_cb );
-    //lv_obj_align( header, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *update_check_autosync_cont = lv_obj_create( update_setup_tile, NULL );
     lv_obj_set_size(update_check_autosync_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( update_check_autosync_cont, LV_OBJ_PART_MAIN, &update_setup_style  );
-    lv_obj_align( update_check_autosync_cont, update_setup_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( update_check_autosync_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
     update_check_autosync_onoff = wf_add_switch( update_check_autosync_cont, false );
     lv_obj_align( update_check_autosync_onoff, update_check_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
