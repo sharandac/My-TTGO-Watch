@@ -55,6 +55,12 @@
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
     /**
+     * @brief jumps direct to the maintile
+     * 
+     * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
+     */
+    void mainbar_jump_to_maintile( lv_anim_enable_t anim );
+    /**
      * @brief add a tile at a specific position
      * 
      * @param   x   x position
@@ -68,11 +74,11 @@
      * 
      *  predefine tiles
      * 
-     *  +---+---+       1 = main tile
-     *  | 1 | 2 |       2 = app tile
-     *  +---+---+       3 = note tile
-     *  | 3 | 4 |       4 = setup tile
-     *  +---+---+
+     *  +---+---+---+---+       0 = main tile
+     *  | 0 | 1 | 2 | 3 |       1..3 = app tile
+     *  +---+---+---+---+       4 = note tile
+     *  | 4 | 5 | 6 |           5..6 = setup tile
+     *  +---+---+---+
      * 
      *  app tile
      * 

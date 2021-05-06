@@ -101,5 +101,13 @@
      * @brief send an interrupt enable request
      */
     void powermgm_enable_interrupts( void );
+    /**
+     * @bried set performace mode 240/240Mhz (only custom framework)
+     */
+    void powermgm_set_perf_mode( void );
+    /**
+     * @brief set normal mode 240/80Mhz (only custom framework)
+     */
+    void powermgm_set_normal_mode( void );
 
 #endif // _POWERMGM_H

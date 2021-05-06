@@ -26,10 +26,6 @@ A subset of settings can be accessed via a swipe from the top of the screen.
 
 Once a setting is selected, you can leave the form with the exit button.
 
-## Battery
-
-![screenshot](images/screen9.png)
-
 ## Display
 
 Set color, background, touch feedback with vibrations...
@@ -68,11 +64,16 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Format
 * Reboot
 * Poweroff
+* GPS injection
 
 ## Sound 
 
 * Enable sound
 * Set volume
+
+# GPS
+
+![screenshot](images/screen11.png)
 
 # Applications
 
@@ -104,6 +105,33 @@ You can also have the next alarm displayed on the main face.
 ## ir-remote
 
 For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
+
+## watchface
+
+If you want to customize your own watchface, copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and decompress it with the watchface app.
+
+A watchface.tar.gz includes the following files and a extra watchface_theme.json. Some example:
+
+![dial](images/watchface/watchface_dial.png)
+![hour](images/watchface/watchface_hour.png)
+![min](images/watchface/watchface_min.png)
+![sec](images/watchface/watchface_sec.png)
+![hour shadow](images/watchface/watchface_hour_s.png)
+![min shadow](images/watchface/watchface_min_s.png)
+![sec shadow](images/watchface/watchface_sec_s.png)
+
+Here you can find some finish watchface packages:
+
+![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
+![undone clock](images/watchface/undone/watchface.tar.gz)<br>
+![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
+
+## OSMmap
+
+![screenshot](images/screen9.png)
+![navigation](images/osmmap_navigation.png)
+
+A long press in the middle centers the map to the current gps position.
 
 ## OSMAnd
 
@@ -141,7 +169,7 @@ Some improvements might come in the future.
 
 # Updates
 
-![screenshot](images/screen11.png)
+It is possible to update over the air.
 
 # FAQ
 

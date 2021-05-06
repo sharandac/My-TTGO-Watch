@@ -36,9 +36,13 @@ lv_obj_t *sailing_setup_tile = NULL;
 lv_style_t sailing_setup_style;
 
 lv_obj_t *sailing_foobar_switch = NULL;
+lv_obj_t *sailing_track_switch = NULL;
+
+bool tracking = false;
 
 static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
+static void sailing_track_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void sailing_setup_setup( uint32_t tile_num ) {
 
@@ -61,18 +65,38 @@ void sailing_setup_setup( uint32_t tile_num ) {
     sailing_foobar_switch = wf_add_switch( sailing_foobar_switch_cont, false );
     lv_obj_align( sailing_foobar_switch, sailing_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sailing_foobar_switch, sailing_foobar_switch_event_cb );
-
     lv_obj_t *sailing_foobar_switch_label = lv_label_create( sailing_foobar_switch_cont, NULL);
     lv_obj_add_style( sailing_foobar_switch_label, LV_OBJ_PART_MAIN, &sailing_setup_style  );
     lv_label_set_text( sailing_foobar_switch_label, "Always on display");
     lv_obj_align( sailing_foobar_switch_label, sailing_foobar_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+
+    lv_obj_t *sailing_track_switch_cont = lv_obj_create( sailing_setup_tile, NULL );
+    lv_obj_set_size( sailing_track_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( sailing_track_switch_cont, LV_OBJ_PART_MAIN, &sailing_setup_style  );
+    lv_obj_align( sailing_track_switch_cont, sailing_foobar_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    sailing_track_switch = wf_add_switch( sailing_track_switch_cont, false );
+    lv_obj_align( sailing_track_switch, sailing_track_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_event_cb( sailing_track_switch, sailing_track_switch_event_cb );
+    lv_obj_t *sailing_track_switch_label = lv_label_create( sailing_track_switch_cont, NULL);
+    lv_obj_add_style( sailing_track_switch_label, LV_OBJ_PART_MAIN, &sailing_setup_style  );
+    lv_label_set_text( sailing_track_switch_label, "Show track");
+    lv_obj_align( sailing_track_switch_label, sailing_track_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
 }
 
 static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): Serial.printf( "switch value = %d\r\n", lv_switch_get_state( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ): SAILING_INFO_LOG( "switch value = %d", lv_switch_get_state( obj ) );
                                         if( lv_switch_get_state( obj ) == 1 ) display_set_timeout( 300 );
                                         else display_set_timeout( 15 );
+                                        break;
+    }
+}
+
+static void sailing_track_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_VALUE_CHANGED ): SAILING_INFO_LOG( "switch value = %d", lv_switch_get_state( obj ) );
+                                        if( lv_switch_get_state( obj ) == 1 ) tracking = true;
+                                        else tracking = false;
                                         break;
     }
 }

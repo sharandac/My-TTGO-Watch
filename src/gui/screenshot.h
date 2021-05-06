@@ -24,7 +24,7 @@
 
     #include "config.h"
 
-    #define SCREENSHOT_FILE_NAME    "/screen.data"
+    #define SCREENSHOT_FILE_NAME    "/spiffs/screen.data"
 
     /**
      * @brief setup screenshot

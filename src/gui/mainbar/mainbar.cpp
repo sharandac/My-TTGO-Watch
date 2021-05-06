@@ -31,6 +31,9 @@
 #include "gui/statusbar.h"
 #include "gui/widget_styles.h"
 
+#include "hardware/display.h"
+#include "hardware/powermgm.h"
+
 #include "utils/alloc.h"
 
 #include "setup_tile/battery_settings/battery_settings.h"
@@ -48,6 +51,8 @@ static uint32_t current_tile = 0;
 static uint32_t tile_entrys = 0;
 static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
 
+bool mainbar_powermgm_event_cb( EventBits_t event, void *arg );
+
 void mainbar_setup( void ) {
     /*
      * check if mainbar already initialized
@@ -61,6 +66,18 @@ void mainbar_setup( void ) {
     lv_tileview_set_edge_flash( mainbar, false);
     lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
+}
+
+bool mainbar_powermgm_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case POWERMGM_WAKEUP:
+                                        if ( !display_get_block_return_maintile() ) {
+                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        }
+                                        break;
+    }
+    return( true );
 }
 
 uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {

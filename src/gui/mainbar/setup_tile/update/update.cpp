@@ -80,7 +80,7 @@ LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
 
 void update_tile_setup( void ) {
-    last_firmware_version = atol( __FIRMWARE__ );
+    last_firmware_version = atoll( __FIRMWARE__ );
     // get an app tile and copy mainstyle
     update_tile_num = mainbar_add_app_tile( 1, 2, "update setup" );
     update_settings_tile = mainbar_get_tile_obj( update_tile_num );
@@ -276,7 +276,7 @@ void update_Task( void * pvParameters ) {
 
     if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
         int64_t firmware_version = update_check_new_version( update_setup_get_url() );
-        if ( firmware_version > atol( __FIRMWARE__ ) && firmware_version > 0 ) {
+        if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
             char version_msg[48] = "";
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
             lv_label_set_text( update_status_label, (const char*)version_msg );
@@ -287,7 +287,7 @@ void update_Task( void * pvParameters ) {
                 last_firmware_version = firmware_version;
             }
         }
-        else if ( firmware_version == atol( __FIRMWARE__ ) ) {
+        else if ( firmware_version == atoll( __FIRMWARE__ ) ) {
             lv_label_set_text( update_status_label, "yeah! up to date ..." );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
             setup_hide_indicator( update_setup_icon );

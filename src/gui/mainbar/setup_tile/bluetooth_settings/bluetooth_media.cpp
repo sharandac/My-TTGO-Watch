@@ -69,15 +69,17 @@ static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc );
 
 void bluetooth_media_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    bluetooth_media_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth media" );
+    //bluetooth_media_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth media" );
+    bluetooth_media_tile_num = mainbar_add_tile( 0, 1, "bluetooth media" );
     bluetooth_media_tile = mainbar_get_tile_obj( bluetooth_media_tile_num );
 
-    lv_style_copy( &bluetooth_media_style, ws_get_app_opa_style() );
+    lv_style_copy( &bluetooth_media_style, ws_get_mainbar_style() );
     lv_style_set_text_font( &bluetooth_media_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( bluetooth_media_tile, LV_OBJ_PART_MAIN, &bluetooth_media_style );
 
-    lv_obj_t *exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_event_cb, &bluetooth_media_style);
+    /*lv_obj_t *exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_event_cb, &bluetooth_media_style);
     lv_obj_align( exit_btn, bluetooth_media_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    */
 
     bluetooth_media_play = wf_add_image_button( bluetooth_media_tile, play_64px, exit_bluetooth_media_play_event_cb, &bluetooth_media_style );
     lv_obj_align( bluetooth_media_play, bluetooth_media_tile, LV_ALIGN_CENTER, 0, 0 );

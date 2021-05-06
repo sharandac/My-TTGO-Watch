@@ -35,7 +35,6 @@ LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
 void note_tile_setup( void ) {
-
     note_cont = mainbar_get_tile_obj( mainbar_add_tile( 0, 1, "note tile" ) );
     style = ws_get_mainbar_style();
 

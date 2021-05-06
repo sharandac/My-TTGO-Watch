@@ -40,7 +40,7 @@ void splash_screen_stage_one( void ) {
 
     lv_split_jpeg_init();
     lv_png_init();
-    lv_img_cache_set_size(100);
+    lv_img_cache_set_size(250);
 
     lv_style_init( &style );
     lv_style_set_radius( &style, LV_OBJ_PART_MAIN, 0 );

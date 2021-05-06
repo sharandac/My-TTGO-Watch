@@ -24,7 +24,7 @@
 
     #include <TTGO.h>
 
-    #define OSMMAP_APP_INFO_LOG     log_d
+    #define OSMMAP_APP_INFO_LOG     log_i
     #define OSMMAP_APP_LOG          log_d
     #define OSMMAP_APP_ERROR_LOG    log_e
 
