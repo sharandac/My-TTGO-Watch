@@ -42,7 +42,6 @@ lv_obj_t *watchface_onoff = NULL;
 lv_obj_t *watchface_info_label = NULL;
 watchface_config_t watchface_config;
 
-LV_IMG_DECLARE(exit_32px);
 static void watchface_app_default_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_enable_event_cb( lv_obj_t *obj, lv_event_t event );
@@ -65,14 +64,8 @@ void watchface_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( watchface_app_main_tile, LV_OBJ_PART_MAIN, &watchface_app_main_style );
     lv_style_copy( &watchface_app_button_style, ws_get_button_style() );
 
-    watchface_exit_btn = lv_imgbtn_create( watchface_app_main_tile, NULL);
-    lv_imgbtn_set_src( watchface_exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( watchface_exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( watchface_exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( watchface_exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( watchface_exit_btn, LV_IMGBTN_PART_MAIN, &watchface_app_main_style );
+    watchface_exit_btn = wf_add_exit_button( watchface_app_main_tile, exit_watchface_app_main_event_cb, &watchface_app_main_style );
     lv_obj_align( watchface_exit_btn, watchface_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( watchface_exit_btn, exit_watchface_app_main_event_cb );
     /**
      * switch container
      */

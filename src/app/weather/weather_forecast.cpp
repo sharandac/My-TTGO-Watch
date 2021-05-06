@@ -31,6 +31,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/powermgm.h"
@@ -57,7 +58,6 @@ static weather_forcast_t *weather_forecast = NULL;
 void weather_forecast_sync_Task( void * pvParameters );
 bool weather_forecast_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_IMG_DECLARE(owm_01d_64px);
@@ -78,14 +78,8 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
     lv_style_copy( &weather_forecast_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &weather_forecast_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, &weather_forecast_style );
     lv_obj_align(exit_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( exit_btn, exit_weather_widget_event_cb );
 
     lv_obj_t * setup_btn = lv_imgbtn_create( weather_forecast_tile, NULL);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);

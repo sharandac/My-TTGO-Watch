@@ -30,6 +30,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/gpsctl.h"
@@ -59,7 +60,6 @@ static bool gps_status_block_return_maintile = false;
 /*
  * images
  */
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
@@ -76,14 +76,8 @@ void gps_status_main_setup(uint32_t tile_num) {
     gps_status_main_tile = mainbar_get_tile_obj(tile_num);
     lv_style_copy(&gps_status_main_style, ws_get_mainbar_style());
 
-    lv_obj_t *exit_btn = lv_imgbtn_create(gps_status_main_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &gps_status_main_style);
+    lv_obj_t * exit_btn = wf_add_exit_button( gps_status_main_tile, exit_gps_status_main_event_cb, &gps_status_main_style );
     lv_obj_align(exit_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
-    lv_obj_set_event_cb(exit_btn, exit_gps_status_main_event_cb);
 
     lv_obj_t *setup_btn = lv_imgbtn_create(gps_status_main_tile, NULL);
     lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);

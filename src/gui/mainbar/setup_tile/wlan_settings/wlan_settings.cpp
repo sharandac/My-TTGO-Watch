@@ -80,7 +80,6 @@ LV_IMG_DECLARE(unlock_16px);
 LV_IMG_DECLARE(check_32px);
 LV_IMG_DECLARE(trash_32px);
 LV_IMG_DECLARE(wifi_64px);
-LV_IMG_DECLARE(setup_32px);
 
 void wlan_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
@@ -98,14 +97,8 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan", exit_wifi_settings_event_cb );
     lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *setup_btn = lv_imgbtn_create( wifi_settings_tile, NULL);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style( setup_btn, LV_IMGBTN_PART_MAIN, &wifi_settings_style );
+    lv_obj_t *setup_btn = wf_add_setup_button( wifi_settings_tile, enter_wifi_setup_event_cb, &wifi_settings_style );
     lv_obj_align( setup_btn, wifi_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( setup_btn, enter_wifi_setup_event_cb );
 
     /*Copy the first switch and turn it ON*/    
     wifi_onoff = wf_add_switch( wifi_settings_tile, false );

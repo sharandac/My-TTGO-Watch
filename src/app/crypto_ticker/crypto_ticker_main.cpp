@@ -32,6 +32,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/wifictl.h"
@@ -53,7 +54,6 @@ crypto_ticker_main_data_t crypto_ticker_main_data;
 void crypto_ticker_main_sync_Task( void * pvParameters );
 bool crypto_ticker_main_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
@@ -67,14 +67,8 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     crypto_ticker_main_tile = mainbar_get_tile_obj( tile_num );
     lv_style_copy( &crypto_ticker_main_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &crypto_ticker_main_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( crypto_ticker_main_tile, exit_crypto_ticker_main_event_cb, &crypto_ticker_main_style );
     lv_obj_align(exit_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( exit_btn, exit_crypto_ticker_main_event_cb );
 
     lv_obj_t * reload_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
     lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_RELEASED, &refresh_32px);
