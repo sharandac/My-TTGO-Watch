@@ -63,73 +63,17 @@ void move_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( move_settings_tile, "movement settings", exit_move_setup_event_cb );
     lv_obj_align( header, move_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *stepcounter_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(stepcounter_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( stepcounter_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    stepcounter_onoff = wf_add_switch( stepcounter_cont, false );
-    lv_obj_align( stepcounter_onoff, stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( stepcounter_onoff, stepcounter_onoff_event_handler );
-    lv_obj_t *stepcounter_label = lv_label_create( stepcounter_cont, NULL);
-    lv_obj_add_style( stepcounter_label, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_label_set_text( stepcounter_label, "step counter");
-    lv_obj_align( stepcounter_label, stepcounter_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_t *stepcounter_cont = wf_add_labeled_switch( move_settings_tile, "step counter", &stepcounter_onoff, bma_get_config( BMA_STEPCOUNTER ), stepcounter_onoff_event_handler );
+    lv_obj_align( stepcounter_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
-    lv_obj_t *doubleclick_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(doubleclick_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( doubleclick_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( doubleclick_cont, stepcounter_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    doubleclick_onoff = wf_add_switch( doubleclick_cont, false );
-    lv_obj_align( doubleclick_onoff, doubleclick_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( doubleclick_onoff, doubleclick_onoff_event_handler );
-    lv_obj_t *doubleclick_label = lv_label_create( doubleclick_cont, NULL);
-    lv_obj_add_style( doubleclick_label, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_label_set_text( doubleclick_label, "double click");
-    lv_obj_align( doubleclick_label, doubleclick_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_t *doubleclick_cont = wf_add_labeled_switch( move_settings_tile, "double click", &doubleclick_onoff, bma_get_config( BMA_DOUBLECLICK ), doubleclick_onoff_event_handler );
+    lv_obj_align( doubleclick_cont, stepcounter_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
-    lv_obj_t *tilt_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(tilt_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( tilt_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( tilt_cont, doubleclick_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    tilt_onoff = wf_add_switch( tilt_cont, false );
-    lv_obj_align( tilt_onoff, tilt_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( tilt_onoff, tilt_onoff_event_handler );
-    lv_obj_t *tilt_label = lv_label_create( tilt_cont, NULL);
-    lv_obj_add_style( tilt_label, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_label_set_text( tilt_label, "tilt");
-    lv_obj_align( tilt_label, tilt_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_t *tilt_cont = wf_add_labeled_switch( move_settings_tile, "double click", &tilt_onoff, bma_get_config( BMA_TILT ), tilt_onoff_event_handler );
+    lv_obj_align( tilt_cont, doubleclick_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
-    lv_obj_t *daily_stepcounter_cont = lv_obj_create( move_settings_tile, NULL );
-    lv_obj_set_size(daily_stepcounter_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( daily_stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( daily_stepcounter_cont, tilt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    daily_stepcounter_onoff = wf_add_switch( daily_stepcounter_cont, false );
-    lv_obj_align( daily_stepcounter_onoff, daily_stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( daily_stepcounter_onoff, daily_stepcounter_onoff_event_handler );
-    lv_obj_t *daily_stepcounter_label = lv_label_create( daily_stepcounter_cont, NULL);
-    lv_obj_add_style( daily_stepcounter_label, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_label_set_text( daily_stepcounter_label, "daily stepcounter");
-    lv_obj_align( daily_stepcounter_label, daily_stepcounter_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    if ( bma_get_config( BMA_DOUBLECLICK ) )
-        lv_switch_on( doubleclick_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( doubleclick_onoff, LV_ANIM_OFF );
-
-    if ( bma_get_config( BMA_STEPCOUNTER ) )
-        lv_switch_on( stepcounter_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( stepcounter_onoff, LV_ANIM_OFF );
-
-    if ( bma_get_config( BMA_TILT ) )
-        lv_switch_on( tilt_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( tilt_onoff, LV_ANIM_OFF );
-
-    if ( bma_get_config( BMA_DAILY_STEPCOUNTER ) )
-        lv_switch_on( daily_stepcounter_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( daily_stepcounter_onoff, LV_ANIM_OFF );
+    lv_obj_t *daily_stepcounter_cont = wf_add_labeled_switch( move_settings_tile, "daily stepcounter", &daily_stepcounter_onoff, bma_get_config( BMA_DAILY_STEPCOUNTER ), daily_stepcounter_onoff_event_handler );
+    lv_obj_align( daily_stepcounter_cont, tilt_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 }
 
 

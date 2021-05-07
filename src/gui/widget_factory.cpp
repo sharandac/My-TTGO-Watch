@@ -104,6 +104,14 @@ lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t *
     return container;
 }
 
+lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj, bool state, lv_event_cb_t event_cb ){
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
+    wf_add_label( container, text);
+    *ret_switch_obj = wf_add_switch( container, state );
+    lv_obj_set_event_cb( *ret_switch_obj, event_cb );
+    return container;
+}
+
 lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int height, lv_event_cb_t event_cb){
     lv_obj_t * button = lv_btn_create(parent, NULL);
     lv_obj_t * label_obj = lv_label_create(button, NULL);
