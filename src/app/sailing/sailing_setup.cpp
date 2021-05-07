@@ -55,13 +55,12 @@ void sailing_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( sailing_setup_tile, LV_OBJ_PART_MAIN, &sailing_setup_style );
 
     lv_obj_t *header = wf_add_settings_header( sailing_setup_tile, "Exit setup", exit_sailing_setup_event_cb );
-    //lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
+    lv_obj_align( header, sailing_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     lv_obj_t *sailing_foobar_switch_cont = lv_obj_create( sailing_setup_tile, NULL );
     lv_obj_set_size( sailing_foobar_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( sailing_foobar_switch_cont, LV_OBJ_PART_MAIN, &sailing_setup_style  );
-    lv_obj_align( sailing_foobar_switch_cont, header, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
-
+    lv_obj_align( sailing_foobar_switch_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     sailing_foobar_switch = wf_add_switch( sailing_foobar_switch_cont, false );
     lv_obj_align( sailing_foobar_switch, sailing_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( sailing_foobar_switch, sailing_foobar_switch_event_cb );
