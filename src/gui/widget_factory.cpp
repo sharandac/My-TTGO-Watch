@@ -65,6 +65,12 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text){
     return label;
 }
 
+lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {
+    lv_obj_t *container = wf_add_container( parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
+    wf_add_label( container, text);
+    return container;
+}
+
 lv_obj_t * wf_add_roller(lv_obj_t *parent, char const * data, lv_roller_mode_t mode, int row_count){
     lv_obj_t *roller = lv_roller_create(parent, NULL);
     lv_obj_add_style(roller, LV_ROLLER_PART_BG, ws_get_roller_bg_style() );

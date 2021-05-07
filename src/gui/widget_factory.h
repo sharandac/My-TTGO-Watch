@@ -65,6 +65,7 @@ lv_obj_t * wf_add_tile_footer_container(lv_obj_t *parent_tile, lv_layout_t layou
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text);
+lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text);
 
 /**
  * @brief   Creates and adds a roller object to a container

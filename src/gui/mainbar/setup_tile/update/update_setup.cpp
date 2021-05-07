@@ -71,18 +71,8 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_t *header = wf_add_settings_header( update_setup_tile, "update settings", exit_update_check_setup_event_cb );
     lv_obj_align( header, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *update_check_autosync_cont = lv_obj_create( update_setup_tile, NULL );
-    lv_obj_set_size(update_check_autosync_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( update_check_autosync_cont, LV_OBJ_PART_MAIN, &update_setup_style  );
-    lv_obj_align( update_check_autosync_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-
-    update_check_autosync_onoff = wf_add_switch( update_check_autosync_cont, false );
-    lv_obj_align( update_check_autosync_onoff, update_check_autosync_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( update_check_autosync_onoff, update_check_autosync_onoff_event_handler );
-    lv_obj_t *update_check_autosync_label = lv_label_create( update_check_autosync_cont, NULL);
-    lv_obj_add_style( update_check_autosync_label, LV_OBJ_PART_MAIN, &update_setup_style  );
-    lv_label_set_text( update_check_autosync_label, "check for updates");
-    lv_obj_align( update_check_autosync_label, update_check_autosync_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_t *update_check_autosync_cont = wf_add_labeled_switch( update_setup_tile, "check for updates", &update_check_autosync_onoff, update_config->autosync, update_check_autosync_onoff_event_handler );
+    lv_obj_align( update_check_autosync_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_obj_t *update_check_url_cont = lv_obj_create( update_setup_tile, NULL );
     lv_obj_set_size(update_check_url_cont, lv_disp_get_hor_res( NULL ) , 60);
@@ -107,12 +97,6 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_align( update_reset_url_btn, update_check_url_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     lv_obj_t *update_reset_url_label = lv_label_create( update_reset_url_btn, NULL );
     lv_label_set_text( update_reset_url_label, "set default url");
-
-    if ( update_config->autosync )
-        lv_switch_on( update_check_autosync_onoff, LV_ANIM_OFF);
-    else
-        lv_switch_off( update_check_autosync_onoff, LV_ANIM_OFF);
-
 }
 
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
