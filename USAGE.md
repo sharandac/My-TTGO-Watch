@@ -30,6 +30,9 @@ Once a setting is selected, you can leave the form with the exit button.
 
 Set color, background, touch feedback with vibrations...
 
+![screenshot](images/display_1.png)
+![screenshot](images/display_2.png)
+
 ## Move
 
 Enable:
@@ -45,9 +48,13 @@ Initially, it is on a 30 minutes frequency.
 When the realtime tab of gadgetbridge is selected, the frequency is set to every 5 seconds.
 If the watch lost contact with gadgetbridge for more than 30 minutes, the stepcounter is also refreshed when bluetooth is reconnected.
 
+![screenshot](images/move.png)
+
 ## Bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime.
+
+![screenshot](images/bluetooth.png)
 
 ## WiFi
 
@@ -59,6 +66,8 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Display 12/24 hours
 * Select region and location
 
+![screenshot](images/time.png)
+
 ## Utilities
 
 * Format
@@ -66,12 +75,16 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Poweroff
 * GPS injection
 
+![screenshot](images/utilities.png)
+
 ## Sound 
 
 * Enable sound
 * Set volume
 
-# GPS
+![screenshot](images/sound.png)
+
+## GPS
 
 ![screenshot](images/screen11.png)
 
