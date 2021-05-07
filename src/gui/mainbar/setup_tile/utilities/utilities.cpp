@@ -29,6 +29,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
 #include "gui/setup.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/motor.h"
@@ -51,8 +52,6 @@ lv_obj_t *gps_test_data_btn_label = NULL;
 
 static lv_style_t style_modal;
 
-
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(utilities_64px);
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -79,19 +78,8 @@ void utilities_tile_setup( void ) {
     icon_t *utilities_setup_icon = setup_register( "Utilities", &utilities_64px, enter_utilities_event_cb );
     setup_hide_indicator( utilities_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( utilities_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &utilities_style );
-    lv_obj_align( exit_btn, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_utilities_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( utilities_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &utilities_style  );
-    lv_label_set_text( exit_label, "System Utilities");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities", exit_utilities_event_cb );
+    //lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     //Spiffs:
     //Add button for dump spiffs details to serial including config files

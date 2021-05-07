@@ -41,7 +41,6 @@ lv_obj_t *app_use_gps_onoff = NULL;
 lv_obj_t *fakegps_onoff = NULL;
 lv_obj_t *gps_latlon_label = NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(gps_64px);
 
 static void enter_gps_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -66,24 +65,13 @@ void gps_settings_tile_setup( void ) {
     icon_t *gps_setup_icon = setup_register( "gps", &gps_64px, enter_gps_setup_event_cb );
     setup_hide_indicator( gps_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( gps_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &gps_settings_style );
-    lv_obj_align( exit_btn, gps_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_gps_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( gps_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &gps_settings_style );
-    lv_label_set_text( exit_label, "gps settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( gps_settings_tile, "gps settings", exit_gps_setup_event_cb );
+    lv_obj_align( header, gps_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *autoon_cont = lv_obj_create( gps_settings_tile, NULL );
     lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( autoon_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( autoon_cont, gps_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     autoon_onoff = wf_add_switch( autoon_cont, false );
     lv_obj_align( autoon_onoff, autoon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( autoon_onoff, autoon_onoff_event_handler );

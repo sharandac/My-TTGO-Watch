@@ -123,14 +123,17 @@ lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int he
     return button;
 }
 
-lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb){
+lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
     lv_obj_t * button = lv_imgbtn_create( parent, NULL );
     lv_imgbtn_set_src( button, LV_BTN_STATE_RELEASED, &image );
     lv_imgbtn_set_src( button, LV_BTN_STATE_PRESSED, &image );
     lv_imgbtn_set_src( button, LV_BTN_STATE_CHECKED_RELEASED, &image );
     lv_imgbtn_set_src( button, LV_BTN_STATE_CHECKED_PRESSED, &image );
 
-    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, ws_get_img_button_style() );
+    if (!style) {
+        style = ws_get_img_button_style();
+    }
+    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, style );
     lv_obj_set_ext_click_area(button, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING);
 
     if (event_cb != NULL) {
@@ -142,9 +145,39 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
     lv_obj_t *exit_btn = wf_add_image_button(container, exit_32px, NULL);
-    wf_add_label(container, title);
+    if (title != NULL && strlen(title) > 0) {
+        wf_add_label(container, title);
+    }
     *ret_back_btn = exit_btn;
     return container;
+}
+
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event_cb_t event_cb){
+    lv_obj_t *exit_btn;
+    lv_obj_t *cont = wf_add_settings_header( parent, title, &exit_btn );
+    lv_obj_set_event_cb( exit_btn, event_cb );
+    return cont;
+}
+
+lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent) {
+    lv_obj_t *title = NULL;
+    lv_obj_t *child = lv_obj_get_child(parent, NULL);
+    while(child) {
+        lv_obj_type_t buf;
+        lv_obj_get_type(child, &buf);
+        if (!strcmp(buf.type[0], "lv_label")) {
+            log_i("header_title found");
+            /* found */
+            title = child;
+            /* Break the loop */
+            child = NULL;
+        } else {
+            log_i("header_title not found");
+            /* continue the loop */
+            child = lv_obj_get_child(parent, child);
+        }
+    }
+    return title;
 }
 
 lv_obj_t * wf_add_image(lv_obj_t *parent, lv_img_dsc_t const &image){

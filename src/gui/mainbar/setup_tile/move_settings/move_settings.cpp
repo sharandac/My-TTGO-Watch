@@ -41,7 +41,6 @@ lv_obj_t *doubleclick_onoff=NULL;
 lv_obj_t *tilt_onoff=NULL;
 lv_obj_t *daily_stepcounter_onoff=NULL;
 
-LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(move_64px);
 
 static void enter_move_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -61,24 +60,13 @@ void move_settings_tile_setup( void ) {
     icon_t *move_setup_icon = setup_register( "move", &move_64px, enter_move_setup_event_cb );
     setup_hide_indicator( move_setup_icon );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( move_settings_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &move_settings_style );
-    lv_obj_align( exit_btn, move_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_move_setup_event_cb );
-    
-    lv_obj_t *exit_label = lv_label_create( move_settings_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_label_set_text( exit_label, "movement settings");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_obj_t *header = wf_add_settings_header( move_settings_tile, "movement settings", exit_move_setup_event_cb );
+    lv_obj_align( header, move_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *stepcounter_cont = lv_obj_create( move_settings_tile, NULL );
     lv_obj_set_size(stepcounter_cont, lv_disp_get_hor_res( NULL ) , 40);
     lv_obj_add_style( stepcounter_cont, LV_OBJ_PART_MAIN, &move_settings_style  );
-    lv_obj_align( stepcounter_cont, move_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_align( stepcounter_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     stepcounter_onoff = wf_add_switch( stepcounter_cont, false );
     lv_obj_align( stepcounter_onoff, stepcounter_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     lv_obj_set_event_cb( stepcounter_onoff, stepcounter_onoff_event_handler );

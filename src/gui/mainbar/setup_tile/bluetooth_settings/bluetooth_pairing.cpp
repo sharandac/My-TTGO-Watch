@@ -25,6 +25,7 @@
 #include "gui/mainbar/mainbar.h"
 // #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
@@ -53,14 +54,7 @@ void bluetooth_pairing_tile_setup( void ) {
     lv_style_set_text_font( &bluetooth_pairing_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_add_style( bluetooth_pairing_tile, LV_OBJ_PART_MAIN, &bluetooth_pairing_style );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_pairing_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_pairing_style );
-    lv_obj_align( exit_btn, bluetooth_pairing_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
-    lv_obj_set_event_cb( exit_btn, exit_bluetooth_pairing_event_cb );
+    lv_obj_t *header = wf_add_settings_header( bluetooth_pairing_tile, NULL, exit_bluetooth_pairing_event_cb );
 
     bluetooth_pairing_img = lv_img_create( bluetooth_pairing_tile, NULL );
     lv_img_set_src( bluetooth_pairing_img, &bluetooth_64px );
