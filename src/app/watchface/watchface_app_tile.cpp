@@ -93,7 +93,6 @@ void watchface_app_tile_update( void );
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event );
 void watchface_app_tile_update_task( lv_task_t *task );
 bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
-bool watchface_touch_event_cb( EventBits_t event, void *arg );
 void watchface_avtivate_cb( void );
 void watchface_hibernate_cb( void );
 void watchface_remove_theme_files ( void );
@@ -201,7 +200,6 @@ void watchface_app_tile_setup( void ) {
      * setup powermgm and touch callback function
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
-//    touch_register_cb( TOUCH_UPDATE, watchface_touch_event_cb, "touch watchface" );
     /**
      * setup watchface background task
      */
@@ -210,6 +208,15 @@ void watchface_app_tile_setup( void ) {
      * reload and setup theme config
      */
     watchface_reload_theme();
+}
+
+void watchface_tile_set_antialias( bool enable ) {
+    lv_img_set_antialias( watchface_hour_s_img, enable );
+    lv_img_set_antialias( watchface_min_s_img, enable );
+    lv_img_set_antialias( watchface_sec_s_img, enable );
+    lv_img_set_antialias( watchface_hour_img, enable );
+    lv_img_set_antialias( watchface_min_img, enable );
+    lv_img_set_antialias( watchface_sec_img, enable );
 }
 
 void watchface_decompress_theme( uint32_t return_tile ) {
@@ -287,27 +294,6 @@ static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event )
                                         watchface_return_tile = 0;
                                         break;
     }    
-}
-
-bool watchface_touch_event_cb( EventBits_t event, void *arg ) {
-    bool retval = false;
-    
-    switch ( event ) {
-        case TOUCH_UPDATE: 
-            if ( watchface_active ) {
-                if ( watchface_test ) {
-                    mainbar_jump_to_tilenumber( watchface_return_tile, LV_ANIM_OFF );
-                }
-                else {
-                    mainbar_jump_to_maintile( LV_ANIM_OFF );
-                }
-                watchface_test = false;
-                watchface_return_tile = 0;
-                retval = true;
-            } 
-            break;
-    }
-    return( retval );
 }
 
 void watchface_reload_theme( void ) {

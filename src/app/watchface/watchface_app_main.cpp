@@ -134,7 +134,11 @@ void watchface_app_main_setup( uint32_t tile_num ) {
     else
         lv_switch_off( watchface_onoff, LV_ANIM_OFF );
 
+    watchface_tile_set_antialias( watchface_config.watchface_antialias );
+
     watchface_enable_tile_after_wakeup( lv_switch_get_state( watchface_onoff ) );
+
+    watchface_config.save();
 }
 
 static void watchface_app_default_cb( lv_obj_t *obj, lv_event_t event ) {

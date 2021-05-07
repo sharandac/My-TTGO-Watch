@@ -69,5 +69,11 @@
      * @param   return_tile return tile after preview
      */
     void watchface_decompress_theme( uint32_t return_tile );
+    /**
+     * @brief setup antialias
+     * 
+     * @param   enable  true enable antialias
+     */
+    void watchface_tile_set_antialias( bool enable );
 
 #endif // _WATCHFACE_APP_TILE_H

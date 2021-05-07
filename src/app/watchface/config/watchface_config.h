@@ -32,7 +32,8 @@
     class watchface_config_t : public BaseJsonConfig {
         public:
         watchface_config_t();
-        bool watchface_enable = false;             /** @brief gps auto on/off */
+        bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
+        bool watchface_antialias = true;            /** @brief setup antialias */
 
         protected:
         ////////////// Available for overloading: //////////////

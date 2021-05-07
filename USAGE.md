@@ -192,6 +192,9 @@ Some improvements might come in the future.
 
 It is possible to update over the air.
 
+![screenshot](images/update_1.png)
+![screenshot](images/update_2.png)
+
 # FAQ
 
 ## how to make a screenshot?
