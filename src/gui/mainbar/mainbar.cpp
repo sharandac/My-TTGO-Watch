@@ -51,7 +51,6 @@ static lv_obj_t *mainbar = NULL;
 
 static lv_tile_t *tile = NULL;
 static lv_point_t *tile_pos_table = NULL;
-static uint32_t current_tile = 0;
 static uint32_t tile_entrys = 0;
 static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
 static volatile bool mainbar_alarm_occurred = false;
@@ -95,11 +94,16 @@ void mainbar_add_current_tile_to_history( void ) {
 
     if ( mainbar_history.entrys < MAINBAR_MAX_HISTORY ) {
         lv_tileview_get_tile_act( mainbar, &x, &y );
-        mainbar_history.entrys++;
-        mainbar_history.tile[ mainbar_history.entrys ].x = x;
-        mainbar_history.tile[ mainbar_history.entrys ].y = y;
-        mainbar_history.statusbar[ mainbar_history.entrys ] = statusbar_get_hidden_state();
-        MAINBAR_INFO_LOG("store tile to history: %d, %d, %d", x, y, statusbar_get_hidden_state() );
+        /**
+         * only store in history when the last entry is not the current
+         */
+        if ( mainbar_history.tile[ mainbar_history.entrys ].x != x || mainbar_history.tile[ mainbar_history.entrys ].y != y ) {
+            mainbar_history.entrys++;
+            mainbar_history.tile[ mainbar_history.entrys ].x = x;
+            mainbar_history.tile[ mainbar_history.entrys ].y = y;
+            mainbar_history.statusbar[ mainbar_history.entrys ] = statusbar_get_hidden_state();
+            MAINBAR_INFO_LOG("store tile to history: %d, %d, %d", x, y, statusbar_get_hidden_state() );
+        }
     }
 }
 
@@ -165,10 +169,12 @@ void mainbar_jump_back( lv_anim_enable_t anim ) {
                     MAINBAR_INFO_LOG("call activation cb for tile: %d", tile_number );
                     tile[ tile_number ].activate_cb();
                 }
-                current_tile = tile_number;
             }
         }
         mainbar_history.entrys--;
+    }
+    else {
+        mainbar_jump_to_maintile( LV_ANIM_OFF );
     }
 }
 
@@ -364,7 +370,9 @@ void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
     }
 }
 
-void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
+void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bool statusbar ) {
+    lv_coord_t x,y;
+    uint32_t current_tile = 0;
     /*
      * check if mainbar already initialized
      */
@@ -372,12 +380,26 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
         log_e("main not initialized");
         while( true );
     }
-
+    /**
+     * get the current tile number
+     */
+    lv_tileview_get_tile_act( mainbar, &x, &y );
+    for ( int i = 0 ; i < tile_entrys; i++ ) {
+        if ( tile_pos_table[ i ].x == x && tile_pos_table[ i ].y == y ) {
+            current_tile = i;
+        }
+    }
+    /**
+     * jump
+     */
     if ( tile_number < tile_entrys ) {
         /**
          * store current tile and statusbar state
          */
-        mainbar_add_current_tile_to_history();
+        if ( tile_number != current_tile ) {
+            mainbar_add_current_tile_to_history();
+        }
+        statusbar_hide( statusbar );
         /**
          * jump into tile
          */
@@ -397,7 +419,60 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
             MAINBAR_INFO_LOG("call activate cb for tile: %d", tile_number );
             tile[ tile_number ].activate_cb();
         }
-        current_tile = tile_number;
+    }
+    else {
+        log_e( "tile number %d do not exist", tile_number );
+    }    
+}
+
+void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
+    lv_coord_t x,y;
+    uint32_t current_tile = 0;
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+    /**
+     * get the current tile number
+     */
+    lv_tileview_get_tile_act( mainbar, &x, &y );
+    for ( int i = 0 ; i < tile_entrys; i++ ) {
+        if ( tile_pos_table[ i ].x == x && tile_pos_table[ i ].y == y ) {
+            current_tile = i;
+        }
+    }
+    /**
+     * jump
+     */
+    if ( tile_number < tile_entrys ) {
+        /**
+         * store current tile and statusbar state
+         */
+        if ( tile_number != current_tile ) {
+            mainbar_add_current_tile_to_history();
+        }
+        /**
+         * jump into tile
+         */
+        MAINBAR_INFO_LOG("jump to tile %d from tile %d", tile_number, current_tile );
+        lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
+        /**
+         * call hibernate callback for the current tile if exist
+         */
+        if ( tile[ current_tile ].hibernate_cb != NULL ) {
+            MAINBAR_INFO_LOG("call hibernate cb for tile: %d", current_tile );
+            tile[ current_tile ].hibernate_cb();
+        }
+        /**
+         * call activate callback for the new tile if exist
+         */
+        if ( tile[ tile_number ].activate_cb != NULL ) { 
+            MAINBAR_INFO_LOG("call activate cb for tile: %d", tile_number );
+            tile[ tile_number ].activate_cb();
+        }
     }
     else {
         log_e( "tile number %d do not exist", tile_number );

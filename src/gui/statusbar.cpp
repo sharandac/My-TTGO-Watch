@@ -1014,8 +1014,10 @@ void statusbar_hide( bool hide ) {
     }
 
     lv_obj_set_hidden( statusbar, hide );
+    statusbar_refresh_update = true;
 }
 
 bool statusbar_get_hidden_state( void ) {
+    statusbar_refresh_update = true;
     return( lv_obj_get_hidden( statusbar ) );
 }

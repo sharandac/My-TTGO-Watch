@@ -26,11 +26,13 @@
 
     typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
 
-    #define MAINBAR_INFO_LOG               log_d
+    #define MAINBAR_INFO_LOG               log_i
 
     #define MAINBAR_APP_TILE_X_START    0
     #define MAINBAR_APP_TILE_Y_START    4
     #define MAINBAR_MAX_HISTORY         16
+    #define STATUSBAR_HIDE              true
+    #define STATUSBAR_SHOW              false
 
     typedef struct {
         uint32_t    entrys;
@@ -58,14 +60,9 @@
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim );
+    void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bool statusbar );
     /**
      * @brief jump direct to main tile
-     * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
-     */
-    void mainbar_jump_to_maintile( lv_anim_enable_t anim );
-    /**
-     * @brief jumps direct to the maintile
-     * 
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );

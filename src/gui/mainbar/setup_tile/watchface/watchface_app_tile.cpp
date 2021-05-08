@@ -51,7 +51,6 @@
  */
 lv_task_t *watchface_tile_task;
 volatile bool watchface_active = false;
-volatile bool watchface_ignore_wakeup = false;
 volatile bool watchface_tile_block_show_messages = false;
 volatile bool watchface_test = false;
 volatile uint32_t watchface_return_tile = 0;
@@ -206,8 +205,7 @@ void watchface_app_tile_setup( void ) {
     /**
      * setup powermgm and touch callback function
      */
-    powermgm_register_cb( POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
-    rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, watchface_rtcctl_event_cb, "watchface rtcctl" );
+    powermgm_register_cb( POWERMGM_STANDBY, watchface_powermgm_event_cb, "watchface powermgm" );
     /**
      * setup watchface background task
      */
@@ -216,19 +214,6 @@ void watchface_app_tile_setup( void ) {
      * reload and setup theme config
      */
     watchface_reload_theme();
-}
-
-bool watchface_rtcctl_event_cb( EventBits_t event, void *arg ) {
-    bool retval = false;
-
-    switch( event ) {
-        case RTCCTL_ALARM_OCCURRED:
-            WATCHFACE_LOG("ignore wakeup");
-            watchface_ignore_wakeup = true;
-            retval = true;
-            break;
-    }
-    return( retval );
 }
 
 void watchface_tile_set_antialias( bool enable ) {
@@ -540,21 +525,15 @@ lv_align_t watchface_get_align( char *align ) {
 }
 bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
-        case POWERMGM_WAKEUP:
-            WATCHFACE_LOG("watchface wakteup");
+        case POWERMGM_STANDBY:
             /**
-             * check if rtc alarm?
+             * switch on standby to watchface for better wakeup perfomance
              */
-            if ( watchface_ignore_wakeup ) {
-                watchface_ignore_wakeup = false;
-            }
-            else {
-                if ( watchface_enable_after_wakeup ) {
-                    watchface_app_tile_update();
-                    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
-                    lv_obj_invalidate( lv_scr_act() );
-                    lv_refr_now( NULL );
-                }
+            if ( watchface_enable_after_wakeup ) {
+                watchface_app_tile_update();
+                mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
+                lv_obj_invalidate( lv_scr_act() );
+                lv_refr_now( NULL );
             }
             break;
     }
