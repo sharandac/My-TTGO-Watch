@@ -26,6 +26,8 @@
 
     typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
 
+    #define MAINBAR_INFO_LOG               log_d
+
     #define MAINBAR_APP_TILE_X_START    0
     #define MAINBAR_APP_TILE_Y_START    4
     #define MAINBAR_MAX_HISTORY         16

@@ -85,6 +85,13 @@ void mainbar_setup( void ) {
 
 void mainbar_add_current_tile_to_history( void ) {
     lv_coord_t x,y;
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
 
     if ( mainbar_history.entrys < MAINBAR_MAX_HISTORY ) {
         lv_tileview_get_tile_act( mainbar, &x, &y );
@@ -92,22 +99,75 @@ void mainbar_add_current_tile_to_history( void ) {
         mainbar_history.tile[ mainbar_history.entrys ].x = x;
         mainbar_history.tile[ mainbar_history.entrys ].y = y;
         mainbar_history.statusbar[ mainbar_history.entrys ] = statusbar_get_hidden_state();
-        log_d("store tile to history: %d, %d, %d", x, y, statusbar_get_hidden_state() );
+        MAINBAR_INFO_LOG("store tile to history: %d, %d, %d", x, y, statusbar_get_hidden_state() );
     }
 }
 
 void mainbar_clear_history( void ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     mainbar_history.entrys = 0;
     mainbar_history.tile[ 0 ].x = 0;
     mainbar_history.tile[ 0 ].y = 0;
-    log_d("clear mainbar history");
+    MAINBAR_INFO_LOG("clear mainbar history");
 }
 
 void mainbar_jump_back( lv_anim_enable_t anim ) {
+    lv_coord_t x,y;
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
     if ( mainbar_history.entrys > 0 ) {
-        log_d("jump back to tile: %d, %d, %d", mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.statusbar[ mainbar_history.entrys ] );
+        /**
+         * get the current tile pos for later use
+         */
+        lv_tileview_get_tile_act( mainbar, &x, &y );
+        /**
+         * jump back
+         */
+        MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.statusbar[ mainbar_history.entrys ] );
         lv_tileview_set_tile_act( mainbar, mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, anim );
         statusbar_hide( mainbar_history.statusbar[ mainbar_history.entrys ] );
+        /**
+         * search for the hibernate cb
+         */
+        for ( int tile_number = 0 ; tile_number < tile_entrys; tile_number++ ) {
+            if ( tile_pos_table[ tile_number ].x == x && tile_pos_table[ tile_number ].y == y ) {
+                /**
+                 * call hibernate callback for the current tile if exist
+                 */
+                if ( tile[ tile_number ].hibernate_cb != NULL ) {
+                    MAINBAR_INFO_LOG("call hibernate cb for tile: %d", tile_number );
+                    tile[ tile_number ].hibernate_cb();
+                }
+            }
+        }
+        /**
+         * search for the activation cb
+         */
+        for ( int tile_number = 0 ; tile_number < tile_entrys; tile_number++ ) {
+            if ( tile_pos_table[ tile_number ].x == mainbar_history.tile[ mainbar_history.entrys ].x && tile_pos_table[ tile_number ].y == mainbar_history.tile[ mainbar_history.entrys ].y ) {
+                /**
+                 * call hibernate callback for the current tile if exist
+                 */
+                if ( tile[ tile_number ].activate_cb != NULL ) {
+                    MAINBAR_INFO_LOG("call activation cb for tile: %d", tile_number );
+                    tile[ tile_number ].activate_cb();
+                }
+                current_tile = tile_number;
+            }
+        }
         mainbar_history.entrys--;
     }
 }
@@ -197,7 +257,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
-    log_d("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
+    MAINBAR_INFO_LOG("add tile: x=%d, y=%d, id=%s", tile_pos_table[ tile_entrys - 1 ].x, tile_pos_table[ tile_entrys - 1 ].y, tile[ tile_entrys - 1 ].id );
 
     return( tile_entrys - 1 );
 }
@@ -321,20 +381,20 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
         /**
          * jump into tile
          */
-        log_d("jump to tile %d from tile %d", tile_number, current_tile );
+        MAINBAR_INFO_LOG("jump to tile %d from tile %d", tile_number, current_tile );
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
         /**
          * call hibernate callback for the current tile if exist
          */
         if ( tile[ current_tile ].hibernate_cb != NULL ) {
-            log_d("call hibernate cb for tile: %d", current_tile );
+            MAINBAR_INFO_LOG("call hibernate cb for tile: %d", current_tile );
             tile[ current_tile ].hibernate_cb();
         }
         /**
          * call activate callback for the new tile if exist
          */
         if ( tile[ tile_number ].activate_cb != NULL ) { 
-            log_d("call activate cb for tile: %d", tile_number );
+            MAINBAR_INFO_LOG("call activate cb for tile: %d", tile_number );
             tile[ tile_number ].activate_cb();
         }
         current_tile = tile_number;

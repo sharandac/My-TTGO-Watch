@@ -737,7 +737,7 @@ void osmmap_activate_cb( void ) {
      * save block show messages state
      */
     osmmap_block_watchface = watchface_get_enable_tile_after_wakeup();
-    blectl_set_show_notification( false );
+    watchface_enable_tile_after_wakeup( false );
     /**
      * save block show messages state
      */
