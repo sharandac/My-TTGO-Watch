@@ -138,12 +138,16 @@ Here you can find some finish watchface packages:
 ![swiss clock](images/watchface/swiss/watchface_theme_prev.png)
 ![undone clock](images/watchface/undone/watchface_theme_prev.png)
 ![star trek clock](images/watchface/startrek/watchface_theme_prev.png)
+![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)
 ![hal9000](images/watchface/hal9000/watchface_theme_prev.png)
+![black](images/watchface/black/watchface_theme_prev.png)
 
 ![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
 ![undone clock](images/watchface/undone/watchface.tar.gz)<br>
 ![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
+![rainbow clock](images/watchface/rainbow/watchface.tar.gz)<br>
 ![hal9000](images/watchface/hal9000/watchface.tar.gz)<br>
+![black](images/watchface/black/watchface.tar.gz)<br>
 
 ## OSMmap
 
