@@ -37,5 +37,11 @@
      * @param   background_image    background image index 0...4
      */
     void gui_set_background_image ( uint32_t background_image);
+    /**
+     * @brief force a complete redraw cycle on next gui cycle
+     * 
+     * @param force  true for redraw
+     */
+    void gui_force_redraw( bool force );
 
 #endif // _STATUSBAR_H

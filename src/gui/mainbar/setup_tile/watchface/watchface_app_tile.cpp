@@ -27,6 +27,7 @@
 #include "watchface_app_tile.h"
 #include "watchface_app_main.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_theme_config.h"
+#include "gui/gui.h"
 #include "app/alarm_clock/alarm_in_progress.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -534,6 +535,10 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
                 mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
                 lv_obj_invalidate( lv_scr_act() );
                 lv_refr_now( NULL );
+                /**
+                 * disable redraw on next gui cycle
+                 */
+                gui_force_redraw( false );
             }
             break;
     }
@@ -562,7 +567,6 @@ void watchface_avtivate_cb( void ) {
 
 void watchface_hibernate_cb( void ) {
     watchface_active = false;
-    statusbar_hide( false );
     blectl_set_show_notification( watchface_tile_block_show_messages );
     powermgm_set_normal_mode();
 }

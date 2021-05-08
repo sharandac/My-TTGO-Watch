@@ -30,6 +30,7 @@
 #include "gui/keyboard.h"
 #include "gui/statusbar.h"
 #include "gui/widget_styles.h"
+#include "gui/gui.h"
 
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
@@ -143,6 +144,7 @@ void mainbar_jump_back( lv_anim_enable_t anim ) {
         MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.statusbar[ mainbar_history.entrys ] );
         lv_tileview_set_tile_act( mainbar, mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, anim );
         statusbar_hide( mainbar_history.statusbar[ mainbar_history.entrys ] );
+        gui_force_redraw( true );
         /**
          * search for the hibernate cb
          */
@@ -190,16 +192,16 @@ bool mainbar_rtcctl_event_cb( EventBits_t event, void *arg ) {
 bool mainbar_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:
-            break;
-        case POWERMGM_SILENCE_WAKEUP:
-            mainbar_alarm_occurred = false;
-            break;
-        case POWERMGM_WAKEUP:
             if ( !mainbar_alarm_occurred ) {
                 if ( !display_get_block_return_maintile() ) {
                     mainbar_jump_to_maintile( LV_ANIM_OFF );
                 }
             }
+            break;
+        case POWERMGM_SILENCE_WAKEUP:
+            mainbar_alarm_occurred = false;
+            break;
+        case POWERMGM_WAKEUP:
             break;
     }
     return( true );
@@ -405,6 +407,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
          */
         MAINBAR_INFO_LOG("jump to tile %d from tile %d", tile_number, current_tile );
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
+        gui_force_redraw( true );
         /**
          * call hibernate callback for the current tile if exist
          */
@@ -459,6 +462,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
          */
         MAINBAR_INFO_LOG("jump to tile %d from tile %d", tile_number, current_tile );
         lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
+        gui_force_redraw( true );       
         /**
          * call hibernate callback for the current tile if exist
          */
