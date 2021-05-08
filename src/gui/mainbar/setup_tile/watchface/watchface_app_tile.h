@@ -46,6 +46,12 @@
      */
     void watchface_enable_tile_after_wakeup( bool enable );
     /**
+     * @brief get watchface enable after wakeup config
+     * 
+     * @return true enable jump into watchface after wakeup
+     */
+    bool watchface_get_enable_tile_after_wakeup( void );
+    /**
      * @brief reload watchface theme from /spiffs or setup default if no
      * watchface_theme.json founf in /watchface/
      */
@@ -55,20 +61,20 @@
      * 
      * @param return_tile   return tile after preview
      */
-    void watchface_default_theme( uint32_t return_tile );
+    void watchface_default_theme( void );
     /**
      * @brief reload watchface theme and show a preview
      * 
      * @param return_tile   return tile after preview
      */
-    void watchface_reload_and_test( uint32_t return_tile );
+    void watchface_reload_and_test( void );
     /**
      * @brief unzip watchface.tar.gz from /spiffs, install theme
      * and show a preview
      * 
      * @param   return_tile return tile after preview
      */
-    void watchface_decompress_theme( uint32_t return_tile );
+    void watchface_decompress_theme( void );
     /**
      * @brief setup antialias
      * 

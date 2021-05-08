@@ -24,42 +24,60 @@
 watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_CONFIG_FILE ) {}
 
 bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
-    doc["dial"]["enable"] = dial.dial.enable;
-    doc["dial"]["x_offset"] = dial.dial.x_offset;
-    doc["dial"]["y_offset"] = dial.dial.y_offset;
+    int32_t labelcount = 0;
 
-    doc["hour"]["enable"] = dial.hour.enable;
-    doc["hour"]["x_offset"] = dial.hour.x_offset;
-    doc["hour"]["y_offset"] = dial.hour.y_offset;
-    doc["min"]["enable"] = dial.min.enable;
-    doc["min"]["smooth"] = dial.min.smooth;
-    doc["min"]["x_offset"] = dial.min.x_offset;
-    doc["min"]["y_offset"] = dial.min.y_offset;
-    doc["sec"]["enable"] = dial.sec.enable;;
-    doc["sec"]["x_offset"] = dial.sec.y_offset;
-    doc["sec"]["y_offset"] = dial.sec.y_offset;
+    if ( dial.dial.enable ) {
+        doc["dial"]["enable"] = dial.dial.enable;
+        doc["dial"]["x_offset"] = dial.dial.x_offset;
+        doc["dial"]["y_offset"] = dial.dial.y_offset;
+    }
+    if ( dial.hour.enable ) {
+        doc["hour"]["enable"] = dial.hour.enable;
+        doc["hour"]["x_offset"] = dial.hour.x_offset;
+        doc["hour"]["y_offset"] = dial.hour.y_offset;
+    }
+    if ( dial.min.enable ) {
+        doc["min"]["enable"] = dial.min.enable;
+        doc["min"]["smooth"] = dial.min.smooth;
+        doc["min"]["x_offset"] = dial.min.x_offset;
+        doc["min"]["y_offset"] = dial.min.y_offset;
+    }
+    if ( dial.sec.enable ) {
+        doc["sec"]["enable"] = dial.sec.enable;;
+        doc["sec"]["x_offset"] = dial.sec.y_offset;
+        doc["sec"]["y_offset"] = dial.sec.y_offset;
+    }
 
-    doc["hour_shadow"]["enable"] = dial.hour_shadow.enable;
-    doc["hour_shadow"]["x_offset"] = dial.hour_shadow.x_offset;
-    doc["hour_shadow"]["y_offset"] = dial.hour_shadow.y_offset;
-    doc["min_shadow"]["enable"] = dial.min_shadow.enable;
-    doc["min_shadow"]["x_offset"] = dial.min_shadow.x_offset;
-    doc["min_shadow"]["y_offset"] = dial.min_shadow.y_offset;
-    doc["sec_shadow"]["enable"] = dial.sec_shadow.enable;
-    doc["sec_shadow"]["x_offset"] = dial.sec_shadow.x_offset;
-    doc["sec_shadow"]["y_offset"] = dial.sec_shadow.y_offset;
+    if ( dial.hour_shadow.enable ) {
+        doc["hour_shadow"]["enable"] = dial.hour_shadow.enable;
+        doc["hour_shadow"]["x_offset"] = dial.hour_shadow.x_offset;
+        doc["hour_shadow"]["y_offset"] = dial.hour_shadow.y_offset;
+    }
+    if ( dial.min_shadow.enable ) {
+        doc["min_shadow"]["enable"] = dial.min_shadow.enable;
+        doc["min_shadow"]["x_offset"] = dial.min_shadow.x_offset;
+        doc["min_shadow"]["y_offset"] = dial.min_shadow.y_offset;
+    }
+    if ( dial.sec_shadow.enable ) {
+        doc["sec_shadow"]["enable"] = dial.sec_shadow.enable;
+        doc["sec_shadow"]["x_offset"] = dial.sec_shadow.x_offset;
+        doc["sec_shadow"]["y_offset"] = dial.sec_shadow.y_offset;
+    }
 
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-        doc["label"][i]["enable"] = dial.label[ i ].enable;
-        doc["label"][i]["type"] = dial.label[ i ].type;
-        doc["label"][i]["label"] = dial.label[ i ].label;
-        doc["label"][i]["font_color"] = dial.label[ i ].font_color;
-        doc["label"][i]["align"] = dial.label[ i ].align;
-        doc["label"][i]["font_size"] = dial.label[ i ].font_size;
-        doc["label"][i]["x_offset"] = dial.label[ i ].x_offset;
-        doc["label"][i]["y_offset"] = dial.label[ i ].y_offset;
-        doc["label"][i]["x_size"] = dial.label[ i ].x_size;
-        doc["label"][i]["y_size"] = dial.label[ i ].y_size;
+        if ( dial.label[ i ].enable ) {
+            doc["label"][ labelcount ]["enable"] = dial.label[ i ].enable;
+            doc["label"][ labelcount ]["type"] = dial.label[ i ].type;
+            doc["label"][ labelcount ]["label"] = dial.label[ i ].label;
+            doc["label"][ labelcount ]["font_color"] = dial.label[ i ].font_color;
+            doc["label"][ labelcount ]["align"] = dial.label[ i ].align;
+            doc["label"][ labelcount ]["font_size"] = dial.label[ i ].font_size;
+            doc["label"][ labelcount ]["x_offset"] = dial.label[ i ].x_offset;
+            doc["label"][ labelcount ]["y_offset"] = dial.label[ i ].y_offset;
+            doc["label"][ labelcount ]["x_size"] = dial.label[ i ].x_size;
+            doc["label"][ labelcount ]["y_size"] = dial.label[ i ].y_size;
+            labelcount++;
+        }
     }
     
     return true;

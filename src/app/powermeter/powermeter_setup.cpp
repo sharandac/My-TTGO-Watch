@@ -203,7 +203,7 @@ static void exit_powermeter_widget_setup_event_cb( lv_obj_t * obj, lv_event_t ev
                                             strlcpy( powermeter_config->topic, lv_textarea_get_text( powermeter_topic_textfield ), sizeof( powermeter_config->topic ) );
                                             powermeter_config->port = atoi(lv_textarea_get_text( powermeter_port_textfield ));
                                             powermeter_save_config();                                            
-                                            mainbar_jump_to_tilenumber( powermeter_get_app_main_tile_num(), LV_ANIM_ON );
+                                            mainbar_jump_back( LV_ANIM_ON );
                                             break;
     }
 }

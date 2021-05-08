@@ -62,9 +62,9 @@ uint32_t stopwatch_app_get_app_main_tile_num( void ) {
  */
 static void enter_stopwatch_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        stopwatch_app_hide_app_icon_info( true );
+        case( LV_EVENT_CLICKED ):       stopwatch_app_hide_app_icon_info( true );
                                         mainbar_jump_to_tilenumber( stopwatch_app_main_tile_num, LV_ANIM_OFF );
+                                        statusbar_hide( true );
                                         break;
     }    
 }

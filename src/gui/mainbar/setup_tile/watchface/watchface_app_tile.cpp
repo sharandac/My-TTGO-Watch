@@ -26,14 +26,18 @@
 #include "watchface_app.h"
 #include "watchface_app_tile.h"
 #include "watchface_app_main.h"
-#include "app/watchface/config/watchface_theme_config.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_theme_config.h"
+#include "app/alarm_clock/alarm_in_progress.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
 #include "gui/widget.h"
 #include "gui/widget_styles.h"
+#include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 
+#include "hardware/blectl.h"
+#include "hardware/rtcctl.h"
 #include "hardware/powermgm.h"
 #include "hardware/display.h"
 #include "hardware/touch.h"
@@ -47,6 +51,8 @@
  */
 lv_task_t *watchface_tile_task;
 volatile bool watchface_active = false;
+volatile bool watchface_ignore_wakeup = false;
+volatile bool watchface_tile_block_show_messages = false;
 volatile bool watchface_test = false;
 volatile uint32_t watchface_return_tile = 0;
 volatile bool watchface_enable_after_wakeup = false;
@@ -92,6 +98,7 @@ LV_FONT_DECLARE(Ubuntu_72px);
 void watchface_app_tile_update( void );
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event );
 void watchface_app_tile_update_task( lv_task_t *task );
+bool watchface_rtcctl_event_cb( EventBits_t event, void *arg );
 bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
 void watchface_avtivate_cb( void );
 void watchface_hibernate_cb( void );
@@ -199,7 +206,8 @@ void watchface_app_tile_setup( void ) {
     /**
      * setup powermgm and touch callback function
      */
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
+    powermgm_register_cb( POWERMGM_WAKEUP, watchface_powermgm_event_cb, "watchface powermgm" );
+    rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, watchface_rtcctl_event_cb, "watchface rtcctl" );
     /**
      * setup watchface background task
      */
@@ -208,6 +216,19 @@ void watchface_app_tile_setup( void ) {
      * reload and setup theme config
      */
     watchface_reload_theme();
+}
+
+bool watchface_rtcctl_event_cb( EventBits_t event, void *arg ) {
+    bool retval = false;
+
+    switch( event ) {
+        case RTCCTL_ALARM_OCCURRED:
+            WATCHFACE_LOG("ignore wakeup");
+            watchface_ignore_wakeup = true;
+            retval = true;
+            break;
+    }
+    return( retval );
 }
 
 void watchface_tile_set_antialias( bool enable ) {
@@ -219,11 +240,7 @@ void watchface_tile_set_antialias( bool enable ) {
     lv_img_set_antialias( watchface_sec_img, enable );
 }
 
-void watchface_decompress_theme( uint32_t return_tile ) {
-    watchface_return_tile = return_tile;
-    watchface_test = true;
-    
-
+void watchface_decompress_theme( void ) {
     FILE *file = fopen( "/spiffs" WATCHFACE_THEME_FILE, "rb" );
     if ( file ) {
         fclose( file );
@@ -240,10 +257,7 @@ void watchface_decompress_theme( uint32_t return_tile ) {
     watchface_reload_theme();
 }
 
-void watchface_default_theme( uint32_t return_tile ) {
-    watchface_return_tile = return_tile;
-    watchface_test = true;
-    
+void watchface_default_theme( void ) {    
     watchface_app_set_info_label( "clear watchface theme, wait ..." );
     watchface_remove_theme_files();
     watchface_reload_theme();
@@ -262,12 +276,7 @@ void watchface_remove_theme_files ( void ) {
     remove( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
 }
 
-void watchface_reload_and_test( uint32_t return_tile ) {
-    /**
-     * set return tile and test flag
-     */
-    watchface_return_tile = return_tile;
-    watchface_test = true;
+void watchface_reload_and_test( void ) {
     /**
      * reload and setup theme config
      */
@@ -280,18 +289,9 @@ void watchface_reload_and_test( uint32_t return_tile ) {
 
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_SHORT_CLICKED ): if ( watchface_test ) {
-                                            mainbar_jump_to_tilenumber( watchface_return_tile, LV_ANIM_OFF );
-                                        }
-                                        else {
-                                            mainbar_jump_to_maintile( LV_ANIM_OFF );
-                                        }
-                                        watchface_test = false;
-                                        watchface_return_tile = 0;
+        case( LV_EVENT_SHORT_CLICKED ): mainbar_jump_back( LV_ANIM_OFF );
                                         break;
         case( LV_EVENT_LONG_PRESSED ):  mainbar_jump_to_tilenumber( watchface_app_get_app_main_tile_num(), LV_ANIM_OFF );
-                                        watchface_test = false;
-                                        watchface_return_tile = 0;
                                         break;
     }    
 }
@@ -540,18 +540,15 @@ lv_align_t watchface_get_align( char *align ) {
 }
 bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
-        case POWERMGM_STANDBY:
-            if ( !display_get_block_return_maintile() ) {
-                if ( watchface_enable_after_wakeup ) {
-                    watchface_app_tile_update();
-                    mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
-                    lv_obj_invalidate( lv_scr_act() );
-                    lv_refr_now( NULL );
-                }
-            }
-            break;
         case POWERMGM_WAKEUP:
-            if ( !display_get_block_return_maintile() ) {
+            WATCHFACE_LOG("watchface wakteup");
+            /**
+             * check if rtc alarm?
+             */
+            if ( watchface_ignore_wakeup ) {
+                watchface_ignore_wakeup = false;
+            }
+            else {
                 if ( watchface_enable_after_wakeup ) {
                     watchface_app_tile_update();
                     mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
@@ -565,14 +562,29 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void watchface_avtivate_cb( void ) {
+    /**
+     * set watchface active flag
+     */
     watchface_active = true;
+    /**
+     * save block show messages state
+     */
+    watchface_tile_block_show_messages = blectl_get_show_notification();
+    blectl_set_show_notification( false );
+    /**
+     * hide statusbar
+     */
     statusbar_hide( true );
+    /**
+     * set full cpu clock
+     */
     powermgm_set_perf_mode();
 }
 
 void watchface_hibernate_cb( void ) {
     watchface_active = false;
     statusbar_hide( false );
+    blectl_set_show_notification( watchface_tile_block_show_messages );
     powermgm_set_normal_mode();
 }
 
@@ -624,6 +636,9 @@ void watchface_app_tile_update( void ) {
                 else if ( !strcmp( "battery_voltage", watchface_theme_config.dial.label[ i ].type ) ) {
                     snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_voltage() / 1000 );
                 }
+                else if ( !strcmp( "bluetooth_messages", watchface_theme_config.dial.label[ i ].type ) ) {
+                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bluetooth_get_number_of_msg() );
+                }
                 else if ( !strcmp( "steps", watchface_theme_config.dial.label[ i ].type ) ) {
                     snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bma_get_stepcounter() );
                 }
@@ -642,6 +657,10 @@ void watchface_app_tile_update( void ) {
 
 void watchface_app_tile_update_task( lv_task_t *task ) {
     watchface_app_tile_update();
+}
+
+bool watchface_get_enable_tile_after_wakeup( void ) {
+    return( watchface_enable_after_wakeup );
 }
 
 void watchface_enable_tile_after_wakeup( bool enable ) {

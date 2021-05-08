@@ -185,15 +185,15 @@ bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
 
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        mainbar_jump_to_tilenumber( sailing_get_app_setup_tile_num(), LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( sailing_get_app_setup_tile_num(), LV_ANIM_ON );
+                                        statusbar_hide( true );
                                         break;
     }
 }
 
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back( LV_ANIM_OFF );
                                         display_set_timeout( 15 );
                                         break;
     }

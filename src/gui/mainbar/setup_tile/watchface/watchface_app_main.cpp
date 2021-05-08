@@ -26,7 +26,7 @@
 #include "watchface_app.h"
 #include "watchface_app_main.h"
 #include "watchface_app_tile.h"
-#include "app/watchface/config/watchface_config.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_config.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
@@ -124,7 +124,7 @@ void watchface_app_main_setup( uint32_t tile_num ) {
 static void watchface_app_default_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:
-            watchface_default_theme( watchface_app_get_app_main_tile_num() );
+            watchface_default_theme();
             break;
     }
 }
@@ -139,7 +139,7 @@ void watchface_app_set_info_label( const char *text ){
 static void watchface_app_decompress_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:
-            watchface_decompress_theme( watchface_app_get_app_main_tile_num() );
+            watchface_decompress_theme( );
             break;
     }
 }
@@ -147,7 +147,7 @@ static void watchface_app_decompress_cb( lv_obj_t *obj, lv_event_t event ) {
 static void watchface_app_reload_and_test_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:
-            watchface_reload_and_test( watchface_app_get_app_main_tile_num() );
+            watchface_reload_and_test();
             break;
     }
 }
@@ -167,7 +167,7 @@ static void exit_watchface_app_main_event_cb( lv_obj_t * obj, lv_event_t event )
             /**
              * exit to mainbar
              */
-            mainbar_jump_to_maintile( LV_ANIM_OFF );
+            mainbar_jump_back( LV_ANIM_OFF );
             break;
     }
 }

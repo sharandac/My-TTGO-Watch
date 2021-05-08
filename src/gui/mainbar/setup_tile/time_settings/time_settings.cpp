@@ -299,7 +299,7 @@ static void enter_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_time_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       time_settings_set_timezone_timerule();
-                                        mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+                                        mainbar_jump_back( LV_ANIM_OFF );
                                         break;
     }
 }

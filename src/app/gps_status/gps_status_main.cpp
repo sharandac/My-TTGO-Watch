@@ -258,7 +258,7 @@ static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {
 static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event) {
     switch (event) {
         case (LV_EVENT_CLICKED):
-            mainbar_jump_to_maintile(LV_ANIM_OFF);
+            mainbar_jump_back(LV_ANIM_OFF);
             break;
     }
 }

@@ -395,6 +395,10 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     return( true );
 }
 
+int32_t bluetooth_get_number_of_msg( void ) {
+    return( bluetooth_current_msg < 0 ? 0 : bluetooth_current_msg );
+}
+
 void bluetooth_message_show_msg( int32_t entry ) {
     char msg_num[16] = "";
     /*

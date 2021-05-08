@@ -69,8 +69,8 @@ uint32_t osmmap_app_get_app_main_tile_num( void ) {
 
 static void enter_osmmap_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( false );
-                                        mainbar_jump_to_tilenumber( osmmap_app_main_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( osmmap_app_main_tile_num, LV_ANIM_OFF );
+                                        statusbar_hide( true );
                                         break;
     }    
 }

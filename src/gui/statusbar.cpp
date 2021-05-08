@@ -1015,3 +1015,7 @@ void statusbar_hide( bool hide ) {
 
     lv_obj_set_hidden( statusbar, hide );
 }
+
+bool statusbar_get_hidden_state( void ) {
+    return( lv_obj_get_hidden( statusbar ) );
+}

@@ -36,7 +36,6 @@
 #include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
 #include "app/IRController/IRController.h"
-#include "app/watchface/watchface_app.h"
 #include "app/fx_rates/fx_rates.h"
 #include "app/activity/activity.h"
 #include "app/powermeter/powermeter_app.h"
@@ -71,7 +70,6 @@ void setup() {
     stopwatch_app_setup();
     alarm_clock_setup();
     activity_app_setup();
-    watchface_app_setup();
     gps_status_setup();
     sailing_setup();
     osmand_app_setup();

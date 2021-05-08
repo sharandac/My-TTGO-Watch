@@ -111,6 +111,12 @@
      * @return  true if dark mode forced
      */
     bool statusbar_get_force_dark( void );
+    /**
+     * @brief geth the current hidden state
+     * 
+     * @return true if hidden or false is visible
+     */
+    bool statusbar_get_hidden_state( void );
 
 #endif // _STATUSBAR_H
 
