@@ -119,15 +119,10 @@ void FindPhone_main_setup( uint32_t tile_num ) {
 
     // eye toggle button
 	lv_obj_t *FindPhone_main_go_btn = NULL;
-    FindPhone_main_go_btn = lv_imgbtn_create( FindPhone_main_tile, NULL);  
-	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_RELEASED, &eye_lid_open);
-	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_open);
-    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_RELEASED, &eye_lid_closed);
-    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_closed);
+    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb, NULL );
 	lv_btn_set_checkable(FindPhone_main_go_btn, true);
     lv_btn_toggle(FindPhone_main_go_btn);
     lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
-	lv_obj_set_event_cb( FindPhone_main_go_btn, go_FindPhone_main_event_cb );
 	
 	// iris 
 	FindPhone_main_iris = lv_img_create( FindPhone_main_tile, NULL);

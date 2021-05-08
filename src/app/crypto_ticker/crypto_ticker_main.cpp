@@ -69,12 +69,7 @@ void crypto_ticker_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( crypto_ticker_main_tile, exit_crypto_ticker_main_event_cb, &crypto_ticker_main_style );
     lv_obj_align(exit_btn, crypto_ticker_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * reload_btn = lv_imgbtn_create( crypto_ticker_main_tile, NULL);
-    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_RELEASED, &refresh_32px);
-    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_PRESSED, &refresh_32px);
-    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_RELEASED, &refresh_32px);
-    lv_imgbtn_set_src(reload_btn, LV_BTN_STATE_CHECKED_PRESSED, &refresh_32px);
-    lv_obj_add_style(reload_btn, LV_IMGBTN_PART_MAIN, &crypto_ticker_main_style );
+    lv_obj_t * reload_btn = wf_add_image_button( crypto_ticker_main_tile, refresh_32px, refresh_crypto_ticker_main_event_cb, &crypto_ticker_main_style );
     lv_obj_align(reload_btn, crypto_ticker_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , 10 );
 
     lv_obj_t * setup_btn = wf_add_setup_button( crypto_ticker_main_tile, enter_crypto_ticker_setup_event_cb, &crypto_ticker_main_style );

@@ -215,23 +215,11 @@ void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     lv_obj_align( mac_label, wifi_password_tile, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
     lv_label_set_text_fmt( mac_label, "MAC: %s", WiFi.macAddress().c_str());
 
-    lv_obj_t *apply_btn = lv_imgbtn_create( wifi_password_tile, NULL);
-    lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_RELEASED, &check_32px);
-    lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_PRESSED, &check_32px);
-    lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_CHECKED_RELEASED, &check_32px);
-    lv_imgbtn_set_src( apply_btn, LV_BTN_STATE_CHECKED_PRESSED, &check_32px);
-    lv_obj_add_style( apply_btn, LV_IMGBTN_PART_MAIN, &wifi_password_style );
+    lv_obj_t *apply_btn = wf_add_image_button( wifi_password_tile, check_32px, apply_wifi_password_event_cb, &wifi_password_style );
     lv_obj_align( apply_btn, wifi_password_pass_textfield, LV_ALIGN_OUT_BOTTOM_RIGHT, -10, 10 );
-    lv_obj_set_event_cb( apply_btn, apply_wifi_password_event_cb );
 
-    lv_obj_t *delete_btn = lv_imgbtn_create( wifi_password_tile, NULL);
-    lv_imgbtn_set_src( delete_btn, LV_BTN_STATE_RELEASED, &trash_32px);
-    lv_imgbtn_set_src( delete_btn, LV_BTN_STATE_PRESSED, &trash_32px);
-    lv_imgbtn_set_src( delete_btn, LV_BTN_STATE_CHECKED_RELEASED, &trash_32px);
-    lv_imgbtn_set_src( delete_btn, LV_BTN_STATE_CHECKED_PRESSED, &trash_32px);
-    lv_obj_add_style( delete_btn, LV_IMGBTN_PART_MAIN, &wifi_password_style );
+    lv_obj_t *delete_btn = wf_add_image_button( wifi_password_tile, trash_32px, delete_wifi_password_event_cb, &wifi_password_style );
     lv_obj_align( delete_btn, wifi_password_pass_textfield, LV_ALIGN_OUT_BOTTOM_LEFT, 10, 10 );
-    lv_obj_set_event_cb( delete_btn, delete_wifi_password_event_cb );
 }
 
 static void apply_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event ) {

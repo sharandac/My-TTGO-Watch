@@ -31,6 +31,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/widget.h"
+#include "gui/widget_factory.h"
 #include "utils/json_psram_allocator.h"
 #include "hardware/powermgm.h"
 #include "hardware/rtcctl.h"
@@ -125,14 +126,9 @@ static void create_alarm_app_icon(){
     // remember, an app icon must have an size of 64x64 pixel with an alpha channel
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/examples/images/
-    lv_obj_t * alarm_clock_icon = lv_imgbtn_create( alarm_clock_icon_cont, NULL );
-    lv_imgbtn_set_src( alarm_clock_icon, LV_BTN_STATE_RELEASED, &alarm_clock_64px);
-    lv_imgbtn_set_src( alarm_clock_icon, LV_BTN_STATE_PRESSED, &alarm_clock_64px);
-    lv_imgbtn_set_src( alarm_clock_icon, LV_BTN_STATE_CHECKED_RELEASED, &alarm_clock_64px);
-    lv_imgbtn_set_src( alarm_clock_icon, LV_BTN_STATE_CHECKED_PRESSED, &alarm_clock_64px);
+    lv_obj_t * alarm_clock_icon = wf_add_image_button( alarm_clock_icon_cont, alarm_clock_64px, enter_alarm_clock_event_cb );
     lv_obj_reset_style_list( alarm_clock_icon, LV_OBJ_PART_MAIN );
     lv_obj_align( alarm_clock_icon , alarm_clock_icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
-    lv_obj_set_event_cb( alarm_clock_icon, enter_alarm_clock_event_cb );
 
     // make app icon drag scroll the mainbar
     mainbar_add_slide_element(alarm_clock_icon);

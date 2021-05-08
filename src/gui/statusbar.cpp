@@ -44,6 +44,7 @@
 #include "hardware/display.h"
 #include "hardware/gpsctl.h"
 
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/wlan_settings/wlan_settings.h"
@@ -207,15 +208,9 @@ void statusbar_setup( void )
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_OPA_100 );
     lv_style_set_image_recolor( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_COLOR_GREEN );
 
-    statusbar_wifi = lv_imgbtn_create( statusbar, NULL);
-    lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_RELEASED, &wifi_64px );
-    lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_PRESSED, &wifi_64px );
-    lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_CHECKED_RELEASED, &wifi_64px );
-    lv_imgbtn_set_src( statusbar_wifi, LV_BTN_STATE_CHECKED_PRESSED, &wifi_64px );
+    statusbar_wifi = wf_add_image_button( statusbar, wifi_64px, statusbar_wifi_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_wifi, true );
-    lv_obj_add_style( statusbar_wifi, LV_IMGBTN_PART_MAIN, &style );
     lv_obj_align( statusbar_wifi, statusbar, LV_ALIGN_IN_TOP_MID, 0, STATUSBAR_HEIGHT );
-    lv_obj_set_event_cb( statusbar_wifi, statusbar_wifi_event_cb );
     lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_PRESSED );
 
     /*Create a label on the Image button*/
@@ -232,26 +227,14 @@ void statusbar_setup( void )
     lv_label_set_text(statusbar_wifiiplabel, "");
     lv_obj_align(statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
-    statusbar_bluetooth = lv_imgbtn_create( statusbar, NULL);
-    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_RELEASED, &bluetooth_64px );
-    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_PRESSED, &bluetooth_64px );
-    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_CHECKED_RELEASED, &bluetooth_64px );
-    lv_imgbtn_set_src( statusbar_bluetooth, LV_BTN_STATE_CHECKED_PRESSED, &bluetooth_64px );
+    statusbar_bluetooth = wf_add_image_button( statusbar, bluetooth_64px, statusbar_bluetooth_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_bluetooth, true );
-    lv_obj_add_style( statusbar_bluetooth, LV_IMGBTN_PART_MAIN, &style );
     lv_obj_align( statusbar_bluetooth, statusbar, LV_ALIGN_IN_TOP_RIGHT, -8, STATUSBAR_HEIGHT );
-    lv_obj_set_event_cb( statusbar_bluetooth, statusbar_bluetooth_event_cb );
     lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_CHECKED_PRESSED );
 
-    statusbar_gps = lv_imgbtn_create( statusbar, NULL);
-    lv_imgbtn_set_src( statusbar_gps, LV_BTN_STATE_RELEASED, &gps_64px );
-    lv_imgbtn_set_src( statusbar_gps, LV_BTN_STATE_PRESSED, &gps_64px );
-    lv_imgbtn_set_src( statusbar_gps, LV_BTN_STATE_CHECKED_RELEASED, &gps_64px );
-    lv_imgbtn_set_src( statusbar_gps, LV_BTN_STATE_CHECKED_PRESSED, &gps_64px );
+    statusbar_gps = wf_add_image_button( statusbar, gps_64px, statusbar_gps_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_gps, true );
-    lv_obj_add_style( statusbar_gps, LV_IMGBTN_PART_MAIN, &style );
     lv_obj_align( statusbar_gps, statusbar, LV_ALIGN_IN_TOP_LEFT, 8, STATUSBAR_HEIGHT );
-    lv_obj_set_event_cb( statusbar_gps, statusbar_gps_event_cb );
     lv_imgbtn_set_state( statusbar_gps, LV_BTN_STATE_CHECKED_PRESSED );
 
     statusbar_stepcounterlabel = lv_label_create(statusbar, NULL );

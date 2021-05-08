@@ -32,6 +32,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/display.h"
@@ -164,41 +165,17 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( osmmap_lonlat_label, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 3, 0 );
     lv_label_set_text( osmmap_lonlat_label, "0 / 0" );
 
-    osmmap_layers_btn = lv_imgbtn_create( osmmap_cont, NULL);
-    lv_imgbtn_set_src( osmmap_layers_btn, LV_BTN_STATE_RELEASED, &layers_dark_48px);
-    lv_imgbtn_set_src( osmmap_layers_btn, LV_BTN_STATE_PRESSED, &layers_dark_48px);
-    lv_imgbtn_set_src( osmmap_layers_btn, LV_BTN_STATE_CHECKED_RELEASED, &layers_dark_48px);
-    lv_imgbtn_set_src( osmmap_layers_btn, LV_BTN_STATE_CHECKED_PRESSED, &layers_dark_48px);
-    lv_obj_add_style( osmmap_layers_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
+    osmmap_layers_btn = wf_add_image_button( osmmap_cont, layers_dark_48px, layers_btn_app_main_event_cb, &osmmap_app_main_style );
     lv_obj_align( osmmap_layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
-    lv_obj_set_event_cb( osmmap_layers_btn, layers_btn_app_main_event_cb );
 
-    osmmap_exit_btn = lv_imgbtn_create( osmmap_cont, NULL);
-    lv_imgbtn_set_src( osmmap_exit_btn, LV_BTN_STATE_RELEASED, &exit_dark_48px);
-    lv_imgbtn_set_src( osmmap_exit_btn, LV_BTN_STATE_PRESSED, &exit_dark_48px);
-    lv_imgbtn_set_src( osmmap_exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_dark_48px);
-    lv_imgbtn_set_src( osmmap_exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_dark_48px);
-    lv_obj_add_style( osmmap_exit_btn, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
+    osmmap_exit_btn = wf_add_image_button( osmmap_cont, exit_dark_48px, exit_osmmap_app_main_event_cb, &osmmap_app_main_style );
     lv_obj_align( osmmap_exit_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( osmmap_exit_btn, exit_osmmap_app_main_event_cb );
 
-    osmmap_zoom_in_btl = lv_imgbtn_create( osmmap_cont, NULL);
-    lv_imgbtn_set_src( osmmap_zoom_in_btl, LV_BTN_STATE_RELEASED, &zoom_in_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_in_btl, LV_BTN_STATE_PRESSED, &zoom_in_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_in_btl, LV_BTN_STATE_CHECKED_RELEASED, &zoom_in_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_in_btl, LV_BTN_STATE_CHECKED_PRESSED, &zoom_in_dark_48px);
-    lv_obj_add_style( osmmap_zoom_in_btl, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
+    osmmap_zoom_in_btl = wf_add_image_button( osmmap_cont, zoom_in_dark_48px, zoom_in_osmmap_app_main_event_cb, &osmmap_app_main_style );
     lv_obj_align( osmmap_zoom_in_btl, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
-    lv_obj_set_event_cb( osmmap_zoom_in_btl, zoom_in_osmmap_app_main_event_cb );
 
-    osmmap_zoom_out_btl = lv_imgbtn_create( osmmap_cont, NULL);
-    lv_imgbtn_set_src( osmmap_zoom_out_btl, LV_BTN_STATE_RELEASED, &zoom_out_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_out_btl, LV_BTN_STATE_PRESSED, &zoom_out_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_out_btl, LV_BTN_STATE_CHECKED_RELEASED, &zoom_out_dark_48px);
-    lv_imgbtn_set_src( osmmap_zoom_out_btl, LV_BTN_STATE_CHECKED_PRESSED, &zoom_out_dark_48px);
-    lv_obj_add_style( osmmap_zoom_out_btl, LV_IMGBTN_PART_MAIN, &osmmap_app_main_style );
+    osmmap_zoom_out_btl = wf_add_image_button( osmmap_cont, zoom_out_dark_48px, zoom_out_osmmap_app_main_event_cb, &osmmap_app_main_style );
     lv_obj_align( osmmap_zoom_out_btl, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( osmmap_zoom_out_btl, zoom_out_osmmap_app_main_event_cb );
 
     osmmap_north_btn = lv_btn_create( osmmap_cont, NULL );
     lv_obj_set_width( osmmap_north_btn, 80 );

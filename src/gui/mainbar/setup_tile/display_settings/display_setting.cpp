@@ -89,23 +89,11 @@ void display_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( display_settings_tile_1, "display settings", exit_display_setup_event_cb );
     lv_obj_align( header, display_settings_tile_1, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     
-    lv_obj_t *down_btn_1 = lv_imgbtn_create( display_settings_tile_1, NULL);
-    lv_imgbtn_set_src( down_btn_1, LV_BTN_STATE_RELEASED, &down_32px);
-    lv_imgbtn_set_src( down_btn_1, LV_BTN_STATE_PRESSED, &down_32px);
-    lv_imgbtn_set_src( down_btn_1, LV_BTN_STATE_CHECKED_RELEASED, &down_32px);
-    lv_imgbtn_set_src( down_btn_1, LV_BTN_STATE_CHECKED_PRESSED, &down_32px);
-    lv_obj_add_style( down_btn_1, LV_IMGBTN_PART_MAIN, &display_settings_style );
+    lv_obj_t *down_btn_1 = wf_add_image_button( display_settings_tile_1, down_32px, down_display_setup_event_cb, &display_settings_style );
     lv_obj_align( down_btn_1, display_settings_tile_1, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( down_btn_1, down_display_setup_event_cb );
 
-    lv_obj_t *up_btn_1 = lv_imgbtn_create( display_settings_tile_2, NULL);
-    lv_imgbtn_set_src( up_btn_1, LV_BTN_STATE_RELEASED, &up_32px);
-    lv_imgbtn_set_src( up_btn_1, LV_BTN_STATE_PRESSED, &up_32px);
-    lv_imgbtn_set_src( up_btn_1, LV_BTN_STATE_CHECKED_RELEASED, &up_32px);
-    lv_imgbtn_set_src( up_btn_1, LV_BTN_STATE_CHECKED_PRESSED, &up_32px);
-    lv_obj_add_style( up_btn_1, LV_IMGBTN_PART_MAIN, &display_settings_style );
+    lv_obj_t *up_btn_1 = wf_add_image_button( display_settings_tile_2, up_32px, up_display_setup_event_cb, &display_settings_style );
     lv_obj_align( up_btn_1, display_settings_tile_2, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( up_btn_1, up_display_setup_event_cb );
     
     lv_obj_t *brightness_cont = lv_obj_create( display_settings_tile_1, NULL );
     lv_obj_set_size( brightness_cont, lv_disp_get_hor_res( NULL ) , 48 );
