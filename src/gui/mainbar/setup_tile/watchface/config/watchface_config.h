@@ -19,21 +19,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "watchface_config.h"
+#ifndef _WATCHFACE_CONFIG_H
+    #define _WATCHFACE_CONFIG_H
 
-watchface_config_t::watchface_config_t() : BaseJsonConfig( WATCHFACE_JSON_COFIG_FILE ) {}
+    #include "utils/basejsonconfig.h"
 
-bool watchface_config_t::onSave(JsonDocument& doc) {
-    doc["watchface_enable"] = watchface_enable;
-    return true;
-}
+    #define WATCHFACE_JSON_COFIG_FILE         "/watchface.json"   /** @brief defines json config file name */
 
-bool watchface_config_t::onLoad(JsonDocument& doc) {
-    watchface_enable = doc["watchface_enable"] | false;
-    return true;
-}
+    /**
+     * @brief blectl config structure
+     */
+    class watchface_config_t : public BaseJsonConfig {
+        public:
+        watchface_config_t();
+        bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
+        bool watchface_antialias = true;            /** @brief setup antialias */
 
-bool watchface_config_t::onDefault( void ) {
-    watchface_enable = false;
-    return true;
-}
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual bool onDefault( void );
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
+
+#endif // _WATCHFACE_CONFIG_H

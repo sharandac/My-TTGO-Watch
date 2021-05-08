@@ -27,6 +27,8 @@
 #include "watchface_app_tile.h"
 
 #include "gui/mainbar/mainbar.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
+#include "gui/setup.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
 #include "gui/widget.h"
@@ -51,11 +53,12 @@ void watchface_app_setup( void ) {
     /*
      * register 2 vertical tiles and get the first tile number and save it for later use
      */
-    watchface_app_main_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace App" );
+    watchface_app_main_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Setup" );
     /*
      * register an app icon and the app enter function
      */
-    watchface_app = app_register( "WatchFace", &watchface_64px, enter_watchface_app_event_cb );
+    watchface_app = setup_register( "watchface", &watchface_64px, enter_watchface_app_event_cb );
+//    watchface_app = app_register( "WatchFace", &watchface_64px, enter_watchface_app_event_cb );
     /*
      * init main tile, see example_app_main.cpp and example_app_setup.cpp
      */
@@ -69,8 +72,8 @@ uint32_t watchface_app_get_app_main_tile_num( void ) {
 
 static void enter_watchface_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( false );
-                                        mainbar_jump_to_tilenumber( watchface_app_main_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( watchface_app_main_tile_num, LV_ANIM_OFF );
+                                        statusbar_hide( false );
                                         break;
     }    
 }

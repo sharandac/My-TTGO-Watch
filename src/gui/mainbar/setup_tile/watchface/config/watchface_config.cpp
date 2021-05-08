@@ -19,27 +19,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _WATCHFACE_CONFIG_H
-    #define _WATCHFACE_CONFIG_H
+#include "watchface_config.h"
 
-    #include "utils/basejsonconfig.h"
+watchface_config_t::watchface_config_t() : BaseJsonConfig( WATCHFACE_JSON_COFIG_FILE ) {}
 
-    #define WATCHFACE_JSON_COFIG_FILE         "/watchface.json"   /** @brief defines json config file name */
+bool watchface_config_t::onSave(JsonDocument& doc) {
+    doc["watchface_enable"] = watchface_enable;
+    doc["watchface_antialias"] = watchface_antialias;
+    return true;
+}
 
-    /**
-     * @brief blectl config structure
-     */
-    class watchface_config_t : public BaseJsonConfig {
-        public:
-        watchface_config_t();
-        bool watchface_enable = false;             /** @brief gps auto on/off */
+bool watchface_config_t::onLoad(JsonDocument& doc) {
+    watchface_enable = doc["watchface_enable"] | false;
+    watchface_antialias = doc["watchface_antialias"] | true;
+    return true;
+}
 
-        protected:
-        ////////////// Available for overloading: //////////////
-        virtual bool onLoad(JsonDocument& document);
-        virtual bool onSave(JsonDocument& document);
-        virtual bool onDefault( void );
-        virtual size_t getJsonBufferSize() { return 1000; }
-    } ;
-
-#endif // _WATCHFACE_CONFIG_H
+bool watchface_config_t::onDefault( void ) {
+    watchface_enable = false;
+    watchface_antialias = true;
+    return true;
+}

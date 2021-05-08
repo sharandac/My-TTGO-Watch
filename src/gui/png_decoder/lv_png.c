@@ -59,6 +59,10 @@ void lv_png_init(void)
 /**********************
  *   STATIC FUNCTIONS
  **********************/
+void lv_rgba_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h ) {
+    unsigned error = lodepng_encode32_file( filename, image, w, h );
+    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+}
 
 /**
  * Get info about a PNG image

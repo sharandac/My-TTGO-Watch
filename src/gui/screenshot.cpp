@@ -19,21 +19,19 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <endian.h>
 #include "config.h"
 #include "screenshot.h"
 
 #include "utils/alloc.h"
+#include "gui/png_decoder/lv_png.h"
 
-static uint8_t *png;
+static RAW_RGB *raw_rgb;
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
 
 void screenshot_setup( void ) {
-    png = (uint8_t*)MALLOC( lv_disp_get_hor_res( NULL ) * lv_disp_get_ver_res( NULL ) * sizeof( lv_color_t ) );
-    if ( png == NULL ) {
-        log_e("screenshot malloc failed");
-        while(1);
-    }
+    raw_rgb = NULL;
 }
 
 void screenshot_take( void ) {
@@ -41,7 +39,17 @@ void screenshot_take( void ) {
     lv_disp_t *system_disp;
 
     log_i("take screenshot");
-    
+    /**
+     * allocate screenshot memory
+     */
+    raw_rgb = (RAW_RGB*)MALLOC( sizeof( RAW_RGB ) );
+    if ( raw_rgb == NULL ) {
+        log_e("screenshot malloc failed");
+        return;
+    }
+    /**
+     * redirect display driver
+     */
     system_disp = lv_disp_get_default();
     driver.flush_cb = system_disp->driver.flush_cb;
     system_disp->driver.flush_cb = screenshot_disp_flush;
@@ -51,30 +59,52 @@ void screenshot_take( void ) {
 }
 
 void screenshot_save( void ) {
-    uint8_t *data_p = png;
-
+    /**
+     * check if screenshot memory allocated
+     */
+    if ( raw_rgb == NULL ) {
+        log_e("no screenshot memory allocated");
+        return;
+    }
+    /**
+     * delete old screenshot
+     */
     remove( SCREENSHOT_FILE_NAME );
-    FILE *file = fopen( SCREENSHOT_FILE_NAME, "wb" );
-
-    if ( file ) {
-        fwrite( (const void*)data_p, 1, 240 * 240 *2, file );
-        log_i("save screenshot");
-    }
-    else {
-        log_e("error while open file");
-    }
-    fflush( file );
-    fclose( file );
+    /**
+     * open new screenshoot file and write them
+     */
+    lv_rgba_as_png( SCREENSHOT_FILE_NAME, (const uint8_t*)raw_rgb, 240, 240 );
+    log_i("save screenshot");
+    /**
+     * free screenshot memory
+     */
+    free( raw_rgb );
 }
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {
 
     uint32_t x, y;
+    uint8_t r,g,b;
     uint16_t *data = (uint16_t *)color_p;
-
+    /**
+     * check if screenshot memory allocated
+     */
+    if ( raw_rgb == NULL ) {
+        log_e("no screenshot memory allocated");
+        return;
+    }
+    /**
+     * copy data into screenshot memory as RGBA
+     */
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
-            *(png + (y * lv_disp_get_hor_res( NULL ) + x )) = *data;
+            r = ( bswap16( *data ) & 0xf800 ) >> 8;
+            g = ( bswap16( *data ) & 0x07E0 ) >> 3;
+            b = ( bswap16( *data ) & 0x001F ) << 3;
+            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].r = r;
+            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].g = g;
+            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].b = b;
+            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].a = 255;
             data++;
         }
     } 

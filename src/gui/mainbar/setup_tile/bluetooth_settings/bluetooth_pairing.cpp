@@ -54,7 +54,8 @@ void bluetooth_pairing_tile_setup( void ) {
     lv_style_set_text_font( &bluetooth_pairing_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_add_style( bluetooth_pairing_tile, LV_OBJ_PART_MAIN, &bluetooth_pairing_style );
 
-    lv_obj_t *header = wf_add_settings_header( bluetooth_pairing_tile, NULL, exit_bluetooth_pairing_event_cb );
+    lv_obj_t *bluetooth_pairing_exit_btn = wf_add_image_button( bluetooth_pairing_tile, cancel_32px, exit_bluetooth_pairing_event_cb, &bluetooth_pairing_style);
+    lv_obj_align( bluetooth_pairing_exit_btn, bluetooth_pairing_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     bluetooth_pairing_img = lv_img_create( bluetooth_pairing_tile, NULL );
     lv_img_set_src( bluetooth_pairing_img, &bluetooth_64px );

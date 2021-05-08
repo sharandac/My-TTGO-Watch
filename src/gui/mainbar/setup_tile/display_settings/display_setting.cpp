@@ -267,7 +267,7 @@ static void down_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void up_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( display_tile_num_1, LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back( LV_ANIM_ON );
                                         break;
     }
 
@@ -275,7 +275,7 @@ static void up_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back( LV_ANIM_OFF );
                                         display_save_config();
                                         break;
     }

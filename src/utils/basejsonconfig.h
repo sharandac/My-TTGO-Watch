@@ -23,6 +23,10 @@ public:
    */
   bool load();
   /**
+   * @brief Load settings from file with a custom json size
+   */
+  bool load( uint32_t size );
+  /**
    * @brief Save settings to file
    */
   bool save();

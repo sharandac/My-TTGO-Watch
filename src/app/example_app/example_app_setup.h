@@ -24,6 +24,8 @@
 
     #include <TTGO.h>
 
+    #define EXAMPLE_APP_INFO_LOG        log_i
+
     void example_app_setup_setup( uint32_t tile_num );
 
 #endif // _EXAMPLE_APP_SETUP_H

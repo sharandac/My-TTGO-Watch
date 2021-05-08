@@ -45,6 +45,8 @@
 #include "mainbar/setup_tile/sound_settings/sound_settings.h"
 #include "mainbar/setup_tile/gps_settings/gps_settings.h"
 #include "mainbar/setup_tile/sdcard_settings/sdcard_settings.h"
+#include "mainbar/setup_tile/watchface/watchface_app.h"
+
 
 #include "mainbar/setup_tile/utilities/utilities.h"
 
@@ -54,6 +56,7 @@
 #include "hardware/touch.h"
 
 lv_obj_t *img_bin;
+static volatile bool force_redraw = false;
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
@@ -99,6 +102,7 @@ void gui_setup( void )
     update_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
+    watchface_app_setup();
     /*
      * trigger an activity
      */
@@ -153,6 +157,11 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         break;                                        
     }
     return( true );
+}
+
+
+void gui_force_redraw( bool force ) {
+    force_redraw = force;
 }
 
 void gui_set_background_image ( uint32_t background_image ) {
@@ -222,6 +231,11 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                                             powermgm_set_event( POWERMGM_STANDBY_REQUEST );
                                         }
                                         break;
+    }
+    if ( force_redraw ) {
+        force_redraw = !force_redraw;
+        lv_obj_invalidate( lv_scr_act() );
+        // lv_refr_now( NULL );
     }
     return( true );
 }

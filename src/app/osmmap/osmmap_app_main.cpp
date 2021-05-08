@@ -28,6 +28,7 @@
 #include "app/osmmap/config/osmmap_config.h"
 
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
+#include "gui/mainbar/setup_tile/watchface/watchface_app_tile.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -81,7 +82,7 @@ lv_style_t osmmap_app_nav_style;                  /** @brief osm main styte obj 
 static volatile bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
 static volatile bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
 static volatile bool osmmap_block_show_messages = false;     /** @brief osm show messages state store */
-static volatile bool osmmap_statusbar_force_dark_mode = false;  /** @brief osm statusbar force dark mode state store */
+static volatile bool osmmap_block_watchface = false;  /** @brief osm statusbar force dark mode state store */
 static volatile bool osmmap_gps_state = false;
 static volatile bool osmmap_wifi_state = false;
 static volatile uint64_t last_touch = 0;
@@ -517,7 +518,7 @@ static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
             /**
              * exit to mainbar
              */
-            mainbar_jump_to_maintile( LV_ANIM_OFF );
+            mainbar_jump_back( LV_ANIM_OFF );
             break;
     }
 }
@@ -712,6 +713,11 @@ void osmmap_activate_cb( void ) {
     /**
      * save block show messages state
      */
+    osmmap_block_watchface = watchface_get_enable_tile_after_wakeup();
+    watchface_enable_tile_after_wakeup( false );
+    /**
+     * save block show messages state
+     */
     osmmap_block_show_messages = blectl_get_show_notification();
     blectl_set_show_notification( false );
     /**
@@ -720,15 +726,9 @@ void osmmap_activate_cb( void ) {
     osmmap_block_return_maintile = display_get_block_return_maintile();
     display_set_block_return_maintile( true );
     /**
-     * save statusbar force dark mode state
-     */
-    osmmap_statusbar_force_dark_mode = statusbar_get_force_dark();
-    statusbar_set_force_dark( true );
-    /**
      * force redraw screen
      */
     lv_obj_invalidate( lv_scr_act() );
-    statusbar_hide( true );
     /**
      * set osm app active
      */
@@ -763,14 +763,13 @@ void osmmap_hibernate_cb( void ) {
      */
     blectl_set_show_notification( osmmap_block_show_messages );
     display_set_block_return_maintile( osmmap_block_return_maintile );
-    statusbar_set_force_dark( osmmap_statusbar_force_dark_mode );
     gpsctl_set_autoon( osmmap_gps_state );
     wifictl_set_autoon( osmmap_wifi_state );
+    watchface_enable_tile_after_wakeup( osmmap_block_watchface );
     /**
      * set osm app inactive
      */
     osmmap_app_active = false;
-    statusbar_hide( false );
     /**
      * stop background osm tile image update Task
      */

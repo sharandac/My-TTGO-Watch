@@ -30,6 +30,9 @@ Once a setting is selected, you can leave the form with the exit button.
 
 Set color, background, touch feedback with vibrations...
 
+![screenshot](images/display_1.png)
+![screenshot](images/display_2.png)
+
 ## Move
 
 Enable:
@@ -45,9 +48,13 @@ Initially, it is on a 30 minutes frequency.
 When the realtime tab of gadgetbridge is selected, the frequency is set to every 5 seconds.
 If the watch lost contact with gadgetbridge for more than 30 minutes, the stepcounter is also refreshed when bluetooth is reconnected.
 
+![screenshot](images/move.png)
+
 ## Bluetooth
 
 The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) very well. But keep in mind, bluetooth in standby reduces the battery runtime.
+
+![screenshot](images/bluetooth.png)
 
 ## WiFi
 
@@ -59,6 +66,8 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Display 12/24 hours
 * Select region and location
 
+![screenshot](images/time.png)
+
 ## Utilities
 
 * Format
@@ -66,12 +75,16 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 * Poweroff
 * GPS injection
 
+![screenshot](images/utilities.png)
+
 ## Sound 
 
 * Enable sound
 * Set volume
 
-# GPS
+![screenshot](images/sound.png)
+
+## GPS
 
 ![screenshot](images/screen11.png)
 
@@ -122,13 +135,21 @@ A watchface.tar.gz includes the following files and a extra watchface_theme.json
 
 Here you can find some finish watchface packages:
 
+![swiss clock](images/watchface/swiss/watchface_theme_prev.png)
+![undone clock](images/watchface/undone/watchface_theme_prev.png)
+![star trek clock](images/watchface/startrek/watchface_theme_prev.png)
+![hal9000](images/watchface/hal9000/watchface_theme_prev.png)
+
 ![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
 ![undone clock](images/watchface/undone/watchface.tar.gz)<br>
 ![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
+![hal9000](images/watchface/hal9000/watchface.tar.gz)<br>
 
 ## OSMmap
 
 ![screenshot](images/screen9.png)
+![maps](images/osmmap_maps.png)
+![menu](images/osmmap_menu.png)
 ![navigation](images/osmmap_navigation.png)
 
 A long press in the middle centers the map to the current gps position.
@@ -171,6 +192,9 @@ Some improvements might come in the future.
 
 It is possible to update over the air.
 
+![screenshot](images/update_1.png)
+![screenshot](images/update_2.png)
+
 # FAQ
 
 ## how to make a screenshot?
@@ -179,13 +203,13 @@ It is possible to update over the air.
 
 Press the button for 2 seconds, after that an quickmenu appears. Here you can select the tiny camera icon to take a screenshot.
 This can be downloaded via the built-in FTP server (binary and passive mode, username: TTWatch and password: passord), if activated.
-The file name is screen.data.
+The file name is screen.png.
 
 Or the other way:
 
-The firmware has an integrated webserver. Over this a screenshot can be triggered. The image has the format RGB565 and can be read with gimp. From bash it look like this
+The firmware has an integrated webserver. Over this a screenshot can be triggered. The image store as png and can be read with gimp. From bash it look like this
 ```bash
-wget x.x.x.x/shot ; wget x.x.x.x/screen.data
+wget x.x.x.x/shot ; wget x.x.x.x/screen.png
 ```
 
 Pro-tipp:

@@ -260,7 +260,7 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
                                             strlcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ), sizeof( weather_config->lat ) );
                                             strlcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ), sizeof( weather_config->lon ) );
                                             weather_save_config();
-                                            weather_jump_to_forecast();
+                                            mainbar_jump_back( LV_ANIM_OFF );
                                             break;
     }
 }

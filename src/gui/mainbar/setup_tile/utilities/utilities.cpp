@@ -79,7 +79,7 @@ void utilities_tile_setup( void ) {
     setup_hide_indicator( utilities_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities", exit_utilities_event_cb );
-    //lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     //Spiffs:
     //Add button for dump spiffs details to serial including config files
@@ -187,7 +187,7 @@ static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back( LV_ANIM_OFF );
                                         break;
     }
 }

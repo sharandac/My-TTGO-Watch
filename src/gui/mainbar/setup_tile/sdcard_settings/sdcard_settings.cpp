@@ -134,23 +134,19 @@ void sdcard_settings_tile_setup(void)
 #endif
 }
 
-static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        mainbar_jump_to_tilenumber(sdcard_settings_tile_num, LV_ANIM_OFF);
-        break;
+static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event) {
+    switch (event) {
+        case (LV_EVENT_CLICKED):
+            mainbar_jump_to_tilenumber( sdcard_settings_tile_num, LV_ANIM_OFF );
+            break;
     }
 }
 
-static void exit_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        mainbar_jump_to_tilenumber(setup_get_tile_num(), LV_ANIM_OFF);
-        break;
+static void exit_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event) {
+    switch (event) {
+        case (LV_EVENT_CLICKED):
+            mainbar_jump_back( LV_ANIM_OFF );
+            break;
     }
 }
 

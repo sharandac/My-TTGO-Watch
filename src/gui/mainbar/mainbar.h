@@ -26,6 +26,20 @@
 
     typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
 
+    #define MAINBAR_INFO_LOG               log_i
+
+    #define MAINBAR_APP_TILE_X_START    0
+    #define MAINBAR_APP_TILE_Y_START    4
+    #define MAINBAR_MAX_HISTORY         16
+    #define STATUSBAR_HIDE              true
+    #define STATUSBAR_SHOW              false
+
+    typedef struct {
+        uint32_t    entrys;
+        lv_point_t  tile[ MAINBAR_MAX_HISTORY ];
+        bool        statusbar[ MAINBAR_MAX_HISTORY ];
+    } mainbar_history_t;
+
     typedef struct {
         lv_obj_t *tile;
         MAINBAR_CALLBACK_FUNC activate_cb;
@@ -34,9 +48,6 @@
         uint16_t y;
         const char *id;
     } lv_tile_t;
-
-    #define MAINBAR_APP_TILE_X_START     0
-    #define MAINBAR_APP_TILE_Y_START     4
 
     /**
      * @brief mainbar setup funktion
@@ -49,14 +60,9 @@
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim );
+    void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bool statusbar );
     /**
      * @brief jump direct to main tile
-     * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
-     */
-    void mainbar_jump_to_maintile( lv_anim_enable_t anim );
-    /**
-     * @brief jumps direct to the maintile
-     * 
      * @param   anim    LV_ANIM_ON or LV_ANIM_OFF for animated switch
      */
     void mainbar_jump_to_maintile( lv_anim_enable_t anim );
@@ -128,5 +134,9 @@
      * @brief
      */
     void mainbar_add_slide_element( lv_obj_t *element );
+    /**
+     * jump back in tile history
+     */
+    void mainbar_jump_back( lv_anim_enable_t anim );
 
 #endif // _MAINBAR_H

@@ -96,7 +96,7 @@ void update_tile_setup( void ) {
     lv_obj_align( setup_btn, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update", exit_update_setup_event_cb );
-    //lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *update_version_cont = lv_obj_create( update_settings_tile, NULL );
     lv_obj_set_size(update_version_cont, lv_disp_get_hor_res( NULL ) , 40);
@@ -215,7 +215,7 @@ static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-            mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+            mainbar_jump_back( LV_ANIM_OFF );
             break;
     }
 }

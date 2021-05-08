@@ -65,6 +65,7 @@ lv_obj_t * wf_add_tile_footer_container(lv_obj_t *parent_tile, lv_layout_t layou
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text);
+lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text);
 
 /**
  * @brief   Creates and adds a roller object to a container
@@ -98,7 +99,7 @@ lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on = false);
  * @return  returns pointer to the added container
  */
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj);
-
+lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj, bool state, lv_event_cb_t event_cb );
 /**
  * @brief   Creates and adds an image button to a container
  *

@@ -64,82 +64,36 @@ void gps_settings_tile_setup( void ) {
 
     icon_t *gps_setup_icon = setup_register( "gps", &gps_64px, enter_gps_setup_event_cb );
     setup_hide_indicator( gps_setup_icon );
-
+    /**
+     * add setup header
+     */
     lv_obj_t *header = wf_add_settings_header( gps_settings_tile, "gps settings", exit_gps_setup_event_cb );
     lv_obj_align( header, gps_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-
-    lv_obj_t *autoon_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(autoon_cont, lv_disp_get_hor_res( NULL ) , 35);
-    lv_obj_add_style( autoon_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    autoon_onoff = wf_add_switch( autoon_cont, false );
-    lv_obj_align( autoon_onoff, autoon_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( autoon_onoff, autoon_onoff_event_handler );
-    lv_obj_t *autoon_label = lv_label_create( autoon_cont, NULL);
-    lv_obj_add_style( autoon_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_label_set_text( autoon_label, "autoon");
-    lv_obj_align( autoon_label, autoon_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    lv_obj_t *enable_on_standby_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(enable_on_standby_cont, lv_disp_get_hor_res( NULL ) , 35);
-    lv_obj_add_style( enable_on_standby_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    enable_on_standby_onoff = wf_add_switch( enable_on_standby_cont, false );
-    lv_obj_align( enable_on_standby_onoff, enable_on_standby_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( enable_on_standby_onoff, enable_on_standby_onoff_event_handler );
-    lv_obj_t *enable_on_standby_label = lv_label_create( enable_on_standby_cont, NULL);
-    lv_obj_add_style( enable_on_standby_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_label_set_text( enable_on_standby_label, "enable on standby");
-    lv_obj_align( enable_on_standby_label, enable_on_standby_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    lv_obj_t *app_use_gps_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(app_use_gps_cont, lv_disp_get_hor_res( NULL ) , 35);
-    lv_obj_add_style( app_use_gps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    app_use_gps_onoff = wf_add_switch( app_use_gps_cont, false );
-    lv_obj_align( app_use_gps_onoff, app_use_gps_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( app_use_gps_onoff, app_use_gps_onoff_event_handler );
-    lv_obj_t *app_use_gps_label = lv_label_create( app_use_gps_cont, NULL);
-    lv_obj_add_style( app_use_gps_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_label_set_text( app_use_gps_label, "apps use gps");
-    lv_obj_align( app_use_gps_label, app_use_gps_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-
-    lv_obj_t *fakegps_cont = lv_obj_create( gps_settings_tile, NULL );
-    lv_obj_set_size(fakegps_cont, lv_disp_get_hor_res( NULL ) , 35);
-    lv_obj_add_style( fakegps_cont, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    fakegps_onoff = wf_add_switch( fakegps_cont, false );
-    lv_obj_align( fakegps_onoff, fakegps_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( fakegps_onoff, fakegps_onoff_event_handler );
-    lv_obj_t *fakegps_label = lv_label_create( fakegps_cont, NULL);
-    lv_obj_add_style( fakegps_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
-    lv_label_set_text( fakegps_label, "fake gps via ip");
-    lv_obj_align( fakegps_label, fakegps_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    /**
+     * add autoon switch
+     */
+    lv_obj_t *autoon_cont = wf_add_labeled_switch( gps_settings_tile, "autoon", &autoon_onoff, gpsctl_get_autoon(), autoon_onoff_event_handler );
+    lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    /**
+     * add enable on standby switch
+     */
+    lv_obj_t *enable_on_standby_cont = wf_add_labeled_switch( gps_settings_tile, "enable on standby", &enable_on_standby_onoff, gpsctl_get_enable_on_standby(), enable_on_standby_onoff_event_handler );
+    lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    /**
+     * add app use gps switch
+     */
+    lv_obj_t *app_use_gps_cont = wf_add_labeled_switch( gps_settings_tile, "apps use gps", &app_use_gps_onoff, gpsctl_get_app_use_gps(), app_use_gps_onoff_event_handler );
+    lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    /**
+     * add fake gps via ip switch
+     */
+    lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler );
+    lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     gps_latlon_label = lv_label_create( gps_settings_tile, NULL);
     lv_obj_add_style( gps_latlon_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
     lv_label_set_text( gps_latlon_label, "fix: - lat: - lon: -");
     lv_obj_align( gps_latlon_label, gps_settings_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -5 );
-
-    if ( gpsctl_get_autoon() )
-        lv_switch_on( autoon_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( autoon_onoff, LV_ANIM_OFF );
-
-    if ( gpsctl_get_enable_on_standby() )
-        lv_switch_on( enable_on_standby_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( enable_on_standby_onoff, LV_ANIM_OFF );
-
-    if ( gpsctl_get_app_use_gps() )
-        lv_switch_on( app_use_gps_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( app_use_gps_onoff, LV_ANIM_OFF );
-
-    if ( gpsctl_get_gps_over_ip() )
-        lv_switch_on( fakegps_onoff, LV_ANIM_OFF );
-    else
-        lv_switch_off( fakegps_onoff, LV_ANIM_OFF );
 
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_UPDATE_LOCATION, gps_settings_latlon_update_cb, "gps settings" );
     gpsctl_register_cb( GPSCTL_UPDATE_CONFIG, gps_settings_config_update_cb, "gps settings" );

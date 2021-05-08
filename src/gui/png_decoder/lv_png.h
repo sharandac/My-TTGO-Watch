@@ -30,6 +30,7 @@ extern "C" {
  * Register the PNG decoder functions in LittlevGL
  */
 void lv_png_init(void);
+void lv_rgba_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h );
 
 /**********************
  *      MACROS
