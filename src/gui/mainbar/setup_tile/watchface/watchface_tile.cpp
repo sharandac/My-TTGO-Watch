@@ -27,6 +27,7 @@
 #include "watchface_tile.h"
 #include "watchface_setup.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_theme_config.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_config.h"
 #include "gui/gui.h"
 #include "app/alarm_clock/alarm_in_progress.h"
 

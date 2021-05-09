@@ -32,7 +32,7 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc );
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc );
 uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc );
 
-uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
+uri_load_dsc_t *uri_load_to_ram( const char *uri, progress_cb_t *progresscb ) {
     /**
      * alloc uri_load_dsc structure
      */
@@ -42,6 +42,10 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
      */
     if ( uri_load_dsc ) {
         URI_LOAD_LOG("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+        /**
+         * set progress call back function
+         */
+        uri_load_dsc->progresscb = progresscb;
         /**
          * set download timestamp
          */
@@ -79,6 +83,138 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
     return( uri_load_dsc );
+}
+
+uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
+    return( uri_load_to_ram( uri, NULL ) );
+}
+
+bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progresscb ) {
+    bool retval = false;
+    /**
+     * alloc uri_load_dsc structure
+     */
+    uri_load_dsc_t *uri_load_dsc = uri_load_create_dsc();
+    /**
+     * 
+     */
+    if ( uri_load_dsc ) {
+        URI_LOAD_LOG("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+        /**
+         * set progress call back function
+         */
+        uri_load_dsc->progresscb = progresscb;
+        /**
+         * set download timestamp
+         */
+        uri_load_dsc->timestamp = millis();
+        /**
+         * set filename in the uri_load_dsc
+         */
+        uri_load_set_filename_from_uri( uri_load_dsc, uri );
+        /**
+         * set filename in the uri_load_dsc
+         */
+        uri_load_set_url_from_uri( uri_load_dsc, uri );
+        /**
+         * check for uri file source
+         */
+        if ( strstr( uri, "http://" ) ) {
+            URI_LOAD_LOG("http source");
+            uri_load_dsc = uri_load_http_to_ram( uri_load_dsc );
+        }
+        else if ( strstr( uri, "https://" ) ) {
+            URI_LOAD_LOG("https source");
+            uri_load_dsc = uri_load_https_to_ram( uri_load_dsc );
+        }
+        else if ( strstr( uri, "file://" ) ) {
+            URI_LOAD_LOG("local files source");
+            uri_load_dsc = uri_load_file_to_ram( uri_load_dsc );
+        }
+        else {
+            URI_LOAD_ERROR_LOG("uri not supported");
+            uri_load_free_all( uri_load_dsc );
+            uri_load_dsc = NULL;
+        }
+        /**
+         * store to path if download was success
+         */
+        if ( uri_load_dsc ) {
+            /**
+             * alloc memory for filename
+             */
+            char *filename = NULL;
+            filename = (char*)MALLOC( strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+            /**
+             * check if alloc failed
+             */
+            if ( !filename ) {
+                /**
+                 * free uri_load_dsc
+                 */
+                uri_load_free_all( uri_load_dsc );
+            }
+            else {
+                /**
+                 * copy path and filename into a file location string
+                 */
+                strncpy( filename, path, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+                strncat( filename, uri_load_dsc->filename, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+                /**
+                 * open file
+                 */
+                FILE *file = fopen( filename, "wb" );
+                /**
+                 * check if create was successfull
+                 */
+                if ( file ) {
+                    URI_LOAD_LOG("open file: %s", filename );
+                    size_t size = uri_load_dsc->size;
+                    unsigned char *data_p = uri_load_dsc->data;
+                    /**
+                     * write all chunks out
+                     */
+                    while( size ) {
+                        if ( size < URI_BLOCK_SIZE ) {
+                            if ( fwrite( data_p, 1, size, file ) == size ) {
+                                size = 0;
+                            }
+                            break;
+                        }
+                        if ( fwrite( data_p, 1, URI_BLOCK_SIZE, file ) == URI_BLOCK_SIZE ) {
+                            data_p = data_p + URI_BLOCK_SIZE;
+                            size = size - URI_BLOCK_SIZE;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    /**
+                     * all bytes written?
+                     */
+                    if ( size ) {
+                        URI_LOAD_ERROR_LOG("error while write %s", filename );
+                    }
+                    else {
+                        retval = true;
+                    }
+                }
+                else {
+                    URI_LOAD_LOG("error open file: %s", filename );
+                }
+                fclose( file );
+            }
+            free( filename );
+        }
+    }
+    else {
+        URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
+    }
+    return( retval );
+}
+
+bool uri_load_to_file( const char *uri, const char *path ) {
+    return( uri_load_to_file( uri, path, NULL ) );
 }
 
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
@@ -129,6 +265,9 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                         size_t c = download_stream->readBytes( data_write_p, size < bytes_left ? size : bytes_left );
                         bytes_left -= c;
                         data_write_p = data_write_p + c;
+                        if ( uri_load_dsc->progresscb ) {
+                            uri_load_dsc->progresscb( ( 100 * ( uri_load_dsc->size - bytes_left ) ) / uri_load_dsc->size );
+                        }
                     }
                 }
                 if ( bytes_left != 0 ) {
@@ -146,22 +285,12 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             }
         }
         else {
-            URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
             char *location = NULL;
             /**
              * check for a 301 redirect
              */
-            if ( httpCode == 301 ) {
-                URI_LOAD_LOG("301 redirect to -> %s", uri_load_dsc->uri, download_client.header("redirect").c_str() );
-                location = (char*)MALLOC( strlen( download_client.header("redirect").c_str() ) + 1 );
-                if ( location )
-                    strcpy( location, download_client.header("redirect").c_str() );
-            }
-            /**
-             * check for a 302 location
-             */
-            if ( httpCode == 302 ) {
-                URI_LOAD_LOG("302 location %s -> %s", uri_load_dsc->uri, download_client.header("location").c_str() );
+            if ( httpCode == 301 || httpCode == 302 ) {
+                URI_LOAD_INFO_LOG("301/302 redirect to: %s", download_client.header("location").c_str() );
                 location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
                 if ( location )
                     strcpy( location, download_client.header("location").c_str() );
@@ -179,7 +308,10 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 uri_load_dsc = uri_load_to_ram( location );
                 free( location );
             }
-            return( NULL );
+            else {
+                URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
+            }
+            return( uri_load_dsc );
         }
         /**
          * close http connection
@@ -242,6 +374,9 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                         size_t c = download_stream->readBytes( data_write_p, size < bytes_left ? size : bytes_left );
                         bytes_left -= c;
                         data_write_p = data_write_p + c;
+                        if ( uri_load_dsc->progresscb ) {
+                            uri_load_dsc->progresscb( ( 100 * ( uri_load_dsc->size - bytes_left ) ) / uri_load_dsc->size );
+                        }
                     }
                 }
                 if ( bytes_left != 0 ) {
@@ -263,22 +398,12 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             }
         }
         else {
-            URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
             char *location = NULL;
             /**
              * check for a 301 redirect
              */
-            if ( httpCode == 301 ) {
-                URI_LOAD_LOG("301 redirect to -> %s", uri_load_dsc->uri, download_client.header("redirect").c_str() );
-                location = (char*)MALLOC( strlen( download_client.header("redirect").c_str() ) + 1 );
-                if ( location )
-                    strcpy( location, download_client.header("redirect").c_str() );
-            }
-            /**
-             * check for a 302 location
-             */
-            if ( httpCode == 302 ) {
-                URI_LOAD_LOG("302 location %s -> %s", uri_load_dsc->uri, download_client.header("location").c_str() );
+            if ( httpCode == 301 || httpCode == 302 ) {
+                URI_LOAD_INFO_LOG("301/302 redirect to: %s", download_client.header("location").c_str() );
                 location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
                 if ( location )
                     strcpy( location, download_client.header("location").c_str() );
@@ -297,6 +422,9 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             if ( location ) {
                 uri_load_dsc = uri_load_to_ram( location );
                 free( location );
+            }
+            else {
+                URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
             }
             return( uri_load_dsc );
         }
@@ -371,6 +499,7 @@ uri_load_dsc_t *uri_load_create_dsc( void ) {
         uri_load_dsc->data = NULL;
         uri_load_dsc->filename = NULL;
         uri_load_dsc->uri = NULL;
+        uri_load_dsc->progresscb = NULL;
         uri_load_dsc->timestamp = millis();
         uri_load_dsc->size = 0;
     }

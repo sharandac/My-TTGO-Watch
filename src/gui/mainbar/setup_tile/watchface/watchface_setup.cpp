@@ -34,6 +34,7 @@
 #include "gui/statusbar.h"
 
 #include "utils/decompress/decompress.h"
+#include "utils/uri_load/uri_load.h"
 
 watchface_config_t watchface_config;
 
@@ -50,6 +51,7 @@ static void watchface_setup_reload_and_test_cb( lv_obj_t *obj, lv_event_t event 
 static void watchface_setup_enable_event_cb( lv_obj_t *obj, lv_event_t event );
 static void exit_watchface_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void watchface_setup_decompress_cb( lv_obj_t *obj, lv_event_t event );
+void watchface_setup_progress_cb( int32_t percent );
 
 void watchface_setup_tile_setup( uint32_t tile_num ) {
     /**
@@ -140,7 +142,14 @@ void watchface_setup_set_info_label( const char *text ){
 static void watchface_setup_decompress_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:
-            watchface_decompress_theme( );
+            /**
+             * only for testing
+             */
+            // uri_load_to_file( "http://raw.githubusercontent.com/sharandac/My-TTGO-Watchfaces/main/rainbow/watchface.tar.gz", "/spiffs" );
+            /**
+             * decompress watchface.tar.gz and install
+             */
+            watchface_decompress_theme();
             break;
     }
 }
