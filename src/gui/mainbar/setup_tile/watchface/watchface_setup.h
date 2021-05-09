@@ -19,16 +19,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _WATCHFACE_APP_H
-    #define _WATCHFACE_APP_H
+#ifndef _WATCHFACE_APP_MAIN_H
+    #define _WATCHFACE_APP_MAIN_H
 
     #include <TTGO.h>
 
-    #define WATCHFACE_APP_INFO_LOG     log_i
-    #define WATCHFACE_APP_LOG          log_d
-    #define WATCHFACE_APP_ERROR_LOG    log_e
+    void watchface_setup_tile_setup( uint32_t tile_num );
+    void watchface_setup_set_info_label( const char *text );
 
-    void watchface_app_setup( void );
-    uint32_t watchface_app_get_app_main_tile_num( void );
-
-#endif // _WATCHFACE_APP_H
+#endif // _WATCHFACE_APP_MAIN_H

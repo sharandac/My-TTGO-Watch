@@ -1,6 +1,8 @@
 {
-	"swiss clock":"http://www.neo-guerillaz.de/watchface/swiss/",
-	"undone clock":"http://www.neo-guerillaz.de/watchface/undone/",
-	"star trek":"http://www.neo-guerillaz.de/watchface/startrek/",
-	"hall9000":"http://www.neo-guerillaz.de/watchface/hal9000/"
+	"swiss clock":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/swiss/",
+	"undone clock":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/undone/",
+	"star trek":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/startrek/",
+    "hall9000 clock":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/hal9000/",
+    "rainbow clock":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/rainbow/",
+	"simple black clock":"https://github.com/sharandac/My-TTGO-Watch/raw/master/images/watchface/bloack/"
 }

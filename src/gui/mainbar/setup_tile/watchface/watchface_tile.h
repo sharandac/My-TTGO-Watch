@@ -38,7 +38,7 @@
     /**
      * @brief watchface tile setup
      */
-    void watchface_app_tile_setup( void );
+    void watchface_tile_setup( void );
     /**
      * @brief watchface enable after wakeup config
      * 

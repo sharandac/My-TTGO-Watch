@@ -45,7 +45,7 @@
 #include "mainbar/setup_tile/sound_settings/sound_settings.h"
 #include "mainbar/setup_tile/gps_settings/gps_settings.h"
 #include "mainbar/setup_tile/sdcard_settings/sdcard_settings.h"
-#include "mainbar/setup_tile/watchface/watchface_app.h"
+#include "mainbar/setup_tile/watchface/watchface_manager_app.h"
 
 
 #include "mainbar/setup_tile/utilities/utilities.h"
@@ -102,7 +102,7 @@ void gui_setup( void )
     update_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
-    watchface_app_setup();
+    watchface_manager_app_setup();
     /*
      * trigger an activity
      */

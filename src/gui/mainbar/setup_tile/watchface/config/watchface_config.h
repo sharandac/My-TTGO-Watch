@@ -24,7 +24,8 @@
 
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_JSON_COFIG_FILE         "/watchface.json"   /** @brief defines json config file name */
+    #define WATCHFACE_JSON_COFIG_FILE           "/watchface.json"   /** @brief defines json config file name */
+    #define WATCHFACE_THEME_URL                 "https://github.com/sharandac/My-TTGO-Watchfaces/blob/main/watchface_theme_list.json"
 
     /**
      * @brief blectl config structure
@@ -34,6 +35,7 @@
         watchface_config_t();
         bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
         bool watchface_antialias = true;            /** @brief setup antialias */
+        char watchface_theme_url[128] = "";
 
         protected:
         ////////////// Available for overloading: //////////////

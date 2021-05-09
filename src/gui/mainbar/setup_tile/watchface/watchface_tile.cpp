@@ -23,9 +23,9 @@
 #include <TTGO.h>
 #include "utils/alloc.h"
 
-#include "watchface_app.h"
-#include "watchface_app_tile.h"
-#include "watchface_app_main.h"
+#include "watchface_manager_app.h"
+#include "watchface_tile.h"
+#include "watchface_setup.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_theme_config.h"
 #include "gui/gui.h"
 #include "app/alarm_clock/alarm_in_progress.h"
@@ -107,7 +107,7 @@ lv_font_t *watchface_get_font( int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
 
-void watchface_app_tile_setup( void ) {
+void watchface_tile_setup( void ) {
     watchface_app_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Tile" );
     watchface_app_tile = mainbar_get_tile_obj( watchface_app_tile_num );
 
@@ -230,25 +230,25 @@ void watchface_decompress_theme( void ) {
     FILE *file = fopen( "/spiffs" WATCHFACE_THEME_FILE, "rb" );
     if ( file ) {
         fclose( file );
-        watchface_app_set_info_label( "clear watchface theme, wait ..." );
+        watchface_setup_set_info_label( "clear watchface theme, wait ..." );
         watchface_remove_theme_files();
-        watchface_app_set_info_label( "unzip watchface theme, wait ..." );
+        watchface_setup_set_info_label( "unzip watchface theme, wait ..." );
         decompress_file_into_spiffs( WATCHFACE_THEME_FILE, "/watchface", NULL );
-        watchface_app_set_info_label( "done!" );
+        watchface_setup_set_info_label( "done!" );
         mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
     }
     else {
-        watchface_app_set_info_label( "no /watchface.tar.gz found" );
+        watchface_setup_set_info_label( "no /watchface.tar.gz found" );
     }
     watchface_reload_theme();
 }
 
 void watchface_default_theme( void ) {    
-    watchface_app_set_info_label( "clear watchface theme, wait ..." );
+    watchface_setup_set_info_label( "clear watchface theme, wait ..." );
     watchface_remove_theme_files();
     watchface_reload_theme();
     mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
-    watchface_app_set_info_label( "done!" );
+    watchface_setup_set_info_label( "done!" );
 }
 
 void watchface_remove_theme_files ( void ) {
@@ -277,7 +277,7 @@ static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event )
     switch( event ) {
         case( LV_EVENT_SHORT_CLICKED ): mainbar_jump_back( LV_ANIM_OFF );
                                         break;
-        case( LV_EVENT_LONG_PRESSED ):  mainbar_jump_to_tilenumber( watchface_app_get_app_main_tile_num(), LV_ANIM_OFF );
+        case( LV_EVENT_LONG_PRESSED ):  mainbar_jump_to_tilenumber( watchface_manager_get_setup_tile_num(), LV_ANIM_OFF );
                                         break;
     }    
 }

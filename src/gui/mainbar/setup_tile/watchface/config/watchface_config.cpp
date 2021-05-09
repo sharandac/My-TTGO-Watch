@@ -26,17 +26,20 @@ watchface_config_t::watchface_config_t() : BaseJsonConfig( WATCHFACE_JSON_COFIG_
 bool watchface_config_t::onSave(JsonDocument& doc) {
     doc["watchface_enable"] = watchface_enable;
     doc["watchface_antialias"] = watchface_antialias;
+    doc["watchface_theme_url"] = watchface_theme_url;
     return true;
 }
 
 bool watchface_config_t::onLoad(JsonDocument& doc) {
     watchface_enable = doc["watchface_enable"] | false;
     watchface_antialias = doc["watchface_antialias"] | true;
+    strncpy( watchface_theme_url, doc["watchface_theme_url"] | WATCHFACE_THEME_URL, sizeof( watchface_theme_url ) );
     return true;
 }
 
 bool watchface_config_t::onDefault( void ) {
     watchface_enable = false;
     watchface_antialias = true;
+    strncpy( watchface_theme_url, WATCHFACE_THEME_URL, sizeof( watchface_theme_url ) );
     return true;
 }
