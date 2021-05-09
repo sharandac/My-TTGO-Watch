@@ -30,6 +30,7 @@ void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *u
 void uri_load_set_url_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri );
 uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc );
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc );
+uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc );
 
 uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
     /**
@@ -56,9 +57,13 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
         /**
          * check for uri file source
          */
-        if ( strstr( uri, "http://" ) || strstr( uri, "https://" ) ) {
-            URI_LOAD_LOG("http/s source");
+        if ( strstr( uri, "http://" ) ) {
+            URI_LOAD_LOG("http source");
             uri_load_dsc = uri_load_http_to_ram( uri_load_dsc );
+        }
+        else if ( strstr( uri, "https://" ) ) {
+            URI_LOAD_LOG("https source");
+            uri_load_dsc = uri_load_https_to_ram( uri_load_dsc );
         }
         else if ( strstr( uri, "file://" ) ) {
             URI_LOAD_LOG("local files source");
@@ -77,6 +82,8 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
 }
 
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
+    const char * headerKeys[] = {"location", "redirect", "Content-Type", "Content-Length", "Content-Disposition" };
+    const size_t numberOfHeaders = 5;
     /**
      * check if alloc was failed
      */
@@ -88,6 +95,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         HTTPClient download_client;                     /** @brief http download client */
         download_client.setTimeout( 1500 );
         download_client.begin( uri_load_dsc->uri );
+        download_client.collectHeaders( headerKeys, numberOfHeaders );
         int httpCode = download_client.GET();
         /**
          * request successfull?
@@ -106,10 +114,9 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 /**
                  * setup data write counter/pointer/buffer and data stream
                  */
-                uint32_t bytes_left = uri_load_dsc->size;                          /** @brief download left byte counter */
-                uint8_t *data_write_p = uri_load_dsc->data;                        /** @brief write pointer for the raw file download */
-
-                WiFiClient *download_stream = download_client.getStreamPtr();
+                uint32_t bytes_left = uri_load_dsc->size;                           /** @brief download left byte counter */
+                uint8_t *data_write_p = uri_load_dsc->data;                         /** @brief write pointer for the raw file download */
+                WiFiClient *download_stream = download_client.getStreamPtr();       /** @brief get streampointer */
                 /**
                  * get download data
                  */
@@ -139,15 +146,166 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             }
         }
         else {
-            URI_LOAD_ERROR_LOG("http connection abort");
+            URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
+            char *location = NULL;
+            /**
+             * check for a 301 redirect
+             */
+            if ( httpCode == 301 ) {
+                URI_LOAD_LOG("301 redirect to -> %s", uri_load_dsc->uri, download_client.header("redirect").c_str() );
+                location = (char*)MALLOC( strlen( download_client.header("redirect").c_str() ) + 1 );
+                if ( location )
+                    strcpy( location, download_client.header("redirect").c_str() );
+            }
+            /**
+             * check for a 302 location
+             */
+            if ( httpCode == 302 ) {
+                URI_LOAD_LOG("302 location %s -> %s", uri_load_dsc->uri, download_client.header("location").c_str() );
+                location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
+                if ( location )
+                    strcpy( location, download_client.header("location").c_str() );
+            }
+            /**
+             * clean old connection and memory
+             */
             download_client.end();
             uri_load_free_all( uri_load_dsc );
+            uri_load_dsc = NULL;
+            /**
+             * if we have a new location, try it
+             */
+            if ( location ) {
+                uri_load_dsc = uri_load_to_ram( location );
+                free( location );
+            }
             return( NULL );
         }
         /**
          * close http connection
          */
         download_client.end();
+    }
+    else {
+        URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
+    }
+    return( uri_load_dsc );
+}
+
+uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
+    const char * headerKeys[] = {"location", "redirect", "Content-Type", "Content-Length", "Content-Disposition" };
+    const size_t numberOfHeaders = 5;
+    /**
+     * check if alloc was failed
+     */
+    if ( uri_load_dsc ) {
+        URI_LOAD_LOG("load file from: %s", uri_load_dsc->uri );
+        /**
+         * open http connection
+         */
+        heap_caps_malloc_extmem_enable( 1 );
+        WiFiClientSecure *client = new WiFiClientSecure;                            /** @brief SSL/TLS client connection */
+        client->setInsecure();                                                      /** allow insecure connection */
+        HTTPClient download_client;                                                 /** @brief http download client */
+        download_client.begin( *client, uri_load_dsc->uri );
+        download_client.collectHeaders( headerKeys, numberOfHeaders );
+        int httpCode = download_client.GET();
+        /**
+         * request successfull?
+         */
+        if ( httpCode > 0 && httpCode == HTTP_CODE_OK  ) {
+            /**
+             * get file size and alloc memory for the file
+             */
+            uri_load_dsc->size = download_client.getSize();
+            uri_load_dsc->data = (uint8_t*)MALLOC( uri_load_dsc->size );
+            URI_LOAD_LOG("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
+            /**
+             * check if alloc success
+             */
+            if ( uri_load_dsc->data ) {
+                /**
+                 * setup data write counter/pointer/buffer and data stream
+                 */
+                uint32_t bytes_left = uri_load_dsc->size;                           /** @brief download left byte counter */
+                uint8_t *data_write_p = uri_load_dsc->data;                         /** @brief write pointer for the raw file download */
+                WiFiClient *download_stream = download_client.getStreamPtr();       /** @brief get streampointer */
+                /**
+                 * get download data
+                 */
+                while( download_client.connected() && ( bytes_left > 0 ) ) {
+                    /**
+                     * get bytes in buffer and store them
+                     */
+                    size_t size = download_stream->available();
+                    if ( size > 0 ) {
+                        size_t c = download_stream->readBytes( data_write_p, size < bytes_left ? size : bytes_left );
+                        bytes_left -= c;
+                        data_write_p = data_write_p + c;
+                    }
+                }
+                if ( bytes_left != 0 ) {
+                    URI_LOAD_ERROR_LOG("download failed");
+                    download_client.end();
+                    client->stop();
+                    uri_load_free_all( uri_load_dsc );
+                    heap_caps_malloc_extmem_enable( 16+1024 );
+                    return( NULL );
+                }
+            }
+            else {
+                URI_LOAD_ERROR_LOG("data alloc failed");
+                download_client.end();
+                client->stop();
+                uri_load_free_all( uri_load_dsc );
+                heap_caps_malloc_extmem_enable( 16+1024 );
+                return( NULL );
+            }
+        }
+        else {
+            URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
+            char *location = NULL;
+            /**
+             * check for a 301 redirect
+             */
+            if ( httpCode == 301 ) {
+                URI_LOAD_LOG("301 redirect to -> %s", uri_load_dsc->uri, download_client.header("redirect").c_str() );
+                location = (char*)MALLOC( strlen( download_client.header("redirect").c_str() ) + 1 );
+                if ( location )
+                    strcpy( location, download_client.header("redirect").c_str() );
+            }
+            /**
+             * check for a 302 location
+             */
+            if ( httpCode == 302 ) {
+                URI_LOAD_LOG("302 location %s -> %s", uri_load_dsc->uri, download_client.header("location").c_str() );
+                location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
+                if ( location )
+                    strcpy( location, download_client.header("location").c_str() );
+            }
+            /**
+             * clean old connection and memory
+             */
+            download_client.end();
+            client->stop();
+            uri_load_free_all( uri_load_dsc );
+            heap_caps_malloc_extmem_enable( 16+1024 );
+            uri_load_dsc = NULL;
+            /**
+             * if we have a new location, try it
+             */
+            if ( location ) {
+                uri_load_dsc = uri_load_to_ram( location );
+                free( location );
+            }
+            return( uri_load_dsc );
+        }
+        /**
+         * close http connection
+         */
+        download_client.end();
+        client->stop();
+        heap_caps_malloc_extmem_enable( 16+1024 );
     }
     else {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
