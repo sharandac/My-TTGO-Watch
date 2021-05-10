@@ -37,7 +37,7 @@
 #include "hardware/wifictl.h"
 #include "hardware/display.h"
 
-AsyncUDP udp;
+AsyncUDP *udp = NULL;
 
 struct pack {
   float heading;
@@ -60,6 +60,9 @@ lv_obj_t * distance_label = NULL;
 
 lv_task_t * _sailing_task;
 
+static volatile bool sailing_app_active = false;
+static volatile bool sailing_app_wifi_active = false;
+
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
@@ -72,7 +75,9 @@ void rmb(char dati[]);
 void apb(char dati[]);
 
 bool sailing_wifictl_event_cb( EventBits_t event, void *arg );
-
+void sailing_activate_cb( void );
+void sailing_hibernate_cb( void );
+void sailing_app_setup_udp( bool enable );
 static void exit_sailing_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void sailing_task( lv_task_t * task );
@@ -158,29 +163,102 @@ void sailing_main_setup( uint32_t tile_num ) {
     _sailing_task = lv_task_create( sailing_task, 1000, LV_TASK_PRIO_MID, NULL );
 
     //udp listening
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, sailing_wifictl_event_cb, "sailing data" );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, sailing_wifictl_event_cb, "sailing data" );
+    mainbar_add_tile_activate_cb( tile_num, sailing_activate_cb );
+    mainbar_add_tile_hibernate_cb( tile_num, sailing_hibernate_cb );
     
+}
+
+void sailing_activate_cb( void ) {
+    SAILING_INFO_LOG("enter sailing app");
+    /**
+     * set sailing app active on enter tile
+     */
+    sailing_app_active = true;
+    /**
+     * if wifi active, enable udp listner
+     */
+    if ( sailing_app_wifi_active ) {
+        sailing_app_setup_udp( true );
+    }
+}
+
+void sailing_hibernate_cb( void ) {
+    SAILING_INFO_LOG("exit sailing app");
+    /**
+     * set sailing app inactive on exit tile
+     */
+    sailing_app_active = false;
+    /**
+     * disable udp listner
+     */
+    sailing_app_setup_udp( false );
 }
 
 bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case WIFICTL_CONNECT:       
-                                if(udp.listen(1234)) {
-                                        SAILING_INFO_LOG("UDP Listening on IP: %s", WiFi.localIP().toString().c_str() );
-                                        udp.onPacket([](AsyncUDPPacket packet) {
-                                            char buf[packet.length()];
-                                            
-                                            for (int i=0;i<packet.length();i++){
-                                                buf[i]= (char)*(packet.data()+i);
-                                            }
-                                            if(String(buf).startsWith("$ECRMB")) rmb(buf);
-                                            if(String(buf).startsWith("$GPRMC")) rmc(buf);
-                                            if(String(buf).startsWith("$ECAPB")) apb(buf);
-                                        });
-                                    }
-                                    break;
+        case WIFICTL_CONNECT:   
+            /**
+             * if sailing app active and wifi comes, start udp listner
+             */
+            if ( sailing_app_active ) {
+                sailing_app_setup_udp( true );
+            }
+            /**
+             * set wifi active
+             */
+            sailing_app_wifi_active = true;
+            break;
+        case WIFICTL_DISCONNECT:
+            /**
+             * set wifi inactive
+             */
+            sailing_app_wifi_active = false;
+            /**
+             * disable udp listner
+             */
+            sailing_app_setup_udp( false );
+            break;
     }
     return(true);
+}
+
+void sailing_app_setup_udp( bool enable ) {
+    if ( enable ) {
+        if ( !udp ) {
+            udp = new AsyncUDP;
+        }
+        /**
+         * enable udp listner if not exist
+         */
+        if( udp->listen( SAILING_UDP_PORT ) ) {
+            SAILING_INFO_LOG("UDP Listening on IP: %s", WiFi.localIP().toString().c_str() );
+            /**
+             * register call back function on packet
+             */
+            udp->onPacket( [] ( AsyncUDPPacket packet ) {
+                char buf[ packet.length() ];
+                /**
+                 * fill buffer with data
+                 */
+                for ( int i = 0 ; i < packet.length() ; i++ ) {
+                    buf[ i ]= (char)*( packet.data() + i );
+                }
+                /**
+                 * check for data
+                 */
+                if( String( buf ).startsWith( "$ECRMB" ) )
+                    rmb( buf );
+                if( String( buf ).startsWith( "$GPRMC" ) )
+                    rmc( buf );
+                if( String( buf ).startsWith( "$ECAPB" ) )
+                    apb( buf );
+            });
+        }
+        else {
+            SAILING_ERROR_LOG("create udp listner failed");
+        }
+    }
 }
 
 static void enter_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

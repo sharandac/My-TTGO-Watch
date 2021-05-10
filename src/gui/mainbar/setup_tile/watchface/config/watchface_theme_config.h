@@ -26,7 +26,7 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_LABEL_NUM                     5
+    #define WATCHFACE_LABEL_NUM                     10
     /**
      * define all decompressed theme file
      */

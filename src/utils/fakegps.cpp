@@ -73,17 +73,9 @@ bool fakegps_wifictl_event_cb( EventBits_t event, void *arg ) {
             break;
         case WIFICTL_DISCONNECT:
             fakegps_wifi_enable = false;
-            if ( xEventGroupGetBits( fakegps_event_handle ) & FAKEGPS_SYNC_REQUEST ) {
-                vTaskDelete( _fakegps_get_location_Task );
-                xEventGroupClearBits( fakegps_event_handle, FAKEGPS_SYNC_REQUEST );
-            }
             break;
         case WIFICTL_OFF:
             fakegps_wifi_enable = false;
-            if ( xEventGroupGetBits( fakegps_event_handle ) & FAKEGPS_SYNC_REQUEST ) {
-                vTaskDelete( _fakegps_get_location_Task );
-                xEventGroupClearBits( fakegps_event_handle, FAKEGPS_SYNC_REQUEST );
-            }
             break;
     }
     return( true );
@@ -109,36 +101,36 @@ void fakegps_start_task( void ) {
 void fakegps_get_location_Task( void * pvParameters ) {
     log_i("start fakegps task, heap: %d", ESP.getFreeHeap() );
 
-    int httpcode = -1;
+    if ( xEventGroupGetBits( fakegps_event_handle ) & FAKEGPS_SYNC_REQUEST ) {
+        int httpcode = -1;
+        HTTPClient fakegps_client;
 
-    HTTPClient fakegps_client;
+        fakegps_client.setUserAgent( "ESP32-" __FIRMWARE__ );
+        fakegps_client.begin( GEOIP_URL );
+        httpcode = fakegps_client.GET();
 
-    fakegps_client.setUserAgent( "ESP32-" __FIRMWARE__ );
-    fakegps_client.begin( GEOIP_URL );
-    httpcode = fakegps_client.GET();
-
-    if ( httpcode != 200 ) {
-        log_e("HTTPClient error %d", httpcode );
-    }
-    else {
-        SpiRamJsonDocument doc( fakegps_client.getSize() * 4 );
-
-        DeserializationError error = deserializeJson( doc, fakegps_client.getStream() );
-        if (error) {
-            log_e("fakegps deserializeJson() failed: %s", error.c_str() );
+        if ( httpcode != 200 ) {
+            log_e("HTTPClient error %d", httpcode );
         }
         else {
-            if ( doc["lat"] && doc["lon"] ) {
-                lat = doc["lat"].as<float>();
-                lon = doc["lon"].as<float>();
-                log_i("lat: %f, lon:%f", lat, lon );
-                gpsctl_set_location( lat, lon, 0, GPS_SOURCE_IP, true );
-            }
-        }
+            SpiRamJsonDocument doc( fakegps_client.getSize() * 4 );
 
-        doc.clear();
+            DeserializationError error = deserializeJson( doc, fakegps_client.getStream() );
+            if (error) {
+                log_e("fakegps deserializeJson() failed: %s", error.c_str() );
+            }
+            else {
+                if ( doc["lat"] && doc["lon"] ) {
+                    lat = doc["lat"].as<float>();
+                    lon = doc["lon"].as<float>();
+                    log_i("lat: %f, lon:%f", lat, lon );
+                    gpsctl_set_location( lat, lon, 0, GPS_SOURCE_IP, true );
+                }
+            }
+            doc.clear();
+        }
+        fakegps_client.end();
     }
-    fakegps_client.end();
     xEventGroupClearBits( fakegps_event_handle, FAKEGPS_SYNC_REQUEST );
     log_i("finish fakegps task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
