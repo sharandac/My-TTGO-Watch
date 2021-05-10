@@ -3,20 +3,8 @@
 
     #include <TTGO.h>
     /**
-     * @brief setup watchface manager app, setup and watchface tile
+     * @brief setup watchface manager app
      */
-    void watchface_manager_app_setup( void );
-    /**
-     * @brief get the watchface manager app tile number
-     * 
-     * @return  watchface manager app tile number
-     */
-    uint32_t watchface_manager_get_app_tile_num( void );
-    /**
-     * @brief get the watchface setup tile number
-     * 
-     * @return  watchface setup tile number
-     */
-    uint32_t watchface_manager_get_setup_tile_num( void );
+    void watchface_manager_app_setup( uint32_t tile_num );
 
 #endif // _WATCHFACE_MANAGER_APP_H

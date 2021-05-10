@@ -69,13 +69,39 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
     bool retval = false;
 
     HTTPClient http;
-    /**
-     * start get firmware file
-     */
+    WiFiClientSecure *sslclient = NULL;
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
-    http.begin( url );
+    /**
+     * setup http or https
+     */
+    if( strstr( url, "http://" ) ) {
+        /**
+         * start get firmware file
+         */
+        http.begin( url );
+    }
+    else if( strstr( url, "https://" ) ) {
+        /**
+         * setup ssl/tls layer
+         */
+        sslclient = new WiFiClientSecure;
+        sslclient->setInsecure();
+        /*
+         * start get firmware file
+         */
+        http.begin( *sslclient, url );
+    }
+    else {
+        log_e("url type not supported, only http:// or https://");
+        return( false );
+    }
+    /**
+     * start GET request
+     */
     int httpCode = http.GET();
-
+    /**
+     * check http respone code
+     */
     if ( httpCode > 0 && httpCode == HTTP_CODE_OK ) {
         /**
          * send http_ota_start event
@@ -95,7 +121,16 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
     else {
         http_ota_send_event_cb( HTTP_OTA_ERROR, (void*)"http error ... weak wifi?" );        
     }
+    /**
+     * terminate http client
+     */
     http.end();
+    /**
+     * terminate ssl/tls layer if exist
+     */
+    if( sslclient ) {
+        sslclient->stop();
+    }
 
     return( retval );
 }
@@ -110,11 +145,35 @@ bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
     uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };       /** @brief firmware write buffer */
 
     HTTPClient http;
-    /**
-     * setup user agent and get connect
-     */
+    WiFiClientSecure *sslclient = NULL;
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
-    http.begin( url );
+    /**
+     * setup http or https
+     */
+    if( strstr( url, "http://" ) ) {
+        /**
+         * start get firmware file
+         */
+        http.begin( url );
+    }
+    else if( strstr( url, "https://" ) ) {
+        /**
+         * setup ssl/tls layer
+         */
+        sslclient = new WiFiClientSecure;
+        sslclient->setInsecure();
+        /*
+         * start get firmware file
+         */
+        http.begin( *sslclient, url );
+    }
+    else {
+        log_e("url type not supported, only http:// or https://");
+        return( false );
+    }
+    /**
+     * start GET request
+     */
     int httpCode = http.GET();
     /**
      * check return code ok
@@ -199,9 +258,15 @@ bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
         ret = false;        
     }
     /**
-     * close http connection
+     * terminate http client
      */
     http.end();
+    /**
+     * terminate ssl/tls layer if exist
+     */
+    if( sslclient ) {
+        sslclient->stop();
+    }
     /**
      * check if written bytes equal to downloaded bytes
      */

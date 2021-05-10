@@ -23,7 +23,7 @@
 #include <TTGO.h>
 #include "quickglui/quickglui.h"
 
-#include "watchface_manager_app.h"
+#include "watchface_manager.h"
 #include "watchface_setup.h"
 #include "watchface_tile.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_config.h"
