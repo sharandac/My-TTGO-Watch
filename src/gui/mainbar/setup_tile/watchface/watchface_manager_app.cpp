@@ -36,13 +36,16 @@
 #include "gui/widget_styles.h"
 #include "gui/widget_factory.h"
 
+#include "hardware/display.h"
+
 #include "utils/json_psram_allocator.h"
 #include "utils/uri_load/uri_load.h"
 #include "utils/alloc.h"
 
 EventGroupHandle_t watchface_manager_app_event_handle = NULL;
 TaskHandle_t _watchface_manager_app_task;
-lv_task_t *_watchface_manager_theme_install_task;                 
+lv_task_t *_watchface_manager_theme_install_task;   
+static volatile uint32_t watchface_manager_display_timeout = 15;              
  /*
  * watchface manager app tile container
  */
@@ -354,6 +357,11 @@ void watchface_manager_app_activate_cb ( void ) {
     watchface_manager_app_set_progressbar( 0 );
     watchface_manager_app_set_progressbar_label( "" );
     /**
+     * block display timeout
+     */
+    watchface_manager_display_timeout = display_get_timeout();
+    display_set_timeout( DISPLAY_MAX_TIMEOUT );
+    /**
      * start watchface manager background task
      */
     xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST );
@@ -368,6 +376,13 @@ void watchface_manager_app_activate_cb ( void ) {
 }
 
 void watchface_manager_app_hibernate_cb ( void ) {
+    /**
+     * restore display timeout
+     */
+    display_set_timeout( watchface_manager_display_timeout );
+    /**
+     * trigger background task to finish
+     */
     xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST );
 }
 
