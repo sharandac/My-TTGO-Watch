@@ -31,6 +31,7 @@
     #define WATCHFACE_THEME_URL                 "https://raw.githubusercontent.com/sharandac/My-TTGO-Watchfaces/main"
     #define WATCHFACE_THEME_LIST_FILE           "/watchface_theme_list.json"
     #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
+    #define WATCHFACE_THEME_PREV                "/watchface_theme_prev_120px.png"
     /**
      * @brief blectl config structure
      */
@@ -39,7 +40,7 @@
         watchface_config_t();
         bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
         bool watchface_antialias = true;            /** @brief setup antialias */
-        char watchface_theme_url[128] = "";
+        String watchface_theme_url = "";
 
         protected:
         ////////////// Available for overloading: //////////////

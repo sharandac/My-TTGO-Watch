@@ -139,6 +139,11 @@ void watchface_setup_set_info_label( const char *text ){
     lv_refr_now( NULL );
 }
 
+
+String watchface_setup_get_theme_url( void ) {
+    return( watchface_config.watchface_theme_url );
+}
+
 static void watchface_setup_decompress_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:

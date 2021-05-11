@@ -33,13 +33,13 @@ bool watchface_config_t::onSave(JsonDocument& doc) {
 bool watchface_config_t::onLoad(JsonDocument& doc) {
     watchface_enable = doc["watchface_enable"] | false;
     watchface_antialias = doc["watchface_antialias"] | true;
-    strncpy( watchface_theme_url, doc["watchface_theme_url"] | WATCHFACE_THEME_URL, sizeof( watchface_theme_url ) );
+    watchface_theme_url = doc["watchface_theme_url"] | WATCHFACE_THEME_URL;
     return true;
 }
 
 bool watchface_config_t::onDefault( void ) {
     watchface_enable = false;
     watchface_antialias = true;
-    strncpy( watchface_theme_url, WATCHFACE_THEME_URL, sizeof( watchface_theme_url ) );
+    watchface_theme_url = WATCHFACE_THEME_URL;
     return true;
 }
