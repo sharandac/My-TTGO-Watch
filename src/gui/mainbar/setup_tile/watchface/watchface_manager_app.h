@@ -3,7 +3,8 @@
 
     #include <TTGO.h>
 
-    #define WATCHFACE_MANAGER_APP_INFO_LOG                  log_d
+    #define WATCHFACE_MANAGER_APP_INFO_LOG                  log_i
+    #define WATCHFACE_MANAGER_APP_DEBUG_LOG                 log_d
     #define WATCHFACE_MANAGER_APP_ERROR_LOG                 log_e
 
     #define WATCHFACE_MANAGER_APP_GET_THEME_JSON_REQUEST    _BV(0)

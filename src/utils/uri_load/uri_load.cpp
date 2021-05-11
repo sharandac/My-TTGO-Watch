@@ -241,7 +241,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
              * get file size and alloc memory for the file
              */
             uri_load_dsc->size = download_client.getSize();
-            uri_load_dsc->data = (uint8_t*)MALLOC( uri_load_dsc->size );
+            uri_load_dsc->data = (uint8_t*)CALLOC( 1, uri_load_dsc->size + 1 );
             URI_LOAD_LOG("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
             /**
              * check if alloc success
@@ -285,15 +285,18 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             }
         }
         else {
-            char *location = NULL;
+            String location = "";
             /**
-             * check for a 301 redirect
+             * check for a 301/302 redirect
              */
             if ( httpCode == 301 || httpCode == 302 ) {
-                URI_LOAD_INFO_LOG("301/302 redirect to: %s", download_client.header("location").c_str() );
-                location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
-                if ( location )
-                    strcpy( location, download_client.header("location").c_str() );
+                if ( download_client.header("location") != "" ) {
+                    location = download_client.header("location");    
+                }
+                else {
+                    location = download_client.header("redirect");    
+                }
+                URI_LOAD_INFO_LOG("301/302 redirect to: %s", location.c_str() );
             }
             /**
              * clean old connection and memory
@@ -305,8 +308,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
              * if we have a new location, try it
              */
             if ( location ) {
-                uri_load_dsc = uri_load_to_ram( location );
-                free( location );
+                uri_load_dsc = uri_load_to_ram( location.c_str() );
             }
             else {
                 URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
@@ -350,7 +352,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
              * get file size and alloc memory for the file
              */
             uri_load_dsc->size = download_client.getSize();
-            uri_load_dsc->data = (uint8_t*)MALLOC( uri_load_dsc->size );
+            uri_load_dsc->data = (uint8_t*)CALLOC( 1, uri_load_dsc->size + 1 );
             URI_LOAD_LOG("uri_load_dsc->data: alloc %d bytes at %p", uri_load_dsc->size, uri_load_dsc->data );
             /**
              * check if alloc success
@@ -398,15 +400,18 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             }
         }
         else {
-            char *location = NULL;
+            String location = "";
             /**
-             * check for a 301 redirect
+             * check for a 301/302 redirect
              */
             if ( httpCode == 301 || httpCode == 302 ) {
-                URI_LOAD_INFO_LOG("301/302 redirect to: %s", download_client.header("location").c_str() );
-                location = (char*)MALLOC( strlen( download_client.header("location").c_str() ) + 1 );
-                if ( location )
-                    strcpy( location, download_client.header("location").c_str() );
+                if ( download_client.header("location") != "" ) {
+                    location = download_client.header("location");    
+                }
+                else {
+                    location = download_client.header("redirect");    
+                }
+                URI_LOAD_INFO_LOG("301/302 redirect to: %s", location.c_str() );
             }
             /**
              * clean old connection and memory
@@ -419,9 +424,8 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * if we have a new location, try it
              */
-            if ( location ) {
-                uri_load_dsc = uri_load_to_ram( location );
-                free( location );
+            if ( location != "" ) {
+                uri_load_dsc = uri_load_to_ram( location.c_str() );
             }
             else {
                 URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
@@ -466,7 +470,7 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * alloc data mamory
              */
-            uri_load_dsc->data = (uint8_t*)MALLOC( uri_load_dsc->size );
+            uri_load_dsc->data = (uint8_t*)CALLOC( 1, uri_load_dsc->size + 1 );
             if( uri_load_dsc->data ) {
                 fread( uri_load_dsc->data, uri_load_dsc->size, 1, file );
                 uri_load_dsc->timestamp = millis();
