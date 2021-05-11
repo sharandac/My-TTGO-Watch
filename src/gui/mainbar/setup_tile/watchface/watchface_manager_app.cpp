@@ -61,6 +61,7 @@ lv_obj_t *watchface_manager_app_info_label = NULL;
 lv_obj_t *watchface_manager_app_progress_label = NULL;
 lv_obj_t *watchface_manager_app_info_progressbar = NULL;
 lv_style_t watchface_manager_style;
+lv_style_t watchface_manager_trans_button_style;
 
 /**
  * font we need
@@ -122,10 +123,14 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     /**
      * get and set main style
      */
-    lv_style_copy( &watchface_manager_style, ws_get_mainbar_style() );
+    lv_style_copy( &watchface_manager_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &watchface_manager_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_style_set_bg_color( &watchface_manager_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_obj_add_style( watchface_manager_app_tile, LV_OBJ_PART_MAIN, &watchface_manager_style );
+
+    lv_style_copy( &watchface_manager_trans_button_style, ws_get_mainbar_style() );
+    lv_style_set_text_font( &watchface_manager_trans_button_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_style_set_bg_color( &watchface_manager_trans_button_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     /**
      * create global watchface manager container
      */
@@ -151,7 +156,7 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     lv_obj_set_width( watchface_manager_download_btn, lv_disp_get_hor_res( NULL ) / 2 );
     lv_obj_set_height( watchface_manager_download_btn, lv_disp_get_ver_res( NULL ) / 2 );
     lv_obj_add_protect( watchface_manager_download_btn, LV_PROTECT_CLICK_FOCUS );
-    lv_obj_add_style( watchface_manager_download_btn, LV_OBJ_PART_MAIN, &watchface_manager_style );
+    lv_obj_add_style( watchface_manager_download_btn, LV_OBJ_PART_MAIN, &watchface_manager_trans_button_style );
     lv_obj_align( watchface_manager_download_btn, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
     lv_obj_set_event_cb( watchface_manager_download_btn, download_watchface_manager_app_event_cb );
     /**
@@ -318,7 +323,16 @@ void watchface_manager_app_Task( void * pvParameters ) {
              */
             xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_GET_PREV_THEME );
         }
-        /**
+        else if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_DOWNLOAD_THEME ) {
+            /**
+             * get next theme entry
+             */
+            watchface_manager_download_theme( &watchface_theme );
+            /**
+             * clear update request flag
+             */
+            xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_DOWNLOAD_THEME );
+        }        /**
          * check if for a task exit request
          */
         if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST ) {
