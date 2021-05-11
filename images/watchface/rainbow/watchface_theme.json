@@ -1,0 +1,28 @@
+{
+  "dial": {
+    "enable": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "hour": {
+    "enable": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "min": {
+    "enable": true,
+    "smooth": true,
+    "x_offset": 0,
+    "y_offset": 0
+  },
+  "hour_shadow": {
+    "enable": true,
+    "x_offset": 5,
+    "y_offset": 5
+  },
+  "min_shadow": {
+    "enable": true,
+    "x_offset": 5,
+    "y_offset": 5
+  }
+}

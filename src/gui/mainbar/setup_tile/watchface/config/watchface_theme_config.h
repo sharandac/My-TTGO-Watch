@@ -26,8 +26,18 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_THEME_JSON_CONFIG_FILE        "/watchface/watchface_theme.json"   /** @brief defines json config file name */
-    #define WATCHFACE_LABEL_NUM                     5
+    #define WATCHFACE_LABEL_NUM                     10
+    /**
+     * define all decompressed theme file
+     */
+    #define WATCHFACE_THEME_JSON_CONFIG_FILE    "/watchface/watchface_theme.json"               /** @brief defines json config file name */
+    #define WATCHFACE_DIAL_IMAGE_FILE           "/spiffs/watchface/watchface_dial.png"
+    #define WATCHFACE_HOUR_IMAGE_FILE           "/spiffs/watchface/watchface_hour.png"
+    #define WATCHFACE_MIN_IMAGE_FILE            "/spiffs/watchface/watchface_min.png"
+    #define WATCHFACE_SEC_IMAGE_FILE            "/spiffs/watchface/watchface_sec.png"
+    #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface/watchface_hour_s.png"
+    #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
+    #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
 
     /**
      * @brief dial image control structure

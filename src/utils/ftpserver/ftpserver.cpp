@@ -24,22 +24,45 @@
 
 #include "hardware/powermgm.h"
 
-FtpServer ftpSrv;   //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
+//set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
+FtpServer *ftpSrv = NULL;   
+
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg );
 
 void ftpserver_start( const char *user, const char *pass ) {
-    ftpSrv.begin( user, pass );
-    log_i("use ftp user/password: %s/%s", user, pass );
-    powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, ftpserver_powermgm_event_loop_cb, "handle ftp" );
+    /**
+     * check if ftp server running
+     */
+    if ( !ftpSrv ) {
+        /**
+         * get a new instance
+         */
+        ftpSrv = new FtpServer;
+        /**
+         * start ftp server
+         */
+        if ( ftpSrv ) {
+            ftpSrv->begin( user, pass );
+            log_i("use ftp user/password: %s/%s", user, pass );
+            powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, ftpserver_powermgm_event_loop_cb, "handle ftp" );
+        }
+        else {
+            log_e("start ftp server failed");
+        }
+    }
 }
 
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_SILENCE_WAKEUP:
-            ftpSrv.handleFTP();
+            if ( ftpSrv ) {
+                ftpSrv->handleFTP();
+            }
             break;
         case POWERMGM_WAKEUP:
-            ftpSrv.handleFTP();
+            if ( ftpSrv ) {
+                ftpSrv->handleFTP();
+            }
             break;
     }
     return( true );

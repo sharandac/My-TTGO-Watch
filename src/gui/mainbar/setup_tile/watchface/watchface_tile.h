@@ -25,20 +25,10 @@
     #include <TTGO.h>
 
     #define WATCHFACE_LOG                       log_d
-
-    #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
-
-    #define WATCHFACE_DIAL_IMAGE_FILE           "/spiffs/watchface/watchface_dial.png"
-    #define WATCHFACE_HOUR_IMAGE_FILE           "/spiffs/watchface/watchface_hour.png"
-    #define WATCHFACE_MIN_IMAGE_FILE            "/spiffs/watchface/watchface_min.png"
-    #define WATCHFACE_SEC_IMAGE_FILE            "/spiffs/watchface/watchface_sec.png"
-    #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface/watchface_hour_s.png"
-    #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
-    #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
     /**
      * @brief watchface tile setup
      */
-    void watchface_app_tile_setup( void );
+    void watchface_tile_setup( void );
     /**
      * @brief watchface enable after wakeup config
      * 
@@ -71,8 +61,6 @@
     /**
      * @brief unzip watchface.tar.gz from /spiffs, install theme
      * and show a preview
-     * 
-     * @param   return_tile return tile after preview
      */
     void watchface_decompress_theme( void );
     /**

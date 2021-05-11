@@ -25,6 +25,8 @@
     #include <TTGO.h>
 
     #define SAILING_INFO_LOG        log_i
+    #define SAILING_ERROR_LOG       log_e
+    #define SAILING_UDP_PORT        1234
 
     void sailing_setup( void );
     uint32_t sailing_get_app_setup_tile_num( void );
