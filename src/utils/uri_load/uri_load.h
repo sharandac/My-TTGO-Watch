@@ -75,11 +75,20 @@
      * 
      * @param   uri requested url to get a file from
      * @param   path path to write the downloaded file, e.g.: "/spiffs/"
+     * 
+     * @return  true if success
+     */
+    bool uri_load_to_file( const char *uri, const char *path, const char *dest_filename );
+    /**
+     * @brief doenload a file from a webserver into a file
+     * 
+     * @param   uri requested url to get a file from
+     * @param   path path to write the downloaded file, e.g.: "/spiffs/"
      * @param   progresscb  pointer to a call back funtion
      * 
      * @return  true if success
      */
-    bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progresscb );
+    bool uri_load_to_file( const char *uri, const char *path, const char *dest_filename, progress_cb_t *progresscb );
     /**
      * @brief delete the complete uri_load_dsc structure and free all allocated memory
      * 

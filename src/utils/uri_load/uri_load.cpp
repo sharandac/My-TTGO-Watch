@@ -89,7 +89,7 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri ) {
     return( uri_load_to_ram( uri, NULL ) );
 }
 
-bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progresscb ) {
+bool uri_load_to_file( const char *uri, const char *path, const char *dest_filename, progress_cb_t *progresscb ) {
     bool retval = false;
     /**
      * alloc uri_load_dsc structure
@@ -144,7 +144,12 @@ bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progres
              * alloc memory for filename
              */
             char *filename = NULL;
-            filename = (char*)MALLOC( strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+            if ( dest_filename ) {
+                filename = (char*)MALLOC( strlen( path ) + strlen( dest_filename ) + 1 );
+            }
+            else {
+                filename = (char*)MALLOC( strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+            }
             /**
              * check if alloc failed
              */
@@ -158,8 +163,14 @@ bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progres
                 /**
                  * copy path and filename into a file location string
                  */
-                strncpy( filename, path, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
-                strncat( filename, uri_load_dsc->filename, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+                if ( dest_filename ) {
+                    strncpy( filename, path, strlen( path ) + strlen( dest_filename ) + 1 );
+                    strncat( filename, dest_filename, strlen( path ) + strlen( dest_filename ) + 1 );
+                }
+                else {
+                    strncpy( filename, path, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+                    strncat( filename, uri_load_dsc->filename, strlen( path ) + strlen( uri_load_dsc->filename ) + 1 );
+                }
                 /**
                  * open file
                  */
@@ -214,7 +225,11 @@ bool uri_load_to_file( const char *uri, const char *path, progress_cb_t *progres
 }
 
 bool uri_load_to_file( const char *uri, const char *path ) {
-    return( uri_load_to_file( uri, path, NULL ) );
+    return( uri_load_to_file( uri, path, NULL, NULL ) );
+}
+
+bool uri_load_to_file( const char *uri, const char *path, const char *dest_filename ) {
+    return( uri_load_to_file( uri, path, dest_filename, NULL ) );
 }
 
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {

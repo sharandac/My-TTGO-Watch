@@ -667,7 +667,7 @@ bool watchface_manager_download_theme( watchface_theme_t *watchface_theme ) {
     /**
      * start download tar.gz theme file
      */
-    if ( uri_load_to_file( watchface_theme->watchface_manager_theme_url.c_str(), "/spiffs", watchface_manager_get_theme_json_cb ) ) {
+    if ( uri_load_to_file( watchface_theme->watchface_manager_theme_url.c_str(), "/spiffs", WATCHFACE_THEME_FILE, watchface_manager_get_theme_json_cb ) ) {
         watchface_manager_app_set_progressbar_label( "install theme" );
         watchface_manager_app_set_progressbar( 0 );
         /**
