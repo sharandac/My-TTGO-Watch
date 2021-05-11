@@ -58,8 +58,6 @@ lv_obj_t *bluetooth_FindPhone_label = NULL;
 lv_task_t * _FindPhone_PhoneSearch_task; 
 lv_task_t * _FindPhone_WatchFind_task = nullptr;
 LV_IMG_DECLARE(eye_200px);
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(eye_lid_closed);
 LV_IMG_DECLARE(eye_lid_open);
 LV_IMG_DECLARE(eye_iris);
@@ -116,26 +114,15 @@ void FindPhone_main_setup( uint32_t tile_num ) {
     FindPhone_main_tile = mainbar_get_tile_obj( tile_num );
     lv_style_copy( &FindPhone_main_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = lv_imgbtn_create( FindPhone_main_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px );
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px );
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px );
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px );
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_FindPhone_exit_btn_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( FindPhone_main_tile, exit_FindPhone_main_event_cb, &bluetooth_FindPhone_exit_btn_style );
     lv_obj_align( exit_btn, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( exit_btn, exit_FindPhone_main_event_cb );
 
     // eye toggle button
 	lv_obj_t *FindPhone_main_go_btn = NULL;
-    FindPhone_main_go_btn = lv_imgbtn_create( FindPhone_main_tile, NULL);  
-	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_RELEASED, &eye_lid_open);
-	lv_imgbtn_set_src(FindPhone_main_go_btn,LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_open);
-    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_RELEASED, &eye_lid_closed);
-    lv_imgbtn_set_src(FindPhone_main_go_btn, LV_BTN_STATE_CHECKED_PRESSED, &eye_lid_closed);
+    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb, NULL );
 	lv_btn_set_checkable(FindPhone_main_go_btn, true);
     lv_btn_toggle(FindPhone_main_go_btn);
     lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
-	lv_obj_set_event_cb( FindPhone_main_go_btn, go_FindPhone_main_event_cb );
 	
 	// iris 
 	FindPhone_main_iris = lv_img_create( FindPhone_main_tile, NULL);

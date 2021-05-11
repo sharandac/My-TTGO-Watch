@@ -33,6 +33,7 @@
 #include "gui/statusbar.h"
 #include "gui/app.h"
 #include "gui/widget.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
 #include "hardware/wifictl.h"
@@ -58,8 +59,6 @@ lv_obj_t *power_label = NULL;
 WiFiClient espClient;
 PubSubClient powermeter_mqtt_client( espClient );
 
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
@@ -128,23 +127,11 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_style_copy( &powermeter_id_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
 
-    lv_obj_t * exit_btn = lv_imgbtn_create( powermeter_main_tile, NULL);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src(exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style(exit_btn, LV_IMGBTN_PART_MAIN, &powermeter_main_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( powermeter_main_tile, exit_powermeter_main_event_cb, &powermeter_main_style );
     lv_obj_align(exit_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-    lv_obj_set_event_cb( exit_btn, exit_powermeter_main_event_cb );
 
-    lv_obj_t * setup_btn = lv_imgbtn_create( powermeter_main_tile, NULL);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src(setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style(setup_btn, LV_IMGBTN_PART_MAIN, &powermeter_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( powermeter_main_tile, enter_powermeter_setup_event_cb, &powermeter_main_style );
     lv_obj_align(setup_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-    lv_obj_set_event_cb( setup_btn, enter_powermeter_setup_event_cb );
 
     id_cont = lv_obj_create( powermeter_main_tile, NULL );
     lv_obj_set_size( id_cont, lv_disp_get_hor_res( NULL ), 20 );

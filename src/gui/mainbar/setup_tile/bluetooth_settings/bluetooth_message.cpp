@@ -26,6 +26,7 @@
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/app.h"
 #include "gui/widget.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"
@@ -158,41 +159,17 @@ void bluetooth_message_tile_setup( void ) {
     lv_obj_add_style( bluetooth_message_msg_label, LV_OBJ_PART_MAIN, &bluetooth_message_style );
     lv_label_set_text( bluetooth_message_msg_label, "");
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_message_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_message_style );
+    lv_obj_t * exit_btn = wf_add_image_button( bluetooth_message_tile, cancel_32px, exit_bluetooth_message_event_cb, &bluetooth_message_style );
     lv_obj_align( exit_btn, bluetooth_message_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
-    lv_obj_set_event_cb( exit_btn, exit_bluetooth_message_event_cb );
 
-    bluetooth_prev_msg_btn = lv_imgbtn_create( bluetooth_message_tile, NULL);
-    lv_imgbtn_set_src( bluetooth_prev_msg_btn, LV_BTN_STATE_RELEASED, &left_32px);
-    lv_imgbtn_set_src( bluetooth_prev_msg_btn, LV_BTN_STATE_PRESSED, &left_32px);
-    lv_imgbtn_set_src( bluetooth_prev_msg_btn, LV_BTN_STATE_CHECKED_RELEASED, &left_32px);
-    lv_imgbtn_set_src( bluetooth_prev_msg_btn, LV_BTN_STATE_CHECKED_PRESSED, &left_32px);
-    lv_obj_add_style( bluetooth_prev_msg_btn, LV_IMGBTN_PART_MAIN, &bluetooth_message_style );
+    bluetooth_prev_msg_btn = wf_add_image_button( bluetooth_message_tile, left_32px, bluetooth_prev_message_event_cb, &bluetooth_message_style );
     lv_obj_align( bluetooth_prev_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
-    lv_obj_set_event_cb( bluetooth_prev_msg_btn, bluetooth_prev_message_event_cb );
 
-    bluetooth_next_msg_btn = lv_imgbtn_create( bluetooth_message_tile, NULL);
-    lv_imgbtn_set_src( bluetooth_next_msg_btn, LV_BTN_STATE_RELEASED, &right_32px);
-    lv_imgbtn_set_src( bluetooth_next_msg_btn, LV_BTN_STATE_PRESSED, &right_32px);
-    lv_imgbtn_set_src( bluetooth_next_msg_btn, LV_BTN_STATE_CHECKED_RELEASED, &right_32px);
-    lv_imgbtn_set_src( bluetooth_next_msg_btn, LV_BTN_STATE_CHECKED_PRESSED, &right_32px);
-    lv_obj_add_style( bluetooth_next_msg_btn, LV_IMGBTN_PART_MAIN, &bluetooth_message_style );
+    bluetooth_next_msg_btn = wf_add_image_button( bluetooth_message_tile, right_32px, bluetooth_next_message_event_cb, &bluetooth_message_style );
     lv_obj_align( bluetooth_next_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
-    lv_obj_set_event_cb( bluetooth_next_msg_btn, bluetooth_next_message_event_cb );
 
-    bluetooth_trash_msg_btn = lv_imgbtn_create( bluetooth_message_tile, NULL);
-    lv_imgbtn_set_src( bluetooth_trash_msg_btn, LV_BTN_STATE_RELEASED, &trash_32px);
-    lv_imgbtn_set_src( bluetooth_trash_msg_btn, LV_BTN_STATE_PRESSED, &trash_32px);
-    lv_imgbtn_set_src( bluetooth_trash_msg_btn, LV_BTN_STATE_CHECKED_RELEASED, &trash_32px);
-    lv_imgbtn_set_src( bluetooth_trash_msg_btn, LV_BTN_STATE_CHECKED_PRESSED, &trash_32px);
-    lv_obj_add_style( bluetooth_trash_msg_btn, LV_IMGBTN_PART_MAIN, &bluetooth_message_style );
+    bluetooth_trash_msg_btn = wf_add_image_button( bluetooth_message_tile, trash_32px, bluetooth_del_message_event_cb, &bluetooth_message_style );
     lv_obj_align( bluetooth_trash_msg_btn, bluetooth_prev_msg_btn, LV_ALIGN_OUT_RIGHT_MID, 15, 0 );
-    lv_obj_set_event_cb( bluetooth_trash_msg_btn, bluetooth_del_message_event_cb );
 
     bluetooth_msg_entrys_label = lv_label_create( bluetooth_message_tile, NULL );
     lv_obj_add_style( bluetooth_msg_entrys_label, LV_OBJ_PART_MAIN, &bluetooth_message_sender_style );

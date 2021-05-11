@@ -26,6 +26,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "hardware/pmu.h"
 #include "hardware/motor.h"
@@ -42,9 +43,6 @@ lv_obj_t *discharge_view_current;
 lv_obj_t *vbus_view_voltage;
 lv_task_t *battery_view_task;
 
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
-
 static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 void battery_view_update_task( lv_task_t *task );
@@ -59,25 +57,11 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_style_copy( &battery_view_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_view_tile, LV_OBJ_PART_MAIN, &battery_view_style );
 
-    // create the battery settings */
-    lv_obj_t *exit_btn = lv_imgbtn_create( battery_view_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &exit_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &exit_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &battery_view_style );
+    lv_obj_t *exit_btn = wf_add_exit_button( battery_view_tile, exit_battery_view_event_cb, &battery_view_style );
     lv_obj_align( exit_btn, battery_view_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( exit_btn, exit_battery_view_event_cb );
     
-    // create the battery settings */
-    lv_obj_t *setup_btn = lv_imgbtn_create( battery_view_tile, NULL);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style( setup_btn, LV_IMGBTN_PART_MAIN, &battery_view_style );
+    lv_obj_t *setup_btn = wf_add_setup_button( battery_view_tile, enter_battery_settings_event_cb, &battery_view_style );
     lv_obj_align( setup_btn, battery_view_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( setup_btn, enter_battery_settings_event_cb );
 
     lv_obj_t *exit_label = lv_label_create( battery_view_tile, NULL);
     lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &battery_view_style );

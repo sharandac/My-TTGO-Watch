@@ -75,7 +75,6 @@ void update_update_activate_cb( void );
 void update_update_hibernate_cb( void );
 void update_progress_task( lv_task_t *task );
 
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(update_64px);
 LV_IMG_DECLARE(info_1_16px);
 
@@ -93,14 +92,8 @@ void update_tile_setup( void ) {
     update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );
     setup_hide_indicator( update_setup_icon );
 
-    lv_obj_t *setup_btn = lv_imgbtn_create( update_settings_tile, NULL);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_PRESSED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_RELEASED, &setup_32px);
-    lv_imgbtn_set_src( setup_btn, LV_BTN_STATE_CHECKED_PRESSED, &setup_32px);
-    lv_obj_add_style( setup_btn, LV_IMGBTN_PART_MAIN, &update_settings_style );
+    lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb, &update_settings_style );
     lv_obj_align( setup_btn, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-    lv_obj_set_event_cb( setup_btn, enter_update_setup_setup_event_cb );
 
     lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update", exit_update_setup_event_cb );
     lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );

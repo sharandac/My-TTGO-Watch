@@ -25,6 +25,7 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
+#include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
@@ -66,14 +67,8 @@ void bluetooth_call_tile_setup( void ) {
     lv_label_set_text( bluetooth_call_number_label, "");
     lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-    lv_obj_t *exit_btn = lv_imgbtn_create( bluetooth_call_tile, NULL);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_PRESSED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_RELEASED, &cancel_32px);
-    lv_imgbtn_set_src( exit_btn, LV_BTN_STATE_CHECKED_PRESSED, &cancel_32px);
-    lv_obj_add_style( exit_btn, LV_IMGBTN_PART_MAIN, &bluetooth_call_style );
+    lv_obj_t * exit_btn = wf_add_image_button( bluetooth_call_tile, cancel_32px, exit_bluetooth_call_event_cb, &bluetooth_call_style );
     lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
-    lv_obj_set_event_cb( exit_btn, exit_bluetooth_call_event_cb );
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_call_event_cb, "bluetooth_call" );
 }
