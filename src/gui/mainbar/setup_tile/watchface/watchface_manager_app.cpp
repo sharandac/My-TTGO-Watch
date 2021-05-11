@@ -380,6 +380,10 @@ void watchface_manager_app_hibernate_cb ( void ) {
      * restore display timeout
      */
     display_set_timeout( watchface_manager_display_timeout );
+    /*
+     * trigger an activity
+     */
+    lv_disp_trig_activity( NULL );
     /**
      * trigger background task to finish
      */
