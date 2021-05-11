@@ -33,7 +33,11 @@ bool watchface_config_t::onSave(JsonDocument& doc) {
 bool watchface_config_t::onLoad(JsonDocument& doc) {
     watchface_enable = doc["watchface_enable"] | false;
     watchface_antialias = doc["watchface_antialias"] | true;
-    watchface_theme_url = doc["watchface_theme_url"] | WATCHFACE_THEME_URL;
+    /**
+     * force use own theme url on alpha/beta tests
+     */
+    // watchface_theme_url = doc["watchface_theme_url"] | WATCHFACE_THEME_URL;
+    watchface_theme_url = WATCHFACE_THEME_URL;
     return true;
 }
 

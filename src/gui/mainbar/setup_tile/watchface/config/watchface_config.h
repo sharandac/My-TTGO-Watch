@@ -32,6 +32,8 @@
     #define WATCHFACE_THEME_LIST_FILE           "/watchface_theme_list.json"
     #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
     #define WATCHFACE_THEME_PREV                "/watchface_theme_prev_120px.png"
+
+    #define WATCHFACE_MAX_ENTRYS                50
     /**
      * @brief blectl config structure
      */

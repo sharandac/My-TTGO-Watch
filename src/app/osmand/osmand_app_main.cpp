@@ -131,7 +131,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( osmand_app_time_label, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 5 );
 
     lv_obj_t * exit_btn = wf_add_image_button( osmand_app_main_tile, cancel_32px, exit_osmand_app_main_event_cb, &osmand_app_main_style );
-    lv_obj_align( exit_btn, osmand_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align( exit_btn, osmand_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
 
     osmand_app_direction_img = lv_img_create( osmand_app_main_tile, NULL );
     lv_img_set_src( osmand_app_direction_img, &ahead_128px );

@@ -151,13 +151,13 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     lv_obj_align( watchface_manager_next_btn, watchface_manager_app_preview_cont, LV_ALIGN_IN_RIGHT_MID, -10, 0 );
     watchface_manager_preview_img = lv_img_create( watchface_manager_app_preview_cont, NULL );
     lv_img_set_src( watchface_manager_preview_img, &downloading_32px );
-    lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
     watchface_manager_download_btn = lv_btn_create( watchface_manager_app_preview_cont, NULL );
     lv_obj_set_width( watchface_manager_download_btn, lv_disp_get_hor_res( NULL ) / 2 );
     lv_obj_set_height( watchface_manager_download_btn, lv_disp_get_ver_res( NULL ) / 2 );
     lv_obj_add_protect( watchface_manager_download_btn, LV_PROTECT_CLICK_FOCUS );
     lv_obj_add_style( watchface_manager_download_btn, LV_OBJ_PART_MAIN, &watchface_manager_trans_button_style );
-    lv_obj_align( watchface_manager_download_btn, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+    lv_obj_align( watchface_manager_download_btn, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_event_cb( watchface_manager_download_btn, download_watchface_manager_app_event_cb );
     /**
      * create watchface info container
@@ -196,7 +196,7 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
      * create event group
      */
     watchface_manager_app_event_handle = xEventGroupCreate();
-    _watchface_manager_theme_install_task = lv_task_create( watchface_manager_theme_install_task, 1000, LV_TASK_PRIO_MID, NULL );
+    _watchface_manager_theme_install_task = lv_task_create( watchface_manager_theme_install_task, 3000, LV_TASK_PRIO_MID, NULL );
 }
 
 void watchface_manager_theme_install_task( lv_task_t * task ) {
@@ -204,7 +204,6 @@ void watchface_manager_theme_install_task( lv_task_t * task ) {
      * install watchface theme from tar.gz work only from main task/lv_task
      */
     if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_INSTALL_THEME ) {
-            watchface_manager_app_set_progressbar_label( "unzip watchface theme, wait ..." );
             watchface_decompress_theme();
             xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_INSTALL_THEME );
     }
@@ -288,7 +287,7 @@ void watchface_manager_app_Task( void * pvParameters ) {
             watchface_manager_update_theme_list( &watchface_theme );
             if ( watchface_manager_update_theme_prev( &watchface_theme ) ) {
                 lv_img_set_src( watchface_manager_preview_img, &watchface_theme.watchface_theme_prev );
-                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
             }
             /**
              * clear update request flag
@@ -302,7 +301,7 @@ void watchface_manager_app_Task( void * pvParameters ) {
             watchface_manager_next_theme_entry( &watchface_theme );
             if ( watchface_manager_update_theme_prev( &watchface_theme ) ) {
                 lv_img_set_src( watchface_manager_preview_img, &watchface_theme.watchface_theme_prev );
-                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
             }
             /**
              * clear update request flag
@@ -316,7 +315,7 @@ void watchface_manager_app_Task( void * pvParameters ) {
             watchface_manager_prev_theme_entry( &watchface_theme );
             if ( watchface_manager_update_theme_prev( &watchface_theme ) ) {
                 lv_img_set_src( watchface_manager_preview_img, &watchface_theme.watchface_theme_prev );
-                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
+                lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
             }
             /**
              * clear update request flag
@@ -438,6 +437,25 @@ void watchface_manager_update_theme_list( watchface_theme_t *watchface_theme ) {
         WATCHFACE_MANAGER_APP_ERROR_LOG("watchface theme list deserializeJson() failed: %s", error.c_str() );
     }
     else {
+        for( int i = 0; i < WATCHFACE_MAX_ENTRYS; i++ ) {
+            if ( doc[ i ]["name"] ) {
+                String watchface_manager_theme_name = doc[ i ][ "name" ];
+                String watchface_theme_url = doc[ i ][ "url" ];
+                String watchface_theme_download = doc[ i ][ "download" ];
+                WATCHFACE_MANAGER_APP_INFO_LOG("theme name / url: %s / %s", watchface_manager_theme_name.c_str(), watchface_theme_url.c_str() );
+                if ( watchface_theme->watchface_manager_theme_entrys == 0 ) {
+                    watchface_theme->watchface_manager_theme_name = watchface_manager_theme_name;
+                    watchface_theme->watchface_manager_theme_url = watchface_theme_download;
+                    watchface_theme->watchface_manager_theme_prev_url = watchface_theme_url + WATCHFACE_THEME_PREV;
+                }
+                watchface_theme->watchface_manager_theme_entrys++;
+            }
+            else {
+                break;
+            }
+        }
+
+/*
         JsonObject obj = doc.as<JsonObject>();
         for ( JsonPair p : obj ) {
             String watchface_manager_theme_name = p.key().c_str();
@@ -450,6 +468,7 @@ void watchface_manager_update_theme_list( watchface_theme_t *watchface_theme ) {
             }
             watchface_theme->watchface_manager_theme_entrys++;
         }
+*/
         watchface_manager_app_set_info_label( watchface_theme->watchface_manager_theme_name.c_str() );
         WATCHFACE_MANAGER_APP_INFO_LOG("theme entrys: %d", watchface_theme->watchface_manager_theme_entrys );
         WATCHFACE_MANAGER_APP_INFO_LOG("current theme entry: %d", watchface_theme->watchface_manager_current_theme_entry );
@@ -483,6 +502,25 @@ void watchface_manager_next_theme_entry( watchface_theme_t *watchface_theme ) {
         else {
             watchface_theme->watchface_manager_current_theme_entry++;
             watchface_theme->watchface_manager_theme_entrys = 0;
+
+            for( int i = 0; i < WATCHFACE_MAX_ENTRYS; i++ ) {
+                if ( doc[ i ]["name"] ) {
+                    String watchface_manager_theme_name = doc[ i ][ "name" ];
+                    String watchface_theme_url = doc[ i ][ "url" ];
+                    String watchface_theme_download = doc[ i ][ "download" ];
+                    WATCHFACE_MANAGER_APP_INFO_LOG("theme name / url: %s / %s", watchface_manager_theme_name.c_str(), watchface_theme_url.c_str() );
+                    if ( watchface_theme->watchface_manager_theme_entrys == watchface_theme->watchface_manager_current_theme_entry ) {
+                        watchface_theme->watchface_manager_theme_name = watchface_manager_theme_name;
+                        watchface_theme->watchface_manager_theme_url = watchface_theme_download;
+                        watchface_theme->watchface_manager_theme_prev_url = watchface_theme_url + WATCHFACE_THEME_PREV;
+                    }
+                    watchface_theme->watchface_manager_theme_entrys++;
+                }
+                else {
+                    break;
+                }
+            }
+/*
             JsonObject obj = doc.as<JsonObject>();
             for ( JsonPair p : obj ) {
                 String watchface_manager_theme_name = p.key().c_str();
@@ -495,6 +533,7 @@ void watchface_manager_next_theme_entry( watchface_theme_t *watchface_theme ) {
                 }
                 watchface_theme->watchface_manager_theme_entrys++;
             }
+*/
             watchface_manager_app_set_info_label( watchface_theme->watchface_manager_theme_name.c_str() );
             WATCHFACE_MANAGER_APP_INFO_LOG("theme entrys: %d", watchface_theme->watchface_manager_theme_entrys );
             WATCHFACE_MANAGER_APP_INFO_LOG("current theme entry: %d", watchface_theme->watchface_manager_current_theme_entry );
@@ -529,6 +568,24 @@ void watchface_manager_prev_theme_entry( watchface_theme_t *watchface_theme ) {
         else {
             watchface_theme->watchface_manager_current_theme_entry--;
             watchface_theme->watchface_manager_theme_entrys = 0;
+            for( int i = 0; i < WATCHFACE_MAX_ENTRYS; i++ ) {
+                if ( doc[ i ]["name"] ) {
+                    String watchface_manager_theme_name = doc[ i ][ "name" ];
+                    String watchface_theme_url = doc[ i ][ "url" ];
+                    String watchface_theme_download = doc[ i ][ "download" ];
+                    WATCHFACE_MANAGER_APP_INFO_LOG("theme name / url: %s / %s", watchface_manager_theme_name.c_str(), watchface_theme_url.c_str() );
+                    if ( watchface_theme->watchface_manager_theme_entrys == watchface_theme->watchface_manager_current_theme_entry ) {
+                        watchface_theme->watchface_manager_theme_name = watchface_manager_theme_name;
+                        watchface_theme->watchface_manager_theme_url = watchface_theme_download;
+                        watchface_theme->watchface_manager_theme_prev_url = watchface_theme_url + WATCHFACE_THEME_PREV;
+                    }
+                    watchface_theme->watchface_manager_theme_entrys++;
+                }
+                else {
+                    break;
+                }
+            }
+/*
             JsonObject obj = doc.as<JsonObject>();
             for ( JsonPair p : obj ) {
                 String watchface_manager_theme_name = p.key().c_str();
@@ -541,6 +598,7 @@ void watchface_manager_prev_theme_entry( watchface_theme_t *watchface_theme ) {
                 }
                 watchface_theme->watchface_manager_theme_entrys++;
             }
+*/
             watchface_manager_app_set_info_label( watchface_theme->watchface_manager_theme_name.c_str() );
             WATCHFACE_MANAGER_APP_INFO_LOG("theme entrys: %d", watchface_theme->watchface_manager_theme_entrys );
             WATCHFACE_MANAGER_APP_INFO_LOG("current theme entry: %d", watchface_theme->watchface_manager_current_theme_entry );
@@ -560,19 +618,41 @@ bool watchface_manager_update_theme_prev( watchface_theme_t *watchface_theme ) {
     if ( !watchface_theme && !watchface_theme->watchface_theme_json_list) {
         return( retval );
     }
-
+    /**
+     * set download info img
+     */
+    lv_img_set_src( watchface_manager_preview_img, &downloading_32px );
+    lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
+    /**
+     * get the preview image
+     */
     watchface_manager_app_set_progressbar_label( "download preview" );
     watchface_manager_app_set_progressbar( 0 );
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( watchface_theme->watchface_manager_theme_prev_url.c_str(), watchface_manager_get_theme_json_cb );
+    /**
+     * show preview image if download was success or abort
+     */
     if ( uri_load_dsc ) {
+        /**
+         * clear old image data
+         */
         if ( watchface_theme->watchface_theme_prev.data )
             free( (void*) watchface_theme->watchface_theme_prev.data );
         watchface_theme->watchface_theme_prev.data = uri_load_dsc->data;
         watchface_theme->watchface_theme_prev.data_size = uri_load_dsc->size;
+        /**
+         * clear uri_load_dsc and leave data in memory
+         */
         uri_load_free_without_data( uri_load_dsc );
+        /**
+         * clear image cache
+         */
         lv_img_cache_invalidate_src( &watchface_theme->watchface_theme_prev );
-        retval = true;
+        /**
+         * clear progressbar label
+         */
         watchface_manager_app_set_progressbar_label( "" );
+        retval = true;
     }
     else {
         watchface_manager_app_set_progressbar_label( "download preview failed" );
@@ -589,15 +669,21 @@ bool watchface_manager_download_theme( watchface_theme_t *watchface_theme ) {
     if ( !watchface_theme && !watchface_theme->watchface_theme_json_list) {
         return( retval );
     }
-
+    /**
+     * set progressbar and progressbar label
+     */
     watchface_manager_app_set_progressbar_label( "download theme" );
     watchface_manager_app_set_progressbar( 0 );
-
+    /**
+     * start download tar.gz theme file
+     */
     if ( uri_load_to_file( watchface_theme->watchface_manager_theme_url.c_str(), "/spiffs", watchface_manager_get_theme_json_cb ) ) {
         watchface_manager_app_set_progressbar_label( "install theme" );
         watchface_manager_app_set_progressbar( 0 );
+        /**
+         * trigger install routine in lv_task
+         */
         xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_INSTALL_THEME );
-        watchface_manager_app_set_progressbar_label( "done" );
         retval = true;
     }
     else {
