@@ -518,7 +518,7 @@ static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
             /**
              * exit to mainbar
              */
-            mainbar_jump_back( LV_ANIM_OFF );
+            mainbar_jump_back();
             break;
     }
 }
