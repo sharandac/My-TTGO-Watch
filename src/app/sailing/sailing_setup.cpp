@@ -95,7 +95,6 @@ static void sailing_track_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_back();
-                                        statusbar_hide( false );
                                         break;
     }
 }
