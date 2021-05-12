@@ -615,6 +615,7 @@ void osm_map_clear_cache( osm_location_t *osm_location ) {
         if ( osm_location->uri_load_dsc[ i ] ) {
             if ( osm_location->uri_load_dsc[ i ]->data != osm_location->osm_map_data.data ) {
                 uri_load_free_all( osm_location->uri_load_dsc[ i ] );
+                osm_location->uri_load_dsc[ i ] = NULL;
             }
         }
     }

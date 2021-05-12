@@ -400,6 +400,7 @@ void watchface_manager_app_activate_cb ( void ) {
     }
     else if( !watchface_manager_wifi_init ) {
         WATCHFACE_MANAGER_APP_ERROR_LOG("wifictl not init, skip");
+        watchface_manager_app_set_progressbar_label( "no wifi init" );
     }
     else {
         xTaskCreate(    watchface_manager_app_Task,     /* Function to implement the task */

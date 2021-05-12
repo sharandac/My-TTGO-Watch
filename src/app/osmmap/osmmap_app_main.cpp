@@ -767,6 +767,10 @@ void osmmap_hibernate_cb( void ) {
     wifictl_set_autoon( osmmap_wifi_state );
     watchface_enable_tile_after_wakeup( osmmap_block_watchface );
     /**
+     * clear cache
+     */
+    osm_map_clear_cache( osmmap_location );
+    /**
      * set osm app inactive
      */
     osmmap_app_active = false;

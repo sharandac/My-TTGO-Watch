@@ -188,5 +188,6 @@
      * @return pointer the to uri string
      */
     char *osm_map_get_current_tile_uri( osm_location_t *osm_location );
+    void osm_map_clear_cache( osm_location_t *osm_location );
 
 #endif // _OSM_HELPER_H
