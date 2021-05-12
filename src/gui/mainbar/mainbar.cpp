@@ -77,10 +77,7 @@ void mainbar_setup( void ) {
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, mainbar_rtcctl_event_cb, "mainbar rtcctl" );
 
-    mainbar_history.entrys = 0;
-    mainbar_history.tile[ 0 ].x = 0;
-    mainbar_history.tile[ 0 ].y = 0;
-    mainbar_history.statusbar[ 0 ] = true;
+    mainbar_clear_history();
 }
 
 void mainbar_add_current_tile_to_history( void ) {
@@ -120,6 +117,7 @@ void mainbar_clear_history( void ) {
     mainbar_history.entrys = 0;
     mainbar_history.tile[ 0 ].x = 0;
     mainbar_history.tile[ 0 ].y = 0;
+    mainbar_history.statusbar[ 0 ] = true;
     MAINBAR_INFO_LOG("clear mainbar history");
 }
 
