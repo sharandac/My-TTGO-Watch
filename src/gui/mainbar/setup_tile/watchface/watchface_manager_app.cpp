@@ -37,6 +37,7 @@
 #include "gui/widget_factory.h"
 
 #include "hardware/display.h"
+#include "hardware/wifictl.h"
 
 #include "utils/json_psram_allocator.h"
 #include "utils/uri_load/uri_load.h"
@@ -45,7 +46,8 @@
 EventGroupHandle_t watchface_manager_app_event_handle = NULL;
 TaskHandle_t _watchface_manager_app_task;
 lv_task_t *_watchface_manager_theme_install_task;   
-static volatile uint32_t watchface_manager_display_timeout = 15;              
+static volatile uint32_t watchface_manager_display_timeout = 15;    
+static volatile bool watchface_manager_wifi_init = false;          
  /*
  * watchface manager app tile container
  */
@@ -86,6 +88,7 @@ watchface_theme_t watchface_theme;
 
 void watchface_manager_theme_install_task( lv_task_t * task );
 void watchface_manager_app_Task( void * pvParameters );
+bool watchface_manager_wifictl_event_cb( EventBits_t event, void *arg );
 static void exit_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
 static void setup_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
 static void prev_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
@@ -207,6 +210,19 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
      */
     watchface_manager_app_event_handle = xEventGroupCreate();
     _watchface_manager_theme_install_task = lv_task_create( watchface_manager_theme_install_task, 3000, LV_TASK_PRIO_MID, NULL );
+    /**
+     * register wifictl call back
+     */
+    wifictl_register_cb( WIFICTL_CONNECT_IP, watchface_manager_wifictl_event_cb, "watchface wifictl" );
+}
+
+bool watchface_manager_wifictl_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case WIFICTL_CONNECT_IP:
+            watchface_manager_wifi_init = true;
+            break;
+    }
+    return( true );
 }
 
 void watchface_manager_theme_install_task( lv_task_t * task ) {
@@ -381,6 +397,9 @@ void watchface_manager_app_activate_cb ( void ) {
      */
     if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST ) {
         WATCHFACE_MANAGER_APP_ERROR_LOG("old watchface manager background task is running, skip");
+    }
+    else if( !watchface_manager_wifi_init ) {
+        WATCHFACE_MANAGER_APP_ERROR_LOG("wifictl not init, skip");
     }
     else {
         xTaskCreate(    watchface_manager_app_Task,     /* Function to implement the task */
