@@ -53,7 +53,7 @@ void alarm_clock_setup_setup( uint32_t tile_num ) {
 static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            mainbar_jump_back( LV_ANIM_ON );
+            mainbar_jump_back();
             break;
     }
 }

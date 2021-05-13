@@ -115,7 +115,7 @@ static void alarm_task_function(lv_task_t * task){
     }
     else{
         display_set_brightness(brightness);
-        mainbar_jump_back( LV_ANIM_OFF );
+        mainbar_jump_back();
     }
 }
 

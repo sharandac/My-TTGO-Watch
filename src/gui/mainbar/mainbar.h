@@ -35,9 +35,10 @@
     #define STATUSBAR_SHOW              false
 
     typedef struct {
-        uint32_t    entrys;
-        lv_point_t  tile[ MAINBAR_MAX_HISTORY ];
-        bool        statusbar[ MAINBAR_MAX_HISTORY ];
+        uint32_t         entrys;
+        lv_point_t       tile[ MAINBAR_MAX_HISTORY ];
+        bool             statusbar[ MAINBAR_MAX_HISTORY ];
+        lv_anim_enable_t anim[ MAINBAR_MAX_HISTORY ];
     } mainbar_history_t;
 
     typedef struct {
@@ -137,6 +138,6 @@
     /**
      * jump back in tile history
      */
-    void mainbar_jump_back( lv_anim_enable_t anim );
+    void mainbar_jump_back( void );
 
 #endif // _MAINBAR_H

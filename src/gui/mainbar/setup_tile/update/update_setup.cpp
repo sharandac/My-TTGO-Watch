@@ -120,7 +120,7 @@ static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_
 
 static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):           mainbar_jump_back( false );
+        case( LV_EVENT_CLICKED ):           mainbar_jump_back();
                                             strlcpy( update_config->updateurl , lv_textarea_get_text( update_check_url_textfield ), sizeof( update_config->updateurl ) );
                                             update_save_config();
                                             break;
