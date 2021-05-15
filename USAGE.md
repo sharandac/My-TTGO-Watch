@@ -123,7 +123,7 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 
 If you want to customize your own watchface, copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and decompress it with the watchface app.
 
-A watchface.tar.gz includes the following files and a extra watchface_theme.json. Some example:
+A `watchface.tar.gz` includes the following files and a extra `watchface_theme.json`. Some example:
 
 ![dial](images/watchface/watchface_dial.png)
 ![hour](images/watchface/watchface_hour.png)
@@ -135,19 +135,12 @@ A watchface.tar.gz includes the following files and a extra watchface_theme.json
 
 Here you can find some finish watchface packages:
 
-![swiss clock](images/watchface/swiss/watchface_theme_prev.png)
-![undone clock](images/watchface/undone/watchface_theme_prev.png)
-![star trek clock](images/watchface/startrek/watchface_theme_prev.png)
-![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)
-![hal9000](images/watchface/hal9000/watchface_theme_prev.png)
-![black](images/watchface/black/watchface_theme_prev.png)
-
-![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
-![undone clock](images/watchface/undone/watchface.tar.gz)<br>
-![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
-![rainbow clock](images/watchface/rainbow/watchface.tar.gz)<br>
-![hal9000](images/watchface/hal9000/watchface.tar.gz)<br>
-![black](images/watchface/black/watchface.tar.gz)<br>
+[![swiss clock](images/watchface/swiss/watchface_theme_prev.png)](images/watchface/swiss/watchface.tar.gz)
+[![undone clock](images/watchface/undone/watchface_theme_prev.png)](images/watchface/undone/watchface.tar.gz)
+[![star trek clock](images/watchface/startrek/watchface_theme_prev.png)](images/watchface/startrek/watchface.tar.gz)
+[![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)](images/watchface/rainbow/watchface.tar.gz)
+[![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
+[![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
 
 ## OSMmap
 
