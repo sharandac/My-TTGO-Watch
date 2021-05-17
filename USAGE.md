@@ -143,6 +143,7 @@ You can use:
 * `bluetooth_messages`: the number of messages, as an integer.
 * `steps`: the number of steps, as an integer.
 
+Available font are: Ubuntu, LCD.
 Available font sizes are: 12, 16, 32, 48, 72.
 
 Here you can find some finish watchface packages:
