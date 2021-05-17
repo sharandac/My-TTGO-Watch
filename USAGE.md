@@ -123,7 +123,7 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 
 If you want to customize your own watchface, copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and decompress it with the watchface app.
 
-A watchface.tar.gz includes the following files and a extra watchface_theme.json. Some example:
+A `watchface.tar.gz` includes the following files and a extra `watchface_theme.json`. Some example:
 
 ![dial](images/watchface/watchface_dial.png)
 ![hour](images/watchface/watchface_hour.png)
@@ -133,21 +133,27 @@ A watchface.tar.gz includes the following files and a extra watchface_theme.json
 ![min shadow](images/watchface/watchface_min_s.png)
 ![sec shadow](images/watchface/watchface_sec_s.png)
 
+In the file `watchface_theme.json` you will describe the position of information via the `label` node.
+You can use:
+
+* `text`: a raw text.
+* `date`: an information related to date/time. See `strftime` function for format.
+* `battery_percent`: the battery percent as an integer. Example: `"%d%%"` for `87%`.
+* `battery_voltage`: the battery voltage, as a float.
+* `bluetooth_messages`: the number of messages, as an integer.
+* `steps`: the number of steps, as an integer.
+
+Available font are: Ubuntu, LCD.
+Available font sizes are: 12, 16, 32, 48, 72.
+
 Here you can find some finish watchface packages:
 
-![swiss clock](images/watchface/swiss/watchface_theme_prev.png)
-![undone clock](images/watchface/undone/watchface_theme_prev.png)
-![star trek clock](images/watchface/startrek/watchface_theme_prev.png)
-![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)
-![hal9000](images/watchface/hal9000/watchface_theme_prev.png)
-![black](images/watchface/black/watchface_theme_prev.png)
-
-![swiss clock](images/watchface/swiss/watchface.tar.gz)<br>
-![undone clock](images/watchface/undone/watchface.tar.gz)<br>
-![star trek clock](images/watchface/startrek/watchface.tar.gz)<br>
-![rainbow clock](images/watchface/rainbow/watchface.tar.gz)<br>
-![hal9000](images/watchface/hal9000/watchface.tar.gz)<br>
-![black](images/watchface/black/watchface.tar.gz)<br>
+[![swiss clock](images/watchface/swiss/watchface_theme_prev.png)](images/watchface/swiss/watchface.tar.gz)
+[![undone clock](images/watchface/undone/watchface_theme_prev.png)](images/watchface/undone/watchface.tar.gz)
+[![star trek clock](images/watchface/startrek/watchface_theme_prev.png)](images/watchface/startrek/watchface.tar.gz)
+[![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)](images/watchface/rainbow/watchface.tar.gz)
+[![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
+[![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
 
 ## OSMmap
 
