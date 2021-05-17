@@ -77,13 +77,10 @@ void mainbar_setup( void ) {
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, mainbar_rtcctl_event_cb, "mainbar rtcctl" );
 
-    mainbar_history.entrys = 0;
-    mainbar_history.tile[ 0 ].x = 0;
-    mainbar_history.tile[ 0 ].y = 0;
-    mainbar_history.statusbar[ 0 ] = true;
+    mainbar_clear_history();
 }
 
-void mainbar_add_current_tile_to_history( void ) {
+void mainbar_add_current_tile_to_history( lv_anim_enable_t anim ) {
     lv_coord_t x,y;
     /*
      * check if mainbar already initialized
@@ -103,7 +100,8 @@ void mainbar_add_current_tile_to_history( void ) {
             mainbar_history.tile[ mainbar_history.entrys ].x = x;
             mainbar_history.tile[ mainbar_history.entrys ].y = y;
             mainbar_history.statusbar[ mainbar_history.entrys ] = statusbar_get_hidden_state();
-            MAINBAR_INFO_LOG("store tile to history: %d, %d, %d", x, y, statusbar_get_hidden_state() );
+            mainbar_history.anim[ mainbar_history.entrys ] = anim;
+            MAINBAR_INFO_LOG("store tile to history: %d, %d, %d, %d", x, y, statusbar_get_hidden_state(), anim );
         }
     }
 }
@@ -120,10 +118,11 @@ void mainbar_clear_history( void ) {
     mainbar_history.entrys = 0;
     mainbar_history.tile[ 0 ].x = 0;
     mainbar_history.tile[ 0 ].y = 0;
+    mainbar_history.statusbar[ 0 ] = true;
     MAINBAR_INFO_LOG("clear mainbar history");
 }
 
-void mainbar_jump_back( lv_anim_enable_t anim ) {
+void mainbar_jump_back( void ) {
     lv_coord_t x,y;
     /*
      * check if mainbar already initialized
@@ -142,7 +141,7 @@ void mainbar_jump_back( lv_anim_enable_t anim ) {
          * jump back
          */
         MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.statusbar[ mainbar_history.entrys ] );
-        lv_tileview_set_tile_act( mainbar, mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, anim );
+        lv_tileview_set_tile_act( mainbar, mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.anim[ mainbar_history.entrys ] );
         statusbar_hide( mainbar_history.statusbar[ mainbar_history.entrys ] );
         gui_force_redraw( true );
         /**
@@ -399,7 +398,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
          * store current tile and statusbar state
          */
         if ( tile_number != current_tile ) {
-            mainbar_add_current_tile_to_history();
+            mainbar_add_current_tile_to_history( anim );
         }
         statusbar_hide( statusbar );
         /**
@@ -455,7 +454,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
          * store current tile and statusbar state
          */
         if ( tile_number != current_tile ) {
-            mainbar_add_current_tile_to_history();
+            mainbar_add_current_tile_to_history( anim );
         }
         /**
          * jump into tile

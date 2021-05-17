@@ -281,7 +281,7 @@ void watchface_reload_and_test( void ) {
 
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_SHORT_CLICKED ): mainbar_jump_back( LV_ANIM_OFF );
+        case( LV_EVENT_SHORT_CLICKED ): mainbar_jump_back();
                                         break;
         case( LV_EVENT_LONG_PRESSED ):  mainbar_jump_to_tilenumber( watchface_manager_get_setup_tile_num(), LV_ANIM_OFF );
                                         break;
