@@ -314,18 +314,38 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 URI_LOAD_INFO_LOG("301/302 redirect to: %s", location.c_str() );
             }
             /**
-             * clean old connection and memory
+             * clean old connection
              */
             download_client.end();
-            uri_load_free_all( uri_load_dsc );
-            uri_load_dsc = NULL;
             /**
              * if we have a new location, try it
              */
             if ( location ) {
-                uri_load_dsc = uri_load_to_ram( location.c_str() );
+                /**
+                 * get new location data
+                 */
+                uri_load_dsc_t *_uri_load_dsc = uri_load_to_ram( location.c_str(), uri_load_dsc->progresscb );
+                /**
+                 * if was success, set data and file size to the old uri_load_dsc to save
+                 * old filename and uri to hide redirect
+                 */
+                if ( _uri_load_dsc ) {
+                    uri_load_dsc->data = _uri_load_dsc->data;
+                    uri_load_dsc->size = _uri_load_dsc->size;
+                    uri_load_free_without_data( _uri_load_dsc );
+                }
+                else {
+                    /**
+                     * clear old uri_load_dsc
+                     */
+                    uri_load_free_all( uri_load_dsc );
+                    uri_load_dsc = NULL;                    
+                    URI_LOAD_ERROR_LOG("redirect failed");
+                }
             }
             else {
+                uri_load_free_all( uri_load_dsc );
+                uri_load_dsc = NULL;
                 URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
             }
             return( uri_load_dsc );
@@ -429,20 +449,39 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 URI_LOAD_INFO_LOG("301/302 redirect to: %s", location.c_str() );
             }
             /**
-             * clean old connection and memory
+             * clean old connection
              */
             download_client.end();
             client->stop();
-            uri_load_free_all( uri_load_dsc );
-            heap_caps_malloc_extmem_enable( 16+1024 );
-            uri_load_dsc = NULL;
             /**
              * if we have a new location, try it
              */
-            if ( location != "" ) {
-                uri_load_dsc = uri_load_to_ram( location.c_str() );
+            if ( location ) {
+                /**
+                 * get new location data
+                 */
+                uri_load_dsc_t *_uri_load_dsc = uri_load_to_ram( location.c_str(), uri_load_dsc->progresscb );
+                /**
+                 * if was success, set data and file size to the old uri_load_dsc to save
+                 * old filename and uri to hide redirect
+                 */
+                if ( _uri_load_dsc ) {
+                    uri_load_dsc->data = _uri_load_dsc->data;
+                    uri_load_dsc->size = _uri_load_dsc->size;
+                    uri_load_free_without_data( _uri_load_dsc );
+                }
+                else {
+                    /**
+                     * clear old uri_load_dsc
+                     */
+                    uri_load_free_all( uri_load_dsc );
+                    uri_load_dsc = NULL;                    
+                    URI_LOAD_ERROR_LOG("redirect failed");
+                }
             }
             else {
+                uri_load_free_all( uri_load_dsc );
+                uri_load_dsc = NULL;
                 URI_LOAD_ERROR_LOG("http connection abort, code: %d", httpCode );
             }
             return( uri_load_dsc );

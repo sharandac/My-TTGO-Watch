@@ -405,7 +405,7 @@ void watchface_manager_app_activate_cb ( void ) {
     else {
         xTaskCreate(    watchface_manager_app_Task,     /* Function to implement the task */
                         "watchface manager Task",       /* Name of the task */
-                        10000,                           /* Stack size in words */
+                        5000,                           /* Stack size in words */
                         NULL,                           /* Task input parameter */
                         1,                              /* Priority of the task */
                         &_watchface_manager_app_task ); /* Task handle. */

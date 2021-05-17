@@ -2,6 +2,7 @@
  * Size: 48 px
  * Bpp: 2
  * Opts: 
+ * https://freefontsdownload.net/free-modern_lcd_7-font-2180.htm
  ******************************************************************************/
 #include "lvgl/lvgl.h"
 
