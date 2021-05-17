@@ -779,5 +779,8 @@ void osmmap_hibernate_cb( void ) {
      */
     xEventGroupSetBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
     powermgm_set_normal_mode();
-
+    /**
+     * save config
+     */
+    osmmap_config.save();
 }
