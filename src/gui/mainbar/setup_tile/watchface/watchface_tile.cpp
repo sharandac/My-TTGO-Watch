@@ -95,6 +95,11 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_48px);
 LV_FONT_DECLARE(Ubuntu_72px);
+LV_FONT_DECLARE(LCD_12px);
+LV_FONT_DECLARE(LCD_16px);
+LV_FONT_DECLARE(LCD_32px);
+LV_FONT_DECLARE(LCD_48px);
+LV_FONT_DECLARE(LCD_72px);
 
 void watchface_app_tile_update( void );
 static void exit_watchface_app_tile_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -104,7 +109,7 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg );
 void watchface_avtivate_cb( void );
 void watchface_hibernate_cb( void );
 void watchface_remove_theme_files ( void );
-lv_font_t *watchface_get_font( int32_t font_size );
+lv_font_t *watchface_get_font( const char *font, int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
 
@@ -140,7 +145,7 @@ void watchface_tile_setup( void ) {
             log_e("watchface_app_label_style[ %d ] alloc failed", i ); while( true );
         }
         lv_style_copy( watchface_app_label_style[ i ], ws_get_mainbar_style() );
-        lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font_size ) );
+        lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
         lv_style_set_text_color( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_color( watchface_theme_config.dial.label[ i ].font_color ) );
         /**
          * alloc and setup label container
@@ -427,7 +432,7 @@ void watchface_reload_theme( void ) {
      * alloc labels and set to defauts
      */
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-        lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font_size ) );
+        lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
         lv_style_set_text_color( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_color( watchface_theme_config.dial.label[ i ].font_color ) );
         /**
          * alloc and setup label container
@@ -455,21 +460,51 @@ void watchface_reload_theme( void ) {
     lv_refr_now( NULL );
 }
 
-lv_font_t *watchface_get_font( int32_t font_size ) {
-    lv_font_t *font = &Ubuntu_12px;
-    switch( font_size ) {
-        case 12:    font = &Ubuntu_12px;
-                    break;
-        case 16:    font = &Ubuntu_16px;
-                    break;
-        case 32:    font = &Ubuntu_32px;
-                    break;
-        case 48:    font = &Ubuntu_48px;
-                    break;
-        case 72:    font = &Ubuntu_72px;
-                    break;
+lv_font_t *watchface_get_font( const char *font, int32_t font_size ) {
+    lv_font_t *lv_font = &Ubuntu_12px;
+    if ( !strcmp( font, "Ubuntu" ) ) {
+        switch( font_size ) {
+            case 12:    lv_font = &Ubuntu_12px;
+                        break;
+            case 16:    lv_font = &Ubuntu_16px;
+                        break;
+            case 32:    lv_font = &Ubuntu_32px;
+                        break;
+            case 48:    lv_font = &Ubuntu_48px;
+                        break;
+            case 72:    lv_font = &Ubuntu_72px;
+                        break;
+        }
     }
-    return( font );
+    else if ( !strcmp( font, "LCD" ) ) {
+        switch( font_size ) {
+            case 12:    lv_font = &LCD_12px;
+                        break;
+            case 16:    lv_font = &LCD_16px;
+                        break;
+            case 32:    lv_font = &LCD_32px;
+                        break;
+            case 48:    lv_font = &LCD_48px;
+                        break;
+            case 72:    lv_font = &LCD_72px;
+                        break;
+        }
+    }
+    else {
+        switch( font_size ) {
+            case 12:    lv_font = &Ubuntu_12px;
+                        break;
+            case 16:    lv_font = &Ubuntu_16px;
+                        break;
+            case 32:    lv_font = &Ubuntu_32px;
+                        break;
+            case 48:    lv_font = &Ubuntu_48px;
+                        break;
+            case 72:    lv_font = &Ubuntu_72px;
+                        break;
+        }
+    }
+    return( lv_font );
 }
 
 lv_color_t watchface_get_color( char *color ) {

@@ -69,9 +69,10 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
             doc["label"][ labelcount ]["enable"] = dial.label[ i ].enable;
             doc["label"][ labelcount ]["type"] = dial.label[ i ].type;
             doc["label"][ labelcount ]["label"] = dial.label[ i ].label;
+            doc["label"][ labelcount ]["font"] = dial.label[ i ].font;
             doc["label"][ labelcount ]["font_color"] = dial.label[ i ].font_color;
-            doc["label"][ labelcount ]["align"] = dial.label[ i ].align;
             doc["label"][ labelcount ]["font_size"] = dial.label[ i ].font_size;
+            doc["label"][ labelcount ]["align"] = dial.label[ i ].align;
             doc["label"][ labelcount ]["x_offset"] = dial.label[ i ].x_offset;
             doc["label"][ labelcount ]["y_offset"] = dial.label[ i ].y_offset;
             doc["label"][ labelcount ]["x_size"] = dial.label[ i ].x_size;
@@ -113,9 +114,10 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         dial.label[ i ].enable = doc["label"][i]["enable"] | false;
         strncpy( dial.label[ i ].type, doc["label"][i]["type"] | "text", sizeof( dial.label[ i ].type ) );
         strncpy( dial.label[ i ].label, doc["label"][i]["label"] | "" , sizeof( dial.label[ i ].label ) );
-        strncpy( dial.label[ i ].align, doc["label"][i]["align"] | "center" , sizeof( dial.label[ i ].align ) );
-        strncpy( dial.label[ i ].font_color, doc["label"][i]["font_color"] | "#ffffff" , sizeof( dial.label[ i ].font_color ) );
+        strncpy( dial.label[ i ].font, doc["label"][i]["font"] | "Ubuntu" , sizeof( dial.label[ i ].font ) );
         dial.label[ i ].font_size = doc["label"][i]["font_size"] | 12;
+        strncpy( dial.label[ i ].font_color, doc["label"][i]["font_color"] | "#ffffff" , sizeof( dial.label[ i ].font_color ) );
+        strncpy( dial.label[ i ].align, doc["label"][i]["align"] | "center" , sizeof( dial.label[ i ].align ) );
         dial.label[ i ].x_offset = doc["label"][i]["x_offset"] | 0;
         dial.label[ i ].y_offset = doc["label"][i]["y_offset"] | 0;
         dial.label[ i ].x_size = doc["label"][i]["x_size"] | 0;
@@ -163,9 +165,10 @@ bool watchface_theme_config_t::onDefault( void ) {
         dial.label[ i ].enable = false;
         strncpy( dial.label[ i ].type, "text", sizeof( dial.label[ i ].type ) );
         strncpy( dial.label[ i ].label, "n/a" , sizeof( dial.label[ i ].label ) );
+        strncpy( dial.label[ i ].font, "Ubuntu" , sizeof( dial.label[ i ].font ) );
+        dial.label[ i ].font_size = 12;
         strncpy( dial.label[ i ].font_color, "#000000" , sizeof( dial.label[ i ].font_color ) );
         strncpy( dial.label[ i ].align, "center" , sizeof( dial.label[ i ].align ) );
-        dial.label[ i ].font_size = 12;
         dial.label[ i ].x_offset = 0;
         dial.label[ i ].y_offset = 0;
         dial.label[ i ].x_size = 0;
@@ -177,9 +180,10 @@ bool watchface_theme_config_t::onDefault( void ) {
     dial.label[ 0 ].enable = true;
     strncpy( dial.label[ 0 ].type, "date", sizeof( dial.label[ 0 ].type ) );
     strncpy( dial.label[ 0 ].label, "%d.%b", sizeof( dial.label[ 0 ].label ) );
+    strncpy( dial.label[ 0 ].font, "Ubuntu" , sizeof( dial.label[ 0 ].font ) );
+    dial.label[ 0 ].font_size = 32;
     strncpy( dial.label[ 0 ].font_color, "#000000", sizeof( dial.label[ 0 ].font_color ) );
     strncpy( dial.label[ 0 ].align, "center" , sizeof( dial.label[ 0 ].align ) );
-    dial.label[ 0 ].font_size = 32;
     dial.label[ 0 ].x_offset = 64;
     dial.label[ 0 ].y_offset = 64;
     dial.label[ 0 ].x_size = 112;
