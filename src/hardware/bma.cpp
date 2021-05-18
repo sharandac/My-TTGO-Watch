@@ -309,6 +309,14 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
 
     TTGOClass *ttgo = TTGOClass::getWatch();
 
+#if defined( LILYGO_WATCH_2020_V2 )
+    /**
+     * fix bma orientation on V2
+     */
+    rotation = rotation + 270;
+#endif
+    rotation = rotation % 360;
+
     switch( rotation / 90 ) {
         case 0:     remap_data.x_axis = 0;
                     remap_data.x_axis_sign = 1;
