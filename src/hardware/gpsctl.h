@@ -26,7 +26,11 @@
     #include "callback.h"
     #include "hardware/config/gpsctlconfig.h"
 
-    #define GPSCTL_INTERVAL             1000           /** @brief gps data intervall in milliseconds */
+    #define GPSCTL_INFO_LOG                 log_i
+    #define GPSCTL_DEBUG_LOG                log_i
+    #define GPSCTL_ERROR_LOG                log_e
+
+    #define GPSCTL_INTERVAL                 1000           /** @brief gps data intervall in milliseconds */
 
     #define GPSCTL_ENABLE                   _BV(0)         /** @brief event mask for GPS enabled */
     #define GPSCTL_DISABLE                  _BV(1)         /** @brief event mask for GPS disable */
@@ -71,12 +75,11 @@
         double altitude_feed = 0;                       /** @brief altitude in feed */
         double altitude_meters = 0;                     /** @brief altitude in meter */
         uint32_t satellites = 0;                        /** @brief number of seen satellites */
-        struct
-        {
-            uint32_t gps_satellites = 0; 
-            uint32_t glonass_satellites = 0; 
-            uint32_t baidou_satellites = 0; 
-        }satellite_types;
+        struct {
+            uint32_t gps_satellites = 0;                /** @brief number of gps satellits in view */
+            uint32_t glonass_satellites = 0;            /** @brief number of glonass satellits in view */
+            uint32_t baidou_satellites = 0;             /** @brief number of baidou satellits in view */
+        } satellite_types;
     } gps_data_t;
     /**
      * @brief setup gps

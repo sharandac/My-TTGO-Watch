@@ -34,6 +34,7 @@
     #define POWERMGM_POWER_BUTTON               _BV(6)         /** @brief event mask for powermgm pmu button is pressed */
     #define POWERMGM_SHUTDOWN                   _BV(12)        /** @brief event mask for powermgm shutdown */
     #define POWERMGM_RESET                      _BV(13)        /** @brief event mask for powermgm reset */
+    #define POWERMGM_SAVE_CONFIG                _BV(14)        /** @brief event mask for powermgm save config */
     #define POWERMGM_DISABLE_INTERRUPTS         _BV(15)        
     #define POWERMGM_ENABLE_INTERRUPTS          _BV(16)        
     

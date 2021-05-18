@@ -121,6 +121,18 @@
      */
     void pmu_set_silence_wakeup( bool value );
     /**
+     * @brief get the current pmu logging state
+     * 
+     * @return  true if logging enabled
+     */ 
+    bool pmu_get_logging( void );
+    /**
+     * @brief get the current pmu logging state
+     * 
+     * @return  true if logging enabled
+     */ 
+    void pmu_set_logging( bool logging );
+    /**
      * @brief get the current battery voltage in mV
      * 
      * @return  voltage in mV

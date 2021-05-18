@@ -42,9 +42,9 @@ bool display_config_t::onLoad(JsonDocument& doc) {
     rotation = doc["rotation"] | DISPLAY_MIN_ROTATE;
     timeout = doc["timeout"] | DISPLAY_MIN_TIMEOUT;
     block_return_maintile = doc["block_return_maintile"] | false;
-    background_image = doc["background_image"] | 2;
+    background_image = doc["background_image"] | 4;
     use_dma = doc["use_dma"] | true;
-    use_double_buffering = doc["use_double_buffering"] | true;
+    use_double_buffering = doc["use_double_buffering"] | false;
     vibe = doc["vibe"] | true;
 
     return true;

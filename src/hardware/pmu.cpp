@@ -439,6 +439,15 @@ void pmu_read_config( void ) {
     pmu_config.load();
 }
 
+bool pmu_get_logging( void ) {
+    return( pmu_config.pmu_logging );
+}
+
+void pmu_set_logging( bool logging ) {
+    pmu_config.pmu_logging = logging;
+    pmu_save_config();
+}
+
 bool pmu_get_silence_wakeup( void ) {
     return( pmu_config.silence_wakeup );
 }
