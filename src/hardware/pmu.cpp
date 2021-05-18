@@ -96,11 +96,6 @@ void pmu_setup( void ) {
     ttgo->power->setPowerOutPut( AXP202_DCDC2, AXP202_OFF );
     ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
     /*
-     * Turn i2s DAC on
-     */
-    ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-    ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-    /*
      * register IRQ function and GPIO pin
      */
     pinMode( AXP202_INT, INPUT );
