@@ -1,4 +1,3 @@
-
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,11 +13,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _ACTIVITY_APP_H
-    #define _ACTIVITY_APP_H
+#ifndef _CALENDAR_APP_H
+    #define _CALENDAR_APP_H
 
     #include <TTGO.h>
 
-    void activity_app_setup();
+    void calendar_app_setup();
 
-#endif // _ACTIVITY_APP_H
+#endif // _CALENDAR_APP_H
