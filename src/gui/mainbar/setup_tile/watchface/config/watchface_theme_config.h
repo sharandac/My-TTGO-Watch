@@ -26,7 +26,7 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_LABEL_NUM                     10
+    #define WATCHFACE_LABEL_NUM                     20
     /**
      * define all decompressed theme file
      */
@@ -69,6 +69,7 @@
         int32_t font_size = 0;                          /** @brief font size: 12,16,32,48 and 72 */
         char font_color[32] = "";                       /** @brief label color in format '#000000' */
         char align[32] = "";                            /** @brief align the label, default is 'center' */
+        int32_t hide_interval = 0;
         int32_t x_offset = 0;                           /** @brief x offset for the label*/
         int32_t y_offset = 0;                           /** @brief y offset for the label*/
         int32_t x_size = 0;                             /** @brief x size for the label*/

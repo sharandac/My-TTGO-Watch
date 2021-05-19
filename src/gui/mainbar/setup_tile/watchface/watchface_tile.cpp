@@ -665,6 +665,42 @@ void watchface_app_tile_update( void ) {
                     snprintf( temp_str, sizeof( temp_str ), "n/a" );
                 }
                 /**
+                 * check toggle option
+                 */
+                if ( watchface_theme_config.dial.label[ i ].hide_interval ) {
+                    /**
+                     * temp toggle value
+                     */
+                    int32_t hide_interval = watchface_theme_config.dial.label[ i ].hide_interval;
+                    if ( hide_interval < 0 ) {
+                        hide_interval = abs( hide_interval );
+                    }
+                    /**
+                     * toggle hide depend
+                     * 
+                     * a postive hide interval means hide/show toggle interval
+                     * a negative hide interval means show/hide toggle interval                    
+                     */
+                    if ( ( info.tm_sec / hide_interval ) % 2 ) {
+                        /**
+                         */
+                        if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
+                            lv_obj_set_hidden( watchface_label[ i ], true );
+                        }
+                        else {
+                            lv_obj_set_hidden( watchface_label[ i ], false );
+                        }
+                    }
+                    else {
+                        if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
+                            lv_obj_set_hidden( watchface_label[ i ], false );
+                        }
+                        else {
+                            lv_obj_set_hidden( watchface_label[ i ], true );
+                        }
+                    }
+                }
+                /**
                  * align label
                  */
                 lv_label_set_text( watchface_label[ i ], temp_str );

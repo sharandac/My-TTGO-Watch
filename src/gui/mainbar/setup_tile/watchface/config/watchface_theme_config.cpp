@@ -73,6 +73,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
             doc["label"][ labelcount ]["font_color"] = dial.label[ i ].font_color;
             doc["label"][ labelcount ]["font_size"] = dial.label[ i ].font_size;
             doc["label"][ labelcount ]["align"] = dial.label[ i ].align;
+            if( dial.label[ i ].hide_interval ) doc["label"][ labelcount ]["toggle_interval"] = dial.label[ i ].hide_interval;
             doc["label"][ labelcount ]["x_offset"] = dial.label[ i ].x_offset;
             doc["label"][ labelcount ]["y_offset"] = dial.label[ i ].y_offset;
             doc["label"][ labelcount ]["x_size"] = dial.label[ i ].x_size;
@@ -118,6 +119,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         dial.label[ i ].font_size = doc["label"][i]["font_size"] | 12;
         strncpy( dial.label[ i ].font_color, doc["label"][i]["font_color"] | "#ffffff" , sizeof( dial.label[ i ].font_color ) );
         strncpy( dial.label[ i ].align, doc["label"][i]["align"] | "center" , sizeof( dial.label[ i ].align ) );
+        dial.label[ i ].hide_interval = doc["label"][i]["hide_interval"] | 0;
         dial.label[ i ].x_offset = doc["label"][i]["x_offset"] | 0;
         dial.label[ i ].y_offset = doc["label"][i]["y_offset"] | 0;
         dial.label[ i ].x_size = doc["label"][i]["x_size"] | 0;
@@ -169,6 +171,7 @@ bool watchface_theme_config_t::onDefault( void ) {
         dial.label[ i ].font_size = 12;
         strncpy( dial.label[ i ].font_color, "#000000" , sizeof( dial.label[ i ].font_color ) );
         strncpy( dial.label[ i ].align, "center" , sizeof( dial.label[ i ].align ) );
+        dial.label[ i ].hide_interval = 0;
         dial.label[ i ].x_offset = 0;
         dial.label[ i ].y_offset = 0;
         dial.label[ i ].x_size = 0;
@@ -184,6 +187,7 @@ bool watchface_theme_config_t::onDefault( void ) {
     dial.label[ 0 ].font_size = 32;
     strncpy( dial.label[ 0 ].font_color, "#000000", sizeof( dial.label[ 0 ].font_color ) );
     strncpy( dial.label[ 0 ].align, "center" , sizeof( dial.label[ 0 ].align ) );
+    dial.label[ 0 ].hide_interval = 0;
     dial.label[ 0 ].x_offset = 64;
     dial.label[ 0 ].y_offset = 64;
     dial.label[ 0 ].x_size = 112;
