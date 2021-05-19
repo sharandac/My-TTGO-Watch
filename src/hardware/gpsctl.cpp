@@ -340,6 +340,16 @@ void gpsctl_off( void ) {
 }
 
 void gpsctl_autoon_on( void ) {
+
+    gps_data.gpsfix = false;
+    gps_data.valid_location = false;
+    gps_data.valid_speed = false;
+    gps_data.valid_altitude = false;
+    gps_data.valid_satellite = false;
+    gps_data.satellite_types.gps_satellites = 0;
+    gps_data.satellite_types.glonass_satellites = 0;
+    gps_data.satellite_types.baidou_satellites = 0;
+
     if ( gpsctl_config.autoon ) {
         if ( !gpsctl_enable ) {
             #if defined( LILYGO_WATCH_HAS_GPS )
@@ -347,28 +357,12 @@ void gpsctl_autoon_on( void ) {
                 ttgo->trunOnGPS();
             #endif
             gpsctl_enable = true;
-            gps_data.gpsfix = false;
-            gps_data.valid_location = false;
-            gps_data.valid_speed = false;
-            gps_data.valid_altitude = false;
-            gps_data.valid_satellite = false;
-            gps_data.satellite_types.gps_satellites = 0;
-            gps_data.satellite_types.glonass_satellites = 0;
-            gps_data.satellite_types.baidou_satellites = 0;
             gpsctl_send_cb( GPSCTL_ENABLE, NULL );
             gpsctl_send_cb( GPSCTL_NOFIX, NULL );
         }
     }
     else {
         gpsctl_enable = false;
-        gps_data.gpsfix = false;
-        gps_data.valid_location = false;
-        gps_data.valid_speed = false;
-        gps_data.valid_altitude = false;
-        gps_data.valid_satellite = false;
-        gps_data.satellite_types.gps_satellites = 0;
-        gps_data.satellite_types.glonass_satellites = 0;
-        gps_data.satellite_types.baidou_satellites = 0;
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
         gpsctl_send_cb( GPSCTL_DISABLE, NULL );
     }
