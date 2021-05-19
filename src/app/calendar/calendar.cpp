@@ -21,6 +21,8 @@
 #include "gui/icon.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
+#include "gui/widget_factory.h"
+#include "gui/widget_styles.h"
 
 uint32_t calendar_main_tile_num;
 
@@ -33,6 +35,7 @@ LV_IMG_DECLARE(calendar_64px);
 
 
 static lv_obj_t * calendar;
+static lv_style_t exit_style;
 
 static void enter_calendar_event_cb( lv_obj_t * obj, lv_event_t event );
 static void event_handler(lv_obj_t * obj, lv_event_t event);
@@ -74,7 +77,7 @@ static void enter_calendar_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void event_handler(lv_obj_t * obj, lv_event_t event)
 {
-    if (event == LV_EVENT_LONG_PRESSED) {
+    if ( event == LV_EVENT_CLICKED ) {
         mainbar_jump_back();
     }
 }
@@ -86,10 +89,17 @@ void build_main_page()
     calendar = lv_calendar_create(main_tile, NULL);
     lv_obj_set_size(calendar, LV_HOR_RES, LV_VER_RES);
     lv_obj_align(calendar, main_tile, LV_ALIGN_IN_TOP_MID, 0, 0);
-    lv_obj_set_event_cb(calendar, event_handler);
 
     /*Make the date number smaller to be sure they fit into their area*/
     lv_obj_set_style_local_text_font(calendar, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, lv_theme_get_font_small());
+
+    lv_style_copy( &exit_style, ws_get_mainbar_style() );
+    lv_style_set_bg_color( &exit_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &exit_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    //lv_style_set_border_width( &exit_style, LV_OBJ_PART_MAIN, 0);
+
+    lv_obj_t *exit_button = wf_add_exit_button(main_tile, event_handler, &exit_style);
+    lv_obj_align( exit_button, main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 }
 
 void refresh_main_page()
