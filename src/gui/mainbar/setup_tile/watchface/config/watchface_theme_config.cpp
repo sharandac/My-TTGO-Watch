@@ -73,7 +73,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
             doc["label"][ labelcount ]["font_color"] = dial.label[ i ].font_color;
             doc["label"][ labelcount ]["font_size"] = dial.label[ i ].font_size;
             doc["label"][ labelcount ]["align"] = dial.label[ i ].align;
-            if( dial.label[ i ].hide_interval ) doc["label"][ labelcount ]["toggle_interval"] = dial.label[ i ].hide_interval;
+            doc["label"][ labelcount ]["hide_interval"] = dial.label[ i ].hide_interval;
             doc["label"][ labelcount ]["x_offset"] = dial.label[ i ].x_offset;
             doc["label"][ labelcount ]["y_offset"] = dial.label[ i ].y_offset;
             doc["label"][ labelcount ]["x_size"] = dial.label[ i ].x_size;
