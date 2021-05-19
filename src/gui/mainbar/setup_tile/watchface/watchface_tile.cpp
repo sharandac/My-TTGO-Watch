@@ -678,7 +678,7 @@ void watchface_app_tile_update( void ) {
                     /**
                      * toggle hide depend
                      * 
-                     * a postive hide interval means hide/show toggle interval
+                     * a positive hide interval means hide/show toggle interval
                      * a negative hide interval means show/hide toggle interval                    
                      */
                     if ( ( info.tm_sec / hide_interval ) % 2 ) {
