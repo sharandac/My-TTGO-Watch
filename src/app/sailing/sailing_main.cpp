@@ -165,6 +165,10 @@ void sailing_activate_cb( void ) {
      */
     sailing_app_active = true;
     /**
+     * Ensure status bar
+     */
+    statusbar_hide( false );
+    /**
      * if wifi active, enable udp listner
      */
     if ( sailing_app_wifi_active ) {

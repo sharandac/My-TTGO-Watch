@@ -40,7 +40,6 @@ lv_obj_t *sailing_track_switch = NULL;
 
 bool tracking = false;
 
-static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sailing_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sailing_track_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 
@@ -60,7 +59,7 @@ void sailing_setup_setup( uint32_t tile_num ) {
     /**
      * add setup header with exit button
      */
-    lv_obj_t *header = wf_add_settings_header( sailing_setup_tile, "Exit setup", exit_sailing_setup_event_cb );
+    lv_obj_t *header = wf_add_settings_header( sailing_setup_tile, "Exit setup" );
     lv_obj_align( header, sailing_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
     /**
      * setup always on display switch
@@ -88,13 +87,6 @@ static void sailing_track_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_VALUE_CHANGED ): SAILING_INFO_LOG( "switch value = %d", lv_switch_get_state( obj ) );
                                         if( lv_switch_get_state( obj ) == 1 ) tracking = true;
                                         else tracking = false;
-                                        break;
-    }
-}
-
-static void exit_sailing_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }
