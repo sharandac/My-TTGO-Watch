@@ -36,7 +36,6 @@ lv_style_t gps_status_setup_style;
 
 lv_obj_t *gps_status_foobar_switch = NULL;
 
-static void exit_gps_status_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void gps_status_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void gps_status_setup_setup( uint32_t tile_num ) {
@@ -45,7 +44,7 @@ void gps_status_setup_setup( uint32_t tile_num ) {
     lv_style_copy( &gps_status_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( gps_status_setup_tile, LV_OBJ_PART_MAIN, &gps_status_setup_style );
 
-    lv_obj_t *header = wf_add_settings_header( gps_status_setup_tile, "gps status setup", exit_gps_status_setup_event_cb );
+    lv_obj_t *header = wf_add_settings_header( gps_status_setup_tile, "gps status setup" );
     //lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
 
     lv_obj_t *gps_status_foobar_switch_cont = lv_obj_create( gps_status_setup_tile, NULL );
@@ -69,13 +68,6 @@ void gps_status_setup_setup( uint32_t tile_num ) {
 static void gps_status_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): Serial.printf( "switch value = %d\r\n", lv_switch_get_state( obj ) );
-                                        break;
-    }
-}
-
-static void exit_gps_status_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

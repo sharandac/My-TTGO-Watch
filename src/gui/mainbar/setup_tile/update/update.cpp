@@ -65,7 +65,6 @@ static bool reset = false;
 
 static void enter_update_setup_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_event_handler(lv_obj_t * obj, lv_event_t event );
 
 bool update_http_ota_event_cb( EventBits_t event, void *arg );
@@ -95,7 +94,7 @@ void update_tile_setup( void ) {
     lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb, &update_settings_style );
     lv_obj_align( setup_btn, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update", exit_update_setup_event_cb );
+    lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update" );
     lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *update_version_cont = lv_obj_create( update_settings_tile, NULL );
@@ -209,13 +208,6 @@ static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
             mainbar_jump_to_tilenumber( update_tile_num, LV_ANIM_OFF );
-            break;
-    }
-}
-static void exit_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       
-            mainbar_jump_back();
             break;
     }
 }

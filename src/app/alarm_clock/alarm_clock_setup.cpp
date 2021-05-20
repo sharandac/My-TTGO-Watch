@@ -33,27 +33,17 @@ lv_obj_t * fade_switch = NULL;
 lv_obj_t * beep_switch = NULL;
 lv_obj_t * main_tile_switch = NULL;
 
-static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-
 void alarm_clock_setup_setup( uint32_t tile_num ) {
     lv_obj_t *tile = mainbar_get_tile_obj( tile_num );
     lv_obj_add_style( tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
     lv_obj_t *tile_container = wf_add_tile_container(tile, LV_LAYOUT_COLUMN_MID);
 
-    wf_add_settings_header(tile_container, "Alarm Settings", exit_alarm_clock_setup_event_cb);
+    wf_add_settings_header(tile_container, "Alarm Settings");
 
     wf_add_labeled_switch(tile_container, "Vibrate", &vibe_switch);
     wf_add_labeled_switch(tile_container, "Fade", &fade_switch);
     wf_add_labeled_switch(tile_container, "Beep", &beep_switch);
     wf_add_labeled_switch(tile_container, "Show on main tile", &main_tile_switch);
-}
-
-static void exit_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            mainbar_jump_back();
-            break;
-    }
 }
 
 static void set_switch_state(lv_obj_t *switch_obj, bool state){

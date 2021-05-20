@@ -21,11 +21,14 @@
 
 #include "widget_factory.h"
 #include "widget_styles.h"
+#include "mainbar/mainbar.h"
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 #define CLICKABLE_PADDING 6
 #define CONTAINER_INNER_PADDING CLICKABLE_PADDING * 2
+
+static void exit_settings_event_cb( lv_obj_t * obj, lv_event_t event );
 
 lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding){
     lv_obj_t *container = lv_cont_create( parent_tile, NULL );
@@ -180,6 +183,19 @@ lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event
     lv_obj_t *cont = wf_add_settings_header( parent, title, &exit_btn );
     lv_obj_set_event_cb( exit_btn, event_cb );
     return cont;
+}
+
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title){
+    lv_obj_t *cont = wf_add_settings_header( parent, title, exit_settings_event_cb );
+    return cont;
+}
+
+static void exit_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            mainbar_jump_back();
+            break;
+    }
 }
 
 lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent) {

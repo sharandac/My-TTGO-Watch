@@ -55,7 +55,6 @@ static lv_style_t style_modal;
 LV_IMG_DECLARE(utilities_64px);
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event );
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -78,7 +77,7 @@ void utilities_tile_setup( void ) {
     icon_t *utilities_setup_icon = setup_register( "Utilities", &utilities_64px, enter_utilities_event_cb );
     setup_hide_indicator( utilities_setup_icon );
 
-    lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities", exit_utilities_event_cb );
+    lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities" );
     lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     //Spiffs:
@@ -184,13 +183,6 @@ static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
-
-static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
-                                        break;
-    }
-}
 //********************************SPIFFS stuff
 
 static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event ){

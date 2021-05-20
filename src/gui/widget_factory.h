@@ -158,6 +158,16 @@ lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int he
  */
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn);
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event_cb_t event_cb);
+
+/**
+ * @brief   Creates and adds header container for settings dialogs with a default exit callback
+ *
+ * @param   parent  pointer to a parent container
+ * @param   title   dialog name (usually the app name)
+ *
+ * @return  returns pointer to the added container
+ */
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title);
 lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent);
 
 /**
