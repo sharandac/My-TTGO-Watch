@@ -28,7 +28,7 @@ LV_IMG_DECLARE(setup_32px);
 #define CLICKABLE_PADDING 6
 #define CONTAINER_INNER_PADDING CLICKABLE_PADDING * 2
 
-static void exit_settings_event_cb( lv_obj_t * obj, lv_event_t event );
+static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event );
 
 lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding){
     lv_obj_t *container = lv_cont_create( parent_tile, NULL );
@@ -164,13 +164,17 @@ lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
     return wf_add_image_button(parent, exit_32px, event_cb, style);
 }
 
+lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_style_t *style){
+    return wf_add_exit_button(parent, exit_jump_back_event_cb, style);
+}
+
 lv_obj_t * wf_add_setup_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
     return wf_add_image_button(parent, setup_32px, event_cb, style);
 }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
-    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL);
+    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
     if (title != NULL && strlen(title) > 0) {
         wf_add_label(container, title);
     }
@@ -186,11 +190,11 @@ lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event
 }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title){
-    lv_obj_t *cont = wf_add_settings_header( parent, title, exit_settings_event_cb );
+    lv_obj_t *cont = wf_add_settings_header( parent, title, exit_jump_back_event_cb );
     return cont;
 }
 
-static void exit_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             mainbar_jump_back();
