@@ -32,12 +32,12 @@ static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event );
 
 lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding){
     lv_obj_t *container = lv_cont_create( parent_tile, NULL );
-     lv_obj_add_style( container, LV_OBJ_PART_MAIN, ws_get_container_style() );
-    lv_cont_set_fit2(container, hor_fit, ver_fit );
+    lv_obj_add_style( container, LV_OBJ_PART_MAIN, ws_get_container_style() );
+    lv_cont_set_fit2( container, hor_fit, ver_fit );
 
-    lv_obj_set_style_local_pad_all( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, add_padding ? CLICKABLE_PADDING : 0);
-    lv_obj_set_style_local_pad_inner( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, CONTAINER_INNER_PADDING);
-    lv_cont_set_layout(container, layout);
+    lv_obj_set_style_local_pad_all( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, add_padding ? CLICKABLE_PADDING : 0 );
+    lv_obj_set_style_local_pad_inner( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, CONTAINER_INNER_PADDING );
+    lv_cont_set_layout( container, layout );
 
     return container;
 }
