@@ -44,8 +44,6 @@ lv_style_t watchface_setup_button_style;                    /** @brief watchface
 lv_obj_t *watchface_onoff = NULL;                           /** @brief watchface enable switch obj */
 lv_obj_t *watchface_info_label = NULL;                      /** @brief watchface info label obj */
 
-LV_IMG_DECLARE(exit_32px);
-
 static void watchface_setup_default_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_setup_reload_and_test_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_setup_enable_event_cb( lv_obj_t *obj, lv_event_t event );
