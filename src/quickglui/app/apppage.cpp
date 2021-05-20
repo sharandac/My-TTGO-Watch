@@ -9,10 +9,9 @@
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>
+#include <gui/widget_factory.h>
 #include <gui/widget_styles.h>
 
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 
 AppPage& AppPage::init(lv_obj_t* handle, bool defaultExitBtn)
@@ -21,9 +20,8 @@ AppPage& AppPage::init(lv_obj_t* handle, bool defaultExitBtn)
 
   if (defaultExitBtn)
   {
-    btnExit = Button(this, exit_32px, [](Widget target) {
-        mainbar_jump_to_maintile(LV_ANIM_OFF);
-    });
+    lv_obj_t *btnExitHandle = wf_add_exit_button(handle);
+    btnExit = Button(btnExitHandle);
     btnExit.align(*this, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
   }
   
@@ -32,7 +30,8 @@ AppPage& AppPage::init(lv_obj_t* handle, bool defaultExitBtn)
 
 AppPage& AppPage::addSettingsButton(WidgetAction onSettingsBtnClick)
 {
-  btnSettings = Button(this, setup_32px, onSettingsBtnClick);
+  lv_obj_t *btnSettingsHandle = wf_add_setup_button(this->handle(), NULL, NULL);
+  btnSettings = Button(btnSettingsHandle).clicked(onSettingsBtnClick);
   btnSettings.align(*this, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
 
   return *this;
