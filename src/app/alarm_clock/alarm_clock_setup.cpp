@@ -40,9 +40,7 @@ void alarm_clock_setup_setup( uint32_t tile_num ) {
     lv_obj_add_style( tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
     lv_obj_t *tile_container = wf_add_tile_container(tile, LV_LAYOUT_COLUMN_MID);
 
-    lv_obj_t *exit_btn = NULL;
-    wf_add_settings_header(tile_container, "Alarm Settings", &exit_btn);
-    lv_obj_set_event_cb( exit_btn, exit_alarm_clock_setup_event_cb );
+    wf_add_settings_header(tile_container, "Alarm Settings", exit_alarm_clock_setup_event_cb);
 
     wf_add_labeled_switch(tile_container, "Vibrate", &vibe_switch);
     wf_add_labeled_switch(tile_container, "Fade", &fade_switch);
