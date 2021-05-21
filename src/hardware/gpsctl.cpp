@@ -90,14 +90,16 @@ bool gpsctl_get_available( void ) {
 }
 
 bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
+    static uint64_t lastmillis = millis();
     /*
-     * check if gpsctl already init
+     * check if gpsctl already init or turn off
      */
-    if ( !gpsctl_init ) {
+    if ( !gpsctl_init || !gpsctl_enable ) {
         return( true );
     }
-    static uint64_t lastmillis = millis();
-
+    /**
+     * run any second
+     */
     if ( millis() - lastmillis > GPSCTL_INTERVAL ) {
         /*
          * check if the last update is more than 2 times away
