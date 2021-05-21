@@ -21,20 +21,23 @@
 
 #include "widget_factory.h"
 #include "widget_styles.h"
+#include "mainbar/mainbar.h"
 
 LV_IMG_DECLARE(exit_32px);
 LV_IMG_DECLARE(setup_32px);
 #define CLICKABLE_PADDING 6
 #define CONTAINER_INNER_PADDING CLICKABLE_PADDING * 2
 
+static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event );
+
 lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding){
     lv_obj_t *container = lv_cont_create( parent_tile, NULL );
-     lv_obj_add_style( container, LV_OBJ_PART_MAIN, ws_get_container_style() );
-    lv_cont_set_fit2(container, hor_fit, ver_fit );
+    lv_obj_add_style( container, LV_OBJ_PART_MAIN, ws_get_container_style() );
+    lv_cont_set_fit2( container, hor_fit, ver_fit );
 
-    lv_obj_set_style_local_pad_all( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, add_padding ? CLICKABLE_PADDING : 0);
-    lv_obj_set_style_local_pad_inner( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, CONTAINER_INNER_PADDING);
-    lv_cont_set_layout(container, layout);
+    lv_obj_set_style_local_pad_all( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, add_padding ? CLICKABLE_PADDING : 0 );
+    lv_obj_set_style_local_pad_inner( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, CONTAINER_INNER_PADDING );
+    lv_cont_set_layout( container, layout );
 
     return container;
 }
@@ -161,13 +164,17 @@ lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
     return wf_add_image_button(parent, exit_32px, event_cb, style);
 }
 
+lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_style_t *style){
+    return wf_add_exit_button(parent, exit_jump_back_event_cb, style);
+}
+
 lv_obj_t * wf_add_setup_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
     return wf_add_image_button(parent, setup_32px, event_cb, style);
 }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
-    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL);
+    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
     if (title != NULL && strlen(title) > 0) {
         wf_add_label(container, title);
     }
@@ -180,6 +187,19 @@ lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_event
     lv_obj_t *cont = wf_add_settings_header( parent, title, &exit_btn );
     lv_obj_set_event_cb( exit_btn, event_cb );
     return cont;
+}
+
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title){
+    lv_obj_t *cont = wf_add_settings_header( parent, title, exit_jump_back_event_cb );
+    return cont;
+}
+
+static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):
+            mainbar_jump_back();
+            break;
+    }
 }
 
 lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent) {

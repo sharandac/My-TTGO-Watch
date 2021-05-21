@@ -64,7 +64,6 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
 bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
-static void exit_powermeter_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
 
@@ -127,7 +126,7 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_style_copy( &powermeter_id_style, ws_get_app_opa_style() );
     lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
 
-    lv_obj_t * exit_btn = wf_add_exit_button( powermeter_main_tile, exit_powermeter_main_event_cb, &powermeter_main_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( powermeter_main_tile, &powermeter_main_style );
     lv_obj_align(exit_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
     lv_obj_t * setup_btn = wf_add_setup_button( powermeter_main_tile, enter_powermeter_setup_event_cb, &powermeter_main_style );
@@ -229,13 +228,6 @@ static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event ) 
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( powermeter_get_app_setup_tile_num(), LV_ANIM_ON );
                                         statusbar_hide( true );
-                                        break;
-    }
-}
-
-static void exit_powermeter_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

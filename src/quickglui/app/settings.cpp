@@ -11,9 +11,8 @@
 #include <config.h>
 #include <gui/mainbar/mainbar.h>
 #include <gui/statusbar.h>
+#include <gui/widget_factory.h>
 #include <gui/widget_styles.h>
-
-LV_IMG_DECLARE(exit_32px);
 
 SettingsPage& SettingsPage::init(lv_obj_t* handle, const char* title, WidgetAction onExitBtnClick)
 {
@@ -30,7 +29,9 @@ void SettingsPage::constructHeader(const char* title, WidgetAction onExitBtnClic
     headerContainer = Widget(this);
     headerContainer.size(LV_HOR_RES, 40);
 
-    Button exitBtn(&headerContainer, exit_32px, onExitBtnClick);
+    lv_obj_t * exitBtnHandle = wf_add_exit_button(headerContainer.handle());
+    Button exitBtn(exitBtnHandle);
+    exitBtn.clicked(onExitBtnClick);
     exitBtn.alignInParentLeftMid(10, 0);
 
     Label titleLabel(&headerContainer, title);

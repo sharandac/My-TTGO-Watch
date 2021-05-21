@@ -33,8 +33,6 @@
 #include "hardware/rtcctl.h"
 
 lv_obj_t *alarm_enabled_switch = NULL;
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
 
 #define ROLLER_ROW_COUNT 4
 
@@ -49,7 +47,6 @@ static lv_obj_t *friday_btn = NULL;
 static lv_obj_t *saturday_btn = NULL;
 static lv_obj_t *sunday_btn = NULL;
 
-static void exit_alarm_clock_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
@@ -119,8 +116,8 @@ void alarm_clock_main_setup( uint32_t tile_num ) {
     );
     lv_obj_set_width(minute_roller, 90);
 
-    wf_add_image_button(footer_container, exit_32px, exit_alarm_clock_main_event_cb);
-    wf_add_image_button(footer_container, setup_32px, enter_alarm_clock_setup_event_cb);
+    wf_add_exit_button(footer_container);
+    wf_add_setup_button(footer_container, enter_alarm_clock_setup_event_cb);
 }
 
 void alarm_clock_main_set_data_to_display(rtcctl_alarm_t *alarm_data, bool clock_24){
@@ -167,14 +164,6 @@ static void enter_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event )
         case( LV_EVENT_CLICKED ):
             statusbar_hide( true );
             mainbar_jump_to_tilenumber( alarm_clock_get_app_setup_tile_num(), LV_ANIM_ON );
-            break;
-    }
-}
-
-static void exit_alarm_clock_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            mainbar_jump_back( ); // user action (return back) will be performed first
             break;
     }
 }

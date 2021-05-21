@@ -51,7 +51,6 @@ LV_IMG_DECLARE(bluetooth_64px);
 LV_IMG_DECLARE(info_fail_16px);
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 bool blectl_onoff_event_cb( EventBits_t event, void *arg );
 static void bluetooth_enable_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
@@ -70,7 +69,7 @@ void bluetooth_settings_tile_setup( void ) {
     bluettoth_setup_icon = setup_register( "bluetooth", &bluetooth_64px, enter_bluetooth_setup_event_cb );
     setup_hide_indicator( bluettoth_setup_icon );
 
-    lv_obj_t *header = wf_add_settings_header( bluetooth_settings_tile, "bluetooth settings", exit_bluetooth_setup_event_cb );
+    lv_obj_t *header = wf_add_settings_header( bluetooth_settings_tile, "bluetooth settings" );
     lv_obj_align( header, bluetooth_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *bluetooth_enable_cont = wf_add_labeled_switch( bluetooth_settings_tile, "enable on wakeup", &bluetooth_enable_onoff, blectl_get_autoon(), bluetooth_enable_onoff_event_handler );
@@ -128,13 +127,6 @@ bool blectl_onoff_event_cb( EventBits_t event, void *arg ) {
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( bluetooth_tile_num, LV_ANIM_OFF );
-                                        break;
-    }
-}
-
-static void exit_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

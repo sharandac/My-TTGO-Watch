@@ -65,9 +65,7 @@ lv_obj_t *wifi_onoff=NULL;
 lv_obj_t *wifiname_list=NULL;
 
 static void enter_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifi_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event );
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg );
@@ -94,7 +92,7 @@ void wlan_settings_tile_setup( void ) {
     wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
     setup_hide_indicator( wifi_setup_icon );
 
-    lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan", exit_wifi_settings_event_cb );
+    lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan" );
     lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *setup_btn = wf_add_setup_button( wifi_settings_tile, enter_wifi_setup_event_cb, &wifi_settings_style );
@@ -154,13 +152,6 @@ bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
 static void enter_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( wifi_settings_tile_num, LV_ANIM_OFF );
-                                        break;
-    }
-}
-
-static void exit_wifi_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }
@@ -281,7 +272,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     lv_style_copy( &wifi_setup_style, ws_get_setup_tile_style() );
     lv_obj_add_style( wifi_setup_tile, LV_OBJ_PART_MAIN, &wifi_setup_style );
 
-    lv_obj_t *header = wf_add_settings_header( wifi_setup_tile, "wlan settings", exit_wifi_setup_event_cb );
+    lv_obj_t *header = wf_add_settings_header( wifi_setup_tile, "wlan settings" );
     lv_obj_align( header, wifi_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
     lv_obj_t *wifi_autoon_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable on wakeup", &wifi_autoon_onoff, wifictl_get_autoon(), wifi_autoon_onoff_event_handler );
@@ -323,13 +314,6 @@ static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event ) {
 static void enter_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( wifi_setup_tile_num, LV_ANIM_ON );
-                                        break;
-    }
-}
-
-static void exit_wifi_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

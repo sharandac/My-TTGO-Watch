@@ -77,9 +77,6 @@ LV_FONT_DECLARE(Ubuntu_48px);
  */
 LV_IMG_DECLARE(right_32px);
 LV_IMG_DECLARE(left_32px);
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(exit_32px);
-LV_IMG_DECLARE(setup_32px);
 LV_IMG_DECLARE(refresh_32px);
 LV_IMG_DECLARE(downloading_32px);
 LV_IMG_DECLARE(t_watch_2020_240px);
@@ -89,7 +86,6 @@ watchface_theme_t watchface_theme;
 void watchface_manager_theme_install_task( lv_task_t * task );
 void watchface_manager_app_Task( void * pvParameters );
 bool watchface_manager_wifictl_event_cb( EventBits_t event, void *arg );
-static void exit_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
 static void setup_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
 static void prev_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
 static void next_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event );
@@ -193,12 +189,12 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     /**
      * add exit button
      */
-    lv_obj_t *watchface_manager_exit_btn = wf_add_image_button( watchface_manager_app_cont, exit_32px, exit_watchface_manager_app_event_cb, NULL );
+    lv_obj_t *watchface_manager_exit_btn = wf_add_exit_button( watchface_manager_app_cont );
     lv_obj_align( watchface_manager_exit_btn, watchface_manager_app_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
     /**
      * add setup button
      */
-    lv_obj_t *watchface_manager_setup_btn = wf_add_image_button( watchface_manager_app_cont, setup_32px, setup_watchface_manager_app_event_cb, NULL );
+    lv_obj_t *watchface_manager_setup_btn = wf_add_setup_button( watchface_manager_app_cont, setup_watchface_manager_app_event_cb, NULL );
     lv_obj_align( watchface_manager_setup_btn, watchface_manager_app_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
     /**
      * set activate and hibernate call back
@@ -232,14 +228,6 @@ void watchface_manager_theme_install_task( lv_task_t * task ) {
     if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_INSTALL_THEME ) {
             watchface_decompress_theme();
             xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_INSTALL_THEME );
-    }
-}
-
-static void exit_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event ) {
-    switch ( event ) {
-        case LV_EVENT_CLICKED:
-            mainbar_jump_back();
-            break;
     }
 }
 

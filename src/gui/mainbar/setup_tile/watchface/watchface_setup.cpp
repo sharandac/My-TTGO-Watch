@@ -44,12 +44,9 @@ lv_style_t watchface_setup_button_style;                    /** @brief watchface
 lv_obj_t *watchface_onoff = NULL;                           /** @brief watchface enable switch obj */
 lv_obj_t *watchface_info_label = NULL;                      /** @brief watchface info label obj */
 
-LV_IMG_DECLARE(exit_32px);
-
 static void watchface_setup_default_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_setup_reload_and_test_cb( lv_obj_t *obj, lv_event_t event );
 static void watchface_setup_enable_event_cb( lv_obj_t *obj, lv_event_t event );
-static void exit_watchface_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void watchface_setup_decompress_cb( lv_obj_t *obj, lv_event_t event );
 void watchface_setup_progress_cb( int32_t percent );
 
@@ -69,7 +66,7 @@ void watchface_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( watchface_setup_tile, LV_OBJ_PART_MAIN, &watchface_setup_style );
     lv_style_copy( &watchface_setup_button_style, ws_get_button_style() );
 
-    lv_obj_t *watchface_setup_header = wf_add_settings_header( watchface_setup_tile, "Watchface setup", exit_watchface_setup_event_cb );
+    lv_obj_t *watchface_setup_header = wf_add_settings_header( watchface_setup_tile, "Watchface setup" );
     lv_obj_align( watchface_setup_header, watchface_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
     /**
      * switch container
@@ -173,16 +170,5 @@ static void watchface_setup_enable_event_cb( lv_obj_t *obj, lv_event_t event ) {
                                             watchface_config.watchface_enable = lv_switch_get_state( obj );
                                             watchface_config.save();
                                             break;
-    }
-}
-
-static void exit_watchface_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):
-            /**
-             * exit to mainbar
-             */
-            mainbar_jump_back();
-            break;
     }
 }
