@@ -51,6 +51,7 @@
         wifictl_config_t();
         bool autoon = true;                                     /** @brief enable on auto on/off an wakeup and standby */
         bool enable_on_standby = false;                         /** @brief enable on standby */
+        char hostname[32]="T-Watch";
         #ifdef ENABLE_WEBSERVER
             bool webserver = false;                             /** @brief enable on webserver */
         #endif

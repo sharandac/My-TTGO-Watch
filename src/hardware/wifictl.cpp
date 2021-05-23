@@ -108,6 +108,7 @@ void wifictl_setup( void ) {
             for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
                 if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
                     wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
+                    WiFi.setHostname(wifictl_config.hostname);
                     WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
                     return;
                 }
@@ -161,6 +162,7 @@ void wifictl_setup( void ) {
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
       esp_wifi_wps_disable();
+      WiFi.setHostname(wifictl_config.hostname);
       WiFi.begin();
       wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps success" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
