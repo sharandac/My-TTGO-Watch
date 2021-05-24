@@ -43,6 +43,10 @@
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
 #include "app/osmmap/osmmap_app.h"
+#include "app/NetTools/NetTools.h"
+#include "app/ping/ping_app.h"
+#include "app/wireless/wireless_app.h"
+#include "app/wifimon/wifimon_app.h"
 
 void setup() {
     /**
@@ -79,6 +83,10 @@ void setup() {
     fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
+    NetTools_setup();
+    ping_app_setup();
+    wireless_app_setup();
+    wifimon_app_setup();
     /**
      * post hardware setup
      * 

@@ -87,6 +87,7 @@ void wifictl_setup( void ) {
      * limit wifi bandwidth to 20Mhz channel width
      */
     esp_wifi_set_bandwidth( ESP_IF_WIFI_STA, WIFI_BW_HT20 );
+    esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
     /*
      * register WiFi events
      */
