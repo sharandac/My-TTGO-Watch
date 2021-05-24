@@ -35,7 +35,6 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg );
 
 void sdcard_setup( void ) {
     #if defined( LILYGO_WATCH_HAS_SDCARD )
-        TTGOClass *ttgo = TTGOClass::getWatch();
         /**
          * as small hack to reduce internal heap memory
          * consumption from 27k to 5k while using sd lib
