@@ -128,7 +128,7 @@ static void create_alarm_app_icon(){
     // the resulting c-file can put in /app/examples/images/
     lv_obj_t * alarm_clock_icon = wf_add_image_button( alarm_clock_icon_cont, alarm_clock_64px, enter_alarm_clock_event_cb );
     lv_obj_reset_style_list( alarm_clock_icon, LV_OBJ_PART_MAIN );
-    lv_obj_align( alarm_clock_icon , alarm_clock_icon_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+    lv_obj_align( alarm_clock_icon , alarm_clock_icon_cont, LV_ALIGN_CENTER, 0, 0 );
 
     // make app icon drag scroll the mainbar
     mainbar_add_slide_element(alarm_clock_icon);
