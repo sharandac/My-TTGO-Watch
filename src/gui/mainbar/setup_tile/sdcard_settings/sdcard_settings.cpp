@@ -57,44 +57,39 @@ void sdcard_settings_tile_setup(void)
     lv_obj_t *header = wf_add_settings_header( sdcard_settings_tile, "SD card setup" );
     lv_obj_align(header, sdcard_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10);
 
-    lv_obj_t *sdcard_fs_browser_enable_cont = lv_obj_create(sdcard_settings_tile, NULL);
-    lv_obj_set_size(sdcard_fs_browser_enable_cont, lv_disp_get_hor_res(NULL), 32);
-    lv_obj_add_style(sdcard_fs_browser_enable_cont, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_obj_align(sdcard_fs_browser_enable_cont, header, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
-    sdcard_fs_browser_onoff = wf_add_switch(sdcard_fs_browser_enable_cont, false);
-    lv_obj_align(sdcard_fs_browser_onoff, sdcard_fs_browser_enable_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
-    lv_obj_set_event_cb(sdcard_fs_browser_onoff, sdcard_fs_browser_onoff_event_handler);
-    lv_obj_t *bluetooth_enable_label = lv_label_create(sdcard_fs_browser_enable_cont, NULL);
-    lv_obj_add_style(bluetooth_enable_label, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_label_set_text(bluetooth_enable_label, "Enable SD card in \nFS browser");
-    lv_obj_align(bluetooth_enable_label, sdcard_fs_browser_enable_cont, LV_ALIGN_IN_LEFT_MID, 5, 0);
+    lv_obj_t *sdcard_fs_browser_enable_cont = wf_add_labeled_switch( sdcard_settings_tile,
+                                                                     "Enable SD card in \nFS browser", 
+                                                                     &sdcard_fs_browser_onoff, 
+                                                                     0, 
+                                                                     sdcard_fs_browser_onoff_event_handler );
+    lv_obj_align( sdcard_fs_browser_enable_cont, header, LV_ALIGN_OUT_BOTTOM_MID, -5, 10 );
 
     lv_obj_t *sd_infos_cont = lv_obj_create(sdcard_settings_tile, NULL);
     lv_obj_set_size(sd_infos_cont, lv_disp_get_hor_res(NULL), 15);
     lv_obj_add_style(sd_infos_cont, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_obj_align(sd_infos_cont, bluetooth_enable_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+    lv_obj_align(sd_infos_cont, sdcard_fs_browser_enable_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
     lv_obj_t *sd_infos_label = lv_label_create(sd_infos_cont, NULL);
     lv_obj_add_style(sd_infos_label, LV_OBJ_PART_MAIN, &sdcard_settings_style);
     lv_label_set_text(sd_infos_label, "SD information");
-    lv_obj_align(sd_infos_label, sd_infos_cont, LV_ALIGN_IN_LEFT_MID, 0, 0);
+    lv_obj_align(sd_infos_label, sd_infos_cont, LV_ALIGN_IN_LEFT_MID, 15, 0);
 
     lv_obj_t *sd_type_cont = lv_obj_create(sdcard_settings_tile, NULL);
     lv_obj_set_size(sd_type_cont, lv_disp_get_hor_res(NULL), 15);
     lv_obj_add_style(sd_type_cont, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_obj_align(sd_type_cont, sd_infos_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+    lv_obj_align(sd_type_cont, sd_infos_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 4);
     lv_obj_t *sd_type_label = lv_label_create(sd_type_cont, NULL);
     lv_obj_add_style(sd_type_label, LV_OBJ_PART_MAIN, &sdcard_settings_style);
     lv_label_set_text(sd_type_label, "SD card type:");
-    lv_obj_align(sd_type_label, sd_type_cont, LV_ALIGN_IN_LEFT_MID, 0, 0);
+    lv_obj_align(sd_type_label, sd_type_cont, LV_ALIGN_IN_LEFT_MID, 15, 0);
 
     lv_obj_t *sd_size_cont = lv_obj_create(sdcard_settings_tile, NULL);
     lv_obj_set_size(sd_size_cont, lv_disp_get_hor_res(NULL), 15);
     lv_obj_add_style(sd_size_cont, LV_OBJ_PART_MAIN, &sdcard_settings_style);
-    lv_obj_align(sd_size_cont, sd_type_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+    lv_obj_align(sd_size_cont, sd_type_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 4);
     lv_obj_t *sd_size_label = lv_label_create(sd_size_cont, NULL);
     lv_obj_add_style(sd_size_label, LV_OBJ_PART_MAIN, &sdcard_settings_style);
     lv_label_set_text(sd_size_label, "SD card size:");
-    lv_obj_align(sd_size_label, sd_size_cont, LV_ALIGN_IN_LEFT_MID, 0, 0);
+    lv_obj_align(sd_size_label, sd_size_cont, LV_ALIGN_IN_LEFT_MID, 15, 0);
 
 #ifdef LILYGO_WATCH_HAS_SDCARD
     //get SD type
@@ -131,6 +126,7 @@ void sdcard_settings_tile_setup(void)
     lv_label_set_text(sd_size_val, sdCardSize);
     lv_obj_align(sd_size_val, sd_size_cont, LV_ALIGN_IN_RIGHT_MID, -5, 8);
 #endif
+
 }
 
 static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event) {
