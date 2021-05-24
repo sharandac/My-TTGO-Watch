@@ -31,6 +31,9 @@
     #ifdef ENABLE_FTPSERVER
         #include "utils/ftpserver/ftpserver.h"
     #endif
+    #ifdef ENABLE_MQTT
+        #include "utils/mqtt/mqtt.h"
+    #endif
 
     #define NETWORKLIST_ENTRYS          20
     #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"
@@ -59,6 +62,14 @@
             bool ftpserver = false;                             /** @brief enable on ftpserver */
             char ftpuser[32] = FTPSERVER_USER;                  /** @brief ftpserver username*/
             char ftppass[32] = FTPSERVER_PASSWORD;              /** @brief ftpserver password*/
+        #endif
+        #ifdef ENABLE_MQTT
+            bool mqtt = false;                                  /** @brief enable on mqtt */
+            bool mqttssl = false;                               /** @brief mqtt ssl */
+            char mqttserver[64] = "";                           /** @brief mqtt server*/
+            int32_t mqttport = 1883;                            /** @brief mqtt port*/
+            char mqttuser[32] = "";                             /** @brief mqtt username*/
+            char mqttpass[32] = "";                             /** @brief mqtt password*/
         #endif
         wifictl_networklist* networklist = NULL;                /** @brief network list config pointer */
 

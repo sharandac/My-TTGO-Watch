@@ -147,17 +147,31 @@
     #endif
     #ifdef ENABLE_FTPSERVER
     /**
-     * @brief   get the current webserver configuration
+     * @brief   get the current ftpserver configuration
      * 
      * @return  true means ftpserver is enable, false ftpserver is disable
      */
     bool wifictl_get_ftpserver( void );
     /**
-     * @brief   set the current werbserver configuration
+     * @brief   set the current ftpserver configuration
      * 
      * @param   ftpserver   true means ftpserver enable, false means ftpserver disable
      */
     void wifictl_set_ftpserver( bool ftpserver );
+    #endif
+    #ifdef ENABLE_MQTT
+    /**
+     * @brief   get the current mqtt configuration
+     * 
+     * @return  true means mqtt is enable, false mqtt is disable
+     */
+    bool wifictl_get_mqtt( void );
+    /**
+     * @brief   set the current mqtt configuration
+     * 
+     * @param   mqtt   true means mqtt enable, false means mqtt disable
+     */
+    void wifictl_set_mqtt( bool mqtt );
     #endif
     /**
      * @brief   set wifi enable on standby

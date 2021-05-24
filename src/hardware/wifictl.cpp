@@ -36,6 +36,9 @@
 #ifdef ENABLE_FTPSERVER
     #include "utils/ftpserver/ftpserver.h"
 #endif
+#ifdef ENABLE_MQTT
+    #include "utils/mqtt/mqtt.h"
+#endif
 
 bool wifi_init = false;
 EventGroupHandle_t wifictl_status = NULL;
@@ -137,6 +140,11 @@ void wifictl_setup( void ) {
             ftpserver_start( wifictl_config.ftpuser , wifictl_config.ftppass );
         }
         # endif
+        #ifdef ENABLE_MQTT
+        if ( wifictl_config.mqtt ) {
+            mqtt_start( wifictl_config.hostname , wifictl_config.mqttssl , wifictl_config.mqttserver , wifictl_config.mqttport , wifictl_config.mqttuser , wifictl_config.mqttpass );
+        }
+        # endif
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -156,6 +164,9 @@ void wifictl_setup( void ) {
         #ifdef ENABLE_WEBSERVER
             asyncwebserver_end();
         #endif
+        #ifdef ENABLE_MQTT
+            mqtt_stop();
+        # endif
         wifictl_clear_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST );
         wifictl_send_event_cb( WIFICTL_OFF, (void *)"" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
@@ -272,6 +283,17 @@ return( wifictl_config.ftpserver );
 
 void wifictl_set_ftpserver( bool ftpserver ) {
   wifictl_config.ftpserver = ftpserver;
+  wifictl_save_config();
+}
+#endif
+
+#ifdef ENABLE_MQTT
+bool wifictl_get_mqtt( void ) {
+return( wifictl_config.mqtt );
+}
+
+void wifictl_set_mqtt( bool mqtt ) {
+  wifictl_config.mqtt = mqtt;
   wifictl_save_config();
 }
 #endif

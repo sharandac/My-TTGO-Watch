@@ -41,6 +41,7 @@
      */
     #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
     #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+    #define ENABLE_MQTT                             /** @brief To disable built-in mqtt connection, comment this line */
     /**
      * Enable non-latin languages support
      */
