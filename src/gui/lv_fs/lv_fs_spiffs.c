@@ -126,11 +126,9 @@ static lv_fs_res_t fs_open (lv_fs_drv_t *drv, void *file_p, const char *path, lv
 
     char buf[256];
     sprintf(buf, LV_FS_SPIFFS_PATH "/%s", path);
-    printf("%s\n", buf);
 
     file_t f = fopen(buf, flags);
     if (f == NULL) {
-        printf("Failed to open %s\n", buf);
         return LV_FS_RES_UNKNOWN;
     }
     /*Be sure we are the beginning of the file*/
