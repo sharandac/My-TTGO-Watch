@@ -74,6 +74,8 @@ lv_obj_t *watchface_hour_s_img = NULL;
 lv_obj_t *watchface_min_s_img = NULL;
 lv_obj_t *watchface_sec_s_img = NULL;
 lv_obj_t *watchface_btn = NULL;
+lv_obj_t *watchface_image[ WATCHFACE_IMAGE_NUM ];
+lv_font_t *watchface_custom_font[ WATCHFACE_LABEL_NUM ];
 lv_obj_t *watchface_label[ WATCHFACE_LABEL_NUM ];
 lv_style_t *watchface_app_label_style[ WATCHFACE_LABEL_NUM ];
 lv_style_t watchface_app_tile_style;
@@ -112,6 +114,7 @@ void watchface_remove_theme_files ( void );
 lv_font_t *watchface_get_font( const char *font, int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
+void watchface_app_label_update( void );
 
 void watchface_tile_setup( void ) {
     watchface_app_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Tile" );
@@ -163,6 +166,31 @@ void watchface_tile_setup( void ) {
         lv_label_set_text( watchface_label[ i ], (const char*)watchface_theme_config.dial.label[ i ].label );
         lv_obj_add_style( watchface_label[ i ], LV_OBJ_PART_MAIN, watchface_app_label_style[ i ] );
         lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
+        /**
+         * free font
+         */
+        watchface_custom_font[ i ] = NULL;
+    }
+    /**
+     * alloc image and set to defauts
+     */
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        /**
+         * alloc and setup image container
+         */
+        lv_obj_t *watchface_image_cont = lv_cont_create( watchface_cont, NULL );
+        lv_obj_set_width( watchface_image_cont, watchface_theme_config.dial.image[ i ].x_size );
+        lv_obj_set_height( watchface_image_cont, watchface_theme_config.dial.image[ i ].y_size );
+        lv_obj_set_pos( watchface_image_cont, watchface_theme_config.dial.image[ i ].x_offset, watchface_theme_config.dial.image[ i ].y_offset );
+        lv_obj_set_hidden( watchface_image_cont, !watchface_theme_config.dial.image[ i ].enable );
+        /**
+         * alloc and setup image
+         */
+        watchface_image[ i ] = lv_img_create( watchface_image_cont, NULL );
+        lv_img_set_src( watchface_image[ i ], watchface_theme_config.dial.image[ i ].file );
+        lv_obj_align( watchface_image[ i ], watchface_image_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+        lv_img_set_pivot( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_x_origin, watchface_theme_config.dial.image[ i ].rotation_y_origin );
+        lv_img_set_angle( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_start );
     }
     /**
      * alloc default index shadows
@@ -432,7 +460,28 @@ void watchface_reload_theme( void ) {
      * alloc labels and set to defauts
      */
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-        lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
+        /**
+         * load font from spiffs
+         */
+        if ( watchface_theme_config.dial.label[ i ].font[ 0 ] == '/' ) {
+            String fontname = watchface_theme_config.dial.label[ i ].font;
+            String font = "P:/spiffs/watchface" + fontname;
+            if ( watchface_custom_font[ i ] ) {
+                lv_font_free( watchface_custom_font[ i ] );
+            }
+            log_i("load font from: %s", font.c_str() );
+            watchface_custom_font[ i ] = lv_font_load( font.c_str() );
+            if ( watchface_custom_font[ i ] ) {
+                lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_custom_font[ i ] );
+            }
+            else {
+                log_e("load font failed");                
+                lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
+            }
+        }
+        else {
+            lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
+        }
         lv_style_set_text_color( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_color( watchface_theme_config.dial.label[ i ].font_color ) );
         /**
          * alloc and setup label container
@@ -449,6 +498,25 @@ void watchface_reload_theme( void ) {
         lv_obj_reset_style_list( watchface_label[ i ], LV_OBJ_PART_MAIN );
         lv_obj_add_style( watchface_label[ i ], LV_OBJ_PART_MAIN, watchface_app_label_style[ i ] );
         lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
+    }
+    /**
+     * alloc image and set to defauts
+     */
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        /**
+         * alloc and setup image container
+         */
+        lv_obj_set_width( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].x_size );
+        lv_obj_set_height( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].y_size );
+        lv_obj_set_pos( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].x_offset, watchface_theme_config.dial.image[ i ].y_offset );
+        lv_obj_set_hidden( lv_obj_get_parent( watchface_image[ i ] ), !watchface_theme_config.dial.image[ i ].enable );
+        /**
+         * alloc and setup image
+         */
+        lv_img_set_src( watchface_image[ i ], watchface_theme_config.dial.image[ i ].file );
+        lv_obj_align( watchface_image[ i ], lv_obj_get_parent( watchface_image[ i ] ), LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+        lv_img_set_pivot( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_x_origin, watchface_theme_config.dial.image[ i ].rotation_y_origin );
+        lv_img_set_angle( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_start );
     }
     /**
      * write clear json back
@@ -634,78 +702,88 @@ void watchface_app_tile_update( void ) {
         lv_img_set_angle( watchface_min_s_img, Angle_M );
         lv_img_set_angle( watchface_sec_s_img, Angle_S );
 
-        for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-            char temp_str[ 64 ] = "";
+        watchface_app_label_update();
+    }
+}
+
+
+void watchface_app_label_update( void ) {
+    tm info;
+    time_t now;
+    time(&now);
+    localtime_r( &now, &info );
+
+    for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
+        char temp_str[ 64 ] = "";
+        /**
+         * check if label enabled
+         */
+        if ( watchface_theme_config.dial.label[ i ].enable ) {
             /**
-             * check if label enabled
+             * check label type
              */
-            if ( watchface_theme_config.dial.label[ i ].enable ) {
+            if ( !strcmp( "date", watchface_theme_config.dial.label[ i ].type ) ) {
+                strftime( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, &info );
+            }
+            else if ( !strcmp( "text", watchface_theme_config.dial.label[ i ].type ) ) {
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label );
+            }
+            else if ( !strcmp( "battery_percent", watchface_theme_config.dial.label[ i ].type ) ) {
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_percent() );
+            }
+            else if ( !strcmp( "battery_voltage", watchface_theme_config.dial.label[ i ].type ) ) {
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_voltage() / 1000 );
+            }
+            else if ( !strcmp( "bluetooth_messages", watchface_theme_config.dial.label[ i ].type ) ) {
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bluetooth_get_number_of_msg() );
+            }
+            else if ( !strcmp( "steps", watchface_theme_config.dial.label[ i ].type ) ) {
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bma_get_stepcounter() );
+            }
+            else {
+                snprintf( temp_str, sizeof( temp_str ), "n/a" );
+            }
+            /**
+             * check toggle option
+             */
+            if ( watchface_theme_config.dial.label[ i ].hide_interval ) {
                 /**
-                 * check label type
+                 * temp toggle value
                  */
-                if ( !strcmp( "date", watchface_theme_config.dial.label[ i ].type ) ) {
-                    strftime( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, &info );
-                }
-                else if ( !strcmp( "text", watchface_theme_config.dial.label[ i ].type ) ) {
-                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label );
-                }
-                else if ( !strcmp( "battery_percent", watchface_theme_config.dial.label[ i ].type ) ) {
-                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_percent() );
-                }
-                else if ( !strcmp( "battery_voltage", watchface_theme_config.dial.label[ i ].type ) ) {
-                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_voltage() / 1000 );
-                }
-                else if ( !strcmp( "bluetooth_messages", watchface_theme_config.dial.label[ i ].type ) ) {
-                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bluetooth_get_number_of_msg() );
-                }
-                else if ( !strcmp( "steps", watchface_theme_config.dial.label[ i ].type ) ) {
-                    snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bma_get_stepcounter() );
-                }
-                else {
-                    snprintf( temp_str, sizeof( temp_str ), "n/a" );
+                int32_t hide_interval = watchface_theme_config.dial.label[ i ].hide_interval;
+                if ( hide_interval < 0 ) {
+                    hide_interval = abs( hide_interval );
                 }
                 /**
-                 * check toggle option
+                 * toggle hide depend
+                 * 
+                 * a positive hide interval means hide/show toggle interval
+                 * a negative hide interval means show/hide toggle interval                    
                  */
-                if ( watchface_theme_config.dial.label[ i ].hide_interval ) {
+                if ( ( info.tm_sec / hide_interval ) % 2 ) {
                     /**
-                     * temp toggle value
                      */
-                    int32_t hide_interval = watchface_theme_config.dial.label[ i ].hide_interval;
-                    if ( hide_interval < 0 ) {
-                        hide_interval = abs( hide_interval );
-                    }
-                    /**
-                     * toggle hide depend
-                     * 
-                     * a positive hide interval means hide/show toggle interval
-                     * a negative hide interval means show/hide toggle interval                    
-                     */
-                    if ( ( info.tm_sec / hide_interval ) % 2 ) {
-                        /**
-                         */
-                        if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
-                            lv_obj_set_hidden( watchface_label[ i ], true );
-                        }
-                        else {
-                            lv_obj_set_hidden( watchface_label[ i ], false );
-                        }
+                    if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
+                        lv_obj_set_hidden( watchface_label[ i ], true );
                     }
                     else {
-                        if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
-                            lv_obj_set_hidden( watchface_label[ i ], false );
-                        }
-                        else {
-                            lv_obj_set_hidden( watchface_label[ i ], true );
-                        }
+                        lv_obj_set_hidden( watchface_label[ i ], false );
                     }
                 }
-                /**
-                 * align label
-                 */
-                lv_label_set_text( watchface_label[ i ], temp_str );
-                lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
+                else {
+                    if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
+                        lv_obj_set_hidden( watchface_label[ i ], false );
+                    }
+                    else {
+                        lv_obj_set_hidden( watchface_label[ i ], true );
+                    }
+                }
             }
+            /**
+             * align label
+             */
+            lv_label_set_text( watchface_label[ i ], temp_str );
+            lv_obj_align( watchface_label[ i ], lv_obj_get_parent( watchface_label[ i ] ), watchface_get_align( watchface_theme_config.dial.label[ i ].align ), 0, 0 );
         }
     }
 }

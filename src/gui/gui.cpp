@@ -22,6 +22,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <TTGO.h>
+#include "gui/lv_fs/lv_fs_spiffs.h"
 
 #include "gui.h"
 #include "statusbar.h"
@@ -61,8 +62,12 @@ static volatile bool force_redraw = false;
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
-void gui_setup( void )
-{
+void gui_setup( void ) {
+    /**
+     * install lv fs spiffs wrapper
+     * files begin with "P:/foo.bar" -> "/spiffs/foo.bar"
+     */
+    lv_fs_if_spiffs_init();
     /*
      * Create an blank wallpaper
      */

@@ -27,6 +27,7 @@
     #include "utils/basejsonconfig.h"
 
     #define WATCHFACE_LABEL_NUM                 20
+    #define WATCHFACE_IMAGE_NUM                 5
     #define API_LEVEL                           2
     /**
      * define all decompressed theme file
@@ -58,7 +59,6 @@
         int32_t x_offset = 0;                           /** @brief x offset of the image relative to the center */
         int32_t y_offset = 0;                           /** @brief x offset of the image relative to the center */
     } watchface_index_t;
-
     /**
      * @brief label control structure
      */
@@ -77,6 +77,23 @@
         int32_t y_size = 0;                             /** @brief y size for the label*/
     } watchface_label_t;
     /**
+     * @brief label control structure
+     */
+    typedef struct {
+        bool enable = true;                             /** @brief enable the label */
+        char type[32] = "";                             /** @brief type of the image */
+        char file[32] = "";                             /** @brief filename of the image */
+        int32_t stages = 0;
+        int32_t rotation_range = 0;                     /** @brief number of vertical stages */
+        int32_t rotation_start = 0;                     /** @brief number of vertical stages */
+        int32_t rotation_x_origin = 0;
+        int32_t rotation_y_origin = 0;
+        int32_t x_offset = 0;                           /** @brief x offset for the image*/
+        int32_t y_offset = 0;                           /** @brief y offset for the image*/
+        int32_t x_size = 0;                             /** @brief x size for the image*/
+        int32_t y_size = 0;                             /** @brief y size for the image*/
+    } watchface_image_t;
+    /**
      * @brief watchface theme control structure
      */
     typedef struct {
@@ -89,6 +106,7 @@
         watchface_index_t min_shadow;                   /** @brief min image shadow struct */
         watchface_index_t sec_shadow;                   /** @brief sec image shadow struct */
         watchface_label_t label[ WATCHFACE_LABEL_NUM ]; /** @brief label struct */
+        watchface_image_t image[ WATCHFACE_IMAGE_NUM ]; /** @brief image struct */
     } watchface_t;
 
     /**

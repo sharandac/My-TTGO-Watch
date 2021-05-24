@@ -83,6 +83,29 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
             labelcount++;
         }
     }
+
+    labelcount = 0;
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        if ( dial.image[ i ].enable ) {
+            doc["image"][ labelcount ]["enable"] = dial.image[ i ].enable;
+            doc["image"][ labelcount ]["type"] = dial.image[ i ].type;
+            doc["image"][ labelcount ]["file"] = dial.image[ i ].file;
+            if ( dial.image[ i ].stages ) {
+                doc["image"][ labelcount ]["stages"] = dial.image[ i ].stages;
+            }
+            else {
+                doc["image"][ labelcount ]["rotation_range"] = dial.image[ i ].rotation_range;
+                doc["image"][ labelcount ]["rotation_start"] = dial.image[ i ].rotation_start;
+                doc["image"][ labelcount ]["rotation_x_origin"] = dial.image[ i ].rotation_x_origin;
+                doc["image"][ labelcount ]["rotation_y_origin"] = dial.image[ i ].rotation_y_origin;
+            }
+            doc["image"][ labelcount ]["x_offset"] = dial.image[ i ].x_offset;
+            doc["image"][ labelcount ]["y_offset"] = dial.image[ i ].y_offset;
+            doc["image"][ labelcount ]["x_size"] = dial.image[ i ].x_size;
+            doc["image"][ labelcount ]["y_size"] = dial.image[ i ].y_size;
+            labelcount++;
+        }
+    }
     
     return true;
 }
@@ -129,6 +152,22 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         dial.label[ i ].x_size = doc["label"][i]["x_size"] | 0;
         dial.label[ i ].y_size = doc["label"][i]["y_size"] | 0;
     }
+
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        dial.image[ i ].enable = doc["image"][i]["enable"] | false;
+        strncpy( dial.image[ i ].type, doc["image"][i]["type"] | "", sizeof( dial.image[ i ].type ) );
+        strncpy( dial.image[ i ].file, doc["image"][i]["file"] | "", sizeof( dial.image[ i ].file ) );
+        dial.image[ i ].stages = doc["image"][i]["stages"] | 0;
+        dial.image[ i ].rotation_range = doc["image"][ i ]["rotation_range"] | 0;
+        dial.image[ i ].rotation_start = doc["image"][ i ]["rotation_start"] | 0;
+        dial.image[ i ].rotation_x_origin = doc["image"][ i ]["rotation_x_origin"] | 0;
+        dial.image[ i ].rotation_y_origin = doc["image"][ i ]["rotation_y_origin"] | 0;
+        dial.image[ i ].x_offset = doc["image"][i]["x_offset"] | 0;
+        dial.image[ i ].y_offset = doc["image"][i]["y_offset"] | 0;
+        dial.image[ i ].x_size = doc["image"][i]["x_size"] | 0;
+        dial.image[ i ].y_size = doc["image"][i]["y_size"] | 0;
+    }
+
     return true;
 }
 
@@ -181,6 +220,23 @@ bool watchface_theme_config_t::onDefault( void ) {
         dial.label[ i ].y_offset = 0;
         dial.label[ i ].x_size = 0;
         dial.label[ i ].y_size = 0;
+    }
+    /**
+     * clear all images
+     */
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        dial.image[ i ].enable = false;
+        strncpy( dial.image[ i ].type, "", sizeof( dial.image[ i ].type ) );
+        strncpy( dial.image[ i ].file, "", sizeof( dial.image[ i ].file ) );
+        dial.image[ i ].stages = 0;
+        dial.image[ i ].rotation_range = 0;
+        dial.image[ i ].rotation_start = 0;
+        dial.image[ i ].rotation_x_origin = 0;
+        dial.image[ i ].rotation_y_origin = 0;
+        dial.image[ i ].x_offset = 0;
+        dial.image[ i ].y_offset = 0;
+        dial.image[ i ].x_size = 0;
+        dial.image[ i ].y_size = 0;
     }
     /**
      * setup default date label
