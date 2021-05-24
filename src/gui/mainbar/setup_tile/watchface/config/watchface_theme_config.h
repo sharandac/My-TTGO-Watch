@@ -26,7 +26,8 @@
     #include "config.h"
     #include "utils/basejsonconfig.h"
 
-    #define WATCHFACE_LABEL_NUM                     20
+    #define WATCHFACE_LABEL_NUM                 20
+    #define API_LEVEL                           2
     /**
      * define all decompressed theme file
      */
@@ -79,6 +80,7 @@
      * @brief watchface theme control structure
      */
     typedef struct {
+        uint32_t api_level;                             /** @brief api level */
         watchface_dial_t dial;                          /** @brief dial image struct */
         watchface_index_t hour;                         /** @brief hour image struct */
         watchface_index_t min;                          /** @brief min image struct */
