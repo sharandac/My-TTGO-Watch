@@ -133,19 +133,7 @@ A `watchface.tar.gz` includes the following files and a extra `watchface_theme.j
 ![min shadow](images/watchface/watchface_min_s.png)
 ![sec shadow](images/watchface/watchface_sec_s.png)
 
-In the file `watchface_theme.json` you will describe the position of information via the `label` node.
-You can use:
-
-* `text`: a raw text.
-* `date`: an information related to date/time. See `strftime` function for format.
-* `battery_percent`: the battery percent as an integer. Example: `"%d%%"` for `87%`.
-* `battery_voltage`: the battery voltage, as a float.
-* `bluetooth_messages`: the number of messages, as an integer.
-* `steps`: the number of steps, as an integer.
-
-Available font are: Ubuntu, LCD.
-Available font sizes are: 12, 16, 32, 48, 72.
-
+In the file `watchface_theme.json` you will describe the position of information via the `label` or 'image' node. See Cf. [here](WATCHFACE.md) for a node list.
 Here you can find some finish watchface packages:
 
 [![swiss clock](images/watchface/swiss/watchface_theme_prev.png)](images/watchface/swiss/watchface.tar.gz)
