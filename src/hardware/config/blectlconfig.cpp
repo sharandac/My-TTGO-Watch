@@ -28,6 +28,7 @@ bool blectl_config_t::onSave(JsonDocument& doc) {
     doc["autoon"] = autoon;
     doc["advertising"] = advertising;
     doc["enable_on_standby"] = enable_on_standby;
+    doc["disable_only_disconnected"] = disable_only_disconnected;
     doc["tx_power"] = txpower;
     doc["show_notification"] = show_notification;
 
@@ -38,6 +39,7 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
     autoon = doc["autoon"] | true;
     advertising = doc["advertising"] | true;
     enable_on_standby = doc["enable_on_standby"] | false;
+    disable_only_disconnected = doc["disable_only_disconnected"] | false;
     txpower = doc["tx_power"] | 1;
     show_notification = doc["show_notification"] | true;
   

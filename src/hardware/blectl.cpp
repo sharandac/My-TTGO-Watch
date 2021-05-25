@@ -319,6 +319,10 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
                 retval = false;
                 log_w("standby blocked by \"enable_on_standby\" option");
             }
+            else if ( blectl_get_disable_only_disconnected() && blectl_get_event( BLECTL_CONNECT ) ) {
+                retval = false;
+                log_w("standby blocked by \"disable_only_disconnected\" option");
+            }
             else {
                 log_i("go standby");
             }
@@ -380,6 +384,11 @@ void blectl_set_enable_on_standby( bool enable_on_standby ) {
     blectl_config.save();
 }
 
+void blectl_set_disable_only_disconnected( bool disable_only_disconnected ) {        
+    blectl_config.disable_only_disconnected = disable_only_disconnected;
+    blectl_config.save();
+}
+
 void blectl_set_show_notification( bool show_notification ) {        
     blectl_config.show_notification = show_notification;
     blectl_config.save();
@@ -438,6 +447,10 @@ int32_t blectl_get_txpower( void ) {
 
 bool blectl_get_enable_on_standby( void ) {
     return( blectl_config.enable_on_standby );
+}
+
+bool blectl_get_disable_only_disconnected( void ) {
+    return( blectl_config.disable_only_disconnected );
 }
 
 bool blectl_get_show_notification( void ) {
