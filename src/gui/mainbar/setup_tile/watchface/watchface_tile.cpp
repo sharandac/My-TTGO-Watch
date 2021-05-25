@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include <TTGO.h>
+#include <WiFi.h>
 #include "utils/alloc.h"
 
 #include "watchface_manager.h"
@@ -79,6 +80,7 @@ lv_font_t *watchface_custom_font[ WATCHFACE_LABEL_NUM ];
 lv_obj_t *watchface_label[ WATCHFACE_LABEL_NUM ];
 lv_style_t *watchface_app_label_style[ WATCHFACE_LABEL_NUM ];
 lv_style_t watchface_app_tile_style;
+lv_style_t watchface_app_image_style;
 /**
  * default watchface
  */
@@ -115,6 +117,7 @@ lv_font_t *watchface_get_font( const char *font, int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
 void watchface_app_label_update( void );
+void watchface_app_image_update( void );
 
 void watchface_tile_setup( void ) {
     watchface_app_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Tile" );
@@ -125,6 +128,15 @@ void watchface_tile_setup( void ) {
     lv_style_copy( &watchface_app_tile_style, ws_get_mainbar_style() );
     lv_style_set_radius( &watchface_app_tile_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &watchface_app_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &watchface_app_tile_style, LV_OBJ_PART_MAIN, LV_OPA_0 );
+    lv_style_set_border_width( &watchface_app_tile_style, LV_OBJ_PART_MAIN, 0 );
+
+    lv_style_copy( &watchface_app_image_style, ws_get_mainbar_style() );
+    lv_style_reset( &watchface_app_image_style );
+    lv_style_set_radius( &watchface_app_image_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_bg_color( &watchface_app_image_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &watchface_app_image_style, LV_OBJ_PART_MAIN, LV_OPA_0 );
+    lv_style_set_border_width( &watchface_app_image_style, LV_OBJ_PART_MAIN, 0 );
 
     lv_obj_t *watchface_cont = lv_obj_create( watchface_app_tile, NULL );
     lv_obj_set_size( watchface_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
@@ -183,12 +195,14 @@ void watchface_tile_setup( void ) {
         lv_obj_set_height( watchface_image_cont, watchface_theme_config.dial.image[ i ].y_size );
         lv_obj_set_pos( watchface_image_cont, watchface_theme_config.dial.image[ i ].x_offset, watchface_theme_config.dial.image[ i ].y_offset );
         lv_obj_set_hidden( watchface_image_cont, !watchface_theme_config.dial.image[ i ].enable );
+        lv_obj_add_style( watchface_image_cont, LV_OBJ_PART_MAIN, &watchface_app_image_style );
         /**
          * alloc and setup image
          */
         watchface_image[ i ] = lv_img_create( watchface_image_cont, NULL );
         lv_img_set_src( watchface_image[ i ], watchface_theme_config.dial.image[ i ].file );
-        lv_obj_align( watchface_image[ i ], watchface_image_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+        lv_obj_add_style( watchface_image[ i ], LV_OBJ_PART_MAIN, &watchface_app_image_style );
+        lv_obj_align( watchface_image[ i ], watchface_image_cont, LV_ALIGN_CENTER, 0, 0 );
         lv_img_set_pivot( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_x_origin, watchface_theme_config.dial.image[ i ].rotation_y_origin );
         lv_img_set_angle( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_start );
     }
@@ -461,20 +475,35 @@ void watchface_reload_theme( void ) {
      */
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
         /**
-         * load font from spiffs
+         * load font from spiffs if font name ends with ".font"
          */
-        if ( watchface_theme_config.dial.label[ i ].font[ 0 ] == '/' ) {
+        if ( strstr( watchface_theme_config.dial.label[ i ].font, ".font" ) ) {
+            /**
+             * build lv_fs path
+             */
             String fontname = watchface_theme_config.dial.label[ i ].font;
-            String font = "P:/spiffs/watchface" + fontname;
+            String font = "P:/spiffs/watchface/" + fontname;
+            /**
+             * clear old font
+             */
             if ( watchface_custom_font[ i ] ) {
                 lv_font_free( watchface_custom_font[ i ] );
             }
+            /**
+             * load new font
+             */
             log_i("load font from: %s", font.c_str() );
             watchface_custom_font[ i ] = lv_font_load( font.c_str() );
             if ( watchface_custom_font[ i ] ) {
+                /**
+                 * set new font
+                 */
                 lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_custom_font[ i ] );
             }
             else {
+                /**
+                 * set default font if load failed
+                 */
                 log_e("load font failed");                
                 lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config.dial.label[ i ].font, watchface_theme_config.dial.label[ i ].font_size ) );
             }
@@ -513,8 +542,10 @@ void watchface_reload_theme( void ) {
         /**
          * alloc and setup image
          */
-        lv_img_set_src( watchface_image[ i ], watchface_theme_config.dial.image[ i ].file );
-        lv_obj_align( watchface_image[ i ], lv_obj_get_parent( watchface_image[ i ] ), LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+        String imagename = watchface_theme_config.dial.image[ i ].file;
+        String image = "/spiffs/watchface/" + imagename;
+        lv_img_set_src( watchface_image[ i ], image.c_str() );
+        lv_obj_align( watchface_image[ i ], lv_obj_get_parent( watchface_image[ i ] ), LV_ALIGN_CENTER, 0, 0 );
         lv_img_set_pivot( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_x_origin, watchface_theme_config.dial.image[ i ].rotation_y_origin );
         lv_img_set_angle( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_start );
     }
@@ -703,9 +734,88 @@ void watchface_app_tile_update( void ) {
         lv_img_set_angle( watchface_sec_s_img, Angle_S );
 
         watchface_app_label_update();
+        watchface_app_image_update();
     }
 }
 
+void watchface_app_image_update( void ) {
+    tm info;
+    time_t now;
+    time(&now);
+    localtime_r( &now, &info );
+
+    for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
+        /**
+         * check if label enabled
+         */
+        if ( watchface_theme_config.dial.image[ i ].enable ) {
+            /**
+             * check label type
+             */
+            if ( !strcmp( "battery_percent", watchface_theme_config.dial.image[ i ].type ) ) {
+                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( pmu_get_battery_percent() * watchface_theme_config.dial.image[ i ].rotation_range ) / 100 );
+                angle = angle % 3600;
+                lv_img_set_angle( watchface_image[ i ], angle );
+            }
+            if ( !strcmp( "battery_voltage", watchface_theme_config.dial.image[ i ].type ) ) {
+                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( ( pmu_get_battery_voltage() / 1000 ) * watchface_theme_config.dial.image[ i ].rotation_range ) / 5 );
+                angle = angle % 3600;
+                lv_img_set_angle( watchface_image[ i ], angle );
+            }
+            else if ( !strcmp( "time_hour", watchface_theme_config.dial.image[ i ].type ) ) {
+                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_hour * watchface_theme_config.dial.image[ i ].rotation_range ) / 24 );
+                angle = angle % 3600;
+                lv_img_set_angle( watchface_image[ i ], angle );
+            }
+            else if ( !strcmp( "time_min", watchface_theme_config.dial.image[ i ].type ) ) {
+                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_min * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
+                angle = angle % 3600;
+                lv_img_set_angle( watchface_image[ i ], angle );
+            }
+            else if ( !strcmp( "time_sec", watchface_theme_config.dial.image[ i ].type ) ) {
+                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_sec * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
+                angle = angle % 3600;
+                lv_img_set_angle( watchface_image[ i ], angle );
+            }
+            /**
+             * check toggle option
+             */
+            if ( watchface_theme_config.dial.image[ i ].hide_interval ) {
+                /**
+                 * temp toggle value
+                 */
+                int32_t hide_interval = watchface_theme_config.dial.image[ i ].hide_interval;
+                if ( hide_interval < 0 ) {
+                    hide_interval = abs( hide_interval );
+                }
+                /**
+                 * toggle hide depend
+                 * 
+                 * a positive hide interval means hide/show toggle interval
+                 * a negative hide interval means show/hide toggle interval                    
+                 */
+                if ( ( info.tm_sec / hide_interval ) % 2 ) {
+                    /**
+                     */
+                    if ( watchface_theme_config.dial.image[ i ].hide_interval > 0 ) {
+                        lv_obj_set_hidden( watchface_image[ i ], true );
+                    }
+                    else {
+                        lv_obj_set_hidden( watchface_image[ i ], false );
+                    }
+                }
+                else {
+                    if ( watchface_theme_config.dial.label[ i ].hide_interval > 0 ) {
+                        lv_obj_set_hidden( watchface_image[ i ], false );
+                    }
+                    else {
+                        lv_obj_set_hidden( watchface_image[ i ], true );
+                    }
+                }
+            }
+        }
+    }
+}
 
 void watchface_app_label_update( void ) {
     tm info;

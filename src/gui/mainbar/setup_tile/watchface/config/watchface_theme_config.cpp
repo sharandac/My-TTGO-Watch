@@ -94,8 +94,8 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
                 doc["image"][ labelcount ]["stages"] = dial.image[ i ].stages;
             }
             else {
-                doc["image"][ labelcount ]["rotation_range"] = dial.image[ i ].rotation_range;
-                doc["image"][ labelcount ]["rotation_start"] = dial.image[ i ].rotation_start;
+                doc["image"][ labelcount ]["rotation_range"] = dial.image[ i ].rotation_range / 10;
+                doc["image"][ labelcount ]["rotation_start"] = dial.image[ i ].rotation_start / 10;
                 doc["image"][ labelcount ]["rotation_x_origin"] = dial.image[ i ].rotation_x_origin;
                 doc["image"][ labelcount ]["rotation_y_origin"] = dial.image[ i ].rotation_y_origin;
             }
@@ -159,7 +159,9 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         strncpy( dial.image[ i ].file, doc["image"][i]["file"] | "", sizeof( dial.image[ i ].file ) );
         dial.image[ i ].stages = doc["image"][i]["stages"] | 0;
         dial.image[ i ].rotation_range = doc["image"][ i ]["rotation_range"] | 0;
+        dial.image[ i ].rotation_range = ( dial.image[ i ].rotation_range % 360 ) * 10;
         dial.image[ i ].rotation_start = doc["image"][ i ]["rotation_start"] | 0;
+        dial.image[ i ].rotation_start = ( dial.image[ i ].rotation_start % 360 ) * 10;
         dial.image[ i ].rotation_x_origin = doc["image"][ i ]["rotation_x_origin"] | 0;
         dial.image[ i ].rotation_y_origin = doc["image"][ i ]["rotation_y_origin"] | 0;
         dial.image[ i ].x_offset = doc["image"][i]["x_offset"] | 0;

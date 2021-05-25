@@ -27,8 +27,8 @@
     #include "utils/basejsonconfig.h"
 
     #define WATCHFACE_LABEL_NUM                 20
-    #define WATCHFACE_IMAGE_NUM                 5
-    #define API_LEVEL                           2
+    #define WATCHFACE_IMAGE_NUM                 20
+    #define API_LEVEL                           3
     /**
      * define all decompressed theme file
      */
@@ -88,6 +88,7 @@
         int32_t rotation_start = 0;                     /** @brief number of vertical stages */
         int32_t rotation_x_origin = 0;
         int32_t rotation_y_origin = 0;
+        int32_t hide_interval = 0;
         int32_t x_offset = 0;                           /** @brief x offset for the image*/
         int32_t y_offset = 0;                           /** @brief y offset for the image*/
         int32_t x_size = 0;                             /** @brief x size for the image*/
