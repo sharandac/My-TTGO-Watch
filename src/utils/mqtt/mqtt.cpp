@@ -21,14 +21,18 @@
 #include <Arduino.h>
 #include <AsyncMqttClient.h>
 
+#include "utils/mqtt/mqtt.h"
 #include "hardware/pmu.h"
 
+bool mqtt_init = false;
+bool mqtt_run = false;
 AsyncMqttClient mqtt_client;
 char stateTopic[64];
 char batteryTopic[64];
 
 void _mqtt_connected(bool sessionPresent) {
-    mqtt_client.publish(stateTopic, 1, true, "online");
+    mqtt_publish_state();
+    mqtt_publish_battery();
 }
 
 bool mqtt_pmuctl_event_cb( EventBits_t event, void *arg ) {
@@ -39,16 +43,16 @@ bool mqtt_pmuctl_event_cb( EventBits_t event, void *arg ) {
 
     switch( event ) {
         case PMUCTL_STATUS:
-            char buffer[8];
-            int32_t voltage = pmu_get_battery_voltage();
-            snprintf(buffer, sizeof(buffer), "%d", voltage);
-            mqtt_client.publish(batteryTopic, 0, true, buffer);
+            mqtt_publish_battery();
             break;
     }
     return( true );
 }
 
 void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, const char *user, const char *pass ) {
+    if (mqtt_run) return;
+    mqtt_run = true;
+
     if ( !mqtt_client.connected() ) {
         log_i("use mqtt server:port as %s: %s:%d", id, server, port );
 
@@ -56,21 +60,39 @@ void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, con
         snprintf(batteryTopic, sizeof(batteryTopic), "%s/battery", id);
 
         mqtt_client.setWill(stateTopic, 1, true, "offline");
-        mqtt_client.onConnect(_mqtt_connected);
+        if (!mqtt_init) mqtt_client.onConnect(_mqtt_connected);
 
         mqtt_client.setClientId( id );
         mqtt_client.setServer( server, port );
         mqtt_client.setCredentials( user, pass );
         mqtt_client.connect();
 
-        pmu_register_cb( PMUCTL_STATUS, mqtt_pmuctl_event_cb, "mqtt pmu");
+        if (!mqtt_init) pmu_register_cb( PMUCTL_STATUS, mqtt_pmuctl_event_cb, "mqtt pmu");
     }
+
+    mqtt_init = true;
 }
 
 void mqtt_stop() {
+    if (!mqtt_run) return;
+    mqtt_run = false;
+
     if ( mqtt_client.connected() ) {
         log_i("stop mqtt");
         mqtt_client.disconnect(true);
+    }
+}
+
+void mqtt_publish_state() {
+    mqtt_client.publish(stateTopic, 1, true, "online");
+}
+
+void mqtt_publish_battery() {
+    int32_t voltage = pmu_get_battery_voltage();
+    if (voltage > 3000) {
+        char temp[8];
+        snprintf(temp, sizeof(temp), "%d", voltage);
+        mqtt_client.publish(batteryTopic, 0, true, temp);
     }
 }
 

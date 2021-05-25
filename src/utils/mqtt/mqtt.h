@@ -35,7 +35,24 @@
      */
     void mqtt_stop();
 
+    /**
+     *  @brief publish online state.
+     */
+    void mqtt_publish_state();
+
+    /**
+     *  @brief publish battery state.
+     */
+    void mqtt_publish_battery();
+
+    /**
+     *  @brief get connection state.
+     */
     bool mqtt_get_connected();
+    
+    /**
+     *  @brief get mqtt client for raw handling.
+     */
     AsyncMqttClient mqtt_get_client();
 
 #endif // _MQTT_H
