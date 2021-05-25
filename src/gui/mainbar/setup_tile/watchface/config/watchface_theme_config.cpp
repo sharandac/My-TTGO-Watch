@@ -90,6 +90,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
             doc["image"][ labelcount ]["enable"] = dial.image[ i ].enable;
             doc["image"][ labelcount ]["type"] = dial.image[ i ].type;
             doc["image"][ labelcount ]["file"] = dial.image[ i ].file;
+            doc["image"][ labelcount ]["hide_interval"] = dial.image[ i ].hide_interval;
             if ( dial.image[ i ].stages ) {
                 doc["image"][ labelcount ]["stages"] = dial.image[ i ].stages;
             }
@@ -157,6 +158,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         dial.image[ i ].enable = doc["image"][i]["enable"] | false;
         strncpy( dial.image[ i ].type, doc["image"][i]["type"] | "", sizeof( dial.image[ i ].type ) );
         strncpy( dial.image[ i ].file, doc["image"][i]["file"] | "", sizeof( dial.image[ i ].file ) );
+        dial.image[ i ].hide_interval = doc["image"][i]["hide_interval"] | 0;
         dial.image[ i ].stages = doc["image"][i]["stages"] | 0;
         dial.image[ i ].rotation_range = doc["image"][ i ]["rotation_range"] | 0;
         dial.image[ i ].rotation_range = ( dial.image[ i ].rotation_range % 360 ) * 10;
@@ -230,6 +232,7 @@ bool watchface_theme_config_t::onDefault( void ) {
         dial.image[ i ].enable = false;
         strncpy( dial.image[ i ].type, "", sizeof( dial.image[ i ].type ) );
         strncpy( dial.image[ i ].file, "", sizeof( dial.image[ i ].file ) );
+        dial.image[ i ].hide_interval = 0;
         dial.image[ i ].stages = 0;
         dial.image[ i ].rotation_range = 0;
         dial.image[ i ].rotation_start = 0;

@@ -749,34 +749,27 @@ void watchface_app_image_update( void ) {
          * check if label enabled
          */
         if ( watchface_theme_config.dial.image[ i ].enable ) {
+            int32_t angle = 0;
             /**
              * check label type
              */
             if ( !strcmp( "battery_percent", watchface_theme_config.dial.image[ i ].type ) ) {
-                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( pmu_get_battery_percent() * watchface_theme_config.dial.image[ i ].rotation_range ) / 100 );
-                angle = angle % 3600;
-                lv_img_set_angle( watchface_image[ i ], angle );
+                angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( pmu_get_battery_percent() * watchface_theme_config.dial.image[ i ].rotation_range ) / 100 );
             }
             if ( !strcmp( "battery_voltage", watchface_theme_config.dial.image[ i ].type ) ) {
-                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( ( pmu_get_battery_voltage() / 1000 ) * watchface_theme_config.dial.image[ i ].rotation_range ) / 5 );
-                angle = angle % 3600;
-                lv_img_set_angle( watchface_image[ i ], angle );
+                angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( ( pmu_get_battery_voltage() / 1000 ) * watchface_theme_config.dial.image[ i ].rotation_range ) / 5 );
             }
             else if ( !strcmp( "time_hour", watchface_theme_config.dial.image[ i ].type ) ) {
-                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_hour * watchface_theme_config.dial.image[ i ].rotation_range ) / 24 );
-                angle = angle % 3600;
-                lv_img_set_angle( watchface_image[ i ], angle );
+                angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_hour * watchface_theme_config.dial.image[ i ].rotation_range ) / 24 );
             }
             else if ( !strcmp( "time_min", watchface_theme_config.dial.image[ i ].type ) ) {
-                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_min * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
-                angle = angle % 3600;
-                lv_img_set_angle( watchface_image[ i ], angle );
+                angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_min * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
             }
             else if ( !strcmp( "time_sec", watchface_theme_config.dial.image[ i ].type ) ) {
-                int32_t angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_sec * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
-                angle = angle % 3600;
-                lv_img_set_angle( watchface_image[ i ], angle );
+                angle = watchface_theme_config.dial.image[ i ].rotation_start + ( ( info.tm_sec * watchface_theme_config.dial.image[ i ].rotation_range ) / 60 );
             }
+            angle = angle % 3600;
+            lv_img_set_angle( watchface_image[ i ], angle );
             /**
              * check toggle option
              */
@@ -812,6 +805,9 @@ void watchface_app_image_update( void ) {
                         lv_obj_set_hidden( watchface_image[ i ], true );
                     }
                 }
+            }
+            else {
+                lv_obj_set_hidden( watchface_image[ i ], false );                
             }
         }
     }
@@ -888,6 +884,9 @@ void watchface_app_label_update( void ) {
                         lv_obj_set_hidden( watchface_label[ i ], true );
                     }
                 }
+            }
+            else {
+                lv_obj_set_hidden( watchface_label[ i ], false );                
             }
             /**
              * align label
