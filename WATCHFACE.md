@@ -117,7 +117,7 @@ On api_level 3 it is possible to load a font on runtime from spiffs. As example:
 [here is a manual how create your own font file](https://github.com/lvgl/lv_font_conv/)
 
 # image
-A label entry looks like this:
+A image entry looks like this:
 ```json
 "image": [
 	{
