@@ -18,6 +18,8 @@
 
     #include <TTGO.h>
 
+    #define CALENDAR_HIGHLIGHTED_DAYS       31
+
     void calendar_app_setup();
 
 #endif // _CALENDAR_APP_H

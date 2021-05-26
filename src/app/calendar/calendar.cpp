@@ -26,6 +26,8 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
+#include "utils/alloc.h"
+
 /**
  * calendar tile store
  */
@@ -44,7 +46,10 @@ LV_FONT_DECLARE(Ubuntu_12px);               /** @brief calendar font */
  */
 static lv_obj_t * calendar;                 /** @brief calendar lv object */
 static lv_style_t calendar_style;           /** @brief calendar style object */
-static lv_style_t exit_style;               /** @brief calendar exit button style object */
+lv_calendar_date_t *highlighted_days = NULL;/** @brief highlighted days table */
+static int calendar_year = 0;
+static int calendar_month = 0;
+static int calendar_day = 0;
 /**
  * calendar app function declaration
  */
@@ -82,6 +87,21 @@ void calendar_app_setup( void ) {
      * check and init database
      */
     calendar_db_setup();
+    /**
+     * alloac highlighted days table
+     */
+    highlighted_days = (lv_calendar_date_t*)MALLOC( sizeof( lv_calendar_date_t ) * CALENDAR_HIGHLIGHTED_DAYS );
+    if ( highlighted_days ) {
+        for( int i = 0 ; i < CALENDAR_HIGHLIGHTED_DAYS ; i++ ) {
+            highlighted_days[ i ].year = 0;
+            highlighted_days[ i ].month = 0;
+            highlighted_days[ i ].day = 0;
+        }
+    }
+    else {
+        log_e("alloac highlighted days table failed");
+        while( true );
+    }
 }
 
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -105,16 +125,25 @@ static void calendar_date_event_cb( lv_obj_t * obj, lv_event_t event ) {
     
     switch( event ) {
         case LV_EVENT_VALUE_CHANGED:
-            date = lv_calendar_get_pressed_date(obj);
+            date = lv_calendar_get_pressed_date( obj );
             if( date ) {
+                calendar_year = date->year;
+                calendar_month = date->month;
+                calendar_day = date->day;
                 log_i("Clicked date: %02d.%02d.%d", date->day, date->month, date->year );
             }
             break;
         case LV_EVENT_CLICKED:
-            date = lv_calendar_get_showed_date(obj);
+            date = lv_calendar_get_showed_date( obj );
             if( date ) {
+                calendar_year = date->year;
+                calendar_month = date->month;
                 log_i("current year and month: %d %d", date->year, date->month );
             }
+            /**
+             * highlight day with dates
+             */
+            lv_calendar_set_highlighted_dates( calendar, highlighted_days, calendar_db_highlight_day( highlighted_days, calendar_year, calendar_month ) );
             break;
     }
 }
@@ -169,20 +198,22 @@ void calendar_refresh_main_page( void ) {
     today.month = time_tm.tm_mon + 1;
     today.day = time_tm.tm_mday;
 
+    calendar_year = today.year;
+    calendar_month = today.month;
+    calendar_day = today.day;
+
     lv_calendar_set_today_date(calendar, &today);
     lv_calendar_set_showed_date(calendar, &today);
-
-    /*Highlight a few days*/
-    static lv_calendar_date_t highlighted_days[3];       /*Only its pointer will be saved so should be static*/
+/*
+    static lv_calendar_date_t highlighted_days[3];
     highlighted_days[0].year = 2021;
     highlighted_days[0].month = 5;
     highlighted_days[0].day = 6;
-
     highlighted_days[1].year = 2021;
     highlighted_days[1].month = 5;
     highlighted_days[1].day = 27;
-
     lv_calendar_set_highlighted_dates( calendar, highlighted_days, 2 );
+*/
 }
 
 void calendar_activate_cb( void ) {
@@ -190,7 +221,21 @@ void calendar_activate_cb( void ) {
      * refresh the calendar on activation
      */
     calendar_refresh_main_page();
+    /**
+     * open calendar date base
+     */
+    if ( calendar_db_open() ) {
+        log_e("open calendar date base failed");
+    }
+    /**
+     * highlight day with dates
+     */
+    lv_calendar_set_highlighted_dates( calendar, highlighted_days, calendar_db_highlight_day( highlighted_days, calendar_year, calendar_month ) );
 }
 
 void calendar_hibernate_cb( void ) {
+    /**
+     * close calendar date base
+     */
+    calendar_db_close();
 }
