@@ -17,6 +17,8 @@
 #include <TTGO.h>
 
 #include "calendar.h"
+#include "calendar_db.h"
+
 #include "gui/mainbar/mainbar.h"
 #include "gui/icon.h"
 #include "gui/statusbar.h"
@@ -24,48 +26,65 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-uint32_t calendar_main_tile_num;
-
-// app icon
-icon_t *calendar_icon = NULL;
-
-// App icon must have an size of 64x64 pixel with an alpha channel
-// Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
-LV_IMG_DECLARE(calendar_64px);
-
-
-static lv_obj_t * calendar;
-static lv_style_t exit_style;
-
-static void enter_calendar_event_cb( lv_obj_t * obj, lv_event_t event );
-static void event_handler(lv_obj_t * obj, lv_event_t event);
-static void build_main_page();
-static void refresh_main_page();
-
-static void calendar_activate_cb();
-
-/*
+/**
+ * calendar tile store
+ */
+uint32_t calendar_main_tile_num;            /** @brief allocated calendar tile number */
+/**
+ * app icon
+ */
+icon_t *calendar_icon = NULL;               /** @brief calendar icon */
+/**
+ * calendar icon
+ */
+LV_IMG_DECLARE(calendar_64px);              /** @brief calendar icon image */
+LV_FONT_DECLARE(Ubuntu_12px);               /** @brief calendar font */
+/**
+ * calendar objects
+ */
+static lv_obj_t * calendar;                 /** @brief calendar lv object */
+static lv_style_t calendar_style;           /** @brief calendar style object */
+static lv_style_t exit_style;               /** @brief calendar exit button style object */
+/**
+ * calendar app function declaration
+ */
+static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event );
+static void calendar_date_event_cb( lv_obj_t * obj, lv_event_t event );
+static void calendar_exit_event_cb( lv_obj_t * obj, lv_event_t event );
+static void calendar_build_main_page( void );
+static void calendar_refresh_main_page( void );
+static void calendar_activate_cb( void );
+static void calendar_hibernate_cb( void );
+/**
  * setup routine for application
  */
 void calendar_app_setup( void ) {
-    calendar_main_tile_num = mainbar_add_app_tile( 1, 1, "Calendar" );
-    mainbar_add_tile_activate_cb( calendar_main_tile_num, calendar_activate_cb );
-
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    calendar_icon = app_register( "Calendar", &calendar_64px, enter_calendar_event_cb );
+    /**
+     * register a tile
+     */
+    calendar_main_tile_num = mainbar_add_app_tile( 2, 1, "Calendar" );
+    /**
+     * register app icon on the app tile
+     */
+    calendar_icon = app_register( "Calendar", &calendar_64px, calendar_enter_event_cb );
     app_set_indicator( calendar_icon, ICON_INDICATOR_OK );
-
-    // Build and configure application
-    build_main_page();
-
-    refresh_main_page();
+    /**
+     * Build and configure application
+     */
+    calendar_build_main_page();
+    calendar_refresh_main_page();
+    /**
+     * set activation/hibernation call back
+     */
+    mainbar_add_tile_activate_cb( calendar_main_tile_num, calendar_activate_cb );
+    mainbar_add_tile_hibernate_cb( calendar_main_tile_num, calendar_hibernate_cb );
+    /**
+     * check and init database
+     */
+    calendar_db_setup();
 }
 
-static void enter_calendar_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
                mainbar_jump_to_tilenumber( calendar_main_tile_num, LV_ANIM_OFF );
@@ -75,35 +94,68 @@ static void enter_calendar_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }
 }
 
-static void event_handler(lv_obj_t * obj, lv_event_t event)
-{
+static void calendar_exit_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if ( event == LV_EVENT_CLICKED ) {
         mainbar_jump_back();
     }
 }
 
-void build_main_page()
-{
+static void calendar_date_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    lv_calendar_date_t * date;
+    
+    switch( event ) {
+        case LV_EVENT_VALUE_CHANGED:
+            date = lv_calendar_get_pressed_date(obj);
+            if( date ) {
+                log_i("Clicked date: %02d.%02d.%d", date->day, date->month, date->year );
+            }
+            break;
+        case LV_EVENT_CLICKED:
+            date = lv_calendar_get_showed_date(obj);
+            if( date ) {
+                log_i("current year and month: %d %d", date->year, date->month );
+            }
+            break;
+    }
+}
+
+void calendar_build_main_page( void ) {
+    /**
+     * get calendar object from tile number
+     */
     lv_obj_t *main_tile = mainbar_get_tile_obj( calendar_main_tile_num );
-
-    calendar = lv_calendar_create(main_tile, NULL);
-    lv_obj_set_size(calendar, LV_HOR_RES, LV_VER_RES);
-    lv_obj_align(calendar, main_tile, LV_ALIGN_IN_TOP_MID, 0, 0);
-
-    /*Make the date number smaller to be sure they fit into their area*/
-    lv_obj_set_style_local_text_font(calendar, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, lv_theme_get_font_small());
-
-    lv_style_copy( &exit_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &exit_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &exit_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    //lv_style_set_border_width( &exit_style, LV_OBJ_PART_MAIN, 0);
-
-    lv_obj_t *exit_button = wf_add_exit_button(main_tile, event_handler, &exit_style);
+    /**
+     * copy mainbar style and set it to calendar
+     */
+    lv_style_copy( &calendar_style, ws_get_mainbar_style() );
+    lv_style_set_radius( &calendar_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_border_width( &calendar_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_bg_color( &calendar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_style_set_bg_opa( &calendar_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
+    /**
+     * create calendar object
+     */
+    calendar = lv_calendar_create( main_tile, NULL);
+    lv_obj_set_size( calendar, 190, 240 );
+    lv_obj_align( calendar, main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0);
+    lv_obj_set_event_cb( calendar, calendar_date_event_cb );
+    lv_obj_add_style( calendar, LV_OBJ_PART_MAIN, &calendar_style );
+    /**
+     * Make the date number smaller to be sure they fit into their area
+     */
+    lv_obj_set_style_local_text_color( calendar, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, LV_COLOR_BLACK );
+    lv_obj_set_style_local_text_font( calendar, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, &Ubuntu_12px );
+    lv_obj_set_style_local_text_color( calendar, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, LV_COLOR_BLACK );
+    lv_obj_set_style_local_bg_color( calendar, LV_CALENDAR_PART_DATE, LV_STATE_CHECKED, LV_COLOR_RED );
+    lv_obj_set_style_local_bg_color( calendar, LV_CALENDAR_PART_DATE, LV_STATE_FOCUSED, LV_COLOR_BLUE );
+    /**
+     * add exit button
+     */
+    lv_obj_t *exit_button = wf_add_exit_button(main_tile, calendar_exit_event_cb, ws_get_mainbar_style() );
     lv_obj_align( exit_button, main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 }
 
-void refresh_main_page()
-{
+void calendar_refresh_main_page( void ) {
     /**
      * Set today's date
      */
@@ -119,9 +171,26 @@ void refresh_main_page()
 
     lv_calendar_set_today_date(calendar, &today);
     lv_calendar_set_showed_date(calendar, &today);
+
+    /*Highlight a few days*/
+    static lv_calendar_date_t highlighted_days[3];       /*Only its pointer will be saved so should be static*/
+    highlighted_days[0].year = 2021;
+    highlighted_days[0].month = 5;
+    highlighted_days[0].day = 6;
+
+    highlighted_days[1].year = 2021;
+    highlighted_days[1].month = 5;
+    highlighted_days[1].day = 27;
+
+    lv_calendar_set_highlighted_dates( calendar, highlighted_days, 2 );
 }
 
-void calendar_activate_cb()
-{
-    refresh_main_page();
+void calendar_activate_cb( void ) {
+    /**
+     * refresh the calendar on activation
+     */
+    calendar_refresh_main_page();
+}
+
+void calendar_hibernate_cb( void ) {
 }
