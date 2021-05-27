@@ -46,6 +46,31 @@
     void mqtt_publish_battery();
 
     /**
+     *  @brief publish version.
+     */
+    void mqtt_publish_version();
+
+    /**
+     *  @brief publish temperature state.
+     */
+    void mqtt_publish_temperature();
+
+    /**
+     *  @brief publish heap state.
+     */
+    void mqtt_publish_heap();
+
+    /**
+     *  @brief publish psram state.
+     */
+    void mqtt_publish_psram();
+
+    /**
+     *  @brief publish sketch state.
+     */
+    void mqtt_publish_sketch();
+
+    /**
      *  @brief get connection state.
      */
     bool mqtt_get_connected();
