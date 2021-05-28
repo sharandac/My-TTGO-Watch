@@ -159,13 +159,13 @@ void calendar_overview_activate_cb( void ) {
      * open calendar date base
      */
     if ( calendar_db_open() ) {
-        log_e("open calendar date base failed");
-    }
-    else {
         /**
          * highlight day with dates
          */
         lv_calendar_set_highlighted_dates( calendar_overview, calendar_overview_highlighted_days, calendar_overview_highlight_day( calendar_year, calendar_month ) );
+    }
+    else {
+        log_e("open calendar date base failed");
     }
 }
 
