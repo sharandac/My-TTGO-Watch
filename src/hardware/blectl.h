@@ -195,6 +195,12 @@
      */
     bool blectl_get_advertising( void );
     /**
+     * @brief get the current custom audio notifications config
+     * 
+     * @return  the array of custom audio notifications
+     */
+    blectl_custom_audio* blectl_get_custom_audio_notifications( void );
+    /**
      * @brief store the current configuration to SPIFFS
      */
     void blectl_save_config( void );

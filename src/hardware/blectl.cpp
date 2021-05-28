@@ -465,6 +465,10 @@ bool blectl_get_advertising( void ) {
     return( blectl_config.advertising );
 }
 
+blectl_custom_audio* blectl_get_custom_audio_notifications( void ) {
+    return( blectl_config.custom_audio_notifications );
+}
+
 void blectl_save_config( void ) {
     blectl_config.save();
 }

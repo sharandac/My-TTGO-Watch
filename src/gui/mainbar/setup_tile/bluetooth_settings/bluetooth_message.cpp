@@ -335,9 +335,10 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     if ( blectl_get_show_notification() ) {
         bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
+    } else {
+        sound_play_progmem_wav( piep_wav, piep_wav_len );
     }
     bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
-    sound_play_progmem_wav( piep_wav, piep_wav_len );
     motor_vibe(10);
     /*
      * set msg icon indicator an the app icon
@@ -450,12 +451,15 @@ void bluetooth_message_show_msg( int32_t entry ) {
              */
             if ( doc["body"] ) {
                 lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
+                bluetooth_message_play_audio(doc["body"]);
             }
             else if ( doc["title"] ) {
                 lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
+                bluetooth_message_play_audio(doc["title"]);
             }
             else {
                 lv_label_set_text( bluetooth_message_msg_label, "" );
+                sound_play_progmem_wav( piep_wav, piep_wav_len );
             }
             /*
              * scroll back to the top of the msg
@@ -485,4 +489,30 @@ void bluetooth_message_show_msg( int32_t entry ) {
         }
     }        
     doc.clear();
+}
+
+void bluetooth_message_play_audio( const char* msg ) {
+    bool found = false;
+    blectl_custom_audio* custom_audio_notifications = blectl_get_custom_audio_notifications();
+
+    for (int entry = 0; entry < CUSTOM_AUDIO_ENTRYS; entry++)
+    {
+        blectl_custom_audio custom_audio_notification = custom_audio_notifications[entry];
+
+        if ( strlen(custom_audio_notification.text) <= 0 ) continue;
+        if ( strstr( msg, custom_audio_notification.text ) == NULL ) continue;
+        found = true;
+
+        if (strlen(custom_audio_notification.value) <= 1) {
+            char tts[128];
+            const char *text = msg;
+            if (!strncmp( msg, "/", 1 )) text = strchr(msg, ' ');
+            snprintf( tts, sizeof(tts), "%s.", text );
+            
+            sound_speak(tts);
+        }
+        else sound_play_spiffs_mp3(custom_audio_notification.value);
+    }
+
+    if (!found) sound_play_progmem_wav( piep_wav, piep_wav_len );
 }
