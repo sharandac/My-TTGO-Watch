@@ -89,10 +89,15 @@ void sound_setup( void ) {
         /*
         * enable sound
         */
+        #if defined( LILYGO_WATCH_2020_V1 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        #endif
         sound_set_enabled( sound_config.enable );
 
         sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
         sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
+
         sound_init = true;
     #elif defined( LILYGO_WATCH_2020_V2 )
         sound_set_enabled( false );

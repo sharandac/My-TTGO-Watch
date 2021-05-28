@@ -13,15 +13,25 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CALENDAR_APP_H
-    #define _CALENDAR_APP_H
+#ifndef _CALENDAR_OVREVIEW_H
+    #define _CALENDAR_OVREVIEW_H
 
     #include <TTGO.h>
-    #define CALENDAR_INFO_LOG               log_i
-    #define CALENDAR_DEBUG_LOG              log_d
-    #define CALENDAR_ERROR_LOG              log_e
-    #define CALENDAR_HIGHLIGHTED_DAYS       31
+    #define CALENDAR_OVREVIEW_INFO_LOG               log_i
+    #define CALENDAR_OVREVIEW_DEBUG_LOG              log_d
+    #define CALENDAR_OVREVIEW_ERROR_LOG              log_e
+    
+    #define CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS       31
 
-    void calendar_app_setup();
+    /**
+     * @brief setup calendar overview tile
+     */
+    void calendar_overview_setup();
+    /**
+     * @brief get calendar overview tile number
+     * 
+     * @return  calendar overview tile number
+     */
+    uint32_t calendar_overview_get_tile( void );
 
-#endif // _CALENDAR_APP_H
+#endif // _CALENDAR_OVREVIEW_H
