@@ -51,9 +51,14 @@
     void mqtt_publish_version();
 
     /**
-     *  @brief publish temperature state.
+     *  @brief publish ambient temperature state.
      */
-    void mqtt_publish_temperature();
+    void mqtt_publish_ambient_temperature();
+
+    /**
+     *  @brief publish power temperature state.
+     */
+    void mqtt_publish_power_temperature();
 
     /**
      *  @brief publish heap state.

@@ -35,12 +35,14 @@ char heapTopic[32];
 char psramTopic[32];
 char sketchTopic[32];
 char versionTopic[32];
-char temperatureTopic[32];
+char ambientTemperatureTopic[32];
+char powerTemperatureTopic[32];
 
 void _mqtt_connected(bool sessionPresent) {
     mqtt_publish_state();
     mqtt_publish_battery();
-    mqtt_publish_temperature();
+    mqtt_publish_ambient_temperature();
+    mqtt_publish_power_temperature();
 
     mqtt_publish_version();
     mqtt_publish_sketch();
@@ -57,7 +59,8 @@ bool mqtt_pmuctl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case PMUCTL_STATUS:
             mqtt_publish_battery();
-            mqtt_publish_temperature();
+            mqtt_publish_ambient_temperature();
+            mqtt_publish_power_temperature();
 
             if (!powermgm_get_event( POWERMGM_STANDBY )) {
                 mqtt_publish_version();
@@ -83,7 +86,8 @@ void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, con
         if (!mqtt_init) snprintf(psramTopic, sizeof(psramTopic), "%s/psram", id);
         if (!mqtt_init) snprintf(sketchTopic, sizeof(sketchTopic), "%s/sketch", id);
         if (!mqtt_init) snprintf(versionTopic, sizeof(versionTopic), "%s/version", id);
-        if (!mqtt_init) snprintf(temperatureTopic, sizeof(temperatureTopic), "%s/temp", id);
+        if (!mqtt_init) snprintf(ambientTemperatureTopic, sizeof(ambientTemperatureTopic), "%s/temp_ambient", id);
+        if (!mqtt_init) snprintf(powerTemperatureTopic, sizeof(powerTemperatureTopic), "%s/temp_power", id);
 
         mqtt_client.setWill(stateTopic, 1, true, "offline");
         if (!mqtt_init) mqtt_client.onConnect(_mqtt_connected);
@@ -128,11 +132,18 @@ void mqtt_publish_version() {
     mqtt_client.publish(versionTopic, 0, true, temp);
 }
 
-void mqtt_publish_temperature() {
+void mqtt_publish_ambient_temperature() {
+    char temp[6];
+    TTGOClass * ttgo = TTGOClass::getWatch();
+    snprintf(temp, sizeof(temp), "%.2f", ttgo->bma->temperature());
+    mqtt_client.publish(ambientTemperatureTopic, 0, false, temp);
+}
+
+void mqtt_publish_power_temperature() {
     char temp[6];
     TTGOClass * ttgo = TTGOClass::getWatch();
     snprintf(temp, sizeof(temp), "%.2f", ttgo->power->getTemp());
-    mqtt_client.publish(temperatureTopic, 0, false, temp);
+    mqtt_client.publish(powerTemperatureTopic, 0, false, temp);
 }
 
 void mqtt_publish_heap() {
