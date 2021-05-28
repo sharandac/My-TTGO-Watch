@@ -28,6 +28,7 @@ void calendar_db_setup( void ) {
         if ( calendar_db_open() ) {
             calendar_db_exec( calendar_db_version_callback, "SELECT version FROM calendar_db_version;");
         }
+        calendar_db_close();
     }
     else {
         CALENDAR_DB_ERROR_LOG("databsae not exist, create database and tables");
@@ -77,7 +78,8 @@ bool calendar_db_open( void ) {
      * check if calendar_db already open
      */
     if ( calendar_db ) {
-        return( retval );
+        CALENDAR_DB_INFO_LOG("calendar_db already open");
+        return( true );
     }
     /**
      * init sqlite3
