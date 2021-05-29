@@ -184,6 +184,11 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                                 gbmsg += 3;
                                                 BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
                                                 if ( request.isValid() ) {
+                                                    if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
+                                                        powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                                                        powermgm_loop();
+                                                    }
+
                                                     blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
                                                 }
                                                 else {
