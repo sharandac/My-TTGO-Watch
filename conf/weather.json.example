@@ -1,0 +1,9 @@
+{
+  "apikey": "",
+  "lat": "",
+  "lon": "",
+  "autosync": true,
+  "showWind": false,
+  "imperial": false,
+  "widget": true
+}

@@ -1,0 +1,97 @@
+{
+  "autoon": true,
+  "enable_on_standby": false,
+  "hostname": "TWatch2020",
+  "webserver": false,
+  "ftpserver": false,
+  "ftpuser": "TWatch",
+  "ftppass": "1234",
+  "mqtt": false,
+  "mqttssl": false,
+  "mqttserver": "192.168.0.2",
+  "mqttport": 1883,
+  "mqttuser": "TWatch",
+  "mqttpass": "1234",
+  "networklist": [
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    },
+    {
+      "ssid": "",
+      "psk": ""
+    }
+  ]
+}
