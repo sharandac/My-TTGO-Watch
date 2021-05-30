@@ -281,7 +281,10 @@ void blectl_setup( void ) {
     // Start the service
     pService->start();
     // Start advertising
-    pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
+    //ESP_BLE_APPEARANCE_GENERIC_WATCH
+    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    pAdvertising->addServiceUUID( pService->getUUID() );
+    pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
 
     // Create device information service
     BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
@@ -298,15 +301,15 @@ void blectl_setup( void ) {
     // Start battery service
     pDeviceInformationService->start();
     // Start advertising battery service
-    pServer->getAdvertising()->addServiceUUID( pDeviceInformationService->getUUID() );
+    pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
 
     blebatctl_setup(pServer);
 
     blestepctl_setup();
 
     // Slow advertising interval for battery life
-    pServer->getAdvertising()->setMinInterval( 700 );
-    pServer->getAdvertising()->setMaxInterval( 800 );
+    pAdvertising->setMinInterval( 700 );
+    pAdvertising->setMaxInterval( 800 );
 
     if ( blectl_get_autoon() ) {
         blectl_on();
@@ -623,4 +626,12 @@ void blectl_loop ( void ) {
             blectl_msg.msgpos = 0;
         }
     }
+}
+
+BLEServer *blectl_get_ble_server() {
+    return pServer;
+}
+
+BLEAdvertising *blectl_get_ble_advertising() {
+    return pServer->getAdvertising();
 }

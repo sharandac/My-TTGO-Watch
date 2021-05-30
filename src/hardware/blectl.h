@@ -23,6 +23,10 @@
     #define _BLECTL_H
 
     #include "TTGO.h"
+
+    #include <BLEServer.h>
+    #include <BLEAdvertising.h>
+
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
 
@@ -254,5 +258,14 @@
      * @param enable    true if enabled, false if disable
      */
     void blectl_set_autoon( bool autoon );
+
+    /**
+     * @brief get the raw BLE Server
+     */
+    BLEServer *blectl_get_ble_server();
+    /**
+     * @brief get the raw BLE Advertising
+     */
+    BLEAdvertising *blectl_get_ble_advertising();
 
 #endif // _BLECTL_H

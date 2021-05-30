@@ -35,6 +35,7 @@
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/sailing/sailing.h"
 #include "app/osmand/osmand_app.h"
+#include "app/tiltmouse/tiltmouse_app.h"
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
 #include "app/activity/activity.h"
@@ -47,6 +48,8 @@
 #include "app/ping/ping_app.h"
 #include "app/wireless/wireless_app.h"
 #include "app/wifimon/wifimon_app.h"
+#include "app/games/ttt/ttt_game.h"
+//#include "app/games/pong/pong_game.h"
 
 void setup() {
     /**
@@ -79,6 +82,7 @@ void setup() {
     gps_status_setup();
     sailing_setup();
     osmand_app_setup();
+    tiltmouse_app_setup();
     IRController_setup();
     fxrates_app_setup();
     powermeter_app_setup();
@@ -87,6 +91,8 @@ void setup() {
     ping_app_setup();
     wireless_app_setup();
     wifimon_app_setup();
+    tic_tac_toe_game_setup();
+    //pong_game_setup();
     /**
      * post hardware setup
      * 
