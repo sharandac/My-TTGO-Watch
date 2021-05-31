@@ -575,6 +575,86 @@ lv_font_t *watchface_get_font( const char *font, int32_t font_size ) {
                         break;
         }
     }
+    else if ( !strcmp( font, "Montserrat" ) ) {
+        switch( font_size ) {
+            #if LV_FONT_MONTSERRAT_12
+            case 12:    lv_font = &lv_font_montserrat_12;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_14
+            case 14:    lv_font = &lv_font_montserrat_14;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_16
+            case 16:    lv_font = &lv_font_montserrat_16;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_18
+            case 18:    lv_font = &lv_font_montserrat_18;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_20
+            case 20:    lv_font = &lv_font_montserrat_20;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_22
+            case 22:    lv_font = &lv_font_montserrat_22;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_24
+            case 24:    lv_font = &lv_font_montserrat_24;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_26
+            case 26:    lv_font = &lv_font_montserrat_26;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_28
+            case 28:    lv_font = &lv_font_montserrat_28;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_30
+            case 30:    lv_font = &lv_font_montserrat_30;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_32
+            case 32:    lv_font = &lv_font_montserrat_32;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_34
+            case 34:    lv_font = &lv_font_montserrat_34;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_36
+            case 36:    lv_font = &lv_font_montserrat_36;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_38
+            case 38:    lv_font = &lv_font_montserrat_38;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_40
+            case 40:    lv_font = &lv_font_montserrat_40;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_42
+            case 42:    lv_font = &lv_font_montserrat_42;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_44
+            case 44:    lv_font = &lv_font_montserrat_44;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_46
+            case 46:    lv_font = &lv_font_montserrat_46;
+                        break;
+            #endif
+            #if LV_FONT_MONTSERRAT_48
+            case 48:    lv_font = &lv_font_montserrat_48;
+                        break;
+            #endif
+        }
+    }
     else if ( !strcmp( font, "LCD" ) ) {
         switch( font_size ) {
             case 12:    lv_font = &LCD_12px;
