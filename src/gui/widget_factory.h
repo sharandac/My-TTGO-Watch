@@ -134,6 +134,28 @@ lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
 lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_style_t *style=NULL);
 
 /**
+ * @brief   Creates and adds an add button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_add_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style=NULL);
+
+/**
+ * @brief   Creates and adds an trash button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_trash_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style=NULL);
+
+/**
  * @brief   Creates and adds an setup button to a container
  *
  * @param   parent   pointer to a parent container

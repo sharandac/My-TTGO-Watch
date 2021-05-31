@@ -18,6 +18,7 @@
 
 #include "calendar.h"
 #include "calendar_db.h"
+#include "calendar_day.h"
 #include "calendar_overview.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -188,6 +189,8 @@ static void calendar_overview_date_event_cb( lv_obj_t * obj, lv_event_t event ) 
                 calendar_month = date->month;
                 calendar_day = date->day;
                 CALENDAR_DEBUG_LOG("Clicked date: %02d.%02d.%d", date->day, date->month, date->year );
+                calendar_day_overview_refresh( date->year, date->month, date->day );
+                mainbar_jump_to_tilenumber( calendar_day_get_tile(), LV_ANIM_OFF );
             }
             break;
         case LV_EVENT_CLICKED:

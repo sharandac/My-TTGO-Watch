@@ -670,7 +670,6 @@ static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
 void osmmap_add_tile_server_list( lv_obj_t *layers_list ) {
     lv_obj_t * list_btn;
     
-
     SpiRamJsonDocument doc( strlen( (const char*)osm_server_json_start ) * 2 );
     DeserializationError error = deserializeJson( doc, (const char *)osm_server_json_start );
 

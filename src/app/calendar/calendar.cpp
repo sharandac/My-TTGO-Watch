@@ -18,7 +18,9 @@
 
 #include "calendar.h"
 #include "calendar_db.h"
+#include "calendar_day.h"
 #include "calendar_overview.h"
+#include "calendar_create.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/icon.h"
@@ -48,9 +50,11 @@ void calendar_app_setup( void ) {
      */
     calendar_db_setup();
     /**
-     * setup calendar overview
+     * setup calendar overview, day overview and create
      */
     calendar_overview_setup();
+    calendar_day_setup();
+    calendar_create_setup();
 }
 
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -41,24 +41,24 @@ void calendar_db_setup( void ) {
              * create tables
              */
             CALENDAR_DB_INFO_LOG("create tables");
-            calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar ( date INTEGER, year INTEGER, month INTEGER, day INTEGER, hour INTEGER, min INTEGER, done BOOL, content );");
+            calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar ( year INTEGER, month INTEGER, day INTEGER, hour INTEGER, min INTEGER, done BOOL, content );");
             calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar_db_version ( version INTEGER );");
             calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar_db_version VALUES ( 1 );");
             #ifdef CALENDAR_DB_CREATE_TEST_DATA
                 CALENDAR_DB_INFO_LOG("create test dataset");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105171000, 2021, 5, 17, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105251100, 2021, 5, 25, 11, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105131000, 2021, 5, 13, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105301000, 2021, 5, 30, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105171130, 2021, 5, 12, 11, 30, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105281000, 2021, 5, 28, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202105171000, 2021, 5, 17, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202106251200, 2021, 6, 25, 12, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202107121000, 2021, 7, 13, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202108301400, 2021, 8, 30, 14, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202108081000, 2021, 8, 12, 10, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 202109281800, 2021, 9, 28, 18, 0, false, 'Hello, World from calendar');");
-                calendar_db_exec( calendar_db_exec_callback, "SELECT rowid, date, year, month, day, hour min, done, content FROM calendar;");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 10,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 25, 11,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 13, 10,  0, false, 'VoIP IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 30, 10,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 11, 30, false, 'VoIP IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 28, 10,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 11,  0, false, 'lunch');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 6, 25, 12,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 7, 13, 10,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 8, 30, 14,  0, false, 'Biergarden');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 8, 12, 10,  0, false, 'lunch');");
+                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 9, 28, 18,  0, false, 'IT Meeting');");
+                calendar_db_exec( calendar_db_exec_callback, "SELECT rowid, year, month, day, hour min, done, content FROM calendar;");
                 calendar_db_exec( calendar_db_version_callback, "SELECT version FROM calendar_db_version;");
             #endif // CALENDAR_DB_CREATE_TEST_DATA
             /**

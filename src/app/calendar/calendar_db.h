@@ -24,9 +24,15 @@
     #define CALENDAR_DB_ERROR_LOG   log_e
 
     #define CALENDAR_DB_FILE        "/spiffs/calendar.db"       /** @brief calendar database file */
-
+    /**
+     * @brief sql exec callback function definition, this function is called on every result line
+     * 
+     * @param   data        user define data
+     * @param   argc        number of arguments
+     * @param   argv        arguments pointer table
+     * @param   azColName   colum name pointer table
+     */
     typedef int ( * SQL_CALLBACK_FUNC ) ( void *data, int argc, char **argv, char **azColName );
-
     /**
      * @brief setup sqlite3 interface and check if a database exist
      */
