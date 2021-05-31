@@ -56,7 +56,6 @@ LV_IMG_DECLARE(info_1_16px);
 
 // declare callback functions for the app and widget icon to enter the app
 static void enter_NetTools_event_cb( lv_obj_t * obj, lv_event_t event );
-static void enter_NetTools_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void NetTools_load_config( void);
 
