@@ -23,7 +23,8 @@
 #include <TTGO.h>
 #include <BLEServer.h>
 #include <BLEAdvertising.h>
-#include "BLEHIDDevice.h"
+#include <BLEHIDDevice.h>
+#include <stdlib.h>
 
 #include "tiltmouse_app.h"
 #include "tiltmouse_app_main.h"
@@ -41,11 +42,15 @@
 lv_obj_t *tiltmouse_app_main_tile = NULL;
 lv_style_t tiltmouse_app_main_style;
 
-bool tiltmouse_active = false;
-BLEHIDDevice *pHID;
-BLECharacteristic *pHIDMouse;
+BLEHIDDevice *pHID = NULL;
+BLECharacteristic *pHIDMouse = NULL;
 lv_task_t * _tiltmouse_app_task;
 
+bool tiltmouse_active = false;
+bool tiltmouse_available = false;
+uint8_t tiltmouse_button = 0;
+
+#define MOUSE_SENSIVITY 0.1
 #define MOUSE_LEFT 1
 #define MOUSE_RIGHT 2
 LV_FONT_DECLARE(Ubuntu_72px);
@@ -92,9 +97,12 @@ static const uint8_t _hidReportDescriptor[] = {
 };
 
 void tiltmouse_app_task( lv_task_t * task );
-static void tiltmouse_left_event_cb( lv_obj_t * obj, lv_event_t event );
-static void tiltmouse_right_event_cb( lv_obj_t * obj, lv_event_t event );
-void tiltmouse_move(uint8_t b, signed char x, signed char y, signed char wheel, signed char hWheel);
+bool tiltmouse_pmuctl_event_cb(EventBits_t event, void *arg);
+bool tiltmouse_blectl_event_cb(EventBits_t event, void *arg);
+void tiltmouse_left_event_cb( lv_obj_t * obj, lv_event_t event );
+void tiltmouse_right_event_cb( lv_obj_t * obj, lv_event_t event );
+void tiltmouse_move(signed char x, signed char y, signed char wheel, signed char hWheel);
+void tiltmouse_battery();
 
 void tiltmouse_app_main_setup( uint32_t tile_num ) {
     tiltmouse_app_main_tile = mainbar_get_tile_obj( tile_num );
@@ -104,60 +112,80 @@ void tiltmouse_app_main_setup( uint32_t tile_num ) {
     lv_obj_align(exit_btn, tiltmouse_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
     // left mouse button
-	lv_obj_t *tiltmouse_left_btn = NULL;
-    tiltmouse_left_btn = wf_add_button( tiltmouse_app_main_tile, "Left", 75, 150, tiltmouse_left_event_cb );
+	lv_obj_t *tiltmouse_left_btn = wf_add_button( tiltmouse_app_main_tile, "Left", 75, 150, tiltmouse_left_event_cb );
     lv_obj_align( tiltmouse_left_btn, NULL, LV_ALIGN_CENTER, -40, 0 );
+    lv_btn_set_checkable(tiltmouse_left_btn, false);
     
     // right mouse button
-	lv_obj_t *tiltmouse_right_btn = NULL;
-    tiltmouse_right_btn = wf_add_button( tiltmouse_app_main_tile, "Right", 75, 150, tiltmouse_right_event_cb );
+	lv_obj_t *tiltmouse_right_btn = wf_add_button( tiltmouse_app_main_tile, "Right", 75, 150, tiltmouse_right_event_cb );
     lv_obj_align( tiltmouse_right_btn, NULL, LV_ALIGN_CENTER, 40, 0 );
+    lv_btn_set_checkable(tiltmouse_right_btn, false);
 
     // create an task that runs every 100ms
     _tiltmouse_app_task = lv_task_create( tiltmouse_app_task, 100, LV_TASK_PRIO_MID, NULL );
 
-    // prepare hid mouse
-    //BLEServer *pServer = blectl_get_ble_server();
-
-    //TODO: Fix panic on the line below!
-    //pHID = new BLEHIDDevice(pServer);
-    //pHIDMouse = pHID->inputReport(0); // <-- input REPORTID from report map
-
-    //pHID->pnp(0x02, 0xe502, 0xa111, 0x0210);
-    //pHID->hidInfo(0x00,0x02);
-    //pHID->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
-    //pHID->startServices();
+    pmu_register_cb( PMUCTL_STATUS, tiltmouse_pmuctl_event_cb, "tiltmouse pmu");
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, tiltmouse_blectl_event_cb, "tiltmouse bluetooth" );
 }
 
-void tiltmouse_app_task( lv_task_t * task ) {
-    if ( !tiltmouse_active ) return;
-    if ( blectl_get_event( BLECTL_OFF | BLECTL_DISCONNECT ) ) return;
-
+void tiltmouse_app_task( lv_task_t * task )
+{
+    if ( !tiltmouse_active || !tiltmouse_available ) return;
     TTGOClass * ttgo = TTGOClass::getWatch();
 
     Accel acc;
     ttgo->bma->getAccel(acc);
 
-    tiltmouse_move( 0, acc.x, acc.y, 0, 0 );
+    int16_t x = acc.x * MOUSE_SENSIVITY;
+    int16_t y = acc.y * MOUSE_SENSIVITY;
+    if (abs(x) < 5) x = 0;
+    if (abs(y) < 5) y = 0;
+
+    tiltmouse_move( x, y, 0, 0 );
+    lv_disp_trig_activity( NULL );
 }
 
-void tiltmouse_activate() {
-    //BLEAdvertising *pAdvertising = blectl_get_ble_advertising();
-    //pAdvertising->setAppearance( ESP_BLE_APPEARANCE_HID_MOUSE );
-    //pAdvertising->addServiceUUID(pHID->hidService()->getUUID());
-    //tiltmouse_active = true;
+void tiltmouse_init()
+{
+    if (pHID == NULL || pHIDMouse == NULL) {
+        BLEServer *pServer = blectl_get_ble_server();
+        BLEAdvertising *pAdvertising = blectl_get_ble_advertising();
+
+        pHID = new BLEHIDDevice(pServer);
+        pHIDMouse = pHID->inputReport(0); // <-- input REPORTID from report map
+
+        pHIDMouse->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
+
+        pHID->pnp(0x02, 0xe502, 0xa111, 0x0210);
+        pHID->hidInfo(0x00,0x02);
+        pHID->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
+        pHID->startServices();
+        
+        pAdvertising->addServiceUUID(pHID->hidService()->getUUID());
+    }
+
+    tiltmouse_battery();
 }
 
-void tiltmouse_deactivate() {
-    //BLEAdvertising *pAdvertising = blectl_get_ble_advertising();
-    //pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
-    //tiltmouse_active = true;
+void tiltmouse_activate()
+{
+    tiltmouse_init();
+    BLEAdvertising *pAdvertising = blectl_get_ble_advertising();
+    pAdvertising->setAppearance( ESP_BLE_APPEARANCE_HID_MOUSE );
+    tiltmouse_active = true;
 }
 
-void tiltmouse_move(uint8_t b, signed char x, signed char y, signed char wheel, signed char hWheel)
+void tiltmouse_deactivate()
+{
+    BLEAdvertising *pAdvertising = blectl_get_ble_advertising();
+    pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
+    tiltmouse_active = false;
+}
+
+void tiltmouse_move(signed char x, signed char y, signed char wheel, signed char hWheel)
 {
     uint8_t m[5];
-    m[0] = b;
+    m[0] = tiltmouse_button;
     m[1] = x;
     m[2] = y;
     m[3] = wheel;
@@ -166,18 +194,53 @@ void tiltmouse_move(uint8_t b, signed char x, signed char y, signed char wheel, 
     pHIDMouse->notify();
 }
 
-static void tiltmouse_left_event_cb( lv_obj_t * obj, lv_event_t event ) 
+void tiltmouse_battery()
+{
+    if (!tiltmouse_available) return;
+    int32_t battery = pmu_get_battery_percent();
+    pHID->setBatteryLevel(battery);
+}
+
+bool tiltmouse_pmuctl_event_cb( EventBits_t event, void *arg )
 {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       tiltmouse_move( MOUSE_LEFT, 0, 0, 0, 0 );
+        case PMUCTL_STATUS:
+            tiltmouse_battery();
+            break;
+    }
+    return( true );
+}
+
+bool tiltmouse_blectl_event_cb(EventBits_t event, void *arg)
+{
+    switch( event ) {
+        case BLECTL_ON:             tiltmouse_init();
+                                    tiltmouse_available = true;
+                                    break;
+        case BLECTL_OFF:            tiltmouse_available = false;
+                                    break;
+    }
+    return (true);
+}
+
+void tiltmouse_left_event_cb( lv_obj_t * obj, lv_event_t event ) 
+{
+    switch( event ) {
+        case( LV_EVENT_PRESSED ):       tiltmouse_button = MOUSE_LEFT;
+                                        tiltmouse_move( 0, 0, 0, 0 );
+                                        break;
+        case( LV_EVENT_RELEASED ):      tiltmouse_move( 0, 0, 0, 0 );
                                         break;
     }
 }
 
-static void tiltmouse_right_event_cb( lv_obj_t * obj, lv_event_t event ) 
+void tiltmouse_right_event_cb( lv_obj_t * obj, lv_event_t event ) 
 {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       tiltmouse_move( MOUSE_RIGHT, 0, 0, 0, 0 );
+        case( LV_EVENT_PRESSED ):       tiltmouse_button = MOUSE_RIGHT;
+                                        tiltmouse_move( 0, 0, 0, 0 );
+                                        break;
+        case( LV_EVENT_RELEASED ):      tiltmouse_move( 0, 0, 0, 0 );
                                         break;
     }
 }

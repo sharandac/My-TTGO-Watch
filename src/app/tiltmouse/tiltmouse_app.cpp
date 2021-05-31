@@ -54,7 +54,6 @@ void tiltmouse_app_setup( void ) {
     // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
     // the resulting c-file can put in /app/tiltmouse/images/ and declare it like LV_IMG_DECLARE( your_icon );
     tiltmouse_app = app_register( "Tilt Mouse", &tiltmouse_app_64px, enter_tiltmouse_app_event_cb );
-    app_set_indicator( tiltmouse_app, ICON_INDICATOR_OK );
 
     // init main and setup tile, see tiltmouse_app_main.cpp and tiltmouse_app_setup.cpp
     tiltmouse_app_main_setup( tiltmouse_app_main_tile_num );

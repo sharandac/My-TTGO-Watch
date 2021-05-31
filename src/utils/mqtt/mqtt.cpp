@@ -109,7 +109,7 @@ void mqtt_stop() {
 
     if ( mqtt_client.connected() ) {
         log_i("stop mqtt");
-        mqtt_client.disconnect(true);
+        mqtt_client.disconnect();
     }
 }
 

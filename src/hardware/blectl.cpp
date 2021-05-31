@@ -153,7 +153,8 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 return;
             }
         }
-        log_e("authentication not handle. reason: %02x", cmpl.fail_reason );
+        
+        log_e("authentication not handle but %s. reason: %02x", cmpl.success ? "successful" : "not successful", cmpl.fail_reason );
     }
 };
 
