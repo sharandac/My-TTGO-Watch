@@ -20,8 +20,6 @@
  */
 
 // Set logging level for this file
-#define CORE_DEBUG_LEVEL 5
-
 #include "config.h"
 #include <Arduino.h>
 #include <memory>

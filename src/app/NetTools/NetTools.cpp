@@ -78,16 +78,6 @@ void NetTools_setup( void ) {
     NetTools = app_register( "Net\nTools", &NetTools_64px, enter_NetTools_event_cb );
     //app_set_indicator( NetTools, ICON_INDICATOR_OK );
 
-#ifdef NETTOOLS_WIDGET
-    // register widget icon on the main tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an widget icon must have an max size of 64x64 pixel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
-    NetTools_widget = widget_register( "Net\nTools", &NetTools_48px, enter_NetTools_widget_event_cb );
-    widget_set_indicator( example_widget, ICON_INDICATOR_UPDATE );
-#endif // EXAMPLE_WIDGET
-
     // init main and setup tile, see NetTools_main.cpp and NetTools_setup.cpp
     NetTools_main_setup( NetTools_main_tile_num );
     NetTools_setup_setup( NetTools_setup_tile_num );
@@ -114,18 +104,6 @@ static void enter_NetTools_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       statusbar_hide( true );
                                         app_hide_indicator( NetTools );
-                                        mainbar_jump_to_tilenumber( NetTools_main_tile_num, LV_ANIM_OFF );
-                                        break;
-    }    
-}
-
-/*
- *
- */
-static void enter_NetTools_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        widget_hide_indicator( NetTools_widget );
                                         mainbar_jump_to_tilenumber( NetTools_main_tile_num, LV_ANIM_OFF );
                                         break;
     }    

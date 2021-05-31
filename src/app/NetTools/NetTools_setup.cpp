@@ -50,7 +50,6 @@ lv_obj_t *NetTools_Tasmota3_IP_textfield = NULL;
 LV_IMG_DECLARE(exit_32px);
 
 static void exit_NetTools_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void NetTools_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event );
 static void NetTools_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void NetTools_setup_setup( uint32_t tile_num ) {
@@ -84,24 +83,6 @@ void NetTools_setup_setup( uint32_t tile_num ) {
     lv_label_set_text( exit_label, "NetTools Setup");
     lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
     
-    /*
-    lv_obj_t *NetTools_foobar_switch_cont = lv_obj_create( NetTools_setup_tile, NULL );
-    lv_obj_set_size( NetTools_foobar_switch_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( NetTools_foobar_switch_cont, LV_OBJ_PART_MAIN, &NetTools_setup_style  );
-    lv_obj_align( NetTools_foobar_switch_cont, exit_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
-
-    NetTools_foobar_switch = lv_switch_create( NetTools_foobar_switch_cont, NULL );
-    lv_obj_add_protect( NetTools_foobar_switch, LV_PROTECT_CLICK_FOCUS);
-    lv_obj_add_style( NetTools_foobar_switch, LV_SWITCH_PART_INDIC, mainbar_get_switch_style() );
-    lv_switch_off( NetTools_foobar_switch, LV_ANIM_ON );
-    lv_obj_align( NetTools_foobar_switch, NetTools_foobar_switch_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-    lv_obj_set_event_cb( NetTools_foobar_switch, NetTools_foobar_switch_event_cb );
-
-    lv_obj_t *NetTools_foobar_switch_label = lv_label_create( NetTools_foobar_switch_cont, NULL);
-    lv_obj_add_style( NetTools_foobar_switch_label, LV_OBJ_PART_MAIN, &NetTools_setup_style  );
-    lv_label_set_text( NetTools_foobar_switch_label, "Foo Bar");
-    lv_obj_align( NetTools_foobar_switch_label, NetTools_foobar_switch_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
-    */
     //WakePC Mac Address
     lv_obj_t *NetTools_WOL_MAC_cont = lv_obj_create( NetTools_setup_tile, NULL );
     lv_obj_set_size(NetTools_WOL_MAC_cont, lv_disp_get_hor_res( NULL ) , 40);
@@ -162,13 +143,6 @@ void NetTools_setup_setup( uint32_t tile_num ) {
     lv_textarea_set_accepted_chars(NetTools_Tasmota2_IP_textfield, "0123456789.");
     lv_textarea_set_max_length(NetTools_Tasmota2_IP_textfield, INPUT_IP_LENGTH);
     
-}
-
-static void NetTools_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): Serial.printf( "switch value = %d\r\n", lv_switch_get_state( obj ) );
-                                        break;
-    }
 }
 
 static void NetTools_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
