@@ -39,6 +39,7 @@
 #include "app/IRController/IRController.h"
 #include "app/fx_rates/fx_rates.h"
 #include "app/activity/activity.h"
+#include "app/calc/calc_app.h"
 #include "app/calendar/calendar.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
@@ -79,6 +80,7 @@ void setup() {
     alarm_clock_setup();
     activity_app_setup();
     calendar_app_setup();
+    calc_app_setup();
     gps_status_setup();
     sailing_setup();
     osmand_app_setup();
