@@ -111,10 +111,12 @@ The example above schow how a blinking time works.
 |`steps`|the number of steps, as an integer.|
 
 ## font type and size
-Available font are: `Ubuntu`, `LCD`.
-Available font sizes are: `12`, `16`, `32`, `48`, `72`.
+Available font are: `Ubuntu`, `Montserrat`, `LCD`.
+Available font sizes are: `12` (U,L), `14` (M), `16` (U,M,L), `22` (M), `28` (M), `32` (U,M,L), `48` (U,L), `72` (U,L).
 On api_level 3 it is possible to load a font on runtime from spiffs. As example: `lcd.font` loads a font file from spiffs. location is: `/spiffs/watchface/lcd.font`
 [here is a manual how create your own font file](https://github.com/lvgl/lv_font_conv/)
+
+The `Montserrat` font allow access to [FontAwesome symbols as presented in the official documentation](https://docs.lvgl.io/7.11/overview/font.html#special-fonts).
 
 # image
 A image entry looks like this:
