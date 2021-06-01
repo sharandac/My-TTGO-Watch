@@ -32,21 +32,24 @@
 /**
  * calendar tile store
  */
-uint32_t calendar_ovreview_tile_num;                                                    /** @brief allocated calendar overview tile number */
+uint32_t calendar_ovreview_tile_num;                                                /** @brief allocated calendar overview tile number */
 /**
- * calendar icon
+ * calendar icon and fonts
  */
-LV_FONT_DECLARE(Ubuntu_12px);                                                           /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_12px);                                                       /** @brief calendar font */
 /**
  * calendar objects
  */
-static lv_obj_t * calendar_overview;                                                    /** @brief calendar lv object */
-static lv_style_t calendar_overview_style;                                              /** @brief calendar style object */
-lv_calendar_date_t *calendar_overview_highlighted_days = NULL;                          /** @brief highlighted days table */
-static bool calendar_overview_highlight_table[ CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS ];    /** @brief highlighted days table bool table for sql query */
-static int calendar_year = 0;                                                           /** @brief current year in calendar overview */
-static int calendar_month = 0;                                                          /** @brief current month in calendar overview */
-static int calendar_day = 0;                                                            /** @brief current day in calendar overview */
+lv_obj_t *calendar_overview;                                                        /** @brief calendar lv object */
+lv_style_t calendar_overview_style;                                                 /** @brief calendar style object */
+lv_calendar_date_t *calendar_overview_highlighted_days = NULL;                      /** @brief highlighted days table */
+/**
+ * internal variables
+ */
+static bool calendar_overview_highlight_table[ CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS ];/** @brief highlighted days table bool table for sql query */
+static int calendar_year = 0;                                                       /** @brief current year in calendar overview */
+static int calendar_month = 0;                                                      /** @brief current month in calendar overview */
+static int calendar_day = 0;                                                        /** @brief current day in calendar overview */
 /**
  * internal function declaration
  */
@@ -153,10 +156,6 @@ void calendar_overview_refresh_ui( void ) {
 
 void calendar_overview_activate_cb( void ) {
     /**
-     * refresh the calendar on activation
-     */
-    calendar_overview_refresh_ui();
-    /**
      * open calendar date base
      */
     if ( calendar_db_open() ) {
@@ -188,7 +187,7 @@ static void calendar_overview_date_event_cb( lv_obj_t * obj, lv_event_t event ) 
                 calendar_year = date->year;
                 calendar_month = date->month;
                 calendar_day = date->day;
-                CALENDAR_DEBUG_LOG("Clicked date: %02d.%02d.%d", date->day, date->month, date->year );
+                CALENDAR_OVREVIEW_DEBUG_LOG("Clicked date: %02d.%02d.%d", date->day, date->month, date->year );
                 calendar_day_overview_refresh( date->year, date->month, date->day );
                 mainbar_jump_to_tilenumber( calendar_day_get_tile(), LV_ANIM_OFF );
             }
@@ -198,7 +197,7 @@ static void calendar_overview_date_event_cb( lv_obj_t * obj, lv_event_t event ) 
             if( date ) {
                 calendar_year = date->year;
                 calendar_month = date->month;
-                CALENDAR_DEBUG_LOG("current year and month: %d %d", date->year, date->month );
+                CALENDAR_OVREVIEW_DEBUG_LOG("current year and month: %d %d", date->year, date->month );
             }
             /**
              * highlight day with dates
@@ -236,10 +235,10 @@ static int calendar_overview_highlight_day_callback( void *data, int argc, char 
          */
         if ( !strcmp( azColName[ i ], "day") ) {
             calendar_overview_highlight_table[ atoi( argv[ i ] ) ] = true;
-            CALENDAR_DB_DEBUG_LOG("highlight day %d", atoi( argv[ i ] ) );
+            CALENDAR_OVREVIEW_DEBUG_LOG("highlight day %d", atoi( argv[ i ] ) );
         }
     }
-    CALENDAR_DB_DEBUG_LOG("Result = %s", Result.c_str() );
+    CALENDAR_OVREVIEW_DEBUG_LOG("Result = %s", Result.c_str() );
     return 0;
 }
 
@@ -254,7 +253,7 @@ int calendar_overview_highlight_day( int year, int month ) {
     /**
      * build sql query string
      */
-    String sql = (String) "SELECT rowid, year, month, day, hour min, done, content FROM calendar WHERE year == " + year + " AND month == " + month + ";";
+    String sql = (String) "SELECT rowid, year, month, day, hour, min, content FROM calendar WHERE year == " + year + " AND month == " + month + ";";
     /**
      * exec sql query
      */
@@ -264,7 +263,7 @@ int calendar_overview_highlight_day( int year, int month ) {
          */
         for ( int i = 0 ; i < CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS ; i++ ) {
             if ( calendar_overview_highlight_table[ i ] ) {
-                CALENDAR_DB_DEBUG_LOG("add year %d and month %d to highlight", year, month );
+                CALENDAR_OVREVIEW_DEBUG_LOG("add year %d and month %d to highlight", year, month );
                 calendar_overview_highlighted_days[ hitcounter ].day = i;
                 calendar_overview_highlighted_days[ hitcounter ].month = month;
                 calendar_overview_highlighted_days[ hitcounter ].year = year;

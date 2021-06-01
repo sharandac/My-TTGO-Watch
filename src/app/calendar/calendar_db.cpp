@@ -3,10 +3,14 @@
 #include "utils/sqlite3/sqlite3.h"
 
 #include "calendar_db.h"
-
+/**
+ * internal variables
+ */
 sqlite3 *calendar_db = NULL;
 static uint32_t calendar_db_version = 0;
-
+/**
+ * internal function declaration
+ */
 static int calendar_db_version_callback( void *data, int argc, char **argv, char **azColName );
 static int calendar_db_exec_callback( void *data, int argc, char **argv, char **azColName );
 
@@ -41,24 +45,29 @@ void calendar_db_setup( void ) {
              * create tables
              */
             CALENDAR_DB_INFO_LOG("create tables");
-            calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar ( year INTEGER, month INTEGER, day INTEGER, hour INTEGER, min INTEGER, done BOOL, content );");
+            calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar ( date INTEGER, year INTEGER, month INTEGER, day INTEGER, hour INTEGER, min INTEGER, content );");
             calendar_db_exec( calendar_db_exec_callback, "CREATE TABLE calendar_db_version ( version INTEGER );");
             calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar_db_version VALUES ( 1 );");
             #ifdef CALENDAR_DB_CREATE_TEST_DATA
                 CALENDAR_DB_INFO_LOG("create test dataset");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 10,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 25, 11,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 13, 10,  0, false, 'VoIP IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 30, 10,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 11, 30, false, 'VoIP IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 28, 10,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 5, 17, 11,  0, false, 'lunch');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 6, 25, 12,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 7, 13, 10,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 8, 30, 14,  0, false, 'Biergarden');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 8, 12, 10,  0, false, 'lunch');");
-                calendar_db_exec( calendar_db_exec_callback, "INSERT INTO calendar VALUES ( 2021, 9, 28, 18,  0, false, 'IT Meeting');");
-                calendar_db_exec( calendar_db_exec_callback, "SELECT rowid, year, month, day, hour min, done, content FROM calendar;");
+                /**
+                 * Set today's date
+                 */
+                time_t now;
+                struct tm time_tm;
+                time( &now );
+                localtime_r( &now, &time_tm );
+                char date[30]="";
+                snprintf( date, sizeof( date ),"%04d%02d%02d%02d%02d", ( time_tm.tm_year + 1900 ), ( time_tm.tm_mon + 1 ), time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min );
+                String sql = (String)   "INSERT INTO calendar VALUES (" +
+                                        date + "," +
+                                        ( time_tm.tm_year + 1900 ) + "," + 
+                                        ( time_tm.tm_mon + 1 ) + "," + 
+                                        time_tm.tm_mday + "," + 
+                                        time_tm.tm_hour + "," + 
+                                        time_tm.tm_min + "," + 
+                                        "'first date');";
+                calendar_db_exec( calendar_db_exec_callback, sql.c_str() );
                 calendar_db_exec( calendar_db_version_callback, "SELECT version FROM calendar_db_version;");
             #endif // CALENDAR_DB_CREATE_TEST_DATA
             /**

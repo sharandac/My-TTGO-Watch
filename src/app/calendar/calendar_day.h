@@ -18,7 +18,7 @@
 
     #include <TTGO.h>
     #define CALENDAR_DAY_INFO_LOG               log_i
-    #define CALENDAR_DAY_DEBUG_LOG              log_i
+    #define CALENDAR_DAY_DEBUG_LOG              log_d
     #define CALENDAR_DAY_ERROR_LOG              log_e
     /**
      * @brief setup calendar overview tile

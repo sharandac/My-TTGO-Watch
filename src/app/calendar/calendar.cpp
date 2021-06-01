@@ -31,11 +31,13 @@
 
 #include "utils/alloc.h"
 /**
- * app icon
+ * calendar icon and fonts
  */
 icon_t *calendar_icon = NULL;                                       /** @brief calendar icon */
 LV_IMG_DECLARE(calendar_64px);                                      /** @brief calendar icon image */
-
+/**
+ * internal function declaration
+ */
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event );
 /**
  * setup routine for application
@@ -44,7 +46,7 @@ void calendar_app_setup( void ) {
     /**
      * register app icon on the app tile
      */
-    calendar_icon = app_register( "Calendar\n(alpha)", &calendar_64px, calendar_enter_event_cb );
+    calendar_icon = app_register( "Calendar\n(beta)", &calendar_64px, calendar_enter_event_cb );
     /**
      * check and init database
      */
