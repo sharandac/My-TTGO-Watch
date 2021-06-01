@@ -38,7 +38,6 @@ lv_style_t result_style;
 lv_obj_t *result_label;
 lv_obj_t **numbers = new lv_obj_t*[10];
 
-LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 float inputs[2] = { 0.0, 0.0 };

@@ -53,7 +53,6 @@ uint8_t tiltmouse_button = 0;
 #define MOUSE_SENSIVITY 0.1
 #define MOUSE_LEFT 1
 #define MOUSE_RIGHT 2
-LV_FONT_DECLARE(Ubuntu_72px);
 
 static const uint8_t _hidReportDescriptor[] = {
   USAGE_PAGE(1),       0x01, // USAGE_PAGE (Generic Desktop)
