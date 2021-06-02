@@ -42,8 +42,8 @@ lv_obj_t *button_matrix;
 LV_IMG_DECLARE(equals_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-static const char* buttons[20] = {"1","2","3","+","\n","4","5","6","-","\n","7","8","9","*","\n","C","0",".","/",""};
-float inputs[2] = { 0.0, 0.0 };
+static const char* buttons[20] = {"1","2","3","+","\n","4","5","6","-","\n","7","8","9","*","\n","C/CE","0",".","/",""};
+float inputs[2] = { NAN, NAN };
 char input[16] = "\0";
 char op = '\0';
 
@@ -107,6 +107,14 @@ void calc_button_event_cb( lv_obj_t * obj, lv_event_t event )
                                         const char * txt = lv_btnmatrix_get_active_btn_text(obj);
                                         calc_process_button(txt[0]);
                                         calc_update_button();
+                                        break;
+        }
+        case( LV_EVENT_LONG_PRESSED ): {
+                                        const char * txt = lv_btnmatrix_get_active_btn_text(obj);
+                                        if (txt[0] == 'C') {
+                                            calc_process_button('D');
+                                            calc_update_button();
+                                        }
                                         break;
         }
         case( LV_EVENT_CLICKED ):       calc_update_button();
@@ -175,6 +183,10 @@ void calc_process_button(char cmd)
         case '8':
         case '9':
         case '.':
+            if ( op == '=') {
+                inputs[1] = NAN;
+                op = '\0';
+            }
             input[strlen(input)] = cmd;
             input[strlen(input)] = '\0';
             inputs[0] = atof(input);
@@ -201,8 +213,12 @@ void calc_process_button(char cmd)
             break;
         case 'C':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = 0.0;
-            inputs[0] = 0.0;
+            inputs[0] = NAN;
+            break;
+        case 'D':
+            memset(input, '\0', sizeof(input)/sizeof(char));
+            inputs[1] = NAN;
+            inputs[0] = NAN;
             op = '\0';
             break;
         case '=':
@@ -213,7 +229,7 @@ void calc_process_button(char cmd)
     }
 
     char temp[16];
-    snprintf(temp, sizeof(temp), "%g", showResult ? inputs[1] : inputs[0]);
+    snprintf(temp, sizeof(temp), "%g", showResult ? (isnan(inputs[1]) ? 0.0 : inputs[1]) : (isnan(inputs[0]) ? 0.0 : inputs[0]));
     lv_label_set_text(result_label, temp);
     lv_event_send_refresh(result_label);
 }
@@ -223,33 +239,32 @@ void calc_process_operator(char cmd, char op)
     switch( op ) {
         case '+':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = inputs[1] + inputs[0];
-            inputs[0] = 0.0;
+            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] + inputs[0];
+            inputs[0] = NAN;
             break;
         case '-':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = inputs[1] - inputs[0];
-            inputs[0] = 0.0;
+            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] - inputs[0];
+            inputs[0] = NAN;
             break;
         case '*':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = inputs[1] * inputs[0];
-            inputs[0] = 0.0;
+            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] * inputs[0];
+            inputs[0] = NAN;
             break;
         case '/':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = inputs[1] / inputs[0];
-            inputs[0] = 0.0;
+            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] / inputs[0];
+            inputs[0] = NAN;
             break;
         case '=':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = inputs[1];
-            inputs[0] = 0.0;
+            inputs[0] = NAN;
             break;
         case '\0':
             memset(input, '\0', sizeof(input)/sizeof(char));
             inputs[1] = inputs[0];
-            inputs[0] = 0.0;
+            inputs[0] = NAN;
             break;
     }
 }
