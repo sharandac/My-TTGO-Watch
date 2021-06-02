@@ -28,8 +28,13 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/statusbar.h"
+#include "gui/sound/piep_higher.h"
+#include "gui/sound/piep_high.h"
+#include "gui/sound/piep_lower.h"
+#include "gui/sound/piep_low.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
+#include "hardware/sound.h"
 
 #include "pong_app.h"
 #include "pong_game.h"

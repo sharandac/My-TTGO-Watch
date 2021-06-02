@@ -28,8 +28,11 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/statusbar.h"
+#include "gui/sound/piep_high.h"
+#include "gui/sound/piep_low.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
+#include "hardware/sound.h"
 
 #include "ttt_app.h"
 #include "ttt_game.h"
@@ -319,7 +322,7 @@ void TicTacToeApp::OnTileClicked(int index)
 {
     if (index < 0 || index >= NUM_SQUARES)
     {
-        log_e("Invaid tile number, expected 0-%d, received %d", NUM_SQUARES, index);
+        log_e("Invalid tile number, expected 0-%d, received %d", NUM_SQUARES, index);
         return;
     }
 
@@ -331,6 +334,9 @@ void TicTacToeApp::OnTileClicked(int index)
 
         lv_obj_add_style(mButtons[index], LV_BTN_PART_MAIN, style);
         lv_btn_set_state(mButtons[index], LV_BTN_STATE_DISABLED);
+
+        sound_play_progmem_wav( (mCurrentPlayer == Owner::Red) ? piep_high_wav : piep_low_wav, (mCurrentPlayer == Owner::Red) ? piep_high_wav_len : piep_low_wav_len );
+        motor_vibe(10);
 
         NextPlayer();
     }
