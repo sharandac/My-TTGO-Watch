@@ -72,7 +72,7 @@ void enter_calc_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         statusbar_hide( true );
                                         app_hide_indicator( calc_app );
                                         break;
-    }    
+    }
 }
 
 /*
