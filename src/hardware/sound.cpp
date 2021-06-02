@@ -277,7 +277,7 @@ void sound_speak( const char *str ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
-        log_i("Speaking text %s", str);
+        log_i("Speaking text: %s", str);
         is_speaking = true;
         sam->Say(out, str);
         is_speaking = false;
@@ -358,7 +358,7 @@ void sound_set_volume_config( uint8_t volume ) {
     }
 
     sound_config.volume = volume;
-        
+
     if ( sound_config.enable && sound_init ) {
         log_i("Setting sound volume to: %d", volume);
         // limiting max gain to 3.5 (max gain is 4.0)
