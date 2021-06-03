@@ -48,9 +48,9 @@ static void startGame(struct _lv_obj_t *obj, lv_event_t event)
 {
     switch (event)
     {
-    case (LV_EVENT_CLICKED):
-        iconInstance.OnStartClicked();
-        break;
+        case (LV_EVENT_CLICKED):
+            iconInstance.OnStartClicked();
+            break;
     }
 }
 

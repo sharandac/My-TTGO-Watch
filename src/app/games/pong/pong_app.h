@@ -32,6 +32,26 @@ class PongApp : public GameBase
 
 private:
     PongIcon *mParentIcon = 0;
+    bool pong_inited = false;
+    bool pong_active = false;
+    
+    // Gameplay data
+    uint8_t score_p1 = 0;
+    uint8_t score_p2 = 0;
+    
+    // Visual data
+    lv_style_t mStyleApp;
+    lv_style_t mStyleMenu;
+    lv_style_t style_ball;
+    lv_style_t style_player1;
+    lv_style_t style_player2;
+    lv_style_t style_scoreboard;
+    lv_obj_t* bar_ball;
+    lv_obj_t* bar_player1;
+    lv_obj_t* bar_player2;
+    lv_obj_t* label_scoreboard;
+
+    void OnExitClicked();
 
 public:
     enum MenuItem : uint8_t
@@ -44,6 +64,19 @@ public:
     PongApp(PongIcon *callingIcon);
     ~PongApp();
 
+    void Loop();
+
+    void UpdatePlayer();
+
+    void UpdateBoard();
+
+    void ClearBoard();
+
+    void ResetBall();
+
     // Launch from watch mainbar
     void OnLaunch();
+
+    // A menu item was clicked.
+    void OnMenuClicked(MenuItem item);
 };

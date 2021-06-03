@@ -38,14 +38,28 @@ LV_IMG_DECLARE(pong_64px);
 
 // The one and only.
 static PongIcon iconInstance;
+lv_task_t * _pong_app_task;
+
+void pong_app_task( lv_task_t * task )
+{
+    if ( !iconInstance.IsActive ) return;
+    iconInstance.Loop();
+}
 
 void pong_game_setup()
 {
     iconInstance.RegisterAppIcon();
+    _pong_app_task = lv_task_create( pong_app_task, 50, LV_TASK_PRIO_HIGH, NULL );
 }
 
 static void startGame(struct _lv_obj_t *obj, lv_event_t event)
 {
+    switch (event)
+    {
+        case (LV_EVENT_CLICKED):
+            iconInstance.OnStartClicked();
+            break;
+    }
 }
 
 PongIcon::PongIcon()
@@ -53,4 +67,48 @@ PongIcon::PongIcon()
     pAppname = "Pong";
     pMenuIcon = &pong_64px;
     pStartFunction = startGame;
+}
+
+void PongIcon::OnStartClicked()
+{
+    motor_vibe(1);
+
+    if(!mGameInstance)
+    {
+        log_d("Creating game instance.");
+        mGameInstance = std::unique_ptr<PongApp>(new PongApp(this));
+    }
+
+    log_d("Launching game instance.");
+    mGameInstance->OnLaunch();
+    IsActive = true;
+}
+
+static void DelayedRelease(void* param)
+{
+    PongIcon *me = reinterpret_cast<PongIcon *>(param);
+
+    me->DoDelayedRelease();
+}
+
+void PongIcon::OnExitClicked()
+{
+    motor_vibe(1);
+    mainbar_jump_to_tilenumber(app_tile_get_tile_num(), LV_ANIM_OFF);
+    IsActive = false;
+
+    /* Delay this until the next task handler cycle */
+    log_d("Queuing async release");
+    lv_async_call(DelayedRelease, this);
+}
+
+void PongIcon::DoDelayedRelease()
+{
+    log_d("Triggering async release");
+    mGameInstance.release();
+}
+
+void PongIcon::Loop()
+{
+    mGameInstance->Loop();
 }

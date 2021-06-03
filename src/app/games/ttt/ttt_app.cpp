@@ -336,7 +336,7 @@ void TicTacToeApp::OnTileClicked(int index)
         lv_btn_set_state(mButtons[index], LV_BTN_STATE_DISABLED);
 
         sound_play_progmem_wav( (mCurrentPlayer == Owner::Red) ? piep_high_wav : piep_low_wav, (mCurrentPlayer == Owner::Red) ? piep_high_wav_len : piep_low_wav_len );
-        motor_vibe(10);
+        motor_vibe(2);
 
         NextPlayer();
     }

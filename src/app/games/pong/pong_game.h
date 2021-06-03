@@ -36,4 +36,9 @@ private:
 
 public:
     PongIcon();
+    void OnStartClicked();
+    void OnExitClicked();
+    void DoDelayedRelease();
+    void Loop();
+    bool IsActive = false;
 };

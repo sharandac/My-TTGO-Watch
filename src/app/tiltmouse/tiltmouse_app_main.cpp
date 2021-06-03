@@ -120,8 +120,8 @@ void tiltmouse_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( tiltmouse_right_btn, NULL, LV_ALIGN_CENTER, 40, 0 );
     lv_btn_set_checkable(tiltmouse_right_btn, false);
 
-    // create an task that runs every 100ms
-    _tiltmouse_app_task = lv_task_create( tiltmouse_app_task, 100, LV_TASK_PRIO_MID, NULL );
+    // create an task that runs every 50ms
+    _tiltmouse_app_task = lv_task_create( tiltmouse_app_task, 50, LV_TASK_PRIO_HIGH, NULL );
 
     pmu_register_cb( PMUCTL_STATUS, tiltmouse_pmuctl_event_cb, "tiltmouse pmu");
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, tiltmouse_blectl_event_cb, "tiltmouse bluetooth" );
