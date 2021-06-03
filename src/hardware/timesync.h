@@ -146,4 +146,13 @@
      * @param buf_len size of the string buffer
      */    
     void timesync_get_current_datestring( char * buf, size_t buf_len );
+    /**
+     * @brief get if the current time is inbetween to specified times
+     * 
+     * @param start time
+     * @param end time
+     * 
+     * @return  true if success, false if failed
+     */    
+    bool timesync_is_between( struct tm start, struct tm end );
 #endif // _TIME_SYNC_H
