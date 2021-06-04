@@ -170,7 +170,7 @@ void watchface_tile_setup( void ) {
         lv_obj_set_width( watchface_label_cont, watchface_theme_config.dial.label[ i ].x_size );
         lv_obj_set_height( watchface_label_cont, watchface_theme_config.dial.label[ i ].y_size );
         lv_obj_set_pos( watchface_label_cont, watchface_theme_config.dial.label[ i ].x_offset, watchface_theme_config.dial.label[ i ].y_offset );
-        lv_obj_set_hidden( watchface_label_cont, !watchface_theme_config.dial.label[ i ].enable );
+        lv_obj_set_hidden( watchface_label_cont, !(watchface_theme_config.dial.label[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.label[ i ].enable)) );
         lv_obj_add_style( watchface_label_cont, LV_OBJ_PART_MAIN, &watchface_app_tile_style );
         /**
          * alloc and setup label
@@ -519,7 +519,7 @@ void watchface_reload_theme( void ) {
         lv_obj_set_width( lv_obj_get_parent( watchface_label[ i ] ), watchface_theme_config.dial.label[ i ].x_size );
         lv_obj_set_height( lv_obj_get_parent( watchface_label[ i ] ), watchface_theme_config.dial.label[ i ].y_size );
         lv_obj_set_pos( lv_obj_get_parent( watchface_label[ i ] ), watchface_theme_config.dial.label[ i ].x_offset, watchface_theme_config.dial.label[ i ].y_offset );
-        lv_obj_set_hidden( lv_obj_get_parent( watchface_label[ i ] ), !watchface_theme_config.dial.label[ i ].enable );
+        lv_obj_set_hidden( lv_obj_get_parent( watchface_label[ i ] ), !(watchface_theme_config.dial.label[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.label[ i ].enable)) );
         lv_obj_add_style( lv_obj_get_parent( watchface_label[ i ] ), LV_OBJ_PART_MAIN, &watchface_app_tile_style );
         /**
          * alloc and setup label
@@ -898,7 +898,7 @@ void watchface_app_label_update( tm &info ) {
         /**
          * check if label enabled
          */
-        if ( watchface_theme_config.dial.label[ i ].enable ) {
+        if ( watchface_theme_config.dial.label[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.label[ i ].enable ) ) {
             /**
              * check label type
              */

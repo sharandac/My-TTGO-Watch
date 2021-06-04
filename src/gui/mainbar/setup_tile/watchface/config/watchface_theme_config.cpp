@@ -70,7 +70,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
 
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
         if ( dial.label[ i ].enable ) {
-            doc["label"][ labelcount ]["enable"] = dial.label[ i ].enable;
+            doc["label"][ labelcount ]["enable"] = dial.label[ i ].enable_expr;
             doc["label"][ labelcount ]["type"] = dial.label[ i ].type;
             doc["label"][ labelcount ]["expr"] = dial.label[ i ].raw_expr;
             doc["label"][ labelcount ]["label"] = dial.label[ i ].label;
@@ -142,17 +142,30 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
     dial.sec_shadow.x_offset = doc["sec_shadow"]["x_offset"] | 5;
     dial.sec_shadow.y_offset = doc["sec_shadow"]["y_offset"] | 5;
 
+    int err;
+
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-        dial.label[ i ].enable = doc["label"][i]["enable"] | false;
+        te_free( dial.label[ i ].enable );
+        dial.label[ i ].enable = NULL;
+        if ( doc["label"][i].containsKey("enable") ) {
+            if ( doc["label"][i]["enable"].is<bool>() ) {
+                const char *val = doc["label"][i]["enable"] ? "1.0" : "0.0";
+                log_i( "Enable : %s", val );
+                strncpy( dial.label[ i ].enable_expr, val, sizeof( dial.label[ i ].enable_expr ) );
+            } else {
+                strncpy( dial.label[ i ].enable_expr, doc["label"][i]["enable"], sizeof( dial.label[ i ].enable_expr ) );
+            }
+            dial.label[ i ].enable = watchface_expr_compile( dial.label[ i ].enable_expr, &err );
+            if ( dial.label[ i ].enable == NULL ) {
+                log_e("Parse error in '%s' at %d", doc["label"][i]["enable"], err);
+            }
+        }
         strncpy( dial.label[ i ].type, doc["label"][i]["type"] | "text", sizeof( dial.label[ i ].type ) );
         te_free( dial.label[ i ].expr );
         if ( doc["label"][i].containsKey("expr") && strlen(doc["label"][i]["expr"]) > 0 ) {
             // Parse expression
-            int err;
-            te_expr *expr = watchface_expr_compile(doc["label"][i]["expr"], &err);
-            if (expr) {
-                dial.label[ i ].expr = expr;
-            } else {
+            dial.label[ i ].expr = watchface_expr_compile(doc["label"][i]["expr"], &err);
+            if ( dial.label[ i ].expr == NULL ) {
                 log_e("Parse error in '%s' at %d", doc["label"][i]["expr"], err);
             }
         } else {
@@ -229,7 +242,8 @@ bool watchface_theme_config_t::onDefault( void ) {
      * clear all labels
      */
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
-        dial.label[ i ].enable = false;
+        dial.label[ i ].enable = NULL;
+        strncpy( dial.label[ i ].enable_expr, "", sizeof( dial.label[ i ].enable_expr ) );
         dial.label[ i ].expr = NULL;
         strncpy( dial.label[ i ].type, "text", sizeof( dial.label[ i ].type ) );
         strncpy( dial.label[ i ].raw_expr, "", sizeof( dial.label[ i ].raw_expr ) );
@@ -265,7 +279,8 @@ bool watchface_theme_config_t::onDefault( void ) {
     /**
      * setup default date label
      */
-    dial.label[ 0 ].enable = true;
+    dial.label[ 0 ].enable = NULL;
+    strncpy( dial.label[ 0 ].enable_expr, "", sizeof( dial.label[ 0 ].enable_expr ) );
     strncpy( dial.label[ 0 ].type, "date", sizeof( dial.label[ 0 ].type ) );
     strncpy( dial.label[ 0 ].label, "%d.%b", sizeof( dial.label[ 0 ].label ) );
     strncpy( dial.label[ 0 ].font, "Ubuntu" , sizeof( dial.label[ 0 ].font ) );

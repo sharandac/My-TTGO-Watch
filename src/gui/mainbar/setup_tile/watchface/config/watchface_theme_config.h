@@ -42,6 +42,8 @@
     #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
     #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
 
+    #define WATCHFACE_EXPR_MAX_SIZE             128
+
     /**
      * @brief dial image control structure
      */
@@ -64,9 +66,10 @@
      * @brief label control structure
      */
     typedef struct {
-        bool enable = true;                             /** @brief enable the label */
+        te_expr *enable = NULL;                         /** @brief enable the label */
+        char enable_expr[WATCHFACE_EXPR_MAX_SIZE] = ""; /** @brief expression for enable flag */
         char type[32] = "";                             /** @brief type of the label */
-        char raw_expr[128] = "";                        /** @brief raw expression */
+        char raw_expr[WATCHFACE_EXPR_MAX_SIZE] = "";    /** @brief raw expression */
         te_expr *expr = NULL;                           /** @brief expression value of the label */
         char label[32] = "";                            /** @brief text for the label */
         char font[32] = "";                             /** @brief font name */
