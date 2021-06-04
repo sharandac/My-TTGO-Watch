@@ -40,4 +40,9 @@ te_expr * watchface_expr_compile(const char* str, int *error);
  */
 double watchface_expr_eval( te_expr *expr);
 
+/**
+ * @brief setup the watchface expression module
+ */
+void watchface_expr_setup( void );
+
 #endif // _WATCHFACE_EXPR_H
