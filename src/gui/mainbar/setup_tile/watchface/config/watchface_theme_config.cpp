@@ -90,7 +90,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
     labelcount = 0;
     for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
         if ( dial.image[ i ].enable ) {
-            doc["image"][ labelcount ]["enable"] = dial.image[ i ].enable;
+            doc["image"][ labelcount ]["enable"] = dial.image[ i ].enable_expr;
             doc["image"][ labelcount ]["type"] = dial.image[ i ].type;
             doc["image"][ labelcount ]["file"] = dial.image[ i ].file;
             doc["image"][ labelcount ]["hide_interval"] = dial.image[ i ].hide_interval;
@@ -185,7 +185,21 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
     }
 
     for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
-        dial.image[ i ].enable = doc["image"][i]["enable"] | false;
+        te_free( dial.image[ i ].enable );
+        dial.image[ i ].enable = NULL;
+        if ( doc["image"][i].containsKey("enable") ) {
+            if ( doc["image"][i]["enable"].is<bool>() ) {
+                const char *val = doc["image"][i]["enable"] ? "1.0" : "0.0";
+                log_i( "Enable : %s", val );
+                strncpy( dial.image[ i ].enable_expr, val, sizeof( dial.image[ i ].enable_expr ) );
+            } else {
+                strncpy( dial.image[ i ].enable_expr, doc["image"][i]["enable"], sizeof( dial.image[ i ].enable_expr ) );
+            }
+            dial.image[ i ].enable = watchface_expr_compile( dial.image[ i ].enable_expr, &err );
+            if ( dial.image[ i ].enable == NULL ) {
+                log_e("Parse error in '%s' at %d", doc["image"][i]["enable"], err);
+            }
+        }
         strncpy( dial.image[ i ].type, doc["image"][i]["type"] | "", sizeof( dial.image[ i ].type ) );
         strncpy( dial.image[ i ].file, doc["image"][i]["file"] | "", sizeof( dial.image[ i ].file ) );
         dial.image[ i ].hide_interval = doc["image"][i]["hide_interval"] | 0;
@@ -262,7 +276,8 @@ bool watchface_theme_config_t::onDefault( void ) {
      * clear all images
      */
     for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
-        dial.image[ i ].enable = false;
+        dial.image[ i ].enable = NULL;
+        strncpy( dial.image[ i ].enable_expr, "", sizeof( dial.image[ i ].enable_expr ) );
         strncpy( dial.image[ i ].type, "", sizeof( dial.image[ i ].type ) );
         strncpy( dial.image[ i ].file, "", sizeof( dial.image[ i ].file ) );
         dial.image[ i ].hide_interval = 0;

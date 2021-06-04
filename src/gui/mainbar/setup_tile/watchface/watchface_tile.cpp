@@ -195,7 +195,7 @@ void watchface_tile_setup( void ) {
         lv_obj_set_width( watchface_image_cont, watchface_theme_config.dial.image[ i ].x_size );
         lv_obj_set_height( watchface_image_cont, watchface_theme_config.dial.image[ i ].y_size );
         lv_obj_set_pos( watchface_image_cont, watchface_theme_config.dial.image[ i ].x_offset, watchface_theme_config.dial.image[ i ].y_offset );
-        lv_obj_set_hidden( watchface_image_cont, !watchface_theme_config.dial.image[ i ].enable );
+        lv_obj_set_hidden( watchface_image_cont, !(watchface_theme_config.dial.image[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.image[ i ].enable)) );
         lv_obj_add_style( watchface_image_cont, LV_OBJ_PART_MAIN, &watchface_app_image_style );
         /**
          * alloc and setup image
@@ -539,7 +539,7 @@ void watchface_reload_theme( void ) {
         lv_obj_set_width( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].x_size );
         lv_obj_set_height( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].y_size );
         lv_obj_set_pos( lv_obj_get_parent( watchface_image[ i ] ), watchface_theme_config.dial.image[ i ].x_offset, watchface_theme_config.dial.image[ i ].y_offset );
-        lv_obj_set_hidden( lv_obj_get_parent( watchface_image[ i ] ), !watchface_theme_config.dial.image[ i ].enable );
+        lv_obj_set_hidden( lv_obj_get_parent( watchface_image[ i ] ), !(watchface_theme_config.dial.image[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.image[ i ].enable)) );
         /**
          * alloc and setup image
          */
@@ -827,7 +827,7 @@ void watchface_app_image_update( tm &info ) {
         /**
          * check if label enabled
          */
-        if ( watchface_theme_config.dial.image[ i ].enable ) {
+        if ( watchface_theme_config.dial.image[ i ].enable != NULL && watchface_expr_eval( watchface_theme_config.dial.image[ i ].enable ) ) {
             int32_t angle = 0;
             /**
              * check label type
