@@ -1,5 +1,8 @@
 # watchface.tar.gz
-This compressed file containts all file as a package to downoad and run a watchface. all image and fontfiles must are included here. a minimum watchface.tar.gz included a watchface_theme.json. from here all fancy things begins.
+This compressed file contains all file as a package to download and run a watchface.
+All image and fontfiles must be included here.
+A minimum `watchface.tar.gz` includes a `watchface_theme.json`.
+From here all fancy things begins.
 
 # watchface_theme.json overview
 file format
@@ -22,10 +25,10 @@ file format
 ```
 # dial, hour, min, sec, hour_shadow, min_shadow and sec_shadow
 
-A dial, hour and so on has the fowllowing three options:
+A dial, hour and so on has the following three options:
 
 `enable`:		true or false
-`x_offset`:		x postion on the screen in pixel. Top is 0.
+`x_offset`:		x position on the screen in pixel. Top is 0.
 `y_offset`:		y position on the screen in pixel. Left is 0.
 
 Remember, a center to the screen and the rotation center is in the middle of the image.
@@ -42,7 +45,7 @@ Remember, a center to the screen and the rotation center is in the middle of the
 },
 ...
 ```
-The image name convention is `watchface_dial.png`, `watchface_hour.png` and so on and will automaticly loaded if enabled. No entry mean disabled.
+The image name convention is `watchface_dial.png`, `watchface_hour.png` and so on and will automatically loaded if enabled. No entry mean disabled.
 
 # label
 A label entry looks like this:
@@ -90,8 +93,8 @@ A label entry looks like this:
 |`font_color`|string|font color like "#808080" for pue grey, format is "#rrggbb" in hex
 |`font_size`|string|font size in pixel, see font types and size
 |`align`|string|`center`, `left` and `right`
-|`hide_interval`|int|0 mean not used. positive values hide this label in a show/hide intveral. and negative values is hide/show.
-|`x_offset`|int|x postion on the screen in pixel. Top is 0.
+|`hide_interval`|int|0 mean not used. positive values hide this label in a show/hide interval. and negative values is hide/show.
+|`x_offset`|int|x position on the screen in pixel. Top is 0.
 |`y_offset`|int|y position on the screen in pixel. Left is 0.
 |`x_size`|int|x container size on the screen in pixel.
 |`y_size`|int|y container size on the screen in pixel.
@@ -157,12 +160,12 @@ A image entry looks like this:
 |`enable`|bool|true or false
 |`type`|string|see image types
 |`file`|string|image filename. Example: `"klingon_red.png"` loads a png from spiffs on location `/spiffs/watchface/klingon_red.png`.
-|`hide_interval`|int|0 mean not used. positive values hide this label in a show/hide intveral. negative values in a hide/show interval.
-|`rotaion_range`|int|ratation range in degree.
-|`rotaion_start`|int|ratation start angle in degree.
+|`hide_interval`|int|0 mean not used. positive values hide this label in a show/hide interval. negative values in a hide/show interval.
+|`rotation_range`|int|rotation range in degree.
+|`rotation_start`|int|rotation start angle in degree.
 |`rotation_x_origin`|int|x origin for rotation center in pixel. top is 0.
 |`rotation_y_origin`|int|y origin for rotation center in pixel. left is 0.
-|`x_offset`|int|x postion on the screen in pixel. Top is 0.
+|`x_offset`|int|x position on the screen in pixel. Top is 0.
 |`y_offset`|int|y position on the screen in pixel. Left is 0.
 |`x_size`|int|x container size on the screen in pixel.
 |`y_size`|int|y container size on the screen in pixel.
@@ -171,9 +174,9 @@ A image entry looks like this:
 |image type|discription|
 |--|--|
 |`image`|a raw image without interaction.|
-|`battery_percent`|`rotaion_range` divide by battery percent and add to `rotaion_start`, battery range is 0-100.|
-|`battery_voltage`|`rotaion_range` divide by battery voltage and add to `rotaion_start`. voltage range is 0-5.|
-|`time_hour`|`rotaion_range` divide by current hour and add to `rotaion_start`. hour range is 0-23|
-|`time_min`|`rotaion_range` divide by current min and add to `rotaion_start`. min range is 0-59|
-|`time_sec`|`rotaion_range` divide by current min and add to `rotaion_start`. hour range is 0-59|
+|`battery_percent`|`rotation_range` divide by battery percent and add to `rotation_start`, battery range is 0-100.|
+|`battery_voltage`|`rotation_range` divide by battery voltage and add to `rotation_start`. voltage range is 0-5.|
+|`time_hour`|`rotation_range` divide by current hour and add to `rotation_start`. hour range is 0-23|
+|`time_min`|`rotation_range` divide by current min and add to `rotation_start`. min range is 0-59|
+|`time_sec`|`rotation_range` divide by current min and add to `rotation_start`. hour range is 0-59|
 
