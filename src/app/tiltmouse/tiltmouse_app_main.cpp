@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   June 04 02:01:00 2021
+ *   Copyright  2021  Dirk Sarodnick
+ *   Email: programmer@dirk-sarodnick.de
  ****************************************************************************/
  
 /*
@@ -38,6 +38,7 @@
 
 #include "hardware/blectl.h"
 #include "hardware/pmu.h"
+#include "hardware/powermgm.h"
 
 lv_obj_t *tiltmouse_app_main_tile = NULL;
 lv_style_t tiltmouse_app_main_style;
@@ -97,6 +98,7 @@ static const uint8_t _hidReportDescriptor[] = {
 
 void tiltmouse_app_task( lv_task_t * task );
 bool tiltmouse_pmuctl_event_cb(EventBits_t event, void *arg);
+bool tiltmouse_powermgm_event_cb(EventBits_t event, void *arg);
 bool tiltmouse_blectl_event_cb(EventBits_t event, void *arg);
 void tiltmouse_left_event_cb( lv_obj_t * obj, lv_event_t event );
 void tiltmouse_right_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -124,6 +126,7 @@ void tiltmouse_app_main_setup( uint32_t tile_num ) {
     _tiltmouse_app_task = lv_task_create( tiltmouse_app_task, 50, LV_TASK_PRIO_HIGH, NULL );
 
     pmu_register_cb( PMUCTL_STATUS, tiltmouse_pmuctl_event_cb, "tiltmouse pmu");
+    powermgm_register_cb( POWERMGM_STANDBY, tiltmouse_powermgm_event_cb, "tiltmouse powermgm");
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, tiltmouse_blectl_event_cb, "tiltmouse bluetooth" );
 }
 
@@ -198,6 +201,16 @@ void tiltmouse_battery()
     if (!tiltmouse_available) return;
     int32_t battery = pmu_get_battery_percent();
     pHID->setBatteryLevel(battery);
+}
+
+bool tiltmouse_powermgm_event_cb(EventBits_t event, void *arg)
+{
+    switch( event ) {
+        case( POWERMGM_STANDBY ):
+            tiltmouse_active = false;
+            break;
+    }
+    return( true );
 }
 
 bool tiltmouse_pmuctl_event_cb( EventBits_t event, void *arg )

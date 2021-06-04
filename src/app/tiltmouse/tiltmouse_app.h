@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   June 04 02:01:00 2021
+ *   Copyright  2021  Dirk Sarodnick
+ *   Email: programmer@dirk-sarodnick.de
  ****************************************************************************/
  
 /*
