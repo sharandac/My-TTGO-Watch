@@ -86,7 +86,7 @@ A label entry looks like this:
 ```
 |option|value type|description|
 |--|--|--|
-|`enable`|bool|true or false
+|`enable`|bool|`true`, `false` or expression
 |`type`|string|see label types
 |`label`|string|label string
 |`font`|string|font name or a font filename. the font filename ends with `.font`. see font types and size.
@@ -157,7 +157,7 @@ A image entry looks like this:
 ```
 |option|value type|description|
 |--|--|--|
-|`enable`|bool|true or false
+|`enable`|bool|`true`, `false` or expression
 |`type`|string|see image types
 |`file`|string|image filename. Example: `"klingon_red.png"` loads a png from spiffs on location `/spiffs/watchface/klingon_red.png`.
 |`hide_interval`|int|0 mean not used. positive values hide this label in a show/hide interval. negative values in a hide/show interval.
@@ -180,3 +180,48 @@ A image entry looks like this:
 |`time_min`|`rotation_range` divide by current min and add to `rotation_start`. min range is 0-59|
 |`time_sec`|`rotation_range` divide by current min and add to `rotation_start`. hour range is 0-59|
 
+# Expressions
+
+Some mathematical or logical expressions can be use to control display of the watchface elements.
+Full syntax is available at [TinyExpr main site](https://github.com/codeplea/tinyexpr).
+
+## Variables
+
+Variables available in this context are described in the following table.
+
+| Name               | Description |
+|--------------------|-------------|
+| gps                | GPS status (disabled=0, enabled(no fix)=1, enabled+fix=2) |
+| ble                | Bluetooth status (disabled=0, enabled+disconnected=1, enabled+connected=2) |
+| sound_volume       | Sound volume |
+| sound_enabled      | Sound enable = 1, else 0 |
+| alarm              | Alarm (No alarm = 0, Alarm set = 1) |
+| wifi               | Wifi status (disabled=0, enabled+disconnected=1, enabled+connected=2) |
+| battery_percent    | Battery percent (range is 0-100) |
+| battery_voltage    | Battery voltage (voltage range is 0-5) |
+| bluetooth_messages | Number of messages (`bluetooth_messages()`) |
+| steps              | Number of steps (`steps()`) |
+| time_hour          | Hour of the current time |
+| time_min           | Minutes of the current time |
+| time_sec           | Seconds of the current time |
+
+Note: expressions are computed in double.
+
+## Examples
+
+Display GPS symbol when GPS is enabled.
+```
+    {
+      "enable": "gps > 0",
+      "type": "text",
+      "label": "\uF124",
+      "font": "Montserrat",
+      "font_color": "#6c680d",
+      "align": "center",
+      "font_size": 16,
+      "x_offset": 206,
+      "y_offset": 20,
+      "x_size": 24,
+      "y_size": 20
+    },
+```
