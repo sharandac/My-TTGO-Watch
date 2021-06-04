@@ -27,6 +27,7 @@
 #include "watchface_manager.h"
 #include "watchface_tile.h"
 #include "watchface_setup.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_theme_config.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_config.h"
 #include "gui/gui.h"
@@ -793,6 +794,9 @@ void watchface_app_tile_update( void ) {
         time(&now);
         localtime_r( &now, &info );
 
+        // Update global context
+        watchface_expr_update( info );
+
         //Angle calculation for Hands
         int Angle_S = (int)((info.tm_sec % 60) * 60 );
         int Angle_M = (int)((info.tm_min % 60) * 60 ) + ( watchface_theme_config.dial.min.smooth ? (int)(info.tm_sec % 60) : 0 );
@@ -915,6 +919,10 @@ void watchface_app_label_update( tm &info ) {
             }
             else if ( !strcmp( "steps", watchface_theme_config.dial.label[ i ].type ) ) {
                 snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, bma_get_stepcounter() );
+            }
+            else if ( !strcmp( "expr", watchface_theme_config.dial.label[ i ].type ) && watchface_theme_config.dial.label[ i ].expr != NULL ) {
+                double val = watchface_expr_eval(watchface_theme_config.dial.label[ i ].expr);
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, val );
             }
             else {
                 snprintf( temp_str, sizeof( temp_str ), "n/a" );

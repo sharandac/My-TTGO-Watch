@@ -20,6 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "watchface_theme_config.h"
+#include "watchface_expr.h"
+#include "utils/tinyexpr/tinyexpr.h"
 
 watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_CONFIG_FILE ) {}
 
@@ -70,6 +72,7 @@ bool watchface_theme_config_t::onSave(JsonDocument& doc ) {
         if ( dial.label[ i ].enable ) {
             doc["label"][ labelcount ]["enable"] = dial.label[ i ].enable;
             doc["label"][ labelcount ]["type"] = dial.label[ i ].type;
+            doc["label"][ labelcount ]["expr"] = dial.label[ i ].raw_expr;
             doc["label"][ labelcount ]["label"] = dial.label[ i ].label;
             doc["label"][ labelcount ]["font"] = dial.label[ i ].font;
             doc["label"][ labelcount ]["font_color"] = dial.label[ i ].font_color;
@@ -142,6 +145,20 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
         dial.label[ i ].enable = doc["label"][i]["enable"] | false;
         strncpy( dial.label[ i ].type, doc["label"][i]["type"] | "text", sizeof( dial.label[ i ].type ) );
+        te_free( dial.label[ i ].expr );
+        if ( doc["label"][i].containsKey("expr") && strlen(doc["label"][i]["expr"]) > 0 ) {
+            // Parse expression
+            int err;
+            te_expr *expr = watchface_expr_compile(doc["label"][i]["expr"], &err);
+            if (expr) {
+                dial.label[ i ].expr = expr;
+            } else {
+                log_e("Parse error in '%s' at %d", doc["label"][i]["expr"], err);
+            }
+        } else {
+            dial.label[ i ].expr = NULL;
+        }
+        strncpy( dial.label[ i ].raw_expr, doc["label"][i]["expr"] | "", sizeof( dial.label[ i ].raw_expr ) );
         strncpy( dial.label[ i ].label, doc["label"][i]["label"] | "" , sizeof( dial.label[ i ].label ) );
         strncpy( dial.label[ i ].font, doc["label"][i]["font"] | "Ubuntu" , sizeof( dial.label[ i ].font ) );
         dial.label[ i ].font_size = doc["label"][i]["font_size"] | 12;
@@ -213,7 +230,9 @@ bool watchface_theme_config_t::onDefault( void ) {
      */
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
         dial.label[ i ].enable = false;
+        dial.label[ i ].expr = NULL;
         strncpy( dial.label[ i ].type, "text", sizeof( dial.label[ i ].type ) );
+        strncpy( dial.label[ i ].raw_expr, "", sizeof( dial.label[ i ].raw_expr ) );
         strncpy( dial.label[ i ].label, "n/a" , sizeof( dial.label[ i ].label ) );
         strncpy( dial.label[ i ].font, "Ubuntu" , sizeof( dial.label[ i ].font ) );
         dial.label[ i ].font_size = 12;

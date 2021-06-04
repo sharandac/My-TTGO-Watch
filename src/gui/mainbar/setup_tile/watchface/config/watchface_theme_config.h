@@ -25,6 +25,7 @@
     #include <TTGO.h>
     #include "config.h"
     #include "utils/basejsonconfig.h"
+    #include "utils/tinyexpr/tinyexpr.h"
 
     #define WATCHFACE_LABEL_NUM                 20
     #define WATCHFACE_IMAGE_NUM                 20
@@ -65,6 +66,8 @@
     typedef struct {
         bool enable = true;                             /** @brief enable the label */
         char type[32] = "";                             /** @brief type of the label */
+        char raw_expr[128] = "";                        /** @brief raw expression */
+        te_expr *expr = NULL;                           /** @brief expression value of the label */
         char label[32] = "";                            /** @brief text for the label */
         char font[32] = "";                             /** @brief font name */
         int32_t font_size = 0;                          /** @brief font size: 12,16,32,48 and 72 */
