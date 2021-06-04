@@ -116,8 +116,8 @@ void watchface_remove_theme_files ( void );
 lv_font_t *watchface_get_font( const char *font, int32_t font_size );
 lv_color_t watchface_get_color( char *color );
 lv_align_t watchface_get_align( char *align );
-void watchface_app_label_update( void );
-void watchface_app_image_update( void );
+void watchface_app_label_update( tm &info );
+void watchface_app_image_update( tm &info );
 
 void watchface_tile_setup( void ) {
     watchface_app_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Tile" );
@@ -813,17 +813,12 @@ void watchface_app_tile_update( void ) {
         lv_img_set_angle( watchface_min_s_img, Angle_M );
         lv_img_set_angle( watchface_sec_s_img, Angle_S );
 
-        watchface_app_label_update();
-        watchface_app_image_update();
+        watchface_app_label_update( info );
+        watchface_app_image_update( info );
     }
 }
 
-void watchface_app_image_update( void ) {
-    tm info;
-    time_t now;
-    time(&now);
-    localtime_r( &now, &info );
-
+void watchface_app_image_update( tm &info ) {
     for( int i = 0 ; i < WATCHFACE_IMAGE_NUM ; i++ ) {
         /**
          * check if label enabled
@@ -893,12 +888,7 @@ void watchface_app_image_update( void ) {
     }
 }
 
-void watchface_app_label_update( void ) {
-    tm info;
-    time_t now;
-    time(&now);
-    localtime_r( &now, &info );
-
+void watchface_app_label_update( tm &info ) {
     for( int i = 0 ; i < WATCHFACE_LABEL_NUM ; i++ ) {
         char temp_str[ 64 ] = "";
         /**
