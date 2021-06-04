@@ -297,8 +297,8 @@ bool PongApp::CheckCollision()
     if (ball_x >= FIELD_WIDTH - (BALL_WIDTH / 2)) return ScorePlayer1();
 
     // check if ball hit top or bottom wall
-    if (ball_y <= 0 + (BALL_HEIGHT / 2)) return BounceWallTop();
-    if (ball_y >= FIELD_HEIGHT - (BALL_HEIGHT / 2)) return BounceWallBottom();
+    if (ball_y <= 0 + (BALL_HEIGHT / 2)) return BounceWallTop(); //TODO: Only bounce, if direction is heading into wall
+    if (ball_y >= FIELD_HEIGHT - (BALL_HEIGHT / 2)) return BounceWallBottom(); //TODO: Only bounce, if direction is heading into wall
 
     return false;
 }
@@ -308,6 +308,7 @@ bool PongApp::TurnDegree(uint16_t base_degree, int8_t altered_degree)
     int16_t new_degree = (base_degree * 2) - 180 - ball_degree + altered_degree;
     while (new_degree < 0) new_degree += 360;
     while (new_degree >= 360) new_degree -= 360;
+    //TODO: Add maximum degree difference of less then 90 degree
 
     log_d("Turn Degree from %d to %d using base of %d", ball_degree, new_degree, base_degree);
     ball_degree = new_degree;
@@ -337,7 +338,7 @@ bool PongApp::BounceWallBottom()
 
 bool PongApp::BouncePlayer1()
 {
-    int8_t altered_degree = map(ball_y, player1_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player1_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), -60, 60);
+    int8_t altered_degree = map(ball_y, player1_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player1_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), -45, 45);
     if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
 
     log_d("Bounce Player 1 with altered Degree %d", altered_degree);
@@ -354,7 +355,7 @@ bool PongApp::BouncePlayer1()
 
 bool PongApp::BouncePlayer2()
 {
-    int8_t altered_degree = map(ball_y, player2_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player2_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), 60, -60);
+    int8_t altered_degree = map(ball_y, player2_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player2_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), 45, -45);
     if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
 
     log_d("Bounce Player 2 with altered Degree %d", altered_degree);
@@ -430,23 +431,23 @@ void PongApp::UpdatePlayer1()
 
 void PongApp::UpdatePlayer2()
 {
+    // determine ball position
+    int16_t new_target = ball_y - (FIELD_HEIGHT / 2);
+
+    // determine direction of movement to get to target and slowly increase speed
+    if (new_target < player2_y) {
+        if (cpu_velocity > 0 - PLAYER_SPEED_MAX && random(0, 2) > 0) cpu_velocity--;
+    }
+    if (new_target > player2_y) {
+        if (cpu_velocity < 0 + PLAYER_SPEED_MAX && random(0, 2) > 0) cpu_velocity++;
+    }
+
     // set new position by ball position
-    int16_t new_position = ball_y - (FIELD_HEIGHT / 2);
+    int16_t new_position = player2_y + cpu_velocity;
     if (new_position > 0 + PLAYER_BOUNDARY) new_position = 0 + PLAYER_BOUNDARY;
     if (new_position < 0 - PLAYER_BOUNDARY) new_position = 0 - PLAYER_BOUNDARY;
-
-    // limit distance by maximum speed
     if (new_position < player2_y && player2_y - new_position > PLAYER_SPEED_MAX) new_position = player2_y - PLAYER_SPEED_MAX;
     if (new_position > player2_y && new_position - player2_y > PLAYER_SPEED_MAX) new_position = player2_y + PLAYER_SPEED_MAX;
-
-    // add a small delay when switching direction
-    if (new_position - player2_y > 0 && cpu_velocity < 0) {
-        new_position -= cpu_velocity;
-        cpu_velocity++;
-    } else if (new_position - player2_y < 0 && cpu_velocity > 0) {
-        new_position += cpu_velocity;
-        cpu_velocity--;
-    } else cpu_velocity = new_position - player2_y;
 
     player2_y = new_position;
 	lv_obj_set_pos(bar_player2, PLAYER2_X, PLAYER_BOUNDARY + player2_y);
@@ -489,13 +490,14 @@ void PongApp::ResetBoard()
 void PongApp::ResetPlayer1()
 {
     log_d("Resetting Player 1");
-    player1_y = (FIELD_HEIGHT / 2);
+    player1_y = 0;
 }
 
 void PongApp::ResetPlayer2()
 {
     log_d("Resetting Player 2");
-    player2_y = (FIELD_HEIGHT / 2);
+    player2_y = 0;
+    cpu_velocity = 0;
 }
 
 void PongApp::ResetGame()

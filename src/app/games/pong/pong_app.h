@@ -55,8 +55,8 @@ private:
     uint16_t ball_degree = 0;
     float ball_x = (FIELD_WIDTH / 2);
     float ball_y = (FIELD_HEIGHT / 2);
-    int16_t player1_y = (FIELD_HEIGHT / 2);
-    int16_t player2_y = (FIELD_HEIGHT / 2);
+    int16_t player1_y = 0;
+    int16_t player2_y = 0;
     int8_t cpu_velocity = 0;
     uint8_t score_p1 = 0;
     uint8_t score_p2 = 0;
