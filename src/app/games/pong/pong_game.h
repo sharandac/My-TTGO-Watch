@@ -1,6 +1,7 @@
-/*   Aug 5 16:03:06 2020
- *   Copyright  2020  Bryan Wagstaff
- *   Email: programmer@bryanwagstaff.com
+/****************************************************************************
+ *   June 04 02:01:00 2021
+ *   Copyright  2021  Dirk Sarodnick
+ *   Email: programmer@dirk-sarodnick.de
  ****************************************************************************/
 
 /*

@@ -1,6 +1,7 @@
-/*   July 31 21:33:35 2020
- *   Copyright  2020  Bryan Wagstaff
- *   Email: programmer@bryanwagstaff.com
+/****************************************************************************
+ *   June 04 02:01:00 2021
+ *   Copyright  2021  Dirk Sarodnick
+ *   Email: programmer@dirk-sarodnick.de
  ****************************************************************************/
 
 /*
@@ -19,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-// Set logging level for this file
 #include "config.h"
 #include <Arduino.h>
 #include <memory>
@@ -34,6 +34,7 @@
 #include "gui/sound/piep_low.h"
 #include "hardware/display.h"
 #include "hardware/motor.h"
+#include "hardware/powermgm.h"
 #include "hardware/sound.h"
 
 #include "pong_app.h"
@@ -44,16 +45,6 @@ LV_IMG_DECLARE(bg1);
 LV_IMG_DECLARE(bg2);
 LV_FONT_DECLARE(Ubuntu_48px);
 
-#define FIELD_WIDTH 240
-#define FIELD_HEIGHT 240
-#define PLAYER1_X 0
-#define PLAYER2_X 230
-#define PLAYER_WIDTH 10
-#define PLAYER_HEIGHT 40
-#define PLAYER_BOUNDARY ((FIELD_HEIGHT / 2) - (PLAYER_HEIGHT / 2))
-#define BALL_WIDTH 8
-#define BALL_HEIGHT 8
-
 /* These would be unnecessary if LVGL supported a data param... */
 
 static PongApp *gameInstance = 0;
@@ -61,9 +52,9 @@ static void OnExit(struct _lv_obj_t *obj, lv_event_t event)
 {
     switch (event)
     {
-    case (LV_EVENT_CLICKED):
-        gameInstance->OnMenuClicked(PongApp::Exit);
-        break;
+        case (LV_EVENT_CLICKED):
+            gameInstance->OnMenuClicked(PongApp::Exit);
+            break;
     }
 }
 
@@ -71,10 +62,30 @@ static void OnReset(struct _lv_obj_t *obj, lv_event_t event)
 {
     switch (event)
     {
-    case (LV_EVENT_CLICKED):
-        gameInstance->OnMenuClicked(PongApp::Reset);
-        break;
+        case (LV_EVENT_CLICKED):
+            gameInstance->OnMenuClicked(PongApp::Reset);
+            break;
     }
+}
+
+static void OnSwitch(struct _lv_obj_t *obj, lv_event_t event)
+{
+    switch (event)
+    {
+        case (LV_EVENT_VALUE_CHANGED):
+            gameInstance->OnTileChanged();
+            break;
+    }
+}
+
+static bool OnPower(EventBits_t event, void *arg)
+{
+    switch( event ) {
+        case( POWERMGM_STANDBY ):
+            gameInstance->OnStandby();
+            break;
+    }
+    return( true );
 }
 
 PongApp::PongApp(PongIcon *icon)
@@ -105,6 +116,7 @@ PongApp::PongApp(PongIcon *icon)
         lv_tileview_set_edge_flash(GetTileView(), false);
         lv_obj_add_style(GetTileView(), LV_OBJ_PART_MAIN, &mStyleApp);
         lv_page_set_scrlbar_mode(GetTileView(), LV_SCRLBAR_MODE_DRAG);
+        lv_obj_set_event_cb(GetTileView(), OnSwitch);
 
         // Initialize screen backgrounds
         log_d("Creating background for menu tile");
@@ -232,9 +244,10 @@ PongApp::PongApp(PongIcon *icon)
         lv_obj_set_click(label_scoreboard, false);
 	    lv_obj_set_size(label_scoreboard, 240, 60);
 
-        ClearBoard();
-        ResetBall();
+        ResetGame();
     }
+    
+    powermgm_register_cb( POWERMGM_STANDBY, OnPower, "pong powermgm");
 
     pong_inited = true;
     log_d("Construction complete");
@@ -250,13 +263,11 @@ PongApp::~PongApp()
 // Open from watch menu
 void PongApp::OnLaunch()
 {
-    pong_active = true;
     lv_tileview_set_tile_act(GetTileView(), 0, 0, LV_ANIM_OFF);
 }
 
 void PongApp::OnExitClicked()
 {
-    pong_active = false;
     log_d("Exiting...");
     // Pass along the message for differed deletion and return to main menu
     mParentIcon->OnExitClicked();
@@ -266,25 +277,179 @@ void PongApp::OnExitClicked()
 void PongApp::Loop()
 {
     if ( !pong_inited || !pong_active ) return;
-    UpdatePlayer();
-    //TODO: implement ball movement
-    //TODO: implement ball boundary and collision check
-    //TODO: implement p2 (cpu) behavior -> tracking the ball with speed limit and small delay/velocity
+
+    UpdateBall();
+    UpdatePlayer1();
+    UpdatePlayer2();
+    CheckCollision();
+
+    lv_disp_trig_activity( NULL );
 }
 
-void PongApp::UpdatePlayer()
+bool PongApp::CheckCollision()
+{
+    // check if ball hit p1 or p2
+    if (ball_x <= 0 + PLAYER_WIDTH + (BALL_WIDTH / 2) && ball_y >= player1_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2) && ball_y <= player1_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2)) return BouncePlayer1();
+    if (ball_x >= FIELD_WIDTH - PLAYER_WIDTH - (BALL_WIDTH / 2) && ball_y >= player2_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2) && ball_y <= player2_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2)) return BouncePlayer2();
+
+    // check if ball hit the left or right wall
+    if (ball_x <= 0 + (BALL_WIDTH / 2)) return ScorePlayer2();
+    if (ball_x >= FIELD_WIDTH - (BALL_WIDTH / 2)) return ScorePlayer1();
+
+    // check if ball hit top or bottom wall
+    if (ball_y <= 0 + (BALL_HEIGHT / 2)) return BounceWallTop();
+    if (ball_y >= FIELD_HEIGHT - (BALL_HEIGHT / 2)) return BounceWallBottom();
+
+    return false;
+}
+
+bool PongApp::TurnDegree(uint16_t base_degree, int8_t altered_degree)
+{
+    int16_t new_degree = (base_degree * 2) - 180 - ball_degree + altered_degree;
+    while (new_degree < 0) new_degree += 360;
+    while (new_degree >= 360) new_degree -= 360;
+
+    log_d("Turn Degree from %d to %d using base of %d", ball_degree, new_degree, base_degree);
+    ball_degree = new_degree;
+
+    return true;
+}
+
+bool PongApp::BounceWallTop()
+{
+    log_d("Bounce Wall Top");
+
+    TurnDegree(90, 0);
+    motor_vibe(1);
+
+    return true;
+}
+
+bool PongApp::BounceWallBottom()
+{
+    log_d("Bounce Wall Bottom");
+
+    TurnDegree(270, 0);
+    motor_vibe(1);
+
+    return true;
+}
+
+bool PongApp::BouncePlayer1()
+{
+    int8_t altered_degree = map(ball_y, player1_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player1_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), -60, 60);
+    if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
+
+    log_d("Bounce Player 1 with altered Degree %d", altered_degree);
+    TurnDegree(0, altered_degree);
+    
+    if (ball_bounce > 0 && ball_bounce % 2 == 0) ball_speed++;
+    ball_bounce++;
+
+    sound_play_progmem_wav( piep_high_wav, piep_high_wav_len );
+    motor_vibe(3);
+
+    return true;
+}
+
+bool PongApp::BouncePlayer2()
+{
+    int8_t altered_degree = map(ball_y, player2_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player2_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), 60, -60);
+    if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
+
+    log_d("Bounce Player 2 with altered Degree %d", altered_degree);
+    TurnDegree(180, altered_degree);
+
+    if (ball_bounce > 0 && ball_bounce % 2 == 0) ball_speed++;
+    ball_bounce++;
+
+    sound_play_progmem_wav( piep_low_wav, piep_low_wav_len );
+    motor_vibe(3);
+
+    return true;
+}
+
+bool PongApp::ScorePlayer1()
+{
+    log_d("Score Player 1");
+
+    score_p1++;
+    UpdateBoard();
+    ResetBall();
+
+    sound_play_progmem_wav( piep_higher_wav, piep_higher_wav_len );
+    motor_vibe(10);
+
+    return true;
+}
+
+bool PongApp::ScorePlayer2()
+{
+    log_d("Score Player 2");
+
+    score_p2++;
+    UpdateBoard();
+    ResetBall();
+
+    sound_play_progmem_wav( piep_lower_wav, piep_lower_wav_len );
+    motor_vibe(10);
+
+    return true;
+}
+
+void PongApp::UpdateBall()
+{
+    if (ball_speed < BALL_SPEED_MIN) ball_speed = BALL_SPEED_MIN;
+    if (ball_speed > BALL_SPEED_MAX) ball_speed = BALL_SPEED_MAX;
+
+    ball_x = ball_x + ((float)ball_speed * cos((float)ball_degree * PI / 180));
+    ball_y = ball_y + ((float)ball_speed * sin((float)ball_degree * PI / 180));
+
+	lv_obj_set_pos(bar_ball, ball_x - (BALL_WIDTH / 2), ball_y - (BALL_HEIGHT / 2));
+}
+
+void PongApp::UpdatePlayer1()
 {
     TTGOClass * ttgo = TTGOClass::getWatch();
 
     Accel acc;
     ttgo->bma->getAccel(acc);
 
-    int16_t y = acc.y * 0.2;
-    if (y > 0 + PLAYER_BOUNDARY) y = 0 + PLAYER_BOUNDARY;
-    if (y < 0 - PLAYER_BOUNDARY) y = 0 - PLAYER_BOUNDARY;
+    // set new position by accelerator
+    int16_t new_position = acc.y * 0.2;
+    if (new_position > 0 + PLAYER_BOUNDARY) new_position = 0 + PLAYER_BOUNDARY;
+    if (new_position < 0 - PLAYER_BOUNDARY) new_position = 0 - PLAYER_BOUNDARY;
 
-	lv_obj_set_pos(bar_player1, PLAYER1_X, PLAYER_BOUNDARY + y);
-    lv_disp_trig_activity( NULL );
+    // limit distance by maximum speed
+    if (new_position < player1_y && player1_y - new_position > PLAYER_SPEED_MAX) new_position = player1_y - PLAYER_SPEED_MAX;
+    if (new_position > player1_y && new_position - player1_y > PLAYER_SPEED_MAX) new_position = player1_y + PLAYER_SPEED_MAX;
+
+    player1_y = new_position;
+	lv_obj_set_pos(bar_player1, PLAYER1_X, PLAYER_BOUNDARY + player1_y);
+}
+
+void PongApp::UpdatePlayer2()
+{
+    // set new position by ball position
+    int16_t new_position = ball_y - (FIELD_HEIGHT / 2);
+    if (new_position > 0 + PLAYER_BOUNDARY) new_position = 0 + PLAYER_BOUNDARY;
+    if (new_position < 0 - PLAYER_BOUNDARY) new_position = 0 - PLAYER_BOUNDARY;
+
+    // limit distance by maximum speed
+    if (new_position < player2_y && player2_y - new_position > PLAYER_SPEED_MAX) new_position = player2_y - PLAYER_SPEED_MAX;
+    if (new_position > player2_y && new_position - player2_y > PLAYER_SPEED_MAX) new_position = player2_y + PLAYER_SPEED_MAX;
+
+    // add a small delay when switching direction
+    if (new_position - player2_y > 0 && cpu_velocity < 0) {
+        new_position -= cpu_velocity;
+        cpu_velocity++;
+    } else if (new_position - player2_y < 0 && cpu_velocity > 0) {
+        new_position += cpu_velocity;
+        cpu_velocity--;
+    } else cpu_velocity = new_position - player2_y;
+
+    player2_y = new_position;
+	lv_obj_set_pos(bar_player2, PLAYER2_X, PLAYER_BOUNDARY + player2_y);
 }
 
 void PongApp::UpdateBoard()
@@ -297,18 +462,48 @@ void PongApp::UpdateBoard()
     lv_event_send_refresh(label_scoreboard);
 }
 
-void PongApp::ClearBoard()
+void PongApp::ResetBall()
 {
-    log_i("Clearing Board to 0 : 0");
+    log_d("Resetting Ball...");
+
+    ball_speed = BALL_SPEED_MIN;
+    ball_bounce = 0;
+
+    ball_degree = random(-45, 45);
+    if (ball_degree < 0) ball_degree += 360;
+
+    ball_x = (FIELD_WIDTH / 2);
+    ball_y = (FIELD_WIDTH / 2);
+
+	lv_obj_set_pos(bar_ball, ball_x - (BALL_WIDTH / 2), ball_y - (BALL_HEIGHT / 2));
+}
+
+void PongApp::ResetBoard()
+{
+    log_d("Resetting Board to 0 : 0");
     score_p1 = 0;
     score_p2 = 0;
     UpdateBoard();
 }
 
-void PongApp::ResetBall()
+void PongApp::ResetPlayer1()
 {
-    log_d("Resetting Ball...");
-	lv_obj_set_pos(bar_ball, (FIELD_WIDTH / 2) - (BALL_WIDTH / 2), (FIELD_HEIGHT / 2) - (BALL_HEIGHT / 2));
+    log_d("Resetting Player 1");
+    player1_y = (FIELD_HEIGHT / 2);
+}
+
+void PongApp::ResetPlayer2()
+{
+    log_d("Resetting Player 2");
+    player2_y = (FIELD_HEIGHT / 2);
+}
+
+void PongApp::ResetGame()
+{
+    ResetBall();
+    ResetBoard();
+    ResetPlayer1();
+    ResetPlayer2();
 }
 
 void PongApp::OnMenuClicked(MenuItem item)
@@ -316,13 +511,31 @@ void PongApp::OnMenuClicked(MenuItem item)
     switch (item)
     {
         case Reset:
-            ClearBoard();
+            ResetGame();
             lv_tileview_set_tile_act(GetTileView(), 1, 0, LV_ANIM_ON);
+            pong_active = true;
             break;
         case Exit:
             OnExitClicked();
+            pong_active = false;
             break;
         default:
             log_e("Unknown menu command %d", item);
     }
+}
+
+void PongApp::OnTileChanged()
+{
+    lv_coord_t x;
+    lv_coord_t y;
+    lv_tileview_get_tile_act(GetTileView(), &x, &y);
+    log_d("Tile changed to %d, %d", x, y);
+
+    if (x == 1) pong_active = true;
+    else pong_active = false;
+}
+
+void PongApp::OnStandby()
+{
+    pong_active = false;
 }
