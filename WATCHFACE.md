@@ -84,7 +84,7 @@ A label entry looks like this:
 	}
 ]
 ```
-|option|value type|discription|
+|option|value type|description|
 |--|--|--|
 |`enable`|bool|true or false
 |`type`|string|see label types
@@ -104,7 +104,7 @@ The example above schow how a blinking time works.
 ## label types
 
 
-|label type|discription|
+|label type|description|
 |--|--|
 |`text`|a raw text.|
 |`date`|an information related to date/time. See `strftime` function for format.|
@@ -155,7 +155,7 @@ A image entry looks like this:
 	}
 ]
 ```
-|option|value type|discription|
+|option|value type|description|
 |--|--|--|
 |`enable`|bool|true or false
 |`type`|string|see image types
@@ -171,7 +171,7 @@ A image entry looks like this:
 |`y_size`|int|y container size on the screen in pixel.
 
 ## image types
-|image type|discription|
+|image type|description|
 |--|--|
 |`image`|a raw image without interaction.|
 |`battery_percent`|`rotation_range` divide by battery percent and add to `rotation_start`, battery range is 0-100.|
