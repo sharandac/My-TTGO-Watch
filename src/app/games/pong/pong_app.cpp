@@ -297,8 +297,8 @@ bool PongApp::CheckCollision()
     if (ball_x >= FIELD_WIDTH - (BALL_WIDTH / 2)) return ScorePlayer1();
 
     // check if ball hit top or bottom wall
-    if (ball_y <= 0 + (BALL_HEIGHT / 2)) return BounceWallTop(); //TODO: Only bounce, if direction is heading into wall
-    if (ball_y >= FIELD_HEIGHT - (BALL_HEIGHT / 2)) return BounceWallBottom(); //TODO: Only bounce, if direction is heading into wall
+    if (ball_y <= 0 + (BALL_HEIGHT / 2)) return BounceWallTop();
+    if (ball_y >= FIELD_HEIGHT - (BALL_HEIGHT / 2)) return BounceWallBottom();
 
     return false;
 }
@@ -308,9 +308,23 @@ bool PongApp::TurnDegree(uint16_t base_degree, int8_t altered_degree)
     int16_t new_degree = (base_degree * 2) - 180 - ball_degree + altered_degree;
     while (new_degree < 0) new_degree += 360;
     while (new_degree >= 360) new_degree -= 360;
-    //TODO: Add maximum degree difference of less then 90 degree
+    log_d("Calculated new %d degree from incoming %d ball degree using %d base degree and altered %d degree", new_degree, ball_degree, base_degree, altered_degree);
 
-    log_d("Turn Degree from %d to %d using base of %d", ball_degree, new_degree, base_degree);
+    int16_t base_degree_invert = base_degree - 180;
+    while (base_degree_invert < 0) base_degree_invert += 360;
+    while (base_degree_invert >= 360) base_degree_invert -= 360;
+
+    int16_t base_degree_min = base_degree - 85;
+    int16_t base_degree_max = base_degree + 85;
+    while (base_degree_min < 0) base_degree_min += 360;
+    while (base_degree_max >= 360) base_degree_max -= 360;
+    if (base_degree_min < base_degree_max && new_degree < base_degree_min) new_degree = base_degree_min;
+    if (base_degree_min > base_degree_max && new_degree < base_degree_min && new_degree > base_degree_invert) new_degree = base_degree_min;
+    if (base_degree_min < base_degree_max && new_degree > base_degree_max) new_degree = base_degree_max;
+    if (base_degree_min > base_degree_max && new_degree > base_degree_max && new_degree < base_degree_invert) new_degree = base_degree_max;
+    log_d("Calculated min %d and max %d degree for %d base degree and changed degree to %d", base_degree_min, base_degree_max, base_degree, new_degree);
+
+    log_d("Turn Degree from %d to %d", ball_degree, new_degree);
     ball_degree = new_degree;
 
     return true;
@@ -318,7 +332,10 @@ bool PongApp::TurnDegree(uint16_t base_degree, int8_t altered_degree)
 
 bool PongApp::BounceWallTop()
 {
+    if (ball_degree > 0 && ball_degree < 180) return false;
     log_d("Bounce Wall Top");
+
+    if (ball_bounce > 0 && ball_bounce % 3 == 0) ball_speed++;
 
     TurnDegree(90, 0);
     motor_vibe(1);
@@ -328,7 +345,10 @@ bool PongApp::BounceWallTop()
 
 bool PongApp::BounceWallBottom()
 {
+    if (ball_degree < 360 && ball_degree > 180) return false;
     log_d("Bounce Wall Bottom");
+
+    if (ball_bounce > 0 && ball_bounce % 3 == 0) ball_speed++;
 
     TurnDegree(270, 0);
     motor_vibe(1);
@@ -338,13 +358,15 @@ bool PongApp::BounceWallBottom()
 
 bool PongApp::BouncePlayer1()
 {
+    if (ball_degree < 90 || ball_degree > 270) return false;
+
     int8_t altered_degree = map(ball_y, player1_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player1_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), -45, 45);
     if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
 
     log_d("Bounce Player 1 with altered Degree %d", altered_degree);
     TurnDegree(0, altered_degree);
     
-    if (ball_bounce > 0 && ball_bounce % 2 == 0) ball_speed++;
+    if (ball_bounce > 0) ball_speed++;
     ball_bounce++;
 
     sound_play_progmem_wav( piep_high_wav, piep_high_wav_len );
@@ -355,13 +377,15 @@ bool PongApp::BouncePlayer1()
 
 bool PongApp::BouncePlayer2()
 {
+    if (ball_degree > 90 && ball_degree < 270) return false;
+
     int8_t altered_degree = map(ball_y, player2_y - (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), player2_y + (PLAYER_HEIGHT / 2) + (FIELD_HEIGHT / 2), 45, -45);
     if (altered_degree < 5 && altered_degree > -5) altered_degree = 0;
 
     log_d("Bounce Player 2 with altered Degree %d", altered_degree);
     TurnDegree(180, altered_degree);
 
-    if (ball_bounce > 0 && ball_bounce % 2 == 0) ball_speed++;
+    if (ball_bounce > 0) ball_speed++;
     ball_bounce++;
 
     sound_play_progmem_wav( piep_low_wav, piep_low_wav_len );
@@ -431,15 +455,17 @@ void PongApp::UpdatePlayer1()
 
 void PongApp::UpdatePlayer2()
 {
-    // determine ball position
-    int16_t new_target = ball_y - (FIELD_HEIGHT / 2);
+    // determine ball future position
+    int16_t new_target = ball_y + (((float)ball_speed * 2) * sin((float)ball_degree * PI / 180)) - (FIELD_HEIGHT / 2);
 
     // determine direction of movement to get to target and slowly increase speed
     if (new_target < player2_y) {
-        if (cpu_velocity > 0 - PLAYER_SPEED_MAX && random(0, 2) > 0) cpu_velocity--;
+        uint8_t speed = cpu_velocity > 0 ? 3 : 2;
+        if (cpu_velocity > 0 - PLAYER_SPEED_MAX && random(0, 3) > 0) cpu_velocity -= speed;
     }
     if (new_target > player2_y) {
-        if (cpu_velocity < 0 + PLAYER_SPEED_MAX && random(0, 2) > 0) cpu_velocity++;
+        uint8_t speed = cpu_velocity < 0 ? 3 : 2;
+        if (cpu_velocity < 0 + PLAYER_SPEED_MAX && random(0, 3) > 0) cpu_velocity += speed;
     }
 
     // set new position by ball position
