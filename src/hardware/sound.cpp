@@ -94,6 +94,7 @@ void sound_setup( void ) {
         #if defined( LILYGO_WATCH_2020_V1 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+                ttgo->power->setLDO3Voltage( 3000 );
         #endif
         sound_set_enabled( sound_config.enable );
 
