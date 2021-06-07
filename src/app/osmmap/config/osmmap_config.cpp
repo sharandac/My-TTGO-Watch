@@ -26,6 +26,7 @@ osmmap_config_t::osmmap_config_t() : BaseJsonConfig( OSMMAP_JSON_COFIG_FILE ) {
 
 bool osmmap_config_t::onSave(JsonDocument& doc) {
     doc["gps_autoon"] = gps_autoon;
+    doc["gps_on_standby"] = gps_on_standby;
     doc["wifi_autoon"] = wifi_autoon;
     doc["load_ahead"] = load_ahead;
     doc["left_right_hand"] = left_right_hand;
@@ -35,6 +36,7 @@ bool osmmap_config_t::onSave(JsonDocument& doc) {
 
 bool osmmap_config_t::onLoad(JsonDocument& doc) {
     gps_autoon = doc["gps_autoon"] | true;
+    gps_on_standby = doc["gps_on_standby"] | false;
     wifi_autoon = doc["wifi_autoon"] | true;
     load_ahead = doc["load_ahead"] | false;
     left_right_hand = doc["left_right_hand"] | false;
@@ -44,6 +46,7 @@ bool osmmap_config_t::onLoad(JsonDocument& doc) {
 
 bool osmmap_config_t::onDefault( void ) {
     gps_autoon = true;
+    gps_on_standby = false;
     wifi_autoon = true;
     load_ahead = false;
     left_right_hand = false;

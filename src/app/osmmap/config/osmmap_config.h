@@ -33,6 +33,7 @@
         public:
         osmmap_config_t();
         bool gps_autoon = true;             /** @brief gps auto on/off */
+        bool gps_on_standby = false;        /** @brief enable gps on standby */
         bool wifi_autoon = true;            /** @brief wifi auto on/off */
         bool load_ahead = false;            /** @brief load ahead on/off */
         bool left_right_hand = false;       /** @brief left/right hand icons, false mean left hand */

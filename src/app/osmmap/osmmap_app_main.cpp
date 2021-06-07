@@ -49,42 +49,43 @@
 extern const uint8_t osm_server_json_start[] asm("_binary_src_utils_osm_map_osmtileserver_json_start");
 extern const uint8_t osm_server_json_end[] asm("_binary_src_utils_osm_map_osmtileserver_json_end");
 
-EventGroupHandle_t osmmap_event_handle = NULL;     /** @brief osm tile image update event queue */
-TaskHandle_t _osmmap_update_Task;                /** @brief osm tile image update Task */
-TaskHandle_t _osmmap_load_ahead_Task;                /** @brief osm tile image update Task */
-lv_task_t *osmmap_main_tile_task;                  /** @brief osm active/inactive task for show/hide user interface */
+EventGroupHandle_t osmmap_event_handle = NULL;                  /** @brief osm tile image update event queue */
+TaskHandle_t _osmmap_update_Task;                               /** @brief osm tile image update Task */
+TaskHandle_t _osmmap_load_ahead_Task;                           /** @brief osm tile image update Task */
+lv_task_t *osmmap_main_tile_task;                               /** @brief osm active/inactive task for show/hide user interface */
 
-lv_obj_t *osmmap_app_main_tile = NULL;              /** @brief osm main tile obj */
-lv_obj_t *osmmap_app_tile_img = NULL;               /** @brief osm tile image obj */
-lv_obj_t *osmmap_app_pos_img = NULL;                /** @brief osm position point obj */
-lv_obj_t *osmmap_lonlat_label = NULL;               /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_north_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_south_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_west_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_zoom_northwest_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_zoom_northeast_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_zoom_southwest_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_zoom_southeast_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_east_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_exit_btn = NULL;                          /** @brief osm exit icon/button obj */
-lv_obj_t *osmmap_zoom_in_btl = NULL;                       /** @brief osm zoom in icon/button obj */
-lv_obj_t *osmmap_zoom_out_btl = NULL;                      /** @brief osm zoom out icon/button obj */
+lv_obj_t *osmmap_app_main_tile = NULL;                          /** @brief osm main tile obj */
+lv_obj_t *osmmap_app_tile_img = NULL;                           /** @brief osm tile image obj */
+lv_obj_t *osmmap_app_pos_img = NULL;                            /** @brief osm position point obj */
+lv_obj_t *osmmap_lonlat_label = NULL;                           /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_north_btn = NULL;                              /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_south_btn = NULL;                              /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_west_btn = NULL;                               /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_zoom_northwest_btn = NULL;                     /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_zoom_northeast_btn = NULL;                     /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_zoom_southwest_btn = NULL;                     /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_zoom_southeast_btn = NULL;                     /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_east_btn = NULL;                               /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_exit_btn = NULL;                               /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_zoom_in_btl = NULL;                            /** @brief osm zoom in icon/button obj */
+lv_obj_t *osmmap_zoom_out_btl = NULL;                           /** @brief osm zoom out icon/button obj */
 
-lv_obj_t *osmmap_layers_btn = NULL;                          /** @brief osm exit icon/button obj */
+lv_obj_t *osmmap_layers_btn = NULL;                             /** @brief osm exit icon/button obj */
 lv_obj_t *osmmap_top_menu = NULL;
 lv_obj_t *osmmap_sub_menu_layers = NULL;
 lv_obj_t *osmmap_sub_menu_setting = NULL;                       /** @brief osm style list box */
 
-lv_style_t osmmap_app_main_style;                   /** @brief osm main styte obj */
-lv_style_t osmmap_app_label_style;                  /** @brief osm main styte obj */
-lv_style_t osmmap_app_nav_style;                  /** @brief osm main styte obj */
+lv_style_t osmmap_app_main_style;                               /** @brief osm main styte obj */
+lv_style_t osmmap_app_label_style;                              /** @brief osm main styte obj */
+lv_style_t osmmap_app_nav_style;                                /** @brief osm main styte obj */
 
-static volatile bool osmmap_app_active = false;              /** @brief osm app active/inactive flag, true means active */
-static volatile bool osmmap_block_return_maintile = false;   /** @brief osm block to maintile state store */
-static volatile bool osmmap_block_show_messages = false;     /** @brief osm show messages state store */
-static volatile bool osmmap_block_watchface = false;  /** @brief osm statusbar force dark mode state store */
-static volatile bool osmmap_gps_state = false;
-static volatile bool osmmap_wifi_state = false;
+static volatile bool osmmap_app_active = false;                 /** @brief osm app active/inactive flag, true means active */
+static volatile bool osmmap_block_return_maintile = false;      /** @brief osm block to maintile state store */
+static volatile bool osmmap_block_show_messages = false;        /** @brief osm show messages state store */
+static volatile bool osmmap_block_watchface = false;            /** @brief osm statusbar force dark mode state store */
+static volatile bool osmmap_gps_state = false;                  /** @brief osm gps state on enter osmmap */
+static volatile bool osmmap_gps_on_standby_state = false;       /** @brief osm gps on standby on enter osmmap */
+static volatile bool osmmap_wifi_state = false;                 /** @brief osm wifi state on enter osmmap */
 static volatile uint64_t last_touch = 0;
 osm_location_t *osmmap_location = NULL;             /** @brief osm location obj */
 osmmap_config_t osmmap_config;
@@ -299,6 +300,8 @@ void osmmap_app_set_setting_menu( lv_obj_t *menu ) {
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
         menu_entry = lv_list_add_btn( menu, osmmap_config.gps_autoon ? &checked_dark_16px : &unchecked_dark_16px, "autostart gps" );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
+        menu_entry = lv_list_add_btn( menu, osmmap_config.gps_on_standby ? &checked_dark_16px : &unchecked_dark_16px, "gps on standby" );
+        lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
         menu_entry = lv_list_add_btn( menu, osmmap_config.wifi_autoon ? &checked_dark_16px : &unchecked_dark_16px, "autostart wifi" );
         lv_obj_set_event_cb( menu_entry, osmmap_app_get_setting_menu_cb );
         menu_entry = lv_list_add_btn( menu, osmmap_config.load_ahead ? &checked_dark_16px : &unchecked_dark_16px, "load ahead" );
@@ -324,6 +327,11 @@ static void osmmap_app_get_setting_menu_cb( lv_obj_t * obj, lv_event_t event ) {
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart gps" ) ) {
                 osmmap_config.gps_autoon = !osmmap_config.gps_autoon;
                 gpsctl_set_autoon( osmmap_config.gps_autoon );
+                osmmap_config.save();
+            }
+            else if ( !strcmp( lv_list_get_btn_text( obj ), "gps on standby" ) ) {
+                osmmap_config.gps_on_standby = !osmmap_config.gps_on_standby;
+                gpsctl_set_enable_on_standby( osmmap_config.gps_on_standby );
                 osmmap_config.save();
             }
             else if ( !strcmp( lv_list_get_btn_text( obj ), "autostart wifi" ) ) {
@@ -712,6 +720,13 @@ void osmmap_activate_cb( void ) {
     /**
      * save block show messages state
      */
+    osmmap_gps_on_standby_state = gpsctl_get_enable_on_standby();
+    if ( osmmap_config.gps_on_standby ) {
+        gpsctl_set_enable_on_standby( true );
+    }
+    /**
+     * save block show messages state
+     */
     osmmap_block_watchface = watchface_get_enable_tile_after_wakeup();
     watchface_enable_tile_after_wakeup( false );
     /**
@@ -764,6 +779,7 @@ void osmmap_hibernate_cb( void ) {
     display_set_block_return_maintile( osmmap_block_return_maintile );
     gpsctl_set_autoon( osmmap_gps_state );
     wifictl_set_autoon( osmmap_wifi_state );
+    gpsctl_set_enable_on_standby( osmmap_gps_on_standby_state );
     watchface_enable_tile_after_wakeup( osmmap_block_watchface );
     /**
      * clear cache

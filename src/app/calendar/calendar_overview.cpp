@@ -58,7 +58,8 @@ static void calendar_overview_date_event_cb( lv_obj_t * obj, lv_event_t event );
 static int calendar_overview_highlight_day_callback( void *data, int argc, char **argv, char **azColName );
 int calendar_overview_highlight_day( int year, int month );
 void calendar_overview_build_ui( void );
-void calendar_overview_refresh_ui( void );
+void calendar_overview_refresh_showed_ui( void );
+void calendar_overview_refresh_today_ui( void );
 void calendar_overview_activate_cb( void );
 void calendar_overview_hibernate_cb( void );
 /**
@@ -73,7 +74,8 @@ void calendar_overview_setup( void ) {
      * Build and configure application
      */
     calendar_overview_build_ui();
-    calendar_overview_refresh_ui();
+    calendar_overview_refresh_today_ui();
+    calendar_overview_refresh_showed_ui();
     /**
      * set activation/hibernation call back
      */
@@ -132,7 +134,7 @@ void calendar_overview_build_ui( void ) {
     lv_obj_align( exit_button, calendar_overview_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 }
 
-void calendar_overview_refresh_ui( void ) {
+void calendar_overview_refresh_showed_ui( void ) {
     /**
      * Set today's date
      */
@@ -150,8 +152,24 @@ void calendar_overview_refresh_ui( void ) {
     calendar_month = today.month;
     calendar_day = today.day;
 
-    lv_calendar_set_today_date( calendar_overview, &today);
     lv_calendar_set_showed_date( calendar_overview, &today);
+}
+
+void calendar_overview_refresh_today_ui( void ) {
+    /**
+     * Set today's date
+     */
+    time_t now;
+    struct tm time_tm;
+    time( &now );
+    localtime_r( &now, &time_tm );
+
+    lv_calendar_date_t today;
+    today.year = time_tm.tm_year + 1900;
+    today.month = time_tm.tm_mon + 1;
+    today.day = time_tm.tm_mday;
+    
+    lv_calendar_set_today_date( calendar_overview, &today);
 }
 
 void calendar_overview_activate_cb( void ) {
@@ -162,6 +180,7 @@ void calendar_overview_activate_cb( void ) {
         /**
          * highlight day with dates
          */
+        calendar_overview_refresh_today_ui();
         lv_calendar_set_highlighted_dates( calendar_overview, calendar_overview_highlighted_days, calendar_overview_highlight_day( calendar_year, calendar_month ) );
     }
     else {
