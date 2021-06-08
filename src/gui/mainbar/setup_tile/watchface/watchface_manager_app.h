@@ -10,8 +10,9 @@
     #define WATCHFACE_MANAGER_APP_GET_THEME_JSON_REQUEST    _BV(0)
     #define WATCHFACE_MANAGER_APP_GET_NEXT_THEME            _BV(1)
     #define WATCHFACE_MANAGER_APP_GET_PREV_THEME            _BV(2)
-    #define WATCHFACE_MANAGER_APP_DOWNLOAD_THEME            _BV(3)
-    #define WATCHFACE_MANAGER_APP_INSTALL_THEME             _BV(4)
+    #define WATCHFACE_MANAGER_APP_UPDATE_THEME_PREV         _BV(3)
+    #define WATCHFACE_MANAGER_APP_DOWNLOAD_THEME            _BV(4)
+    #define WATCHFACE_MANAGER_APP_INSTALL_THEME             _BV(5)
     #define WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST         _BV(8)
 
     typedef struct {
