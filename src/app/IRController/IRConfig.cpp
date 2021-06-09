@@ -8,18 +8,19 @@ IRConfig::IRConfig() : BaseJsonConfig("ir-remote.json") {
     prettyJson = false;
 }
 
-InfraButton* IRConfig::add(const char* name) {
+InfraButton* IRConfig::add(size_t page, const char* name) {
     void* pointer = MALLOC(sizeof(InfraButton));
     InfraButton* btn = new (pointer) InfraButton();
+    btn->page = page;
     btn->name = name;
     buttons[count++] = btn;
     return btn;
 }
 
-void IRConfig::del(const char* name) {
+void IRConfig::del(size_t page, const char* name) {
   bool found = false;
   for (int i = 0; i < count; i++) {
-    if (buttons[i]->name == name) {
+    if (buttons[i]->page == page && buttons[i]->name == name) {
       if (buttons[i]->uiButton.isCreated()) {
         buttons[i]->uiButton.free();
       }
@@ -33,9 +34,9 @@ void IRConfig::del(const char* name) {
     count--;
 }
 
-InfraButton* IRConfig::get(const char* name) {
+InfraButton* IRConfig::get(size_t page, const char* name) {
   for (int i = 0; i < count; i++) {
-    if (buttons[i]->name == name)
+    if (buttons[i]->page == page && buttons[i]->name == name)
       return buttons[i];
   }
   return nullptr;
@@ -49,8 +50,8 @@ void IRConfig::sendListNames(BluetoothJsonResponse& response) {
   response.send();
 }
 
-void IRConfig::sendButtonEdit(BluetoothJsonResponse& response, const char* name) {
-  auto btn = get(name);
+void IRConfig::sendButtonEdit(BluetoothJsonResponse& response, size_t page, const char* name) {
+  auto btn = get(page, name);
   if (btn != nullptr) {
     response["v"] = btn->name;
     response["m"] = (int)btn->mode;
@@ -98,18 +99,22 @@ bool IRConfig::onLoad(JsonDocument& document) {
   JsonArray pages = document["pages"].as<JsonArray>();
   if (pages.isNull() || pages.size() < 1) return false;
   
-  JsonObject main = pages[0].as<JsonObject>(); // For now only first page supported
-  if (main.isNull()) return false;
+  pageCount = pages.size();
+  for (size_t i = 0; i < pageCount; i++)
+  {
+    JsonObject main = pages[i].as<JsonObject>(); // For now only first page supported
+    if (main.isNull()) continue;
 
-  for (JsonPair record : main) {
-    if (record.value().isNull()) continue;
-    // Create and load button
-    log_d("Loading ir button: %s", record.key().c_str());
-    auto btn = add(record.key().c_str());
-    JsonObject configuration = record.value().as<JsonObject>();
-    btn->loadFrom(configuration);
+    for (JsonPair record : main) {
+      if (record.value().isNull()) continue;
+      // Create and load button
+      log_d("Loading ir button: %s", record.key().c_str());
+      auto btn = add(i, record.key().c_str());
+      JsonObject configuration = record.value().as<JsonObject>();
+      btn->loadFrom(configuration);
+    }
   }
-
+  
   if (document.containsKey("defBtnHeight"))
     defBtnHeight = document["defBtnHeight"];
   if (document.containsKey("defBtnWidth"))

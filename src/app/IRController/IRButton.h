@@ -13,6 +13,7 @@ struct InfraButton
     free(raw);
     raw = nullptr;
   }
+  size_t page;
   String name;
   decode_type_t mode;
   uint32_t code = 0;

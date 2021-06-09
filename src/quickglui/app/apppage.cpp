@@ -54,6 +54,12 @@ AppPage& AppPage::addAppButton(const lv_img_dsc_t& image, WidgetAction onBtnClic
   return *this;
 }
 
+AppPage& AppPage::moveExitButtonToForeground()
+{
+  lv_obj_move_foreground(btnExit.handle());
+  return *this;
+}
+
 Container& AppPage::createChildContainer(lv_layout_t autoLayoutOptios) {
   if (!hasChildContainer()) {
     childContainer = Container(this);
