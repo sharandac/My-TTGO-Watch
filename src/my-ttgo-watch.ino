@@ -34,17 +34,17 @@
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/alarm_clock/alarm_clock.h"
 //#include "app/sailing/sailing.h"
-//#include "app/osmand/osmand_app.h"
+#include "app/osmand/osmand_app.h"
 #include "app/tiltmouse/tiltmouse_app.h"
 #include "app/IRController/IRController.h"
 //#include "app/fx_rates/fx_rates.h"
 #include "app/activity/activity.h"
 #include "app/calc/calc_app.h"
 #include "app/calendar/calendar.h"
-//#include "app/powermeter/powermeter_app.h"
+#include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 //#include "app/gps_status/gps_status.h"
-//#include "app/osmmap/osmmap_app.h"
+#include "app/osmmap/osmmap_app.h"
 #include "app/NetTools/NetTools.h"
 #include "app/ping/ping_app.h"
 #include "app/wireless/wireless_app.h"
@@ -74,7 +74,7 @@ void setup() {
      * inlude your header file
      * and call your app setup
      */
-    //osmmap_app_setup();
+    osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
@@ -83,11 +83,11 @@ void setup() {
     calc_app_setup();
     //gps_status_setup();
     //sailing_setup();
-    //osmand_app_setup();
+    osmand_app_setup();
     tiltmouse_app_setup();
     IRController_setup();
     //fxrates_app_setup();
-    //powermeter_app_setup();
+    powermeter_app_setup();
 	FindPhone_setup();
     NetTools_setup();
     ping_app_setup();
