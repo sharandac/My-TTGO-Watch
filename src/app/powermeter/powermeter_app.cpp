@@ -54,7 +54,7 @@ void powermeter_app_setup( void ) {
     powermeter_load_config();
 
     // register 2 vertical tiles and get the first tile number and save it for later use
-    powermeter_app_main_tile_num = mainbar_add_app_tile( 1, 3, "Powermeter App" );
+    powermeter_app_main_tile_num = mainbar_add_app_tile( 1, 2, "Powermeter App" );
     powermeter_app_setup_tile_num = powermeter_app_main_tile_num + 1;
 
     powermeter_app = app_register( "power-\nmeter", &powermeter_64px, enter_powermeter_app_event_cb );
@@ -110,11 +110,6 @@ void powermeter_load_config( void ) {
             log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            strlcpy( powermeter_config.server, doc["powermeter"]["server"], sizeof( powermeter_config.server ) );
-	    powermeter_config.port = doc["powermeter"]["port"] | 1883;
-            powermeter_config.ssl = doc["powermeter"]["ssl"] | false;
-            strlcpy( powermeter_config.user, doc["powermeter"]["user"], sizeof( powermeter_config.user ) );
-            strlcpy( powermeter_config.password, doc["powermeter"]["password"], sizeof( powermeter_config.password ) );
             strlcpy( powermeter_config.topic, doc["powermeter"]["topic"], sizeof( powermeter_config.topic ) );
             powermeter_config.autoconnect = doc["powermeter"]["autoconnect"] | false;
             powermeter_config.widget = doc["powermeter"]["widget"] | false;
@@ -133,13 +128,7 @@ void powermeter_save_config( void ) {
     else {
         SpiRamJsonDocument doc( 1000 );
 
-        doc["powermeter"]["server"] = powermeter_config.server;
-        doc["powermeter"]["port"] = powermeter_config.port;
-        doc["powermeter"]["ssl"] = powermeter_config.ssl;
-        doc["powermeter"]["user"] = powermeter_config.user;
-        doc["powermeter"]["password"] = powermeter_config.password;
         doc["powermeter"]["topic"] = powermeter_config.topic;
-        doc["powermeter"]["port"] = powermeter_config.port;
         doc["powermeter"]["autoconnect"] = powermeter_config.autoconnect;
         doc["powermeter"]["widget"] = powermeter_config.widget;
 

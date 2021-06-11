@@ -27,11 +27,6 @@
     #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
 
     typedef struct {
-        char server[64] = "";
-        int32_t port = 1883;
-        bool ssl = false;
-        char user[32] = "";
-        char password[32] = "";
         char topic[64] = "";
         bool autoconnect = false;
         bool widget = false;

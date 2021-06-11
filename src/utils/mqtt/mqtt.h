@@ -23,7 +23,22 @@
     #define _MQTT_H
     
     #include <AsyncMqttClient.h>
+    #include "hardware/callback.h"
     #include "stdint.h"
+
+    typedef std::function<void(char* topic, char* payload, size_t len)> MqttMessageCallback;
+    enum mqtt_event_t {
+        MQTT_OFF                    = _BV(0),
+        MQTT_CONNECT                = _BV(1),
+        MQTT_CONNECTED              = _BV(2),
+        MQTT_DISCONNECT             = _BV(3),
+        MQTT_DISCONNECTED           = _BV(4)
+    };
+
+    /**
+     *  @brief init builtin mqtt.
+     */
+    void mqtt_init( void );
 
     /**
      *  @brief setup builtin mqtt, call after first wifi-connection.
@@ -33,7 +48,14 @@
     /**
      *  @brief stop builtin mqtt.
      */
-    void mqtt_stop();
+    void mqtt_stop( void );
+
+    /**
+     * @brief subscribes to a specified mqtt topic
+     * 
+     * @param   topic  to which should be subscribed
+     */
+    void mqtt_subscribe(const char* topic);
 
     /**
      *  @brief publish online state.
@@ -81,8 +103,18 @@
     bool mqtt_get_connected();
     
     /**
-     *  @brief get mqtt client for raw handling.
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event  possible values: MQTT_CONNECT,
+     *                                  MQTT_DISCONNECT
+     * @param   mqtt_event_cb   pointer to the callback function 
+     * @param   id      program id
      */
-    AsyncMqttClient mqtt_get_client();
+    bool mqtt_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
+
+    /**
+     *  @brief registers a callback function which is called on receiving a mqtt message for a subscribed topic
+     */
+    void mqtt_register_message_cb(MqttMessageCallback callback);
 
 #endif // _MQTT_H

@@ -102,6 +102,9 @@ void wifictl_setup( void ) {
             wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
             WiFi.scanNetworks( true );
         }
+        #ifdef ENABLE_MQTT
+            mqtt_stop();
+        # endif
     }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -207,6 +210,9 @@ void wifictl_setup( void ) {
      * set default state after init
      */
     wifictl_set_event( WIFICTL_OFF );
+    #ifdef ENABLE_MQTT
+        mqtt_init();
+    # endif
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {

@@ -21,8 +21,6 @@
  */
 #include "config.h"
 #include <TTGO.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
 
 #include "powermeter_app.h"
 #include "powermeter_main.h"
@@ -36,16 +34,13 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-#include "hardware/wifictl.h"
-
+#include "utils/mqtt/mqtt.h"
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
 
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;
 lv_style_t powermeter_id_style;
-
-lv_task_t * _powermeter_main_task;
 
 lv_obj_t *id_cont = NULL;
 lv_obj_t *id_label = NULL;
@@ -56,18 +51,17 @@ lv_obj_t *current_label = NULL;
 lv_obj_t *power_cont = NULL;
 lv_obj_t *power_label = NULL;
 
-WiFiClient espClient;
-PubSubClient powermeter_mqtt_client( espClient );
-
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
-bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
+bool powermeter_mqtt_event_cb( EventBits_t event, void *arg );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback(char *topic, char *payload, size_t length) {
+    if (strncmp(topic, powermeter_get_config()->topic, strlen(powermeter_get_config()->topic) - 1) != 0) return;
+
     char *msg = NULL;
     msg = (char*)CALLOC( length + 1, 1 );
     if ( msg == NULL ) {
@@ -184,42 +178,32 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( power_label, "n/a" );
     lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    powermeter_mqtt_client.setCallback( callback );
-    powermeter_mqtt_client.setBufferSize( 512 );
-
-    wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb, "powermeter" );
-    // create an task that runs every secound
-    _powermeter_main_task = lv_task_create( powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL );
+    mqtt_register_cb( MQTT_OFF | MQTT_CONNECTED | MQTT_DISCONNECTED , powermeter_mqtt_event_cb, "powermeter" );
+    mqtt_register_message_cb( callback );
 }
 
-bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
+bool powermeter_mqtt_event_cb( EventBits_t event, void *arg ) {
     powermeter_config_t *powermeter_config = powermeter_get_config();
     switch( event ) {
-        case WIFICTL_CONNECT_IP:    if ( powermeter_config->autoconnect ) {
-                                        powermeter_mqtt_client.setServer( powermeter_config->server, powermeter_config->port );
-                                        if ( !powermeter_mqtt_client.connect( "powermeter", powermeter_config->user, powermeter_config->password ) ) {
-                                            log_e("connect to mqtt server %s failed", powermeter_config->server );
-                                            app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_FAIL );
-                                            widget_set_indicator( powermeter_get_widget_icon() , ICON_INDICATOR_FAIL );
-                                        }
-                                        else {
-                                            log_i("connect to mqtt server %s success", powermeter_config->server );
-                                            powermeter_mqtt_client.subscribe( powermeter_config->topic );
-                                            app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_OK );
-                                            widget_set_indicator( powermeter_get_widget_icon(), ICON_INDICATOR_OK );
-                                        }
-                                    } 
-                                    break;
-        case WIFICTL_OFF_REQUEST:
-        case WIFICTL_OFF:
-        case WIFICTL_DISCONNECT:    if ( powermeter_mqtt_client.connected() ) {
-                                        log_i("disconnect from mqtt server %s", powermeter_config->server );
-                                        powermeter_mqtt_client.disconnect();
-                                        app_hide_indicator( powermeter_get_app_icon() );
-                                        widget_hide_indicator( powermeter_get_widget_icon() );
-                                        widget_set_label( powermeter_get_widget_icon(), "n/a" );
-                                    }
-                                    break;
+        case MQTT_OFF:          app_hide_indicator( powermeter_get_app_icon() );
+                                widget_hide_indicator( powermeter_get_widget_icon() );
+                                widget_set_label( powermeter_get_widget_icon(), "n/a" );
+                                break;
+        case MQTT_CONNECTED:    if (powermeter_config->autoconnect) {
+                                    mqtt_subscribe( powermeter_config->topic );
+                                    app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_OK );
+                                    widget_set_indicator( powermeter_get_widget_icon(), ICON_INDICATOR_OK );
+                                } else {
+                                    app_hide_indicator( powermeter_get_app_icon() );
+                                    widget_hide_indicator( powermeter_get_widget_icon() );
+                                    widget_set_label( powermeter_get_widget_icon(), "n/a" );
+                                }
+                                break;
+        case MQTT_DISCONNECTED: if (powermeter_config->autoconnect) {
+                                    app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_FAIL );
+                                    widget_set_indicator( powermeter_get_widget_icon() , ICON_INDICATOR_FAIL );
+                                }
+                                break;
     }
     return( true );
 }
@@ -230,9 +214,4 @@ static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event ) 
                                         statusbar_hide( true );
                                         break;
     }
-}
-
-void powermeter_main_task( lv_task_t * task ) {
-    // put your code her
-    powermeter_mqtt_client.loop();
 }
