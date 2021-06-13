@@ -186,6 +186,10 @@ void mqtt_subscribe(const char* topic) {
   mqtt_client.subscribe(topic, 0);
 }
 
+void mqtt_publish(const char* topic, bool retain, const char* payload) {
+  mqtt_client.publish(topic, 0, retain, payload);
+}
+
 void mqtt_publish_state() {
   mqtt_client.publish(stateTopic, 1, true, "online");
 }

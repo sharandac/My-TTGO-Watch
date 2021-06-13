@@ -43,7 +43,7 @@ LV_IMG_DECLARE(calc_app_64px);
  */
 void calc_app_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    calc_app_main_tile_num = mainbar_add_app_tile( 1, 2, "calc app" );
+    calc_app_main_tile_num = mainbar_add_app_tile( 1, 1, "calc app" );
 
     // register app icon on the app tile
     // set your own icon and register her callback to activate by an click

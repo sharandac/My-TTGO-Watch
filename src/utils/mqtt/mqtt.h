@@ -58,6 +58,15 @@
     void mqtt_subscribe(const char* topic);
 
     /**
+     * @brief publishes to a specified mqtt topic
+     * 
+     * @param   topic  to which should be published
+     * @param   retain  if the message should be retained
+     * @param   payload  that should be published
+     */
+    void mqtt_publish(const char* topic, bool retain, const char* payload = (const char*)nullptr);
+
+    /**
      *  @brief publish online state.
      */
     void mqtt_publish_state();

@@ -43,7 +43,7 @@ LV_IMG_DECLARE(tiltmouse_app_64px);
  */
 void tiltmouse_app_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    tiltmouse_app_main_tile_num = mainbar_add_app_tile( 1, 2, "tiltmouse app" );
+    tiltmouse_app_main_tile_num = mainbar_add_app_tile( 1, 1, "tiltmouse app" );
 
     // register app icon on the app tile
     // set your own icon and register her callback to activate by an click
