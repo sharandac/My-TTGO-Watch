@@ -31,6 +31,7 @@
 #include "gui/app.h"
 #include "gui/widget.h"
 
+#include "utils/mqtt/mqtt.h"
 #include "utils/json_psram_allocator.h"
 
 mqtt_player_config_t mqtt_player_config;
@@ -92,6 +93,7 @@ static void enter_mqtt_player_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( mqtt_player_main_tile_num, LV_ANIM_OFF );
                                         statusbar_hide( true );
                                         app_hide_indicator( mqtt_player_app );
+                                        mqtt_start();
                                         break;
     }    
 }

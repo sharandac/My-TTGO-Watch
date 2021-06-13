@@ -126,7 +126,7 @@ void mqtt_player_main_setup( uint32_t tile_num ) {
     mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
     snprintf( mqtt_player_subscribe_topic, sizeof( mqtt_player_subscribe_topic ), "%s/#", mqtt_player_config->topic_base );
 
-    // create an task that runs every secound
+    // create an task that runs every second
     _mqtt_player_task = lv_task_create( mqtt_player_task, 1000, LV_TASK_PRIO_MID, NULL );
 }
 
@@ -141,6 +141,8 @@ static bool mqtt_player_mqtt_event_cb( EventBits_t event, void *arg ) {
                                 break;
         case MQTT_DISCONNECTED: mqtt_player_state = false;
                                 mqtt_player_app_set_indicator( ICON_INDICATOR_FAIL );
+                                lv_label_set_text( mqtt_player_artist, "" );
+                                lv_label_set_text( mqtt_player_title, "" );
                                 break;
     }
     return( true );
@@ -243,7 +245,7 @@ static void mqtt_player_volume_up_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
             char temp[64] = "";
             snprintf( temp, sizeof( temp ), "%s/%s", mqtt_player_config->topic_base, mqtt_player_config->topic_cmd_volumeup );
-            mqtt_publish(temp, false, "volumeup\0");
+            mqtt_publish(temp, false, "+5\0");
             break;
     }
 }
@@ -255,7 +257,7 @@ static void mqtt_player_volume_down_event_cb( lv_obj_t * obj, lv_event_t event )
 
             char temp[64] = "";
             snprintf( temp, sizeof( temp ), "%s/%s", mqtt_player_config->topic_base, mqtt_player_config->topic_cmd_volumedown );
-            mqtt_publish(temp, false, "volumedown\0");
+            mqtt_publish(temp, false, "-5\0");
             break;
     }
 }

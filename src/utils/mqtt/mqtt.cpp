@@ -28,6 +28,7 @@
 
 bool mqtt_setup = false;
 bool mqtt_run = false;
+bool mqtt_needs_publish = false;
 EventGroupHandle_t mqtt_status = NULL;
 portMUX_TYPE DRAM_ATTR mqttMux = portMUX_INITIALIZER_UNLOCKED;
 callback_t *mqtt_callback = NULL;
@@ -53,14 +54,7 @@ void _mqtt_connected(bool sessionPresent) {
   log_d("mqtt connected");
 
   mqtt_publish_state();
-  mqtt_publish_battery();
-  mqtt_publish_ambient_temperature();
-  mqtt_publish_power_temperature();
-
-  mqtt_publish_version();
-  mqtt_publish_sketch();
-  mqtt_publish_heap();
-  mqtt_publish_psram();
+  mqtt_needs_publish = true;
 
   mqtt_set_event( MQTT_CONNECT );
   mqtt_clear_event( MQTT_DISCONNECT | MQTT_DISCONNECTED | MQTT_OFF );
@@ -96,16 +90,7 @@ bool mqtt_pmuctl_event_cb( EventBits_t event, void *arg ) {
 
   switch( event ) {
     case PMUCTL_STATUS:
-      mqtt_publish_battery();
-      mqtt_publish_ambient_temperature();
-      mqtt_publish_power_temperature();
-
-      if (!powermgm_get_event( POWERMGM_STANDBY )) {
-          mqtt_publish_version();
-          mqtt_publish_sketch();
-          mqtt_publish_heap();
-          mqtt_publish_psram();
-      }
+      mqtt_needs_publish = true;
       break;
   }
   return( true );
@@ -124,12 +109,38 @@ void mqtt_loop( lv_task_t * task ) {
     mqtt_clear_event( MQTT_DISCONNECT );
     mqtt_send_event_cb( MQTT_DISCONNECTED, (void *)NULL );
   }
+
+  if (mqtt_needs_publish) {
+    mqtt_needs_publish = false;
+
+    mqtt_publish_battery();
+    mqtt_publish_ambient_temperature();
+    mqtt_publish_power_temperature();
+
+    if (!powermgm_get_event( POWERMGM_STANDBY )) {
+        mqtt_publish_version();
+        mqtt_publish_sketch();
+        mqtt_publish_heap();
+        mqtt_publish_psram();
+    }
+  }
 }
 
 void mqtt_init( void ) {
   mqtt_status = xEventGroupCreate();
   mqtt_set_event( MQTT_OFF );
   _mqtt_main_task = lv_task_create( mqtt_loop, 250, LV_TASK_PRIO_MID, NULL );
+}
+
+void mqtt_start() {
+  if (!mqtt_setup) return;
+  if (mqtt_run) return;
+  mqtt_run = true;
+
+  if ( !mqtt_client.connected() ) {
+    mqtt_client.setWill(stateTopic, 1, true, "offline");
+    mqtt_client.connect();
+  }
 }
 
 void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, const char *user, const char *pass ) {

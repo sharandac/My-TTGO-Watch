@@ -41,6 +41,11 @@
     void mqtt_init( void );
 
     /**
+     *  @brief setup builtin mqtt
+     */
+    void mqtt_start();
+
+    /**
      *  @brief setup builtin mqtt, call after first wifi-connection.
      */
     void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, const char *user, const char *pass );

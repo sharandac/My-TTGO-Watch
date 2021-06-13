@@ -31,6 +31,9 @@
 #include "gui/app.h"
 #include "gui/widget.h"
 
+#include "utils/mqtt/mqtt.h"
+#include "utils/json_psram_allocator.h"
+
 uint32_t mqtt_control_main_tile_num;
 uint32_t mqtt_control_setup_tile_num;
 
@@ -86,6 +89,7 @@ static void enter_mqtt_control_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( mqtt_control_main_tile_num, LV_ANIM_OFF );
                                         statusbar_hide( true );
                                         app_hide_indicator( mqtt_control_app );
+                                        mqtt_start();
                                         break;
     }    
 }
