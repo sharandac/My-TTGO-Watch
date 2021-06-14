@@ -61,7 +61,6 @@ LV_IMG_DECLARE(down_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-char mqtt_player_subscribe_topic[34] = "";
 static void exit_mqtt_player_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_mqtt_player_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void mqtt_player_volume_up_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -123,9 +122,6 @@ void mqtt_player_main_setup( uint32_t tile_num ) {
     mqtt_register_cb( MQTT_OFF | MQTT_CONNECTED | MQTT_DISCONNECTED , mqtt_player_mqtt_event_cb, "mqtt player" );
     mqtt_register_message_cb( mqtt_player_message_cb );
 
-    mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
-    snprintf( mqtt_player_subscribe_topic, sizeof( mqtt_player_subscribe_topic ), "%s/#", mqtt_player_config->topic_base );
-
     // create an task that runs every second
     _mqtt_player_task = lv_task_create( mqtt_player_task, 1000, LV_TASK_PRIO_MID, NULL );
 }
@@ -136,7 +132,12 @@ static bool mqtt_player_mqtt_event_cb( EventBits_t event, void *arg ) {
                                 mqtt_player_app_hide_indicator();
                                 break;
         case MQTT_CONNECTED:    mqtt_player_state = true;
-                                mqtt_subscribe( mqtt_player_subscribe_topic );
+                                {
+                                    char mqtt_player_subscribe_topic[34];
+                                    mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
+                                    snprintf( mqtt_player_subscribe_topic, sizeof( mqtt_player_subscribe_topic ), "%s/#", mqtt_player_config->topic_base );
+                                    mqtt_subscribe( mqtt_player_subscribe_topic );
+                                }
                                 mqtt_player_app_set_indicator( ICON_INDICATOR_OK );
                                 break;
         case MQTT_DISCONNECTED: mqtt_player_state = false;

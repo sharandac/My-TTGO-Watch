@@ -35,14 +35,7 @@ callback_t *mqtt_callback = NULL;
 lv_task_t * _mqtt_main_task;
 
 AsyncMqttClient mqtt_client;
-char stateTopic[32];
-char batteryTopic[32];
-char heapTopic[32];
-char psramTopic[32];
-char sketchTopic[32];
-char versionTopic[32];
-char ambientTemperatureTopic[32];
-char powerTemperatureTopic[32];
+char clientId[24];
 
 bool mqtt_send_event_cb( EventBits_t event, void *arg );
 void mqtt_set_event( EventBits_t bits );
@@ -138,7 +131,12 @@ void mqtt_start() {
   mqtt_run = true;
 
   if ( !mqtt_client.connected() ) {
-    mqtt_client.setWill(stateTopic, 1, true, "offline");
+    {
+      char topic[64];
+      snprintf(topic, sizeof(topic), "%s/state", clientId);
+      mqtt_client.setWill(topic, 1, true, "offline");
+    }
+
     mqtt_client.connect();
   }
 }
@@ -150,22 +148,19 @@ void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, con
   if ( !mqtt_client.connected() ) {
     log_i("use mqtt server:port as %s: %s:%d", id, server, port );
 
-    if (!mqtt_setup) snprintf(stateTopic, sizeof(stateTopic), "%s/state", id);
-    if (!mqtt_setup) snprintf(batteryTopic, sizeof(batteryTopic), "%s/battery", id);
-    if (!mqtt_setup) snprintf(heapTopic, sizeof(heapTopic), "%s/heap", id);
-    if (!mqtt_setup) snprintf(psramTopic, sizeof(psramTopic), "%s/psram", id);
-    if (!mqtt_setup) snprintf(sketchTopic, sizeof(sketchTopic), "%s/sketch", id);
-    if (!mqtt_setup) snprintf(versionTopic, sizeof(versionTopic), "%s/version", id);
-    if (!mqtt_setup) snprintf(ambientTemperatureTopic, sizeof(ambientTemperatureTopic), "%s/temp_ambient", id);
-    if (!mqtt_setup) snprintf(powerTemperatureTopic, sizeof(powerTemperatureTopic), "%s/temp_power", id);
+    {
+      char topic[64];
+      snprintf(topic, sizeof(topic), "%s/state", clientId);
+      mqtt_client.setWill(topic, 1, true, "offline");
+    }
 
-    mqtt_client.setWill(stateTopic, 1, true, "offline");
     if (!mqtt_setup) mqtt_client.onConnect(_mqtt_connected);
     if (!mqtt_setup) mqtt_client.onDisconnect(_mqtt_disconnected);
     if (!mqtt_setup) mqtt_client.onSubscribe(_mqtt_subscribe);
     if (!mqtt_setup) mqtt_client.onUnsubscribe(_mqtt_unsubscribe);
     if (!mqtt_setup) mqtt_client.onMessage(_mqtt_message);
 
+    strlcpy( clientId, id, strlen( id ) + 1 );
     mqtt_client.setClientId( id );
     mqtt_client.setServer( server, port );
     mqtt_client.setCredentials( user, pass );
@@ -202,54 +197,86 @@ void mqtt_publish(const char* topic, bool retain, const char* payload) {
 }
 
 void mqtt_publish_state() {
-  mqtt_client.publish(stateTopic, 1, true, "online");
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/state", clientId);
+  mqtt_client.publish(topic, 1, true, "online");
 }
 
 void mqtt_publish_battery() {
   int32_t voltage = pmu_get_battery_voltage();
   if (voltage > 3000) {
-    char temp[5];
-    snprintf(temp, sizeof(temp), "%d", voltage);
-    mqtt_client.publish(batteryTopic, 0, true, temp);
+    char topic[64];
+    snprintf(topic, sizeof(topic), "%s/battery", clientId);
+
+    char payload[5];
+    snprintf(payload, sizeof(payload), "%d", voltage);
+
+    mqtt_client.publish(topic, 0, true, payload);
   }
 }
 
 void mqtt_publish_version() {
-  char temp[11];
-  snprintf(temp, sizeof(temp), "%s", __FIRMWARE__);
-  mqtt_client.publish(versionTopic, 0, true, temp);
+    char topic[64];
+    snprintf(topic, sizeof(topic), "%s/version", clientId);
+
+  char payload[11];
+  snprintf(payload, sizeof(payload), "%s", __FIRMWARE__);
+
+  mqtt_client.publish(topic, 0, true, payload);
 }
 
 void mqtt_publish_ambient_temperature() {
-  char temp[6];
   TTGOClass * ttgo = TTGOClass::getWatch();
-  snprintf(temp, sizeof(temp), "%.2f", ttgo->bma->temperature());
-  mqtt_client.publish(ambientTemperatureTopic, 0, false, temp);
+
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/temp_ambient", clientId);
+  
+  char payload[6];
+  snprintf(payload, sizeof(payload), "%.2f", ttgo->bma->temperature());
+
+  mqtt_client.publish(topic, 0, false, payload);
 }
 
 void mqtt_publish_power_temperature() {
-  char temp[6];
   TTGOClass * ttgo = TTGOClass::getWatch();
-  snprintf(temp, sizeof(temp), "%.2f", ttgo->power->getTemp());
-  mqtt_client.publish(powerTemperatureTopic, 0, false, temp);
+
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/temp_power", clientId);
+  
+  char payload[6];
+  snprintf(payload, sizeof(payload), "%.2f", ttgo->power->getTemp());
+
+  mqtt_client.publish(topic, 0, false, payload);
 }
 
 void mqtt_publish_heap() {
-  char temp[22];
-  snprintf(temp, sizeof(temp), "%d/%d", ESP.getFreeHeap(), ESP.getHeapSize());
-  mqtt_client.publish(heapTopic, 0, false, temp);
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/heap", clientId);
+  
+  char payload[22];
+  snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreeHeap(), ESP.getHeapSize());
+
+  mqtt_client.publish(topic, 0, false, payload);
 }
 
 void mqtt_publish_psram() {
-  char temp[22];
-  snprintf(temp, sizeof(temp), "%d/%d", ESP.getFreePsram(), ESP.getPsramSize());
-  mqtt_client.publish(psramTopic, 0, false, temp);
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/psram", clientId);
+  
+  char payload[22];
+  snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreePsram(), ESP.getPsramSize());
+
+  mqtt_client.publish(topic, 0, false, payload);
 }
 
 void mqtt_publish_sketch() {
-  char temp[22];
-  snprintf(temp, sizeof(temp), "%d/%d", ESP.getFreeSketchSpace(), ESP.getSketchSize());
-  mqtt_client.publish(sketchTopic, 0, false, temp);
+  char topic[64];
+  snprintf(topic, sizeof(topic), "%s/sketch", clientId);
+  
+  char payload[22];
+  snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreeSketchSpace(), ESP.getSketchSize());
+
+  mqtt_client.publish(topic, 0, false, payload);
 }
 
 bool mqtt_get_connected() {
