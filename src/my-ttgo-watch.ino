@@ -45,8 +45,9 @@
 #include "app/FindPhone/FindPhone.h"
 //#include "app/gps_status/gps_status.h"
 #include "app/osmmap/osmmap_app.h"
-#include "app/mqtt_control/mqtt_control_app.h"
+#include "app/kodi_remote/kodi_remote_app.h"
 #include "app/mqtt_player/mqtt_player_app.h"
+#include "app/mqtt_control/mqtt_control_app.h"
 #include "app/NetTools/NetTools.h"
 #include "app/ping/ping_app.h"
 #include "app/wireless/wireless_app.h"
@@ -91,8 +92,9 @@ void setup() {
     //fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
-    mqtt_control_app_setup();
+    kodi_remote_app_setup();
     mqtt_player_app_setup();
+    mqtt_control_app_setup();
     NetTools_setup();
     ping_app_setup();
     wireless_app_setup();
