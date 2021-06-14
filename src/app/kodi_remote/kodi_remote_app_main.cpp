@@ -357,7 +357,6 @@ int16_t kodi_remote_get_active_player_id() {
     if (kodi_remote_videoplayer_id >= 0) player = kodi_remote_videoplayer_id;
     if (kodi_remote_audioplayer_id >= 0) player = kodi_remote_audioplayer_id;
     if (kodi_remote_pictureplayer_id >= 0) player = kodi_remote_pictureplayer_id;
-    log_i("current active player: %d", player);
     return player;
 }
 
@@ -372,8 +371,8 @@ void kodi_remote_get_active_players() {
             kodi_remote_audioplayer_id = -1;
             kodi_remote_pictureplayer_id = -1;
 
-            JsonArray array = doc["result"].as<JsonArray>();
-            for (JsonObject player : array) {
+            JsonArray players = doc["result"].as<JsonArray>();
+            for (JsonObject player : players) {
                 if (!player.containsKey("type")) continue;
                 if (strncmp(player["type"], "video", 6) == 0) kodi_remote_videoplayer_id = player["playerid"].as<int16_t>();
                 if (strncmp(player["type"], "audio", 6) == 0) kodi_remote_audioplayer_id = player["playerid"].as<int16_t>();
@@ -449,14 +448,25 @@ void kodi_remote_get_active_player_item() {
     if (httpcode >= 200 && httpcode < 400) {
         kodi_remote_app_set_indicator( ICON_INDICATOR_OK );
 
-        char test[256];
-        serializeJson(doc, test, sizeof(test));
-        log_i("sent payload successful and got httpcode %d with result: %s", httpcode, test);
-
         if (doc.containsKey("result")) {
             if (doc["result"].containsKey("item")) {
                 if (doc["result"]["item"].containsKey("artist")) {
-                    lv_label_set_text( kodi_remote_artist, doc["result"]["item"]["artist"] );//TODO: improve handling, if artist comes as string array instead of string
+                    if (doc["result"]["item"]["artist"].is<JsonArray>()) {
+                        JsonArray artists = doc["result"]["item"]["artist"].as<JsonArray>();
+
+                        uint8_t num = 0;
+                        String artistList;
+                        for (JsonVariant artist : artists) {
+                            if (num > 0) artistList.concat(", ");
+                            artistList.concat(artist.as<const char*>());
+                            num++;
+                        }
+                        
+                        lv_label_set_text( kodi_remote_artist, artistList.c_str() );
+                    } else {
+                        lv_label_set_text( kodi_remote_artist, doc["result"]["item"]["artist"] );
+                    }
+                    lv_label_set_text( kodi_remote_artist, doc["result"]["item"]["artist"] );
                     lv_obj_align( kodi_remote_artist, kodi_remote_player_main_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
                 } else {
                     lv_label_set_text( kodi_remote_artist, "" );
