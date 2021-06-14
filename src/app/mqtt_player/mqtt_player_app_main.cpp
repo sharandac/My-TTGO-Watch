@@ -1,7 +1,7 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
- *   Copyright  2020  Dirk Brosswick
- *   Email: dirk.brosswick@googlemail.com
+ *   June 14 02:01:00 2021
+ *   Copyright  2021  Dirk Sarodnick
+ *   Email: programmer@dirk-sarodnick.de
  ****************************************************************************/
  
 /*
@@ -162,7 +162,7 @@ static void mqtt_player_message_cb(char *topic, char *payload, size_t length) {
     memcpy( payload_msg, payload, length );
 
     snprintf( topic_compare, sizeof( topic_compare ), "%s/%s", mqtt_player_config->topic_base, mqtt_player_config->topic_state );
-    if (strncmp(topic, topic_compare, strlen(topic_compare) - 1) == 0) {
+    if (strncmp(topic, topic_compare, strlen(topic_compare)) == 0) {
         if( !strcmp( payload_msg, "pause" ) || !strcmp( payload_msg, "stop" ) ) {
             lv_imgbtn_set_src( mqtt_player_play, LV_BTN_STATE_RELEASED, &play_64px);
             lv_imgbtn_set_src( mqtt_player_play, LV_BTN_STATE_PRESSED, &play_64px);
@@ -180,13 +180,13 @@ static void mqtt_player_message_cb(char *topic, char *payload, size_t length) {
     }
 
     snprintf( topic_compare, sizeof( topic_compare ), "%s/%s", mqtt_player_config->topic_base, mqtt_player_config->topic_artist );
-    if (strncmp(topic, topic_compare, strlen(topic_compare) - 1) == 0) {
+    if (strncmp(topic, topic_compare, strlen(topic_compare)) == 0) {
         lv_label_set_text( mqtt_player_artist, payload_msg );
         lv_obj_align( mqtt_player_artist, mqtt_player_main_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
     }
 
     snprintf( topic_compare, sizeof( topic_compare ), "%s/%s", mqtt_player_config->topic_base, mqtt_player_config->topic_title );
-    if (strncmp(topic, topic_compare, strlen(topic_compare) - 1) == 0) {
+    if (strncmp(topic, topic_compare, strlen(topic_compare)) == 0) {
         lv_label_set_text( mqtt_player_title, payload_msg );
         lv_obj_align( mqtt_player_title, mqtt_player_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
     }
