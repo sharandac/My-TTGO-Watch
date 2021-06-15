@@ -150,6 +150,8 @@ static bool mqtt_player_mqtt_event_cb( EventBits_t event, void *arg ) {
 }
 
 static void mqtt_player_message_cb(char *topic, char *payload, size_t length) {
+    if (!length) return;
+
     mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
     if (strncmp(topic, mqtt_player_config->topic_base, strlen(mqtt_player_config->topic_base) - 1) != 0) return;
 

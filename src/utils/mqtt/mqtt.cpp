@@ -192,6 +192,11 @@ void mqtt_subscribe(const char* topic) {
   mqtt_client.subscribe(topic, 0);
 }
 
+void mqtt_unsubscribe(const char* topic) {
+  log_d("subscribing to topic '%s'", topic);
+  mqtt_client.unsubscribe(topic);
+}
+
 void mqtt_publish(const char* topic, bool retain, const char* payload) {
   mqtt_client.publish(topic, 0, retain, payload);
 }

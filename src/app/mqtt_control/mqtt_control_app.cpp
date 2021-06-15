@@ -24,7 +24,6 @@
 
 #include "mqtt_control_app.h"
 #include "mqtt_control_app_main.h"
-#include "mqtt_control_app_setup.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -34,8 +33,9 @@
 #include "utils/mqtt/mqtt.h"
 #include "utils/json_psram_allocator.h"
 
+mqtt_control_config_t mqtt_control_config;
+
 uint32_t mqtt_control_main_tile_num;
-uint32_t mqtt_control_setup_tile_num;
 
 // app icon
 icon_t *mqtt_control_app = NULL;
@@ -50,9 +50,10 @@ static void enter_mqtt_control_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void mqtt_control_app_setup( void ) {
+    mqtt_control_load_config();
+
     // register 2 vertical tiles and get the first tile number and save it for later use
-    mqtt_control_main_tile_num = mainbar_add_app_tile( 1, 2, "mqtt control" );
-    mqtt_control_setup_tile_num = mqtt_control_main_tile_num + 1;
+    mqtt_control_main_tile_num = mainbar_add_app_tile( 1, 1, "mqtt control" );
 
     // register app icon on the app tile
     // set your own icon and register her callback to activate by an click
@@ -64,7 +65,6 @@ void mqtt_control_app_setup( void ) {
 
     // init main and setup tile, see mqtt_control_main.cpp and mqtt_control_setup.cpp
     mqtt_control_main_setup( mqtt_control_main_tile_num );
-    mqtt_control_setup_setup( mqtt_control_setup_tile_num );
 }
 
 /*
@@ -72,13 +72,6 @@ void mqtt_control_app_setup( void ) {
  */
 uint32_t mqtt_control_get_app_main_tile_num( void ) {
     return( mqtt_control_main_tile_num );
-}
-
-/*
- *
- */
-uint32_t mqtt_control_get_app_setup_tile_num( void ) {
-    return( mqtt_control_setup_tile_num );
 }
 
 /*
@@ -100,4 +93,53 @@ void mqtt_control_app_set_indicator(icon_indicator_t indicator) {
 
 void mqtt_control_app_hide_indicator() {
     app_hide_indicator( mqtt_control_app );
+}
+
+mqtt_control_config_t *mqtt_control_get_config( void ) {
+    return( &mqtt_control_config );
+}
+
+void mqtt_control_load_config( void ) {
+    if ( mqtt_control_config.items == NULL ) {
+        mqtt_control_config.items = ( mqtt_control_item_t* )CALLOC( sizeof( mqtt_control_item_t ) * MQTT_CONTROL_ITEMS, 1 );
+        if( !mqtt_control_config.items ) {
+            log_e("mqtt_control_item_t calloc faild");
+            while(true);
+        }
+    }
+
+    fs::File file = SPIFFS.open( MQTT_CONTROL_JSON_CONFIG_FILE, FILE_READ );
+    if (!file) {
+        log_e("Can't open file: %s!", MQTT_CONTROL_JSON_CONFIG_FILE );
+    }
+    else {
+        int filesize = file.size();
+        SpiRamJsonDocument doc( filesize * 4 );
+
+        DeserializationError error = deserializeJson( doc, file );
+        if ( error ) {
+            log_e("update check deserializeJson() failed: %s", error.c_str() );
+        }
+        else {
+            for ( int i = 0 ; i < MQTT_CONTROL_ITEMS ; i++ ) {
+                mqtt_control_config.items[ i ].type             = doc["items"][ i ]["type"].as<uint8_t>();
+                strlcpy( mqtt_control_config.items[ i ].label   , doc["items"][ i ]["label"], sizeof( mqtt_control_config.items[ i ].label ) );
+                strlcpy( mqtt_control_config.items[ i ].topic   , doc["items"][ i ]["topic"], sizeof( mqtt_control_config.items[ i ].topic ) );
+
+                if (mqtt_control_config.items->gui_label){
+                    lv_obj_clean(mqtt_control_config.items->gui_label);
+                    lv_obj_del(mqtt_control_config.items->gui_label);
+                    mqtt_control_config.items->gui_label = 0;
+                }
+
+                if (mqtt_control_config.items->gui_object){
+                    lv_obj_clean(mqtt_control_config.items->gui_object);
+                    lv_obj_del(mqtt_control_config.items->gui_object);
+                    mqtt_control_config.items->gui_object = 0;
+                }
+            }
+        }
+        doc.clear();
+    }
+    file.close();
 }

@@ -63,6 +63,13 @@
     void mqtt_subscribe(const char* topic);
 
     /**
+     * @brief unsubscribes to a specified mqtt topic
+     * 
+     * @param   topic  to which should be unsubscribed
+     */
+    void mqtt_unsubscribe(const char* topic);
+
+    /**
      * @brief publishes to a specified mqtt topic
      * 
      * @param   topic  to which should be published

@@ -25,11 +25,35 @@
     #include <TTGO.h>
     #include "gui/icon.h"
 
+    #define MQTT_CONTROL_ITEMS             20
+    #define MQTT_CONTROL_JSON_CONFIG_FILE  "/mqtt_control.json"
+
+    enum {
+        MQTT_CONTROL_TYPE_NONE,
+        MQTT_CONTROL_TYPE_LABEL,
+        MQTT_CONTROL_TYPE_BUTTON,
+        MQTT_CONTROL_TYPE_SWITCH
+    };
+
+    typedef struct {
+        uint8_t type = MQTT_CONTROL_TYPE_NONE;
+        char label[32]="";
+        char topic[64]="";
+        lv_obj_t *gui_label;
+        lv_obj_t *gui_object;
+    } mqtt_control_item_t;
+
+    typedef struct {
+        mqtt_control_item_t* items = NULL;
+    } mqtt_control_config_t;
+
     void mqtt_control_app_setup( void );
-    uint32_t mqtt_control_get_app_setup_tile_num( void );
     uint32_t mqtt_control_get_app_main_tile_num( void );
 
     void mqtt_control_app_set_indicator(icon_indicator_t indicator);
     void mqtt_control_app_hide_indicator();
+
+    mqtt_control_config_t *mqtt_control_get_config( void );
+    void mqtt_control_load_config( void );
 
 #endif // _MQTT_CONTROL_H
