@@ -74,6 +74,8 @@ void mqtt_control_main_setup( uint32_t tile_num ) {
 	lv_style_set_pad_top(&mqtt_control_label_style, LV_STATE_DEFAULT, 3);
 	lv_style_set_pad_left(&mqtt_control_label_style, LV_STATE_DEFAULT, 10);
 	lv_style_set_pad_right(&mqtt_control_label_style, LV_STATE_DEFAULT, 10);
+    lv_style_set_bg_color( &mqtt_control_label_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &mqtt_control_label_style, LV_STATE_DEFAULT, LV_OPA_50 );
 
     lv_style_copy(&mqtt_control_button_style, ws_get_button_style());
     lv_style_set_text_font(&mqtt_control_button_style, LV_STATE_DEFAULT, &Ubuntu_16px);
@@ -84,8 +86,7 @@ void mqtt_control_main_setup( uint32_t tile_num ) {
     mqtt_control_page_setup();
 
     mqtt_register_cb( MQTT_OFF | MQTT_CONNECTED | MQTT_DISCONNECTED , mqtt_control_mqtt_event_cb, "mqtt control" );
-    //TODO: Find out why it freezes within the callback
-    //mqtt_register_message_cb( mqtt_control_message_cb );
+    mqtt_register_message_cb( mqtt_control_message_cb );
 }
 
 void mqtt_control_page_setup() {
@@ -100,20 +101,20 @@ void mqtt_control_page_setup() {
     mqtt_control_config_t *mqtt_control_config = mqtt_control_get_config();
     for (size_t i = 0; i < MQTT_CONTROL_ITEMS; i++)
     {
-        mqtt_control_item_t mqtt_control_item = mqtt_control_config->items[ i ];
-        if (!strlen(mqtt_control_item.label) || !strlen(mqtt_control_item.topic)) continue;
+        if (mqtt_control_config->items[ i ].type == MQTT_CONTROL_TYPE_NONE) continue;
+        if (!strlen(mqtt_control_config->items[ i ].label) || !strlen(mqtt_control_config->items[ i ].topic)) continue;
 
-        switch (mqtt_control_item.type) {
+        switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_LABEL:
-                mqtt_control_label_setup(i, &mqtt_control_item);
-                mqtt_subscribe(mqtt_control_item.topic);
+                mqtt_control_label_setup(i, &mqtt_control_config->items[ i ]);
+                mqtt_subscribe(mqtt_control_config->items[ i ].topic);
                 break;
             case MQTT_CONTROL_TYPE_BUTTON:
-                mqtt_control_button_setup(i, &mqtt_control_item);
+                mqtt_control_button_setup(i, &mqtt_control_config->items[ i ]);
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
-                mqtt_control_switch_setup(i, &mqtt_control_item);
-                mqtt_subscribe(mqtt_control_item.topic);
+                mqtt_control_switch_setup(i, &mqtt_control_config->items[ i ]);
+                mqtt_subscribe(mqtt_control_config->items[ i ].topic);
                 break;
         }
     }
@@ -173,16 +174,16 @@ void mqtt_control_page_refresh() {
     mqtt_control_config_t *mqtt_control_config = mqtt_control_get_config();
     for (size_t i = 0; i < MQTT_CONTROL_ITEMS; i++)
     {
-        mqtt_control_item_t mqtt_control_item = mqtt_control_config->items[ i ];
-        if (mqtt_control_item.type == MQTT_CONTROL_TYPE_NONE) continue;
-        if (!strlen(mqtt_control_item.topic)) continue;
+        if (mqtt_control_config->items[ i ].type == MQTT_CONTROL_TYPE_NONE) continue;
+        if (!mqtt_control_config->items[ i ].gui_object) { log_e("gui_object is missing"); continue; }
+        if (!strlen(mqtt_control_config->items[ i ].topic)) continue;
 
-        switch (mqtt_control_item.type) {
+        switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_LABEL:
-                mqtt_subscribe(mqtt_control_item.topic);
+                mqtt_subscribe(mqtt_control_config->items[ i ].topic);
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
-                mqtt_subscribe(mqtt_control_item.topic);
+                mqtt_subscribe(mqtt_control_config->items[ i ].topic);
                 break;
         }
     }
@@ -194,16 +195,16 @@ void mqtt_control_page_clean() {
     mqtt_control_config_t *mqtt_control_config = mqtt_control_get_config();
     for (size_t i = 0; i < MQTT_CONTROL_ITEMS; i++)
     {
-        mqtt_control_item_t mqtt_control_item = mqtt_control_config->items[ i ];
-        if (mqtt_control_item.type == MQTT_CONTROL_TYPE_NONE) continue;
-        if (!strlen(mqtt_control_item.topic)) continue;
+        if (mqtt_control_config->items[ i ].type == MQTT_CONTROL_TYPE_NONE) continue;
+        if (!mqtt_control_config->items[ i ].gui_object) { log_e("gui_object is missing"); continue; }
+        if (!strlen(mqtt_control_config->items[ i ].topic)) continue;
 
-        switch (mqtt_control_item.type) {
+        switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_LABEL:
-                mqtt_unsubscribe(mqtt_control_item.topic);
+                mqtt_unsubscribe(mqtt_control_config->items[ i ].topic);
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
-                mqtt_unsubscribe(mqtt_control_item.topic);
+                mqtt_unsubscribe(mqtt_control_config->items[ i ].topic);
                 break;
         }
     }
@@ -236,14 +237,14 @@ static void mqtt_control_message_cb(char *topic, char *payload, size_t length) {
     mqtt_control_config_t *mqtt_control_config = mqtt_control_get_config();
     for (size_t i = 0; i < MQTT_CONTROL_ITEMS; i++)
     {
-        mqtt_control_item_t mqtt_control_item = mqtt_control_config->items[ i ];
-        if (mqtt_control_item.type == MQTT_CONTROL_TYPE_NONE) continue;
-        if (!strlen(mqtt_control_item.topic)) continue;
+        if (mqtt_control_config->items[ i ].type == MQTT_CONTROL_TYPE_NONE) continue;
+        if (!mqtt_control_config->items[ i ].gui_object) { log_e("gui_object is missing"); continue; }
+        if (!strlen(mqtt_control_config->items[ i ].topic)) continue;
 
-        if (mqtt_control_item.type != MQTT_CONTROL_TYPE_LABEL &&
-            mqtt_control_item.type != MQTT_CONTROL_TYPE_SWITCH) continue;
+        if (mqtt_control_config->items[ i ].type != MQTT_CONTROL_TYPE_LABEL &&
+            mqtt_control_config->items[ i ].type != MQTT_CONTROL_TYPE_SWITCH) continue;
 
-        if (strncmp(topic, mqtt_control_item.topic, strlen(mqtt_control_item.topic)) != 0) continue;
+        if (strncmp(topic, mqtt_control_config->items[ i ].topic, strlen(mqtt_control_config->items[ i ].topic)) != 0) continue;
 
         char *payload_msg = NULL;
         payload_msg = (char*)CALLOC( length + 1, 1 );
@@ -253,16 +254,16 @@ static void mqtt_control_message_cb(char *topic, char *payload, size_t length) {
         }
         memcpy( payload_msg, payload, length );
 
-        switch (mqtt_control_item.type) {
+        switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_LABEL:
-                lv_label_set_text(mqtt_control_item.gui_object, payload_msg);
+                lv_label_set_text(mqtt_control_config->items[ i ].gui_object, payload_msg);
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
                 if (strncmp(payload_msg, "on", 2) == 0) {
-                    lv_switch_on(mqtt_control_item.gui_object, LV_ANIM_OFF);
+                    lv_switch_on(mqtt_control_config->items[ i ].gui_object, LV_ANIM_OFF);
                 }
                 if (strncmp(payload_msg, "off", 3) == 0) {
-                    lv_switch_off(mqtt_control_item.gui_object, LV_ANIM_OFF);
+                    lv_switch_off(mqtt_control_config->items[ i ].gui_object, LV_ANIM_OFF);
                 }
                 break;
         }
@@ -289,25 +290,24 @@ static void mqtt_control_item_cb( lv_obj_t * obj, lv_event_t event ) {
     mqtt_control_config_t *mqtt_control_config = mqtt_control_get_config();
     for (size_t i = 0; i < MQTT_CONTROL_ITEMS; i++)
     {
-        mqtt_control_item_t mqtt_control_item = mqtt_control_config->items[ i ];
-        if (mqtt_control_item.type == MQTT_CONTROL_TYPE_NONE) continue;
-        if (!strlen(mqtt_control_item.topic)) continue;
+        if (mqtt_control_config->items[ i ].type == MQTT_CONTROL_TYPE_NONE) continue;
+        if (!mqtt_control_config->items[ i ].gui_object) { log_e("gui_object is missing"); continue; }
+        if (!strlen(mqtt_control_config->items[ i ].topic)) continue;
 
-        if (mqtt_control_item.type != MQTT_CONTROL_TYPE_BUTTON &&
-            mqtt_control_item.type != MQTT_CONTROL_TYPE_SWITCH) continue;
+        if (mqtt_control_config->items[ i ].type != MQTT_CONTROL_TYPE_BUTTON &&
+            mqtt_control_config->items[ i ].type != MQTT_CONTROL_TYPE_SWITCH) continue;
 
-        //TODO: Find the best way to compare the correct lv_obj
-        if (obj != mqtt_control_item.gui_object) continue;
+        if (obj != mqtt_control_config->items[ i ].gui_object) continue;
 
-        switch (mqtt_control_item.type) {
+        switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_BUTTON:
-                mqtt_publish(mqtt_control_item.topic, false, "1");
+                mqtt_publish(mqtt_control_config->items[ i ].topic, false, "1");
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
-                if (lv_switch_get_state(mqtt_control_item.gui_object)) {
-                    mqtt_publish(mqtt_control_item.topic, false, "1");
+                if (lv_switch_get_state(mqtt_control_config->items[ i ].gui_object)) {
+                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "1");
                 } else {
-                    mqtt_publish(mqtt_control_item.topic, false, "0");
+                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "0");
                 }
                 break;
         }
