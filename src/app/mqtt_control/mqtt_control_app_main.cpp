@@ -41,11 +41,12 @@ lv_obj_t *mqtt_control_main_tile = NULL;
 lv_style_t mqtt_control_main_style;
 lv_obj_t *mqtt_control_page = NULL;
 lv_style_t mqtt_control_page_style;
+lv_style_t mqtt_control_title_style;
 lv_style_t mqtt_control_label_style;
 lv_style_t mqtt_control_button_style;
 lv_style_t mqtt_control_switch_style;
 
-LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_12px);
 
 static void exit_mqtt_control_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static bool mqtt_control_mqtt_event_cb( EventBits_t event, void *arg );
@@ -68,20 +69,23 @@ void mqtt_control_main_setup( uint32_t tile_num ) {
 
     lv_obj_t * exit_btn = wf_add_exit_button( mqtt_control_main_tile, exit_mqtt_control_main_event_cb, &mqtt_control_main_style );
     lv_obj_align(exit_btn, mqtt_control_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    
+    lv_style_copy(&mqtt_control_title_style, ws_get_label_style());
+    lv_style_set_text_font(&mqtt_control_title_style, LV_STATE_DEFAULT, &Ubuntu_12px);
 
     lv_style_copy(&mqtt_control_label_style, ws_get_button_style());
-    lv_style_set_text_font(&mqtt_control_label_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-	lv_style_set_pad_top(&mqtt_control_label_style, LV_STATE_DEFAULT, 3);
-	lv_style_set_pad_left(&mqtt_control_label_style, LV_STATE_DEFAULT, 10);
-	lv_style_set_pad_right(&mqtt_control_label_style, LV_STATE_DEFAULT, 10);
+    lv_style_set_text_font(&mqtt_control_label_style, LV_STATE_DEFAULT, &Ubuntu_12px);
+	lv_style_set_pad_top(&mqtt_control_label_style, LV_STATE_DEFAULT, 2);
+	lv_style_set_pad_left(&mqtt_control_label_style, LV_STATE_DEFAULT, 6);
+	lv_style_set_pad_right(&mqtt_control_label_style, LV_STATE_DEFAULT, 6);
     lv_style_set_bg_color( &mqtt_control_label_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &mqtt_control_label_style, LV_STATE_DEFAULT, LV_OPA_50 );
 
     lv_style_copy(&mqtt_control_button_style, ws_get_button_style());
-    lv_style_set_text_font(&mqtt_control_button_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_style_set_text_font(&mqtt_control_button_style, LV_STATE_DEFAULT, &Ubuntu_12px);
 
     lv_style_copy(&mqtt_control_switch_style, ws_get_switch_style());
-    lv_style_set_text_font(&mqtt_control_switch_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_style_set_text_font(&mqtt_control_switch_style, LV_STATE_DEFAULT, &Ubuntu_12px);
 
     mqtt_control_page_setup();
 
@@ -122,32 +126,32 @@ void mqtt_control_page_setup() {
 
 void mqtt_control_label_setup(size_t index, mqtt_control_item_t *mqtt_control_item) {
     mqtt_control_item->gui_label = lv_label_create(mqtt_control_page, NULL);
-	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, ws_get_label_style());
+	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, &mqtt_control_title_style);
 	lv_label_set_text(mqtt_control_item->gui_label, mqtt_control_item->label);
 	lv_label_set_long_mode(mqtt_control_item->gui_label, LV_LABEL_LONG_CROP);
-	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_label, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_label, 100, 20);
 
     mqtt_control_item->gui_object = lv_label_create(mqtt_control_page, NULL);
 	lv_obj_add_style(mqtt_control_item->gui_object, LV_OBJ_PART_MAIN, &mqtt_control_label_style);
 	lv_label_set_long_mode(mqtt_control_item->gui_object, LV_LABEL_LONG_SROLL_CIRC);
 	lv_label_set_text(mqtt_control_item->gui_object, "");
-	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_object, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_object, 100, 20);
 }
 
 void mqtt_control_button_setup(size_t index, mqtt_control_item_t *mqtt_control_item) {
     mqtt_control_item->gui_label = lv_label_create(mqtt_control_page, NULL);
-	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, ws_get_label_style());
+	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, &mqtt_control_title_style);
 	lv_label_set_text(mqtt_control_item->gui_label, mqtt_control_item->label);
 	lv_label_set_long_mode(mqtt_control_item->gui_label, LV_LABEL_LONG_CROP);
-	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_label, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_label, 100, 20);
 
     mqtt_control_item->gui_object = lv_btn_create(mqtt_control_page, NULL);
 	lv_obj_add_style(mqtt_control_item->gui_object, LV_OBJ_PART_MAIN, &mqtt_control_button_style);
-	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_object, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_object, 100, 20);
 	lv_btn_set_checkable(mqtt_control_item->gui_object, false);
 	lv_btn_set_fit(mqtt_control_item->gui_object, LV_FIT_NONE);
     lv_obj_set_event_cb(mqtt_control_item->gui_object, mqtt_control_button_event_cb );
@@ -155,16 +159,16 @@ void mqtt_control_button_setup(size_t index, mqtt_control_item_t *mqtt_control_i
 
 void mqtt_control_switch_setup(size_t index, mqtt_control_item_t *mqtt_control_item) {
     mqtt_control_item->gui_label = lv_label_create(mqtt_control_page, NULL);
-	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, ws_get_label_style());
+	lv_obj_add_style(mqtt_control_item->gui_label, LV_OBJ_PART_MAIN, &mqtt_control_title_style);
 	lv_label_set_text(mqtt_control_item->gui_label, mqtt_control_item->label);
 	lv_label_set_long_mode(mqtt_control_item->gui_label, LV_LABEL_LONG_CROP);
-	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_label, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_label, 0, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_label, 100, 20);
 
     mqtt_control_item->gui_object = lv_switch_create(mqtt_control_page, NULL);
 	lv_obj_add_style(mqtt_control_item->gui_object, LV_OBJ_PART_MAIN, &mqtt_control_switch_style);
-	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 35 * index);
-	lv_obj_set_size(mqtt_control_item->gui_object, 100, 25);
+	lv_obj_set_pos(mqtt_control_item->gui_object, 110, 30 * index);
+	lv_obj_set_size(mqtt_control_item->gui_object, 100, 20);
     lv_obj_set_event_cb(mqtt_control_item->gui_object, mqtt_control_switch_event_cb );
 }
 
