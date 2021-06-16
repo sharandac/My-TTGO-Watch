@@ -46,6 +46,18 @@ callback_t *rtcctl_callback = NULL;
 
 void rtcctl_setup( void ) {
 
+    /**
+     * fix issue #276
+     * disable timer and clk if enabled from older projects
+     */
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    if ( ttgo->rtc->isTimerActive() || ttgo->rtc->isTimerEnable() ) {
+        log_i("clear/disable rtc timer");
+        ttgo->rtc->clearTimer();
+        ttgo->rtc->disableTimer();
+    }
+    ttgo->rtc->disableCLK();
+
     pinMode( RTC_INT_PIN, INPUT_PULLUP);
     attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
 
