@@ -260,7 +260,9 @@ static void mqtt_control_message_cb(char *topic, char *payload, size_t length) {
 
         switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_LABEL:
-                lv_label_set_text(mqtt_control_config->items[ i ].gui_object, payload_msg);
+                char val[32];
+                snprintf( val, sizeof(val), mqtt_control_config->items[ i ].format, payload_msg );
+                lv_label_set_text(mqtt_control_config->items[ i ].gui_object, val);
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
                 if (strncmp(payload_msg, "on", 2) == 0) {

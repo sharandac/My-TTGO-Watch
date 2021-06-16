@@ -3,7 +3,8 @@
     {
         "type": 1,
         "label": "Example Label",
-        "topic": "something/label"
+        "topic": "something/label",
+        "format": "%s"
     },
     {
         "type": 2,

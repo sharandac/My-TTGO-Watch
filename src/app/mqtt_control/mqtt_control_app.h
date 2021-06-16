@@ -39,6 +39,7 @@
         uint8_t type = MQTT_CONTROL_TYPE_NONE;
         char label[32]="";
         char topic[64]="";
+        char format[16]="%s";
         lv_obj_t *gui_label;
         lv_obj_t *gui_object;
     } mqtt_control_item_t;

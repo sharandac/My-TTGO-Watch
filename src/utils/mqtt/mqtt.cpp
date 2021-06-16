@@ -127,7 +127,6 @@ void mqtt_init( void ) {
 
 void mqtt_start() {
   if (!mqtt_setup) return;
-  if (mqtt_run) return;
   mqtt_run = true;
 
   if ( !mqtt_client.connected() ) {

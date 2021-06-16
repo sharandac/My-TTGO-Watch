@@ -126,6 +126,12 @@ void mqtt_control_load_config( void ) {
                 strlcpy( mqtt_control_config.items[ i ].label   , doc["items"][ i ]["label"], sizeof( mqtt_control_config.items[ i ].label ) );
                 strlcpy( mqtt_control_config.items[ i ].topic   , doc["items"][ i ]["topic"], sizeof( mqtt_control_config.items[ i ].topic ) );
 
+                if (doc["items"][ i ].containsKey("format") && strlen(doc["items"][ i ]["format"])) {
+                    strlcpy( mqtt_control_config.items[ i ].format   , doc["items"][ i ]["format"], sizeof( mqtt_control_config.items[ i ].format ) );
+                } else {
+                    strlcpy( mqtt_control_config.items[ i ].format, "%s", sizeof( mqtt_control_config.items[ i ].format ) );
+                }
+
                 if (mqtt_control_config.items->gui_label){
                     lv_obj_clean(mqtt_control_config.items->gui_label);
                     lv_obj_del(mqtt_control_config.items->gui_label);
