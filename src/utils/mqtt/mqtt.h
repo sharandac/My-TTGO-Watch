@@ -22,17 +22,17 @@
 #ifndef _MQTT_H
     #define _MQTT_H
     
-    #include <AsyncMqttClient.h>
+    #include <PubSubClient.h>
     #include "hardware/callback.h"
     #include "stdint.h"
 
-    typedef std::function<void(char* topic, char* payload, size_t len)> MqttMessageCallback;
+    typedef std::function<void(char* topic, byte* payload, size_t len)> MqttMessageCallback;
     enum mqtt_event_t {
-        MQTT_OFF                    = _BV(0),
-        MQTT_CONNECT                = _BV(1),
-        MQTT_CONNECTED              = _BV(2),
-        MQTT_DISCONNECT             = _BV(3),
-        MQTT_DISCONNECTED           = _BV(4)
+        MQTTCTL_OFF                    = _BV(0),
+        MQTTCTL_CONNECT                = _BV(1),
+        MQTTCTL_CONNECTED              = _BV(2),
+        MQTTCTL_DISCONNECT             = _BV(3),
+        MQTTCTL_DISCONNECTED           = _BV(4)
     };
 
     /**
