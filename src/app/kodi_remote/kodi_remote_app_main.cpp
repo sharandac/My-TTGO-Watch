@@ -520,7 +520,7 @@ int kodi_remote_publish(const char* method, const char* params, SpiRamJsonDocume
     publish_client.setAuthorization( kodi_remote_config->user, kodi_remote_config->pass );
     httpcode = publish_client.POST((uint8_t*)payload, strlen(payload));
 
-    if (doc != NULL && doc != nullptr) {
+    if (httpcode > 200 && httpcode < 300 && doc != NULL && doc != nullptr) {
         DeserializationError error = deserializeJson( *(doc), publish_client.getStream() );
         if (error) {
             log_e("kodi_remote deserializeJson() failed: %s", error.c_str() );
