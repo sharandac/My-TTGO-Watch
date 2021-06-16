@@ -119,7 +119,7 @@ void mqtt_player_main_setup( uint32_t tile_num ) {
     lv_obj_t *mqtt_player_volume_up = wf_add_image_button( mqtt_player_main_tile, up_32px, mqtt_player_volume_up_event_cb, &mqtt_player_main_style );
     lv_obj_align( mqtt_player_volume_up, mqtt_player_speaker, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
 
-    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECTED | MQTTCTL_DISCONNECTED , mqtt_player_mqtt_event_cb, "mqtt player" );
+    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECT | MQTTCTL_DISCONNECT , mqtt_player_mqtt_event_cb, "mqtt player" );
     mqtt_register_message_cb( mqtt_player_message_cb );
 
     // create an task that runs every second
@@ -128,23 +128,23 @@ void mqtt_player_main_setup( uint32_t tile_num ) {
 
 static bool mqtt_player_mqtt_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case MQTTCTL_OFF:          mqtt_player_state = false;
-                                   mqtt_player_app_hide_indicator();
-                                   break;
-        case MQTTCTL_CONNECTED:    mqtt_player_state = true;
-                                   {
-                                       char mqtt_player_subscribe_topic[34];
-                                       mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
-                                       snprintf( mqtt_player_subscribe_topic, sizeof( mqtt_player_subscribe_topic ), "%s/#", mqtt_player_config->topic_base );
-                                       mqtt_subscribe( mqtt_player_subscribe_topic );
-                                   }
-                                   mqtt_player_app_set_indicator( ICON_INDICATOR_OK );
-                                   break;
-        case MQTTCTL_DISCONNECTED: mqtt_player_state = false;
-                                   mqtt_player_app_set_indicator( ICON_INDICATOR_FAIL );
-                                   lv_label_set_text( mqtt_player_artist, "" );
-                                   lv_label_set_text( mqtt_player_title, "" );
-                                   break;
+        case MQTTCTL_OFF:        mqtt_player_state = false;
+                                 mqtt_player_app_hide_indicator();
+                                 break;
+        case MQTTCTL_CONNECT:    mqtt_player_state = true;
+                                 {
+                                     char mqtt_player_subscribe_topic[34];
+                                     mqtt_player_config_t *mqtt_player_config = mqtt_player_get_config();
+                                     snprintf( mqtt_player_subscribe_topic, sizeof( mqtt_player_subscribe_topic ), "%s/#", mqtt_player_config->topic_base );
+                                     mqtt_subscribe( mqtt_player_subscribe_topic );
+                                 }
+                                 mqtt_player_app_set_indicator( ICON_INDICATOR_OK );
+                                 break;
+        case MQTTCTL_DISCONNECT: mqtt_player_state = false;
+                                 mqtt_player_app_set_indicator( ICON_INDICATOR_FAIL );
+                                 lv_label_set_text( mqtt_player_artist, "" );
+                                 lv_label_set_text( mqtt_player_title, "" );
+                                 break;
     }
     return( true );
 }

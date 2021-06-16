@@ -178,32 +178,32 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( power_label, "n/a" );
     lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECTED | MQTTCTL_DISCONNECTED , powermeter_mqtt_event_cb, "powermeter" );
+    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECT | MQTTCTL_DISCONNECT , powermeter_mqtt_event_cb, "powermeter" );
     mqtt_register_message_cb( powermeter_message_cb );
 }
 
 bool powermeter_mqtt_event_cb( EventBits_t event, void *arg ) {
     powermeter_config_t *powermeter_config = powermeter_get_config();
     switch( event ) {
-        case MQTTCTL_OFF:          app_hide_indicator( powermeter_get_app_icon() );
-                                   widget_hide_indicator( powermeter_get_widget_icon() );
-                                   widget_set_label( powermeter_get_widget_icon(), "n/a" );
-                                   break;
-        case MQTTCTL_CONNECTED:    if (powermeter_config->autoconnect) {
-                                       mqtt_subscribe( powermeter_config->topic );
-                                       app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_OK );
-                                       widget_set_indicator( powermeter_get_widget_icon(), ICON_INDICATOR_OK );
-                                   } else {
-                                       app_hide_indicator( powermeter_get_app_icon() );
-                                       widget_hide_indicator( powermeter_get_widget_icon() );
-                                       widget_set_label( powermeter_get_widget_icon(), "n/a" );
-                                   }
-                                   break;
-        case MQTTCTL_DISCONNECTED: if (powermeter_config->autoconnect) {
-                                       app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_FAIL );
-                                       widget_set_indicator( powermeter_get_widget_icon() , ICON_INDICATOR_FAIL );
-                                   }
-                                   break;
+        case MQTTCTL_OFF:        app_hide_indicator( powermeter_get_app_icon() );
+                                 widget_hide_indicator( powermeter_get_widget_icon() );
+                                 widget_set_label( powermeter_get_widget_icon(), "n/a" );
+                                 break;
+        case MQTTCTL_CONNECT:    if (powermeter_config->autoconnect) {
+                                     mqtt_subscribe( powermeter_config->topic );
+                                     app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_OK );
+                                     widget_set_indicator( powermeter_get_widget_icon(), ICON_INDICATOR_OK );
+                                 } else {
+                                     app_hide_indicator( powermeter_get_app_icon() );
+                                     widget_hide_indicator( powermeter_get_widget_icon() );
+                                     widget_set_label( powermeter_get_widget_icon(), "n/a" );
+                                 }
+                                 break;
+        case MQTTCTL_DISCONNECT: if (powermeter_config->autoconnect) {
+                                     app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_FAIL );
+                                     widget_set_indicator( powermeter_get_widget_icon() , ICON_INDICATOR_FAIL );
+                                 }
+                                 break;
     }
     return( true );
 }

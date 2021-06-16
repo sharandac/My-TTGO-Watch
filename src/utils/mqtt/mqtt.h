@@ -30,9 +30,7 @@
     enum mqtt_event_t {
         MQTTCTL_OFF                    = _BV(0),
         MQTTCTL_CONNECT                = _BV(1),
-        MQTTCTL_CONNECTED              = _BV(2),
-        MQTTCTL_DISCONNECT             = _BV(3),
-        MQTTCTL_DISCONNECTED           = _BV(4)
+        MQTTCTL_DISCONNECT             = _BV(2)
     };
 
     /**

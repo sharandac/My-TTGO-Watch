@@ -29,12 +29,12 @@
 
 bool mqtt_setup = false;
 bool mqtt_run = false;
-bool mqtt_needs_publish = false;
 bool mqtt_connected = false;
+bool mqtt_needs_publish = false;
 EventGroupHandle_t mqtt_status = NULL;
 portMUX_TYPE DRAM_ATTR mqttMux = portMUX_INITIALIZER_UNLOCKED;
 callback_t *mqtt_callback = NULL;
-lv_task_t * _mqtt_main_task;
+lv_task_t * mqtt_main_task;
 
 WiFiClient espClient;
 PubSubClient mqtt_client( espClient );
@@ -46,40 +46,7 @@ bool mqtt_get_event( EventBits_t bits );
 void mqtt_clear_event( EventBits_t bits );
 std::vector<MqttMessageCallback> _mqtt_message_callbacks;
 
-void _mqtt_connected() {
-  log_d("mqtt connected");
-  mqtt_connected = true;
-
-  mqtt_publish_state();
-  mqtt_needs_publish = true;
-
-  mqtt_set_event( MQTTCTL_CONNECT );
-  mqtt_clear_event( MQTTCTL_DISCONNECT | MQTTCTL_DISCONNECTED | MQTTCTL_OFF );
-  mqtt_send_event_cb( MQTTCTL_CONNECT, (void *)NULL );
-}
-
-void _mqtt_disconnected() {
-  log_d("mqtt disconnected");
-  mqtt_connected = false;
-
-  mqtt_set_event( MQTTCTL_DISCONNECT );
-  mqtt_clear_event( MQTTCTL_CONNECT | MQTTCTL_CONNECTED | MQTTCTL_OFF );
-  mqtt_send_event_cb( MQTTCTL_DISCONNECT, (void *)NULL );
-}
-
-void _mqtt_connection() {
-  bool connected = mqtt_client.connected();
-
-  if (!mqtt_connected && connected){
-    _mqtt_connected();
-  }
-  
-  if (mqtt_connected && !connected){
-    _mqtt_disconnected();
-  }
-}
-
-void _mqtt_message(char* topic, byte* payload, unsigned int length) {
+void mqtt_message_event_cb(char* topic, byte* payload, unsigned int length) {
   log_d("mqtt message: %s -> %s", topic, payload);
   for (auto callback : _mqtt_message_callbacks) callback(topic, payload, length);
 }
@@ -101,19 +68,24 @@ bool mqtt_pmuctl_event_cb( EventBits_t event, void *arg ) {
 void mqtt_loop( lv_task_t * task ) {
   if (!mqtt_setup) return;
 
-  _mqtt_connection();
-  mqtt_client.loop();
+  if (!mqtt_connected && mqtt_client.connected()) {
+    mqtt_connected = true;
+    mqtt_needs_publish = true;
+    mqtt_publish_state();
 
-  if (mqtt_run && mqtt_get_event( MQTTCTL_CONNECT )) {
-    mqtt_set_event( MQTTCTL_CONNECTED );
-    mqtt_clear_event( MQTTCTL_CONNECT );
-    mqtt_send_event_cb( MQTTCTL_CONNECTED, (void *)NULL );
-  }
-  if (mqtt_run && mqtt_get_event( MQTTCTL_DISCONNECT )) {
-    mqtt_set_event( MQTTCTL_DISCONNECTED );
+    mqtt_set_event( MQTTCTL_CONNECT );
     mqtt_clear_event( MQTTCTL_DISCONNECT );
-    mqtt_send_event_cb( MQTTCTL_DISCONNECTED, (void *)NULL );
+    mqtt_send_event_cb( MQTTCTL_CONNECT, (void *)NULL );
   }
+  
+  if (mqtt_connected && !mqtt_client.connected()) {
+    mqtt_connected = false;
+    mqtt_set_event( MQTTCTL_DISCONNECT );
+    mqtt_clear_event( MQTTCTL_CONNECT );
+    mqtt_send_event_cb( MQTTCTL_DISCONNECT, (void *)NULL );
+  }
+
+  mqtt_client.loop();
 
   if (mqtt_run && mqtt_connected && mqtt_needs_publish) {
     mqtt_needs_publish = false;
@@ -134,7 +106,7 @@ void mqtt_loop( lv_task_t * task ) {
 void mqtt_init( void ) {
   mqtt_status = xEventGroupCreate();
   mqtt_set_event( MQTTCTL_OFF );
-  _mqtt_main_task = lv_task_create( mqtt_loop, 250, LV_TASK_PRIO_MID, NULL );
+  mqtt_main_task = lv_task_create( mqtt_loop, 100, LV_TASK_PRIO_MID, NULL );
 }
 
 void mqtt_start() {
@@ -153,7 +125,7 @@ void mqtt_start( const char *id, bool ssl, const char *server, int32_t port, con
   if ( !mqtt_client.connected() ) {
     log_i("use mqtt server:port as %s: %s:%d", id, server, port );
 
-    if (!mqtt_setup) mqtt_client.setCallback(_mqtt_message);
+    if (!mqtt_setup) mqtt_client.setCallback(mqtt_message_event_cb);
 
     char topic[64];
     strlcpy( clientId, id, strlen( id ) + 1 );
@@ -194,7 +166,7 @@ void mqtt_unsubscribe(const char* topic) {
 }
 
 void mqtt_publish(const char* topic, bool retain, const char* payload) {
-  mqtt_client.publish(topic, 0, retain, payload);
+  mqtt_client.publish(topic, payload, retain);
 }
 
 void mqtt_publish_state() {
@@ -235,7 +207,7 @@ void mqtt_publish_ambient_temperature() {
   char payload[6];
   snprintf(payload, sizeof(payload), "%.2f", ttgo->bma->temperature());
 
-  mqtt_client.publish(topic, payload, true);
+  mqtt_client.publish(topic, payload, false);
 }
 
 void mqtt_publish_power_temperature() {
@@ -247,7 +219,7 @@ void mqtt_publish_power_temperature() {
   char payload[6];
   snprintf(payload, sizeof(payload), "%.2f", ttgo->power->getTemp());
 
-  mqtt_client.publish(topic, payload, true);
+  mqtt_client.publish(topic, payload, false);
 }
 
 void mqtt_publish_heap() {
@@ -257,7 +229,7 @@ void mqtt_publish_heap() {
   char payload[22];
   snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreeHeap(), ESP.getHeapSize());
 
-  mqtt_client.publish(topic, payload, true);
+  mqtt_client.publish(topic, payload, false);
 }
 
 void mqtt_publish_psram() {
@@ -267,7 +239,7 @@ void mqtt_publish_psram() {
   char payload[22];
   snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreePsram(), ESP.getPsramSize());
 
-  mqtt_client.publish(topic, payload, true);
+  mqtt_client.publish(topic, payload, false);
 }
 
 void mqtt_publish_sketch() {
@@ -277,7 +249,7 @@ void mqtt_publish_sketch() {
   char payload[22];
   snprintf(payload, sizeof(payload), "%d/%d", ESP.getFreeSketchSpace(), ESP.getSketchSize());
 
-  mqtt_client.publish(topic, payload, true);
+  mqtt_client.publish(topic, payload, false);
 }
 
 bool mqtt_get_connected() {

@@ -89,7 +89,7 @@ void mqtt_control_main_setup( uint32_t tile_num ) {
 
     mqtt_control_page_setup();
 
-    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECTED | MQTTCTL_DISCONNECTED , mqtt_control_mqtt_event_cb, "mqtt control" );
+    mqtt_register_cb( MQTTCTL_OFF | MQTTCTL_CONNECT | MQTTCTL_DISCONNECT , mqtt_control_mqtt_event_cb, "mqtt control" );
     mqtt_register_message_cb( mqtt_control_message_cb );
 }
 
@@ -220,16 +220,16 @@ void mqtt_control_page_clean() {
 
 static bool mqtt_control_mqtt_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case MQTTCTL_OFF:          mqtt_control_state = false;
-                                   mqtt_control_app_hide_indicator();
-                                   break;
-        case MQTTCTL_CONNECTED:    mqtt_control_state = true;
-                                   mqtt_control_app_set_indicator( ICON_INDICATOR_OK );
-                                   mqtt_control_page_refresh();
-                                   break;
-        case MQTTCTL_DISCONNECTED: mqtt_control_state = false;
-                                   mqtt_control_app_set_indicator( ICON_INDICATOR_FAIL );
-                                   break;
+        case MQTTCTL_OFF:        mqtt_control_state = false;
+                                 mqtt_control_app_hide_indicator();
+                                 break;
+        case MQTTCTL_CONNECT:    mqtt_control_state = true;
+                                 mqtt_control_app_set_indicator( ICON_INDICATOR_OK );
+                                 mqtt_control_page_refresh();
+                                 break;
+        case MQTTCTL_DISCONNECT: mqtt_control_state = false;
+                                 mqtt_control_app_set_indicator( ICON_INDICATOR_FAIL );
+                                 break;
     }
     return( true );
 }
