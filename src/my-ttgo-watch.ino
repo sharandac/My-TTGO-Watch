@@ -31,6 +31,7 @@
 #include "hardware/powermgm.h"
 
 #include "app/weather/weather.h"
+#include "app/weather_station/weather_station_app.h"
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/alarm_clock/alarm_clock.h"
 //#include "app/sailing/sailing.h"
@@ -86,6 +87,7 @@ void setup() {
     calc_app_setup();
     //gps_status_setup();
     //sailing_setup();
+    weather_station_app_setup();
     osmand_app_setup();
     tiltmouse_app_setup();
     IRController_setup();
