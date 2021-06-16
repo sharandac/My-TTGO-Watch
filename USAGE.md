@@ -7,6 +7,7 @@ On startup you see the main screen (time tile). It show the time and widgets.
 Widgets are:
 
 * the current weather (if correctly configured).
+* the next alarm.
 * the notifications.
 
 # Screen Navigation
@@ -25,6 +26,10 @@ A subset of settings can be accessed via a swipe from the top of the screen.
 ![screenshot](images/screen4.png)
 
 Once a setting is selected, you can leave the form with the exit button.
+
+## Battery
+
+Battery status.
 
 ## Display
 
@@ -68,6 +73,13 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 
 ![screenshot](images/time.png)
 
+## Updates
+
+It is possible to update over the air.
+
+![screenshot](images/update_1.png)
+![screenshot](images/update_2.png)
+
 ## Utilities
 
 * Format
@@ -87,6 +99,30 @@ The bluetooth notification work with [gadgetbridge](https://gadgetbridge.org) ve
 ## GPS
 
 ![screenshot](images/screen11.png)
+
+## Watchfaces
+
+If you want to customize your own watchface, copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and decompress it with the watchface app.
+
+A `watchface.tar.gz` includes the following files and a extra `watchface_theme.json`. Some example:
+
+![dial](images/watchface/watchface_dial.png)
+![hour](images/watchface/watchface_hour.png)
+![min](images/watchface/watchface_min.png)
+![sec](images/watchface/watchface_sec.png)
+![hour shadow](images/watchface/watchface_hour_s.png)
+![min shadow](images/watchface/watchface_min_s.png)
+![sec shadow](images/watchface/watchface_sec_s.png)
+
+In the file `watchface_theme.json` you will describe the position of information via the `label` or 'image' node. See Cf. [here](WATCHFACE.md) for a node list.
+Here you can find some finish watchface packages:
+
+[![swiss clock](images/watchface/swiss/watchface_theme_prev.png)](images/watchface/swiss/watchface.tar.gz)
+[![undone clock](images/watchface/undone/watchface_theme_prev.png)](images/watchface/undone/watchface.tar.gz)
+[![star trek clock](images/watchface/startrek/watchface_theme_prev.png)](images/watchface/startrek/watchface.tar.gz)
+[![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)](images/watchface/rainbow/watchface.tar.gz)
+[![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
+[![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
 
 # Applications
 
@@ -121,29 +157,16 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 
 ## watchface
 
-If you want to customize your own watchface, copy a ![watchface.tar.gz](images/watchface/undone/watchface.tar.gz) to your watch and decompress it with the watchface app.
-
-A `watchface.tar.gz` includes the following files and a extra `watchface_theme.json`. Some example:
-
-![dial](images/watchface/watchface_dial.png)
-![hour](images/watchface/watchface_hour.png)
-![min](images/watchface/watchface_min.png)
-![sec](images/watchface/watchface_sec.png)
-![hour shadow](images/watchface/watchface_hour_s.png)
-![min shadow](images/watchface/watchface_min_s.png)
-![sec shadow](images/watchface/watchface_sec_s.png)
-
-In the file `watchface_theme.json` you will describe the position of information via the `label` or 'image' node. See Cf. [here](WATCHFACE.md) for a node list.
-Here you can find some finish watchface packages:
-
-[![swiss clock](images/watchface/swiss/watchface_theme_prev.png)](images/watchface/swiss/watchface.tar.gz)
-[![undone clock](images/watchface/undone/watchface_theme_prev.png)](images/watchface/undone/watchface.tar.gz)
-[![star trek clock](images/watchface/startrek/watchface_theme_prev.png)](images/watchface/startrek/watchface.tar.gz)
-[![rainbow clock](images/watchface/rainbow/watchface_theme_prev.png)](images/watchface/rainbow/watchface.tar.gz)
-[![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
-[![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
+This application let you download community based watch faces.
+Browse watch face with left/right button.
+Clic on the icon when you find yours.
 
 Here you can find an overview of all [watchfaces](https://sharandac.github.io/My-TTGO-Watchfaces/) on github.
+
+Note that the information are downloaded in real time (remember to activate WiFi):
+
+* The list of watchfaces.
+* The preview of each watch.
 
 ## OSMmap
 
@@ -190,10 +213,7 @@ Some improvements might come in the future.
 
 # Updates
 
-It is possible to update over the air.
-
-![screenshot](images/update_1.png)
-![screenshot](images/update_2.png)
+See `Updates` in settings.
 
 # FAQ
 
