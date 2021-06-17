@@ -41,6 +41,7 @@ static uint64_t nextmillis = 0;
 
 lv_obj_t *weather_station_app_main_tile = NULL;
 lv_style_t weather_station_app_main_style;
+lv_style_t weather_station_header_style;
 lv_style_t weather_station_title_style;
 lv_style_t weather_station_label_style;
 
@@ -60,6 +61,7 @@ lv_obj_t *weather_station_rain_label = NULL;
 lv_task_t * _weather_station_app_task;
 
 LV_FONT_DECLARE(Ubuntu_12px);
+LV_FONT_DECLARE(Ubuntu_16px);
 LV_IMG_DECLARE(refresh_32px);
 
 static void exit_weather_station_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -94,12 +96,21 @@ void weather_station_app_main_setup( uint32_t tile_num ) {
     lv_style_set_bg_color( &weather_station_label_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &weather_station_label_style, LV_STATE_DEFAULT, LV_OPA_50 );
 
-    lv_obj_t * temperature_air_label = lv_label_create(weather_station_app_main_tile, NULL);
-	lv_obj_add_style(temperature_air_label, LV_OBJ_PART_MAIN, &weather_station_title_style);
-	lv_label_set_text(temperature_air_label, "Air Temp.:");
-	lv_label_set_long_mode(temperature_air_label, LV_LABEL_LONG_CROP);
-	lv_obj_set_pos(temperature_air_label, 10, 50);
-	lv_obj_set_size(temperature_air_label, 60, 20);
+    lv_style_copy(&weather_station_header_style, ws_get_label_style());
+    lv_style_set_text_font(&weather_station_header_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+
+    lv_obj_t * label_header = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_header, LV_OBJ_PART_MAIN, &weather_station_header_style);
+	lv_label_set_text(label_header, "Weather Station");
+	lv_obj_set_pos(label_header, 10, 10);
+	lv_obj_set_size(label_header, 60, 40);
+
+    lv_obj_t * label_row1 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row1, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row1, "Air Temp.:");
+	lv_label_set_long_mode(label_row1, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row1, 10, 50);
+	lv_obj_set_size(label_row1, 60, 20);
 
     weather_station_temp_low_label = lv_label_create(weather_station_app_main_tile, NULL);
 	lv_obj_add_style(weather_station_temp_low_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
@@ -115,7 +126,110 @@ void weather_station_app_main_setup( uint32_t tile_num ) {
 	lv_obj_set_pos(weather_station_temp_high_label, 160, 50);
 	lv_obj_set_size(weather_station_temp_high_label, 75, 20);
 
-    //TODO: Create all other GUI Elements
+    lv_obj_t * label_row2 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row2, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row2, "Shed / Humidity:");
+	lv_label_set_long_mode(label_row2, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row2, 10, 75);
+	lv_obj_set_size(label_row2, 60, 20);
+
+    weather_station_temp_house_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_temp_house_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_temp_house_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_temp_house_label, "");
+	lv_obj_set_pos(weather_station_temp_house_label, 80, 75);
+	lv_obj_set_size(weather_station_temp_house_label, 75, 20);
+
+    weather_station_humidity_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_humidity_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_humidity_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_humidity_label, "");
+	lv_obj_set_pos(weather_station_humidity_label, 160, 75);
+	lv_obj_set_size(weather_station_humidity_label, 75, 20);
+
+    lv_obj_t * label_row3 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row3, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row3, "Garden Bed:");
+	lv_label_set_long_mode(label_row3, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row3, 10, 100);
+	lv_obj_set_size(label_row3, 60, 20);
+
+    weather_station_garden_bed_temp_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_garden_bed_temp_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_garden_bed_temp_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_garden_bed_temp_label, "");
+	lv_obj_set_pos(weather_station_garden_bed_temp_label, 80, 100);
+	lv_obj_set_size(weather_station_garden_bed_temp_label, 75, 20);
+
+    weather_station_garden_bed_soil_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_garden_bed_soil_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_garden_bed_soil_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_garden_bed_soil_label, "");
+	lv_obj_set_pos(weather_station_garden_bed_soil_label, 160, 100);
+	lv_obj_set_size(weather_station_garden_bed_soil_label, 75, 20);
+
+    lv_obj_t * label_row4 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row4, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row4, "Garden House:");
+	lv_label_set_long_mode(label_row4, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row4, 10, 125);
+	lv_obj_set_size(label_row4, 60, 20);
+
+    weather_station_garden_house_temp_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_garden_house_temp_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_garden_house_temp_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_garden_house_temp_label, "");
+	lv_obj_set_pos(weather_station_garden_house_temp_label, 80, 125);
+	lv_obj_set_size(weather_station_garden_house_temp_label, 75, 20);
+
+    weather_station_garden_house_soil_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_garden_house_soil_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_garden_house_soil_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_garden_house_soil_label, "");
+	lv_obj_set_pos(weather_station_garden_house_soil_label, 160, 125);
+	lv_obj_set_size(weather_station_garden_house_soil_label, 75, 20);
+
+    lv_obj_t * label_row5 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row5, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row5, "Wind / Rain:");
+	lv_label_set_long_mode(label_row5, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row5, 10, 150);
+	lv_obj_set_size(label_row5, 60, 20);
+
+    weather_station_wind_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_wind_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_wind_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_wind_label, "");
+	lv_obj_set_pos(weather_station_wind_label, 80, 150);
+	lv_obj_set_size(weather_station_wind_label, 75, 20);
+
+    weather_station_rain_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_rain_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_rain_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_rain_label, "");
+	lv_obj_set_pos(weather_station_rain_label, 160, 150);
+	lv_obj_set_size(weather_station_rain_label, 75, 20);
+
+    lv_obj_t * label_row6 = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(label_row6, LV_OBJ_PART_MAIN, &weather_station_title_style);
+	lv_label_set_text(label_row6, "Tank Level:");
+	lv_label_set_long_mode(label_row6, LV_LABEL_LONG_CROP);
+	lv_obj_set_pos(label_row6, 10, 175);
+	lv_obj_set_size(label_row6, 60, 20);
+
+    weather_station_tank1_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_tank1_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_tank1_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_tank1_label, "");
+	lv_obj_set_pos(weather_station_tank1_label, 80, 175);
+	lv_obj_set_size(weather_station_tank1_label, 75, 20);
+
+    weather_station_tank2_label = lv_label_create(weather_station_app_main_tile, NULL);
+	lv_obj_add_style(weather_station_tank2_label, LV_OBJ_PART_MAIN, &weather_station_label_style);
+	lv_label_set_long_mode(weather_station_tank2_label, LV_LABEL_LONG_SROLL_CIRC);
+	lv_label_set_text(weather_station_tank2_label, "");
+	lv_obj_set_pos(weather_station_tank2_label, 160, 175);
+	lv_obj_set_size(weather_station_tank2_label, 75, 20);
 
     // callbacks
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_station_main_wifictl_event_cb, "weather station main" );
@@ -194,13 +308,41 @@ void weather_station_refresh() {
 
         char val[32];
 
-        snprintf( val, sizeof(val), "%.2f °C", doc["Temp1"].as<float>() );
+        snprintf( val, sizeof(val), "%.1f °C", doc["Temp1"].as<float>() );
         lv_label_set_text(weather_station_temp_high_label, val);
 
-        snprintf( val, sizeof(val), "%.2f °C", doc["Temp2"].as<float>() );
+        snprintf( val, sizeof(val), "%.1f °C", doc["Temp2"].as<float>() );
         lv_label_set_text(weather_station_temp_low_label, val);
         
-        //TODO: Fill the Values into the GUID
+        snprintf( val, sizeof(val), "%.1f °C", doc["ShedTemp"].as<float>() );
+        lv_label_set_text(weather_station_temp_house_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f %%", doc["Humidity"].as<float>() );
+        lv_label_set_text(weather_station_humidity_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f °C", doc["GroundTemp"].as<float>() );
+        lv_label_set_text(weather_station_garden_bed_temp_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f °C", doc["HouseTemp"].as<float>() );
+        lv_label_set_text(weather_station_garden_house_temp_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f %%", doc["SoilMoisture"].as<float>() );
+        lv_label_set_text(weather_station_garden_bed_soil_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f %%", doc["SoilMoisture2"].as<float>() );
+        lv_label_set_text(weather_station_garden_house_soil_label, val);
+
+        snprintf( val, sizeof(val), "%.1f m/s", doc["WindSpeed"].as<float>() );
+        lv_label_set_text(weather_station_wind_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f mm/3h", doc["Rain"].as<float>() );
+        lv_label_set_text(weather_station_rain_label, val);
+
+        snprintf( val, sizeof(val), "%.1f %%", doc["Tank"].as<float>() );
+        lv_label_set_text(weather_station_tank1_label, val);
+        
+        snprintf( val, sizeof(val), "%.1f %%", doc["Tank2"].as<float>() );
+        lv_label_set_text(weather_station_tank2_label, val);
 
         doc.clear();
     } else {
