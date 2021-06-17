@@ -11,6 +11,42 @@
 
 A smartwatch based on ESP32 from LilyGo. Currently support for T-Watch2020 V1, V2 and V3.
 
+## Features
+
+* BLE communication
+* Time synchronization via BLE
+* Notification via BLE
+* Step counting
+* Wake-up on wrist rotation
+* Quick actions:
+
+  * WiFi
+  * Bluetooth
+  * GPS
+  * Luminosity
+  * Sound volume
+
+* Multiple watch faces:
+
+  * Embedded (digital)
+  * [Community based watchfaces](https://sharandac.github.io/My-TTGO-Watchfaces/)
+
+* Multiple 'apps':
+
+  * Music (control the playback of the music on your phone)
+  * Navigation (displays navigation instructions coming from the companion app)
+  * Map (displays a map)
+  * Notification (displays the last notification received)
+  * Stopwatch (with all the necessary functions such as play, pause, stop)
+  * Alarm
+  * Step counter (displays the number of steps and daily objective)
+  * Weather
+  * Calendar
+  * IR remote
+  * ...
+
+* Companion apps: Gadgetbridge
+
 ## Install
 
 Clone this repository and open it with platformIO. Select the right env and then build and upload.
