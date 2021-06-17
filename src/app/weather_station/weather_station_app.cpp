@@ -109,9 +109,9 @@ weather_station_config_t *weather_station_get_config( void ) {
 }
 
 void weather_station_load_config( void ) {
-    fs::File file = SPIFFS.open( KODI_REMOTE_JSON_CONFIG_FILE, FILE_READ );
+    fs::File file = SPIFFS.open( WEATHER_STATION_JSON_CONFIG_FILE, FILE_READ );
     if (!file) {
-        log_e("Can't open file: %s!", KODI_REMOTE_JSON_CONFIG_FILE );
+        log_e("Can't open file: %s!", WEATHER_STATION_JSON_CONFIG_FILE );
     }
     else {
         int filesize = file.size();
@@ -130,10 +130,10 @@ void weather_station_load_config( void ) {
 }
 
 void weather_station_save_config( void ) {
-    fs::File file = SPIFFS.open( KODI_REMOTE_JSON_CONFIG_FILE, FILE_WRITE );
+    fs::File file = SPIFFS.open( WEATHER_STATION_JSON_CONFIG_FILE, FILE_WRITE );
 
     if (!file) {
-        log_e("Can't open file: %s!", KODI_REMOTE_JSON_CONFIG_FILE );
+        log_e("Can't open file: %s!", WEATHER_STATION_JSON_CONFIG_FILE );
     }
     else {
         SpiRamJsonDocument doc( 1000 );

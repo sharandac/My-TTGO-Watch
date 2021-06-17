@@ -25,7 +25,7 @@
     #include <TTGO.h>
     #include "gui/icon.h"
 
-    #define KODI_REMOTE_JSON_CONFIG_FILE        "/weather_station.json"
+    #define WEATHER_STATION_JSON_CONFIG_FILE        "/weather_station.json"
 
     typedef struct {
         char url[64] = "";
