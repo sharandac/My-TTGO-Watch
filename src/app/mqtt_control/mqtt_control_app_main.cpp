@@ -307,13 +307,13 @@ static void mqtt_control_item_cb( lv_obj_t * obj, lv_event_t event ) {
 
         switch (mqtt_control_config->items[ i ].type) {
             case MQTT_CONTROL_TYPE_BUTTON:
-                mqtt_publish(mqtt_control_config->items[ i ].topic, false, "1");
+                mqtt_publish(mqtt_control_config->items[ i ].topic, false, "run");
                 break;
             case MQTT_CONTROL_TYPE_SWITCH:
                 if (lv_switch_get_state(mqtt_control_config->items[ i ].gui_object)) {
-                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "1");
+                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "on");
                 } else {
-                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "0");
+                    mqtt_publish(mqtt_control_config->items[ i ].topic, false, "off");
                 }
                 break;
         }
