@@ -172,7 +172,7 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb(button_matrix, kodi_remote_button_event_cb);
 
     // callbacks
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );
 
     // create an task that runs every secound
     _kodi_remote_app_task = lv_task_create( kodi_remote_app_task, 1000, LV_TASK_PRIO_MID, NULL );
@@ -520,7 +520,7 @@ int kodi_remote_publish(const char* method, const char* params, SpiRamJsonDocume
     publish_client.setAuthorization( kodi_remote_config->user, kodi_remote_config->pass );
     httpcode = publish_client.POST((uint8_t*)payload, strlen(payload));
 
-    if (httpcode > 200 && httpcode < 300 && doc != NULL && doc != nullptr) {
+    if (httpcode >= 200 && httpcode < 300 && doc != NULL && doc != nullptr) {
         DeserializationError error = deserializeJson( *(doc), publish_client.getStream() );
         if (error) {
             log_e("kodi_remote deserializeJson() failed: %s", error.c_str() );

@@ -40,7 +40,6 @@
 #include "pong_app.h"
 #include "pong_game.h"
 
-//TODO: Placeholder background images
 LV_IMG_DECLARE(bg1);
 LV_IMG_DECLARE(bg2);
 LV_FONT_DECLARE(Ubuntu_48px);
