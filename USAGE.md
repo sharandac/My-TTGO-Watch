@@ -188,6 +188,58 @@ Set "Output filtering" to trasmit the sentences: RMB,RMC,APB
 Contact [fliuzzi02](https://github.com/fliuzzi02) for further info and help.
 Some improvements might come in the future.
 
+## Calc
+
+A simple calculator.
+
+![screenshot](images/calc.png)
+
+## Kodi Remote
+
+A remote for controlling Kodi. Includes a player tile and a tile for a remote control.
+
+![screenshot](images/kodi_remote_player.png)
+![screenshot](images/kodi_remote_control.png)
+
+## MQTT Player
+
+A simple MQTT player. I personally used it to control the Phoniebox of our little one, if needed.
+Phoniebox brings a small extension to expose attributes and commands into MQTT. But I implemented it
+configurable, so that it can be used with other players exposed through MQTT.
+
+![screenshot](images/mqtt_player.png)
+
+## MQTT Control
+
+A configurable MQTT Control board. You can add labels that show formatted values, buttons that just
+publish something or switches that basically subscribe to and publish an on/off state. In my case,
+I can switch on/off my printer, see some battery values of different devices and make a random noise
+on a buzzer in a specific project.
+
+![screenshot](images/mqtt_control.png)
+
+## Pong
+
+Based on some groundwork of [bwagstaff](https://github.com/bwagstaff), that can be found here: https://github.com/bwagstaff/My-TTGO-Watch/tree/master/src/app/games
+
+A simple Pong game using the Accelerometer of the T-Watch 2020. It also has some nostalgic sound.
+
+![screenshot](images/pong.png)
+
+## TiltMouse
+
+A Bluetooth mouse using the Accelerometer of the T-Watch 2020, that you can connect to your PC or
+even your android device. Getting it to connect can be hard on some devices, but should work fine on most.
+
+![screenshot](images/tiltmouse.png)
+
+## WeatherStation
+
+A very specific app for my needs, as I have two ESP32 powered Weatherstations and wanted to show some raw
+values of them. Might not be the prettiest app, but it does its job.
+
+![screenshot](images/weatherstation.png)
+
 # Updates
 
 It is possible to update over the air.
