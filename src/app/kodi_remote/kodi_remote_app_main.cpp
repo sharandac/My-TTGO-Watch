@@ -50,6 +50,7 @@ lv_obj_t *kodi_remote_player_main_tile = NULL;
 lv_style_t kodi_remote_player_main_style;
 lv_obj_t *kodi_remote_control_main_tile = NULL;
 lv_style_t kodi_remote_control_main_style;
+lv_style_t kodi_remote_control_button_matrix_style;
 lv_style_t kodi_remote_control_button_style;
 
 lv_task_t * _kodi_remote_app_task;
@@ -156,17 +157,23 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     lv_obj_t * setup_btn_control = wf_add_setup_button( kodi_remote_control_main_tile, enter_kodi_remote_setup_event_cb, &kodi_remote_control_main_style );
     lv_obj_align(setup_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 
+    lv_style_copy(&kodi_remote_control_button_matrix_style, ws_get_button_style());
+    lv_style_set_bg_opa(&kodi_remote_control_button_matrix_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_border_width( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_radius( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
+
     lv_style_copy(&kodi_remote_control_button_style, ws_get_button_style());
-    lv_style_set_bg_opa(&kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_OPA_60);
+    lv_style_set_bg_opa(&kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_OPA_90);
     lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
     lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_CHECKED, LV_COLOR_SILVER );
     lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_FOCUSED, LV_COLOR_SILVER );
     lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_PRESSED, LV_COLOR_SILVER );
 
     lv_obj_t * button_matrix = lv_btnmatrix_create(kodi_remote_control_main_tile, NULL);
-	lv_obj_add_style(button_matrix, LV_STATE_DEFAULT, &kodi_remote_control_button_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &kodi_remote_control_button_matrix_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &kodi_remote_control_button_style);
 	lv_obj_set_pos(button_matrix, 0, 0);
-	lv_obj_set_size(button_matrix, 240, 180);
+	lv_obj_set_size(button_matrix, 240, 190);
 	lv_btnmatrix_set_map(button_matrix, buttons);
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_obj_set_event_cb(button_matrix, kodi_remote_button_event_cb);
