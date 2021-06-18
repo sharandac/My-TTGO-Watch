@@ -36,6 +36,7 @@ lv_obj_t *calc_app_main_tile = NULL;
 lv_style_t calc_app_main_style;
 lv_style_t result_style;
 lv_obj_t *result_label;
+lv_style_t button_matrix_style;
 lv_style_t button_style;
 lv_obj_t *button_matrix;
 
@@ -70,6 +71,8 @@ void calc_app_main_setup( uint32_t tile_num ) {
     lv_style_set_bg_color(&result_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
     lv_style_set_bg_opa(&result_style, LV_STATE_DEFAULT, LV_OPA_80);
     lv_style_set_text_font(&result_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+	lv_style_set_pad_left(&result_style, LV_STATE_DEFAULT, 3);
+	lv_style_set_pad_right(&result_style, LV_STATE_DEFAULT, 3);
 
     result_label = lv_label_create( calc_app_main_tile, NULL);
     lv_label_set_text(result_label, "");
@@ -80,17 +83,24 @@ void calc_app_main_setup( uint32_t tile_num ) {
 	lv_obj_set_size(result_label, 240, 38);
 
     // buttons
+    lv_style_copy(&button_matrix_style, ws_get_button_style());
+    lv_style_set_bg_opa(&button_matrix_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_border_width( &button_matrix_style , LV_OBJ_PART_MAIN, 1 );
+    lv_style_set_border_side(&button_matrix_style, LV_STATE_DEFAULT, LV_BORDER_SIDE_TOP);
+    lv_style_set_radius( &button_matrix_style , LV_OBJ_PART_MAIN, 0 );
+
     lv_style_copy(&button_style, ws_get_button_style());
-    lv_style_set_bg_opa(&button_style, LV_STATE_DEFAULT, LV_OPA_80);
+    lv_style_set_bg_opa(&button_style, LV_STATE_DEFAULT, LV_OPA_90);
     lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
     lv_style_set_border_color( &button_style, LV_STATE_CHECKED, LV_COLOR_SILVER );
     lv_style_set_border_color( &button_style, LV_STATE_FOCUSED, LV_COLOR_SILVER );
     lv_style_set_border_color( &button_style, LV_STATE_PRESSED, LV_COLOR_SILVER );
-
+    
     button_matrix = lv_btnmatrix_create(calc_app_main_tile, NULL);
-	lv_obj_add_style(button_matrix, LV_STATE_DEFAULT, &button_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &button_matrix_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &button_style);
 	lv_obj_set_pos(button_matrix, 0, 38);
-	lv_obj_set_size(button_matrix, 240, 160);
+	lv_obj_set_size(button_matrix, 240, 152);
 	lv_btnmatrix_set_map(button_matrix, buttons);
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_btnmatrix_set_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECKABLE);
@@ -131,6 +141,9 @@ void calc_result_event_cb( lv_obj_t * obj, lv_event_t event )
     }
 }
 
+/*
+ * Update the operator buttons checked styles
+*/
 void calc_update_button()
 {
     switch( op ) {
@@ -168,6 +181,10 @@ void calc_update_button()
     }
 }
 
+/*
+ * Processes the pressed button
+ * The idea of this part is inspired by https://github.com/wfdudley/T-watch-2020/blob/master/appCalc.cpp
+*/
 void calc_process_button(char cmd)
 {
     bool showResult = false;
@@ -234,6 +251,9 @@ void calc_process_button(char cmd)
     lv_event_send_refresh(result_label);
 }
 
+/*
+ * Process the pressed button in combination with the current operator
+*/
 void calc_process_operator(char cmd, char op)
 {
     switch( op ) {
