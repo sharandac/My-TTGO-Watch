@@ -43,6 +43,8 @@
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
 #include "app/osmmap/osmmap_app.h"
+#include "app/wifimon/wifimon_app.h"
+#include "app/calc/calc_app.h"
 
 void setup() {
     /**
@@ -79,6 +81,8 @@ void setup() {
     fxrates_app_setup();
     powermeter_app_setup();
 	FindPhone_setup();
+    wifimon_app_setup();
+    calc_app_setup();
     /**
      * post hardware setup
      * 
