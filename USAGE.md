@@ -211,6 +211,13 @@ Set "Output filtering" to trasmit the sentences: RMB,RMC,APB
 Contact [fliuzzi02](https://github.com/fliuzzi02) for further info and help.
 Some improvements might come in the future.
 
+## Kodi Remote
+
+A remote for controlling Kodi. Includes a player tile and a tile for a remote control.
+
+![screenshot](images/kodi_remote_player.png)
+![screenshot](images/kodi_remote_control.png)
+
 # Updates
 
 See `Updates` in settings.
