@@ -218,6 +218,12 @@ A remote for controlling Kodi. Includes a player tile and a tile for a remote co
 ![screenshot](images/kodi_remote_player.png)
 ![screenshot](images/kodi_remote_control.png)
 
+## Calc
+
+A simple calculator.
+
+![screenshot](images/calc.png)
+
 # Updates
 
 See `Updates` in settings.
