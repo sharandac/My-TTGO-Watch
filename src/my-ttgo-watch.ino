@@ -27,6 +27,8 @@
 
 #include "gui/gui.h"
 
+#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
+
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
 
@@ -85,6 +87,7 @@ void setup() {
     wifimon_app_setup();
     calc_app_setup();
     kodi_remote_app_setup();
+    watchface_expr_setup();
     /**
      * post hardware setup
      * 
