@@ -135,7 +135,7 @@ void kodi_remote_app_setup_setup( uint32_t tile_num ) {
 
 static void exit_kodi_remote_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( kodi_remote_app_get_app_main_tile_num(), LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         kodi_remote_setup_save_config();
                                         break;
     }

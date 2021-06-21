@@ -80,7 +80,7 @@ void enter_calc_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
  */
 void exit_calc_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

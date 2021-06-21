@@ -183,13 +183,13 @@ void wifictl_setup( void ) {
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-      esp_wifi_wps_disable();
-      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps failed" );
+        esp_wifi_wps_disable();
+        wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps failed" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_FAILED );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-      esp_wifi_wps_disable();
-      wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
+        esp_wifi_wps_disable();
+        wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
     }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
     /*
      * Add wifictl task
@@ -216,37 +216,40 @@ void wifictl_setup( void ) {
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
-  bool retval = false;
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
+    bool retval = false;
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return( retval );
+    }
+    
+    switch( event ) {
+        case POWERMGM_STANDBY:          
+            if ( !wifictl_config.enable_on_standby || wifictl_get_event( WIFICTL_OFF ) ) {
+                wifictl_standby();
+                retval = true;
+            }
+            else {
+                log_w("standby blocked by \"enable on standby\" option");
+                retval = false;
+            }
+            break;
+        case POWERMGM_WAKEUP:
+            wifictl_wakeup();
+            retval = true;
+            break;
+        case POWERMGM_SILENCE_WAKEUP:   
+            wifictl_wakeup();
+            retval = true;
+            break;
+    }
     return( retval );
-  }
-  
-  switch( event ) {
-      case POWERMGM_STANDBY:          if ( !wifictl_config.enable_on_standby || wifictl_get_event( WIFICTL_OFF ) ) {
-                                        wifictl_standby();
-                                        retval = true;
-                                      }
-                                      else {
-                                        log_w("standby blocked by \"enable on standby\" option");
-                                        retval = false;
-                                      }
-                                      break;
-      case POWERMGM_WAKEUP:           wifictl_wakeup();
-                                      retval = true;
-                                      break;
-      case POWERMGM_SILENCE_WAKEUP:   wifictl_wakeup();
-                                      retval = true;
-                                      break;
-  }
-  return( retval );
 }
 
 void wifictl_save_config( void ) {
-   wifictl_config.save();
+    wifictl_config.save();
 }
 
 void wifictl_load_config( void ) {
@@ -254,43 +257,43 @@ void wifictl_load_config( void ) {
 }
 
 bool wifictl_get_autoon( void ) {
-  return( wifictl_config.autoon );
+    return( wifictl_config.autoon );
 }
 
 bool wifictl_get_enable_on_standby( void ) {
-  return( wifictl_config.enable_on_standby );
+    return( wifictl_config.enable_on_standby );
 }
 
 void wifictl_set_autoon( bool autoon ) {
-  wifictl_config.autoon = autoon;
-  wifictl_send_event_cb( WIFICTL_AUTOON, (void*)&autoon );
-  wifictl_save_config();
+    wifictl_config.autoon = autoon;
+    wifictl_send_event_cb( WIFICTL_AUTOON, (void*)&autoon );
+    wifictl_save_config();
 }
 
 void wifictl_set_enable_on_standby( bool enable ) {
-  wifictl_config.enable_on_standby = enable;
-  wifictl_save_config();
+    wifictl_config.enable_on_standby = enable;
+    wifictl_save_config();
 }
 
 #ifdef ENABLE_WEBSERVER
 bool wifictl_get_webserver( void ) {
-  return( wifictl_config.webserver );
+    return( wifictl_config.webserver );
 }
 
 void wifictl_set_webserver( bool webserver ) {
-  wifictl_config.webserver = webserver;
-  wifictl_save_config();
+    wifictl_config.webserver = webserver;
+    wifictl_save_config();
 }
 #endif
 
 #ifdef ENABLE_FTPSERVER
 bool wifictl_get_ftpserver( void ) {
-return( wifictl_config.ftpserver );
+    return( wifictl_config.ftpserver );
 }
 
 void wifictl_set_ftpserver( bool ftpserver ) {
-  wifictl_config.ftpserver = ftpserver;
-  wifictl_save_config();
+    wifictl_config.ftpserver = ftpserver;
+    wifictl_save_config();
 }
 #endif
 
@@ -306,302 +309,300 @@ void wifictl_set_mqtt( bool mqtt ) {
 #endif
 
 void wifictl_set_event( EventBits_t bits ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  portENTER_CRITICAL(&wifictlMux);
-  xEventGroupSetBits( wifictl_status, bits );
-  portEXIT_CRITICAL(&wifictlMux);
+    portENTER_CRITICAL(&wifictlMux);
+    xEventGroupSetBits( wifictl_status, bits );
+    portEXIT_CRITICAL(&wifictlMux);
 }
 
 void wifictl_clear_event( EventBits_t bits ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  portENTER_CRITICAL(&wifictlMux);
-  xEventGroupClearBits( wifictl_status, bits );
-  portEXIT_CRITICAL(&wifictlMux);
+    portENTER_CRITICAL(&wifictlMux);
+    xEventGroupClearBits( wifictl_status, bits );
+    portEXIT_CRITICAL(&wifictlMux);
 }
 
 bool wifictl_get_event( EventBits_t bits ) {
-  bool retval = false;
-  
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return( retval );
-  }
-  
-  portENTER_CRITICAL(&wifictlMux);
-  EventBits_t temp = xEventGroupGetBits( wifictl_status ) & bits;
-  portEXIT_CRITICAL(&wifictlMux);
-  if ( temp )
-    retval = true;
+    bool retval = false;
+    
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return( retval );
+    }
+    
+    portENTER_CRITICAL(&wifictlMux);
+    EventBits_t temp = xEventGroupGetBits( wifictl_status ) & bits;
+    portEXIT_CRITICAL(&wifictlMux);
+    if ( temp )
+        retval = true;
 
-  return( retval );
+    return( retval );
 }
 
 bool wifictl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
-  /*
-    * check if an callback table exist, if not allocate a callback table
-    */
-  if ( wifictl_callback == NULL ) {
-      wifictl_callback = callback_init( "wifictl" );
-      if ( wifictl_callback == NULL ) {
-          log_e("wifictl callback alloc failed");
-          while(true);
-      }
-  }
-  /*
-    * register an callback entry and return them
-    */
-  return( callback_register( wifictl_callback, event, callback_func, id ) );
+    /*
+     * check if an callback table exist, if not allocate a callback table
+     */
+    if ( wifictl_callback == NULL ) {
+        wifictl_callback = callback_init( "wifictl" );
+        if ( wifictl_callback == NULL ) {
+            log_e("wifictl callback alloc failed");
+            while(true);
+        }
+    }
+    /*
+     * register an callback entry and return them
+     */
+    return( callback_register( wifictl_callback, event, callback_func, id ) );
 }
 
 bool wifictl_send_event_cb( EventBits_t event, void *arg ) {
-  /*
-    * call all callbacks with her event mask
-    */
-  return( callback_send( wifictl_callback, event, arg ) );
+    /*
+     * call all callbacks with her event mask
+     */
+    return( callback_send( wifictl_callback, event, arg ) );
 }
 
 bool wifictl_is_known( const char* networkname ) {
-  bool retval = false;
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return( retval );
-  }
-  /*
-   * check if network already in the networklist
-   */
-  for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( networkname, wifictl_config.networklist[ entry ].ssid ) ) {
-      retval = true;
-      return( retval );
+    bool retval = false;
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return( retval );
     }
-  }
-  return( retval );
+    /*
+    * check if network already in the networklist
+    */
+    for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
+        if( !strcmp( networkname, wifictl_config.networklist[ entry ].ssid ) ) {
+        retval = true;
+        return( retval );
+        }
+    }
+    return( retval );
 }
 
 bool wifictl_delete_network( const char *ssid ) {
-  bool retval = false;
-  
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return( retval );
-  }
-  /*
-   * search networklist entry and zero them
-   */
-  for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
-      wifictl_config.networklist[ entry ].ssid[ 0 ] = '\0';
-      wifictl_config.networklist[ entry ].password[ 0 ] = '\0';
-      wifictl_save_config();
-      retval = true;
-      return( retval );
+    bool retval = false;
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return( retval );
     }
-  }
-  return( retval );
+    /*
+    * search networklist entry and zero them
+    */
+    for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
+        if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
+        wifictl_config.networklist[ entry ].ssid[ 0 ] = '\0';
+        wifictl_config.networklist[ entry ].password[ 0 ] = '\0';
+        wifictl_save_config();
+        retval = true;
+        return( retval );
+        }
+    }
+    return( retval );
 }
 
 bool wifictl_insert_network( const char *ssid, const char *password ) {
-  bool retval = false;
-  
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return( retval );
-  }
-  /*
-   * check if network exist
-   */
-  for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
-      strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
-      wifictl_save_config();
-      WiFi.scanNetworks( true );
-      wifictl_set_event( WIFICTL_SCAN );
-      retval = true;
-      return( retval );
+    bool retval = false;
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return( retval );
     }
-  }
-  /*
-   * check for an emty entry and insert
-   */
-  for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-    if( strlen( wifictl_config.networklist[ entry ].ssid ) == 0 ) {
-      strlcpy( wifictl_config.networklist[ entry ].ssid, ssid, sizeof( wifictl_config.networklist[ entry ].ssid ) );
-      strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
-      wifictl_save_config();
-      WiFi.scanNetworks( true );
-      wifictl_set_event( WIFICTL_SCAN );
-      retval = true;
-      return( retval );
+    /*
+    * check if network exist
+    */
+    for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
+        if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
+        strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
+        wifictl_save_config();
+        WiFi.scanNetworks( true );
+        wifictl_set_event( WIFICTL_SCAN );
+        retval = true;
+        return( retval );
+        }
     }
-  }
-  return( retval ); 
+    /*
+    * check for an emty entry and insert
+    */
+    for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
+        if( strlen( wifictl_config.networklist[ entry ].ssid ) == 0 ) {
+        strlcpy( wifictl_config.networklist[ entry ].ssid, ssid, sizeof( wifictl_config.networklist[ entry ].ssid ) );
+        strlcpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
+        wifictl_save_config();
+        WiFi.scanNetworks( true );
+        wifictl_set_event( WIFICTL_SCAN );
+        retval = true;
+        return( retval );
+        }
+    }
+    return( retval ); 
 }
 
 void wifictl_on( void ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  log_i("request wifictl on");
-  while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
-    yield();
-  }
-  wifictl_set_event( WIFICTL_ON_REQUEST | WIFICTL_FIRST_RUN );
-  vTaskResume( _wifictl_Task );
+    log_i("request wifictl on");
+    while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
+        yield();
+    }
+    wifictl_set_event( WIFICTL_ON_REQUEST | WIFICTL_FIRST_RUN );
+    vTaskResume( _wifictl_Task );
 }
 
 void wifictl_off( void ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  
-  log_i("request wifictl off");
-  while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
-    yield();
-  }
+    
+    log_i("request wifictl off");
+    while( wifictl_get_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST ) ) { 
+        yield();
+    }
 
-  if ( !wifictl_get_event( WIFICTL_FIRST_RUN ) ) {
-    log_i("wifictl not active, prevent first run crash");
-    return;
-  }
+    if ( !wifictl_get_event( WIFICTL_FIRST_RUN ) ) {
+        log_i("wifictl not active, prevent first run crash");
+        return;
+    }
 
-  wifictl_set_event( WIFICTL_OFF_REQUEST );
-  vTaskResume( _wifictl_Task );
+    wifictl_set_event( WIFICTL_OFF_REQUEST );
+    vTaskResume( _wifictl_Task );
 }
 
 void wifictl_standby( void ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  log_i("request wifictl standby");
-  wifictl_off();
-  while( wifictl_get_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST ) ) { 
-    yield();
-  }
-  log_i("request wifictl standby done");
+    log_i("request wifictl standby");
+    wifictl_off();
+    while( wifictl_get_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST ) ) { 
+        yield();
+    }
+    log_i("request wifictl standby done");
 }
 
 void wifictl_wakeup( void ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
-  
-  if ( wifictl_config.autoon ) {
-    log_i("request wifictl wakeup");
-    wifictl_on();
-    log_i("request wifictl wakeup done");
-  }
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
+    
+    if ( wifictl_config.autoon ) {
+        log_i("request wifictl wakeup");
+        wifictl_on();
+        log_i("request wifictl wakeup done");
+    }
 }
 
 void wifictl_start_wps( void ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise");
-    return;
-  }
-  
-  if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
-  return;
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise");
+        return;
+    }
 
-  log_i("start WPS");
+    if ( wifictl_get_event( WIFICTL_WPS_REQUEST ) )
+        return;
 
-  esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
-  esp_wps_config.wps_type = ESP_WPS_MODE;
-  strlcpy( esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER, sizeof( esp_wps_config.factory_info.manufacturer ) );
-  strlcpy( esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER, sizeof( esp_wps_config.factory_info.model_number ) );
-  strlcpy( esp_wps_config.factory_info.model_name, ESP_MODEL_NAME, sizeof( esp_wps_config.factory_info.model_name ) );
-  strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
+    log_i("start WPS");
 
-  WiFi.mode( WIFI_OFF );
-  esp_wifi_stop();
+    esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+    esp_wps_config.wps_type = ESP_WPS_MODE;
+    strlcpy( esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER, sizeof( esp_wps_config.factory_info.manufacturer ) );
+    strlcpy( esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER, sizeof( esp_wps_config.factory_info.model_number ) );
+    strlcpy( esp_wps_config.factory_info.model_name, ESP_MODEL_NAME, sizeof( esp_wps_config.factory_info.model_name ) );
+    strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
 
-  wifictl_set_event( WIFICTL_WPS_REQUEST );
+    WiFi.mode( WIFI_OFF );
+    esp_wifi_stop();
 
-  ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
-  ESP_ERROR_CHECK( esp_wifi_start() );
+    wifictl_set_event( WIFICTL_WPS_REQUEST );
 
-  ESP_ERROR_CHECK( esp_wifi_wps_enable( &esp_wps_config ) );
-  ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
+    ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
+    ESP_ERROR_CHECK( esp_wifi_start() );
+
+    ESP_ERROR_CHECK( esp_wifi_wps_enable( &esp_wps_config ) );
+    ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
 }
 
 void wifictl_Task( void * pvParameters ) {
-  /*
-   * check if init
-   */
-  if ( wifi_init == false ) {
-    log_e("wifictl not initialise, start task failed");
-    while( true );
-  }
-
-  log_i("start wifictl task, heap: %d", ESP.getFreeHeap() );
-
-  while ( true ) {
-    vTaskDelay( 500 );
-    if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) && wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
-      log_w("confused by wifictl on/off at the same time. off request accept");
+    /*
+    * check if init
+    */
+    if ( wifi_init == false ) {
+        log_e("wifictl not initialise, start task failed");
+        while( true );
     }
 
-    if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) ) {
-      WiFi.mode( WIFI_OFF );
-      esp_wifi_stop();
-      log_i("request wifictl off done");
-      wifictl_set_event( WIFICTL_OFF );
-      wifictl_clear_event( WIFICTL_ON );
+    log_i("start wifictl task, heap: %d", ESP.getFreeHeap() );
+
+    while ( true ) {
+        vTaskDelay( 500 );
+        if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) && wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
+            log_w("confused by wifictl on/off at the same time. off request accept");
+        }
+
+        if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) ) {
+            WiFi.mode( WIFI_OFF );
+            esp_wifi_stop();
+            log_i("request wifictl off done");
+            wifictl_set_event( WIFICTL_OFF );
+            wifictl_clear_event( WIFICTL_ON );
+        }
+        else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
+            esp_wifi_start();
+            WiFi.mode( WIFI_STA );
+            log_i("request wifictl on done");
+            wifictl_set_event( WIFICTL_ON );
+            wifictl_clear_event( WIFICTL_OFF );
+        }
+        wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_SCAN | WIFICTL_ON_REQUEST );
+        vTaskSuspend( _wifictl_Task );
     }
-    else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
-      esp_wifi_start();
-      WiFi.mode( WIFI_STA );
-      log_i("request wifictl on done");
-      wifictl_set_event( WIFICTL_ON );
-      wifictl_clear_event( WIFICTL_OFF );
-    }
-    wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_SCAN | WIFICTL_ON_REQUEST );
-    vTaskSuspend( _wifictl_Task );
-  }
 }
