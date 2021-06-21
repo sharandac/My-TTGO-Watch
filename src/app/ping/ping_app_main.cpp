@@ -164,7 +164,7 @@ static void exit_ping_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                             lv_obj_del( ping_result_cont ); 
                                             ping_result_cont = NULL;           
                                         }        
-                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        mainbar_jump_back();
                                         break;
     }
 }

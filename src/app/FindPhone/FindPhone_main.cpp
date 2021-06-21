@@ -188,7 +188,7 @@ static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event )
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
                                         pinMode(13, INPUT); //Leave this tristated when we leave
-                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        mainbar_jump_back();
                                         break;
     }
 }
@@ -235,7 +235,7 @@ static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event)
     switch (event)
     {
     case (LV_EVENT_CLICKED):
-        mainbar_jump_to_maintile(LV_ANIM_OFF);
+        mainbar_jump_back();
         break;
     }
 }
@@ -263,6 +263,6 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
             _FindPhone_WatchFind_task = nullptr;
         }            
         statusbar_hide(false);
-        mainbar_jump_to_maintile(LV_ANIM_OFF);          
+        mainbar_jump_back();          
     }
 }
