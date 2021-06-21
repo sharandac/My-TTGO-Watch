@@ -212,8 +212,8 @@ static bool kodi_remote_main_wifictl_event_cb( EventBits_t event, void *arg ) {
 
 static void enter_kodi_remote_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        mainbar_jump_to_tilenumber( kodi_remote_app_get_app_setup_tile_num(), LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( kodi_remote_app_get_app_setup_tile_num(), LV_ANIM_ON );
+                                        statusbar_hide( true );
                                         nextmillis = 0;
                                         break;
     }
@@ -222,7 +222,7 @@ static void enter_kodi_remote_setup_event_cb( lv_obj_t * obj, lv_event_t event )
 static void exit_kodi_remote_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       kodi_remote_open_state = false;
-                                        mainbar_jump_to_maintile( LV_ANIM_OFF );
+                                        mainbar_jump_back();
                                         break;
     }
 }
