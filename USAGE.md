@@ -211,6 +211,12 @@ Set "Output filtering" to trasmit the sentences: RMB,RMC,APB
 Contact [fliuzzi02](https://github.com/fliuzzi02) for further info and help.
 Some improvements might come in the future.
 
+## Calc
+
+A simple calculator.
+
+![screenshot](images/calc.png)
+
 # Updates
 
 See `Updates` in settings.
