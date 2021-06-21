@@ -59,8 +59,6 @@ static void wifimon_app_task( lv_task_t * task );
 static void wifimon_activate_cb( void );
 static void wifimon_hibernate_cb( void );
 
-void wifimon_app_task( lv_task_t * task );
-
 uint8_t level = 0, channel = 1;
 int data = 0, mgmt = 0, misc = 0; 
 static wifi_country_t wifi_country = {.cc="CN", .schan = 1, .nchan = 13}; 
