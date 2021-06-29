@@ -335,7 +335,7 @@ void weather_station_refresh() {
         snprintf( val, sizeof(val), "%.1f m/s", doc["WindSpeed"].as<float>() );
         lv_label_set_text(weather_station_wind_label, val);
         
-        snprintf( val, sizeof(val), "%.1f mm/3h", doc["Rain"].as<float>() );
+        snprintf( val, sizeof(val), "%.1f mm/3h", doc["Precipitation"].as<float>() );
         lv_label_set_text(weather_station_rain_label, val);
 
         snprintf( val, sizeof(val), "%.1f %%", doc["Tank"].as<float>() );
