@@ -71,6 +71,7 @@ Cf. [Usage](USAGE.md)
 [FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
 [linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
+[d03n3rfr1tz3](https://github.com/d03n3rfr1tz3/TTGO.T-Watch.2020)<br>
 
 # for the programmers
 

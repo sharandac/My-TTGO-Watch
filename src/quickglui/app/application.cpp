@@ -84,15 +84,15 @@ void Application::onButtonCloseSettingsClicked() {
 }
 
 void Application::onAppIconClicked() {
-  statusbar_hide(true);
   icon().hideIndicator();
   navigateToMain(false);
+  statusbar_hide(true);
 }
 
 void Application::onDesktopWidgetClicked() {
-  statusbar_hide(true);
   icon().hideIndicator();
   navigateToMain(false);
+  statusbar_hide(true);
 }
 
 Application& Application::navigateToMain(bool animate, int id) {
