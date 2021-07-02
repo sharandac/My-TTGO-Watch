@@ -145,6 +145,9 @@ bool BaseJsonConfig::save( uint32_t size ) {
             log_e("Failed to write config file %s", fileName);
             result = false;
         }
+        else {
+            log_i("json config serializeJson() success: %s", fileName );
+        }
         
         doc.clear();
     }
@@ -178,6 +181,9 @@ bool BaseJsonConfig::save() {
         if (result == true && outSize == 0) {
             log_e("Failed to write config file %s", fileName);
             result = false;
+        }
+        else {
+            log_i("json config serializeJson() success: %s", fileName );            
         }
         
         doc.clear();
