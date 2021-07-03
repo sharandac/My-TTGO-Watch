@@ -35,8 +35,8 @@ public:
   TextArea& alignText(lv_label_align_t mode);
   TextArea& digitsMode(bool onlyDigits, const char* filterDigitsList = "+-.,0123456789");
 
-  static const uint16_t IsDigitsOnlyMode = 1;
-  static const uint16_t IsAutoKeyboardDisabled = 2;
+  static const uint16_t IsDigitsOnlyMode = 2;
+  static const uint16_t IsAutoKeyboardDisabled = 4;
 
   constexpr static const char* TypeName = "lv_textarea";
 

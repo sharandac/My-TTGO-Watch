@@ -64,40 +64,43 @@ void Application::onBuildMainPage(lv_obj_t* tile) {
 }
 
 void Application::onBuildSettingsPage(lv_obj_t* tile) {
-  auto title = name + " settings";
-  settings.init(tile, title.c_str(), [this](Widget btn) { onButtonCloseSettingsClicked(); });
+    log_i("build Settings page");
+    auto title = name + " settings";
+    settings.init(tile, title.c_str(), [this](Widget btn) { onButtonCloseSettingsClicked(); });
 }
 
 void Application::onButtonOpenSettingsClicked() {
-  if (configuration != nullptr)
-    configuration->load();
-  statusbar_hide(true);
-  navigateToSettings(true);
+    log_i("enter settings");
+    if (configuration != nullptr)
+        configuration->load();
+    statusbar_hide(true);
+    navigateToSettings(true);
 }
+
 void Application::onButtonCloseSettingsClicked() {
-  if (configuration != nullptr)
-  {
-    configuration->applyFromUI();
-    configuration->save();
-  }
-  navigateToMain(true);
+    log_i("leave settings");
+    if (configuration != nullptr) {
+        configuration->applyFromUI();
+        configuration->save();
+    }
+    mainbar_jump_back();
 }
 
 void Application::onAppIconClicked() {
-  statusbar_hide(true);
   icon().hideIndicator();
   navigateToMain(false);
+  statusbar_hide(true);
 }
 
 void Application::onDesktopWidgetClicked() {
-  statusbar_hide(true);
   icon().hideIndicator();
   navigateToMain(false);
+  statusbar_hide(true);
 }
 
 Application& Application::navigateToMain(bool animate, int id) {
-  mainbar_jump_to_tilenumber(initialTileId + id, (animate ? LV_ANIM_ON : LV_ANIM_OFF) );
-  return *this;
+    mainbar_jump_to_tilenumber(initialTileId + id, (animate ? LV_ANIM_ON : LV_ANIM_OFF) );
+    return *this;
 }
 
 Application& Application::navigateToSettings(bool animate, int id) {

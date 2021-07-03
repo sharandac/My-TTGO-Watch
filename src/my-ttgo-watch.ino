@@ -27,6 +27,8 @@
 
 #include "gui/gui.h"
 
+#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
+
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
 
@@ -103,6 +105,7 @@ void setup() {
     wifimon_app_setup();
     tic_tac_toe_game_setup();
     pong_game_setup();
+    watchface_expr_setup();
     /**
      * post hardware setup
      * 

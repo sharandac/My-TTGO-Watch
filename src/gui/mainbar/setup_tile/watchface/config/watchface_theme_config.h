@@ -25,6 +25,7 @@
     #include <TTGO.h>
     #include "config.h"
     #include "utils/basejsonconfig.h"
+    #include "utils/tinyexpr/tinyexpr.h"
 
     #define WATCHFACE_LABEL_NUM                 20
     #define WATCHFACE_IMAGE_NUM                 20
@@ -40,6 +41,8 @@
     #define WATCHFACE_HOUR_SHADOW_IMAGE_FILE    "/spiffs/watchface/watchface_hour_s.png"
     #define WATCHFACE_MIN_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_min_s.png"
     #define WATCHFACE_SEC_SHADOW_IMAGE_FILE     "/spiffs/watchface/watchface_sec_s.png"
+
+    #define WATCHFACE_EXPR_MAX_SIZE             128
 
     /**
      * @brief dial image control structure
@@ -59,40 +62,38 @@
         int32_t x_offset = 0;                           /** @brief x offset of the image relative to the center */
         int32_t y_offset = 0;                           /** @brief x offset of the image relative to the center */
     } watchface_index_t;
+    typedef struct {
+        te_expr *enable = NULL;                         /** @brief enable the widget */
+        char enable_expr[WATCHFACE_EXPR_MAX_SIZE] = ""; /** @brief expression for enable flag */
+        char type[32] = "";                             /** @brief type of the widget */
+        int32_t hide_interval = 0;
+        int32_t x_offset = 0;                           /** @brief x offset for the widget*/
+        int32_t y_offset = 0;                           /** @brief y offset for the widget*/
+        int32_t x_size = 0;                             /** @brief x size for the widget*/
+        int32_t y_size = 0;                             /** @brief y size for the widget*/
+    } watchface_widget_t;
     /**
      * @brief label control structure
      */
-    typedef struct {
-        bool enable = true;                             /** @brief enable the label */
-        char type[32] = "";                             /** @brief type of the label */
+    typedef struct : watchface_widget_t {
+        char raw_expr[WATCHFACE_EXPR_MAX_SIZE] = "";    /** @brief raw expression */
+        te_expr *expr = NULL;                           /** @brief expression value of the label */
         char label[32] = "";                            /** @brief text for the label */
         char font[32] = "";                             /** @brief font name */
         int32_t font_size = 0;                          /** @brief font size: 12,16,32,48 and 72 */
         char font_color[32] = "";                       /** @brief label color in format '#000000' */
         char align[32] = "";                            /** @brief align the label, default is 'center' */
-        int32_t hide_interval = 0;
-        int32_t x_offset = 0;                           /** @brief x offset for the label*/
-        int32_t y_offset = 0;                           /** @brief y offset for the label*/
-        int32_t x_size = 0;                             /** @brief x size for the label*/
-        int32_t y_size = 0;                             /** @brief y size for the label*/
     } watchface_label_t;
     /**
      * @brief label control structure
      */
-    typedef struct {
-        bool enable = true;                             /** @brief enable the label */
-        char type[32] = "";                             /** @brief type of the image */
+    typedef struct : watchface_widget_t {
         char file[32] = "";                             /** @brief filename of the image */
         int32_t stages = 0;
         int32_t rotation_range = 0;                     /** @brief number of vertical stages */
         int32_t rotation_start = 0;                     /** @brief number of vertical stages */
         int32_t rotation_x_origin = 0;
         int32_t rotation_y_origin = 0;
-        int32_t hide_interval = 0;
-        int32_t x_offset = 0;                           /** @brief x offset for the image*/
-        int32_t y_offset = 0;                           /** @brief y offset for the image*/
-        int32_t x_size = 0;                             /** @brief x size for the image*/
-        int32_t y_size = 0;                             /** @brief y size for the image*/
     } watchface_image_t;
     /**
      * @brief watchface theme control structure

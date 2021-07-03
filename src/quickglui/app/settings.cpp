@@ -29,7 +29,7 @@ void SettingsPage::constructHeader(const char* title, WidgetAction onExitBtnClic
     headerContainer = Widget(this);
     headerContainer.size(LV_HOR_RES, 40);
 
-    lv_obj_t * exitBtnHandle = wf_add_exit_button(headerContainer.handle());
+    lv_obj_t * exitBtnHandle = wf_add_exit_button( headerContainer.handle(), NULL, NULL );
     Button exitBtn(exitBtnHandle);
     exitBtn.clicked(onExitBtnClick);
     exitBtn.alignInParentLeftMid(10, 0);
