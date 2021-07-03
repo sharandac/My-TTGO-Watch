@@ -629,10 +629,10 @@ void blectl_loop ( void ) {
     }
 }
 
-BLEServer *blectl_get_ble_server() {
+BLEServer *blectl_get_ble_server( void ) {
     return pServer;
 }
 
-BLEAdvertising *blectl_get_ble_advertising() {
+BLEAdvertising *blectl_get_ble_advertising( void ) {
     return pServer->getAdvertising();
 }
