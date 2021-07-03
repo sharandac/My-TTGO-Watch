@@ -292,10 +292,20 @@ void weather_station_refresh() {
     weather_station_config_t *weather_station_config = weather_station_get_config();
 
     HTTPClient http_client;
-    http_client.useHTTP10( true );
-    http_client.begin( weather_station_config->url );
-    int httpcode = http_client.GET();
+    WiFiClientSecure *sslclient = NULL;
 
+    if( strstr( weather_station_config->url, "http://" ) ) {
+        http_client.useHTTP10( true );
+        http_client.begin( weather_station_config->url );
+    }
+    else if( strstr( weather_station_config->url, "https://" ) ) {
+        sslclient = new WiFiClientSecure;
+        sslclient->setInsecure();
+        http_client.useHTTP10( true );
+        http_client.begin( *sslclient, weather_station_config->url );
+    }
+
+    int httpcode = http_client.GET();
     if (httpcode >= 200 && httpcode < 300) {
         SpiRamJsonDocument doc( 1000 );
 
