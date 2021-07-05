@@ -26,7 +26,7 @@
 #include <TTGO.h>
 
 #include "gui/gui.h"
-//#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
 
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
@@ -45,7 +45,7 @@
 #include "app/calendar/calendar.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
-//#include "app/gps_status/gps_status.h"
+#include "app/gps_status/gps_status.h"
 #include "app/osmmap/osmmap_app.h"
 #include "app/kodi_remote/kodi_remote_app.h"
 #include "app/mqtt_player/mqtt_player_app.h"
@@ -86,7 +86,6 @@ void setup() {
     activity_app_setup();
     calendar_app_setup();
     calc_app_setup();
-    //gps_status_setup();
     //sailing_setup();
     weather_station_app_setup();
     osmand_app_setup();
@@ -104,7 +103,8 @@ void setup() {
     wifimon_app_setup();
     tic_tac_toe_game_setup();
     pong_game_setup();
-    //watchface_expr_setup();
+    gps_status_setup();
+    watchface_expr_setup();
     /**
      * post hardware setup
      * 
