@@ -5,27 +5,28 @@
 #include "quickglui/quickglui.h"
 #include "IRButton.h"
 
-#define MAX_IR_BUTTONS 16
+#define MAX_IR_BUTTONS 32
 
 class IRConfig : public BaseJsonConfig
 {
 public:
   IRConfig();
 
-  InfraButton* add(const char* name);
-  void del(const char* name);
-  InfraButton* get(const char* name);
+  InfraButton* add(size_t page, const char* name);
+  void del(size_t page, const char* name);
+  InfraButton* get(size_t page, const char* name);
 
   InfraButton* get(int id) { return buttons[id]; }
   int totalCount() { return count; }
 
   void sendListNames(BluetoothJsonResponse& target);
-  void sendButtonEdit(BluetoothJsonResponse& target, const char* name);
+  void sendButtonEdit(BluetoothJsonResponse& target, size_t page, const char* name);
 
 public:
   int defBtnWidth = 95;
   int defBtnHeight = 33;
   int defSpacing = 3;
+  size_t pageCount = 1;
 
 protected:
   virtual bool onSave(JsonDocument& document);
