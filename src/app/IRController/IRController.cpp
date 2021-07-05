@@ -150,8 +150,20 @@ void execute_ir_cmd(InfraButton* config) {
         else
             irsend.sendSony(config->code);
         break;
+    case PANASONIC:
+        irsend.sendPanasonic64(config->code);
+        break;
+    case JVC:
+        irsend.sendJVC(config->code);
+        break;
     case SAMSUNG:
         irsend.sendSAMSUNG(config->code);
+        break;
+    case LG:
+        irsend.sendLG(config->code);
+        break;
+    case SHARP:
+        irsend.sendSharpRaw(config->code);
         break;
     case RAW:
         if (config->raw != nullptr && config->rawLength > 0)

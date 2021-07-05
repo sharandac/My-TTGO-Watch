@@ -102,11 +102,12 @@ bool IRConfig::onLoad(JsonDocument& document) {
   pageCount = pages.size();
   for (size_t i = 0; i < pageCount; i++)
   {
-    JsonObject main = pages[i].as<JsonObject>(); // For now only first page supported
+    JsonObject main = pages[i].as<JsonObject>();
     if (main.isNull()) continue;
 
     for (JsonPair record : main) {
       if (record.value().isNull()) continue;
+      
       // Create and load button
       log_d("Loading ir button: %s", record.key().c_str());
       auto btn = add(i, record.key().c_str());

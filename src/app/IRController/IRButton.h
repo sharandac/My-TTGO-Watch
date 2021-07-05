@@ -5,7 +5,7 @@
 #include "utils/alloc.h"
 #include <IRremoteESP8266.h>
 
-#define RAW_CODE_BUFER_SIZE sizeof(uint16_t)*120
+#define RAW_CODE_BUFFER_SIZE sizeof(uint16_t)*120
 
 struct InfraButton
 {
@@ -25,7 +25,7 @@ struct InfraButton
   void resize(int size)
   {
     if (raw == nullptr)
-      raw = (uint16_t*)MALLOC(RAW_CODE_BUFER_SIZE);
+      raw = (uint16_t*)MALLOC(RAW_CODE_BUFFER_SIZE);
     rawLength = size;
     memset(raw, 0, sizeof(uint16_t)*rawLength);
   }
