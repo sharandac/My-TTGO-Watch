@@ -37,12 +37,13 @@
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
 LV_IMG_DECLARE(IRController_64px);
 
+static lv_point_t* valid_pos;
 static bool IRController_bluetooth_event_cb(EventBits_t event, void *arg);
 
 IRConfig irConfig;
 Application irController;
 IRsend irsend(TWATCH_2020_IR_PIN);
-Style irDeskStyle;
+lv_style_t irDeskStyle;
 
 /*
  * setup routine for IR Controller app
@@ -61,30 +62,65 @@ void IRController_build_UI(IRControlSettingsAction settingsAction)
         irConfig.load();
 
     AppPage& main = irController.mainPage();
-    // Create parent widget which will contains all IR control buttons
-    // It also will auto-align child buttons on it:
-    Container& desk = main.createChildContainer(LV_LAYOUT_PRETTY_MID);
-    
-    irDeskStyle = Style::Create(ws_get_mainbar_style(), true);
-    irDeskStyle.paddingInner(irConfig.defSpacing);
-    irDeskStyle.padding(7, 16, 7, 16);
-    desk.style(irDeskStyle);
+    lv_obj_t *desks = lv_tileview_create(main.handle(), NULL);
+    lv_obj_set_size(desks, LV_HOR_RES, LV_VER_RES);
+    lv_page_set_scrollbar_mode(desks, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_add_style(desks, LV_OBJ_PART_MAIN, ws_get_mainbar_style());
 
-    for (int i = 0; i < irConfig.totalCount(); i++)
+    valid_pos = ( lv_point_t * )MALLOC( sizeof( lv_point_t ) * irConfig.pageCount );
+    for (lv_coord_t i = 0; i < irConfig.pageCount; i++)
     {
-        auto btnConfig = irConfig.get(i);
-        if (btnConfig->uiButton.isCreated()) {
-            btnConfig->uiButton.alignInParentTopLeft(0, 0); // Call auto alignment
-            continue;
-        }
-        
-        // Add new button
-        Button btn(&desk, btnConfig->name.c_str(), [btnConfig](Widget& btn) {
-            execute_ir_cmd(btnConfig);
-        });
-        btn.size(irConfig.defBtnWidth, irConfig.defBtnHeight);
-        btnConfig->uiButton = btn;
+        valid_pos[i].x = i;
+        valid_pos[i].y = 0;
     }
+    
+    for (size_t i = 0; i < irConfig.pageCount; i++)
+    {
+        lv_obj_t * tile = lv_obj_create(desks, NULL);
+        lv_obj_set_size(tile, LV_HOR_RES, LV_VER_RES);
+        lv_obj_set_pos(tile, valid_pos[i].x * LV_HOR_RES, valid_pos[i].y * LV_VER_RES);
+        lv_obj_add_style(tile, LV_OBJ_PART_MAIN, ws_get_mainbar_style());
+
+        lv_obj_t * desk = lv_cont_create(tile, NULL);
+        lv_obj_set_size(desk, LV_HOR_RES, LV_VER_RES - 42);
+        lv_cont_set_layout(desk, LV_LAYOUT_PRETTY_MID);
+
+        lv_style_copy(&irDeskStyle, ws_get_mainbar_style());
+        lv_style_set_pad_inner(&irDeskStyle, LV_STATE_DEFAULT, irConfig.defSpacing);
+        lv_style_set_pad_top(&irDeskStyle, LV_STATE_DEFAULT, 7);
+        lv_style_set_pad_bottom(&irDeskStyle, LV_STATE_DEFAULT, 7);
+        lv_style_set_pad_left(&irDeskStyle, LV_STATE_DEFAULT, 16);
+        lv_style_set_pad_right(&irDeskStyle, LV_STATE_DEFAULT, 16);
+        lv_obj_add_style(desk, LV_OBJ_PART_MAIN, &irDeskStyle);
+
+        for (int j = 0; j < irConfig.totalCount(); j++)
+        {
+            auto btnConfig = irConfig.get(j);
+            if (btnConfig->page != i) continue;
+
+            if (btnConfig->uiButton.isCreated()) {
+                btnConfig->uiButton.alignInParentTopLeft(0, 0); // Call auto alignment
+                continue;
+            }
+            
+            lv_obj_t * button = lv_btn_create(desk, NULL);
+            lv_label_create(button, NULL);
+
+            Button btn(button);
+            btn.size(irConfig.defBtnWidth, irConfig.defBtnHeight);
+            btn.text(btnConfig->name.c_str());
+            btn.clicked([btnConfig](Widget& btn) {
+                execute_ir_cmd(btnConfig);
+            });
+            btnConfig->uiButton = btn;
+        }
+
+        lv_tileview_add_element(desks, tile);
+    }
+    
+    lv_tileview_set_valid_positions(desks, valid_pos, irConfig.pageCount);
+    lv_tileview_set_edge_flash(desks, true);
+    main.moveExitButtonToForeground();
 
     // Refresh screen
     lv_obj_invalidate(lv_scr_act());
@@ -114,8 +150,20 @@ void execute_ir_cmd(InfraButton* config) {
         else
             irsend.sendSony(config->code);
         break;
+    case PANASONIC:
+        irsend.sendPanasonic64(config->code);
+        break;
+    case JVC:
+        irsend.sendJVC(config->code);
+        break;
     case SAMSUNG:
         irsend.sendSAMSUNG(config->code);
+        break;
+    case LG:
+        irsend.sendLG(config->code);
+        break;
+    case SHARP:
+        irsend.sendSharpRaw(config->code);
         break;
     case RAW:
         if (config->raw != nullptr && config->rawLength > 0)
@@ -149,22 +197,22 @@ bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
             String name = request["v"];
             if (cmd == "save") {
                 // Update button data:
-                btn = irConfig.get(name.c_str());
+                btn = irConfig.get(0, name.c_str());
                 if (btn != nullptr) {
                     JsonObject obj = request.as<JsonObject>();
                     btn->loadFrom(obj);
                     irConfig.save();
                 }
             }
-            irConfig.sendButtonEdit(response, name.c_str());
+            irConfig.sendButtonEdit(response, 0, name.c_str());
         } else if (cmd == "add") {
             String name = request["v"];
-            btn = irConfig.add(name.c_str());
+            btn = irConfig.add(0, name.c_str());
             irConfig.sendListNames(response);
             IRController_build_UI(IRControlSettingsAction::Save);
         } else if (cmd == "del") {
             String name = request["v"];
-            irConfig.del(name.c_str());
+            irConfig.del(0, name.c_str());
             irConfig.sendListNames(response);
             IRController_build_UI(IRControlSettingsAction::Save);
         }

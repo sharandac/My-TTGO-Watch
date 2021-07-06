@@ -23,6 +23,7 @@ public:
     AppPage& addSettingsButton(WidgetAction onSettingsBtnClick);
     AppPage& addRefreshButton(WidgetAction onRefreshBtnClick);
     AppPage& addAppButton(const lv_img_dsc_t& image, WidgetAction onBtnClick);
+    AppPage& moveExitButtonToForeground();
 
     virtual Container& createChildContainer(lv_layout_t autoLayoutOptios);
     bool hasChildContainer() { return childContainer.handle() != nullptr; }
