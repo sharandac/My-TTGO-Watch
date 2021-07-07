@@ -159,6 +159,9 @@ void execute_ir_cmd(InfraButton* config) {
     case SAMSUNG:
         irsend.sendSAMSUNG(config->code);
         break;
+    case SAMSUNG36:
+        irsend.sendSamsung36(config->code);
+        break;
     case LG:
         irsend.sendLG(config->code);
         break;
