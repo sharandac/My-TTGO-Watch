@@ -5,7 +5,7 @@
 #include "quickglui/quickglui.h"
 #include "IRButton.h"
 
-#define MAX_IR_BUTTONS 32
+#define MAX_IR_BUTTONS 48
 
 class IRConfig : public BaseJsonConfig
 {
@@ -32,7 +32,7 @@ protected:
   virtual bool onSave(JsonDocument& document);
   virtual bool onLoad(JsonDocument& document);
   virtual bool onDefault( void );
-  virtual size_t getJsonBufferSize() { return 16000; }
+  virtual size_t getJsonBufferSize() { return 48000; }
 
 protected:
   InfraButton *buttons[MAX_IR_BUTTONS];
