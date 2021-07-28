@@ -63,6 +63,7 @@ lv_obj_t *bluetooth_msg_entrys_label = NULL;
 msg_chain_t *bluetooth_msg_chain = NULL;
 static bool bluetooth_message_active = true;
 int32_t bluetooth_current_msg = -1;
+static uint64_t nextmillis = 0;
 
 LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -492,6 +493,15 @@ void bluetooth_message_show_msg( int32_t entry ) {
 }
 
 void bluetooth_message_play_audio( int32_t entry ) {
+    /*
+     * check if audio played recently
+     */
+    if ( nextmillis >= millis() ) {
+        log_i("skip playing audio notification, because played one recently");
+        nextmillis += 5000L;
+        return;
+    }
+    nextmillis = millis() + 10000L;
     /*
      * if an msg set?
      */
