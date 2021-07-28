@@ -186,7 +186,8 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                                 BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
                                                 if ( request.isValid() ) {
                                                     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
-                                                        powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                                                        log_i("silent wakeup just before ble message");
+                                                        powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
                                                         powermgm_loop();
                                                     }
 

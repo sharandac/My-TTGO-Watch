@@ -95,6 +95,7 @@ void sound_setup( void ) {
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
                 ttgo->power->setLDO3Voltage( 3000 );
+                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
         #endif
         sound_set_enabled( sound_config.enable );
 
@@ -216,6 +217,7 @@ void sound_set_enabled( bool enabled ) {
     if ( enabled ) {
 #if     defined(LILYGO_WATCH_2020_V1)
         ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+        ttgo->power->setLDO3Voltage( 3000 );
         ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
 #endif
         ttgo->enableAudio();
@@ -361,12 +363,11 @@ void sound_set_volume_config( uint8_t volume ) {
 
     if ( sound_config.enable && sound_init ) {
         log_i("Setting sound volume to: %d", volume);
-        // limiting max gain to 3.5 (max gain is 4.0)
-        out->SetGain(3.5f * ( sound_config.volume / 100.0f ));
+        // limiting max gain to 2.0, because most range is already very loud (max gain is 4.0)
+        out->SetGain(2.0f * ( sound_config.volume / 100.0f ));
     }
     sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume ); 
 }
-
 
 bool sound_is_silenced( void ) {
     if (!sound_config.silence_timeframe) return false;

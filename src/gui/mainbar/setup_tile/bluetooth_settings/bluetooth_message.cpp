@@ -555,6 +555,6 @@ void bluetooth_message_play_audio( int32_t entry ) {
         }
 
         if (!found) sound_play_progmem_wav( piep_wav, piep_wav_len );
-    }        
+    }
     doc.clear();
 }
