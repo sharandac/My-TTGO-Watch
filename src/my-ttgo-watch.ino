@@ -43,7 +43,7 @@
 #include "app/activity/activity.h"
 #include "app/calc/calc_app.h"
 #include "app/calendar/calendar.h"
-#include "app/powermeter/powermeter_app.h"
+//#include "app/powermeter/powermeter_app.h"
 #include "app/FindPhone/FindPhone.h"
 #include "app/gps_status/gps_status.h"
 #include "app/osmmap/osmmap_app.h"
@@ -89,10 +89,11 @@ void setup() {
     //sailing_setup();
     weather_station_app_setup();
     osmand_app_setup();
+    gps_status_setup();
     tiltmouse_app_setup();
     IRController_setup();
     //fxrates_app_setup();
-    powermeter_app_setup();
+    //powermeter_app_setup();
 	FindPhone_setup();
     kodi_remote_app_setup();
     mqtt_player_app_setup();
@@ -103,7 +104,6 @@ void setup() {
     wifimon_app_setup();
     tic_tac_toe_game_setup();
     pong_game_setup();
-    gps_status_setup();
     watchface_expr_setup();
     /**
      * post hardware setup
