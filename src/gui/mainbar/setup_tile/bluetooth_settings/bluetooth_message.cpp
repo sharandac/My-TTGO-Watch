@@ -63,7 +63,6 @@ lv_obj_t *bluetooth_msg_entrys_label = NULL;
 msg_chain_t *bluetooth_msg_chain = NULL;
 static bool bluetooth_message_active = true;
 int32_t bluetooth_current_msg = -1;
-static uint64_t nextmillis = 0;
 
 LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -493,6 +492,9 @@ void bluetooth_message_show_msg( int32_t entry ) {
 }
 
 void bluetooth_message_play_audio( int32_t entry ) {
+    bool found = false;
+    static uint64_t nextmillis = 0;
+
     /*
      * check if audio played recently
      */
@@ -542,29 +544,41 @@ void bluetooth_message_play_audio( int32_t entry ) {
             message = doc["title"];
         }
 
-        bool found = false;
         blectl_custom_audio* custom_audio_notifications = blectl_get_custom_audio_notifications();
+        /**
+         * check for custom audio notifications
+         */
+        for ( int entry = 0; entry < CUSTOM_AUDIO_ENTRYS; entry++) {
+            blectl_custom_audio custom_audio_notification = custom_audio_notifications[ entry ];
 
-        for (int entry = 0; entry < CUSTOM_AUDIO_ENTRYS; entry++)
-        {
-            blectl_custom_audio custom_audio_notification = custom_audio_notifications[entry];
+            if ( strlen( custom_audio_notification.text ) <= 0 )
+                continue;
+            if ( strstr( message, custom_audio_notification.text ) == NULL )
+                continue;
 
-            if ( strlen(custom_audio_notification.text) <= 0 ) continue;
-            if ( strstr( message, custom_audio_notification.text ) == NULL ) continue;
             found = true;
 
-            if (strlen(custom_audio_notification.value) <= 1) {
+            if ( strlen( custom_audio_notification.value ) <= 1 ) {
                 char tts[128];
                 const char *text = message;
-                if (!strncmp( message, "/", 1 )) text = strchr(message, ' ');
-                snprintf( tts, sizeof(tts), "%s.", text );
+                if ( !strncmp( message, "/", 1 ) ) text = strchr( message, ' ' );
+                snprintf( tts, sizeof( tts ), "%s.", text );
                 
-                sound_speak(tts);
+                sound_speak( tts );
+                log_i("playing custom tts audio notification: \"%s\"", tts );
             }
-            else sound_play_spiffs_mp3(custom_audio_notification.value);
+            else {
+                sound_play_spiffs_mp3( custom_audio_notification.value );
+                log_i("playing custom mp3 audio notification: \"%s\"", custom_audio_notification.value );
+            }
         }
-
-        if (!found) sound_play_progmem_wav( piep_wav, piep_wav_len );
+        /**
+         * if not custom audio notification found, play default piep
+         */
+        if ( !found ) {
+            sound_play_progmem_wav( piep_wav, piep_wav_len );
+            log_i("playing default mp3 audio notification");
+        }
     }
     doc.clear();
 }

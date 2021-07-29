@@ -76,6 +76,17 @@ void sound_setup( void ) {
      * config sound driver and interface
      */
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        /*
+        * set sound chip voltage on V1
+        */
+        #if defined( LILYGO_WATCH_2020_V1 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+                ttgo->power->setLDO3Voltage( 3300 );
+        #endif
+        /**
+         * set sound driver
+         */
         out = new AudioOutputI2S();
         out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
         sound_set_volume_config( sound_config.volume );
@@ -88,14 +99,6 @@ void sound_setup( void ) {
         */
         powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
         powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
-        /*
-        * enable sound
-        */
-        #if defined( LILYGO_WATCH_2020_V1 )
-                TTGOClass *ttgo = TTGOClass::getWatch();
-                ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-                ttgo->power->setLDO3Voltage( 3000 );
-        #endif
         sound_set_enabled( sound_config.enable );
 
         sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
@@ -361,7 +364,10 @@ void sound_set_volume_config( uint8_t volume ) {
 
 
 bool sound_is_silenced( void ) {
-    if (!sound_config.silence_timeframe) return false;
+    if ( !sound_config.silence_timeframe ) {
+        log_i("no silence sound timeframe");
+        return( false );
+    }
 
     struct tm start;
     struct tm end;
