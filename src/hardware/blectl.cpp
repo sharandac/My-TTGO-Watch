@@ -153,7 +153,8 @@ class BtlCtlSecurity : public BLESecurityCallbacks {
                 return;
             }
         }
-        log_e("authentication not handle. reason: %02x", cmpl.fail_reason );
+        
+        log_e("authentication not handle but %s. reason: %02x", cmpl.success ? "successful" : "not successful", cmpl.fail_reason );
     }
 };
 
@@ -184,6 +185,12 @@ class BleCtlCallbacks : public BLECharacteristicCallbacks
                                                 gbmsg += 3;
                                                 BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
                                                 if ( request.isValid() ) {
+                                                    if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
+                                                        log_i("silent wakeup just before ble message");
+                                                        powermgm_set_event( POWERMGM_SILENCE_WAKEUP );
+                                                        powermgm_loop();
+                                                    }
+
                                                     blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
                                                 }
                                                 else {
@@ -276,7 +283,10 @@ void blectl_setup( void ) {
     // Start the service
     pService->start();
     // Start advertising
-    pServer->getAdvertising()->addServiceUUID( pService->getUUID() );
+    //ESP_BLE_APPEARANCE_GENERIC_WATCH
+    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    pAdvertising->addServiceUUID( pService->getUUID() );
+    pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
 
     // Create device information service
     BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
@@ -293,15 +303,15 @@ void blectl_setup( void ) {
     // Start battery service
     pDeviceInformationService->start();
     // Start advertising battery service
-    pServer->getAdvertising()->addServiceUUID( pDeviceInformationService->getUUID() );
+    pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
 
     blebatctl_setup(pServer);
 
     blestepctl_setup();
 
     // Slow advertising interval for battery life
-    pServer->getAdvertising()->setMinInterval( 700 );
-    pServer->getAdvertising()->setMaxInterval( 800 );
+    pAdvertising->setMinInterval( 700 );
+    pAdvertising->setMaxInterval( 800 );
 
     if ( blectl_get_autoon() ) {
         blectl_on();
@@ -318,6 +328,10 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
             if ( blectl_get_enable_on_standby() && blectl_get_event( BLECTL_ON ) ) {
                 retval = false;
                 log_w("standby blocked by \"enable_on_standby\" option");
+            }
+            else if ( blectl_get_disable_only_disconnected() && blectl_get_event( BLECTL_CONNECT ) ) {
+                retval = false;
+                log_w("standby blocked by \"disable_only_disconnected\" option");
             }
             else {
                 log_i("go standby");
@@ -377,6 +391,11 @@ bool blectl_send_event_cb( EventBits_t event, void *arg ) {
 
 void blectl_set_enable_on_standby( bool enable_on_standby ) {        
     blectl_config.enable_on_standby = enable_on_standby;
+    blectl_config.save();
+}
+
+void blectl_set_disable_only_disconnected( bool disable_only_disconnected ) {        
+    blectl_config.disable_only_disconnected = disable_only_disconnected;
     blectl_config.save();
 }
 
@@ -440,6 +459,10 @@ bool blectl_get_enable_on_standby( void ) {
     return( blectl_config.enable_on_standby );
 }
 
+bool blectl_get_disable_only_disconnected( void ) {
+    return( blectl_config.disable_only_disconnected );
+}
+
 bool blectl_get_show_notification( void ) {
     return( blectl_config.show_notification );
 }
@@ -450,6 +473,10 @@ bool blectl_get_autoon( void ) {
 
 bool blectl_get_advertising( void ) {
     return( blectl_config.advertising );
+}
+
+blectl_custom_audio* blectl_get_custom_audio_notifications( void ) {
+    return( blectl_config.custom_audio_notifications );
 }
 
 void blectl_save_config( void ) {

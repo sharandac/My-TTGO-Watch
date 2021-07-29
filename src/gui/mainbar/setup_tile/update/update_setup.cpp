@@ -23,6 +23,7 @@
 
 #include "update.h"
 #include "update_setup.h"
+#include "config/updateconfig.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -31,59 +32,48 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-#include "utils/json_psram_allocator.h"
-#include "utils/alloc.h"
+update_config_t update_config;
 
-static update_config_t *update_config = NULL;
+lv_obj_t *update_setup_tile = NULL;                 /** @brief pointer to the setup tile object */
+uint32_t update_setup_tile_num;                     /** @brief setup tile number */
 
-lv_obj_t *update_setup_tile = NULL;
-lv_style_t update_setup_style;
-uint32_t update_setup_tile_num;
-
-lv_obj_t *update_check_autosync_onoff = NULL;
-lv_obj_t *update_check_url_textfield = NULL;
+lv_obj_t *update_check_autosync_onoff = NULL;       /** @brief pointer to autosync switch object */
+lv_obj_t *update_check_autorestart_onoff = NULL;    /** @brief pointer to autorestart switch object */
+lv_obj_t *update_check_url_textfield = NULL;        /** @brief pointer to url textarea object */
 
 LV_IMG_DECLARE(setup_32px);
 
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_reset_url_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-void update_read_config( void );
-void update_save_config( void );
+static void update_check_autorestart_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
+static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void update_setup_tile_setup( uint32_t tile_num ) {
 
-    update_config = (update_config_t*)CALLOC( sizeof( update_config_t ), 1 );
-    if( !update_config ) {
-      log_e("update_config calloc faild");
-      while(true);
-    }
-
-    update_read_config();
+    update_config.load();
 
     update_setup_tile_num = tile_num;
     update_setup_tile = mainbar_get_tile_obj( update_setup_tile_num );
 
-    lv_style_copy( &update_setup_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, &update_setup_style );
+    lv_obj_add_style( update_setup_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
 
     lv_obj_t *header = wf_add_settings_header( update_setup_tile, "update settings", exit_update_check_setup_event_cb );
     lv_obj_align( header, update_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *update_check_autosync_cont = wf_add_labeled_switch( update_setup_tile, "check for updates", &update_check_autosync_onoff, update_config->autosync, update_check_autosync_onoff_event_handler );
-    lv_obj_align( update_check_autosync_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_t *update_check_autorestart_cont = wf_add_labeled_switch( update_setup_tile, "reset after update", &update_check_autorestart_onoff, update_config.autorestart, update_check_autorestart_onoff_event_handler );
+    lv_obj_align( update_check_autorestart_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+
+    lv_obj_t *update_check_autosync_cont = wf_add_labeled_switch( update_setup_tile, "check for updates", &update_check_autosync_onoff, update_config.autosync, update_check_autosync_onoff_event_handler );
+    lv_obj_align( update_check_autosync_cont, update_check_autorestart_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_obj_t *update_check_url_cont = lv_obj_create( update_setup_tile, NULL );
-    lv_obj_set_size(update_check_url_cont, lv_disp_get_hor_res( NULL ) , 60);
-    lv_obj_add_style( update_check_url_cont, LV_OBJ_PART_MAIN, &update_setup_style  );
+    lv_obj_set_size(update_check_url_cont, lv_disp_get_hor_res( NULL ) , 40);
+    lv_obj_add_style( update_check_url_cont, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
     lv_obj_align( update_check_url_cont, update_check_autosync_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
-    lv_obj_t *update_check_url_label = lv_label_create( update_check_url_cont, NULL);
-    lv_obj_add_style( update_check_url_label, LV_OBJ_PART_MAIN, &update_setup_style  );
-    lv_label_set_text( update_check_url_label, "update URL");
-    lv_obj_align( update_check_url_label, update_check_url_cont, LV_ALIGN_IN_TOP_LEFT, 5, 0 );
+    
     update_check_url_textfield = lv_textarea_create( update_check_url_cont, NULL);
-    lv_textarea_set_text( update_check_url_textfield, update_config->updateurl );
+    lv_textarea_set_text( update_check_url_textfield, update_config.updateurl );
     lv_textarea_set_pwd_mode( update_check_url_textfield, false);
     lv_textarea_set_one_line( update_check_url_textfield, true);
     lv_textarea_set_cursor_hidden( update_check_url_textfield, true);
@@ -99,108 +89,64 @@ void update_setup_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( update_reset_url_label, "set default url");
 }
 
+/**
+ * @brief update url callback function
+ */
 static void update_check_url_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         keyboard_set_textarea( obj );
     }
 }
 
+/**
+ * @brief update reset url string button callback function
+ */
 static void update_reset_url_event_cb( lv_obj_t * obj, lv_event_t event ) {
     if( event == LV_EVENT_CLICKED ) {
         lv_textarea_set_text( update_check_url_textfield, FIRMWARE_UPDATE_URL );
     }
 }
 
+/**
+ * @brief update autosync switch callback function
+ */
 static void update_check_autosync_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
-        case ( LV_EVENT_VALUE_CHANGED ):    update_config->autosync = lv_switch_get_state( obj );
+        case ( LV_EVENT_VALUE_CHANGED ):    update_config.autosync = lv_switch_get_state( obj );
                                             break;
     }
 }
 
+/**
+ * @brief update autoreset switch callback function
+ */
+static void update_check_autorestart_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
+    switch (event) {
+        case ( LV_EVENT_VALUE_CHANGED ):    update_config.autorestart = lv_switch_get_state( obj );
+                                            break;
+    }
+}
+
+/**
+ * @brief exit button callback function
+ */
 static void exit_update_check_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):           mainbar_jump_back();
-                                            strlcpy( update_config->updateurl , lv_textarea_get_text( update_check_url_textfield ), sizeof( update_config->updateurl ) );
-                                            update_save_config();
+                                            strlcpy( update_config.updateurl , lv_textarea_get_text( update_check_url_textfield ), FIRMWARE_UPDATE_URL_LEN );
+                                            update_config.save();
                                             break;
-    }
-}
-
-void update_save_config( void ) {
-    if ( SPIFFS.exists( UPDATE_CONFIG_FILE ) ) {
-        SPIFFS.remove( UPDATE_CONFIG_FILE );
-        log_i("remove old binary update config");
-    }
-
-    fs::File file = SPIFFS.open( UPDATE_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", UPDATE_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["autosync"] = update_config->autosync;
-        doc["updateurl"] = update_config->updateurl;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
-}
-
-void update_read_config( void ) {
-    if ( SPIFFS.exists( UPDATE_JSON_CONFIG_FILE ) ) {       
-        fs::File file = SPIFFS.open( UPDATE_JSON_CONFIG_FILE, FILE_READ );
-        if (!file) {
-            log_e("Can't open file: %s!", UPDATE_JSON_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            SpiRamJsonDocument doc( filesize * 2 );
-
-            DeserializationError error = deserializeJson( doc, file );
-            if ( error ) {
-                log_e("update check deserializeJson() failed: %s", error.c_str() );
-            }
-            else {
-                update_config->autosync = doc["autosync"].as<bool>();
-                strlcpy( update_config->updateurl, doc["updateurl"] | FIRMWARE_UPDATE_URL, sizeof( update_config->updateurl ) );
-            }        
-            doc.clear();
-        }
-        file.close();
-    }
-    else {
-        log_i("no json config exists, read from binary");
-        fs::File file = SPIFFS.open( UPDATE_CONFIG_FILE, FILE_READ );
-
-        if (!file) {
-            log_e("Can't open file: %s!", UPDATE_CONFIG_FILE );
-        }
-        else {
-            int filesize = file.size();
-            if ( filesize > sizeof( update_config ) ) {
-                log_e("Failed to read configfile. Wrong filesize!" );
-            }
-            else {
-                file.read( (uint8_t *)&update_config, filesize );
-                file.close();
-                update_save_config();
-                return; 
-            }
-        file.close();
-        }
     }
 }
 
 bool update_setup_get_autosync( void ) {
-    return( update_config->autosync );
+    return( update_config.autosync );
+}
+
+bool update_setup_get_autorestart( void ) {
+    return( update_config.autorestart );
 }
 
 char* update_setup_get_url( void ) {
-    return( update_config->updateurl );
+    return( update_config.updateurl );
 }

@@ -157,6 +157,12 @@
      */
     void blectl_set_enable_on_standby( bool enable_on_standby );
     /**
+     * @brief disable blueetooth only when disconnected
+     * 
+     * @param   disable_only_disconnected   true means enabled, false means disabled 
+     */
+    void blectl_set_disable_only_disconnected( bool disable_only_disconnected );
+    /**
      * @brief enable show notification
      * 
      * @param   show_notification   true means enabled, false means disabled 
@@ -175,6 +181,12 @@
      */
     bool blectl_get_enable_on_standby( void );
     /**
+     * @brief get the current disable_only_disconnected config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_disable_only_disconnected( void );
+    /**
      * @brief get the current show notification config
      * 
      * @return  true means enabled, false means disabled
@@ -186,6 +198,12 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_advertising( void );
+    /**
+     * @brief get the current custom audio notifications config
+     * 
+     * @return  the array of custom audio notifications
+     */
+    blectl_custom_audio* blectl_get_custom_audio_notifications( void );
     /**
      * @brief store the current configuration to SPIFFS
      */
@@ -248,5 +266,14 @@
      * @brief get the raw BLE Advertising
      */
     BLEAdvertising *blectl_get_ble_advertising( void );
+
+    /**
+     * @brief get the raw BLE Server
+     */
+    BLEServer *blectl_get_ble_server();
+    /**
+     * @brief get the raw BLE Advertising
+     */
+    BLEAdvertising *blectl_get_ble_advertising();
 
 #endif // _BLECTL_H
