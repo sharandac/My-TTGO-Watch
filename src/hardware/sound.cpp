@@ -220,10 +220,11 @@ void sound_set_enabled( bool enabled ) {
         /**
          * ttgo->enableAudio() is not working
          */
-        #if     defined(LILYGO_WATCH_2020_V1)
-                ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_ON);
-        #elif   defined(LILYGO_WATCH_2020_V3)
-                ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_ON);
+        delay( 50 );
+        #if     defined( LILYGO_WATCH_2020_V1 )
+                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
+        #elif   defined( LILYGO_WATCH_2020_V3 )
+                ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
         #endif
     }
     else {
@@ -234,10 +235,10 @@ void sound_set_enabled( bool enabled ) {
         /**
          * ttgo->disableAudio() is not working
          */
-        #if     defined(LILYGO_WATCH_2020_V1)
-                ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF);
-        #elif   defined(LILYGO_WATCH_2020_V3)
-                ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_OFF);
+        #if     defined( LILYGO_WATCH_2020_V1 )
+                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
+        #elif   defined( LILYGO_WATCH_2020_V3 )
+                ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
         #endif
     }
 }
@@ -251,6 +252,7 @@ void sound_play_spiffs_mp3( const char *filename ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
+        sound_set_enabled( sound_config.enable );
         log_i("playing file %s from SPIFFS", filename);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
@@ -269,6 +271,7 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
+        sound_set_enabled( sound_config.enable );
         log_i("playing audio (size %d) from PROGMEM ", len );
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
@@ -286,6 +289,7 @@ void sound_speak( const char *str ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
+        sound_set_enabled( sound_config.enable );
         log_i("Speaking text", str);
         is_speaking = true;
         sam->Say(out, str);
