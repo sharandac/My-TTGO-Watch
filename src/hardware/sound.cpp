@@ -217,14 +217,28 @@ void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( enabled ) {
-        ttgo->enableAudio();
+        /**
+         * ttgo->enableAudio() is not working
+         */
+        #if     defined(LILYGO_WATCH_2020_V1)
+                ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_ON);
+        #elif   defined(LILYGO_WATCH_2020_V3)
+                ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_ON);
+        #endif
     }
     else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-        ttgo->disableAudio();
+        /**
+         * ttgo->disableAudio() is not working
+         */
+        #if     defined(LILYGO_WATCH_2020_V1)
+                ttgo->power->setPowerOutPut(AXP202_LDO3, AXP202_OFF);
+        #elif   defined(LILYGO_WATCH_2020_V3)
+                ttgo->power->setPowerOutPut(AXP202_LDO4, AXP202_OFF);
+        #endif
     }
 }
 
