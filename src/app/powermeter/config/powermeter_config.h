@@ -19,42 +19,34 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLECTL_CONFIG_H
-    #define _BLECTL_CONFIG_H
+#ifndef _POWERMETER_CONFIG_H
+    #define _POWERMETER_CONFIG_H
 
     #include "utils/basejsonconfig.h"
 
-    #define CUSTOM_AUDIO_ENTRYS            20
-    #define BLECTL_JSON_COFIG_FILE         "/blectl.json"   /** @brief defines json config file name */
-
-    /**
-     * @brief custom audio notification structure
-     */
-    typedef struct {
-        char text[64]="";
-        char value[32]="";
-    } blectl_custom_audio;
-
+    #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
+    
     /**
      * @brief blectl config structure
      */
-    class blectl_config_t : public BaseJsonConfig {
+    class powermeter_config_t : public BaseJsonConfig {
         public:
-        blectl_config_t();
-        bool autoon = true;                     /** @brief auto on/off */
-        bool advertising = true;                /** @brief advertising on/off */
-        bool enable_on_standby = false;         /** @brief enable on standby on/off */
-        bool disable_only_disconnected = false; /** @brief disable only when disconnected on/off */
-        bool show_notification = true;          /** @brief enable show notifications */
-        int32_t txpower = 1;                    /** @brief tx power, valide values are from 0 to 4 */
-        blectl_custom_audio* custom_audio_notifications = NULL; /** @brief custom audio notifications config pointer */
+        powermeter_config_t();
+        char server[64] = "";
+        int32_t port = 1883;
+        bool ssl = false;
+        char user[32] = "";
+        char password[32] = "";
+        char topic[64] = "";
+        bool autoconnect = false;
+        bool widget = false;
 
         protected:
         ////////////// Available for overloading: //////////////
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
         virtual bool onDefault( void );
-        virtual size_t getJsonBufferSize() { return 2000; }
+        virtual size_t getJsonBufferSize() { return 1000; }
     } ;
 
-#endif // _BLECTL_CONFIG_H
+#endif // _POWERMETER_CONFIG_H

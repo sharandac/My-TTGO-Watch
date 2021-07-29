@@ -23,6 +23,7 @@
 
 #include "powermeter_app.h"
 #include "powermeter_setup.h"
+#include "config/powermeter_config.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -203,7 +204,7 @@ static void powermeter_setup_hibernate_callback ( void ) {
     strlcpy( powermeter_config->password, lv_textarea_get_text( powermeter_password_textfield ), sizeof( powermeter_config->password ) );
     strlcpy( powermeter_config->topic, lv_textarea_get_text( powermeter_topic_textfield ), sizeof( powermeter_config->topic ) );
     powermeter_config->port = atoi(lv_textarea_get_text( powermeter_port_textfield ));
-    powermeter_save_config();
+    powermeter_config->save();
 }
 
 static void powermeter_textarea_event_cb( lv_obj_t * obj, lv_event_t event ) {

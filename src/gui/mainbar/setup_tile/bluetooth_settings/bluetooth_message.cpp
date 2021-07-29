@@ -113,6 +113,7 @@ int32_t bluetooth_get_msg_entrys( void );
 const char* bluetooth_get_msg_entry( int32_t entry );
 void bluetooth_print_msg_chain( void );
 void bluetooth_message_show_msg( int32_t entry );
+void bluetooth_message_play_audio( int32_t entry );
 
 void bluetooth_message_tile_setup( void ) {
     /*
@@ -332,12 +333,15 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     /*
      * only alert or alret and showing msg
      */
+    int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     if ( blectl_get_show_notification() ) {
-        bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
+        bluetooth_message_show_msg( entry );
+        bluetooth_message_play_audio( entry );
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
+    } else {
+        bluetooth_message_play_audio( entry );
     }
     bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
-    sound_play_progmem_wav( piep_wav, piep_wav_len );
     motor_vibe(10);
     /*
      * set msg icon indicator an the app icon
@@ -484,5 +488,97 @@ void bluetooth_message_show_msg( int32_t entry ) {
             lv_obj_invalidate( lv_scr_act() );
         }
     }        
+    doc.clear();
+}
+
+void bluetooth_message_play_audio( int32_t entry ) {
+    bool found = false;
+    static uint64_t nextmillis = 0;
+
+    /*
+     * check if audio played recently
+     */
+    if ( nextmillis >= millis() ) {
+        log_i("skip playing audio notification, because played one recently");
+        nextmillis += 5000L;
+        return;
+    }
+    nextmillis = millis() + 10000L;
+    /*
+     * if an msg set?
+     */
+    const char *msg = msg_chain_get_msg_entry( bluetooth_msg_chain, entry );
+    if ( msg == NULL ) {
+        return;
+    }
+    /*
+     * check msg number to print pre/next arrow
+     */
+    if ( entry > 0 ) {
+        lv_obj_set_hidden( bluetooth_prev_msg_btn, false );
+    }
+    else {
+        lv_obj_set_hidden( bluetooth_prev_msg_btn, true );
+    }
+    if ( entry < ( msg_chain_get_entrys( bluetooth_msg_chain ) -1 ) ) {
+        lv_obj_set_hidden( bluetooth_next_msg_btn, false );
+    }
+    else {
+        lv_obj_set_hidden( bluetooth_next_msg_btn, true );
+    }
+    /*
+     * allocate json memory and serialize msg
+     */
+    SpiRamJsonDocument doc( strlen( msg ) * 4 );
+    DeserializationError error = deserializeJson( doc, msg );
+    if ( error ) {
+        log_e("bluetooth message deserializeJson() failed: %s", error.c_str() );
+    }
+    else {
+        const char *message = "";
+
+        if ( doc["body"] ) {
+            message = doc["body"];
+        }
+        else if ( doc["title"] ) {
+            message = doc["title"];
+        }
+
+        blectl_custom_audio* custom_audio_notifications = blectl_get_custom_audio_notifications();
+        /**
+         * check for custom audio notifications
+         */
+        for ( int entry = 0; entry < CUSTOM_AUDIO_ENTRYS; entry++) {
+            blectl_custom_audio custom_audio_notification = custom_audio_notifications[ entry ];
+
+            if ( strlen( custom_audio_notification.text ) <= 0 )
+                continue;
+            if ( strstr( message, custom_audio_notification.text ) == NULL )
+                continue;
+
+            found = true;
+
+            if ( strlen( custom_audio_notification.value ) <= 1 ) {
+                char tts[128];
+                const char *text = message;
+                if ( !strncmp( message, "/", 1 ) ) text = strchr( message, ' ' );
+                snprintf( tts, sizeof( tts ), "%s.", text );
+                
+                sound_speak( tts );
+                log_i("playing custom tts audio notification: \"%s\"", tts );
+            }
+            else {
+                sound_play_spiffs_mp3( custom_audio_notification.value );
+                log_i("playing custom mp3 audio notification: \"%s\"", custom_audio_notification.value );
+            }
+        }
+        /**
+         * if not custom audio notification found, play default piep
+         */
+        if ( !found ) {
+            sound_play_progmem_wav( piep_wav, piep_wav_len );
+            log_i("playing default mp3 audio notification");
+        }
+    }
     doc.clear();
 }
