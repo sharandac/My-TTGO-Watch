@@ -23,14 +23,9 @@
     #define _POWERMETER_APP_H
 
     #include "gui/icon.h"
+    #include "config/powermeter_config.h"
 
     #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
-
-    typedef struct {
-        char topic[64] = "";
-        bool autoconnect = false;
-        bool widget = false;
-    } powermeter_config_t;
 
     void powermeter_app_setup( void );
     uint32_t powermeter_get_app_main_tile_num( void );

@@ -24,30 +24,29 @@
 
     #include <TTGO.h>
 
-    #define UPDATE_CONFIG_FILE             "/update.cfg"
-    #define UPDATE_JSON_CONFIG_FILE        "/update.json"
-
-    #if defined( LILYGO_WATCH_2020_V1 )
-        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.version.json"
-    #endif
-    #if defined( LILYGO_WATCH_2020_V2 )
-        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v2.version.json"
-    #endif
-    #if defined( LILYGO_WATCH_2020_V3 )
-        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"
-    #endif
-
-    #if !defined( FIRMWARE_UPDATE_URL )
-        #error "no ttgo t-watch version defined"
-    #endif
-
-    typedef struct {
-        bool autosync = true;
-        char updateurl[512] = FIRMWARE_UPDATE_URL;
-    } update_config_t;
-
+    /**
+     * @brief setup update setup tile
+     * 
+     * @param tile_num tile number
+     */
     void update_setup_tile_setup( uint32_t tile_num );
+    /**
+     * @brief get autosync config state
+     * 
+     * @return true if sync enablled, false if not
+     */
     bool update_setup_get_autosync( void );
+    /**
+     * @brief get autorestart state
+     * 
+     * @return true if reset after success update, false if not
+     */
+    bool update_setup_get_autorestart( void );
+    /**
+     * @brief get update file url
+     * 
+     * @return pointer to url string
+     */
     char* update_setup_get_url( void );
 
 #endif // _UPDATE_SETUP_H

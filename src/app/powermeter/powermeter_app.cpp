@@ -25,6 +25,7 @@
 #include "powermeter_app.h"
 #include "powermeter_main.h"
 #include "powermeter_setup.h"
+#include "config/powermeter_config.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -51,7 +52,7 @@ static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event );
 // setup routine for example app
 void powermeter_app_setup( void ) {
 
-    powermeter_load_config();
+    powermeter_config.load();
 
     // register 2 vertical tiles and get the first tile number and save it for later use
     powermeter_app_main_tile_num = mainbar_add_app_tile( 1, 2, "Powermeter App" );
@@ -89,55 +90,6 @@ static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         statusbar_hide( true );
                                         break;
     }    
-}
-
-
-powermeter_config_t *powermeter_get_config( void ) {
-    return( &powermeter_config );
-}
-
-void powermeter_load_config( void ) {
-    fs::File file = SPIFFS.open( POWERMETER_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", POWERMETER_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 4 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            strlcpy( powermeter_config.topic, doc["powermeter"]["topic"], sizeof( powermeter_config.topic ) );
-            powermeter_config.autoconnect = doc["powermeter"]["autoconnect"] | false;
-            powermeter_config.widget = doc["powermeter"]["widget"] | false;
-        }        
-        doc.clear();
-    }
-    file.close();
-}
-
-void powermeter_save_config( void ) {
-    fs::File file = SPIFFS.open( POWERMETER_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", POWERMETER_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["powermeter"]["topic"] = powermeter_config.topic;
-        doc["powermeter"]["autoconnect"] = powermeter_config.autoconnect;
-        doc["powermeter"]["widget"] = powermeter_config.widget;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
 }
 
 

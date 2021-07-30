@@ -34,20 +34,26 @@
     #define STATUSBAR_HIDE              true
     #define STATUSBAR_SHOW              false
 
+    /**
+     * @brief mainbar history structure
+     */
     typedef struct {
-        uint32_t         entrys;
-        lv_point_t       tile[ MAINBAR_MAX_HISTORY ];
-        bool             statusbar[ MAINBAR_MAX_HISTORY ];
-        lv_anim_enable_t anim[ MAINBAR_MAX_HISTORY ];
+        uint32_t         entrys;                                /** @brief number of history entrys */
+        lv_point_t       tile[ MAINBAR_MAX_HISTORY ];           /** @brief stored tile coordinates */
+        bool             statusbar[ MAINBAR_MAX_HISTORY ];      /** @brief stored statusbar state */
+        lv_anim_enable_t anim[ MAINBAR_MAX_HISTORY ];           /** @brief stored anim enable state */
     } mainbar_history_t;
 
+    /**
+     * @brief mainbar tile controll structure
+     */
     typedef struct {
-        lv_obj_t *tile;
-        MAINBAR_CALLBACK_FUNC activate_cb;
-        MAINBAR_CALLBACK_FUNC hibernate_cb;
-        uint16_t x;
-        uint16_t y;
-        const char *id;
+        lv_obj_t *tile;                                         /** @brief pointer to the lv tile obj */
+        MAINBAR_CALLBACK_FUNC activate_cb;                      /** @brief pointer to a activate function when enter this tile */
+        MAINBAR_CALLBACK_FUNC hibernate_cb;                     /** @brief pointer to a hibernate function when leave this tile */
+        uint16_t x;                                             /** @brief tile x pos */
+        uint16_t y;                                             /** @brief tile y pos */
+        const char *id;                                         /** @brief pointer to the tile id */
     } lv_tile_t;
 
     /**
