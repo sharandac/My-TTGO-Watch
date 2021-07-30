@@ -117,7 +117,6 @@ static void powermeter_setup_hibernate_callback ( void ) {
     keyboard_hide();
     powermeter_config_t *powermeter_config = powermeter_get_config();
     strlcpy( powermeter_config->topic, lv_textarea_get_text( powermeter_topic_textfield ), sizeof( powermeter_config->topic ) );
-    powermeter_config->port = atoi(lv_textarea_get_text( powermeter_port_textfield ));
     powermeter_config->save();
 }
 
