@@ -32,11 +32,6 @@
     class powermeter_config_t : public BaseJsonConfig {
         public:
         powermeter_config_t();
-        char server[64] = "";
-        int32_t port = 1883;
-        bool ssl = false;
-        char user[32] = "";
-        char password[32] = "";
         char topic[64] = "";
         bool autoconnect = false;
         bool widget = false;
