@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 18 12:37:31 2020
+ *   Aug 11 17:13:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,34 +19,34 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLUETOOTH_MESSAGE_H
-    #define _BLUETOOTH_MESSAGE_H
+#ifndef _POWERMETER_CONFIG_H
+    #define _POWERMETER_CONFIG_H
 
-    #include <TTGO.h>
-    #include "lvgl/lvgl.h"
+    #include "utils/basejsonconfig.h"
 
-    struct src_icon_t {
-        const char src_name[ 24 ];
-        const lv_img_dsc_t *img;
-    };
-
-    void bluetooth_message_tile_setup( void );
+    #define POWERMETER_JSON_CONFIG_FILE        "/powermeter.json"
+    
     /**
-     * @brief disable show bluetooth message notification
+     * @brief blectl config structure
      */
-    void bluetooth_message_disable( void );
-    /**
-     * @brief enable show bluettoth message notification
-     */
-    void bluetooth_message_enable( void );
-    /**
-     * @brief add a msg to msg queue
-     * 
-     * @param msg   pointer to the msg string
-     * 
-     * @return  true if add was success od false if failed
-     */
-    bool bluetooth_message_queue_msg( const char *msg );
-    int32_t bluetooth_get_number_of_msg( void );
+    class powermeter_config_t : public BaseJsonConfig {
+        public:
+        powermeter_config_t();
+        char server[64] = "";
+        int32_t port = 1883;
+        bool ssl = false;
+        char user[32] = "";
+        char password[32] = "";
+        char topic[64] = "";
+        bool autoconnect = false;
+        bool widget = false;
 
-#endif // _BLUETOOTH_MESSAGE_H
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual bool onDefault( void );
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
+
+#endif // _POWERMETER_CONFIG_H

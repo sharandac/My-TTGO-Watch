@@ -172,7 +172,6 @@ void execute_ir_cmd(InfraButton* config) {
         if (config->raw != nullptr && config->rawLength > 0)
             irsend.sendRaw(config->raw, config->rawLength, 38);
         break;
-    
     default:
         log_e("IR Protocol %d not supported, please add it first!", (int)config->mode);
         break;

@@ -296,6 +296,18 @@ void update_Task( void * pvParameters ) {
                 lv_label_set_text( update_status_label, "update ok, turn off and on!" );
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                 lv_label_set_text( update_btn_label, "restart");
+                if( update_setup_get_autorestart() ) {
+                    TTGOClass *ttgo = TTGOClass::getWatch();
+                    log_i("System reboot by user");
+                    motor_vibe(20);
+                    delay(20);
+                    display_standby();
+                    ttgo->stopLvglTick();
+                    SPIFFS.end();
+                    log_i("SPIFFS unmounted!");
+                    delay(500);
+                    ESP.restart();
+                }
             }
             else {
                 reset = false;

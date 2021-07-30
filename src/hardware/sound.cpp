@@ -76,6 +76,17 @@ void sound_setup( void ) {
      * config sound driver and interface
      */
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        /*
+        * set sound chip voltage on V1
+        */
+        #if defined( LILYGO_WATCH_2020_V1 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
+                ttgo->power->setLDO3Voltage( 3300 );
+        #endif
+        /**
+         * set sound driver
+         */
         out = new AudioOutputI2S();
         out->SetPinout( TWATCH_DAC_IIS_BCK, TWATCH_DAC_IIS_WS, TWATCH_DAC_IIS_DOUT );
         sound_set_volume_config( sound_config.volume );
@@ -88,15 +99,6 @@ void sound_setup( void ) {
         */
         powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sound_powermgm_event_cb, "powermgm sound" );
         powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, sound_powermgm_loop_cb, "powermgm sound loop" );
-        /*
-        * enable sound
-        */
-        #if defined( LILYGO_WATCH_2020_V1 )
-                TTGOClass *ttgo = TTGOClass::getWatch();
-                ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-                ttgo->power->setLDO3Voltage( 3000 );
-                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-        #endif
         sound_set_enabled( sound_config.enable );
 
         sound_send_event_cb( SOUNDCTL_ENABLED, (void *)&sound_config.enable );
@@ -215,23 +217,29 @@ void sound_set_enabled( bool enabled ) {
     TTGOClass *ttgo = TTGOClass::getWatch();
 
     if ( enabled ) {
-#if     defined(LILYGO_WATCH_2020_V1)
-        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-        ttgo->power->setLDO3Voltage( 3000 );
-        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
-#endif
-        ttgo->enableAudio();
+        /**
+         * ttgo->enableAudio() is not working
+         */
+        delay( 50 );
+        #if     defined( LILYGO_WATCH_2020_V1 )
+                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
+        #elif   defined( LILYGO_WATCH_2020_V3 )
+                ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
+        #endif
     }
     else {
         if ( sound_init ) {
             if ( mp3->isRunning() ) mp3->stop();
             if ( wav->isRunning() ) wav->stop();
         }
-#if     defined(LILYGO_WATCH_2020_V1)
-        ttgo->power->setLDO3Mode( AXP202_LDO3_MODE_DCIN );
-        ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
-#endif
-        ttgo->disableAudio();
+        /**
+         * ttgo->disableAudio() is not working
+         */
+        #if     defined( LILYGO_WATCH_2020_V1 )
+                ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_OFF );
+        #elif   defined( LILYGO_WATCH_2020_V3 )
+                ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_OFF );
+        #endif
     }
 }
 
@@ -244,6 +252,7 @@ void sound_play_spiffs_mp3( const char *filename ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
+        sound_set_enabled( sound_config.enable );
         log_i("playing file %s from SPIFFS", filename);
         spliffs_file = new AudioFileSourceSPIFFS(filename);
         id3 = new AudioFileSourceID3(spliffs_file);
@@ -262,6 +271,7 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
+        sound_set_enabled( sound_config.enable );
         log_i("playing audio (size %d) from PROGMEM ", len );
         progmem_file = new AudioFileSourcePROGMEM( data, len );
         wav->begin(progmem_file, out);
@@ -279,7 +289,8 @@ void sound_speak( const char *str ) {
     }
 
     if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
-        log_i("Speaking text: %s", str);
+        sound_set_enabled( sound_config.enable );
+        log_i("Speaking text", str);
         is_speaking = true;
         sam->Say(out, str);
         is_speaking = false;
@@ -370,7 +381,10 @@ void sound_set_volume_config( uint8_t volume ) {
 }
 
 bool sound_is_silenced( void ) {
-    if (!sound_config.silence_timeframe) return false;
+    if ( !sound_config.silence_timeframe ) {
+        log_i("no silence sound timeframe");
+        return( false );
+    }
 
     struct tm start;
     struct tm end;

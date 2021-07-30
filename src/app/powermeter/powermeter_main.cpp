@@ -24,6 +24,7 @@
 
 #include "powermeter_app.h"
 #include "powermeter_main.h"
+#include "config/powermeter_config.h"
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"

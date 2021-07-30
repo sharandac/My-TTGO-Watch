@@ -132,11 +132,13 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
          * set powermgm wakeup event and save BMA_* event
          */
         if ( ttgo->bma->isDoubleClick() ) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             BMA_doubleclick = true;
         }
         if ( ttgo->bma->isTilt() ) {
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             BMA_tilt = true;
         }
         if ( ttgo->bma->isStepCounter() ) {
