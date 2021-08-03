@@ -251,12 +251,16 @@ void sound_play_spiffs_mp3( const char *filename ) {
         return;
     }
 
-    if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
-        sound_set_enabled( sound_config.enable );
-        log_i("playing file %s from SPIFFS", filename);
-        spliffs_file = new AudioFileSourceSPIFFS(filename);
-        id3 = new AudioFileSourceID3(spliffs_file);
-        mp3->begin(id3, out);
+    if ( sound_config.enable && sound_init ) {
+        if ( !sound_is_silenced() ) {
+            sound_set_enabled( sound_config.enable );
+            log_i("playing file %s from SPIFFS", filename);
+            spliffs_file = new AudioFileSourceSPIFFS(filename);
+            id3 = new AudioFileSourceID3(spliffs_file);
+            mp3->begin(id3, out);
+        } else {
+            log_i("Cannot play mp3, sound is silenced");
+        }
     } else {
         log_i("Cannot play mp3, sound is disabled");
     }
@@ -270,11 +274,15 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
         return;
     }
 
-    if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
-        sound_set_enabled( sound_config.enable );
-        log_i("playing audio (size %d) from PROGMEM ", len );
-        progmem_file = new AudioFileSourcePROGMEM( data, len );
-        wav->begin(progmem_file, out);
+    if ( sound_config.enable && sound_init ) {
+        if ( !sound_is_silenced() ) {
+            sound_set_enabled( sound_config.enable );
+            log_i("playing audio (size %d) from PROGMEM ", len );
+            progmem_file = new AudioFileSourcePROGMEM( data, len );
+            wav->begin(progmem_file, out);
+        } else {
+            log_i("Cannot play mp3, sound is silenced");
+        }
     } else {
         log_i("Cannot play wav, sound is disabled");
     }
@@ -288,12 +296,16 @@ void sound_speak( const char *str ) {
         return;
     }
 
-    if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
-        sound_set_enabled( sound_config.enable );
-        log_i("Speaking text", str);
-        is_speaking = true;
-        sam->Say(out, str);
-        is_speaking = false;
+    if ( sound_config.enable && sound_init ) {
+        if ( !sound_is_silenced() ) {
+            sound_set_enabled( sound_config.enable );
+            log_i("Speaking text", str);
+            is_speaking = true;
+            sam->Say(out, str);
+            is_speaking = false;
+        } else {
+            log_i("Cannot play mp3, sound is silenced");
+        }
     }
     else {
         log_i("Cannot speak, sound is disabled");
