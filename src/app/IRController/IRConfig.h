@@ -5,7 +5,7 @@
 #include "quickglui/quickglui.h"
 #include "IRButton.h"
 
-#define MAX_IR_BUTTONS 64
+#define MAX_IR_BUTTONS 96
 
 class IRConfig : public BaseJsonConfig
 {
