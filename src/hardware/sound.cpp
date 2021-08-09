@@ -220,12 +220,12 @@ void sound_set_enabled( bool enabled ) {
         /**
          * ttgo->enableAudio() is not working
          */
-        delay( 50 );
         #if     defined( LILYGO_WATCH_2020_V1 )
                 ttgo->power->setPowerOutPut( AXP202_LDO3, AXP202_ON );
         #elif   defined( LILYGO_WATCH_2020_V3 )
                 ttgo->power->setPowerOutPut( AXP202_LDO4, AXP202_ON );
         #endif
+        delay( 50 );
     }
     else {
         if ( sound_init ) {
