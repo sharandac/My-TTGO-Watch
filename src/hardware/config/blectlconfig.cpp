@@ -68,8 +68,8 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
 
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
         if ( doc["custom_audio_notifications"][ i ]["text"] && doc["custom_audio_notifications"][ i ]["value"] ) {
-            strlcpy( custom_audio_notifications[ i ].text    , doc["custom_audio_notifications"][ i ]["text"], sizeof( custom_audio_notifications[ i ].text ) );
-            strlcpy( custom_audio_notifications[ i ].value, doc["custom_audio_notifications"][ i ]["value"], sizeof( custom_audio_notifications[ i ].value ) );
+            strlcpy( custom_audio_notifications[ i ].text   , doc["custom_audio_notifications"][ i ]["text"], sizeof( custom_audio_notifications[ i ].text ) );
+            strlcpy( custom_audio_notifications[ i ].value  , doc["custom_audio_notifications"][ i ]["value"], sizeof( custom_audio_notifications[ i ].value ) );
         }
     }
   
@@ -77,5 +77,30 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
 }
 
 bool blectl_config_t::onDefault( void ) {
+    /*
+     * allocate custom audio notifications if needed
+     */
+    if ( custom_audio_notifications == NULL ) {
+        custom_audio_notifications = ( blectl_custom_audio* )CALLOC( sizeof( blectl_custom_audio ) * CUSTOM_AUDIO_ENTRYS, 1 );
+        if( !custom_audio_notifications ) {
+            log_e("blectl_custom_audio calloc faild");
+            while(true);
+        }
+    }
+    /*
+     * clean custom audio notifications
+     */
+    for ( int entry = 0 ; entry < CUSTOM_AUDIO_ENTRYS ; entry++ ) {
+      custom_audio_notifications[ entry ].text[ 0 ] = '\0';
+      custom_audio_notifications[ entry ].value[ 0 ] = '\0';
+    }
+
+    autoon = true;
+    advertising = true;
+    enable_on_standby = false;
+    disable_only_disconnected = false;
+    txpower = 1;
+    show_notification = true;
+
     return true;
 }
