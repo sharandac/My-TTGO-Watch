@@ -153,7 +153,48 @@ You can also have the next alarm displayed on the main face.
 
 ## ir-remote
 
-For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator).
+For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConfigurator). For an example ir-remote.json configuration file see [here](https://github.com/d03n3rfr1tz3/TTGO.T-Watch.2020/blob/master/conf/ir-remote.json.example).
+
+```json
+{
+    "pages": [{
+            "Power": {
+                "m": 7,
+                "hex": "E0E040BF"
+            },
+            .
+            .
+            .
+            "Stop": {
+                "m": 7,
+                "hex": "E0E0629D"
+            }
+        }
+    ],
+    "defBtnHeight": 33,
+    "defBtnWidth": 65,
+    "defSpacing": 2
+}
+```
+
+IR-modes supported:
+
+RC5 = 1 
+RC6 = 2
+NEC = 3
+SONY = 4
+PANASONIC = 5
+JVC = 6
+SAMSUNG = 7
+LG = 10
+SHARP = 14
+RAW = 30
+SAMSUNG36 = 56
+
+IR-data format supported:
+
+raw
+hex
 
 ## watchface
 
