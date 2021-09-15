@@ -19,10 +19,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <WiFi.h>
 #include "config.h"
 #include "wlan_settings.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
@@ -30,20 +28,24 @@
 #include "gui/setup.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
-
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
 #include "hardware/blectl.h"
+#include "utils/bluejsonrequest.h"
 
-#ifdef ENABLE_WEBSERVER
-    #include "utils/webserver/webserver.h"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+    #include <WiFi.h>
+
+    #ifdef ENABLE_WEBSERVER
+        #include "utils/webserver/webserver.h"
+    #endif
+    #ifdef ENABLE_FTPSERVER
+        #include "utils/ftpserver/ftpserver.h"
+    #endif
 #endif
-#ifdef ENABLE_FTPSERVER
-    #include "utils/ftpserver/ftpserver.h"
-#endif
-
-
-#include "quickglui/common/bluejsonrequest.h"
 
 lv_obj_t *wifi_settings_tile=NULL;
 lv_style_t wifi_settings_style;
@@ -104,7 +106,7 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_set_event_cb( wifi_onoff, wifi_onoff_event_handler);
 
     wifiname_list = lv_list_create( wifi_settings_tile, NULL);
-    lv_obj_set_size( wifiname_list, lv_disp_get_hor_res( NULL ), 160);
+    lv_obj_set_size( wifiname_list, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - STATUSBAR_HEIGHT - 40 );
     lv_style_init( &wifi_list_style  );
     lv_style_set_border_width( &wifi_list_style , LV_OBJ_PART_MAIN, 0);
     lv_style_set_radius( &wifi_list_style , LV_OBJ_PART_MAIN, 0);
@@ -114,7 +116,7 @@ void wlan_settings_tile_setup( void ) {
     wlan_password_tile_setup( wifi_password_tile_num );
     wlan_setup_tile_setup( wifi_setup_tile_num );
 
-    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN , wifi_setup_wifictl_event_cb, "wifi network scan" );
+    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN | WIFICTL_SCAN_ENTRY, wifi_setup_wifictl_event_cb, "wifi network scan" );
 }
 
 uint32_t wifi_get_setup_tile_num( void ) {
@@ -124,27 +126,19 @@ uint32_t wifi_get_setup_tile_num( void ) {
 bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case    WIFICTL_ON:
-            lv_switch_on( wifi_onoff, LV_ANIM_OFF );
-            break;
+                    lv_switch_on( wifi_onoff, LV_ANIM_OFF );
+                    break;
         case    WIFICTL_OFF:
-            lv_switch_off( wifi_onoff, LV_ANIM_OFF );
-            while ( lv_list_remove( wifiname_list, 0 ) );
-            break;
+                    lv_switch_off( wifi_onoff, LV_ANIM_OFF );
+                    while ( lv_list_remove( wifiname_list, 0 ) );
+                    break;
         case    WIFICTL_SCAN:
-            while ( lv_list_remove( wifiname_list, 0 ) );
-
-            int len = WiFi.scanComplete();
-            for( int i = 0 ; i < len ; i++ ) {
-                if ( wifictl_is_known( WiFi.SSID(i).c_str() ) ) {
-                    lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &unlock_16px, WiFi.SSID(i).c_str() );
+                    while ( lv_list_remove( wifiname_list, 0 ) );
+                    break;
+        case    WIFICTL_SCAN_ENTRY:
+                    lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, wifictl_is_known( (const char*)arg )?&unlock_16px:&lock_16px , (const char*)arg );
                     lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
-                }
-                else {
-                    lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, &lock_16px, WiFi.SSID(i).c_str() );
-                    lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
-                }
-            }            
-            break;
+                    break;
     }
     return( true );
 }
@@ -204,7 +198,9 @@ void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     lv_obj_add_style( mac_label, LV_IMGBTN_PART_MAIN, &wifi_password_style );
     lv_obj_set_width( mac_label, lv_disp_get_hor_res( NULL ) );
     lv_obj_align( mac_label, wifi_password_tile, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
+#ifndef NATIVE_64BIT
     lv_label_set_text_fmt( mac_label, "MAC: %s", WiFi.macAddress().c_str());
+#endif
 
     lv_obj_t *apply_btn = wf_add_image_button( wifi_password_tile, check_32px, apply_wifi_password_event_cb, &wifi_password_style );
     lv_obj_align( apply_btn, wifi_password_pass_textfield, LV_ALIGN_OUT_BOTTOM_RIGHT, -10, 10 );
@@ -329,12 +325,15 @@ static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) 
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_webserver( lv_switch_get_state( obj ) );
+    
+#ifndef ENABLE_WEBSERVER
                                         if ( lv_switch_get_state( obj ) ) {
                                             asyncwebserver_start();
                                         }
                                         else {
                                             asyncwebserver_end();
                                         }
+#endif
                                         break;
     }
 }

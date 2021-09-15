@@ -20,8 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include "quickglui/quickglui.h"
+//#include "quickglui/quickglui.h"
 
 #include "watchface_manager.h"
 #include "watchface_setup.h"
@@ -33,8 +32,26 @@
 #include "gui/widget_factory.h"
 #include "gui/statusbar.h"
 
-#include "utils/decompress/decompress.h"
 #include "utils/uri_load/uri_load.h"
+
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+#else
+    #include <WiFi.h>
+    #include <Arduino.h>
+
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+
+    #include "utils/decompress/decompress.h"
+#endif
 
 watchface_config_t watchface_config;
 

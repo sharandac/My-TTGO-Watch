@@ -23,8 +23,6 @@
 #ifndef _GPS_STATUS_SETUP_H
     #define _GPS_STATUS_SETUP_H
 
-    #include <TTGO.h>
-
     void gps_status_setup_setup( uint32_t tile_num );
 
 #endif // _GPS_STATUS_SETUP_H

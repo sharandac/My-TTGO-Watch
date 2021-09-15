@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "gps_status.h"
 #include "gps_status_setup.h"
@@ -30,6 +29,12 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 lv_obj_t *gps_status_setup_tile = NULL;
 lv_style_t gps_status_setup_style;
@@ -67,7 +72,7 @@ void gps_status_setup_setup( uint32_t tile_num ) {
 
 static void gps_status_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): Serial.printf( "switch value = %d\r\n", lv_switch_get_state( obj ) );
+        case( LV_EVENT_VALUE_CHANGED ): log_i( "switch value = %d\r\n", lv_switch_get_state( obj ) );
                                         break;
     }
 }

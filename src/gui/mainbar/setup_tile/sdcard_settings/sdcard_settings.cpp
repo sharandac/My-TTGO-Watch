@@ -22,8 +22,6 @@
  */
 #include "config.h"
 #include "sdcard_settings.h"
-#include <Arduino.h>
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
@@ -31,7 +29,14 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-#include "utils/webserver/webserver.h"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include "utils/webserver/webserver.h"
+    #include <SD.h>
+    #include <SPIFFS.h>
+    #include <Arduino.h>
+#endif
 
 lv_obj_t *sdcard_settings_tile = NULL;
 lv_style_t sdcard_settings_style;
@@ -41,6 +46,7 @@ lv_obj_t *sdcard_fs_browser_onoff = NULL;
 LV_IMG_DECLARE(sdcard_settings_64px);
 
 static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event);
+static void exit_sdcard_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t event);
 
 void sdcard_settings_tile_setup(void)
@@ -54,7 +60,7 @@ void sdcard_settings_tile_setup(void)
     icon_t *utilities_setup_icon = setup_register("SD card", &sdcard_settings_64px, enter_sdcard_settings_event_cb);
     setup_hide_indicator(utilities_setup_icon);
 
-    lv_obj_t *header = wf_add_settings_header( sdcard_settings_tile, "SD card setup" );
+    lv_obj_t *header = wf_add_settings_header( sdcard_settings_tile, "SD card setup", exit_sdcard_setup_event_cb );
     lv_obj_align(header, sdcard_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10);
 
     lv_obj_t *sdcard_fs_browser_enable_cont = wf_add_labeled_switch( sdcard_settings_tile,
@@ -137,6 +143,13 @@ static void enter_sdcard_settings_event_cb(lv_obj_t *obj, lv_event_t event) {
     }
 }
 
+static void exit_sdcard_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
+                                        break;
+    }
+}
+
 static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t event)
 {
     if (event == LV_EVENT_VALUE_CHANGED)
@@ -150,8 +163,10 @@ static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t even
         }
         else
         {
+#ifndef NATIVE_64BIT
             log_d("enable SPIFFS");
             setFsEditorFilesystem(SPIFFS);
+#endif
         }
     }
 }

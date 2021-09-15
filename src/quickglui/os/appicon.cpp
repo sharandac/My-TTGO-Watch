@@ -13,6 +13,17 @@
 #include <gui/app.h>
 #include <gui/widget.h>
 
+#ifdef NATIVE_64BIT
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+        #include <Arduino.h>
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
 ApplicationIcon::ApplicationIcon(Application& app) : application(app) {}
 
 ApplicationIcon& ApplicationIcon::showIndicator(icon_indicator_t value) {
@@ -83,7 +94,7 @@ ApplicationIcon& ApplicationIcon::registerAppIcon(const char* title, const lv_im
      * Replace spaces with new line break to fit space in case of long text
      */
     char buf[64] = {0};
-    strlcpy(buf, title, sizeof(buf)-1);
+    strncpy(buf, title, sizeof(buf)-1);
     if (strlen(buf) > 6) {
         char* s = buf; int k = 0;
         while (*s != 0) {

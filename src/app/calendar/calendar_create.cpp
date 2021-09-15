@@ -14,7 +14,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "calendar.h"
 #include "calendar_db.h"
@@ -30,15 +29,33 @@
 #include "gui/widget_styles.h"
 
 #include "utils/alloc.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 /**
  * calendar tile store
  */
 uint32_t calendar_create_tile_num;                  /** @brief allocated calendar ctreate/edit tile number */
 uint32_t calendar_create_date_select_tile_num;      /** @brief allocated calendar date select tile number */
 /**
- * calendar icon and fonts
+ * calendar icon
  */
-LV_FONT_DECLARE(Ubuntu_12px);                       /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_12px);                   /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_32px);                   /** @brief calendar font */
+
+#if defined( M5PAPER )
+    lv_font_t *date_create_font = &Ubuntu_32px;
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    lv_font_t *date_create_font = &Ubuntu_12px;
+#endif
 /**
  * lv objects
  */
@@ -111,17 +128,18 @@ void calendar_create_build_ui( void ) {
     lv_style_set_radius( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    lv_style_set_bg_opa( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
+    lv_style_set_bg_opa( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
     /**
      * 
      */
     calendar_create_date_select = lv_calendar_create( calendar_create_date_select_tile, NULL );
-    lv_obj_set_size( calendar_create_date_select, 190, 240 );
+    lv_obj_set_size( calendar_create_date_select, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE, lv_disp_get_ver_res( NULL ) );
     lv_obj_align( calendar_create_date_select, calendar_create_date_select_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_obj_set_event_cb( calendar_create_date_select, calendar_create_date_selected_event_cb );
     lv_obj_add_style( calendar_create_date_select, LV_OBJ_PART_MAIN, &calendar_create_date_select_style );
+    lv_obj_set_style_local_text_font( calendar_create_date_select, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, date_create_font );
     lv_obj_set_style_local_text_color( calendar_create_date_select, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, LV_COLOR_BLACK );
-    lv_obj_set_style_local_text_font( calendar_create_date_select, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, &Ubuntu_12px );
+    lv_obj_set_style_local_text_font( calendar_create_date_select, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, date_create_font );
     lv_obj_set_style_local_text_color( calendar_create_date_select, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_obj_set_style_local_bg_color( calendar_create_date_select, LV_CALENDAR_PART_DATE, LV_STATE_CHECKED, LV_COLOR_RED );
     lv_obj_set_style_local_bg_color( calendar_create_date_select, LV_CALENDAR_PART_DATE, LV_STATE_FOCUSED, LV_COLOR_BLUE );
@@ -129,7 +147,7 @@ void calendar_create_build_ui( void ) {
      * add exit button
      */
     lv_obj_t *date_select_exit_button = wf_add_exit_button( calendar_create_date_select_tile, calendar_create_exit_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( date_select_exit_button, calendar_create_date_select_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align( date_select_exit_button, calendar_create_date_select_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * 
      */
@@ -173,17 +191,17 @@ void calendar_create_build_ui( void ) {
      * add exit button
      */
     lv_obj_t *exit_button = wf_add_exit_button( calendar_create_tile, calendar_create_exit_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( exit_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align( exit_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add add button
      */
     lv_obj_t *create_button = wf_add_add_button( calendar_create_tile, calendar_create_add_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( create_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align( create_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add trash button
      */
     lv_obj_t *trash_button = wf_add_trash_button( calendar_create_tile, calendar_create_trash_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( trash_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -10 );
+    lv_obj_align( trash_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_ICON_PADDING );
 }
 
 static void calendar_create_date_selected_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -274,6 +292,26 @@ void calendar_create_set_content( void ) {
     /**
      * build sql query string
      */
+#ifdef NATIVE_64BIT
+    char sql[512]="";
+    snprintf( sql, sizeof( sql ),   "SELECT rowid, content FROM calendar WHERE year == %d AND month == %d AND day == %d AND hour == %d AND min == %d;",
+                                    calendar_create_year,
+                                    calendar_create_month,
+                                    calendar_create_day,
+                                    calendar_create_hour,
+                                    calendar_create_min );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_create_get_content_callback, sql ) ) {
+        if ( calendar_create_edit_rowid != -1 ) {
+            CALENDAR_DAY_DEBUG_LOG("entry exist, set content from rowid %d", calendar_create_edit_rowid );
+        }
+        else {
+            CALENDAR_DAY_DEBUG_LOG("new entry");
+        }
+    }
+#else
     String sql = (String) "SELECT rowid, content FROM calendar WHERE year == " + calendar_create_year + " AND month == " + calendar_create_month + " AND day == " + calendar_create_day + " AND hour == " + calendar_create_hour + " AND min == " + calendar_create_min + ";";
     /**
      * exec sql query
@@ -286,6 +324,7 @@ void calendar_create_set_content( void ) {
             CALENDAR_DAY_DEBUG_LOG("new entry");
         }
     }
+#endif
 }
 
 void calendar_create_clear_content( void ) {
@@ -344,6 +383,26 @@ void calendar_create_update_date( void ) {
      */
     char date[30]="";
     snprintf( date, sizeof( date ),"%04d%02d%02d%02d%02d", calendar_create_year, calendar_create_month, calendar_create_day, lv_dropdown_get_selected( calendar_create_hour_list ), lv_dropdown_get_selected( calendar_create_min_list ) * 15 );
+#ifdef NATIVE_64BIT
+    char sql[512]="";
+    snprintf( sql, sizeof( sql ), "UPDATE calendar SET date=%s,year=%d,month=%d,day=%d,hour=%d,min=%d,content='%s' WHERE rowid == %d;",
+                            date,
+                            calendar_create_year,
+                            calendar_create_month,
+                            calendar_create_day,
+                            lv_dropdown_get_selected( calendar_create_hour_list ),
+                            lv_dropdown_get_selected( calendar_create_min_list ) * 15,
+                            lv_textarea_get_text( claendar_create_textfield ),
+                            calendar_create_edit_rowid );
+
+    CALENDAR_DAY_DEBUG_LOG("UPDATE query: %s", sql );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_create_dummy_callback, sql ) ) {
+        CALENDAR_DAY_DEBUG_LOG("sql query ok");
+    }
+#else
     String sql = (String)   "UPDATE calendar SET " + 
                             "date=" + date + "," +
                             "year=" + calendar_create_year + "," +
@@ -360,6 +419,7 @@ void calendar_create_update_date( void ) {
     if ( calendar_db_exec( calendar_create_dummy_callback, sql.c_str() ) ) {
         CALENDAR_DAY_DEBUG_LOG("sql query ok");
     }
+#endif
 }
 
 void calendar_create_insert_date( void ) {
@@ -368,6 +428,25 @@ void calendar_create_insert_date( void ) {
      */
     char date[30]="";
     snprintf( date, sizeof( date ),"%04d%02d%02d%02d%02d", calendar_create_year, calendar_create_month, calendar_create_day, lv_dropdown_get_selected( calendar_create_hour_list ), lv_dropdown_get_selected( calendar_create_min_list ) * 15 );
+#ifdef NATIVE_64BIT
+    char sql[512]="";
+    snprintf( sql, sizeof( sql ),   "INSERT INTO calendar VALUES ( %s, %d, %d, %d, %d, %d, '%s');" ,
+                                    date,
+                                    calendar_create_year, 
+                                    calendar_create_month,
+                                    calendar_create_day,
+                                    lv_dropdown_get_selected( calendar_create_hour_list ),
+                                    lv_dropdown_get_selected( calendar_create_min_list ) * 15,
+                                    lv_textarea_get_text( claendar_create_textfield ) );
+
+    CALENDAR_DAY_DEBUG_LOG("UPDATE query: %s", sql );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_create_dummy_callback, sql ) ) {
+        CALENDAR_DAY_DEBUG_LOG("sql query ok");
+    }
+#else
     String sql = (String)   "INSERT INTO calendar VALUES ( " +
                             date + "," +
                             calendar_create_year + "," +
@@ -377,6 +456,7 @@ void calendar_create_insert_date( void ) {
                             lv_dropdown_get_selected( calendar_create_min_list ) * 15 + "," +
                             "'" + lv_textarea_get_text( claendar_create_textfield ) + "'" +
                             ");";
+
     CALENDAR_DAY_DEBUG_LOG("UPDATE query: %s", sql.c_str() );
     /**
      * exec sql query
@@ -384,12 +464,24 @@ void calendar_create_insert_date( void ) {
     if ( calendar_db_exec( calendar_create_dummy_callback, sql.c_str() ) ) {
         CALENDAR_DAY_DEBUG_LOG("sql query ok");
     }
+#endif
 }
 
 void calendar_create_delete_date( void ) {
     /**
      * build sql query string
      */
+#ifdef NATIVE_64BIT
+    char sql[512] = "";
+    snprintf( sql, sizeof( sql ), "DELETE FROM calendar WHERE rowid == %d;", calendar_create_edit_rowid );
+    CALENDAR_DAY_DEBUG_LOG("UPDATE query: %s", sql );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_create_dummy_callback, sql ) ) {
+        CALENDAR_DAY_DEBUG_LOG("sql query ok");
+    }
+#else
     String sql = (String)   "DELETE FROM calendar WHERE rowid == " + calendar_create_edit_rowid + ";";
     CALENDAR_DAY_DEBUG_LOG("UPDATE query: %s", sql.c_str() );
     /**
@@ -398,14 +490,16 @@ void calendar_create_delete_date( void ) {
     if ( calendar_db_exec( calendar_create_dummy_callback, sql.c_str() ) ) {
         CALENDAR_DAY_DEBUG_LOG("sql query ok");
     }
+#endif
 }
 
 void calendar_create_activate_cb( void ) {
     /**
      * set select date btn label
      */
-    String select_date = (String) calendar_create_year + "-" + calendar_create_month + "-" + calendar_create_day;
-    lv_label_set_text( calendar_select_date_btn_label, select_date.c_str() );
+    char select_date[32]="";
+    snprintf( select_date, sizeof( select_date ), "%d-%d-%d", calendar_create_year, calendar_create_month, calendar_create_day );
+    lv_label_set_text( calendar_select_date_btn_label, select_date );
     /**
      * set select date calender
      */

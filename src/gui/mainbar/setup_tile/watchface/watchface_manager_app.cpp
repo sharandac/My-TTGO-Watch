@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "gui/mainbar/setup_tile/watchface/config/watchface_config.h"
 #include "gui/mainbar/setup_tile/watchface/watchface_manager.h"
@@ -43,8 +42,26 @@
 #include "utils/uri_load/uri_load.h"
 #include "utils/alloc.h"
 
-EventGroupHandle_t watchface_manager_app_event_handle = NULL;
-TaskHandle_t _watchface_manager_app_task;
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+#else
+    #include <WiFi.h>
+    #include <Arduino.h>
+
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+
+    EventGroupHandle_t watchface_manager_app_event_handle = NULL;
+    TaskHandle_t _watchface_manager_app_task;
+#endif
+
 lv_task_t *_watchface_manager_theme_install_task;   
 static volatile uint32_t watchface_manager_display_timeout = 15;    
 static volatile bool watchface_manager_wifi_init = false;          
@@ -225,7 +242,10 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     /**
      * create event group
      */
+#ifdef NATIVE_64BIT
+#else
     watchface_manager_app_event_handle = xEventGroupCreate();
+#endif
     _watchface_manager_theme_install_task = lv_task_create( watchface_manager_theme_install_task, 3000, LV_TASK_PRIO_MID, NULL );
     /**
      * register wifictl call back
@@ -246,10 +266,13 @@ void watchface_manager_theme_install_task( lv_task_t * task ) {
     /**
      * install watchface theme from tar.gz work only from main task/lv_task
      */
+#ifdef NATIVE_64BIT
+#else
     if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_INSTALL_THEME ) {
             watchface_decompress_theme();
             xEventGroupClearBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_INSTALL_THEME );
     }
+#endif
 }
 
 static void watchface_manager_theme_menu_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -270,9 +293,12 @@ static void watchface_manager_theme_menu_select_event_cb( lv_obj_t * obj, lv_eve
         case( LV_EVENT_CLICKED ):
             lv_obj_set_hidden( watchface_manager_theme_menu, true );
             watchface_manager_set_theme_entry( &watchface_theme, lv_list_get_btn_text( obj ) );
+#ifdef NATIVE_64BIT
+#else
             if ( !(xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_UPDATE_THEME_PREV) ) {
                 xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_UPDATE_THEME_PREV );
             }
+#endif
             break;
     }
 }
@@ -288,9 +314,12 @@ static void setup_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t ev
 static void watchface_manager_refresh_event_cb(  lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED:
+#ifdef NATIVE_64BIT
+#else
             if ( !(xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_GET_THEME_JSON_REQUEST) ) {
                 xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_GET_THEME_JSON_REQUEST );
             }
+#endif
             break;
     }
 }
@@ -298,9 +327,12 @@ static void watchface_manager_refresh_event_cb(  lv_obj_t * obj, lv_event_t even
 static void watchface_manager_prev_theme_event_cb(  lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED:
+#ifdef NATIVE_64BIT
+#else
             if ( !(xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_GET_PREV_THEME) ) {
                 xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_GET_PREV_THEME );
             }
+#endif
             break;
     }
 }
@@ -308,9 +340,12 @@ static void watchface_manager_prev_theme_event_cb(  lv_obj_t * obj, lv_event_t e
 static void download_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED:
+#ifdef NATIVE_64BIT
+#else
             if ( !(xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_DOWNLOAD_THEME) ) {
                 xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_DOWNLOAD_THEME );
             }
+#endif
             break;
     }
 }
@@ -318,9 +353,12 @@ static void download_watchface_manager_app_event_cb(  lv_obj_t * obj, lv_event_t
 static void watchface_manager_next_theme_event_cb(  lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED:
+#ifdef NATIVE_64BIT
+#else
             if ( !(xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_GET_NEXT_THEME) ) {
                 xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_GET_NEXT_THEME );
             }
+#endif
             break;
     }
 }
@@ -345,6 +383,8 @@ void watchface_manager_app_set_info_label( const char *label ) {
 }
 
 void watchface_manager_app_Task( void * pvParameters ) {
+#ifdef NATIVE_64BIT
+#else
     WATCHFACE_MANAGER_APP_INFO_LOG("start watchface manager background task, heap: %d", ESP.getFreeHeap() );
     while( true ) {
         /**
@@ -435,7 +475,8 @@ void watchface_manager_app_Task( void * pvParameters ) {
         vTaskDelay( 25 );
     }
     WATCHFACE_MANAGER_APP_INFO_LOG("finsh watchface manager background task, heap: %d", ESP.getFreeHeap() );
-    vTaskDelete( NULL );    
+    vTaskDelete( NULL );  
+#endif  
 }
 
 void watchface_manager_app_activate_cb ( void ) {
@@ -452,6 +493,8 @@ void watchface_manager_app_activate_cb ( void ) {
     /**
      * start watchface manager background task
      */
+#ifdef NATIVE_64BIT
+#else
     if ( xEventGroupGetBits( watchface_manager_app_event_handle ) & WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST ) {
         WATCHFACE_MANAGER_APP_ERROR_LOG("old watchface manager background task is running, skip");
     }
@@ -469,6 +512,7 @@ void watchface_manager_app_activate_cb ( void ) {
     }
     if ( !watchface_theme.watchface_theme_json_list )
         xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_GET_THEME_JSON_REQUEST );
+#endif
 }
 
 void watchface_manager_app_hibernate_cb ( void ) {
@@ -483,7 +527,10 @@ void watchface_manager_app_hibernate_cb ( void ) {
     /**
      * trigger background task to finish
      */
+#ifdef NATIVE_64BIT
+#else
     xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST );
+#endif
 }
 
 void watchface_manager_update_theme_list( watchface_theme_t *watchface_theme ) {    
@@ -826,7 +873,11 @@ bool watchface_manager_download_theme( watchface_theme_t *watchface_theme ) {
         /**
          * trigger install routine in lv_task
          */
+#ifdef NATIVE_64BIT
+
+#else
         xEventGroupSetBits( watchface_manager_app_event_handle, WATCHFACE_MANAGER_APP_INSTALL_THEME );
+#endif
         retval = true;
     }
     else {

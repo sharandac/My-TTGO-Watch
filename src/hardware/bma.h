@@ -22,7 +22,6 @@
 #ifndef _BMA_H
     #define _BMA_H
 
-    #include "TTGO.h"
     #include "callback.h"
     #include "hardware/config/bmaconfig.h"
     

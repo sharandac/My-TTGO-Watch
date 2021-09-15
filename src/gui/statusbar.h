@@ -25,9 +25,17 @@
 
     #include "config.h"
 
-    #define STATUSBAR_HEIGHT            26
-    #define STATUSBAR_EXPAND_HEIGHT     200
-
+    #if defined( M5PAPER )
+        #ifdef BIG_THEME
+            #define STATUSBAR_HEIGHT                52
+        #else
+            #define STATUSBAR_HEIGHT                26
+        #endif
+        #define STATUSBAR_EXPAND_HEIGHT         300
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #define STATUSBAR_HEIGHT                26
+        #define STATUSBAR_EXPAND_HEIGHT         200
+    #endif
     typedef struct {
         lv_obj_t *icon;
         const void *symbol;

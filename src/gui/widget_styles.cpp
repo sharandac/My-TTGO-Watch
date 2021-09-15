@@ -41,6 +41,10 @@ static lv_style_t slider_style;
 static lv_style_t arc_bg_style;
 static lv_style_t arc_style;
 
+LV_FONT_DECLARE(Ubuntu_12px);
+LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_48px);
+
 static void define_styles(){
     lv_style_init( &mainbar_style );
     lv_style_set_radius( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
@@ -49,7 +53,6 @@ static void define_styles(){
     lv_style_set_border_width( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    //lv_style_set_bg_opa( &mainbar_style, LV_OBJ_PART_MAIN, LV_OPA_30);
 
     lv_style_init( &app_style );
     lv_style_set_radius( &app_style, LV_OBJ_PART_MAIN, 0 );
@@ -75,7 +78,6 @@ static void define_styles(){
     lv_style_set_border_opa( &button_style, LV_STATE_DEFAULT, LV_OPA_70 );
     lv_style_set_border_width( &button_style, LV_STATE_DEFAULT, 2 );
 
-
     lv_style_copy(&img_button_style, &mainbar_style);
 
     lv_style_init( &label_style );
@@ -87,8 +89,6 @@ static void define_styles(){
     lv_style_init( &roller_bg_style );
     lv_style_set_text_line_space(&roller_bg_style, LV_STATE_DEFAULT, ROLLER_TEXT_SPACE);
     lv_style_init( &roller_part_selected_style );
-    //the default roller color is red - may be it is the best one as default
-    //lv_style_set_bg_color( &roller_part_selected_style, LV_STATE_DEFAULT, LV_COLOR_GRAY);
 
     lv_style_init( &arc_bg_style );
     lv_style_set_bg_opa( &arc_bg_style, LV_ARC_PART_BG, LV_OPA_TRANSP );

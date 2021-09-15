@@ -9,9 +9,20 @@
 #define SYNCAPP_H
 
 #include "application.h"
-#include <FreeRTOS.h>
-// #include <freertos/task.h>
-// #include <freertos/event_groups.h>
+
+#ifdef NATIVE_64BIT
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+    #include <FreeRTOS.h>
+    #include <Arduino.h>
+    // #include <freertos/task.h>
+    // #include <freertos/event_groups.h>
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
 
 #define WEATHER_FORECAST_SYNC_REQUEST   _BV(0)
 
@@ -69,8 +80,14 @@ private:
   static void SyncTaskHandler(void* pvSelf);
 
 protected:
-  EventGroupHandle_t syncEvent = NULL;
-  TaskHandle_t syncTask;
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        EventGroupHandle_t syncEvent = NULL;
+        TaskHandle_t syncTask;
+    #endif
   SynchronizeAction synchronize;
   String title;
 };

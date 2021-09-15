@@ -22,7 +22,6 @@
 #ifndef _WATCHFACE_THEME_CONFIG_H
     #define _WATCHFACE_THEME_CONFIG_H
 
-    #include <TTGO.h>
     #include "config.h"
     #include "utils/basejsonconfig.h"
     #include "utils/tinyexpr/tinyexpr.h"

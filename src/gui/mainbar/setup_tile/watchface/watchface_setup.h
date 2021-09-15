@@ -22,7 +22,15 @@
 #ifndef _WATCHFACE_APP_MAIN_H
     #define _WATCHFACE_APP_MAIN_H
 
-    #include <TTGO.h>
+#ifdef NATIVE_64BIT
+    #include "utils/io.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 
     void watchface_setup_tile_setup( uint32_t tile_num );
     void watchface_setup_set_info_label( const char *text );

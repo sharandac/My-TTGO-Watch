@@ -22,7 +22,6 @@
 #ifndef _RTCCTL_H
     #define _RTCCTL_H
 
-    #include "TTGO.h"
     #include "callback.h"
     #include "hardware/config/rtcctlconfig.h"
 

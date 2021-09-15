@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <WiFi.h>
 #include "utils/alloc.h"
 
 #include "watchface_manager.h"
@@ -39,7 +37,6 @@
 #include "gui/widget.h"
 #include "gui/widget_styles.h"
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
-
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
 #include "hardware/powermgm.h"
@@ -48,8 +45,27 @@
 #include "hardware/pmu.h"
 #include "hardware/bma.h"
 #include "hardware/wifictl.h"
+#include "utils/filepath_convert.h"
 
-#include "utils/decompress/decompress.h"
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+#else
+    #include <WiFi.h>
+    #include <Arduino.h>
+
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+
+    #include "utils/decompress/decompress.h"
+#endif
+
 /**
  * watchface task and states
  */
@@ -276,13 +292,22 @@ void watchface_tile_set_antialias( bool enable ) {
 }
 
 void watchface_decompress_theme( void ) {
-    FILE *file = fopen( "/spiffs" WATCHFACE_THEME_FILE, "rb" );
+    FILE* file;
+    char filename[256] ="";
+
+    file = fopen( filepath_convert( filename, sizeof( filename ), "/spiffs" WATCHFACE_THEME_FILE ), "rb" );
     if ( file ) {
         fclose( file );
         watchface_setup_set_info_label( "clear watchface theme, wait ..." );
         watchface_remove_theme_files();
         watchface_setup_set_info_label( "unzip watchface theme, wait ..." );
-        decompress_file_into_spiffs( WATCHFACE_THEME_FILE, "/watchface", NULL );
+        #ifdef NATIVE_64BIT
+            /**
+             * no implementation
+             */
+        #else
+                decompress_file_into_spiffs( WATCHFACE_THEME_FILE, "/watchface", NULL );
+        #endif
         watchface_setup_set_info_label( "done!" );
         mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
     }
@@ -301,14 +326,16 @@ void watchface_default_theme( void ) {
 }
 
 void watchface_remove_theme_files ( void ) {
-    remove( "/spiffs" WATCHFACE_THEME_JSON_CONFIG_FILE );
-    remove( WATCHFACE_DIAL_IMAGE_FILE );
-    remove( WATCHFACE_HOUR_IMAGE_FILE );
-    remove( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
-    remove( WATCHFACE_MIN_IMAGE_FILE );
-    remove( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
-    remove( WATCHFACE_SEC_IMAGE_FILE );
-    remove( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
+    char filename[256] ="";
+
+    remove( filepath_convert( filename, sizeof( filename ), "/spiffs" WATCHFACE_THEME_JSON_CONFIG_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_DIAL_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_SHADOW_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_SHADOW_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_IMAGE_FILE ) );
+    remove( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_SHADOW_IMAGE_FILE ) );
 }
 
 void watchface_reload_and_test( void ) {
@@ -338,16 +365,17 @@ void watchface_reload_theme( void ) {
     watchface_theme_config.load();
     lv_img_cache_set_size(0);
     FILE* file;
+    char filename[256] = "";
     /**
      * load dial image
      * 240x240px
      */
-    file = fopen( WATCHFACE_DIAL_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_DIAL_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_dial_img, WATCHFACE_DIAL_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_DIAL_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface dial from %s", WATCHFACE_DIAL_IMAGE_FILE );
+        lv_img_set_src( watchface_dial_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_DIAL_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_DIAL_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface dial from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_DIAL_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_dial_img, &swiss_dial_240px );
@@ -361,12 +389,12 @@ void watchface_reload_theme( void ) {
      * load hour shadow image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_HOUR_SHADOW_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_SHADOW_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_hour_s_img, WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface hour shadow from %s", WATCHFACE_HOUR_SHADOW_IMAGE_FILE );
+        lv_img_set_src( watchface_hour_s_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_SHADOW_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_SHADOW_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface hour shadow from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_SHADOW_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_hour_s_img, &swiss_hour_s_240px );
@@ -380,12 +408,12 @@ void watchface_reload_theme( void ) {
      * load min shadow image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_MIN_SHADOW_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_SHADOW_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_min_s_img, WATCHFACE_MIN_SHADOW_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_MIN_SHADOW_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface min shadow from %s", WATCHFACE_MIN_SHADOW_IMAGE_FILE );
+        lv_img_set_src( watchface_min_s_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_SHADOW_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_SHADOW_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface min shadow from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_SHADOW_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_min_s_img, &swiss_min_s_240px );
@@ -399,12 +427,12 @@ void watchface_reload_theme( void ) {
      * load sec shadow image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_SEC_SHADOW_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_SHADOW_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_sec_s_img, WATCHFACE_SEC_SHADOW_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_SEC_SHADOW_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface sec shadow from %s", WATCHFACE_SEC_SHADOW_IMAGE_FILE );
+        lv_img_set_src( watchface_sec_s_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_SHADOW_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_SHADOW_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface sec shadow from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_SHADOW_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_sec_s_img, &swiss_sec_s_240px );
@@ -418,12 +446,12 @@ void watchface_reload_theme( void ) {
      * load hour image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_HOUR_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_hour_img, WATCHFACE_HOUR_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_HOUR_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface hour from %s", WATCHFACE_HOUR_IMAGE_FILE );
+        lv_img_set_src( watchface_hour_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface hour from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_HOUR_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_hour_img, &swiss_hour_240px );
@@ -437,12 +465,12 @@ void watchface_reload_theme( void ) {
      * load min image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_MIN_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_min_img, WATCHFACE_MIN_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_MIN_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface min from %s", WATCHFACE_MIN_IMAGE_FILE );
+        lv_img_set_src( watchface_min_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface min from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_MIN_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_min_img, &swiss_min_240px );
@@ -456,12 +484,12 @@ void watchface_reload_theme( void ) {
      * load sec image
      * 40x240px, center x=20, y=120
      */
-    file = fopen( WATCHFACE_SEC_IMAGE_FILE, "rb" );
+    file = fopen( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_IMAGE_FILE ), "rb" );
     if ( file ) {
         fclose( file );
-        lv_img_set_src( watchface_sec_img, WATCHFACE_SEC_IMAGE_FILE );
-        lv_img_cache_invalidate_src( WATCHFACE_SEC_IMAGE_FILE );
-        WATCHFACE_LOG("load custom watchface sec from %s", WATCHFACE_SEC_IMAGE_FILE );
+        lv_img_set_src( watchface_sec_img, filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_IMAGE_FILE ) );
+        lv_img_cache_invalidate_src( filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_IMAGE_FILE ) );
+        WATCHFACE_LOG("load custom watchface sec from %s", filepath_convert( filename, sizeof( filename ), WATCHFACE_SEC_IMAGE_FILE ) );
     }
     else {
         lv_img_set_src( watchface_sec_img, &swiss_sec_240px );
@@ -483,7 +511,16 @@ void watchface_reload_theme( void ) {
              * build lv_fs path
              */
             String fontname = watchface_theme_config.dial.label[ i ].font;
-            String font = "P:/spiffs/watchface/" + fontname;
+            #ifdef NATIVE_64BIT
+                char filename[512] = "";
+                char path[512] = "";
+                snprintf( path, sizeof( path ), "/spiffs/watchface/%s", fontname.c_str() );
+                filepath_convert( filename, sizeof( filename ), path );
+                String font = "P:";
+                font += filename;
+            #else
+                String font = "P:/spiffs/watchface/" + fontname;
+            #endif
             /**
              * clear old font
              */
@@ -544,7 +581,15 @@ void watchface_reload_theme( void ) {
          * alloc and setup image
          */
         String imagename = watchface_theme_config.dial.image[ i ].file;
-        String image = "/spiffs/watchface/" + imagename;
+        #ifdef NATIVE_64BIT
+            char filename[512] = "";
+            char path[512] = "";
+            snprintf( path, sizeof( path ), "/spiffs/watchface/%s", imagename.c_str() );
+            filepath_convert( filename, sizeof( filename ), path );
+            String image = filename;
+        #else
+            String image = "/spiffs/watchface/" + imagename;
+        #endif
         lv_img_set_src( watchface_image[ i ], image.c_str() );
         lv_obj_align( watchface_image[ i ], lv_obj_get_parent( watchface_image[ i ] ), LV_ALIGN_CENTER, 0, 0 );
         lv_img_set_pivot( watchface_image[ i ], watchface_theme_config.dial.image[ i ].rotation_x_origin, watchface_theme_config.dial.image[ i ].rotation_y_origin );
@@ -906,7 +951,7 @@ void watchface_app_label_update( tm &info ) {
                 strftime( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, &info );
             }
             else if ( !strcmp( "text", watchface_theme_config.dial.label[ i ].type ) ) {
-                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label );
+                snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, NULL );
             }
             else if ( !strcmp( "battery_percent", watchface_theme_config.dial.label[ i ].type ) ) {
                 snprintf( temp_str, sizeof( temp_str ), watchface_theme_config.dial.label[ i ].label, pmu_get_battery_percent() );

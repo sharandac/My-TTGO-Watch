@@ -22,6 +22,10 @@
 #include "blectlconfig.h"
 #include "utils/alloc.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#endif
+
 blectl_config_t::blectl_config_t() : BaseJsonConfig(BLECTL_JSON_COFIG_FILE) {
 }
 
@@ -68,8 +72,8 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
 
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
         if ( doc["custom_audio_notifications"][ i ]["text"] && doc["custom_audio_notifications"][ i ]["value"] ) {
-            strlcpy( custom_audio_notifications[ i ].text   , doc["custom_audio_notifications"][ i ]["text"], sizeof( custom_audio_notifications[ i ].text ) );
-            strlcpy( custom_audio_notifications[ i ].value  , doc["custom_audio_notifications"][ i ]["value"], sizeof( custom_audio_notifications[ i ].value ) );
+            strncpy( custom_audio_notifications[ i ].text   , doc["custom_audio_notifications"][ i ]["text"], sizeof( custom_audio_notifications[ i ].text ) );
+            strncpy( custom_audio_notifications[ i ].value  , doc["custom_audio_notifications"][ i ]["value"], sizeof( custom_audio_notifications[ i ].value ) );
         }
     }
   

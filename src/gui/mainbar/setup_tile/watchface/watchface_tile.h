@@ -22,8 +22,6 @@
 #ifndef _WATCHFACE_APP_TILE_H
     #define _WATCHFACE_APP_TILE_H
 
-    #include <TTGO.h>
-
     #define WATCHFACE_LOG                       log_d
     /**
      * @brief watchface tile setup

@@ -22,10 +22,12 @@
 #ifndef _BLECTL_H
     #define _BLECTL_H
 
-    #include "TTGO.h"
-
-    #include <BLEServer.h>
-    #include <BLEAdvertising.h>
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
+        #include <BLEServer.h>
+        #include <BLEAdvertising.h>
+    #endif
 
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
@@ -258,6 +260,7 @@
      * @param enable    true if enabled, false if disable
      */
     void blectl_set_autoon( bool autoon );
+#ifndef NATIVE_64BIT
     /**
      * @brief get the raw BLE Server
      */
@@ -266,7 +269,6 @@
      * @brief get the raw BLE Advertising
      */
     BLEAdvertising *blectl_get_ble_advertising( void );
-
     /**
      * @brief get the raw BLE Server
      */
@@ -275,5 +277,6 @@
      * @brief get the raw BLE Advertising
      */
     BLEAdvertising *blectl_get_ble_advertising();
+#endif
 
 #endif // _BLECTL_H

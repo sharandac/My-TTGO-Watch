@@ -22,8 +22,6 @@
 #ifndef _ICON_H
     #define _ICON_H
 
-    #include <TTGO.h>
-
     LV_IMG_DECLARE(info_ok_16px);
     LV_IMG_DECLARE(info_fail_16px);
     LV_IMG_DECLARE(info_update_16px);

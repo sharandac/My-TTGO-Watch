@@ -60,7 +60,23 @@ void lv_png_init(void)
  *   STATIC FUNCTIONS
  **********************/
 void lv_rgba_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h ) {
-    unsigned error = lodepng_encode32_file( filename, image, w, h );
+    unsigned error = lodepng_encode_file( filename, image, w, h, LCT_RGBA, 8 );
+//    unsigned error = lodepng_encode32_file( filename, image, w, h );
+    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+}
+
+void lv_rgb_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h ) {
+    unsigned error = lodepng_encode_file( filename, image, w, h, LCT_RGB, 8 );
+    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+}
+
+void lv_8grey_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h ) {
+    unsigned error = lodepng_encode_file( filename, image, w, h, LCT_GREY, 8 );
+    if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
+}
+
+void lv_4grey_as_png( const char* filename, const unsigned char* image, unsigned int w, unsigned int h ) {
+    unsigned error = lodepng_encode_file( filename, image, w, h, LCT_GREY, 4 );
     if(error) printf("error %u: %s\n", error, lodepng_error_text(error));
 }
 

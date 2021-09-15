@@ -22,64 +22,97 @@
 #include "config.h"
 #include <stdio.h>
 #include <time.h>
-#include <TTGO.h>
-#include <soc/rtc.h>
 
 #include "bma.h"
 #include "powermgm.h"
 #include "callback.h"
 
-#include "gui/statusbar.h"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
 
-volatile bool DRAM_ATTR bma_irq_flag = false;
-portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+    static uint32_t stepcounter_valid;                      /** @brief stepcount valid mask, if 0xa5a5a5a5 when stepcounter is valid after reset */
+    static uint32_t stepcounter_before_reset;               /** @brief stepcounter before reset */
+    static uint32_t stepcounter;                            /** @brief stepcounter */
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+    #endif
+    #include <soc/rtc.h>
 
-/**
- * move internal stepcounter into noninit ram section
- */
-__NOINIT_ATTR uint32_t stepcounter_valid;           /** @brief stepcount valid mask, if 0xa5a5a5a5 when stepcounter is valid after reset */
-__NOINIT_ATTR uint32_t stepcounter_before_reset;    /** @brief stepcounter before reset */
-__NOINIT_ATTR uint32_t stepcounter;                 /** @brief stepcounter */
+    volatile bool DRAM_ATTR bma_irq_flag = false;
+    portMUX_TYPE DRAM_ATTR BMA_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+    /**
+     * move internal stepcounter into noninit ram section
+     */
+    __NOINIT_ATTR uint32_t stepcounter_valid;               /** @brief stepcount valid mask, if 0xa5a5a5a5 when stepcounter is valid after reset */
+    __NOINIT_ATTR uint32_t stepcounter_before_reset;        /** @brief stepcounter before reset */
+    __NOINIT_ATTR uint32_t stepcounter;                     /** @brief stepcounter */
+
+    void IRAM_ATTR bma_irq( void );
+    void IRAM_ATTR bma_irq( void ) {
+        portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
+        bma_irq_flag = true;
+        portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
+    }
+#endif
 
 bma_config_t bma_config;
 callback_t *bma_callback = NULL;
 
 bool first_loop_run = true;
 
-void IRAM_ATTR bma_irq( void );
 bool bma_send_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_event_cb( EventBits_t event, void *arg );
 bool bma_powermgm_loop_cb( EventBits_t event, void *arg );
 void bma_notify_stepcounter( void );
 
 void bma_setup( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
     /*
      * check if stepcounter valid and reset if not valid
      */
-    if ( stepcounter_valid != 0xa5a5a5a5 ) {
-        stepcounter = 0;
-        stepcounter_before_reset = 0;
-        stepcounter_valid = 0xa5a5a5a5;
-        bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
-        log_i("stepcounter not valid. reset");
-    }
-    stepcounter = stepcounter + stepcounter_before_reset;
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+            /**
+             * forec reset stepcounter on M5PAPER
+             */
+            stepcounter_valid = 0;
+            stepcounter_before_reset = 0;
+            stepcounter = 0;
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            if ( stepcounter_valid != 0xa5a5a5a5 ) {
+                stepcounter = 0;
+                stepcounter_before_reset = 0;
+                stepcounter_valid = 0xa5a5a5a5;
+                bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
+                log_i("stepcounter not valid. reset");
+            }
+            stepcounter = stepcounter + stepcounter_before_reset;
+        #endif
+    #endif
     /*
      * load config from json
      */
     bma_config.load();
-    /*
-     * init stepcounter
-     */
-    ttgo->bma->begin();
-    ttgo->bma->attachInterrupt();
-    ttgo->bma->direction();
-    /*
-     * init stepcounter interrupt function
-     */
-    pinMode( BMA423_INT1, INPUT );
-    attachInterrupt( BMA423_INT1, bma_irq, RISING );
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            /*
+             * init stepcounter
+             */
+            ttgo->bma->begin();
+            ttgo->bma->attachInterrupt();
+            ttgo->bma->direction();
+            /*
+             * init stepcounter interrupt function
+             */
+            pinMode( BMA423_INT1, INPUT );
+            attachInterrupt( BMA423_INT1, bma_irq, RISING );
+        #endif
+    #endif
     /*
      * load config setting for tilt, stepcounter and wakeup to enabled interrupts
      */
@@ -99,12 +132,18 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   bma_wakeup();
                                         break;
-        case POWERMGM_ENABLE_INTERRUPTS:
-                                        attachInterrupt( BMA423_INT1, bma_irq, RISING );
-                                        break;
-        case POWERMGM_DISABLE_INTERRUPTS:
-                                        detachInterrupt( BMA423_INT1 );
-                                        break;
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                case POWERMGM_ENABLE_INTERRUPTS:
+                                                attachInterrupt( BMA423_INT1, bma_irq, RISING );
+                                                break;
+                case POWERMGM_DISABLE_INTERRUPTS:
+                                                detachInterrupt( BMA423_INT1 );
+                                                break;
+            #endif
+        #endif
     }
     return( true );
 }
@@ -114,36 +153,48 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
     static bool BMA_tilt = false;
     static bool BMA_doubleclick = false;
     static bool BMA_stepcounter = false;
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    bool temp_bma_irq_flag = false;
     /*
      * handle IRQ event
      */
-    portENTER_CRITICAL(&BMA_IRQ_Mux);
-    bool temp_bma_irq_flag = bma_irq_flag;
-    bma_irq_flag = false;
-    portEXIT_CRITICAL(&BMA_IRQ_Mux);
+    #ifdef NATIVE_64BIT
+    #else
+        portENTER_CRITICAL(&BMA_IRQ_Mux);
+        temp_bma_irq_flag = bma_irq_flag;
+        bma_irq_flag = false;
+        portEXIT_CRITICAL(&BMA_IRQ_Mux);
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+    #endif
     /*
      * check interrupts event source
      */
-    if ( temp_bma_irq_flag ) {                
-        while( !ttgo->bma->readInterrupt() );
-        /*
-         * set powermgm wakeup event and save BMA_* event
-         */
-        if ( ttgo->bma->isDoubleClick() ) {
-            if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
-                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            BMA_doubleclick = true;
-        }
-        if ( ttgo->bma->isTilt() ) {
-            if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
-                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            BMA_tilt = true;
-        }
-        if ( ttgo->bma->isStepCounter() ) {
-            BMA_stepcounter = true;
-        }
+    if ( temp_bma_irq_flag ) {
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                while( !ttgo->bma->readInterrupt() );
+                /*
+                * set powermgm wakeup event and save BMA_* event
+                */
+                if ( ttgo->bma->isDoubleClick() ) {
+                    if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    BMA_doubleclick = true;
+                }
+                if ( ttgo->bma->isTilt() ) {
+                    if ( !powermgm_get_event( POWERMGM_WAKEUP ) )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    BMA_tilt = true;
+                }
+                if ( ttgo->bma->isStepCounter() ) {
+                    BMA_stepcounter = true;
+                }
+            #endif
+        #endif         
     }
     /*
      * check pmu event
@@ -182,40 +233,62 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
 
 void bma_notify_stepcounter( void ) {
     uint32_t val = 0;
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-    stepcounter_before_reset = ttgo->bma->getCounter();
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            stepcounter_before_reset = ttgo->bma->getCounter();
+        #endif
+    #endif
     val = stepcounter + stepcounter_before_reset;
     bma_send_event_cb( BMACTL_STEPCOUNTER, &val );
 }
 
 void bma_standby( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
     log_i("go standby");
     /*
      * disable stepcounter interrupt to avoid
      * wakeup in standby mode
      */
     if ( bma_get_config( BMA_STEPCOUNTER ) ) {
-        ttgo->bma->enableStepCountInterrupt( false );
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->bma->enableStepCountInterrupt( false );
+            #endif
+        #endif
     }
     /*
      * enable interrupt in ESP32 sleepmode
      */
-    gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
-    esp_sleep_enable_gpio_wakeup ();
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            esp_sleep_enable_gpio_wakeup ();
+        #endif
+    #endif
 }
 
 void bma_wakeup( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
     log_i("go wakeup");
     /*
      * enable stepcounter interrupt for updates
      * when the user interacts with the watch
      */
     if ( bma_get_config( BMA_STEPCOUNTER ) ) {
-        ttgo->bma->enableStepCountInterrupt( true );
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->bma->enableStepCountInterrupt( true );
+            #endif
+        #endif
     }
     /*
      * check for a new day and reset stepcounter if configure
@@ -242,7 +315,14 @@ void bma_wakeup( void ) {
          */
         if ( info.tm_yday != old_info.tm_yday ) {
             log_i("reset setcounter: %d != %d", info.tm_yday, old_info.tm_yday );
-            ttgo->bma->resetStepCounter();
+            #ifdef NATIVE_64BIT
+            #else
+                #ifdef M5PAPER
+                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                    TTGOClass *ttgo = TTGOClass::getWatch();
+                    ttgo->bma->resetStepCounter();
+                #endif
+            #endif
             stepcounter_before_reset = 0;
             stepcounter = 0;
             bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
@@ -259,18 +339,16 @@ void bma_wakeup( void ) {
 }
 
 void bma_reload_settings( void ) {
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-    ttgo->bma->enableStepCountInterrupt( bma_config.enable[ BMA_STEPCOUNTER ] );
-    ttgo->bma->enableWakeupInterrupt( bma_config.enable[ BMA_DOUBLECLICK ] );
-    ttgo->bma->enableTiltInterrupt( bma_config.enable[ BMA_TILT ] );
-}
-
-void IRAM_ATTR bma_irq( void ) {
-    portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
-    bma_irq_flag = true;
-    portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            ttgo->bma->enableStepCountInterrupt( bma_config.enable[ BMA_STEPCOUNTER ] );
+            ttgo->bma->enableWakeupInterrupt( bma_config.enable[ BMA_DOUBLECLICK ] );
+            ttgo->bma->enableTiltInterrupt( bma_config.enable[ BMA_TILT ] );
+        #endif
+    #endif
 }
 
 bool bma_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
@@ -307,52 +385,55 @@ void bma_set_config( int config, bool enable ) {
 }
 
 void bma_set_rotate_tilt( uint32_t rotation ) {
-    struct bma423_axes_remap remap_data;
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
-
-#if defined( LILYGO_WATCH_2020_V2 )
-    /**
-     * fix bma orientation on V2
-     */
-    rotation = rotation + 270;
-#endif
-    rotation = rotation % 360;
-
-    switch( rotation / 90 ) {
-        case 0:     remap_data.x_axis = 0;
-                    remap_data.x_axis_sign = 1;
-                    remap_data.y_axis = 1;
-                    remap_data.y_axis_sign = 1;
-                    remap_data.z_axis  = 2;
-                    remap_data.z_axis_sign  = 1;
-                    ttgo->bma->set_remap_axes(&remap_data);
-                    break;
-        case 1:     remap_data.x_axis = 1;
-                    remap_data.x_axis_sign = 1;
-                    remap_data.y_axis = 0;
-                    remap_data.y_axis_sign = 0;
-                    remap_data.z_axis  = 2;
-                    remap_data.z_axis_sign  = 1;
-                    ttgo->bma->set_remap_axes(&remap_data);
-                    break;
-        case 2:     remap_data.x_axis = 0;
-                    remap_data.x_axis_sign = 1;
-                    remap_data.y_axis = 1;
-                    remap_data.y_axis_sign = 0;
-                    remap_data.z_axis  = 2;
-                    remap_data.z_axis_sign  = 1;
-                    ttgo->bma->set_remap_axes(&remap_data);
-                    break;
-        case 3:     remap_data.x_axis = 1;
-                    remap_data.x_axis_sign = 1;
-                    remap_data.y_axis = 0;
-                    remap_data.y_axis_sign = 1;
-                    remap_data.z_axis  = 2;
-                    remap_data.z_axis_sign  = 1;
-                    ttgo->bma->set_remap_axes(&remap_data);
-                    break;
-    }
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            struct bma423_axes_remap remap_data;
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            #if defined( LILYGO_WATCH_2020_V2 )
+                /**
+                 * fix bma orientation on V2
+                 */
+                rotation = rotation + 270;
+            #endif
+            rotation = rotation % 360;
+            switch( rotation / 90 ) {
+                case 0:     remap_data.x_axis = 0;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 1;
+                            remap_data.y_axis_sign = 1;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 1:     remap_data.x_axis = 1;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 0;
+                            remap_data.y_axis_sign = 0;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 2:     remap_data.x_axis = 0;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 1;
+                            remap_data.y_axis_sign = 0;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+                case 3:     remap_data.x_axis = 1;
+                            remap_data.x_axis_sign = 1;
+                            remap_data.y_axis = 0;
+                            remap_data.y_axis_sign = 1;
+                            remap_data.z_axis  = 2;
+                            remap_data.z_axis_sign  = 1;
+                            ttgo->bma->set_remap_axes(&remap_data);
+                            break;
+            }
+        #endif
+    #endif
 }
 
 uint32_t bma_get_stepcounter( void ) {
@@ -360,9 +441,15 @@ uint32_t bma_get_stepcounter( void ) {
 }
 
 void bma_reset_stepcounter( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
     log_i("reset step counter");
-    ttgo->bma->resetStepCounter();
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            ttgo->bma->resetStepCounter();
+        #endif
+    #endif
     /**
      * FIXME: why not required during daily reset?
      */

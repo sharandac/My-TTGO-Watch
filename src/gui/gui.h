@@ -20,13 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #ifndef _GUI_H
-
     #define _GUI_H
-
-    #include <TTGO.h>
     
     #define BACKGROUNDIMAGE    "/spiffs/bg.png"
-
     /**
      * @brief GUI setup
      */

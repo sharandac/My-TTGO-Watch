@@ -22,8 +22,6 @@
 #ifndef _EXAMPLE_APP_MAIN_H
     #define _EXAMPLE_APP_MAIN_H
 
-    #include <TTGO.h>
-
     void example_app_main_setup( uint32_t tile_num );
 
 #endif // _EXAMPLE_APP_MAIN_H

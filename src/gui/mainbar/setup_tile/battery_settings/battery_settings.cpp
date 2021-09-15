@@ -60,10 +60,10 @@ void battery_set_experimental_indicator( void );
 
 void battery_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    battery_settings_tile_num = mainbar_add_app_tile( 1, 2, "battery setup" );
-    battery_settings_tile = mainbar_get_tile_obj( battery_settings_tile_num + 1 );
+    battery_settings_tile_num = mainbar_add_app_tile( 1, 1, "battery setup" );
+    battery_settings_tile = mainbar_get_tile_obj( battery_settings_tile_num );
 
-    battery_view_tile_setup( battery_settings_tile_num );
+//     battery_view_tile_setup( battery_settings_tile_num );
 
     lv_style_copy( &battery_settings_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_settings_tile, LV_OBJ_PART_MAIN, &battery_settings_style );
@@ -151,7 +151,7 @@ static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_settings_tile_num,  LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

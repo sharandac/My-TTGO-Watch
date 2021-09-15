@@ -19,31 +19,32 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <config.h>
-#include "esp_task_wdt.h"
-
+#include "config.h"
 #include "weather.h"
 #include "weather_fetch.h"
 #include "weather_forecast.h"
 #include "images/resolve_owm_icon.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
-
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
-
 #include "utils/alloc.h"
 
-EventGroupHandle_t weather_forecast_event_handle = NULL;
-TaskHandle_t _weather_forecast_sync_Task;
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+    #include "esp_task_wdt.h"
+
+    EventGroupHandle_t weather_forecast_event_handle = NULL;
+    TaskHandle_t _weather_forecast_sync_Task;
+#endif
 
 lv_obj_t *weather_forecast_tile = NULL;
-lv_style_t weather_forecast_style;
 uint32_t weather_forecast_tile_num;
 
 lv_obj_t *weather_forecast_location_label = NULL;
@@ -75,15 +76,14 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     weather_forecast_tile_num = tile_num;
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
-    lv_style_copy( &weather_forecast_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, &weather_forecast_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, ws_get_app_style() );
     lv_obj_align(exit_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = wf_add_setup_button( weather_forecast_tile, setup_weather_widget_event_cb, &weather_forecast_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( weather_forecast_tile, setup_weather_widget_event_cb, ws_get_app_style() );
     lv_obj_align(setup_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 
-    lv_obj_t * reload_btn = wf_add_image_button( weather_forecast_tile, refresh_32px, refresh_weather_widget_event_cb, &weather_forecast_style );
+    lv_obj_t * reload_btn = wf_add_refresh_button( weather_forecast_tile, refresh_weather_widget_event_cb, ws_get_app_style() );
     lv_obj_align(reload_btn, weather_forecast_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , 10 );
 
     weather_forecast_location_label = lv_label_create( weather_forecast_tile , NULL);
@@ -97,12 +97,12 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
 
     lv_obj_t * weater_forecast_cont = lv_obj_create( weather_forecast_tile, NULL );
-    lv_obj_set_size( weater_forecast_cont, lv_disp_get_hor_res( NULL ) , 96 );
-    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, &weather_forecast_style  );
+    lv_obj_set_size( weater_forecast_cont, 240 , 96 );
+    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, ws_get_app_style()  );
     lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 0 );
 
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST / 4 ; i++ ) {
-        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, &weather_forecast_style );
+        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, ws_get_app_style() );
         lv_obj_align( weather_forecast_icon_imgbtn[ i ], weater_forecast_cont, LV_ALIGN_IN_LEFT_MID, i*58, 0 );
 
         weather_forecast_temperature_label[ i ] = lv_label_create( weater_forecast_cont , NULL);
@@ -120,9 +120,11 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
         lv_obj_reset_style_list( weather_forecast_time_label[ i ], LV_OBJ_PART_MAIN );
         lv_obj_align( weather_forecast_time_label[ i ], weather_forecast_icon_imgbtn[ i ], LV_ALIGN_OUT_TOP_MID, 0, 0);
     }
+#ifdef NATIVE_64BIT
 
+#else
     weather_forecast_event_handle = xEventGroupCreate();
-
+#endif
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_forecast_wifictl_event_cb, "weather forcecast" );
 }
 
@@ -160,6 +162,9 @@ static void refresh_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) 
 }
 
 void weather_forecast_sync_request( void ) {
+#ifdef NATIVE_64BIT
+    weather_forecast_sync_Task( NULL );
+#else
     if ( xEventGroupGetBits( weather_forecast_event_handle ) & WEATHER_FORECAST_SYNC_REQUEST ) {
         return;
     }
@@ -172,18 +177,20 @@ void weather_forecast_sync_request( void ) {
                         1,                               /* Priority of the task */
                         &_weather_forecast_sync_Task );  /* Task handle. */ 
     }
+#endif
 }
 
 void weather_forecast_sync_Task( void * pvParameters ) {
     weather_config_t *weather_config = weather_get_config();
     int32_t retval = -1;
 
+#ifndef NATIVE_64BIT
     log_i("start weather forecast task, heap: %d", ESP.getFreeHeap() );
-
     vTaskDelay( 250 );
-
-    if ( xEventGroupGetBits( weather_forecast_event_handle ) & WEATHER_FORECAST_SYNC_REQUEST ) {   
+    if ( xEventGroupGetBits( weather_forecast_event_handle ) & WEATHER_FORECAST_SYNC_REQUEST ) { 
+#endif
         if ( weather_config->autosync ) {
+            log_i("sysnc weather information");
             retval = weather_fetch_forecast( weather_get_config() , &weather_forecast[ 0 ] );
             if ( retval == 200 ) {
                 time_t now;
@@ -225,8 +232,10 @@ void weather_forecast_sync_Task( void * pvParameters ) {
                 lv_obj_invalidate( lv_scr_act() );
             }
         }
+#ifndef NATIVE_64BIT
     }
     xEventGroupClearBits( weather_forecast_event_handle, WEATHER_FORECAST_SYNC_REQUEST );
     log_i("finsh weather forecast task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
+#endif
 }

@@ -20,14 +20,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <HTTPClient.h>
-#include <Update.h>
-#include <SPIFFS.h>
 
 #include "osm_map.h"
 #include "utils/alloc.h"
 #include "utils/uri_load/uri_load.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include <string.h>
+    #include <string>
+    #include <math.h>
+    
+    using namespace std;
+    #define String string
+#else
+    #include <HTTPClient.h>
+    #include <Update.h>
+    #include <SPIFFS.h>
+#endif
 
 /**
  * @brief osm_map default tile image
@@ -90,11 +107,15 @@ osm_location_t *osm_map_create_location_obj( void ) {
         for( int i = 0 ; i < DEFAULT_OSM_CACHE_SIZE ; i++ ) {
             osm_location->uri_load_dsc[ i ] = NULL;
         }
+#ifndef NATIVE_64BIT
         osm_location->xSemaphoreMutex = xSemaphoreCreateMutex();;
+#endif
     }
-
+#ifdef NATIVE_64BIT
+    OSM_MAP_LOG("osm_location: alloc %ld bytes at %p", sizeof( osm_location_t ), osm_location );
+#else
     OSM_MAP_LOG("osm_location: alloc %d bytes at %p", sizeof( osm_location_t ), osm_location );
-
+#endif
     return( osm_location );
 }
 /*
@@ -122,14 +143,22 @@ bool osm_map_take( osm_location_t *osm_location ) {
     /**
      * enter critical section
      */
+#ifdef NATIVE_64BIT
+    return( true );
+#else
     return xSemaphoreTake( osm_location->xSemaphoreMutex, portMAX_DELAY ) == pdTRUE;
+#endif
 }
 
 void osm_map_give( osm_location_t *osm_location ) {
     /**
      * leave critical section
      */
+#ifdef NATIVE_64BIT
+
+#else
     xSemaphoreGive( osm_location->xSemaphoreMutex );
+#endif
 }
 
 void osm_map_set_lon_lat( osm_location_t *osm_location, double lon, double lat ) {
@@ -725,7 +754,11 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
             osm_location->uri_load_dsc[ tile ] = NULL;
         }
         osm_location->uri_load_dsc[ tile ] = uri_load_dsc;
+#ifdef NATIVE_64BIT
+        OSM_MAP_LOG("use tile cache %ld", tile );
+#else
         OSM_MAP_LOG("use tile cache %d", tile );
+#endif
         /**
          * get cache size
          */
@@ -737,7 +770,11 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
         }
         osm_location->cache_size = cache_size;
         osm_location->cached_fies = cache_file;
+#ifdef NATIVE_64BIT
+        OSM_MAP_LOG("cached files: %ld, cachesize = %ld bytes", cache_file, cache_size );
+#else
         OSM_MAP_LOG("cached files: %d, cachesize = %d bytes", cache_file, cache_size );
+#endif
     }
     /**
      * leave critical section
@@ -804,7 +841,11 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
             OSM_MAP_ERROR_LOG("osm_location->tile_server: alloc failed");
             while(1);
         }
+#ifdef NATIVE_64BIT
+        OSM_MAP_LOG("osm_location->tile_server: alloc %ld bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
+#else
         OSM_MAP_LOG("osm_location->tile_server: alloc %d bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
+#endif
         strcpy( osm_location->tile_server, DEFAULT_OSM_TILE_SERVER );
     }
     /**

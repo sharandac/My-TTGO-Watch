@@ -19,9 +19,20 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 #include "watchface_theme_config.h"
 #include "watchface_expr.h"
 #include "utils/tinyexpr/tinyexpr.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 
 watchface_theme_config_t::watchface_theme_config_t() : BaseJsonConfig( WATCHFACE_THEME_JSON_CONFIG_FILE ) {}
 
@@ -157,7 +168,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
             }
             dial.label[ i ].enable = watchface_expr_compile( dial.label[ i ].enable_expr, &err );
             if ( dial.label[ i ].enable == NULL ) {
-                log_e("Parse error in '%s' at %d", doc["label"][i]["enable"], err);
+                log_e("Parse error in '%s' at %d", doc["label"][i]["enable"].as<String>().c_str(), err);
             }
         }
         strncpy( dial.label[ i ].type, doc["label"][i]["type"] | "text", sizeof( dial.label[ i ].type ) );
@@ -166,7 +177,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
             // Parse expression
             dial.label[ i ].expr = watchface_expr_compile(doc["label"][i]["expr"], &err);
             if ( dial.label[ i ].expr == NULL ) {
-                log_e("Parse error in '%s' at %d", doc["label"][i]["expr"], err);
+                log_e("Parse error in '%s' at %d", doc["label"][i]["expr"].as<String>().c_str(), err);
             }
         } else {
             dial.label[ i ].expr = NULL;
@@ -197,7 +208,7 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
             }
             dial.image[ i ].enable = watchface_expr_compile( dial.image[ i ].enable_expr, &err );
             if ( dial.image[ i ].enable == NULL ) {
-                log_e("Parse error in '%s' at %d", doc["image"][i]["enable"], err);
+                log_e("Parse error in '%s' at %d", doc["image"][i]["enable"].as<String>().c_str(), err);
             }
         }
         strncpy( dial.image[ i ].type, doc["image"][i]["type"] | "", sizeof( dial.image[ i ].type ) );

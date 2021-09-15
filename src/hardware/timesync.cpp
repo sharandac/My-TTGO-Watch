@@ -20,21 +20,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "TTGO.h"
 #include <sys/time.h>
-
-#include "wifictl.h"
 #include "timesync.h"
 #include "powermgm.h"
-#include "blectl.h"
 #include "callback.h"
-
 #include "hardware/config/timesyncconfig.h"
 
-EventGroupHandle_t time_event_handle = NULL;
-TaskHandle_t _timesync_Task;
-timesync_config_t timesync_config;
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else  
+    #ifdef M5PAPER
+        #include <M5EPD.h>
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include "TTGO.h"
+    #endif
 
+    #include "wifictl.h"
+    #include "blectl.h"
+
+    EventGroupHandle_t time_event_handle = NULL;
+    TaskHandle_t _timesync_Task;
+#endif
+
+timesync_config_t timesync_config;
 callback_t *timesync_callback = NULL;
 
 void timesync_Task( void * pvParameters );
@@ -48,6 +56,7 @@ void timesync_setup( void ) {
      * load config from json
      */
     timesync_config.load();
+#ifndef NATIVE_64BIT
     /*
      * create timesync event group
      */
@@ -57,6 +66,7 @@ void timesync_setup( void ) {
      */
     wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
     blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
+#endif
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "powermgm timesync" );
     /*
      * sync time from rtc to system
@@ -91,6 +101,9 @@ bool timesync_send_event_cb( EventBits_t event, void *arg ) {
 bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          
+#ifdef NATIVE_64BIT
+            log_i("go standby");
+#else
             /*
              * only update rtc time when an NTP timesync was success
              */
@@ -102,6 +115,7 @@ bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
             else {
                 log_i("go standby");
             }
+#endif
             break;
         case POWERMGM_WAKEUP:           
             /*
@@ -122,6 +136,7 @@ bool timesync_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
+#ifndef NATIVE_64BIT
     switch ( event ) {
         case WIFICTL_CONNECT:
             /*
@@ -148,7 +163,9 @@ bool timesync_wifictl_event_cb( EventBits_t event, void *arg ) {
                 }
             }
             break;
+
     }
+#endif
     return( true );
 }
 
@@ -157,6 +174,7 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
     time_t now;
     struct timeval new_now;
 
+#ifndef NATIVE_64BIT
     switch( event ) {
         case BLECTL_MSG:
             settime_str = strstr( (const char*)arg, "setTime(" );
@@ -175,6 +193,8 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
                 xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
             }
     }
+#endif
+
     return( true );
 }
 
@@ -228,14 +248,14 @@ void timesync_set_timezone( int32_t timezone ) {
 }
 
 void timesync_set_timezone_name( char * timezone_name ) {
-    strlcpy( timesync_config.timezone_name, timezone_name, sizeof( timesync_config.timezone_name ) );
+    strncpy( timesync_config.timezone_name, timezone_name, sizeof( timesync_config.timezone_name ) );
     timesyncToSystem();
     timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
     timesync_save_config();
 }
 
 void timesync_set_timezone_rule( const char * timezone_rule ) {
-    strlcpy( timesync_config.timezone_rule, timezone_rule, sizeof( timesync_config.timezone_rule ) );
+    strncpy( timesync_config.timezone_rule, timezone_rule, sizeof( timesync_config.timezone_rule ) );
     timesyncToSystem();
     timesync_send_event_cb( TIME_SYNC_UPDATE, (void *)NULL );
     timesync_save_config();
@@ -249,19 +269,99 @@ void timesync_set_24hr( bool use24 ) {
 }
 
 void timesyncToSystem( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    /**
+     * set TZ tp GMT0 to get time from RTC
+     */
     setenv("TZ", "GMT0", 1);
     tzset();
-    ttgo->rtc->syncToSystem();
+#ifdef NATIVE_64BIT
+
+#else
+    #ifdef M5PAPER
+        struct tm t_tm;
+        struct timeval val;
+        /**
+         * get GMT0 RTC time
+         */
+        rtc_time_t RTCtime;
+        rtc_date_t RTCDate;
+
+        M5.RTC.getTime(&RTCtime);
+        M5.RTC.getDate(&RTCDate);
+
+        t_tm.tm_hour = RTCtime.hour;
+        t_tm.tm_min = RTCtime.min;
+        t_tm.tm_sec = RTCtime.sec;
+        t_tm.tm_year = RTCDate.year - 1900;    //Year, whose value starts from 1900
+        t_tm.tm_mon = RTCDate.mon - 1;       //Month (starting from January, 0 for January) - Value range is [0,11]
+        t_tm.tm_mday = RTCDate.day;
+        val.tv_sec = mktime(&t_tm);
+        val.tv_usec = 0;
+        settimeofday(&val, NULL);
+
+        log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
+        log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
+        log_i("to --->");
+        log_i("GMT0-System - Time: %02d:%02d.%02d", t_tm.tm_hour, t_tm.tm_min, t_tm.tm_sec );
+        log_i("GMT0-System - Date: %02d.%02d.%04d", t_tm.tm_mday, t_tm.tm_mon, t_tm.tm_year + 1900 );
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        TTGOClass *ttgo = TTGOClass::getWatch();
+        ttgo->rtc->syncToSystem();
+    #endif
+#endif
+    /**
+     * set back TZ to local settings
+     */
+    log_i("TZ rule: %s", timesync_config.timezone_rule );
     setenv("TZ", timesync_config.timezone_rule, 1);
     tzset();
 }
 
 void timesyncToRTC( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    /**
+     * set TZ to GMT0 for storinf it into rtc
+     */
     setenv("TZ", "GMT0", 1);
     tzset();
-    ttgo->rtc->syncToRtc();
+#ifdef NATIVE_64BIT
+
+#else
+    #ifdef M5PAPER
+        time_t now;
+        struct tm  t_tm;
+        /**
+         * get GMT0 system time
+         */
+        time(&now);
+        localtime_r(&now, &t_tm);
+        /**
+         * store GMT0 System time to RTC
+         */
+        rtc_time_t RTCtime;
+        rtc_date_t RTCDate;
+
+        RTCtime.hour = t_tm.tm_hour;
+        RTCtime.min = t_tm.tm_min;
+        RTCtime.sec = t_tm.tm_sec;
+        M5.RTC.setTime(&RTCtime);
+
+        RTCDate.year = t_tm.tm_year + 1900;
+        RTCDate.mon = t_tm.tm_mon + 1;
+        RTCDate.day = t_tm.tm_mday;
+        M5.RTC.setDate(&RTCDate);
+
+        log_i("to --->");
+        log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
+        log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        TTGOClass *ttgo = TTGOClass::getWatch();
+        ttgo->rtc->syncToRtc();
+    #endif
+#endif
+    /**
+     * set back TZ to local settings
+     */
+    log_i("TZ rule: %s", timesync_config.timezone_rule );
     setenv("TZ", timesync_config.timezone_rule, 1);
     tzset();
     timesync_send_event_cb( TIME_SYNC_OK, (void *)NULL );
@@ -269,6 +369,7 @@ void timesyncToRTC( void ) {
 }
 
 void timesync_Task( void * pvParameters ) {
+#ifndef NATIVE_64BIT
   log_i("start time sync task, heap: %d", ESP.getFreeHeap() );
 
     if ( xEventGroupGetBits( time_event_handle ) & TIME_SYNC_REQUEST ) { 
@@ -283,9 +384,11 @@ void timesync_Task( void * pvParameters ) {
             xEventGroupSetBits( time_event_handle, TIME_SYNC_OK );
         }
     }
+
     xEventGroupClearBits( time_event_handle, TIME_SYNC_REQUEST );
     log_i("finish time sync task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
+#endif
 }
 
 void timesync_get_current_timestring( char * buf, size_t buf_len ) {

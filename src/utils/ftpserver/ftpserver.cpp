@@ -19,13 +19,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <Arduino.h>
-#include <ESP8266FtpServer.h>
-
 #include "hardware/powermgm.h"
 
-//set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
-FtpServer *ftpSrv = NULL;   
+#ifdef NATIVE_64BIT
+#else
+    #include <Arduino.h>
+    #include <ESP8266FtpServer.h>
+
+    //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verbose on serial
+    FtpServer *ftpSrv = NULL;   
+#endif
 
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg );
 
@@ -33,6 +36,9 @@ void ftpserver_start( const char *user, const char *pass ) {
     /**
      * check if ftp server running
      */
+#ifdef NATIVE_64BIT
+
+#else
     if ( !ftpSrv ) {
         /**
          * get a new instance
@@ -50,9 +56,13 @@ void ftpserver_start( const char *user, const char *pass ) {
             log_e("start ftp server failed");
         }
     }
+#endif
 }
 
 bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg ) {
+#ifdef NATIVE_64BIT
+
+#else
     switch( event ) {
         case POWERMGM_SILENCE_WAKEUP:
             if ( ftpSrv ) {
@@ -65,5 +75,6 @@ bool ftpserver_powermgm_event_loop_cb( EventBits_t event, void *arg ) {
             }
             break;
     }
+#endif
     return( true );
 }

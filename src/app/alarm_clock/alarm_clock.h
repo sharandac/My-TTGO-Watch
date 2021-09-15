@@ -20,14 +20,7 @@
  */
 #pragma once
 
-#include <TTGO.h>
-
-typedef struct {
-    bool beep;
-    bool fade;
-    bool vibe;
-    bool show_on_main_tile;
-} alarm_properties_t;
+#include "config/alarm_clock_config.h"
 
 void alarm_clock_setup( void );
 uint32_t alarm_clock_get_app_setup_tile_num( void );

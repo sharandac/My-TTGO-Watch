@@ -22,8 +22,6 @@
 #ifndef _UPDATE_H
     #define _UPDATE_H
 
-    #include <TTGO.h>
-
     #define UPDATE_REQUEST              _BV(0)
     #define UPDATE_GET_VERSION_REQUEST  _BV(1)
 

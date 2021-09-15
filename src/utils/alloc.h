@@ -1,6 +1,9 @@
 #ifndef _ALLOC_H
     #define _ALLOC_H
 
+    #include <stdio.h>
+    #include <stdlib.h>
+
     #if defined( BOARD_HAS_PSRAM )
         #include <stddef.h>
         #include <stdbool.h>

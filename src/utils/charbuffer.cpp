@@ -19,9 +19,13 @@
  */
 
 #include "config.h"
+#ifdef NATIVE_64BIT
+    #include "logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 #include "charbuffer.h"
-
 #include "utils/alloc.h"
 
 CharBuffer::CharBuffer( void ) : msg(NULL), capacity(0), size(0) {
@@ -29,11 +33,19 @@ CharBuffer::CharBuffer( void ) : msg(NULL), capacity(0), size(0) {
 }
 
 void CharBuffer::append(char c) {
+#ifdef NATIVE_64BIT
+    log_v("CharBuffer::append: size %ld capacity %ld", size, capacity);
+#else
     log_v("CharBuffer::append: size %d capacity %d", size, capacity);
+#endif
     if ( capacity == 0 )
         clear();
     if ( size + 2 > capacity ) {
+#ifdef NATIVE_64BIT
+        log_v("CharBuffer::append realloc: size %ld capacity %ld", size, capacity);
+#else
         log_v("CharBuffer::append realloc: size %d capacity %d", size, capacity);
+#endif
         // Realloc
         char *new_msg = NULL;
         new_msg = (char *)REALLOC( msg, capacity + CHUNK_CAPACITY );

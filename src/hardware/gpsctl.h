@@ -22,10 +22,10 @@
 #ifndef _GPSCTL_H
     #define _GPSCTL_H
 
-    #include "TTGO.h"
     #include "callback.h"
     #include "hardware/config/gpsctlconfig.h"
-
+    #include "utils/io.h"
+    
     #define GPSCTL_INFO_LOG                 log_i
     #define GPSCTL_DEBUG_LOG                log_i
     #define GPSCTL_ERROR_LOG                log_e

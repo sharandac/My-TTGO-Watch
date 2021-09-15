@@ -14,7 +14,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "calendar.h"
 #include "calendar_db.h"
@@ -29,6 +28,17 @@
 #include "gui/widget_styles.h"
 
 #include "utils/alloc.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 /**
  * calendar tile store
  */
@@ -36,7 +46,14 @@ uint32_t calendar_ovreview_tile_num;                                            
 /**
  * calendar icon and fonts
  */
+LV_FONT_DECLARE(Ubuntu_32px);                                                       /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_12px);                                                       /** @brief calendar font */
+#if defined( M5PAPER )
+    lv_font_t *calandar_font = &Ubuntu_32px;
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    lv_font_t *calandar_font = &Ubuntu_12px;
+#endif
+
 /**
  * calendar objects
  */
@@ -110,20 +127,21 @@ void calendar_overview_build_ui( void ) {
     lv_style_set_radius( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    lv_style_set_bg_opa( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
+    lv_style_set_bg_opa( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
     /**
      * create calendar object
      */
     calendar_overview = lv_calendar_create( calendar_overview_tile, NULL);
-    lv_obj_set_size( calendar_overview, 190, 240 );
+    lv_obj_set_size( calendar_overview, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE, lv_disp_get_ver_res( NULL ) );
     lv_obj_align( calendar_overview, calendar_overview_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0);
     lv_obj_set_event_cb( calendar_overview, calendar_overview_date_event_cb );
     lv_obj_add_style( calendar_overview, LV_OBJ_PART_MAIN, &calendar_overview_style );
     /**
      * Make the date number smaller to be sure they fit into their area
      */
+    lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, calandar_font );
     lv_obj_set_style_local_text_color( calendar_overview, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, LV_COLOR_BLACK );
-    lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, &Ubuntu_12px );
+    lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, calandar_font );
     lv_obj_set_style_local_text_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_obj_set_style_local_bg_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_CHECKED, LV_COLOR_RED );
     lv_obj_set_style_local_bg_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_FOCUSED, LV_COLOR_BLUE );
@@ -131,7 +149,7 @@ void calendar_overview_build_ui( void ) {
      * add exit button
      */
     lv_obj_t *exit_button = wf_add_exit_button( calendar_overview_tile, calendar_overview_exit_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( exit_button, calendar_overview_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align( exit_button, calendar_overview_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 
 void calendar_overview_refresh_showed_ui( void ) {
@@ -272,6 +290,27 @@ int calendar_overview_highlight_day( int year, int month ) {
     /**
      * build sql query string
      */
+#ifdef NATIVE_64BIT
+    char sql[ 512 ] = "";
+    snprintf( sql, sizeof( sql ), "SELECT rowid, year, month, day, hour, min, content FROM calendar WHERE year == %d AND month == %d;", year, month );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_overview_highlight_day_callback, sql ) ) {
+        /**
+         * count day with day and marked days with dates
+         */
+        for ( int i = 0 ; i < CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS ; i++ ) {
+            if ( calendar_overview_highlight_table[ i ] ) {
+                CALENDAR_OVREVIEW_DEBUG_LOG("add year %d and month %d to highlight", year, month );
+                calendar_overview_highlighted_days[ hitcounter ].day = i;
+                calendar_overview_highlighted_days[ hitcounter ].month = month;
+                calendar_overview_highlighted_days[ hitcounter ].year = year;
+                hitcounter++;
+            }
+        }
+    }
+#else
     String sql = (String) "SELECT rowid, year, month, day, hour, min, content FROM calendar WHERE year == " + year + " AND month == " + month + ";";
     /**
      * exec sql query
@@ -290,5 +329,6 @@ int calendar_overview_highlight_day( int year, int month ) {
             }
         }
     }
+#endif
     return( hitcounter );
 }

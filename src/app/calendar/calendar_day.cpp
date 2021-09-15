@@ -14,7 +14,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "calendar.h"
 #include "calendar_db.h"
@@ -29,6 +28,17 @@
 #include "gui/widget_styles.h"
 
 #include "utils/alloc.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 /**
  * calendar tile store
  */
@@ -37,6 +47,13 @@ uint32_t calendar_day_tile_num;                 /** @brief allocated calendar ov
  * calendar icon
  */
 LV_FONT_DECLARE(Ubuntu_12px);                   /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_32px);                   /** @brief calendar font */
+
+#if defined( M5PAPER )
+    lv_font_t *daylist_font = &Ubuntu_32px;
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    lv_font_t *daylist_font = &Ubuntu_12px;
+#endif
 /**
  * calendar objects
  */
@@ -88,23 +105,24 @@ void calendar_day_build_ui( void ) {
     lv_style_init( &calendar_day_list_style );
     lv_style_set_border_width( &calendar_day_list_style , LV_OBJ_PART_MAIN, 0 );
     lv_style_set_radius( &calendar_day_list_style , LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_text_font( &calendar_day_list_style , LV_OBJ_PART_MAIN, daylist_font );
     /**
      * day date list
      */
     calendar_day_list = lv_list_create( calendar_day_tile, NULL );
-    lv_obj_set_size( calendar_day_list, 240, 190 );
+    lv_obj_set_size( calendar_day_list, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - THEME_ICON_SIZE );
     lv_obj_align( calendar_day_list, calendar_day_tile, LV_ALIGN_IN_TOP_MID, 0, 0);
     lv_obj_add_style( calendar_day_list, LV_OBJ_PART_MAIN, &calendar_day_list_style  );
     /**
      * add exit button
      */
     lv_obj_t *exit_button = wf_add_exit_button( calendar_day_tile, calendar_day_exit_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( exit_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align( exit_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add exit button
      */
     lv_obj_t *create_button = wf_add_add_button( calendar_day_tile, calendar_day_create_event_cb, ws_get_mainbar_style() );
-    lv_obj_align( create_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align( create_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 
 static void calendar_day_exit_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -220,6 +238,19 @@ void calendar_day_overview_refresh( int year, int month, int day ) {
     /**
      * build sql query string
      */
+#ifdef NATIVE_64BIT
+    char sql[512]="";
+    snprintf( sql, sizeof( sql ),    "SELECT hour, min, content FROM calendar WHERE year == %d AND month == %d AND day == %d ORDER BY hour, min;",
+                                    year,
+                                    month,
+                                    day );
+    /**
+     * exec sql query
+     */
+    if ( calendar_db_exec( calendar_day_overview_callback, sql ) ) {
+        CALENDAR_DAY_DEBUG_LOG("list created");
+    }
+#else
     String sql = (String) "SELECT hour, min, content FROM calendar WHERE year == " + year + " AND month == " + month + " AND day == " + day + " ORDER BY hour, min;";
     /**
      * exec sql query
@@ -227,4 +258,5 @@ void calendar_day_overview_refresh( int year, int month, int day ) {
     if ( calendar_db_exec( calendar_day_overview_callback, sql.c_str() ) ) {
         CALENDAR_DAY_DEBUG_LOG("list created");
     }
+#endif
 }

@@ -27,18 +27,17 @@
     #define UPDATE_JSON_COFIG_FILE              "/update.json"          /** @brief defines json config file name */
     #define FIRMWARE_UPDATE_URL_LEN             512
 
-    #if defined( LILYGO_WATCH_2020_V1 )
+    #if defined( M5PAPER )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/m5stack-fire.version.json"
+    #elif defined( LILYGO_WATCH_2020_V1 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v1.version.json"
-    #endif
-    #if defined( LILYGO_WATCH_2020_V2 )
+    #elif defined( LILYGO_WATCH_2020_V2 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v2.version.json"
-    #endif
-    #if defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V3 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"
     #endif
-
     #if !defined( FIRMWARE_UPDATE_URL )
-        #error "no ttgo t-watch version defined"
+        #error "nohardware version defined"
     #endif
 
     /**

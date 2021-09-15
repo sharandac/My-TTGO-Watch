@@ -20,17 +20,22 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <HTTPClient.h>
-#include <Update.h>
+#ifdef NATIVE_64BIT
 
-#define DEST_FS_USES_SPIFFS
-#include <ESP32-targz.h>
+#else
+    #include <HTTPClient.h>
+    #include <Update.h>
+    #define DEST_FS_USES_SPIFFS
+    #include <ESP32-targz.h>
+#endif
 
 #include "decompress.h"
 
 bool decompress_file_into_spiffs( const char*filename, const char *dest, ProgressCallback cb ) {
     bool retval = false;
-    
+#ifdef NATIVE_64BIT
+
+#else
     TarGzUnpacker *TARGZUnpacker = new TarGzUnpacker();
 
     TARGZUnpacker->haltOnError( false ); // stop on fail (manual restart/reset required)
@@ -50,31 +55,38 @@ bool decompress_file_into_spiffs( const char*filename, const char *dest, Progres
         log_i("success!");
         retval = true;
     }
+#endif
     return( retval );
 }
 
-bool decompress_stream_into_flash( Stream *stream, const char* md5, int32_t firmwaresize, ProgressCallback cb ) {
-    int32_t size = UPDATE_SIZE_UNKNOWN;
-    bool retval = false;
-    /**
-     * start an unpacker instance, reister progress callback and put the stream in
-     */
-    GzUnpacker *GZUnpacker = new GzUnpacker();
-    GZUnpacker->setGzProgressCallback( cb );
-    GZUnpacker->setPsram( true );
-    /**
-     * if firmware size known set the right value
-     */
-    if ( firmwaresize != 0 )
-        size = firmwaresize;
-    /**
-     * progress the stream
-     */
-    if( !GZUnpacker->gzStreamUpdater( stream, size, 0, false ) ) {
-        log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
+#ifdef NATIVE_64BIT
+    bool decompress_stream_into_flash( void *stream, const char* md5, int32_t firmwaresize, ProgressCallback cb ) {
+        return( false );
     }
-    else {
-        retval = true;
+#else
+    bool decompress_stream_into_flash( Stream *stream, const char* md5, int32_t firmwaresize, ProgressCallback cb ) {
+        int32_t size = UPDATE_SIZE_UNKNOWN;
+        bool retval = false;
+        /**
+         * start an unpacker instance, reister progress callback and put the stream in
+         */
+        GzUnpacker *GZUnpacker = new GzUnpacker();
+        GZUnpacker->setGzProgressCallback( cb );
+        GZUnpacker->setPsram( true );
+        /**
+         * if firmware size known set the right value
+         */
+        if ( firmwaresize != 0 )
+            size = firmwaresize;
+        /**
+         * progress the stream
+         */
+        if( !GZUnpacker->gzStreamUpdater( stream, size, 0, false ) ) {
+            log_e("gzStreamUpdater failed with return code #%d\n", GZUnpacker->tarGzGetError() );
+        }
+        else {
+            retval = true;
+        }
+        return( retval );
     }
-    return( retval );
-}
+#endif

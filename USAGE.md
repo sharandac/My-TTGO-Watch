@@ -179,21 +179,21 @@ For customise your ir-codes, use [WConfigurator](https://github.com/anakod/WConf
 
 IR-modes supported:
 
-RC5 = 1 
-RC6 = 2
-NEC = 3
-SONY = 4
-PANASONIC = 5
-JVC = 6
-SAMSUNG = 7
-LG = 10
-SHARP = 14
-RAW = 30
+RC5 = 1, 
+RC6 = 2,
+NEC = 3,
+SONY = 4,
+PANASONIC = 5,
+JVC = 6,
+SAMSUNG = 7,
+LG = 10,
+SHARP = 14,
+RAW = 30,
 SAMSUNG36 = 56
 
 IR-data format supported:
 
-raw
+raw,
 hex
 
 ## watchface

@@ -23,7 +23,6 @@
  * 
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "FindPhone.h"
 #include "FindPhone_main.h"
@@ -42,7 +41,7 @@
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
 
 lv_obj_t *FindPhone_main_tile = NULL;
 lv_obj_t *FindPhone_main_iris = NULL;
@@ -187,7 +186,6 @@ static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event )
 {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-                                        pinMode(13, INPUT); //Leave this tristated when we leave
                                         mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }

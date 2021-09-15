@@ -14,8 +14,6 @@
 #include <unistd.h>
 #include <time.h>
 #include "sqlite3.h"
-#include <Arduino.h>
-#include <esp_spi_flash.h>
 #include <sys/stat.h>
 #include <assert.h>
 #include <sys/types.h>
@@ -24,6 +22,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include "shox96_0_2.h"
+
+#ifdef NATIVE_64BIT
+
+#else
+    #include <Arduino.h>
+    #include <esp_spi_flash.h>
+#endif
 
 #undef dbg_printf
 //#define dbg_printf(...) Serial.printf(__VA_ARGS__)

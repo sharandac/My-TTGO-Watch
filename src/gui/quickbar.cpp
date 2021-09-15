@@ -27,10 +27,16 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 
-#include "hardware/pmu.h"
+#include "hardware/button.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 #include "hardware/timesync.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 static bool quickbar_init = false;
 
@@ -57,7 +63,7 @@ static uint32_t quickbar_counter = 0;
 void quickbar_maintile_event_cb( lv_obj_t *bluetooth, lv_event_t event );
 void quickbar_setup_event_cb( lv_obj_t *bluetooth, lv_event_t event );
 void quickbar_screenshot_event_cb( lv_obj_t *bluetooth, lv_event_t event );
-bool quickbar_pmuctl_event_cb( EventBits_t event, void *arg );
+bool quickbar_button_event_cb( EventBits_t event, void *arg );
 bool quickbar_powermgm_event_cb( EventBits_t event, void *arg );
 void quickbar_counter_task( lv_task_t * task );
 
@@ -184,7 +190,7 @@ void quickbar_setup( void ){
     /*
      * register pmu callback to detect long press and powermgm callback
      */
-    pmu_register_cb( PMUCTL_LONG_PRESS, quickbar_pmuctl_event_cb, "quickbar pmu event");
+    button_register_cb( BUTTON_QUICKBAR, quickbar_button_event_cb, "quickbar pmu event");
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, quickbar_powermgm_event_cb, "quickbar powermgm event" );
 
     return;
@@ -215,7 +221,7 @@ bool quickbar_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( retval );
 }
 
-bool quickbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
+bool quickbar_button_event_cb( EventBits_t event, void *arg ) {
     /*
      * check if quickar already initialized
      */
@@ -228,7 +234,7 @@ bool quickbar_pmuctl_event_cb( EventBits_t event, void *arg ) {
     char time[32] = "";
     
     switch ( event ) {
-        case PMUCTL_LONG_PRESS:
+        case BUTTON_QUICKBAR:
             motor_vibe(3);
             lv_disp_trig_activity( NULL );
             if( lv_obj_get_hidden( quickbar ) ) {

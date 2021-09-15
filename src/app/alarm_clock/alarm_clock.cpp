@@ -19,13 +19,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <SPIFFS.h>
 
 #include "alarm_clock.h"
 #include "alarm_clock_main.h"
 #include "alarm_clock_setup.h"
 #include "alarm_in_progress.h"
+#include "config/alarm_clock_config.h"
+
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -37,19 +37,15 @@
 #include "hardware/rtcctl.h"
 #include "hardware/timesync.h"
 
-#define VERSION_KEY "version"
-#define BEEP_KEY "beep"
-#define FADE_KEY "fade"
-#define VIBE_KEY "vibe"
-#define SHOW_ON_MAIN_TILE_KEY "show_on_main_tile_key"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #else // NEW_HARDWARE_TAG
+    #endif
+#endif
 
-#define CONFIG_ALARM_FILE_PATH "/alarm_clock.json"
-
-#define AM "AM"
-#define PM "PM"
-
-#define AM_ONE "A"
-#define PM_ONE "P"
 #define LABEL_MAX_SIZE 11
 
 static const char alarm_clock_week_day_2[7][3] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
@@ -68,56 +64,6 @@ static icon_t *alarm_clock_widget = NULL;
 // declare callback functions
 static void enter_alarm_clock_event_cb( lv_obj_t * obj, lv_event_t event );
 
-static void load_data(){
-    if (! SPIFFS.exists( CONFIG_ALARM_FILE_PATH ) ) {
-        return; //wil be used default values set during theier creation
-    }
-
-    fs::File file = SPIFFS.open( CONFIG_ALARM_FILE_PATH, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_ALARM_FILE_PATH );
-        return;
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 2 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            properties.beep = doc[BEEP_KEY].as<bool>();
-            properties.fade = doc[FADE_KEY].as<bool>();
-            properties.vibe = doc[VIBE_KEY].as<bool>();
-            properties.show_on_main_tile = doc[SHOW_ON_MAIN_TILE_KEY].as<bool>();
-        }
-        doc.clear();
-    }
-    file.close();
-}
-
-static void store_data(){
-    fs::File file = SPIFFS.open( CONFIG_ALARM_FILE_PATH, FILE_WRITE );
-    if (!file) {
-        log_e("Can't open file: %s!", CONFIG_ALARM_FILE_PATH );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc[VERSION_KEY] = 1;
-        doc[BEEP_KEY] = properties.beep;
-        doc[FADE_KEY] = properties.fade;
-        doc[VIBE_KEY] = properties.vibe;
-        doc[SHOW_ON_MAIN_TILE_KEY] = properties.show_on_main_tile;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
-}
 
 static void create_alarm_app_icon(){
     // create an app icon, label it and get the lv_obj_t icon container
@@ -174,7 +120,7 @@ static void add_main_tile_widget(){
 }
 
 static void setup_tile_hibernate_callback (){
-    log_n("alarm_clock_setup_is_main_tile_switch_on(): %d, properties.show_on_main_tile: %d", alarm_clock_setup_is_main_tile_switch_on(), properties.show_on_main_tile);
+    log_d("alarm_clock_setup_is_main_tile_switch_on(): %d, properties.show_on_main_tile: %d", alarm_clock_setup_is_main_tile_switch_on(), properties.show_on_main_tile);
     if (alarm_clock_setup_is_main_tile_switch_on() != properties.show_on_main_tile) {
         if (alarm_clock_setup_is_main_tile_switch_on()){
             add_main_tile_widget();
@@ -184,7 +130,7 @@ static void setup_tile_hibernate_callback (){
         }
     }
     properties = *alarm_clock_setup_get_data_to_store();
-    store_data();
+    properties.save();
 }
 
 static void create_alarm_main_tile(uint32_t tile_num ){
@@ -225,7 +171,7 @@ bool powermgmt_callback( EventBits_t event, void *arg  ){
 
 // setup routine for example app
 void alarm_clock_setup( void ) {
-    load_data();
+    properties.load();
 
     create_alarm_app_icon();
     if (properties.show_on_main_tile){

@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A smartwatch based on ESP32 from LilyGo. Currently support for T-Watch2020 V1, V2 and V3.
+A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), M5Paper and native Linux support for testing.
 
 ## Features
 
@@ -51,6 +51,11 @@ A smartwatch based on ESP32 from LilyGo. Currently support for T-Watch2020 V1, V
 
 Clone this repository and open it with platformIO. Select the right env and then build and upload.
 Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from [ShotokuTech](https://github.com/ShotokuTech).
+If you are interested in native Linux support, please install sdl2, curl and mosquitto dev lib and change the env to emulator_* in platformIO.
+
+```bash
+sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev
+```
 
 # Telegram chatgroup
 
@@ -79,6 +84,8 @@ Cf. [contribution guide](CONTRIBUTING.md)
 
 # Interface
 
+## TTGO T-Watch 2020
+
 ![screenshot](images/screen1.png)
 ![screenshot](images/screen2.png)
 ![screenshot](images/screen3.png)
@@ -92,6 +99,11 @@ Cf. [contribution guide](CONTRIBUTING.md)
 ![screenshot](images/screen11.png)
 ![screenshot](images/screen12.png)
 
+## M5Paper ( downscaled )
+
+![screenshot](images/image1.png)
+![screenshot](images/image2.png)
+![screenshot](images/image3.png)
 
 # Contributors
 

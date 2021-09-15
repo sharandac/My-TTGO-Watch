@@ -2,6 +2,11 @@
     #define _OSM_HELPER_H
 
     #include "utils/uri_load/uri_load.h"
+    #ifdef NATIVE_64BIT
+        #include "utils/logging.h"
+    #else
+        #include <Arduino.h>
+    #endif
 
     #define OSM_MAP_LOG                 log_d
     #define OSM_MAP_ERROR_LOG           log_e
@@ -44,7 +49,9 @@
         uint32_t cached_fies = 0;
         lv_img_dsc_t osm_map_data;                      /** @brief pointer to an lv_img_dsc for lvgl use */
         uri_load_dsc_t *uri_load_dsc[ DEFAULT_OSM_CACHE_SIZE ];
+#ifndef NATIVE_64BIT
         SemaphoreHandle_t xSemaphoreMutex;
+#endif
     } osm_location_t;
 
     /**

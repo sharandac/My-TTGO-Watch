@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <Arduino.h>
-#include <HTTPClient.h>
-#include <HTTPUpdate.h>
 
 #include "update.h"
 #include "update_setup.h"
@@ -40,18 +37,36 @@
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
+#include "hardware/callback.h"
 
-#include "utils/http_ota/http_ota.h"
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
 
-EventGroupHandle_t update_event_handle = NULL;
-TaskHandle_t _update_Task;
+    EventBits_t update_event = 0;
+#else
+    #include <Arduino.h>
+    #include <SPIFFS.h>
+    #include <HTTPClient.h>
+    #include <HTTPUpdate.h>
+
+    #include "utils/http_ota/http_ota.h"
+
+    EventGroupHandle_t update_event = NULL;
+    TaskHandle_t _update_Task;
+#endif
+
 lv_task_t *_update_progress_task;
 void update_Task( void * pvParameters );
 
 icon_t *update_setup_icon = NULL;
 
 lv_obj_t *update_settings_tile=NULL;
-lv_style_t update_settings_style;
 uint32_t update_tile_num;
 static float progress = 0;
 static int64_t last_firmware_version = 0;
@@ -85,28 +100,27 @@ void update_tile_setup( void ) {
 
     update_setup_tile_setup( update_tile_num + 1 );
 
-    lv_style_copy( &update_settings_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, &update_settings_style );
+    lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
 
     update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );
     setup_hide_indicator( update_setup_icon );
 
-    lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb, &update_settings_style );
-    lv_obj_align( setup_btn, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-
     lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update" );
     lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
+    lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb, ws_get_setup_tile_style() );
+    lv_obj_align( setup_btn, header, LV_ALIGN_IN_RIGHT_MID, 0, 0 );
+
     lv_obj_t *update_version_cont = lv_obj_create( update_settings_tile, NULL );
     lv_obj_set_size(update_version_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( update_version_cont, LV_OBJ_PART_MAIN, &update_settings_style  );
-    lv_obj_align( update_version_cont, update_settings_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 75 );
+    lv_obj_add_style( update_version_cont, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
+    lv_obj_align( update_version_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
     lv_obj_t *update_version_label = lv_label_create( update_version_cont, NULL);
-    lv_obj_add_style( update_version_label, LV_OBJ_PART_MAIN, &update_settings_style  );
+    lv_obj_add_style( update_version_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
     lv_label_set_text( update_version_label, "firmware version" );
     lv_obj_align( update_version_label, update_version_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
     lv_obj_t *update_firmware_version_label = lv_label_create( update_version_cont, NULL);
-    lv_obj_add_style( update_firmware_version_label, LV_OBJ_PART_MAIN, &update_settings_style  );
+    lv_obj_add_style( update_firmware_version_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
     lv_label_set_text( update_firmware_version_label, __FIRMWARE__ );
     lv_obj_align( update_firmware_version_label, update_version_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
 
@@ -118,25 +132,31 @@ void update_tile_setup( void ) {
     lv_label_set_text( update_btn_label, "update");
 
     update_status_label = lv_label_create( update_settings_tile, NULL);
-    lv_obj_add_style( update_status_label, LV_OBJ_PART_MAIN, &update_settings_style  );
+    lv_obj_add_style( update_status_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     update_progressbar = lv_bar_create( update_settings_tile, NULL );
     lv_obj_set_size( update_progressbar, lv_disp_get_hor_res( NULL ) - 80, 20 );
-    lv_obj_add_style( update_progressbar, LV_OBJ_PART_MAIN, &update_settings_style );
+    lv_obj_add_style( update_progressbar, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
     lv_obj_align( update_progressbar, update_status_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     lv_bar_set_anim_time( update_progressbar, 2000 );
     lv_bar_set_value( update_progressbar, 0, LV_ANIM_ON );
 
     wifictl_register_cb( WIFICTL_CONNECT, update_wifictl_event_cb, "update" );
+#ifdef NATIVE_64BIT
+#else
     http_ota_register_cb( HTTP_OTA_PROGRESS | HTTP_OTA_START | HTTP_OTA_FINISH | HTTP_OTA_ERROR, update_http_ota_event_cb, "http updater");
-
+#endif
     mainbar_add_tile_activate_cb( update_tile_num, update_update_activate_cb );
     mainbar_add_tile_hibernate_cb( update_tile_num, update_update_hibernate_cb );
 
-    update_event_handle = xEventGroupCreate();
-    xEventGroupClearBits( update_event_handle, UPDATE_REQUEST );
+#ifdef NATIVE_64BIT
+    update_event = 0;
+#else
+    update_event = xEventGroupCreate();
+    xEventGroupClearBits( update_event, UPDATE_REQUEST );
+#endif
 }
 
 void update_update_activate_cb( void ) {
@@ -160,6 +180,8 @@ void update_progress_task( lv_task_t *task ) {
 
 bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
+#ifdef NATIVE_64BIT
+#else
         case HTTP_OTA_PROGRESS:
             progress = *(float *)arg;
             break;
@@ -181,6 +203,7 @@ bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
             lv_label_set_text( update_status_label, (char *)arg );
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             break;
+#endif
     }
     return( true );
 }
@@ -214,39 +237,58 @@ static void enter_update_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
     if( event == LV_EVENT_CLICKED ) {
-        if ( reset ) {
-            TTGOClass *ttgo = TTGOClass::getWatch();
-            log_i("System reboot by user");
-            motor_vibe(20);
-            delay(20);
-            display_standby();
-            ttgo->stopLvglTick();
-            SPIFFS.end();
-            log_i("SPIFFS unmounted!");
-            delay(500);
-            ESP.restart();
-        }
-        else if ( xEventGroupGetBits( update_event_handle) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
+
+    #ifdef NATIVE_64BIT
+        if ( update_event & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
             return;
         }
         else {
-            xEventGroupSetBits( update_event_handle, UPDATE_REQUEST );
-            xTaskCreate(    update_Task,
-                            "update Task",
-                            5000,
-                            NULL,
-                            1,
-                            &_update_Task );
+            update_event |= UPDATE_REQUEST;
+            update_Task( NULL );
         }
+    #else
+            if ( reset ) {
+                log_i("System reboot by user");
+                motor_vibe(20);
+                delay(20);
+                display_standby();
+                SPIFFS.end();
+                log_i("SPIFFS unmounted!");
+                delay(500);
+                ESP.restart();
+            }
+            else if ( xEventGroupGetBits( update_event) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) )  {
+                return;
+            }
+            else {
+                xEventGroupSetBits( update_event, UPDATE_REQUEST );
+                xTaskCreate(    update_Task,
+                                "update Task",
+                                5000,
+                                NULL,
+                                1,
+                                &_update_Task );
+            }
+    #endif
+
     }
 }
 
 void update_check_version( void ) {
-    if ( xEventGroupGetBits( update_event_handle ) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
+#ifdef NATIVE_64BIT
+    if( update_event & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
         return;
     }
     else {
-        xEventGroupSetBits( update_event_handle, UPDATE_GET_VERSION_REQUEST );
+        update_event |= UPDATE_GET_VERSION_REQUEST;
+        update_Task( NULL );
+    }
+#else
+    if ( xEventGroupGetBits( update_event ) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
+        return;
+    }
+    else {
+        xEventGroupSetBits( update_event, UPDATE_GET_VERSION_REQUEST );
         xTaskCreate(    update_Task,
                         "update Task",
                         5000,
@@ -254,12 +296,12 @@ void update_check_version( void ) {
                         1,
                         &_update_Task );
     }
+#endif
 }
 
 void update_Task( void * pvParameters ) {
-    log_i("start update task, heap: %d", ESP.getFreeHeap() );
-
-    if ( xEventGroupGetBits( update_event_handle) & UPDATE_GET_VERSION_REQUEST ) {
+#ifdef NATIVE_64BIT
+    if ( update_event & UPDATE_GET_VERSION_REQUEST ) {
         int64_t firmware_version = update_check_new_version( update_setup_get_url() );
         if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
             char version_msg[48] = "";
@@ -284,7 +326,39 @@ void update_Task( void * pvParameters ) {
         }
         lv_obj_invalidate( lv_scr_act() );
     }
-    if ( ( xEventGroupGetBits( update_event_handle) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {
+
+    update_event = update_event & ~( UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
+    lv_disp_trig_activity(NULL);
+    lv_obj_invalidate( lv_scr_act() );
+#else
+    log_i("start update task, heap: %d", ESP.getFreeHeap() );
+
+    if ( xEventGroupGetBits( update_event) & UPDATE_GET_VERSION_REQUEST ) {
+        int64_t firmware_version = update_check_new_version( update_setup_get_url() );
+        if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
+            char version_msg[48] = "";
+            snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
+            lv_label_set_text( update_status_label, (const char*)version_msg );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
+            if ( last_firmware_version < firmware_version ) {
+                bluetooth_message_queue_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"update\",\"body\":\"new firmware version available\"}");
+                last_firmware_version = firmware_version;
+            }
+        }
+        else if ( firmware_version == atoll( __FIRMWARE__ ) ) {
+            lv_label_set_text( update_status_label, "yeah! up to date ..." );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
+            setup_hide_indicator( update_setup_icon );
+        }
+        else {
+            lv_label_set_text( update_status_label, "get update info failed" );
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
+            setup_hide_indicator( update_setup_icon );
+        }
+        lv_obj_invalidate( lv_scr_act() );
+    }
+    if ( ( xEventGroupGetBits( update_event) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {
         if( ( WiFi.status() == WL_CONNECTED ) ) {
 
             uint32_t display_timeout = display_get_timeout();
@@ -297,12 +371,10 @@ void update_Task( void * pvParameters ) {
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                 lv_label_set_text( update_btn_label, "restart");
                 if( update_setup_get_autorestart() ) {
-                    TTGOClass *ttgo = TTGOClass::getWatch();
                     log_i("System reboot by user");
                     motor_vibe(20);
                     delay(20);
                     display_standby();
-                    ttgo->stopLvglTick();
                     SPIFFS.end();
                     log_i("SPIFFS unmounted!");
                     delay(500);
@@ -323,9 +395,10 @@ void update_Task( void * pvParameters ) {
             lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
         }
     }
-    xEventGroupClearBits( update_event_handle, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
+    xEventGroupClearBits( update_event, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
     lv_disp_trig_activity(NULL);
     lv_obj_invalidate( lv_scr_act() );
     log_i("finish update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
+#endif
 }

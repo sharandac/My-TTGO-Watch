@@ -25,7 +25,6 @@
 #ifndef _FindPhone_MAIN_H
     #define _FindPhone_MAIN_H
 
-    #include <TTGO.h>
     void FindPhone_main_setup( uint32_t tile_num );
     void bluetooth_FindPhone_tile_setup( void );
 #endif // _EXAMPLE_APP_MAIN_H

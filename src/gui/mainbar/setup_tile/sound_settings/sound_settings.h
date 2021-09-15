@@ -22,8 +22,6 @@
 #ifndef _SOUND_SETTINGS_H
     #define _SOUND_SETTINGS_H
 
-    #include <TTGO.h>
-
     void sound_settings_tile_setup( void );
     /**
      * @brief   get the sound setup tile number

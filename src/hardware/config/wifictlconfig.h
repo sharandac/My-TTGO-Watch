@@ -25,13 +25,14 @@
 
     #include "config.h"
     #include "utils/basejsonconfig.h"
+#ifndef NATIVE_64BIT
     #ifdef ENABLE_WEBSERVER
         #include "utils/webserver/webserver.h"
     #endif
     #ifdef ENABLE_FTPSERVER
         #include "utils/ftpserver/ftpserver.h"
     #endif
-
+#endif
     #define NETWORKLIST_ENTRYS          20
     #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"
 
@@ -51,6 +52,8 @@
         wifictl_config_t();
         bool autoon = true;                                     /** @brief enable on auto on/off an wakeup and standby */
         bool enable_on_standby = false;                         /** @brief enable on standby */
+
+#ifndef NATIVE_64BIT
         #ifdef ENABLE_WEBSERVER
             bool webserver = false;                             /** @brief enable on webserver */
         #endif
@@ -59,6 +62,7 @@
             char ftpuser[32] = FTPSERVER_USER;                  /** @brief ftpserver username*/
             char ftppass[32] = FTPSERVER_PASSWORD;              /** @brief ftpserver password*/
         #endif
+#endif
         wifictl_networklist* networklist = NULL;                /** @brief network list config pointer */
 
         protected:
