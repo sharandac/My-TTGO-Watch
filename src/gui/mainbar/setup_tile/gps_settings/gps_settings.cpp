@@ -68,22 +68,22 @@ void gps_settings_tile_setup( void ) {
     /**
      * add autoon switch
      */
-    lv_obj_t *autoon_cont = wf_add_labeled_switch( gps_settings_tile, "autoon", &autoon_onoff, gpsctl_get_autoon(), autoon_onoff_event_handler );
+    lv_obj_t *autoon_cont = wf_add_labeled_switch( gps_settings_tile, "autoon", &autoon_onoff, gpsctl_get_autoon(), autoon_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add enable on standby switch
      */
-    lv_obj_t *enable_on_standby_cont = wf_add_labeled_switch( gps_settings_tile, "enable on standby", &enable_on_standby_onoff, gpsctl_get_enable_on_standby(), enable_on_standby_onoff_event_handler );
+    lv_obj_t *enable_on_standby_cont = wf_add_labeled_switch( gps_settings_tile, "enable on standby", &enable_on_standby_onoff, gpsctl_get_enable_on_standby(), enable_on_standby_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add app use gps switch
      */
-    lv_obj_t *app_use_gps_cont = wf_add_labeled_switch( gps_settings_tile, "apps use gps", &app_use_gps_onoff, gpsctl_get_app_use_gps(), app_use_gps_onoff_event_handler );
+    lv_obj_t *app_use_gps_cont = wf_add_labeled_switch( gps_settings_tile, "apps use gps", &app_use_gps_onoff, gpsctl_get_app_use_gps(), app_use_gps_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add fake gps via ip switch
      */
-    lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler );
+    lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     gps_latlon_label = lv_label_create( gps_settings_tile, NULL);

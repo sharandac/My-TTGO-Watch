@@ -30,6 +30,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install --upgrade platformio
+    - name: Install native libs
+      run: |
+        sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev
     - name: Run PlatformIO
       run: pio run
     - name: Version name
@@ -87,3 +90,4 @@ jobs:
         asset_path: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
         asset_name: ttgo-t-watch2020_${{ steps.version_name.outputs.SOURCE_TAG }}.version.json
         asset_content_type: application/json
+        

@@ -628,6 +628,9 @@ void wifictl_Task( lv_task_t * task ) {
         wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
         wifictl_send_event_cb( WIFICTL_CONNECT, (void *)"connect to wifi" );
         wifictl_send_event_cb( WIFICTL_CONNECT_IP, (void *)"x.x.x.x" );
+        wifictl_send_event_cb( WIFICTL_SCAN_ENTRY, (void *)"foobar" );
+        wifictl_send_event_cb( WIFICTL_SCAN_ENTRY, (void *)"fnord" );
+        wifictl_send_event_cb( WIFICTL_SCAN_ENTRY, (void *)"23" );
     }
 
     wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_SCAN | WIFICTL_ON_REQUEST );

@@ -45,5 +45,11 @@ do
 	echo "$LINE -> $FILE"
 	cp $LINE ../../src/gui/images/
 done < pxc-list.txt
-
+#
+# delete all .c and low res files
+#
 rm *.txt
+find . -name '*.c' -exec rm -rf {} \;
+find . -name '*32px*' -exec rm -rf {} \;
+find . -name '*48px*' -exec rm -rf {} \;
+find . -name '*64px*' -exec rm -rf {} \;

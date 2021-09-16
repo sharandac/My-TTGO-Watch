@@ -67,7 +67,9 @@ void sdcard_settings_tile_setup(void)
                                                                      "Enable SD card in \nFS browser", 
                                                                      &sdcard_fs_browser_onoff, 
                                                                      0, 
-                                                                     sdcard_fs_browser_onoff_event_handler );
+                                                                     sdcard_fs_browser_onoff_event_handler,
+                                                                     ws_get_setup_tile_style() );
+                                                                     
     lv_obj_align( sdcard_fs_browser_enable_cont, header, LV_ALIGN_OUT_BOTTOM_MID, -5, 10 );
 
     lv_obj_t *sd_infos_cont = lv_obj_create(sdcard_settings_tile, NULL);

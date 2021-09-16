@@ -96,7 +96,7 @@ LV_FONT_DECLARE(Ubuntu_48px);
 LV_IMG_DECLARE(right_32px);
 LV_IMG_DECLARE(left_32px);
 LV_IMG_DECLARE(refresh_32px);
-LV_IMG_DECLARE(downloading_32px);
+LV_IMG_DECLARE(download_32px);
 LV_IMG_DECLARE(t_watch_2020_240px);
 
 watchface_theme_t watchface_theme;
@@ -184,7 +184,7 @@ void watchface_manager_app_setup( uint32_t tile_num ) {
     watchface_manager_next_btn = wf_add_image_button( watchface_manager_app_preview_cont, right_32px, watchface_manager_next_theme_event_cb, NULL );
     lv_obj_align( watchface_manager_next_btn, watchface_manager_app_preview_cont, LV_ALIGN_IN_RIGHT_MID, -10, 0 );
     watchface_manager_preview_img = lv_img_create( watchface_manager_app_preview_cont, NULL );
-    lv_img_set_src( watchface_manager_preview_img, &downloading_32px );
+    lv_img_set_src( watchface_manager_preview_img, &download_32px );
     lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
     watchface_manager_download_btn = lv_btn_create( watchface_manager_app_preview_cont, NULL );
     lv_obj_set_width( watchface_manager_download_btn, lv_disp_get_hor_res( NULL ) / 2 );
@@ -811,7 +811,7 @@ bool watchface_manager_update_theme_prev( watchface_theme_t *watchface_theme ) {
     /**
      * set download info img
      */
-    lv_img_set_src( watchface_manager_preview_img, &downloading_32px );
+    lv_img_set_src( watchface_manager_preview_img, &download_32px );
     lv_obj_align( watchface_manager_preview_img, watchface_manager_app_preview_cont, LV_ALIGN_CENTER, 0, 0 );
     /**
      * get the preview image

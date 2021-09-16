@@ -83,7 +83,7 @@ void utilities_tile_setup( void ) {
     setup_hide_indicator( utilities_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities", exit_utilities_event_cb );
-    lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
     //Spiffs:
     //Add button for dump spiffs details to serial including config files
@@ -95,7 +95,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_event_cb( format_spiffs_btn, format_SPIFFS_utilities_event_cb );
     lv_obj_set_size( format_spiffs_btn, 80, 60);
     lv_obj_add_style( format_spiffs_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_IN_LEFT_MID, 5, -15);
+    lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, -15);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format\nSPIFFS");
     
@@ -103,7 +103,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_event_cb( gps_test_data_btn, gps_test_data_utilities_event_cb );
     lv_obj_set_size( gps_test_data_btn, 80, 60);
     lv_obj_add_style( gps_test_data_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( gps_test_data_btn, utilities_tile, LV_ALIGN_IN_RIGHT_MID, -5, -15);
+    lv_obj_align( gps_test_data_btn, utilities_tile, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, -15);
     gps_test_data_btn_label = lv_label_create( gps_test_data_btn, NULL );
     lv_label_set_text( gps_test_data_btn_label, "send GPS\ntest data");
 
@@ -112,7 +112,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_size(reboot_btn, 70, 40);
     lv_obj_set_event_cb( reboot_btn, reboot_utilities_event_cb );
     lv_obj_add_style( reboot_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
+    lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     lv_obj_t *reboot_btn_label = lv_label_create( reboot_btn, NULL );
     lv_label_set_text( reboot_btn_label, "Reboot");
 
@@ -122,14 +122,14 @@ void utilities_tile_setup( void ) {
     lv_obj_set_size(poweroff_btn, 80, 40);
     lv_obj_set_event_cb( poweroff_btn, poweroff_utilities_event_cb );
     lv_obj_add_style( poweroff_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
+    lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     lv_obj_t *poweroff_btn_label = lv_label_create( poweroff_btn, NULL );
     lv_label_set_text( poweroff_btn_label, "Poweroff");
     
     lv_obj_t *last_reboot_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reboot_label, LV_OBJ_PART_MAIN, &utilities_style  );
     lv_label_set_text( last_reboot_label, "Last Reboot Reason:");
-    lv_obj_align( last_reboot_label, format_spiffs_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_align( last_reboot_label, format_spiffs_btn, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );
     
     lv_obj_t *last_reason_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reason_label, LV_OBJ_PART_MAIN, &utilities_style  );
@@ -177,7 +177,7 @@ void utilities_tile_setup( void ) {
                                         break;
     }
     lv_label_set_align( last_reason_label, LV_LABEL_ALIGN_CENTER );
-    lv_obj_align( last_reason_label, last_reboot_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );//Now that the text has changed, align it.
+    lv_obj_align( last_reason_label, last_reboot_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );//Now that the text has changed, align it.
 
 #endif
     _gps_test_data_task = lv_task_create( gps_test_data_task, 1000, LV_TASK_PRIO_MID, NULL );

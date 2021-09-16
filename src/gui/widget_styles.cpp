@@ -34,6 +34,7 @@ static lv_style_t button_style;
 static lv_style_t img_button_style;
 static lv_style_t label_style;
 static lv_style_t switch_style;
+static lv_style_t dropdown_style;
 static lv_style_t roller_bg_style;
 static lv_style_t roller_part_selected_style;
 static lv_style_t popup_style;
@@ -49,7 +50,7 @@ LV_FONT_DECLARE(Ubuntu_48px);
 #if defined( BIG_THEME )
     lv_font_t *mainbar_font = &lv_font_montserrat_14;
     lv_font_t *app_font = &lv_font_montserrat_14;
-    lv_font_t *setup_font = &lv_font_montserrat_14;
+    lv_font_t *setup_font = &lv_font_montserrat_22;
     lv_font_t *setup_header_font = &lv_font_montserrat_32;
 #elif defined( MID_THEME )
     lv_font_t *mainbar_font = &lv_font_montserrat_14;
@@ -89,14 +90,14 @@ static void define_styles(){
     lv_style_set_text_font( &app_opa_style, LV_OBJ_PART_MAIN, app_font );
 
     lv_style_copy( &setup_tile_style, &mainbar_style );
-    lv_style_set_bg_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &setup_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_bg_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
+    lv_style_set_bg_opa( &setup_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+    lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_font( &setup_tile_style, LV_OBJ_PART_MAIN, setup_font );
 
     lv_style_copy( &setup_header_tile_style, &mainbar_style );
     lv_style_set_bg_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_bg_opa( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
     lv_style_set_border_width( &setup_header_tile_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font( &setup_header_tile_style, LV_OBJ_PART_MAIN, setup_header_font );
 
@@ -107,6 +108,12 @@ static void define_styles(){
     lv_style_set_border_width( &button_style, LV_STATE_DEFAULT, 2 );
 
     lv_style_copy(&img_button_style, &mainbar_style);
+
+    lv_style_copy( &dropdown_style, &mainbar_style );
+    lv_style_set_bg_color( &dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_style_set_bg_opa( &dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &dropdown_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_text_font( &dropdown_style, LV_OBJ_PART_MAIN, mainbar_font );
 
     lv_style_init( &label_style );
     lv_style_set_text_color(&label_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
@@ -208,6 +215,13 @@ lv_style_t *ws_get_roller_bg_style(){
          define_styles();
     }
     return &roller_bg_style;
+}
+
+lv_style_t *ws_get_dropdown_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &dropdown_style;
 }
 
 lv_style_t *ws_get_roller_part_selected_style(){
