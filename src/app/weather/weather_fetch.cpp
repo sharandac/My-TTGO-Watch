@@ -60,7 +60,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
             return( httpcode );
         }
 
-        if ( doc["cod"] == 200 ) {
+        if ( doc["cod"].as<uint32_t>() == 200 ) {
             weather_today->valide = true;
             snprintf( weather_today->temp, sizeof( weather_today->temp ), "%0.1f°%s", doc["main"]["temp"].as<float>(), weather_units_symbol);
             snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
@@ -117,7 +117,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
             return( httpcode );
         }
 
-        if ( doc["cod"] == 200 ) {
+        if ( doc["cod"].as<uint32_t>() == 200 ) {
             weather_forecast[0].valide = true;
             for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
                 weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>() | 0;
