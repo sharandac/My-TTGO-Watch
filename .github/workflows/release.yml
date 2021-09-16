@@ -38,4 +38,3 @@ jobs:
         sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev
     - name: Run PlatformIO
       run: pio run
-        
