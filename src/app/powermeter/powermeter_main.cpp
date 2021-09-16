@@ -35,7 +35,9 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
+#include "hardware/wifictl.h"
 #include "utils/mqtt/mqtt.h"
+
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
 
@@ -51,16 +53,13 @@
     struct mosquitto *mosq;
 #else
     #include <Arduino.h>
-    #include <WiFi.h>
-    #include <PubSubClient.h>
-
-    WiFiClient espClient;
-    PubSubClient powermeter_mqtt_client( espClient );
 #endif
 
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;
 lv_style_t powermeter_id_style;
+
+lv_task_t * _powermeter_main_task;
 
 lv_obj_t *id_cont = NULL;
 lv_obj_t *id_label = NULL;
@@ -224,12 +223,11 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     mosq = mosquitto_new(NULL, true, NULL);
     mosquitto_message_callback_set(mosq, callback );
     mosquitto_connect_callback_set(mosq, on_connect);
+    wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb, "powermeter" );
 #else
-    powermeter_mqtt_client.setCallback( callback );
-    powermeter_mqtt_client.setBufferSize( 512 );
-#endif
     mqtt_register_cb(MQTTCTL_OFF | MQTTCTL_CONNECT | MQTTCTL_DISCONNECT, powermeter_mqtt_event_cb, "powermeter");
     mqtt_register_message_cb(powermeter_message_cb);
+#endif
     // create an task that runs every secound
     _powermeter_main_task = lv_task_create(powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL);
 }
@@ -257,26 +255,29 @@ bool powermeter_wifictl_event_cb(EventBits_t event, void* arg) {
 bool powermeter_mqtt_event_cb(EventBits_t event, void* arg) {
     powermeter_config_t* powermeter_config = powermeter_get_config();
     switch (event) {
-    case MQTTCTL_OFF:        app_hide_indicator(powermeter_get_app_icon());
-        widget_hide_indicator(powermeter_get_widget_icon());
-        widget_set_label(powermeter_get_widget_icon(), "n/a");
-        break;
-    case MQTTCTL_CONNECT:    if (powermeter_config->autoconnect) {
-        mqtt_subscribe(powermeter_config->topic);
-        app_set_indicator(powermeter_get_app_icon(), ICON_INDICATOR_OK);
-        widget_set_indicator(powermeter_get_widget_icon(), ICON_INDICATOR_OK);
-    }
-                        else {
-        app_hide_indicator(powermeter_get_app_icon());
-        widget_hide_indicator(powermeter_get_widget_icon());
-        widget_set_label(powermeter_get_widget_icon(), "n/a");
-    }
-                        break;
-    case MQTTCTL_DISCONNECT: if (powermeter_config->autoconnect) {
-        app_set_indicator(powermeter_get_app_icon(), ICON_INDICATOR_FAIL);
-        widget_set_indicator(powermeter_get_widget_icon(), ICON_INDICATOR_FAIL);
-    }
-                           break;
+        case MQTTCTL_OFF:
+            app_hide_indicator(powermeter_get_app_icon());
+            widget_hide_indicator(powermeter_get_widget_icon());
+            widget_set_label(powermeter_get_widget_icon(), "n/a");
+            break;
+        case MQTTCTL_CONNECT:
+            if (powermeter_config->autoconnect) {
+                mqtt_subscribe(powermeter_config->topic);
+                app_set_indicator(powermeter_get_app_icon(), ICON_INDICATOR_OK);
+                widget_set_indicator(powermeter_get_widget_icon(), ICON_INDICATOR_OK);
+            }
+            else {
+                app_hide_indicator(powermeter_get_app_icon());
+                widget_hide_indicator(powermeter_get_widget_icon());
+                widget_set_label(powermeter_get_widget_icon(), "n/a");
+            }
+            break;
+        case MQTTCTL_DISCONNECT:
+            if (powermeter_config->autoconnect) {
+                app_set_indicator(powermeter_get_app_icon(), ICON_INDICATOR_FAIL);
+                widget_set_indicator(powermeter_get_widget_icon(), ICON_INDICATOR_FAIL);
+            }
+            break;
     }
     return(true);
 }

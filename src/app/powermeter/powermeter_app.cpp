@@ -90,6 +90,9 @@ static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }    
 }
 
+powermeter_config_t *powermeter_get_config( void ) {
+    return( &powermeter_config );
+}
 
 bool powermeter_add_widget( void ) {
     if ( powermeter_widget == NULL ) {
