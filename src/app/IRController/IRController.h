@@ -22,18 +22,28 @@
 #ifndef _IRCONTROLLER_H
     #define _IRCONTROLLER_H
 
-    #include <TTGO.h>
+    #ifdef NATIVE_64BIT
+        void IRController_setup( void );
+    #else
+        #ifdef M5PAPER
+            void IRController_setup( void );
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            enum IRControlSettingsAction {
+                Ignore,
+                Load,
+                Save
+            };
 
-    enum IRControlSettingsAction {
-        Ignore,
-        Load,
-        Save
-    };
+            struct InfraButton;
 
-    struct InfraButton;
-
-    void IRController_setup( void );
-    void IRController_build_UI(IRControlSettingsAction settingsAction);
-    void execute_ir_cmd(InfraButton* config);
-
+            void IRController_setup( void );
+            void IRController_build_UI(IRControlSettingsAction settingsAction);
+            void execute_ir_cmd(InfraButton* config);
+        #else
+            /**
+             * NEW_HARDWARE_TAG or not defined
+             */
+            #error "No destination hardware defined"
+        #endif
+    #endif
 #endif // _IRCONTROLLER_H

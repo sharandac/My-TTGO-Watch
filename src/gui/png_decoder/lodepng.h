@@ -36,7 +36,7 @@ freely, subject to the following restrictions:
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
 #include <lvgl.h>
 #else
-#include <lvgl/lvgl.h>
+#include <lvgl.h>
 #endif
 #endif /* LV_PNG_USE_LV_FILESYSTEM */
 

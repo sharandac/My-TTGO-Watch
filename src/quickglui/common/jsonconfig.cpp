@@ -10,7 +10,6 @@
 
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
-#include <FS.h>
 
 JsonConfig::JsonConfig(const char* configFileName) : BaseJsonConfig(configFileName) {
   count = 0;

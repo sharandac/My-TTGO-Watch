@@ -1,6 +1,5 @@
 /****************************************************************************
               config.h
-
     Tu May 22 21:23:51 2020
     Copyright  2020  Dirk Brosswick
  *  Email: dirk.brosswick@googlemail.com
@@ -23,19 +22,36 @@
  */
 #ifndef _CONFIG_H
 
-    #if defined( LILYGO_WATCH_2020_V1 )
-        #define WATCH_VERSION_NAME  "V1"
-    #elif defined( LILYGO_WATCH_2020_V2 )
-        #define WATCH_VERSION_NAME  "V2"
-    #elif defined( LILYGO_WATCH_2020_V3 )
-        #define WATCH_VERSION_NAME  "V3"
+    #include "lvgl.h"
+
+    #ifdef NATIVE_64BIT
+            #define RES_X_MAX       LV_HOR_RES_MAX
+            #define RES_Y_MAX       LV_VER_RES_MAX
     #else
-        #error "no ttgo t-watch 2020 version defined"
+        #if defined( LILYGO_WATCH_2020_V1 )
+            #define HARDWARE_NAME   "TTGO T-Watch 2020 V1"
+            #define RES_X_MAX       240
+            #define RES_Y_MAX       240
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+        #elif defined( LILYGO_WATCH_2020_V2 )
+            #define HARDWARE_NAME   "TTGO T-Watch 2020 V2"
+            #define RES_X_MAX       240
+            #define RES_Y_MAX       240
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+        #elif defined( LILYGO_WATCH_2020_V3 )
+            #define HARDWARE_NAME   "TTGO T-Watch 2020 V3"
+            #define RES_X_MAX       240
+            #define RES_Y_MAX       240
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+        #elif defined( M5PAPER )
+            #define RES_X_MAX       540
+            #define RES_Y_MAX       960
+            #define HARDWARE_NAME   "m5stack-fire"
+        #else
+            #error "no destination hardware version defined"
+        #endif
     #endif
 
-
-    #define LILYGO_WATCH_LVGL                       /** @brief To use LVGL, you need to enable the macro LVGL */
-    #define TWATCH_USE_PSRAM_ALLOC_LVGL             /** @brief enabled lillygo-lib to use PSRAM */ 
     /**
      * Built-in applications
      */
@@ -48,12 +64,18 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021081201"
+    #define __FIRMWARE__            "2021091601"
     /**
      * Allows to include config.h from C code
      */
     #ifdef __cplusplus
-        #include <LilyGoWatch.h>
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #include <LilyGoWatch.h>
+            #endif
+        #endif
         #define _CONFIG_H 
     #endif
 

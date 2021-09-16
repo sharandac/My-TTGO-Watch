@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
 
 #include "powermeter_app.h"
 #include "powermeter_main.h"
@@ -42,6 +39,25 @@
 #include "utils/json_psram_allocator.h"
 #include "utils/alloc.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+    #include <mosquitto.h>
+
+    using namespace std;
+    #define String string
+
+    struct mosquitto *mosq;
+#else
+    #include <Arduino.h>
+    #include <WiFi.h>
+    #include <PubSubClient.h>
+
+    WiFiClient espClient;
+    PubSubClient powermeter_mqtt_client( espClient );
+#endif
+
 lv_obj_t *powermeter_main_tile = NULL;
 lv_style_t powermeter_main_style;
 lv_style_t powermeter_id_style;
@@ -57,9 +73,6 @@ lv_obj_t *current_label = NULL;
 lv_obj_t *power_cont = NULL;
 lv_obj_t *power_label = NULL;
 
-WiFiClient espClient;
-PubSubClient powermeter_mqtt_client( espClient );
-
 LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
@@ -68,18 +81,41 @@ bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
 
-void callback(char* topic, byte* payload, unsigned int length) {
-    char *msg = NULL;
-    msg = (char*)CALLOC( length + 1, 1 );
-    if ( msg == NULL ) {
+#ifdef NATIVE_64BIT
+    void on_connect(struct mosquitto *mosq, void *obj, int reason_code) {
+        powermeter_config_t *powermeter_config = powermeter_get_config();
+        int rc;
+        log_i("on_connect: %s\n", mosquitto_connack_string( reason_code ) );
+        if(reason_code != 0){
+            mosquitto_disconnect(mosq);
+        }
+        rc = mosquitto_subscribe(mosq, NULL, powermeter_config->topic, 1);
+        if(rc != MOSQ_ERR_SUCCESS){
+            log_i( "Error subscribing: %s\n", mosquitto_strerror( rc ) );
+            mosquitto_disconnect(mosq);
+        }
+    }
+
+    void callback (struct mosquitto *mosq, void *obj, const struct mosquitto_message *msg)  {
+        unsigned int length = msg->payloadlen;
+        char *payload = (char *)msg->payload;
+#else
+    void callback(char* topic, byte* payload, unsigned int length) {
+#endif
+    /**
+     * alloc a msg buffer and copy payload and terminate it with '\0';
+     */
+    char *mqttmsg = NULL;
+    mqttmsg = (char*)CALLOC( length + 1, 1 );
+    if ( mqttmsg == NULL ) {
         log_e("calloc failed");
         return;
     }
-    memcpy( msg, payload, length );
+    memcpy( mqttmsg, payload, length );
 
-    SpiRamJsonDocument doc( strlen( msg ) * 2 );
+    SpiRamJsonDocument doc( strlen( mqttmsg ) * 2 );
+    DeserializationError error = deserializeJson( doc, mqttmsg );
 
-    DeserializationError error = deserializeJson( doc, msg );
     if ( error ) {
         log_e("powermeter message deserializeJson() failed: %s", error.c_str() );
     }
@@ -113,7 +149,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
         lv_obj_align( current_label, current_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
     }
     doc.clear();
-    free( msg );
+    free( mqttmsg );
 }
 
 void powermeter_main_tile_setup( uint32_t tile_num ) {
@@ -185,9 +221,15 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( power_label, "n/a" );
     lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
+#ifdef NATIVE_64BIT
+    mosquitto_lib_init();
+    mosq = mosquitto_new(NULL, true, NULL);
+    mosquitto_message_callback_set(mosq, callback );
+    mosquitto_connect_callback_set(mosq, on_connect);
+#else
     powermeter_mqtt_client.setCallback( callback );
     powermeter_mqtt_client.setBufferSize( 512 );
-
+#endif
     wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb, "powermeter" );
     // create an task that runs every secound
     _powermeter_main_task = lv_task_create( powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL );
@@ -195,8 +237,22 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
 
 bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
     powermeter_config_t *powermeter_config = powermeter_get_config();
+
     switch( event ) {
-        case WIFICTL_CONNECT_IP:    if ( powermeter_config->autoconnect ) {
+        case WIFICTL_CONNECT_IP:    
+#ifdef NATIVE_64BIT
+                                    if ( powermeter_config->autoconnect ) {
+                                        mosquitto_username_pw_set( mosq, powermeter_config->user, powermeter_config->password );
+                                        int rc = mosquitto_connect( mosq, powermeter_config->server, powermeter_config->port, 60 );
+                                        log_i("connect to : %s", powermeter_config->server );
+                                      	if(rc != MOSQ_ERR_SUCCESS){
+                                            mosquitto_destroy(mosq);
+                                            log_i("Error: %s\n", mosquitto_strerror(rc) );
+                                            return 1;
+                                    	}
+                                    }
+#else
+                                    if ( powermeter_config->autoconnect ) {
                                         powermeter_mqtt_client.setServer( powermeter_config->server, powermeter_config->port );
                                         if ( !powermeter_mqtt_client.connect( "powermeter", powermeter_config->user, powermeter_config->password ) ) {
                                             log_e("connect to mqtt server %s failed", powermeter_config->server );
@@ -209,17 +265,23 @@ bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
                                             app_set_indicator( powermeter_get_app_icon(), ICON_INDICATOR_OK );
                                             widget_set_indicator( powermeter_get_widget_icon(), ICON_INDICATOR_OK );
                                         }
-                                    } 
+                                    }
+#endif                               
                                     break;
         case WIFICTL_OFF_REQUEST:
         case WIFICTL_OFF:
-        case WIFICTL_DISCONNECT:    if ( powermeter_mqtt_client.connected() ) {
+        case WIFICTL_DISCONNECT:    
+#ifdef NATIVE_64BIT
+
+#else
+                                    if ( powermeter_mqtt_client.connected() ) {
                                         log_i("disconnect from mqtt server %s", powermeter_config->server );
                                         powermeter_mqtt_client.disconnect();
                                         app_hide_indicator( powermeter_get_app_icon() );
                                         widget_hide_indicator( powermeter_get_widget_icon() );
                                         widget_set_label( powermeter_get_widget_icon(), "n/a" );
                                     }
+#endif
                                     break;
     }
     return( true );
@@ -235,5 +297,9 @@ static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event ) 
 
 void powermeter_main_task( lv_task_t * task ) {
     // put your code her
+#ifdef NATIVE_64BIT
+    mosquitto_loop( mosq, 60, 10 );
+#else
     powermeter_mqtt_client.loop();
+#endif
 }

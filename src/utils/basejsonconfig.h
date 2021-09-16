@@ -8,7 +8,7 @@
 #ifndef BASEJSONCONFIG_H_
 #define BASEJSONCONFIG_H_
 
-#define MAX_CONFIG_FILE_NAME_LENGTH 32
+#define MAX_CONFIG_FILE_NAME_LENGTH 128
 
 #include "ArduinoJson.h"
 

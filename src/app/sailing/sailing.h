@@ -22,8 +22,6 @@
 #ifndef _SAILING_H
     #define _SAILING_H
 
-    #include <TTGO.h>
-
     #define SAILING_INFO_LOG        log_i
     #define SAILING_ERROR_LOG       log_e
     #define SAILING_UDP_PORT        1234

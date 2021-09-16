@@ -20,8 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include "quickglui/quickglui.h"
+//#include "quickglui/quickglui.h"
 
 #include "watchface_manager.h"
 #include "watchface_setup.h"
@@ -33,8 +32,26 @@
 #include "gui/widget_factory.h"
 #include "gui/statusbar.h"
 
-#include "utils/decompress/decompress.h"
 #include "utils/uri_load/uri_load.h"
+
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+#else
+    #include <WiFi.h>
+    #include <Arduino.h>
+
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+
+    #include "utils/decompress/decompress.h"
+#endif
 
 watchface_config_t watchface_config;
 
@@ -67,22 +84,22 @@ void watchface_setup_tile_setup( uint32_t tile_num ) {
     lv_style_copy( &watchface_setup_button_style, ws_get_button_style() );
 
     lv_obj_t *watchface_setup_header = wf_add_settings_header( watchface_setup_tile, "Watchface setup" );
-    lv_obj_align( watchface_setup_header, watchface_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( watchface_setup_header, watchface_setup_tile, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
     /**
      * switch container
      */
-    lv_obj_t *watchface_onoff_cont = wf_add_labeled_switch( watchface_setup_tile, "enable watchface", &watchface_onoff, watchface_config.watchface_enable, watchface_setup_enable_event_cb );
-    lv_obj_align( watchface_onoff_cont, watchface_setup_header, LV_ALIGN_OUT_BOTTOM_MID, 0, 10 );
+    lv_obj_t *watchface_onoff_cont = wf_add_labeled_switch( watchface_setup_tile, "enable watchface", &watchface_onoff, watchface_config.watchface_enable, watchface_setup_enable_event_cb, ws_get_setup_tile_style() );
+    lv_obj_align( watchface_onoff_cont, watchface_setup_header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
     /**
      * btn container
      */
     lv_obj_t *watchface_btn_cont = lv_obj_create( watchface_setup_tile, NULL );
-    lv_obj_set_size( watchface_btn_cont, lv_disp_get_hor_res( NULL ) , 90 );
+    lv_obj_set_size( watchface_btn_cont, lv_disp_get_hor_res( NULL ) - THEME_ICON_PADDING * 2, 90 );
     lv_obj_add_style( watchface_btn_cont, LV_OBJ_PART_MAIN, &watchface_setup_style );
-    lv_obj_align( watchface_btn_cont, watchface_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 10 );
+    lv_obj_align( watchface_btn_cont, watchface_onoff_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );
 
     lv_obj_t *watchface_reload_and_test_btn = lv_btn_create( watchface_btn_cont, NULL );
-    lv_obj_set_size( watchface_reload_and_test_btn, 115, 40 );
+    lv_obj_set_size( watchface_reload_and_test_btn, lv_disp_get_hor_res( NULL ) / 2 - THEME_ICON_PADDING * 2, 40 );
     lv_obj_add_style( watchface_reload_and_test_btn, LV_OBJ_PART_MAIN, &watchface_setup_button_style );
     lv_obj_align( watchface_reload_and_test_btn, watchface_btn_cont, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_obj_set_event_cb( watchface_reload_and_test_btn, watchface_setup_reload_and_test_cb );
@@ -90,7 +107,7 @@ void watchface_setup_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( watchface_reload_and_test_btn_label, "reload and test");
 
     lv_obj_t *watchface_decompress_btn = lv_btn_create( watchface_btn_cont, NULL );
-    lv_obj_set_size( watchface_decompress_btn, 115, 40 );
+    lv_obj_set_size( watchface_decompress_btn, lv_disp_get_hor_res( NULL ) / 2 - THEME_ICON_PADDING * 2, 40 );
     lv_obj_add_style( watchface_decompress_btn, LV_OBJ_PART_MAIN, &watchface_setup_button_style );
     lv_obj_align( watchface_decompress_btn, watchface_btn_cont, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0 );
     lv_obj_set_event_cb( watchface_decompress_btn,watchface_setup_decompress_cb );
@@ -98,7 +115,7 @@ void watchface_setup_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( watchface_decompress_btn_label, "install theme");
 
     lv_obj_t *watchface_default_btn = lv_btn_create( watchface_btn_cont, NULL );
-    lv_obj_set_size( watchface_default_btn, 115, 90 );
+    lv_obj_set_size( watchface_default_btn, lv_disp_get_hor_res( NULL ) / 2 - THEME_ICON_PADDING * 2, 90 );
     lv_obj_add_style( watchface_default_btn, LV_OBJ_PART_MAIN, &watchface_setup_button_style );
     lv_obj_align( watchface_default_btn, watchface_btn_cont, LV_ALIGN_IN_RIGHT_MID, 0, 0 );
     lv_obj_set_event_cb( watchface_default_btn, watchface_setup_default_cb );

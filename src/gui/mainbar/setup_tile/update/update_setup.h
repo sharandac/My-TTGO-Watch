@@ -21,9 +21,7 @@
  */
 #ifndef _UPDATE_SETUP_H
     #define _UPDATE_SETUP_H
-
-    #include <TTGO.h>
-
+    
     /**
      * @brief setup update setup tile
      * 

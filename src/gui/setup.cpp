@@ -21,11 +21,15 @@
  */
 
 #include "config.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
-
 #include "setup.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 icon_t *setup_register( const char* setupname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
 

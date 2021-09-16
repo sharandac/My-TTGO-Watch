@@ -15,7 +15,7 @@ extern "C" {
  *********************/
 
 #include <stdio.h>
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "tjpgd.h"
 
 /*********************

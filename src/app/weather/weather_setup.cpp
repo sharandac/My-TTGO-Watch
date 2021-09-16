@@ -20,23 +20,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include <config.h>
-
 #include "weather.h"
 #include "weather_fetch.h"
 #include "weather_setup.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
-
 #include "hardware/blectl.h"
 #include "hardware/motor.h"
 #include "hardware/gpsctl.h"
+#include "utils/bluejsonrequest.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 lv_obj_t *weather_setup_tile = NULL;
 lv_style_t weather_setup_style;
@@ -75,12 +77,12 @@ void weather_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( weather_setup_tile, LV_OBJ_PART_MAIN, &weather_setup_style );
 
     lv_obj_t *header = wf_add_settings_header( weather_setup_tile, "open weather setup", exit_weather_widget_setup_event_cb );
-    //lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    lv_obj_align( header, weather_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     lv_obj_t *weather_apikey_cont = lv_obj_create( weather_setup_tile, NULL );
     lv_obj_set_size(weather_apikey_cont, lv_disp_get_hor_res( NULL ) , 35);
     lv_obj_add_style( weather_apikey_cont, LV_OBJ_PART_MAIN, &weather_setup_style  );
-    lv_obj_align( weather_apikey_cont, weather_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 45 );
+    lv_obj_align( weather_apikey_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *weather_apikey_label = lv_label_create( weather_apikey_cont, NULL);
     lv_obj_add_style( weather_apikey_label, LV_OBJ_PART_MAIN, &weather_setup_style  );
     lv_label_set_text( weather_apikey_label, "appid");
@@ -256,9 +258,9 @@ static void exit_weather_widget_setup_event_cb( lv_obj_t * obj, lv_event_t event
     switch( event ) {
         case( LV_EVENT_CLICKED ):           keyboard_hide();
                                             weather_config_t *weather_config = weather_get_config();
-                                            strlcpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ), sizeof( weather_config->apikey ) );
-                                            strlcpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ), sizeof( weather_config->lat ) );
-                                            strlcpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ), sizeof( weather_config->lon ) );
+                                            strncpy( weather_config->apikey, lv_textarea_get_text( weather_apikey_textfield ), sizeof( weather_config->apikey ) );
+                                            strncpy( weather_config->lat, lv_textarea_get_text( weather_lat_textfield ), sizeof( weather_config->lat ) );
+                                            strncpy( weather_config->lon, lv_textarea_get_text( weather_lon_textfield ), sizeof( weather_config->lon ) );
                                             weather_save_config();
                                             mainbar_jump_back();
                                             break;
@@ -278,9 +280,9 @@ void weather_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
         if ( !strcmp( doc["app"], "weather" ) ) {
 
             weather_config_t *weather_config = weather_get_config();
-            strlcpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
-            strlcpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
-            strlcpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
+            strncpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
+            strncpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
+            strncpy( weather_config->lon, doc["lon"] | "", sizeof( weather_config->lon ) );
             weather_save_config();
 
             lv_textarea_set_text( weather_apikey_textfield, weather_config->apikey );

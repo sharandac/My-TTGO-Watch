@@ -23,6 +23,7 @@
     #define CALENDAR_DB_DEBUG_LOG   log_d
     #define CALENDAR_DB_ERROR_LOG   log_e
 
+//    #define CALENDAR_DB_FILE        "/home/sharan/.hedge/spiffs/calendar.db"       /** @brief calendar database file */
     #define CALENDAR_DB_FILE        "/spiffs/calendar.db"       /** @brief calendar database file */
     /**
      * @brief sql exec callback function definition, this function is called on every result line

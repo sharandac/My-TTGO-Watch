@@ -23,7 +23,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "FindPhone.h"
 #include "FindPhone_main.h"
@@ -91,9 +90,9 @@ uint32_t FindPhone_get_app_setup_tile_num( void ) {
  */
 static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       statusbar_hide( true );
-                                        app_hide_indicator( FindPhone );
+        case( LV_EVENT_CLICKED ):       app_hide_indicator( FindPhone );
                                         mainbar_jump_to_tilenumber( FindPhone_main_tile_num, LV_ANIM_OFF );
+                                        statusbar_hide( true );
                                         break;
     }    
 }

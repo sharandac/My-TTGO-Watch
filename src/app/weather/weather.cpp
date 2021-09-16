@@ -20,27 +20,40 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include "esp_task_wdt.h"
-
 #include "weather.h"
 #include "weather_fetch.h"
 #include "weather_forecast.h"
 #include "weather_setup.h"
 #include "images/resolve_owm_icon.h"
-
 #include "gui/app.h"
 #include "gui/widget.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/keyboard.h"
-
 #include "hardware/wifictl.h"
-
 #include "utils/json_psram_allocator.h"
 
-EventGroupHandle_t weather_widget_event_handle = NULL;
-TaskHandle_t _weather_widget_sync_Task;
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+    #include <SPIFFS.h>
+    #include <FS.h>
+    #include "esp_task_wdt.h"
+
+    EventGroupHandle_t weather_widget_event_handle = NULL;
+    TaskHandle_t _weather_widget_sync_Task;
+#endif
+
 void weather_widget_sync_Task( void * pvParameters );
 
 weather_config_t weather_config;
@@ -62,7 +75,7 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 void weather_app_setup( void ) {
 
-    weather_load_config();
+    weather_config.load();
 
     // get an app tile and copy mainstyle
     weather_app_tile_num = mainbar_add_app_tile( 1, 2, "Weather App" );
@@ -83,7 +96,11 @@ void weather_app_setup( void ) {
         widget_set_extended_label( weather_widget, "n/a" );
     }
 
+#ifdef NATIVE_64BIT
+
+#else
     weather_widget_event_handle = xEventGroupCreate();
+#endif
 
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb, "weather" );
 }
@@ -127,6 +144,9 @@ void weather_jump_to_setup( void ) {
 }
 
 void weather_widget_sync_request( void ) {
+#ifdef NATIVE_64BIT
+    weather_widget_sync_Task( NULL );
+#else
     if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {
         return;
     }
@@ -140,6 +160,7 @@ void weather_widget_sync_request( void ) {
                         1,                              /* Priority of the task */
                         &_weather_widget_sync_Task );   /* Task handle. */
     }
+#endif
 }
 
 weather_config_t *weather_get_config( void ) {
@@ -147,11 +168,11 @@ weather_config_t *weather_get_config( void ) {
 }
 
 void weather_widget_sync_Task( void * pvParameters ) {
+#ifndef NATIVE_64BIT
     log_i("start weather widget task, heap: %d", ESP.getFreeHeap() );
-
     vTaskDelay( 250 );
-
     if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {       
+#endif
         uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
         if ( retval == 200 ) {
             widget_set_label( weather_widget, weather_today.temp );
@@ -169,61 +190,19 @@ void weather_widget_sync_Task( void * pvParameters ) {
             widget_set_indicator( weather_widget, ICON_INDICATOR_FAIL );
         }
         lv_obj_invalidate( lv_scr_act() );
+#ifndef NATIVE_64BIT
     }
     xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
     log_i("finish weather widget task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
+#endif
 }
 
 void weather_save_config( void ) {
-    fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
-    }
-    else {
-        SpiRamJsonDocument doc( 1000 );
-
-        doc["apikey"] = weather_config.apikey;
-        doc["lat"] = weather_config.lat;
-        doc["lon"] = weather_config.lon;
-        doc["autosync"] = weather_config.autosync;
-        doc["showWind"] = weather_config.showWind;
-        doc["imperial"] = weather_config.imperial;
-        doc["widget"] = weather_config.widget;
-
-        if ( serializeJsonPretty( doc, file ) == 0) {
-            log_e("Failed to write config file");
-        }
-        doc.clear();
-    }
-    file.close();
+    weather_config.save();
 }
 
 void weather_load_config( void ) {
-    fs::File file = SPIFFS.open( WEATHER_JSON_CONFIG_FILE, FILE_READ );
-    if (!file) {
-        log_e("Can't open file: %s!", WEATHER_JSON_CONFIG_FILE );
-    }
-    else {
-        int filesize = file.size();
-        SpiRamJsonDocument doc( filesize * 4 );
-
-        DeserializationError error = deserializeJson( doc, file );
-        if ( error ) {
-            log_e("update check deserializeJson() failed: %s", error.c_str() );
-        }
-        else {
-            strlcpy( weather_config.apikey, doc["apikey"], sizeof( weather_config.apikey ) );
-            strlcpy( weather_config.lat, doc["lat"], sizeof( weather_config.lat ) );
-            strlcpy( weather_config.lon, doc["lon"], sizeof( weather_config.lon ) );
-            weather_config.autosync = doc["autosync"] | true;
-            weather_config.showWind = doc["showWind"] | false;
-            weather_config.imperial = doc["imperial"] | false;
-            weather_config.widget = doc["widget"] | true;
-        }        
-        doc.clear();
-    }
-    file.close();
+    weather_config.load();
 }
 

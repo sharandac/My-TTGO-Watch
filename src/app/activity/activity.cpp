@@ -15,15 +15,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 #include "quickglui/quickglui.h"
 
 #include "activity.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
 #include "hardware/bma.h"
-#include "hardware/blestepctl.h"
+// #include "hardware/blestepctl.h"
 #include "hardware/motor.h"
+
+#ifdef NATIVE_64BIT
+
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+    #endif
+#endif
 
 // App icon must have an size of 64x64 pixel with an alpha channel
 // Use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha"
@@ -76,7 +84,7 @@ void activity_app_setup() {
     activityApp.synchronizeActionHandler([](SyncRequestSource source) {
         if ( blectl_get_event( BLECTL_ON ) )
         {
-            blestepctl_update(true);
+            // blestepctl_update(true);
         }
         // Return feedback to user as nothing else changed
         motor_vibe(20);
@@ -148,12 +156,12 @@ void build_main_page()
 void refresh_main_page()
 {
     char buff[36];
-    uint32_t gStep = goal_step.toInt();
-    uint32_t gDist = goal_dist.toInt();
+    uint32_t gStep = atoi( goal_step.c_str() );
+    uint32_t gDist = atoi( goal_dist.c_str() );
     // Get current value
     uint32_t stp = bma_get_stepcounter();
     uint32_t ach = gStep == 0 ? 0 : 100 * stp / gStep;
-    uint32_t dist = stp * length.toInt() / 100;
+    uint32_t dist = stp * atoi( length.c_str() ) / 100;
     log_d("Refresh activity: %d steps", stp);
     // Raw steps
     snprintf( buff, sizeof( buff ), "%d", stp );

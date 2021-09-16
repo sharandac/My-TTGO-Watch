@@ -22,8 +22,6 @@
 #ifndef _BATTERY_VIEW_H
     #define _BATTERY_VIEW_H
 
-    #include <TTGO.h>
-
     void battery_view_tile_setup( uint32_t tile_num );
 
 #endif // _BATTERY_VIEW_H

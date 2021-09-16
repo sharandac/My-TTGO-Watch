@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "sailing.h"
 #include "sailing_setup.h"
@@ -31,6 +30,13 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+    #include <Arduino.h>
+#endif
 
 lv_obj_t *sailing_setup_tile = NULL;
 lv_style_t sailing_setup_style;
@@ -64,12 +70,12 @@ void sailing_setup_setup( uint32_t tile_num ) {
     /**
      * setup always on display switch
      */
-    lv_obj_t *sailing_foobar_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Always on display", &sailing_foobar_switch, false, sailing_foobar_switch_event_cb );
+    lv_obj_t *sailing_foobar_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Always on display", &sailing_foobar_switch, false, sailing_foobar_switch_event_cb, ws_get_setup_tile_style() );
     lv_obj_align( sailing_foobar_switch_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * setup show track switch
      */
-    lv_obj_t *sailing_track_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Show track", &sailing_track_switch, false, sailing_track_switch_event_cb );
+    lv_obj_t *sailing_track_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Show track", &sailing_track_switch, false, sailing_track_switch_event_cb, ws_get_setup_tile_style() );
     lv_obj_align( sailing_track_switch_cont, sailing_foobar_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 }
 

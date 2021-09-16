@@ -23,6 +23,16 @@
 
     #include <stdint.h>
 
+    typedef uint32_t EventBits_t;
+
+    /**
+     * @brief prio type def
+     */
+    typedef enum {
+        CALL_CB_FIRST = 0,
+        CALL_CB_MIDDLE,
+        CALL_CB_LAST
+    } callback_prio_t;
     /**
      * @brief typedef for the callback function call
      * 
@@ -40,6 +50,7 @@
         EventBits_t event;                  /** @brief event mask */
         CALLBACK_FUNC callback_func;        /** @brief pointer to a callback function */
         const char *id;                     /** @brief id for the callback */
+        callback_prio_t prio;               /** @brief order to call cb functions, CALL_CB_FIRST means first */
         uint64_t counter;                   /** @brief callback function call counter thair returned true */
     } callback_table_t;
 
@@ -70,9 +81,23 @@
      * @param   callback_func   pointer to a callbackfunc
      * @param   id              pointer to an string thats contains the id aka name for the callback function
      * 
+     * @note    prio is set to CALL_CB_MIDDLE as default
+     * 
      * @return  true if success, false if failed
      */
     bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
+    /**
+     * @brief   register an callback function and their prio
+     * 
+     * @param   callback        pointer to a callback_t structure
+     * @param   event           event filter mask
+     * @param   callback_func   pointer to a callbackfunc
+     * @param   id              pointer to an string thats contains the id aka name for the callback function
+     * @param   prio            prio ( CALL_CB_FIRST, CALL_CB_MIDDLE, CALL_CB_LAST )
+     * 
+     * @return  true if success, false if failed
+     */
+    bool callback_register_with_prio( callback_t *callback, EventBits_t event, CALLBACK_FUNC callback_func, const char *id, callback_prio_t prio );
     /**
      * @brief   call all callback function thats match with the event filter mask
      * 
@@ -84,6 +109,16 @@
      */
     bool callback_send( callback_t *callback, EventBits_t event, void *arg );
     /**
+     * @brief   call all callback function thats match with the event filter mask in reverse order
+     * 
+     * @param   callback        pointer to a callback_t structure
+     * @param   event           event filter mask
+     * @param   arg             argument for the called callback function
+     * 
+     * @return  true if success, false if failed
+     */
+    bool callback_send_reverse( callback_t *callback, EventBits_t event, void *arg );
+    /**
      * @brief   call all callback function thats match with the event filter mask without logging
      * 
      * @param   callback        pointer to a callback_t structure
@@ -93,19 +128,6 @@
      * @return  true if success, false if failed
      */
     bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg );
-    /**
-     * @brief enable/disable SPIFFS event logging
-     * 
-     * @param enable    true if logging enabled, false if logging disabled
-     */
-    void display_event_logging_enable( bool enable );
-    /**
-     * @brief enable/disable SPIFFS event logging
-     * 
-     * @param   callback        pointer to a callback_t structure
-     * @param   debuging        true enable debuging, false disable debuging
-     */
-    void callback_enable_debuging( callback_t *callback, bool debuging );
     /**
      * @brief prints out the complete callback table and their entrys
      */

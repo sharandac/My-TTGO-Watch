@@ -4,7 +4,7 @@
  * Opts: 
  * https://freefontsdownload.net/free-modern_lcd_7-font-2180.htm
  ******************************************************************************/
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 #ifndef LCD_48PX
 #define LCD_48PX 1

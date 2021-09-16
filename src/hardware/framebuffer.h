@@ -21,19 +21,29 @@
  */
 #ifndef _FRAMEBUFFER_H
     #define _FRAMEBUFFER_H
+    
+    #include "lvgl.h"
+    #include "config.h"
 
-    #define FRAMEBUFFER_BUFFER_W        ( 240 )
-    #define FRAMEBUFFER_BUFFER_H        ( 10 )
+    #ifdef NATIVE_64BIT
+            #define FRAMEBUFFER_BUFFER_W        LV_HOR_RES_MAX
+            #define FRAMEBUFFER_BUFFER_H        LV_VER_RES_MAX
+    #else
+        #if defined( M5PAPER )
+            #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
+            #define FRAMEBUFFER_BUFFER_H        RES_Y_MAX
+            #define FRAMEBUFFER_REFRESH_DELAY   100
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
+            #define FRAMEBUFFER_BUFFER_H        10
+        #endif
+    #endif
+
     #define FRAMEBUFFER_BUFFER_SIZE     ( FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H )
 
     /**
      * @brief setup framebuffer
-     * 
-     * @param dma   true enable DMA and false DMA memory transfers
-     * @param doubleframebuffer true enable framebuffer double buffering, false disabled double buffering
-     * 
-     * @note DMA and double buffering can enable/disable at any time with no restriction
      */
-    void framebuffer_setup( bool dma, bool doubleframebuffer );
-    
+    void framebuffer_setup( void );
+    void framebuffer_refresh( void );
 #endif // _FRAMEBUFFER_H

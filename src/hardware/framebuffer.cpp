@@ -20,181 +20,257 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <esp_ipc.h>
-
+#include "lvgl.h"
 #include "framebuffer.h"
 #include "powermgm.h"
-
 #include "utils/alloc.h"
-
-lv_color_t *framebuffer1 = NULL;
-lv_color_t *framebuffer2 = NULL;
-static bool framebuffer_use_dma = false;
-
-static lv_disp_buf_t disp_buf;
-
-bool framebuffer_setup_dma( bool doubleframebuffer  );
-bool framebuffer_setup_nodma( bool doubleframebuffer  );
-static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p);
-
-void framebuffer_setup( bool dma, bool doubleframebuffer ) {
-    /**
-     * see issue #227
-     */
-    #if defined( LILYGO_WATCH_2020_V3 )
-        dma = false;
-    #endif
-
-    if ( dma ) {
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->tft->initDMA();
-        framebuffer_setup_dma( doubleframebuffer );
-    }
-    else {
-        framebuffer_setup_nodma( doubleframebuffer );
-    }
-}
-
-bool framebuffer_setup_nodma( bool doubleframebuffer  ) {
-    lv_color_t *tmp_framebuffer1 = NULL;
-    lv_color_t *tmp_framebuffer2 = NULL;
+/**
+ * device depends includes and inits
+ */
+#ifdef NATIVE_64BIT
     /*
-     * allocate new framebuffer
+     * To fix SDL's "undefined reference to WinMain" issue
      */
-    tmp_framebuffer1 = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
-    if ( tmp_framebuffer1 == NULL ) {
-        log_e("framebuffer 1 malloc failed");
-        return( false );
-    }
-    /**
-     * if double buffer set, allocate the second one
-     */
-    if ( doubleframebuffer ) {
-        tmp_framebuffer2 = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
-        if ( tmp_framebuffer2 == NULL ) {
-            log_e("framebuffer 2 malloc failed");
-            if ( tmp_framebuffer1 ) {
-                free( tmp_framebuffer1 );
-            }
-            return( false );
-        }
-    }
-
-    /*
-     * free old framebuffer
-     */
-    if ( framebuffer1 ) {
-        free( framebuffer1 );
-    }
-    if ( framebuffer2 ) {
-        free( framebuffer2 );
-    }
-    /*
-     * set new framebuffer
-     */
-    framebuffer1 = tmp_framebuffer1;
-    if ( doubleframebuffer ) {
-        framebuffer2 = tmp_framebuffer2;
-        log_i("double framebuffer enable ( 2 x %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
-    }
-    else {
-        framebuffer2 = NULL;
-        log_i("single framebuffer enable ( %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
-    }
-    /*
-     * set LVGL driver
-     */
-    lv_disp_t *system_disp;
-    lv_disp_buf_init( &disp_buf, framebuffer1, framebuffer2, FRAMEBUFFER_BUFFER_SIZE );
-    system_disp = lv_disp_get_default();
-    system_disp->driver.flush_cb = framebuffer_flush;
-    system_disp->driver.hor_res = lv_disp_get_hor_res( NULL );
-    system_disp->driver.ver_res = lv_disp_get_ver_res( NULL );
-    system_disp->driver.buffer = &disp_buf;
-    framebuffer_use_dma = false;
-
-    return( true );
-}
-
-bool framebuffer_setup_dma( bool doubleframebuffer  ) {
-
-#if defined( TWATCH_USE_PSRAM_ALLOC_LVGL ) && defined( CONFIG_SPIRAM_SPEED_80M )
-    lv_color_t *tmp_framebuffer1 = NULL;
-    lv_color_t *tmp_framebuffer2 = NULL;
-    /*
-     * allocate new framebuffer
-     */
-    tmp_framebuffer1 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
-    if ( tmp_framebuffer1 == NULL ) {
-        log_e("framebuffer 1 malloc failed");
-        return( false );
-    }
-    /**
-     * if double buffer set, allocate the second one
-     */
-    if ( doubleframebuffer ) {
-        tmp_framebuffer2 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_SIZE );
-        if ( tmp_framebuffer2 == NULL ) {
-            log_e("framebuffer 2 malloc failed");
-            if ( tmp_framebuffer1 ) {
-                free( tmp_framebuffer1 );
-            }
-            return( false );
-        }
-    }
-    /*
-     * free old framebuffer
-     */
-    if ( framebuffer1 ) {
-        free( framebuffer1 );
-    }
-    if ( framebuffer2 ) {
-        free( framebuffer2 );
-    }
-    /*
-     * set new framebuffer
-     */
-    framebuffer1 = tmp_framebuffer1;
-    if ( doubleframebuffer ) {
-        framebuffer2 = tmp_framebuffer2;
-        log_i("custom arduino-esp32 framework detected, double DMA framebuffer enable ( 2 x %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
-    }
-    else {
-        framebuffer2 = NULL;
-        log_i("custom arduino-esp32 framework detected, single DMA framebuffer enable ( %d bytes )", sizeof(lv_color_t) * FRAMEBUFFER_BUFFER_SIZE );
-    }
-    /*
-     * set LVGL driver
-     */
-    lv_disp_t *system_disp;
-    lv_disp_buf_init( &disp_buf, framebuffer1, framebuffer2, FRAMEBUFFER_BUFFER_SIZE );
-    system_disp = lv_disp_get_default();
-    system_disp->driver.flush_cb = framebuffer_flush;
-    system_disp->driver.hor_res = lv_disp_get_hor_res( NULL );
-    system_disp->driver.ver_res = lv_disp_get_ver_res( NULL );
-    system_disp->driver.buffer = &disp_buf;
-    framebuffer_use_dma = true;
-
-    return( true );
+    #define SDL_MAIN_HANDLED
+    #include <unistd.h>
+    #include <SDL2/SDL.h>
+    #include "display/monitor.h"
+    #include "utils/logging.h"
 #else
-    log_i("no custom arduino-esp32 framework detected, use normal framebuffer");
-    return( false );
+    #include <Arduino.h>
+    #ifdef M5PAPER
+        #include <M5EPD.h>
+
+        M5EPD_Canvas canvas(&M5.EPD);
+        static uint64_t refreshdelay = 0;                                   /** @brief refresh delay counter to mark next screen refresh */
+        static lv_coord_t min_x = FRAMEBUFFER_BUFFER_W, max_x = 0;          /** @brief screen area to refresh */
+        static lv_coord_t min_y = FRAMEBUFFER_BUFFER_H, max_y = 0;          /** @brief screen area to refresh */
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+    #endif
 #endif
+
+static bool framebuffer_use_dma = false;
+lv_color_t *framebuffer = NULL;                                     /** @brief pointer to a full size framebuffer */
+uint32_t framebuffer_size = FRAMEBUFFER_BUFFER_SIZE;                /** @brief framebuffer size */
+
+bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg );
+bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg );
+static void framebuffer_flush_cb( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
+
+void framebuffer_setup( void ) {
+    static lv_disp_buf_t disp_buf;
+    lv_disp_drv_t disp_drv;
+
+    #ifdef NATIVE_64BIT
+        /**
+         * setup SDL
+         */
+        monitor_init();
+    #else
+        #ifdef M5PAPER
+            /**
+             * setup e-ink display and clear it
+             */
+            M5.EPD.SetRotation( 90 );
+            M5.EPD.Clear( true );
+            canvas.createCanvas( 540, 960 );
+            canvas.pushCanvas( UPDATE_MODE_GLD16 );
+            canvas.deleteCanvas();
+            /**
+             * cleat next screen refresh time
+             */
+            refreshdelay = 0;
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+
+            #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 )
+                framebuffer_use_dma = true;
+            #endif
+
+            if ( framebuffer_use_dma ) {
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                ttgo->tft->initDMA();
+            }
+        #endif
+    #endif
+    /*
+     * allocate new framebuffer
+     */
+    if ( !framebuffer ) {
+        if ( framebuffer_use_dma ) {
+            framebuffer = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+        }
+        else {
+            framebuffer = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+        }
+        if ( framebuffer == NULL ) {
+            log_e("framebuffer malloc failed");
+            while( 1 );
+        }
+    }
+    /*
+     * set LVGL driver
+     */
+    lv_disp_buf_init( &disp_buf, framebuffer, NULL, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+    lv_disp_drv_init( &disp_drv );
+    disp_drv.flush_cb = framebuffer_flush_cb;
+    disp_drv.buffer = &disp_buf;
+    disp_drv.hor_res = RES_X_MAX;
+    disp_drv.ver_res = RES_Y_MAX;
+    lv_disp_drv_register( &disp_drv );
+    /**
+     * log info about framebuffer
+     */
+    #ifdef NATIVE_64BIT
+        log_i("framebuffer: 0x%p (%ld bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
+    #else
+        log_i("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
+    #endif
+    /**
+     * setup powermgm events and loop
+     */
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , framebuffer_powermgm_event_cb, "powermgm framebuffer" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , framebuffer_powermgm_loop_cb, "powermgm framebuffer loop" );
 }
 
-static void framebuffer_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
+    return( true );
+}
 
-    uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
-    ttgo->tft->startWrite();
-    ttgo->tft->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
-    if ( framebuffer_use_dma ) {
-        ttgo->tft->pushPixelsDMA(( uint16_t *)color_p, size);
-    }
-    else {
-        ttgo->tft->pushPixels(( uint16_t *)color_p, size);
-    }
-    ttgo->tft->endWrite();
+bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg ) {
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+            /**
+             * check if a refresh delay is set
+             */
+            if ( refreshdelay != 0 ) {
+                /**
+                 * check if refresh time is reached
+                 */
+                if ( refreshdelay < millis() ) {
+                    log_d("area: %d.%d / %d.%d", min_x, min_y, max_x, max_y );
+                    /**
+                     * check if we nee a full screen refresh or a specified area refresh
+                     */
+                    if ( min_x == FRAMEBUFFER_BUFFER_W && min_y == FRAMEBUFFER_BUFFER_H && max_x == 0 && max_y == 0 ) {
+                        log_d("refreshing full display");
+                        M5.EPD.UpdateFull( UPDATE_MODE_GC16 );
+                    }
+                    else {
+                        log_d("refreshing specified area display");
+                        M5.EPD.UpdateArea( min_x, min_y, max_x - min_x, max_y - min_y, UPDATE_MODE_GC16 );
+                    }
+                    /**
+                     * reset refreshdelay time an area
+                     */
+                    refreshdelay = 0;
+                    min_x = FRAMEBUFFER_BUFFER_W;
+                    max_x = 0;
+                    min_y = FRAMEBUFFER_BUFFER_H;
+                    max_y = 0;
+                }
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+    #endif
+    return( true );
+}
+
+void framebuffer_refresh( void ) {
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+            /**
+             * do a full screen refresh
+             */
+            log_d("refreshing display");
+            log_d("area: %d.%d / %d.%d", min_x, min_y, max_x, max_y );
+            M5.EPD.UpdateFull( UPDATE_MODE_GC16 );
+            refreshdelay = 0;
+            min_x = FRAMEBUFFER_BUFFER_W;
+            max_x = 0;
+            min_y = FRAMEBUFFER_BUFFER_H;
+            max_y = 0;
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+    #endif
+}
+
+static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+    #ifdef NATIVE_64BIT
+        /**
+         * flush SDL screen
+         */
+        #if defined( MONOCHROME ) || defined( MONOCHROME_4BIT ) || defined( MONOCHROME_EINK )
+            lv_color_t *color = color_p;
+
+            for( int y = 0 ; y < ( area->y2 - area->y1 + 1 ); y++ ) {
+                for( int x = 0 ; x < ( area->x2 - area->x1 + 1 ); x++ ) {
+                    #if defined( MONOCHROME_4BIT )
+                        uint8_t brightness = ( lv_color_brightness( *color ) & 0xf0 );
+                    #elif defined( MONOCHROME_EINK )
+                        uint8_t brightness = ( lv_color_brightness( *color ) >> 2 ) * 3 + 64;
+                    #else
+                        uint8_t brightness = lv_color_brightness( *color );
+                    #endif
+                    *color = lv_color_make( brightness, brightness, brightness );
+                    color++;
+                }
+            }     
+            monitor_flush( disp_drv, area, color_p );
+        #else
+            monitor_flush( disp_drv, area, color_p );
+        #endif
+    #else
+        #ifdef M5PAPER
+            lv_color_t *color = color_p;
+            /**
+             * set/update area to freshing
+             */
+            if ( min_x > area->x1 ) min_x = area->x1;
+            if ( min_y > area->y1 ) min_y = area->y1;
+            if ( max_x < area->x2 ) max_x = area->x2;
+            if ( max_y < area->y2 ) max_y = area->y2;
+            /**
+             * write buffer to display
+             */
+            canvas.createCanvas( area->x2 - area->x1, area->y2 - area->y1 );
+            /**
+             * loop pixel data
+             */
+            for( int y = 0 ; y < ( area->y2 - area->y1 + 1 ); y++ ) {
+                for( int x = 0 ; x < ( area->x2 - area->x1 + 1 ); x++ ) {
+                    canvas.drawPixel( x, y, ( 255 - lv_color_brightness( *color ) ) >> 4 );
+                    color++;
+                }
+            }
+            /**
+             * transfer canvas to the screen without update
+             * and delete canvas
+             */
+            canvas.pushCanvas( area->x1, area->y1, UPDATE_MODE_NONE );
+            canvas.deleteCanvas();
+            /**
+             * set refresh time from now + FRAMEBUFFER_REFRESH_DELAY
+             */
+            if ( refreshdelay == 0 ) {
+                refreshdelay = millis() + FRAMEBUFFER_REFRESH_DELAY;
+            }
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+
+            uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+            ttgo->tft->startWrite();
+            ttgo->tft->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
+            if ( framebuffer_use_dma ) {
+                ttgo->tft->pushPixelsDMA(( uint16_t *)color_p, size);
+            }
+            else {
+                ttgo->tft->pushPixels(( uint16_t *)color_p, size);
+            }
+            ttgo->tft->endWrite();
+        #endif
+    #endif
     lv_disp_flush_ready( disp_drv );
 }

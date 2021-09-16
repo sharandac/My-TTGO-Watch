@@ -14,6 +14,18 @@
 #include "../widgets/textarea.h"
 #include "utils/alloc.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+        #include <Arduino.h>
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
 enum OptionDataType
 {
   BoolOption,
@@ -22,7 +34,7 @@ enum OptionDataType
 
 struct JsonOption {
     JsonOption(const char* optionName, OptionDataType type) {
-        strlcpy(name, optionName, MAX_OPTION_NAME_LENGTH);
+        strncpy(name, optionName, MAX_OPTION_NAME_LENGTH);
         optionDataType = type;
     }
     virtual ~JsonOption() {}
@@ -119,7 +131,7 @@ struct JsonStringOption : public JsonOption {
         }
 
         if ( defValue != nullptr ) {
-            strlcpy(value, defValue, maxLength);
+            strncpy(value, defValue, maxLength);
         }
         else {
             memset(value, 0, maxLength);
@@ -138,7 +150,7 @@ struct JsonStringOption : public JsonOption {
     virtual void applyFromUI() {
         if (isControlAssigned) {
             String currentValue = control.text();
-            strlcpy(value, currentValue.c_str(), maxLength);
+            strncpy(value, currentValue.c_str(), maxLength);
             if (source != nullptr)
             *source = value;
         }
@@ -150,7 +162,7 @@ struct JsonStringOption : public JsonOption {
 
     virtual void load(JsonDocument& document) {
         if ( document.containsKey( name ) ) {
-            strlcpy(value, document[name], maxLength);
+            strncpy(value, document[name], maxLength);
         }
         else {
             value[0] = '\0';

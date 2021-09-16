@@ -20,55 +20,60 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-
 #include "motor.h"
 #include "powermgm.h"
-
 #include "hardware/config/motorconfig.h"
 
-#if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-    volatile int DRAM_ATTR motor_run_time_counter=0;
-    hw_timer_t * timer = NULL;
-    portMUX_TYPE DRAM_ATTR timerMux = portMUX_INITIALIZER_UNLOCKED;
-#elif defined( LILYGO_WATCH_2020_V2 )
-    static Adafruit_DRV2605 *drv = NULL;
-    #define DRV2605_ADDRESS 0x5A
+#ifdef NATIVE_64BIT
+
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+            volatile int DRAM_ATTR motor_run_time_counter=0;
+            hw_timer_t * timer = NULL;
+            portMUX_TYPE DRAM_ATTR timerMux = portMUX_INITIALIZER_UNLOCKED;
+
+            void IRAM_ATTR onTimer();
+            void IRAM_ATTR onTimer() {
+                /*
+                * set critical section
+                */
+                portENTER_CRITICAL_ISR(&timerMux);
+                /*
+                * check if timer counter > zero
+                */
+                if ( motor_run_time_counter >0 ) {
+                    /*
+                    * decrement timer counter and enable motor
+                    */
+                    motor_run_time_counter--;       
+                    digitalWrite(MOTOR_PIN, HIGH );
+                }
+                else {
+                    /*
+                    * disable motor
+                    */
+                    digitalWrite(MOTOR_PIN, LOW );              
+                }
+                /*
+                * leave critical section
+                */
+                portEXIT_CRITICAL_ISR(&timerMux);
+            }
+        #elif defined( LILYGO_WATCH_2020_V2 )
+            static Adafruit_DRV2605 *drv = NULL;
+            #define DRV2605_ADDRESS 0x5A
+        #endif
+    #endif
 #endif
 
 bool motor_init = false;
 motor_config_t motor_config;
 
 bool motor_powermgm_event_cb( EventBits_t event, void *arg );
-
-#if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-void IRAM_ATTR onTimer() {
-    /*
-     * set critical section
-     */
-    portENTER_CRITICAL_ISR(&timerMux);
-    /*
-     * check if timer counter > zero
-     */
-    if ( motor_run_time_counter >0 ) {
-        /*
-         * decrement timer counter and enable motor
-         */
-        motor_run_time_counter--;       
-        digitalWrite(MOTOR_PIN, HIGH );
-    }
-    else {
-        /*
-         * disable motor
-         */
-        digitalWrite(MOTOR_PIN, LOW );              
-    }
-    /*
-     * leave critical section
-     */
-    portEXIT_CRITICAL_ISR(&timerMux);
-}
-#endif 
 
 void motor_setup( void ) {
     /*
@@ -77,45 +82,49 @@ void motor_setup( void ) {
     if ( motor_init == true ) {
         return;
     }
-
     /*
      * load config from json
      */
     motor_config.load();
+    #ifdef NATIVE_64BIT
+
+    #else
+        #ifdef M5PAPER
+        
+        #elif defined( LILYGO_WATCH_2020_V2 )
+            /**
+             * check if an DRV2605 connected
+             */
+            Wire.beginTransmission( DRV2605_ADDRESS );
+            uint8_t err = Wire.endTransmission();
+            if ( err == 0 ) {
+                log_i("Motor init: I2C device found at address %p", DRV2605_ADDRESS);
+                TTGOClass * ttgo = TTGOClass::getWatch(); 
+                ttgo->enableDrv2650( true );
+                drv = ttgo->drv;
+                drv->setMode( DRV2605_MODE_INTTRIG );
+                /**
+                 * default, internal trigger when sending GO command
+                 */
+                drv->selectLibrary( 1 );
+                drv->setWaveform( 0, 75 ); //Transition Ramp Down Short Smooth 2 – 100 to 0%
+                drv->setWaveform( 2, 0 );  //end of waveforms        
+            }
+            else {
+                log_e("Motor init: I2C device not found, error %d", err);
+                drv = NULL;    
+            }     
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+            pinMode(MOTOR_PIN, OUTPUT);
+            timer = timerBegin(0, 80, true);
+            timerAttachInterrupt(timer, &onTimer, true);
+            timerAlarmWrite(timer, 10000, true);
+            timerAlarmEnable(timer);
+        #endif
+    #endif
     /*
      * setup motor gpio, timer interrupt and interrupt function
      */
-    #if defined( LILYGO_WATCH_2020_V2 )
-        /**
-         * check if an DRV2605 connected
-         */
-        Wire.beginTransmission( DRV2605_ADDRESS );
-        uint8_t err = Wire.endTransmission();
-        if ( err == 0 ) {
-            log_i("Motor init: I2C device found at address %p", DRV2605_ADDRESS);
-            TTGOClass * ttgo = TTGOClass::getWatch(); 
-            ttgo->enableDrv2650( true );
-            drv = ttgo->drv;
-            drv->setMode( DRV2605_MODE_INTTRIG );
-            /**
-             * default, internal trigger when sending GO command
-             */
-            drv->selectLibrary( 1 );
-            drv->setWaveform( 0, 75 ); //Transition Ramp Down Short Smooth 2 – 100 to 0%
-            drv->setWaveform( 2, 0 );  //end of waveforms        
-        }
-        else {
-            log_e("Motor init: I2C device not found, error %d", err);
-            drv = NULL;    
-        }     
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-        pinMode(MOTOR_PIN, OUTPUT);
-        timer = timerBegin(0, 80, true);
-        timerAttachInterrupt(timer, &onTimer, true);
-        timerAlarmWrite(timer, 10000, true);
-        timerAlarmEnable(timer);
-    #endif
-
     motor_init = true;
     /*
      * register powermgm callback function
@@ -128,34 +137,31 @@ void motor_setup( void ) {
 }
 
 bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
+    #ifdef NATIVE_64BIT
 
-    #if defined( LILYGO_WATCH_2020_V2 )
-        TTGOClass * ttgo = TTGOClass::getWatch(); 
-        
-        switch( event ) {
-            case POWERMGM_WAKEUP:           break;
-            case POWERMGM_SILENCE_WAKEUP:   break;
-            case POWERMGM_STANDBY:          break;
-        }
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
-        switch( event ) {
-            case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
-                                            motor_run_time_counter = 0;
-                                            digitalWrite(MOTOR_PIN, LOW );   
-                                            portEXIT_CRITICAL(&timerMux);
-                                            break;
-            case POWERMGM_STANDBY:          portENTER_CRITICAL(&timerMux);
-                                            motor_run_time_counter = 0;
-                                            digitalWrite(MOTOR_PIN, LOW );
-                                            portEXIT_CRITICAL(&timerMux);
-                                            break;
-            case POWERMGM_ENABLE_INTERRUPTS:
-                                            timerAttachInterrupt(timer, &onTimer, true);
-                                            break;
-            case POWERMGM_DISABLE_INTERRUPTS:
-                                            timerDetachInterrupt(timer);
-                                            break;
-        }
+    #else
+        #if defined( M5PAPER )
+        #elif defined( LILYGO_WATCH_2020_V2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+            switch( event ) {
+                case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
+                                                motor_run_time_counter = 0;
+                                                digitalWrite(MOTOR_PIN, LOW );   
+                                                portEXIT_CRITICAL(&timerMux);
+                                                break;
+                case POWERMGM_STANDBY:          portENTER_CRITICAL(&timerMux);
+                                                motor_run_time_counter = 0;
+                                                digitalWrite(MOTOR_PIN, LOW );
+                                                portEXIT_CRITICAL(&timerMux);
+                                                break;
+                case POWERMGM_ENABLE_INTERRUPTS:
+                                                timerAttachInterrupt(timer, &onTimer, true);
+                                                break;
+                case POWERMGM_DISABLE_INTERRUPTS:
+                                                timerDetachInterrupt(timer);
+                                                break;
+            }
+        #endif
     #endif
     return( true );
 }
@@ -171,7 +177,12 @@ void motor_vibe( int time, bool enforced ) {
      * if motor disabled or forced?
      */
     if ( motor_get_vibe_config() || enforced ) {
-        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+    #ifdef NATIVE_64BIT
+
+    #else
+        #if defined( M5PAPER )
+
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
             /*
             * set critical section
             */        
@@ -189,6 +200,7 @@ void motor_vibe( int time, bool enforced ) {
                 drv->go();
             }
         #endif
+    #endif
     }
 }
 

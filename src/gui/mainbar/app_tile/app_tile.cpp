@@ -20,10 +20,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
-#include "app_tile.h"
+#include "gui/mainbar/app_tile/app_tile.h"
+#include "gui/mainbar/main_tile/main_tile.h"
+#include "gui/mainbar/note_tile/note_tile.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 static bool apptile_init = false;
 
@@ -32,6 +40,8 @@ lv_obj_t *app_cont[ MAX_APPS_TILES ];
 uint32_t app_tile_num[ MAX_APPS_TILES ];
 static lv_style_t app_icon_style;
 static lv_style_t app_label_style;
+
+static bool app_tile_button_event_cb( EventBits_t event, void *arg );
 
 void app_tile_setup( void ) {
     /*
@@ -45,8 +55,13 @@ void app_tile_setup( void ) {
      * add tiles to to main tile
      */
     for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
-        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 0, "app tile" );
+#if defined( M5PAPER )
+        app_tile_num[ tiles ] = mainbar_add_tile( 0 , 1 + tiles, "app tile" );
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile" );
+#endif
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
+        mainbar_add_tile_button_cb( app_tile_num[ tiles ], app_tile_button_event_cb );
     }
     /**
      * copy mainbar style
@@ -90,7 +105,20 @@ void app_tile_setup( void ) {
 
         log_d("icon screen/x/y: %d/%d/%d", app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ), app_entry[ app ].x, app_entry[ app ].y );
     }
+
     apptile_init = true;
+}
+
+static bool app_tile_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_LEFT:   mainbar_jump_to_tilenumber( main_tile_get_tile_num(), LV_ANIM_OFF );
+                            mainbar_clear_history();
+                            break;
+        case BUTTON_RIGHT:  mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+                            mainbar_clear_history();
+                            break;
+    }
+    return( true );
 }
 
 lv_obj_t *app_tile_register_app( const char* appname ) {

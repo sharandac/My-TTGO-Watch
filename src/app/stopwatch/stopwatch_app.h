@@ -22,8 +22,6 @@
 #ifndef _stopwatch_APP_H
     #define _stopwatch_APP_H
 
-    #include <TTGO.h>
-
 //    #define stopwatch_WIDGET    // uncomment if an widget need
 
     void stopwatch_app_setup( void );

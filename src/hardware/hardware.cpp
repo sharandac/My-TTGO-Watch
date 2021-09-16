@@ -1,63 +1,176 @@
 #include "config.h"
-#include <Arduino.h>
-#include "esp_bt.h"
-#include "esp_task_wdt.h"
-#include <TTGO.h>
 
-#include "gui/splashscreen.h"
-#include "gui/screenshot.h"
-#include "gui/mainbar/mainbar.h"
-#include "gui/screenshot.h"
-
-#include "hardware/blectl.h"
-#include "hardware/bma.h"
-#include "hardware/callback.h"
-#include "hardware/display.h"
-#include "hardware/gpsctl.h"
-#include "hardware/motor.h"
-#include "hardware/pmu.h"
-#include "hardware/powermgm.h"
-#include "hardware/rtcctl.h"
-#include "hardware/sound.h"
-#include "hardware/timesync.h"
-#include "hardware/touch.h"
-#include "hardware/wifictl.h"
-#include "hardware/sdcard.h"
+#include "hardware.h"
+#include "button.h"
+#include "powermgm.h"
+#include "framebuffer.h"
+#include "touch.h"
+#include "bma.h"
+#include "display.h"
+#include "gpsctl.h"
+#include "timesync.h"
+#include "sound.h"
+#include "motor.h"
+#include "pmu.h"
+#include "rtcctl.h"
+#include "sdcard.h"
+#include "wifictl.h"
+#include "blectl.h"
+#include "callback.h"
+#include "sensor.h"
 
 #include "utils/fakegps.h"
+#include "gui/splashscreen.h"
+#include "gui/screenshot.h"
+
+#ifdef NATIVE_64BIT
+    #include "lvgl.h"
+    #include <unistd.h>
+    #define SDL_MAIN_HANDLED        /*To fix SDL's "undefined reference to WinMain" issue*/
+    #include <SDL2/SDL.h>
+    #include "utils/logging.h"
+
+    /**
+     * A task to measure the elapsed time for LittlevGL
+     * @param data unused
+     * @return never return
+     */
+    static int tick_thread(void * data)
+    {
+        (void)data;
+        log_i("start lvgl ticker");
+        while(1) {
+            SDL_Delay(5);   /*Sleep for 5 millisecond*/
+            lv_tick_inc(5); /*Tell LittelvGL that 5 milliseconds were elapsed*/
+        }
+        return 0;
+    }
+#else
+    #include <Arduino.h>
+    #include <SPIFFS.h>
+    #include <Ticker.h>
+    #include "esp_bt.h"
+    #include "esp_task_wdt.h"
+    #include "lvgl.h"
+
+    #ifdef M5PAPER
+        #include <M5EPD.h>
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+    #endif
+
+    Ticker *tickTicker = nullptr;
+
+
+#endif
+
+void hardware_attach_lvgl_ticker( void ) {
+    #ifdef NATIVE_64BIT
+
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        tickTicker->attach_ms(5, []() {
+            lv_tick_inc(5);
+        });
+    #endif
+}
+
+void hardware_detach_lvgl_ticker( void ) {
+    #ifdef NATIVE_64BIT
+
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        tickTicker->detach();
+    #endif
+}
 
 void hardware_setup( void ) {
+    #ifdef NATIVE_64BIT
+        /**
+         * lvgl init
+         */
+        lv_init();
+        // Workaround for sdl2 `-m32` crash
+        // https://bugs.launchpad.net/ubuntu/+source/libsdl2/+bug/1775067/comments/7
+        #ifndef WIN32
+            setenv("DBUS_FATAL_WARNINGS", "0", 1);
+        #endif
+        /* Tick init.
+        * You have to call 'lv_tick_inc()' in periodically to inform LittelvGL about how much time were elapsed
+        * Create an SDL thread to do this*/
+        SDL_CreateThread( tick_thread, "tick", NULL );
+    #else
+        #ifdef M5PAPER
+            /**
+             * lvgl init
+             */
+            lv_init();
+            /**
+             * init M5paper hardware
+             */
+            M5.begin();
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            /**
+             * lvgl init
+             */
+            lv_init();
+            /**
+             * ttgo init
+             */
+            ttgo->begin();
+        #endif
+        /**
+         * init lvgl ticker
+         */    
+        tickTicker = new Ticker();
+        hardware_attach_lvgl_ticker();
+        /*
+        * setup spiffs
+        */
+        SPIFFS.begin();
+    #endif
     /**
-     * pre hardware/powermgm setup
+     * driver init
      */
-    powermgm_setup();
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    ttgo->begin();
-    ttgo->lvgl_begin();
-    SPIFFS.begin();
     sdcard_setup();
+    powermgm_setup();
+    button_setup();
     motor_setup();
     display_setup();
     screenshot_setup();
-
+    /**
+     * splashscreen setup
+     */
     splash_screen_stage_one();
-    splash_screen_stage_update( "init serial", 10 );
-    splash_screen_stage_update( "init spiff", 20 );
-    if ( !SPIFFS.begin() ) {
-        splash_screen_stage_update( "format spiff", 30 );
-        SPIFFS.format();
-        splash_screen_stage_update( "format spiff done", 40 );
-        delay(500);
-        bool remount_attempt = SPIFFS.begin();
-        if (!remount_attempt){
-            splash_screen_stage_update( "Err: SPIFF Failed", 0 );
-            delay(3000);
-            ESP.restart();
-        }
-    }
+    /**
+     * work on SPIFFS
+     */
+    #ifdef NATIVE_64BIT
 
-    splash_screen_stage_update( "init hardware", 60 );    
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        if ( !SPIFFS.begin() ) {
+            splash_screen_stage_update( "format spiff", 30 );
+            log_i("format SPIFFS");
+            SPIFFS.format();
+            splash_screen_stage_update( "format spiff done", 40 );
+            delay(500);
+            bool remount_attempt = SPIFFS.begin();
+            if (!remount_attempt){
+                splash_screen_stage_update( "Err: SPIFF Failed", 0 );
+                delay(3000);
+                ESP.restart();
+            }
+        }
+    #endif
+    splash_screen_stage_update( "init hardware", 60 );  
 
     pmu_setup();
     bma_setup();
@@ -65,18 +178,37 @@ void hardware_setup( void ) {
     touch_setup();
     timesync_setup();
     rtcctl_setup();
+    sensor_setup();
     blectl_read_config();
     sound_read_config();
     fakegps_setup();
-    
+
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
+
+    #ifdef NATIVE_64BIT
+
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        delay(500);
+
+        log_i("Total heap: %d", ESP.getHeapSize());
+        log_i("Free heap: %d", ESP.getFreeHeap());
+        log_i("Total PSRAM: %d", ESP.getPsramSize());
+        log_i("Free PSRAM: %d", ESP.getFreePsram());
+
+        disableCore0WDT();
+    #endif
 }
 
 void hardware_post_setup( void ) {
+
     if ( wifictl_get_autoon() && ( pmu_is_charging() || pmu_is_vbus_plug() || ( pmu_get_battery_voltage() > 3400) ) ) {
         wifictl_on();
     }
+
     sound_setup();
     gpsctl_setup();
     powermgm_set_event( POWERMGM_WAKEUP );
@@ -84,12 +216,19 @@ void hardware_post_setup( void ) {
 
     display_set_brightness( display_get_brightness() );
 
-    delay(500);
+    #ifdef NATIVE_64BIT
 
-    log_i("Total heap: %d", ESP.getHeapSize());
-    log_i("Free heap: %d", ESP.getFreeHeap());
-    log_i("Total PSRAM: %d", ESP.getPsramSize());
-    log_i("Free PSRAM: %d", ESP.getFreePsram());
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #endif
+        delay(500);
 
-    disableCore0WDT();
+        log_i("Total heap: %d", ESP.getHeapSize());
+        log_i("Free heap: %d", ESP.getFreeHeap());
+        log_i("Total PSRAM: %d", ESP.getPsramSize());
+        log_i("Free PSRAM: %d", ESP.getFreePsram());
+
+        disableCore0WDT();
+    #endif
 }

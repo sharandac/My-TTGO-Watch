@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "osmand_app.h"
 #include "osmand_app_main.h"
@@ -38,7 +37,18 @@
 #include "hardware/powermgm.h"
 #include "hardware/timesync.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 
 lv_task_t *osmand_app_main_tile_task;
 
@@ -199,9 +209,10 @@ void osmand_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
          * React to messages from "OsmAnd" and "OsmAnd~"
          */
         if ( !strcmp( doc["t"], "notify" ) && !strncmp( doc["src"], "OsmAnd", 6 ) ) {
-            if ( strstr( doc["title"], "?") ) {
+            const char * title = doc["title"]; 
+            if ( strstr( title, "?") ) {
                 const char * distance = doc["title"];
-                char * direction = strstr( doc["title"], "?");
+                char * direction = (char *)strstr( title, "?");
                 *direction = '\0';
                 direction++;
                 lv_img_set_src( osmand_app_direction_img, osmand_find_direction_img( (const char*)direction ) );

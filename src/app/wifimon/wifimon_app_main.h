@@ -16,8 +16,6 @@
 #ifndef _WIFIMON_APP_MAIN_H
     #define _WIFIMON_APP_MAIN_H
 
-    #include <TTGO.h>
-
     /**
      * @brief ieee80211 mac header
      */

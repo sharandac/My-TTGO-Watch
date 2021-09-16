@@ -19,7 +19,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #pragma once
-#include <TTGO.h>
 #include <hardware/rtcctl.h>
 
 void alarm_clock_main_setup( uint32_t tile_num );

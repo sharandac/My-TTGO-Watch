@@ -21,8 +21,13 @@
  */
 #include "config.h"
 #include "alloc.h"
-
 #include "msg_chain.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
     /*
@@ -57,7 +62,7 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
         }
         msg_chain_entry->prev_msg = NULL;
         msg_chain_entry->next_msg = NULL;
-        time( &msg_chain_entry->timestamp );
+        // time( &msg_chain_entry->timestamp );
         strcpy( (char*)msg_chain_entry->msg, msg );
     }
     

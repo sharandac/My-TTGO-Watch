@@ -28,7 +28,7 @@
  
 ## Example code
 ```c
-#include <lvgl/lvgl.h>
+#include <lvgl.h>
 #include "lv_lib_split_jpg/lv_sjpg.h"
 
 LV_IMG_DECLARE( small_image_sjpg );

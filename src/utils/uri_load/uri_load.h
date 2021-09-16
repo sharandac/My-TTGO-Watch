@@ -22,6 +22,8 @@
 #ifndef _URI_LOAD__H
     #define _URI_LOAD__H
 
+    #include <stdint.h>
+
     #define URI_LOAD_INFO_LOG   log_i
     #define URI_LOAD_LOG        log_d
     #define URI_LOAD_ERROR_LOG  log_e

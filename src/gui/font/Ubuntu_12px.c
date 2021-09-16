@@ -8,7 +8,7 @@
  * Bpp: 2
  * Opts: 
  ******************************************************************************/
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 #ifndef UBUNTU_12PX
 #define UBUNTU_12PX 1

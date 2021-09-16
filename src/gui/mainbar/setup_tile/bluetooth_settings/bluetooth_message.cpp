@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include "bluetooth_message.h"
+#include "ArduinoJson.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
@@ -38,7 +39,18 @@
 
 #include "utils/alloc.h"
 #include "utils/msg_chain.h"
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 
 // messages app and widget
 icon_t *messages_app = NULL;
@@ -310,7 +322,7 @@ bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
     /*
      * if msg an notify msg?
      */
-    if( !strcmp( doc["t"], "notify" ) ) {
+    if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
         char msg[256];
         serializeJson( doc, msg, sizeof(msg) );
         retval = bluetooth_message_queue_msg( msg );
@@ -416,7 +428,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
         /*
          * if msg an notify msg?
          */
-        if( !strcmp( doc["t"], "notify" ) ) {
+        if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
             /*
              * set the receive time string
              */
@@ -457,6 +469,15 @@ void bluetooth_message_show_msg( int32_t entry ) {
             }
             else if ( doc["title"] ) {
                 lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
+            }
+            else if ( doc["temp"] ) {
+                /*
+                 * add special case when a weather information is set
+                 */
+                int temperature = doc["temp"];
+                const char temp_str[128] = "";
+                snprintf( (char*)temp_str, sizeof( temp_str ), "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
+                lv_label_set_text( bluetooth_message_msg_label, temp_str );
             }
             else {
                 lv_label_set_text( bluetooth_message_msg_label, "" );

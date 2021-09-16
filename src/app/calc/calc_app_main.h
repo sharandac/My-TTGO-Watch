@@ -22,7 +22,7 @@
 #ifndef _CALC_APP_MAIN_H
     #define _CALC_APP_MAIN_H
 
-    #include <TTGO.h>
+    #
 
     void calc_app_main_setup( uint32_t tile_num );
 

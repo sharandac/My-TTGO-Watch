@@ -22,23 +22,16 @@
 #ifndef _WEATHER_H
     #define _WEATHER_H
 
-    #include <TTGO.h>
+    #include "config/weather_config.h"
 
-    #define WEATHER_CONFIG_FILE             "/weather.cfg"
-    #define WEATHER_JSON_CONFIG_FILE        "/weather.json"
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+        #include <time.h>
+    #else
+        #include <Arduino.h>
+    #endif
 
     #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
-
-    typedef struct {
-        char version = 2;
-        char apikey[64] = "";
-        char lon[16] = "";
-        char lat[16] = "";
-        bool autosync = true;
-        bool showWind = false;
-        bool imperial = false;
-        bool widget = true;
-    } weather_config_t;
 
     typedef struct {
         bool valide = false;

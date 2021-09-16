@@ -8,7 +8,7 @@
 #ifndef TYPEINFO_H_
 #define TYPEINFO_H_
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "../widgets/widget.h"
 #include "../widgets/label.h"
 #include "../widgets/textarea.h"

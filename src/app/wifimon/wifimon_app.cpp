@@ -19,7 +19,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "wifimon_app.h"
 #include "wifimon_app_main.h"
@@ -27,6 +26,13 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/app.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+    #include <Arduino.h>
+#endif
 
 uint32_t wifimon_app_main_tile_num;
 uint32_t wifimon_app_setup_tile_num;

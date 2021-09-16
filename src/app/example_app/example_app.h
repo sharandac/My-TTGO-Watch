@@ -22,8 +22,6 @@
 #ifndef _EXAMPLE_APP_H
     #define _EXAMPLE_APP_H
 
-    #include <TTGO.h>
-
 //    #define EXAMPLE_WIDGET    // uncomment if an widget need
 
     void example_app_setup( void );
