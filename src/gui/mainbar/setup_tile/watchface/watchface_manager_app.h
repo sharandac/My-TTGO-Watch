@@ -1,7 +1,15 @@
 #ifndef _WATCHFACE_MANAGER_APP_H
     #define _WATCHFACE_MANAGER_APP_H
 
-    #include <TTGO.h>
+#ifdef NATIVE_64BIT
+    #include "utils/io.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 
     #define WATCHFACE_MANAGER_APP_INFO_LOG                  log_i
     #define WATCHFACE_MANAGER_APP_DEBUG_LOG                 log_d

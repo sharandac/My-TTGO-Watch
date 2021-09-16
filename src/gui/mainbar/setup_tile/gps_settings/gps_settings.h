@@ -22,8 +22,6 @@
 #ifndef _GPS_SETTINGS_H
     #define _GPS_SETTINGS_H
 
-    #include <TTGO.h>
-
     void gps_settings_tile_setup( void );
     /**
      * @brief get the gps setup tile number

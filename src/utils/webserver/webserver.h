@@ -21,25 +21,28 @@
  */
 
 #ifndef _ASYNCWEBSERVER_H
-
     #define _ASYNCWEBSERVER_H
-
-    #define WEBSERVERPORT   80
-    #define UPNPPORT        80
-
-    #define DEV_NAME        "My-Watch" 
-    #define DEV_INFO        "Watch based on ESP32 from Espressif Systems"
-
-    /*
-     *  @brief setup builtin webserver, call after first wifi-connection. otherwise esp32 will crash
-     */
-    void asyncwebserver_start(void);
-    void asyncwebserver_end(void);
     
-    /*
-     *  @brief set a new filesystem for the SPIFFSEditor
-     */
-    void setFsEditorFilesystem(const fs::FS& fs);
+    #ifdef NATIVE_64BIT
+    #else
+        #include <FS.h>
+
+        #define WEBSERVERPORT   80
+        #define UPNPPORT        80
+
+        #define DEV_NAME        "My-Watch" 
+        #define DEV_INFO        "Watch based on ESP32 from Espressif Systems"
+
+        /*
+        *  @brief setup builtin webserver, call after first wifi-connection. otherwise esp32 will crash
+        */
+        void asyncwebserver_start(void);
+        void asyncwebserver_end(void);
+        /*
+        *  @brief set a new filesystem for the SPIFFSEditor
+        */
+        void setFsEditorFilesystem(const fs::FS& fs);
+    #endif
 
 
 #endif // _ASYNCWEBSERVER_H

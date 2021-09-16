@@ -1,8 +1,25 @@
 #include "config.h"
-#include <TTGO.h>
+
 #include "utils/sqlite3/sqlite3.h"
 
 #include "calendar_db.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
 /**
  * internal variables
  */
@@ -21,8 +38,19 @@ void calendar_db_setup( void ) {
     #ifdef CALENDAR_DB_FORCE_CREATE_DB
         remove( CALENDAR_DB_FILE );
     #endif // CALENDAR_DB_FORCE_CREATE_DB
+    /**
+     * create calendar db filename
+     */
+    char filename[256] = CALENDAR_DB_FILE;
+#ifdef NATIVE_64BIT
+    if ( getenv("HOME") )
+        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, CALENDAR_DB_FILE );
+#endif
+    /**
+     * open calendar db
+     */
     FILE *dbfile;
-    dbfile = fopen( CALENDAR_DB_FILE, "r" );
+    dbfile = fopen( filename, "r" );
     if ( dbfile ) {
         CALENDAR_DB_DEBUG_LOG("database exist");
         fclose( dbfile );
@@ -59,6 +87,17 @@ void calendar_db_setup( void ) {
                 localtime_r( &now, &time_tm );
                 char date[30]="";
                 snprintf( date, sizeof( date ),"%04d%02d%02d%02d%02d", ( time_tm.tm_year + 1900 ), ( time_tm.tm_mon + 1 ), time_tm.tm_mday, time_tm.tm_hour, time_tm.tm_min );
+#ifdef NATIVE_64BIT
+                char sql[ 512 ] = "";
+                snprintf( sql, sizeof( sql ), "INSERT INTO calendar VALUES (%s,%d,%d,%d,%d,%d, 'first date');",
+                                        date,
+                                        ( time_tm.tm_year + 1900 ),
+                                        ( time_tm.tm_mon + 1 ), 
+                                        time_tm.tm_mday, 
+                                        time_tm.tm_hour, 
+                                        time_tm.tm_min ); 
+                calendar_db_exec( calendar_db_exec_callback, sql );
+#else
                 String sql = (String)   "INSERT INTO calendar VALUES (" +
                                         date + "," +
                                         ( time_tm.tm_year + 1900 ) + "," + 
@@ -68,6 +107,7 @@ void calendar_db_setup( void ) {
                                         time_tm.tm_min + "," + 
                                         "'first date');";
                 calendar_db_exec( calendar_db_exec_callback, sql.c_str() );
+#endif
                 calendar_db_exec( calendar_db_version_callback, "SELECT version FROM calendar_db_version;");
             #endif // CALENDAR_DB_CREATE_TEST_DATA
             /**
@@ -95,9 +135,17 @@ bool calendar_db_open( void ) {
      */
     sqlite3_initialize();
     /**
+     * create calendar db filename
+     */
+    char filename[256] = CALENDAR_DB_FILE;
+#ifdef NATIVE_64BIT
+    if ( getenv("HOME") )
+        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, CALENDAR_DB_FILE );
+#endif
+    /**
      * open database
      */
-    int error = sqlite3_open( CALENDAR_DB_FILE, &calendar_db );
+    int error = sqlite3_open( filename, &calendar_db );
     if ( error ) {
         CALENDAR_DB_ERROR_LOG("can't open calendar database: %s", sqlite3_errmsg( calendar_db ) );
         calendar_db = NULL;
@@ -177,6 +225,6 @@ bool calendar_db_exec( SQL_CALLBACK_FUNC callback, const char *sql ) {
         retval = true;
     }
     query_time = millis() - query_start;
-    CALENDAR_DB_INFO_LOG("query time = %dms", query_time );
+    CALENDAR_DB_INFO_LOG("query time = %ldms", query_time );
     return retval;
 }

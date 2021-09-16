@@ -21,8 +21,6 @@
  */
 #include "config.h"
 #include "utilities.h"
-#include "esp_system.h"//Needed for reset types
-#include <Arduino.h>
 #include "gps_test_data.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -35,6 +33,15 @@
 #include "hardware/motor.h"
 #include "hardware/display.h"
 #include "hardware/gpsctl.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include "esp_system.h"//Needed for reset types
+    #include <Arduino.h>
+    #include <SPIFFS.h>
+
+#endif
 
 lv_task_t *_gps_test_data_task = NULL;
 static volatile bool gps_test_data_start_trigger = false;
@@ -55,14 +62,12 @@ static lv_style_t style_modal;
 LV_IMG_DECLARE(utilities_64px);
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
-
+static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 static void SpiffsWarningBox_event_handler( lv_obj_t * obj, lv_event_t event );
 static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
-static void format_SPIFFS(void);
-
+static void format_SPIFFS( void );
 static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 static void poweroff_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
-
 static void gps_test_data_utilities_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void gps_test_data_task( lv_task_t * task );
@@ -77,8 +82,8 @@ void utilities_tile_setup( void ) {
     icon_t *utilities_setup_icon = setup_register( "Utilities", &utilities_64px, enter_utilities_event_cb );
     setup_hide_indicator( utilities_setup_icon );
 
-    lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities" );
-    lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_t *header = wf_add_settings_header( utilities_tile, "System Utilities", exit_utilities_event_cb );
+    lv_obj_align( header, utilities_tile, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
     //Spiffs:
     //Add button for dump spiffs details to serial including config files
@@ -90,7 +95,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_event_cb( format_spiffs_btn, format_SPIFFS_utilities_event_cb );
     lv_obj_set_size( format_spiffs_btn, 80, 60);
     lv_obj_add_style( format_spiffs_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_IN_LEFT_MID, 5, -15);
+    lv_obj_align( format_spiffs_btn, utilities_tile, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, -15);
     lv_obj_t *format_spiffs_btn_label = lv_label_create( format_spiffs_btn, NULL );
     lv_label_set_text( format_spiffs_btn_label, "Format\nSPIFFS");
     
@@ -98,7 +103,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_event_cb( gps_test_data_btn, gps_test_data_utilities_event_cb );
     lv_obj_set_size( gps_test_data_btn, 80, 60);
     lv_obj_add_style( gps_test_data_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( gps_test_data_btn, utilities_tile, LV_ALIGN_IN_RIGHT_MID, -5, -15);
+    lv_obj_align( gps_test_data_btn, utilities_tile, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, -15);
     gps_test_data_btn_label = lv_label_create( gps_test_data_btn, NULL );
     lv_label_set_text( gps_test_data_btn_label, "send GPS\ntest data");
 
@@ -107,7 +112,7 @@ void utilities_tile_setup( void ) {
     lv_obj_set_size(reboot_btn, 70, 40);
     lv_obj_set_event_cb( reboot_btn, reboot_utilities_event_cb );
     lv_obj_add_style( reboot_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
+    lv_obj_align( reboot_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     lv_obj_t *reboot_btn_label = lv_label_create( reboot_btn, NULL );
     lv_label_set_text( reboot_btn_label, "Reboot");
 
@@ -117,20 +122,21 @@ void utilities_tile_setup( void ) {
     lv_obj_set_size(poweroff_btn, 80, 40);
     lv_obj_set_event_cb( poweroff_btn, poweroff_utilities_event_cb );
     lv_obj_add_style( poweroff_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
+    lv_obj_align( poweroff_btn, utilities_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     lv_obj_t *poweroff_btn_label = lv_label_create( poweroff_btn, NULL );
     lv_label_set_text( poweroff_btn_label, "Poweroff");
     
     lv_obj_t *last_reboot_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reboot_label, LV_OBJ_PART_MAIN, &utilities_style  );
     lv_label_set_text( last_reboot_label, "Last Reboot Reason:");
-    lv_obj_align( last_reboot_label, format_spiffs_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_align( last_reboot_label, format_spiffs_btn, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );
     
     lv_obj_t *last_reason_label = lv_label_create( utilities_tile, NULL);
     lv_obj_add_style( last_reason_label, LV_OBJ_PART_MAIN, &utilities_style  );
     lv_label_set_text( last_reason_label, "");  
     
     //Get the reason for the last reset, this could be moved into a dedicated function....
+#ifndef NATIVE_64BIT
     esp_reset_reason_t why = esp_reset_reason();
     switch (why){
       case (ESP_RST_UNKNOWN):
@@ -171,14 +177,22 @@ void utilities_tile_setup( void ) {
                                         break;
     }
     lv_label_set_align( last_reason_label, LV_LABEL_ALIGN_CENTER );
-    lv_obj_align( last_reason_label, last_reboot_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );//Now that the text has changed, align it.
+    lv_obj_align( last_reason_label, last_reboot_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );//Now that the text has changed, align it.
 
+#endif
     _gps_test_data_task = lv_task_create( gps_test_data_task, 1000, LV_TASK_PRIO_MID, NULL );
 }
 
 static void enter_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( utilities_tile_num, LV_ANIM_OFF );
+                                        break;
+    }
+}
+
+static void exit_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }
@@ -218,7 +232,11 @@ static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event )
             
                                     //If you change the message below you need to recalculate the character buffer size!
                                     char temp[72]=""; //65 characters - 2 (%d) + 8 (16mb in bytes=16777216) + 1 = 72 characters
-                                    snprintf( temp, sizeof( temp ), "Confirm reformat of SPIFFS, and reset settings?\n(Used bytes: %d)", SPIFFS.usedBytes() );
+#ifdef NATIVE_64BIT
+                                        snprintf( temp, sizeof( temp ), "Confirm reformat of SPIFFS, and reset settings?\n(Used bytes: %d)", 0 );
+#else
+                                        snprintf( temp, sizeof( temp ), "Confirm reformat of SPIFFS, and reset settings?\n(Used bytes: %d)", SPIFFS.usedBytes() );
+#endif
                                     
                                     SpiffsWarningBox = lv_msgbox_create(obj, NULL);
                                     lv_msgbox_set_text(SpiffsWarningBox, temp);
@@ -231,17 +249,15 @@ static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event )
 }
 
 static void format_SPIFFS(void){
+#ifndef NATIVE_64BIT
     log_i("SPIFFS Format by User");
     motor_vibe(20);
     delay(20);
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    ttgo->stopLvglTick();
     SPIFFS.end();
     log_i("SPIFFS unmounted!");
     delay(100);
     SPIFFS.format();
     log_i("SPIFFS format complete!");
-    ttgo->startLvglTick();
     motor_vibe(20);
     delay(100);
     bool newmount_attempt = SPIFFS.begin();
@@ -250,22 +266,22 @@ static void format_SPIFFS(void){
         delay(1000);
         ESP.restart();
     }
+#endif
 }
 //********************************Power stuff
 static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
+#ifndef NATIVE_64BIT
                                         log_i("System reboot by user");
                                         motor_vibe(20);
                                         delay(20);
                                         display_standby();
-
-                                        TTGOClass *ttgo = TTGOClass::getWatch();
-                                        ttgo->stopLvglTick();
                                         SPIFFS.end();
                                         log_i("SPIFFS unmounted!");
                                         delay(500);
                                         ESP.restart();
+#endif
                                         break;
     }
 }
@@ -274,16 +290,15 @@ static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void poweroff_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
+#ifndef NATIVE_64BIT
                                         log_i("System poweroff by user");
                                         motor_vibe(20);
                                         delay(20);
-                                        
-                                        TTGOClass *ttgo = TTGOClass::getWatch();
-                                        ttgo->stopLvglTick();
                                         SPIFFS.end();
                                         log_i("SPIFFS unmounted!");
                                         delay(500);
-                                        ttgo->power->shutdown();
+#endif
+                                        break;
     }
 }
 

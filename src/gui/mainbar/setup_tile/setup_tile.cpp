@@ -25,7 +25,18 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/icon.h"
 #include "gui/widget_styles.h"
+#include "gui/mainbar/app_tile/app_tile.h"
+#include "gui/mainbar/main_tile/main_tile.h"
+#include "gui/mainbar/note_tile/note_tile.h"
+#include "gui/mainbar/setup_tile/setup_tile.h"
+
 #include "hardware/motor.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 static bool setuptile_init = false;
 
@@ -34,6 +45,8 @@ icon_t setup_entry[ MAX_SETUP_ICON ];
 lv_obj_t *setup_cont[ MAX_SETUP_TILES ];
 uint32_t setup_tile_num[ MAX_SETUP_TILES ];
 lv_style_t setup_style;
+
+static bool setup_tile_button_event_cb( EventBits_t event, void *arg );
 
 void setup_tile_setup( void ) {
     /*
@@ -45,8 +58,13 @@ void setup_tile_setup( void ) {
     }
 
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {
+#if defined( M5PAPER )
+        setup_tile_num[ tiles ] = mainbar_add_tile( 0, 2 + tiles, "setup tile" );
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         setup_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 1, "setup tile" );
+#endif        
         setup_cont[ tiles ] = mainbar_get_tile_obj( setup_tile_num[ tiles ] );
+        mainbar_add_tile_button_cb( setup_tile_num[ tiles ], setup_tile_button_event_cb );
     }
 
     lv_style_copy( &setup_style, ws_get_mainbar_style() );
@@ -62,6 +80,7 @@ void setup_tile_setup( void ) {
         lv_obj_add_style( setup_entry[ setup ].icon_cont, LV_OBJ_PART_MAIN, &setup_style );
         lv_obj_set_size( setup_entry[ setup ].icon_cont, SETUP_ICON_X_SIZE, SETUP_ICON_Y_SIZE );
         lv_obj_align( setup_entry[ setup ].icon_cont , setup_cont[ setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ) ], LV_ALIGN_IN_TOP_LEFT, setup_entry[ setup ].x, setup_entry[ setup ].y );
+
         // create app label
         setup_entry[ setup ].label = lv_label_create( setup_cont[ setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ) ], NULL );
         mainbar_add_slide_element(setup_entry[ setup ].label);
@@ -75,7 +94,21 @@ void setup_tile_setup( void ) {
 
         log_d("icon screen/x/y: %d/%d/%d", setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ), setup_entry[ setup ].x, setup_entry[ setup ].y );
     }
+
     setuptile_init = true;
+    log_i("setup tile finish");
+}
+
+static bool setup_tile_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_LEFT:   mainbar_jump_to_tilenumber( app_tile_get_tile_num(), LV_ANIM_OFF );
+                            mainbar_clear_history();
+                            break;
+        case BUTTON_RIGHT:  mainbar_jump_to_tilenumber( note_tile_get_tile_num(), LV_ANIM_OFF );
+                            mainbar_clear_history();
+                            break;
+    }
+    return( true );
 }
 
 lv_obj_t *setup_tile_register_setup( void ) {

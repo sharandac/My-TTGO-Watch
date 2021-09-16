@@ -1,7 +1,11 @@
 #ifndef _fxrates_APP_H
     #define _fxrates_APP_H
 
-    #include <TTGO.h>
+    #ifdef NATIVE_64BIT
+        #include <string>
+        using namespace std;
+        #define String string
+    #endif
 
     void fxrates_app_setup();
 

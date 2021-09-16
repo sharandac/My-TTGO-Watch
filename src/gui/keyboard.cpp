@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-
 #include "keyboard.h"
 
 static lv_obj_t *kb_screen = NULL;
@@ -68,7 +66,11 @@ void keyboard_setup( void ) {
     keyboard_prelim();
 
     kb = lv_keyboard_create( lv_scr_act() , NULL);
-    lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
+    #if defined( M5PAPER )
+        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
+        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
+    #endif
     lv_obj_align( kb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_keyboard_set_cursor_manage( kb, true);
     lv_obj_set_event_cb( kb, kb_event_cb );
@@ -85,7 +87,11 @@ void num_keyboard_setup( void ) {
 
     keyboard_prelim();
     nkb = lv_keyboard_create( lv_scr_act() , NULL);
-    lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
+    #if defined( M5PAPER )
+        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
+        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
+    #endif
     lv_obj_align( nkb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_keyboard_set_mode( nkb, LV_KEYBOARD_MODE_NUM);
     lv_keyboard_set_cursor_manage( nkb, true);

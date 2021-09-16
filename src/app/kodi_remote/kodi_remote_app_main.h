@@ -22,8 +22,6 @@
 #ifndef _KODI_REMOTE_MAIN_H
     #define _KODI_REMOTE_MAIN_H
 
-    #include <TTGO.h>
-
     void kodi_remote_app_main_setup( uint32_t tile_num );
 
 #endif // _KODI_REMOTE_MAIN_H

@@ -20,8 +20,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "calc_app.h"
 #include "calc_app_main.h"
 
@@ -80,7 +81,7 @@ void calc_app_main_setup( uint32_t tile_num ) {
 	lv_label_set_long_mode(result_label, LV_LABEL_LONG_CROP);
     lv_obj_add_style(result_label, LV_OBJ_PART_MAIN, &result_style);
     lv_obj_align(result_label, calc_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
-	lv_obj_set_size(result_label, 240, 38);
+	lv_obj_set_size(result_label, lv_disp_get_hor_res( NULL ), 38 );
 
     // buttons
     lv_style_copy(&button_matrix_style, ws_get_button_style());
@@ -99,8 +100,9 @@ void calc_app_main_setup( uint32_t tile_num ) {
     button_matrix = lv_btnmatrix_create(calc_app_main_tile, NULL);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &button_matrix_style);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &button_style);
-	lv_obj_set_pos(button_matrix, 0, 38);
-	lv_obj_set_size(button_matrix, 240, 152);
+	lv_obj_set_pos( button_matrix, 0, 38);
+	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - 38 - THEME_ICON_SIZE );
+
 	lv_btnmatrix_set_map(button_matrix, buttons);
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_btnmatrix_set_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECKABLE);

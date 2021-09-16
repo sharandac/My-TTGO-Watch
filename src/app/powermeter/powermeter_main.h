@@ -22,8 +22,6 @@
 #ifndef _POWERMETER_MAIN_H
     #define _POWERMETER_MAIN_H
 
-    #include <TTGO.h>
-
     void powermeter_main_tile_setup( uint32_t tile_num );
 
 #endif // _POWERMETER_MAIN_H

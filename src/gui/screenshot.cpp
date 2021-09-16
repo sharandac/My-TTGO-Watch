@@ -19,34 +19,66 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <endian.h>
 #include "config.h"
+#include <endian.h>
 #include "screenshot.h"
-
 #include "utils/alloc.h"
 #include "gui/png_decoder/lv_png.h"
 
-static RAW_RGB *raw_rgb;
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
+static raw_img_grey_t *raw_grey;
+static raw_img_rgb_t *raw_rgb;
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p );
 
 void screenshot_setup( void ) {
+    raw_grey = NULL;
     raw_rgb = NULL;
 }
 
 void screenshot_take( void ) {
     lv_disp_drv_t driver;
     lv_disp_t *system_disp;
-
-    log_i("take screenshot");
+    
+    lv_img_cache_set_size( 1 );
+    lv_img_cache_set_size( 256 );
     /**
      * allocate screenshot memory
      */
-    raw_rgb = (RAW_RGB*)MALLOC( sizeof( RAW_RGB ) );
-    if ( raw_rgb == NULL ) {
-        log_e("screenshot malloc failed");
-        return;
-    }
+    #if defined( MONOCHROME ) || defined( MONOCHROME_4BIT ) || defined( MONOCHROME_EINK )
+        if ( !raw_grey ) {
+            raw_grey = (raw_img_grey_t*)MALLOC( sizeof( raw_img_grey_t ) );
+            if ( raw_grey == NULL ) {
+                log_e("screenshot malloc failed");
+                return;
+            }
+        }
+    #else
+        if ( !raw_rgb ) {
+            raw_rgb = (raw_img_rgb_t*)MALLOC( sizeof( raw_img_rgb_t ) );
+            if ( raw_rgb == NULL ) {
+                log_e("screenshot malloc failed");
+                return;
+            }
+        }
+    #endif
+
+    log_i("take screenshot");
     /**
      * redirect display driver
      */
@@ -62,30 +94,55 @@ void screenshot_save( void ) {
     /**
      * check if screenshot memory allocated
      */
-    if ( raw_rgb == NULL ) {
+    if ( raw_grey == NULL && raw_rgb == NULL ) {
         log_e("no screenshot memory allocated");
         return;
     }
     /**
+     * genrate local filename + path
+     */
+    char filename[256] = SCREENSHOT_FILE_NAME;
+#ifdef NATIVE_64BIT
+    if ( getenv("HOME") )
+        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, SCREENSHOT_FILE_NAME );
+#endif
+    /**
      * delete old screenshot
      */
-    remove( SCREENSHOT_FILE_NAME );
+    remove( filename );
     /**
      * open new screenshoot file and write them
      */
-    lv_rgba_as_png( SCREENSHOT_FILE_NAME, (const uint8_t*)raw_rgb, 240, 240 );
-    log_i("save screenshot");
-    /**
-     * free screenshot memory
-     */
-    free( raw_rgb );
+    if ( raw_grey ) {
+        log_i("save 8bit grey screenshot");
+        /**
+         * save img buffer as png
+         */
+        lv_8grey_as_png( filename, (const uint8_t*)raw_grey, RES_X_MAX, RES_Y_MAX );
+        /**
+         * free screenshot memory
+         */
+        free( raw_grey );
+        raw_grey = NULL;
+    }
+    if ( raw_rgb ) {
+        log_i("save rgba screenshot");
+        /**
+         * save img buffer as png
+         */
+        lv_rgb_as_png( SCREENSHOT_FILE_NAME, (const uint8_t*)raw_rgb, RES_X_MAX, RES_Y_MAX );
+        /**
+         * free screenshot memory
+         */
+        free( raw_rgb );
+        raw_rgb = NULL;
+    }
 }
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {
 
     uint32_t x, y;
-    uint8_t r,g,b;
-    uint16_t *data = (uint16_t *)color_p;
+    lv_color_t *color = color_p;
     /**
      * check if screenshot memory allocated
      */
@@ -98,15 +155,33 @@ static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *are
      */
     for(y = area->y1; y <= area->y2; y++) {
         for(x = area->x1; x <= area->x2; x++) {
-            r = ( bswap16( *data ) & 0xf800 ) >> 8;
-            g = ( bswap16( *data ) & 0x07E0 ) >> 3;
-            b = ( bswap16( *data ) & 0x001F ) << 3;
-            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].r = r;
-            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].g = g;
-            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].b = b;
-            raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].a = 255;
-            data++;
+            uint8_t r,g,b;
+            switch( LV_COLOR_DEPTH ) {
+                case 8:     r = LV_COLOR_GET_R( *color ) << 5;
+                            g = LV_COLOR_GET_G( *color ) << 5;
+                            b = LV_COLOR_GET_B( *color ) << 6;
+                            break;
+                case 16:    r = LV_COLOR_GET_R( *color ) << 3;
+                            g = LV_COLOR_GET_G( *color ) << 2;
+                            b = LV_COLOR_GET_B( *color ) << 3;
+                            break;
+                case 32:    r = LV_COLOR_GET_R( *color );
+                            g = LV_COLOR_GET_G( *color );
+                            b = LV_COLOR_GET_B( *color );
+                            break;
+                default:    r = g = b = 0;
+                            break;
+            }
+            if ( raw_grey ) {
+                raw_grey->data[ ( y * lv_disp_get_hor_res( NULL ) ) + x ].grey = lv_color_brightness( *color );
+            }
+            if ( raw_rgb ) {
+                raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].r = r;
+                raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].g = g;
+                raw_rgb->data[ y * lv_disp_get_hor_res( NULL ) + x ].b = b;
+            }
+            color++;
         }
-    } 
+    }
     lv_disp_flush_ready(disp_drv);
 }

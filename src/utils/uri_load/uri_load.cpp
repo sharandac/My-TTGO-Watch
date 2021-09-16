@@ -19,11 +19,59 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include <HTTPClient.h>
-#include <SPIFFS.h>
-
 #include "uri_load.h"
 #include "utils/alloc.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include <string.h>
+    #include <string>
+    #include <curl/curl.h>
+
+    /**
+     * curl memory controll structure
+     */
+    struct MemoryStruct {
+        char *memory;
+        size_t size;
+    };
+    /**
+     * curl memory write callback function
+     */
+    static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+        size_t realsize = size * nmemb;
+        struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+        
+        char *ptr = (char*)REALLOC(mem->memory, mem->size + realsize + 1);
+        if(!ptr) {
+            /* out of memory! */
+            printf("not enough memory (realloc returned NULL)\n");
+            return 0;
+        }
+        
+        mem->memory = ptr;
+        memcpy(&(mem->memory[mem->size]), contents, realsize);
+        mem->size += realsize;
+        mem->memory[mem->size] = 0;
+        
+        return realsize;
+    }
+
+    using namespace std;
+    #define String string
+#else
+    #include <HTTPClient.h>
+    #include <SPIFFS.h>
+#endif
 
 uri_load_dsc_t *uri_load_create_dsc( void );
 void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri );
@@ -41,8 +89,11 @@ uri_load_dsc_t *uri_load_to_ram( const char *uri, progress_cb_t *progresscb ) {
      * 
      */
     if ( uri_load_dsc ) {
+#ifdef NATIVE_64BIT
+        URI_LOAD_LOG("uri_load_dsc: alloc %ld bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+#else
         URI_LOAD_LOG("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
-        /**
+#endif        /**
          * set progress call back function
          */
         uri_load_dsc->progresscb = progresscb;
@@ -99,7 +150,11 @@ bool uri_load_to_file( const char *uri, const char *path, const char *dest_filen
      * 
      */
     if ( uri_load_dsc ) {
+#ifdef NATIVE_64BIT
+        URI_LOAD_LOG("uri_load_dsc: alloc %ld bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+#else
         URI_LOAD_LOG("uri_load_dsc: alloc %d bytes at %p", sizeof( uri_load_dsc_t ), uri_load_dsc );
+#endif
         /**
          * set progress call back function
          */
@@ -233,6 +288,81 @@ bool uri_load_to_file( const char *uri, const char *path, const char *dest_filen
 }
 
 uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
+#ifdef NATIVE_64BIT
+    if ( uri_load_dsc ) {
+        CURL *curl_handle;
+        CURLcode res;
+        struct MemoryStruct chunk;
+
+        chunk.memory = (char*)malloc(1);  /* will be grown as needed by the realloc above */
+        chunk.size = 0;    /* no data at this point */
+
+        curl_global_init(CURL_GLOBAL_ALL);
+        /**
+         * init the curl session
+         */
+        curl_handle = curl_easy_init();
+        /**
+         * specify URL to get
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_URL, uri_load_dsc->uri );
+        /**
+         * send all data to this function 
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback );
+        /**
+         * we pass our 'chunk' struct to the callback function
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_WRITEDATA, (void *)&chunk );
+        /**
+         * some servers don't like requests that are made without a user-agent
+         * field, so we provide one
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0" );
+        /**
+         * get it!
+         */
+        res = curl_easy_perform( curl_handle );
+        /*
+        * check for errors
+        */
+        if( res != CURLE_OK ) {
+            log_e( "curl_easy_perform() failed: %s\n", curl_easy_strerror( res ) );
+            uri_load_free_all( uri_load_dsc );
+            uri_load_dsc = NULL;
+        }
+        else {
+            /*
+             * Do something nice with it!
+             */
+            uri_load_dsc->data = (uint8_t *)chunk.memory;
+            uri_load_dsc->size = chunk.size;
+        }
+        /**
+         * cleanup curl stuff
+         */
+        curl_easy_cleanup( curl_handle );
+        /**
+         * we're done with libcurl, so clean it up
+         */
+        curl_global_cleanup();
+    }
+
+    if ( uri_load_dsc ) {
+        /**
+         * add a char to terminate strings
+         */
+        uint8_t *ptr = (uint8_t*)REALLOC( uri_load_dsc->data , uri_load_dsc->size + 1 );
+        if( !ptr ) {
+            log_e("no memory left");
+            while( 1 );
+        }
+        uri_load_dsc->data = ptr;
+        ptr += uri_load_dsc->size;
+        *ptr = '\0';
+    }
+
+#else
     const char * headerKeys[] = {"location", "redirect", "Content-Type", "Content-Length", "Content-Disposition" };
     const size_t numberOfHeaders = 5;
     /**
@@ -358,10 +488,94 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
     else {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
+#endif
     return( uri_load_dsc );
 }
 
 uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
+#ifdef NATIVE_64BIT
+    if ( uri_load_dsc ) {
+        CURL *curl_handle;
+        CURLcode res;
+        struct MemoryStruct chunk;
+        /**
+         * will be grown as needed by the realloc above
+         * no data at this point
+         */
+        chunk.memory = (char*)malloc( 1 );  
+        chunk.size = 0;
+        /**
+         * global curl init
+         */
+        curl_global_init(CURL_GLOBAL_ALL);
+        /**
+         * init the curl session
+         */
+        curl_handle = curl_easy_init();
+        /**
+         * specify URL to get
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_URL, uri_load_dsc->uri );
+        /**
+         * send all data to this function 
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback );
+        /**
+         * we pass our 'chunk' struct to the callback function
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_WRITEDATA, (void *)&chunk );
+        /**
+         * some servers don't like requests that are made without a user-agent
+         * field, so we provide one
+         */
+        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0" );
+        /**
+         * get it!
+         */
+        res = curl_easy_perform( curl_handle );
+        /*
+        * check for errors
+        */
+        if( res != CURLE_OK ) {
+            URI_LOAD_ERROR_LOG( "curl_easy_perform() failed: %s\n", curl_easy_strerror( res ) );
+            uri_load_free_all( uri_load_dsc );
+            uri_load_dsc = NULL;
+        }
+        else {
+            /*
+            * Now, our chunk.memory points to a memory block that is chunk.size
+            * bytes big and contains the remote file.
+            *
+            * Do something nice with it!
+            */
+            uri_load_dsc->data = (uint8_t *)chunk.memory;
+            uri_load_dsc->size = chunk.size;
+        }
+        /**
+         * cleanup curl stuff
+         */
+        curl_easy_cleanup(curl_handle);
+        /**
+         * we're done with libcurl, so clean it up
+         */
+        curl_global_cleanup();
+    }
+
+    if ( uri_load_dsc ) {
+        /**
+         * add a char to terminate strings
+         */
+        uint8_t *ptr = (uint8_t*)REALLOC( uri_load_dsc->data , uri_load_dsc->size + 1 );
+        if( !ptr ) {
+            URI_LOAD_ERROR_LOG("no memory left");
+            while( 1 );
+        }
+        uri_load_dsc->data = ptr;
+        ptr += uri_load_dsc->size;
+        *ptr = '\0';
+    }
+
+#else
     const char * headerKeys[] = {"location", "redirect", "Content-Type", "Content-Length", "Content-Disposition" };
     const size_t numberOfHeaders = 5;
     /**
@@ -496,6 +710,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
     else {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
     }
+#endif
     return( uri_load_dsc );
 }
 
@@ -508,7 +723,16 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         /**
          * try to open file
          */
+#ifdef NATIVE_64BIT
+        char filepath[512] = "";
+        /**
+         * resolve local filepath on native uni*x maschine
+         */
+        if ( getenv("HOME") )
+            snprintf( filepath, sizeof( filepath ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, strstr( uri_load_dsc->uri, "://" ) + 3 );
+#else
         const char *filepath = strstr( uri_load_dsc->uri, "://" ) + 3;
+#endif
         URI_LOAD_LOG("open file from %s", filepath );
         FILE* file;
         file = fopen( filepath, "rb" );
@@ -534,13 +758,13 @@ uri_load_dsc_t *uri_load_file_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 uri_load_free_all( uri_load_dsc );
                 uri_load_dsc = NULL;
             }
+            fclose( file );
         }
         else {
             URI_LOAD_ERROR_LOG("file open failed");
             uri_load_free_all( uri_load_dsc );
             uri_load_dsc = NULL;
         }
-        fclose( file );
     }
     else {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");
@@ -664,7 +888,11 @@ void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *u
                 /**
                  * copy filename into alloc mamory
                  */
+#ifdef NATIVE_64BIT
+                URI_LOAD_LOG("uri_load_dsc->filename: alloc %ld bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+#else
                 URI_LOAD_LOG("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+#endif
                 strncpy( uri_load_dsc->filename, filename_from_uri, strlen( filename_from_uri ) + 2 );
             }
             else {
@@ -681,7 +909,11 @@ void uri_load_set_filename_from_uri( uri_load_dsc_t *uri_load_dsc, const char *u
                 /**
                  * copy filename into alloc mamory
                  */
+#ifdef NATIVE_64BIT
+                URI_LOAD_LOG("uri_load_dsc->filename: alloc %ld bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+#else
                 URI_LOAD_LOG("uri_load_dsc->filename: alloc %d bytes at %p", strlen( filename_from_uri ), uri_load_dsc->filename );
+#endif
                 strncpy( uri_load_dsc->filename, filename_from_uri, strlen( filename_from_uri ) + 2 );
             }
             else {
@@ -704,7 +936,11 @@ void uri_load_set_url_from_uri( uri_load_dsc_t *uri_load_dsc, const char *uri ) 
             /**
              * copy url into alloc mamory
              */
+#ifdef NATIVE_64BIT
+            URI_LOAD_LOG("uri_load_dsc->uri: alloc %ld bytes at %p", strlen( uri ), uri_load_dsc->uri );
+#else
             URI_LOAD_LOG("uri_load_dsc->uri: alloc %d bytes at %p", strlen( uri ), uri_load_dsc->uri );
+#endif
             strncpy( uri_load_dsc->uri, uri, strlen( uri )  + 2 );
         }
         else {

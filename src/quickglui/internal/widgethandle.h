@@ -8,7 +8,7 @@
 #ifndef WIDGETHANDLE_H_
 #define WIDGETMANAGER_H_
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "../widgets/widget.h"
 
 class WidgetHandle {

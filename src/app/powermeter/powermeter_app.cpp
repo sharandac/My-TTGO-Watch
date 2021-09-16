@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-
 #include "powermeter_app.h"
 #include "powermeter_main.h"
 #include "powermeter_setup.h"
@@ -92,6 +90,9 @@ static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     }    
 }
 
+powermeter_config_t *powermeter_get_config( void ) {
+    return( &powermeter_config );
+}
 
 bool powermeter_add_widget( void ) {
     if ( powermeter_widget == NULL ) {

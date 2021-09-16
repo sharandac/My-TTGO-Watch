@@ -22,8 +22,6 @@
 #ifndef _TIME_SETTINGS_H
     #define _TIME_SETTINGS_H
 
-    #include <TTGO.h>
-
     void time_settings_tile_setup( void );
 
 #endif // _TIME_SETTINGS_H

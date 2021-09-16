@@ -16,10 +16,9 @@
 #ifndef _CALENDAR_OVREVIEW_H
     #define _CALENDAR_OVREVIEW_H
 
-    #include <TTGO.h>
     #define CALENDAR_OVREVIEW_INFO_LOG               log_i
-    #define CALENDAR_OVREVIEW_DEBUG_LOG              log_d
-    #define CALENDAR_OVREVIEW_ERROR_LOG              log_e
+    #define CALENDAR_OVREVIEW_DEBUG_LOG              log_i
+    #define CALENDAR_OVREVIEW_ERROR_LOG              log_i
     
     #define CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS       31
 

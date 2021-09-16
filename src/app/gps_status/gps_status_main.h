@@ -28,7 +28,6 @@
      */
     #define STATUS_HEIGHT 24
 
-    #include <TTGO.h>
     void gps_status_main_setup( uint32_t tile_num );
 
 #endif // _GPS_STATUS_MAIN_H

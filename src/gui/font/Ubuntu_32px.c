@@ -3,7 +3,7 @@
 
 #if !defined(USE_EXTENDED_CHARSET) // Use dafault charset: latin chars only
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 /*******************************************************************************
  * Size: 32 px

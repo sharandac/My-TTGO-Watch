@@ -14,6 +14,10 @@
 #include <errno.h>
 #include <dirent.h>
 #include <unistd.h>
+#include "utils/logging.h"
+#ifdef NATIVE_64BIT
+    #include <pwd.h>
+#endif
 
 /*********************
  *      DEFINES
@@ -123,7 +127,6 @@ static lv_fs_res_t fs_open (lv_fs_drv_t *drv, void *file_p, const char *path, lv
     else if (mode == (LV_FS_MODE_WR | LV_FS_MODE_RD)) flags = "rb+";
 
     /*Make the path relative to the current directory (the projects root folder)*/
-
     char buf[256];
     sprintf(buf, LV_FS_SPIFFS_PATH "/%s", path);
 

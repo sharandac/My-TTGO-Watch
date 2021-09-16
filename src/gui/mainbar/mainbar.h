@@ -22,14 +22,15 @@
 #ifndef _MAINBAR_H
     #define _MAINBAR_H
 
-    #include <TTGO.h>
+    #include "hardware/callback.h"
+    #include "hardware/button.h"
 
     typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
 
-    #define MAINBAR_INFO_LOG               log_d
+    #define MAINBAR_INFO_LOG            log_d
 
     #define MAINBAR_APP_TILE_X_START    0
-    #define MAINBAR_APP_TILE_Y_START    4
+    #define MAINBAR_APP_TILE_Y_START    8
     #define MAINBAR_MAX_HISTORY         16
     #define STATUSBAR_HIDE              true
     #define STATUSBAR_SHOW              false
@@ -51,6 +52,7 @@
         lv_obj_t *tile;                                         /** @brief pointer to the lv tile obj */
         MAINBAR_CALLBACK_FUNC activate_cb;                      /** @brief pointer to a activate function when enter this tile */
         MAINBAR_CALLBACK_FUNC hibernate_cb;                     /** @brief pointer to a hibernate function when leave this tile */
+        CALLBACK_FUNC button_cb;                                /** @brief pointer to a button event function tile is active */
         uint16_t x;                                             /** @brief tile x pos */
         uint16_t y;                                             /** @brief tile y pos */
         const char *id;                                         /** @brief pointer to the tile id */
@@ -134,6 +136,15 @@
      */
     bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb );
     /**
+     * @brief register an activate callback function when enter the tile
+     * 
+     * @param   tile_number     tile number
+     * @param   button_cb       pointer to the button callback function
+     * 
+     * @return  true or false, true means registration was success
+     */
+    bool mainbar_add_tile_button_cb( uint32_t tile_number, CALLBACK_FUNC button_cb );
+    /**
      * @brief
      */
     lv_obj_t *mainbar_obj_create( lv_obj_t *parent );
@@ -145,5 +156,9 @@
      * jump back in tile history
      */
     void mainbar_jump_back( void );
+    /**
+     * @brief clear tile history
+     */
+    void mainbar_clear_history( void );
 
 #endif // _MAINBAR_H

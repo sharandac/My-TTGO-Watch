@@ -8,6 +8,21 @@
 #include "widgetmanager.h"
 #include <config.h>
 #include "utils/alloc.h"
+#include "lvgl.h"
+#include "lv_core/lv_obj.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+        #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
 
 WidgetManager DefaultWidgetManager;
 

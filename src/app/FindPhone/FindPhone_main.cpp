@@ -23,7 +23,6 @@
  * 
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "FindPhone.h"
 #include "FindPhone_main.h"
@@ -42,7 +41,7 @@
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
 
 lv_obj_t *FindPhone_main_tile = NULL;
 lv_obj_t *FindPhone_main_iris = NULL;
@@ -187,7 +186,6 @@ static void exit_FindPhone_main_event_cb( lv_obj_t * obj, lv_event_t event )
 {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-                                        pinMode(13, INPUT); //Leave this tristated when we leave
                                         mainbar_jump_back();
                                         break;
     }
@@ -245,10 +243,10 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
     if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", true) )
     {
         log_i("FindPhone screen active");
-        statusbar_hide(true);
         powermgm_get_event(POWERMGM_STANDBY);          
         powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
         mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF);
+        statusbar_hide(true);
         lv_label_set_text(bluetooth_FindPhone_label, "Looking for me?");
         lv_obj_invalidate(lv_scr_act());
         _FindPhone_WatchFind_task = lv_task_create( FindPhone_WatchFind_task, 1500, LV_TASK_PRIO_MID, NULL );           
@@ -262,7 +260,6 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
             lv_task_del( _FindPhone_WatchFind_task );
             _FindPhone_WatchFind_task = nullptr;
         }            
-        statusbar_hide(false);
         mainbar_jump_back();          
     }
 }

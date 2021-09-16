@@ -1,7 +1,6 @@
 #ifndef _WATCHFACE_MANAGER_H
     #define _WATCHFACE_MANAGER_H
 
-    #include <TTGO.h>
     /**
      * @brief setup watchface manager app, setup and watchface tile
      */

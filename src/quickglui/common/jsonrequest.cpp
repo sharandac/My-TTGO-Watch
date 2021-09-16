@@ -6,7 +6,7 @@
  ****/
 
 #include "jsonrequest.h"
-#include "HTTPClient.h"
+#include "utils/uri_load/uri_load.h"
 
 JsonRequest::JsonRequest(size_t maxJsonBufferSize) : SpiRamJsonDocument(maxJsonBufferSize)
 {
@@ -19,32 +19,34 @@ JsonRequest::~JsonRequest() {
 bool JsonRequest::process(const char* url)
 {
     if (httpcode != -1)
-      clear();
-
-    HTTPClient client;
-
-    client.useHTTP10(true);
-    client.begin(url);
-    client.addHeader("force-unsecure","true");
-    httpcode = client.GET();
+        clear();
 
     time(&now);
     localtime_r(&now, &timeStamp);
-    
-    if (httpcode != 200) {
-        log_e("HTTPClient error %d", httpcode, url);
-        client.end();
-        return false;
-    }
+    /**
+     * load uri file into ram
+     */
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+    /**
+     * if was success, pharse the json
+     */
+    if ( uri_load_dsc ) {
+        httpcode = 200;
 
-    dsError = deserializeJson(*this, client.getStream());
-    if (dsError) {
-        log_e("deserializeJson() failed: %s", dsError.c_str());
-        clear();
-        client.end();
-        return false;
+        dsError = deserializeJson(*this, uri_load_dsc->data );
+        if (dsError) {
+            log_e("deserializeJson() failed: %s", dsError.c_str());
+            clear();
+            return false;
+        }
     }
-    client.end();
+    else {
+        httpcode = -1;
+    }
+    /**
+     * clear uri dsc
+     */
+    uri_load_free_all( uri_load_dsc );
 
     return true;
 }
@@ -58,7 +60,7 @@ String JsonRequest::formatCompletedAt(const char* format)
 
 String JsonRequest::errorString() {
     if (httpcode != 200)
-        return String("HTTP error: ") + httpcode;
+        return String("HTTP error");
     else if (dsError)
         return String(dsError.c_str());
     else

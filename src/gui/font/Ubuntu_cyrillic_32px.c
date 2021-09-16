@@ -4,7 +4,7 @@
 #if defined(USE_EXTENDED_CHARSET) && USE_EXTENDED_CHARSET == CHARSET_CYRILLIC
 
 // 0x20-0xFF, 0x2012-0x2022, 0x401-0x045F, 0x0024, 0x00A3, 0x20AC, 0x00A9, 0x00AB, 0x00BB, 0x00AE, 0x00B0-0x00B4, 0x00D7, 0x2022, 0x2032-0x203A
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 
 /*******************************************************************************
  * Size: 32 px

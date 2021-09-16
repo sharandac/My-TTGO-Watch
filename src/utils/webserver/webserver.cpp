@@ -19,28 +19,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <Update.h>
-#include <SPIFFS.h>
-#include <AsyncTCP.h>
-#include <ESPAsyncWebServer.h>
-#include <SPIFFSEditor.h>
-#include <ESP32SSDP.h>
-
 #include "webserver.h"
 #include "config.h"
-#include "gui/screenshot.h"
-#include "hardware/touch.h"
 
-AsyncWebServer asyncserver( WEBSERVERPORT );
-TaskHandle_t _WEBSERVER_Task;
-AsyncWebHandler mHandler_SPIFFSEditor;
-SPIFFSEditor * mSPIFFSEditor = nullptr;
+#ifdef NATIVE_64BIT
 
+#else
+    #include <WiFi.h>
+    #include <WiFiClient.h>
+    #include <Update.h>
+    #include <SPIFFS.h>
+    #include <FS.h>
+    #include <AsyncTCP.h>
+    #include <ESPAsyncWebServer.h>
+    #include <SPIFFSEditor.h>
+    #include <ESP32SSDP.h>
 
-  static const char* serverIndex =
+    AsyncWebServer asyncserver( WEBSERVERPORT );
+    TaskHandle_t _WEBSERVER_Task;
+    AsyncWebHandler mHandler_SPIFFSEditor;
+    SPIFFSEditor * mSPIFFSEditor = nullptr;
+
+static const char* serverIndex =
     "<!DOCTYPE html>\n <html><head>\n <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
     "\n <script src='/jquery.min.js'></script>"
 
@@ -101,7 +101,6 @@ SPIFFSEditor * mSPIFFSEditor = nullptr;
     "\n </body></html>";
 
 void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final) {
-
   if (!index){
     /*
      * if filename includes spiffs, update the spiffs partition
@@ -141,7 +140,6 @@ void handleUpdate( AsyncWebServerRequest *request, const String& filename, size_
  *
  */
 void asyncwebserver_start(void){
-
   asyncserver.on("/index.htm", HTTP_GET, [](AsyncWebServerRequest *request) {
     String html = (String) "<!DOCTYPE html>"
       "<html>"
@@ -192,8 +190,8 @@ void asyncwebserver_start(void){
                   "<b>Psram size: </b>" + ESP.getPsramSize() + "<br>" +
                   "<b>Psram free: </b>" + ESP.getFreePsram() + "<br>" +
 
-                  "<br><b><u>System</u></b><br>" +
-                  "\t<b>Battery voltage: </b>" + TTGOClass::getWatch()->power->getBattVoltage() / 1000 + " Volts" + "<br>" +
+//                  "<br><b><u>System</u></b><br>" +
+//                  "\t<b>Battery voltage: </b>" + TTGOClass::getWatch()->power->getBattVoltage() / 1000 + " Volts" + "<br>" +
 
                   "\t<b>Uptime: </b>" + millis() / 1000 + "<br>" +
                   "<br><b><u>Chip</u></b>" +
@@ -236,6 +234,7 @@ void asyncwebserver_start(void){
     request->send(200, "text/html", html);
   });
 
+/*
   asyncserver.on("/battery", HTTP_GET, [](AsyncWebServerRequest *request) {
     TTGOClass * ttgo = TTGOClass::getWatch();
 
@@ -291,7 +290,7 @@ void asyncwebserver_start(void){
                   "</body></html>";
     request->send(200, "text/html", html);
   });
-
+*/
   asyncserver.on("/network", HTTP_GET, [](AsyncWebServerRequest *request) {
     String html = (String) "<html><head><meta charset=\"utf-8\"></head><body><h3>Network</h3>" +
                   "<b>IP Addr: </b>" + WiFi.localIP().toString() + "<br>" +
@@ -307,13 +306,13 @@ void asyncwebserver_start(void){
                   "</body></html>";
     request->send(200, "text/html", html);
   });
-
+/*
   asyncserver.on("/shot", HTTP_GET, [](AsyncWebServerRequest * request) {
     request->send(200, "text/plain", "screen is taken\r\n" );
     screenshot_take();
     screenshot_save();
   });
-
+*/
   //start FsEditor with SPIFFS
   setFsEditorFilesystem(SPIFFS);
 
@@ -453,18 +452,18 @@ void asyncwebserver_start(void){
 }
 
 void asyncwebserver_end(void) {
-  SSDP.end();
-  asyncserver.end();
-  log_d("disable webserver and ssdp");
+    SSDP.end();
+    asyncserver.end();
+    log_d("disable webserver and ssdp");
 }
 
-void setFsEditorFilesystem(const fs::FS& fs)
-{
+void setFsEditorFilesystem(const fs::FS& fs) {
     log_d("asyncserver.removeHandler");
     asyncserver.removeHandler(&mHandler_SPIFFSEditor);
     if(mSPIFFSEditor!=nullptr)
-      delete mSPIFFSEditor;  
+        delete mSPIFFSEditor;  
     mSPIFFSEditor = new SPIFFSEditor(fs);
     log_d("asyncserver.addHandler");
     mHandler_SPIFFSEditor = asyncserver.addHandler(mSPIFFSEditor);
 }
+#endif

@@ -24,19 +24,25 @@
 
     #include "config.h"
 
-    #define BLOCK_SIZE              8192
     #define SCREENSHOT_FILE_NAME    "/spiffs/screen.png"
 
     typedef struct {
         uint8_t r;
         uint8_t g;
         uint8_t b;
-        uint8_t a;
     } rgba_t;
 
-    struct RAW_RGB {
-        rgba_t data[ 240 * 240 ];
-    };
+    typedef struct {
+        uint8_t grey;
+    } grey_t;
+
+    typedef struct {
+        rgba_t data[ RES_X_MAX * RES_Y_MAX ];
+    } raw_img_rgb_t;
+
+    typedef struct {
+        grey_t data[ RES_X_MAX * RES_Y_MAX ];
+    } raw_img_grey_t;
 
     /**
      * @brief setup screenshot

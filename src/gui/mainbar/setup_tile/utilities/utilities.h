@@ -22,8 +22,6 @@
 #ifndef _UTILITIES_H
     #define _UTILITIES_H
 
-    #include <TTGO.h>
-
     void utilities_tile_setup( void );
 
 #endif // _UTILITIES_H

@@ -20,15 +20,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include "quickglui/quickglui.h"
 
 #include "osmmap_app.h"
 #include "osmmap_app_main.h"
 #include "app/osmmap/config/osmmap_config.h"
 
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
-#include "gui/mainbar/setup_tile/watchface/watchface_tile.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -46,12 +43,37 @@
 #include "utils/osm_map/osm_map.h"
 #include "utils/json_psram_allocator.h"
 
-extern const uint8_t osm_server_json_start[] asm("_binary_src_utils_osm_map_osmtileserver_json_start");
-extern const uint8_t osm_server_json_end[] asm("_binary_src_utils_osm_map_osmtileserver_json_end");
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+    #include "utils/osm_map/osmtileserver.h"
 
-EventGroupHandle_t osmmap_event_handle = NULL;                  /** @brief osm tile image update event queue */
-TaskHandle_t _osmmap_update_Task;                               /** @brief osm tile image update Task */
-TaskHandle_t _osmmap_load_ahead_Task;                           /** @brief osm tile image update Task */
+    using namespace std;
+    #define String string
+
+    uint32_t eventmask = 0;
+    const uint8_t * osm_server_json_start = osmtileserver_json;
+#else
+    #include <Arduino.h>
+    #include <FS.h>
+    #include <SPIFFS.h>
+    #include "gui/mainbar/setup_tile/watchface/watchface_tile.h"
+
+    EventGroupHandle_t osmmap_event_handle = NULL;                  /** @brief osm tile image update event queue */
+    TaskHandle_t _osmmap_update_Task;                               /** @brief osm tile image update Task */
+    TaskHandle_t _osmmap_load_ahead_Task;                           /** @brief osm tile image update Task */
+
+    extern const uint8_t osm_server_json_start[] asm("_binary_src_utils_osm_map_osmtileserver_json_start");
+    extern const uint8_t osm_server_json_end[] asm("_binary_src_utils_osm_map_osmtileserver_json_end");
+#endif
+
 lv_task_t *osmmap_main_tile_task;                               /** @brief osm active/inactive task for show/hide user interface */
 
 lv_obj_t *osmmap_app_main_tile = NULL;                          /** @brief osm main tile obj */
@@ -122,6 +144,7 @@ bool osmmap_gpsctl_event_cb( EventBits_t event, void *arg );
 void osmmap_add_tile_server_list( lv_obj_t *layers_list );
 void osmmap_activate_cb( void );
 void osmmap_hibernate_cb( void );
+bool osmmap_button_cb( EventBits_t event, void *arg );
 
 void osmmap_app_main_setup( uint32_t tile_num ) {
     /**
@@ -130,6 +153,10 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     osmmap_config.load();
     osmmap_location = osm_map_create_location_obj();
     osmmap_location->load_ahead = osmmap_config.load_ahead;
+#if defined( M5PAPER )
+    osmmap_location->tilex_dest_px_res = 540;
+    osmmap_location->tiley_dest_px_res = 540;
+#endif
     /**
      * geht app tile
      */
@@ -147,14 +174,17 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_color(&osmmap_app_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
     lv_obj_t *osmmap_cont = lv_obj_create( osmmap_app_main_tile, NULL );
-    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
+    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_hor_res( NULL ) );
     lv_obj_add_style( osmmap_cont, LV_OBJ_PART_MAIN, &osmmap_app_main_style );
     lv_obj_align( osmmap_cont, osmmap_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
 
     osmmap_app_tile_img = lv_img_create( osmmap_cont, NULL );
     lv_obj_set_width( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
-    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_ver_res( NULL ) );
+    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
     lv_img_set_src( osmmap_app_tile_img, osm_map_get_no_data_image() );
+#ifdef M5PAPER
+    lv_img_set_zoom( osmmap_app_tile_img, 540 );
+#endif
     lv_obj_align( osmmap_app_tile_img, osmmap_cont, LV_ALIGN_CENTER, 0, 0 );
 
     osmmap_app_pos_img = lv_img_create( osmmap_cont, NULL );
@@ -246,14 +276,19 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
      */
     mainbar_add_tile_activate_cb( tile_num, osmmap_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmmap_hibernate_cb );
+    mainbar_add_tile_button_cb( tile_num, osmmap_button_cb );
     gpsctl_register_cb( GPSCTL_SET_APP_LOCATION | GPSCTL_UPDATE_LOCATION, osmmap_gpsctl_event_cb, "osm" );
     touch_register_cb( TOUCH_UPDATE , osmmap_app_touch_event_cb, "osm touch" );
+#ifdef NATIVE_64BIT
+    eventmask = 0;
+#else
     osmmap_event_handle = xEventGroupCreate();
+#endif
     osmmap_main_tile_task = lv_task_create( osmmap_main_tile_update_task, 250, LV_TASK_PRIO_MID, NULL );
 }
 
 bool osmmap_app_touch_event_cb( EventBits_t event, void *arg ) {
-        switch( event ) {
+    switch( event ) {
         case( TOUCH_UPDATE ):
             if ( osmmap_app_active ) {
                 last_touch = millis();
@@ -261,6 +296,20 @@ bool osmmap_app_touch_event_cb( EventBits_t event, void *arg ) {
             break;
     }
     return( false );
+}
+
+bool osmmap_button_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_LEFT:   osm_map_zoom_in( osmmap_location );
+                            if ( osmmap_app_active )
+                                osmmap_update_request();
+                            break;
+        case BUTTON_RIGHT:  osm_map_zoom_out( osmmap_location );
+                            if ( osmmap_app_active )
+                                osmmap_update_request();
+                            break;
+    }
+    return( true );
 }
 
 void osmmap_app_set_left_right_hand( bool left_right_hand ) {
@@ -357,6 +406,7 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
     /*
      * check if maintile alread initialized
      */
+/*
     if ( osmmap_app_active ) {
         if ( last_touch + 5000 < millis() ) {
             lv_obj_set_hidden( osmmap_layers_btn, true );
@@ -389,6 +439,11 @@ void osmmap_main_tile_update_task( lv_task_t * task ) {
             lv_obj_set_hidden( osmmap_east_btn, false );
         }
     }
+*/
+#ifdef NATIVE_64BIT
+    osmmap_load_ahead_Task( NULL );
+    osmmap_update_Task( NULL );
+#endif
 }
 
 bool osmmap_gpsctl_event_cb( EventBits_t event, void *arg ) {
@@ -429,15 +484,37 @@ void osmmap_update_request( void ) {
     /**
      * check if another osm tile image update is running
      */
+#ifdef NATIVE_64BIT
+    if ( eventmask & OSM_APP_UPDATE_REQUEST ) {
+        return;
+    }
+    else {
+        eventmask |= OSM_APP_UPDATE_REQUEST;
+    }
+#else
     if ( xEventGroupGetBits( osmmap_event_handle ) & OSM_APP_UPDATE_REQUEST ) {
         return;
     }
     else {
         xEventGroupSetBits( osmmap_event_handle, OSM_APP_UPDATE_REQUEST );
     }
+#endif
 }
 
 void osmmap_load_ahead_Task( void * pvParameters ) {
+#ifdef NATIVE_64BIT
+    /**
+     * check for  load ahead request
+     */
+    if ( eventmask & OSM_APP_LOAD_AHEAD_REQUEST ) {
+        /**
+         * check if load ahead need or finsh
+         */
+        OSMMAP_APP_LOG("start load ahead update handler");
+        eventmask &= ~OSM_APP_LOAD_AHEAD_REQUEST ;
+        while ( osm_map_load_tiles_ahead( osmmap_location ) ) {}
+    }
+#else
     OSMMAP_APP_INFO_LOG("start osm map load ahead background task, heap: %d", ESP.getFreeHeap() );
     while( true ) {
         /**
@@ -469,9 +546,42 @@ void osmmap_load_ahead_Task( void * pvParameters ) {
     }
     OSMMAP_APP_INFO_LOG("finsh osm map load ahead background task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );    
+#endif
 }
 
 void osmmap_update_Task( void * pvParameters ) {
+#ifdef NATIVE_64BIT
+    /**
+     * check if a tile image update is requested
+     */
+    if ( eventmask & OSM_APP_UPDATE_REQUEST ) {
+        /**
+         * check if a tile image update is required and update them
+         */
+        OSMMAP_APP_LOG("start osm map update");
+        if( osm_map_update( osmmap_location ) ) {
+            if ( osm_map_get_tile_image( osmmap_location ) ) {
+                lv_img_set_src( osmmap_app_tile_img, osm_map_get_tile_image( osmmap_location ) );
+            }
+            lv_obj_align( osmmap_app_tile_img, lv_obj_get_parent( osmmap_app_tile_img ), LV_ALIGN_CENTER, 0 , 0 );
+            eventmask |= OSM_APP_LOAD_AHEAD_REQUEST;
+        }
+        /**
+         * update postion point on the tile image when is valid
+         */
+        if ( osmmap_location->tilexy_pos_valid ) {
+            lv_obj_align( osmmap_app_pos_img, lv_obj_get_parent( osmmap_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osmmap_location->tilex_pos - 8 , osmmap_location->tiley_pos - 8 );
+            lv_obj_set_hidden( osmmap_app_pos_img, false );
+        }
+        else {
+            lv_obj_set_hidden( osmmap_app_pos_img, true );
+        }
+        /**
+         * clear update request flag
+         */
+        eventmask &= ~OSM_APP_UPDATE_REQUEST;
+    }
+#else
     OSMMAP_APP_INFO_LOG("start osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     while( true ) {
         /**
@@ -518,6 +628,7 @@ void osmmap_update_Task( void * pvParameters ) {
     }
     OSMMAP_APP_INFO_LOG("finsh osm map tile background update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );    
+#endif
 }
 
 static void exit_osmmap_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -727,8 +838,12 @@ void osmmap_activate_cb( void ) {
     /**
      * save block show messages state
      */
+#ifdef NATIVE_64BIT
+
+#else
     osmmap_block_watchface = watchface_get_enable_tile_after_wakeup();
     watchface_enable_tile_after_wakeup( false );
+#endif
     /**
      * save block show messages state
      */
@@ -748,6 +863,9 @@ void osmmap_activate_cb( void ) {
      */
     osmmap_app_active = true;
     last_touch = millis();
+#ifdef NATIVE_64BIT
+
+#else
     /**
      * start background osm tile image update Task
      */
@@ -765,7 +883,7 @@ void osmmap_activate_cb( void ) {
                     NULL,                            /* Task input parameter */
                     1,                               /* Priority of the task */
                     &_osmmap_load_ahead_Task );  /* Task handle. */
-
+#endif
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
     powermgm_set_perf_mode();
@@ -780,7 +898,11 @@ void osmmap_hibernate_cb( void ) {
     gpsctl_set_autoon( osmmap_gps_state );
     wifictl_set_autoon( osmmap_wifi_state );
     gpsctl_set_enable_on_standby( osmmap_gps_on_standby_state );
+#ifdef NATIVE_64BIT
+
+#else
     watchface_enable_tile_after_wakeup( osmmap_block_watchface );
+#endif
     /**
      * clear cache
      */
@@ -792,7 +914,11 @@ void osmmap_hibernate_cb( void ) {
     /**
      * stop background osm tile image update Task
      */
+#ifdef NATIVE_64BIT
+    eventmask |= OSM_APP_TASK_EXIT_REQUEST;
+#else
     xEventGroupSetBits( osmmap_event_handle, OSM_APP_TASK_EXIT_REQUEST );
+#endif
     powermgm_set_normal_mode();
     /**
      * save config

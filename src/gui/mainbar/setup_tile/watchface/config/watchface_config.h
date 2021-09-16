@@ -24,6 +24,16 @@
 
     #include "utils/basejsonconfig.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/io.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
+
     #define WATCHFACE_JSON_COFIG_FILE           "/watchface.json"   /** @brief defines json config file name */
     /**
      * define all theme download and compressed theme file

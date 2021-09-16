@@ -22,8 +22,6 @@
 #ifndef _CORONA_APP_DETECTOR_H
     #define _CORONA_APP_DETECTOR_H
 
-    #include <TTGO.h>
-
     void corona_app_detector_setup( void );
     uint32_t corona_app_detector_get_main_tile_num( void );
     uint32_t corona_app_detector_get_setup_tile_num( void );

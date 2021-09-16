@@ -22,8 +22,6 @@
 #ifndef _SAILING_MAIN_H
     #define _SAILING_MAIN_H
 
-    #include <TTGO.h>
-
     void sailing_main_setup( uint32_t tile_num );
 
 #endif // _SAILING_MAIN_H

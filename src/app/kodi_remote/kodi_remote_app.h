@@ -22,7 +22,6 @@
 #ifndef _KODI_REMOTE_H
     #define _KODI_REMOTE_H
 
-    #include <TTGO.h>
     #include "gui/icon.h"
 
     #define KODI_REMOTE_JSON_CONFIG_FILE        "/kodi_remote.json"

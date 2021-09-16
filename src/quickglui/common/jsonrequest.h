@@ -11,6 +11,16 @@
 #include "ArduinoJson.h"
 #include "utils/json_psram_allocator.h"
 
+#ifdef NATIVE_64BIT
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
 /**
  * @brief HTTP request wrapper with internal JSON parser.
  * Reponse should be in JSON format

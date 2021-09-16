@@ -21,11 +21,15 @@
  */
 
 #include "config.h"
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
-
 #include "widget.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 icon_t *widget_register( const char* widgetname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
 

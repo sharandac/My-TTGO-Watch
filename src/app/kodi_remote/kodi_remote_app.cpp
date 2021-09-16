@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "kodi_remote_app.h"
 #include "kodi_remote_app_main.h"
@@ -32,6 +31,25 @@
 #include "gui/widget.h"
 
 #include "utils/json_psram_allocator.h"
+
+#ifdef NATIVE_64BIT
+    #include <iostream>
+    #include <fstream>
+    #include <string.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <pwd.h>
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+    #include <FS.h>
+    #include <SPIFFS.h>
+#endif
 
 kodi_remote_config_t kodi_remote_config;
 
@@ -109,12 +127,40 @@ kodi_remote_config_t *kodi_remote_get_config( void ) {
 }
 
 void kodi_remote_load_config( void ) {
+#ifdef NATIVE_64BIT
+    std::fstream file;
+    const char *homedir;
+    char fileName[256] = "";
+    char configFileName[] = KODI_REMOTE_JSON_CONFIG_FILE;
+    /**
+     * get home dir and build full path to file
+     */
+    if ( ( homedir = getenv("HOME") ) == NULL ) {
+        homedir = getpwuid(getuid())->pw_dir;
+    }
+    if ( configFileName[0] == '/')
+        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs%s", homedir, configFileName );
+    else
+    {
+        fileName[0] = '/';
+        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs/%s", homedir, configFileName );
+    }
+
+    file.open( fileName, std::fstream::in );
+#else
     fs::File file = SPIFFS.open( KODI_REMOTE_JSON_CONFIG_FILE, FILE_READ );
+#endif
     if (!file) {
         log_e("Can't open file: %s!", KODI_REMOTE_JSON_CONFIG_FILE );
     }
     else {
+#ifdef NATIVE_64BIT
+        file.seekg( 0, file.end );
+        int filesize = file.tellg();
+        file.seekg( 0, file.beg );
+#else
         int filesize = file.size();
+#endif
         SpiRamJsonDocument doc( filesize * 4 );
 
         DeserializationError error = deserializeJson( doc, file );
@@ -122,9 +168,9 @@ void kodi_remote_load_config( void ) {
             log_e("update check deserializeJson() failed: %s", error.c_str() );
         }
         else {
-            strlcpy( kodi_remote_config.host, doc["host"], sizeof( kodi_remote_config.host ) );
-            strlcpy( kodi_remote_config.user, doc["user"], sizeof( kodi_remote_config.user ) );
-            strlcpy( kodi_remote_config.pass, doc["pass"], sizeof( kodi_remote_config.pass ) );
+            strncpy( kodi_remote_config.host, doc["host"], sizeof( kodi_remote_config.host ) );
+            strncpy( kodi_remote_config.user, doc["user"], sizeof( kodi_remote_config.user ) );
+            strncpy( kodi_remote_config.pass, doc["pass"], sizeof( kodi_remote_config.pass ) );
             kodi_remote_config.port = (uint16_t)doc["port"];
         }
         doc.clear();
@@ -133,8 +179,29 @@ void kodi_remote_load_config( void ) {
 }
 
 void kodi_remote_save_config( void ) {
-    fs::File file = SPIFFS.open( KODI_REMOTE_JSON_CONFIG_FILE, FILE_WRITE );
+#ifdef NATIVE_64BIT
+    std::fstream file;
+    const char *homedir;
+    char fileName[256] = "";
+    char configFileName[] = KODI_REMOTE_JSON_CONFIG_FILE;
+    /**
+     * get home dir and build full path to file
+     */
+    if ( ( homedir = getenv("HOME") ) == NULL ) {
+        homedir = getpwuid(getuid())->pw_dir;
+    }
+    if ( configFileName[0] == '/')
+        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs%s", homedir, configFileName );
+    else
+    {
+        fileName[0] = '/';
+        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs/%s", homedir, configFileName );
+    }
 
+    file.open( fileName, std::fstream::out );
+#else
+    fs::File file = SPIFFS.open( KODI_REMOTE_JSON_CONFIG_FILE, FILE_WRITE );
+#endif
     if (!file) {
         log_e("Can't open file: %s!", KODI_REMOTE_JSON_CONFIG_FILE );
     }

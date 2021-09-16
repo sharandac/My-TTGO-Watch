@@ -32,6 +32,17 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+#endif
+
 lv_obj_t *powermeter_setup_tile = NULL;
 lv_style_t powermeter_setup_style;
 uint32_t powermeter_setup_tile_num;
@@ -58,7 +69,7 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( powermeter_setup_tile, LV_OBJ_PART_MAIN, &powermeter_setup_style );
 
     lv_obj_t *header = wf_add_settings_header( powermeter_setup_tile, "powermeter setup" );
-    //lv_obj_align( header, powermeter_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    lv_obj_align( header, powermeter_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     lv_obj_t *powermeter_topic_cont = lv_obj_create( powermeter_setup_tile, NULL );
     lv_obj_set_size( powermeter_topic_cont, lv_disp_get_hor_res( NULL ) , 37);
@@ -116,7 +127,7 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
 static void powermeter_setup_hibernate_callback ( void ) {
     keyboard_hide();
     powermeter_config_t *powermeter_config = powermeter_get_config();
-    strlcpy( powermeter_config->topic, lv_textarea_get_text( powermeter_topic_textfield ), sizeof( powermeter_config->topic ) );
+    strncpy( powermeter_config->topic, lv_textarea_get_text( powermeter_topic_textfield ), sizeof( powermeter_config->topic ) );
     powermeter_config->save();
 }
 

@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "HTTPClient.h"
-#include <TTGO.h>
 
 #include "kodi_remote_app.h"
 #include "kodi_remote_app_main.h"
@@ -36,7 +34,19 @@
 #include "hardware/wifictl.h"
 #include "utils/json_psram_allocator.h"
 
-static const char* buttons[11] = {"Info","Up","Context","\n","Left","OK","Right","\n","Back","Down","Exit"};
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+    #include "HTTPClient.h"
+#endif
+
+static const char* buttons[] = {"Info","Up","Context","\n","Left","OK","Right","\n","Back","Down","Exit",""};
 bool kodi_remote_state = false;
 volatile bool kodi_remote_open_state = false;
 volatile bool kodi_remote_play_state = false;
@@ -100,7 +110,7 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_hibernate_cb( tile_num, kodi_remote_setup_hibernate_callback );
     kodi_remote_player_main_tile = mainbar_get_tile_obj( tile_num );
     lv_style_copy( &kodi_remote_player_main_style, ws_get_mainbar_style() );
-
+    
     lv_style_copy( &kodi_remote_player_main_style, ws_get_mainbar_style() );
     lv_style_set_text_font( &kodi_remote_player_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( kodi_remote_player_main_tile, LV_OBJ_PART_MAIN, &kodi_remote_player_main_style );
@@ -173,8 +183,9 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &kodi_remote_control_button_matrix_style);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &kodi_remote_control_button_style);
 	lv_obj_set_pos(button_matrix, 0, 0);
-	lv_obj_set_size(button_matrix, 240, 190);
-	lv_btnmatrix_set_map(button_matrix, buttons);
+	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - 50 );
+
+	lv_btnmatrix_set_map(button_matrix, buttons );
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_obj_set_event_cb(button_matrix, kodi_remote_button_event_cb);
 
@@ -464,8 +475,12 @@ void kodi_remote_get_active_player_item() {
                         uint8_t num = 0;
                         String artistList;
                         for (JsonVariant artist : artists) {
-                            if (num > 0) artistList.concat(", ");
-                            artistList.concat(artist.as<const char*>());
+                            if (num > 0) {
+//                                artistList.concat(", ");
+                                artistList += ", ";
+                            }
+//                            artistList.concat( artist.as<const char*>() );
+                            artistList += artist.as<const char*>();
                             num++;
                         }
                         
@@ -516,6 +531,9 @@ int kodi_remote_publish(const char* method, const char* params, SpiRamJsonDocume
     char url[128] = "";
     snprintf( url, sizeof( url ), "http://%s:%d/jsonrpc", kodi_remote_config->host, kodi_remote_config->port );
 
+#ifdef NATIVE_64BIT
+    return( 200 );
+#else
     kodi_remote_id++;
     char payload[256] = "";
     snprintf( payload, sizeof( payload ), "{ \"jsonrpc\": \"2.0\", \"method\": \"%s\", \"params\": %s, \"id\": \"%d\" }", method, params, kodi_remote_id );
@@ -538,4 +556,5 @@ int kodi_remote_publish(const char* method, const char* params, SpiRamJsonDocume
 
     publish_client.end();
     return httpcode;
+#endif
 }

@@ -16,8 +16,6 @@
 #ifndef _WIFIMON_APP_H
     #define _WIFIMON_APP_H
 
-    #include <TTGO.h>
-
     void wifimon_app_setup( void );
     uint32_t wifimon_app_get_app_main_tile_num( void );
 

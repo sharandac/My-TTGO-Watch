@@ -35,16 +35,15 @@
 #include "hardware/display.h"
 #include "hardware/powermgm.h"
 #include "hardware/rtcctl.h"
+#include "hardware/button.h"
 
 #include "utils/alloc.h"
 
-#include "setup_tile/battery_settings/battery_settings.h"
-#include "setup_tile/wlan_settings/wlan_settings.h"
-#include "setup_tile/move_settings/move_settings.h"
-#include "setup_tile/display_settings/display_settings.h"
-#include "setup_tile/time_settings/time_settings.h"
-#include "setup_tile/update/update.h"
-
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 mainbar_history_t mainbar_history;
 
@@ -53,12 +52,13 @@ static lv_obj_t *mainbar = NULL;
 static lv_tile_t *tile = NULL;
 static lv_point_t *tile_pos_table = NULL;
 static uint32_t tile_entrys = 0;
-static uint32_t app_tile_pos = MAINBAR_APP_TILE_X_START;
+static uint32_t app_tile_x_pos = MAINBAR_APP_TILE_X_START;
+static uint32_t app_tile_y_pos = MAINBAR_APP_TILE_Y_START;
 static volatile bool mainbar_alarm_occurred = false;
 
+bool mainbar_button_event_cb( EventBits_t event, void *arg );
 bool mainbar_powermgm_event_cb( EventBits_t event, void *arg );
 bool mainbar_rtcctl_event_cb( EventBits_t event, void *arg );
-void mainbar_clear_history( void );
 void mainbar_add_current_tile_to_history( void );
 
 void mainbar_setup( void ) {
@@ -76,8 +76,48 @@ void mainbar_setup( void ) {
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, mainbar_rtcctl_event_cb, "mainbar rtcctl" );
+    button_register_cb( BUTTON_UP | BUTTON_RIGHT | BUTTON_LEFT | BUTTON_DOWN | BUTTON_ENTER | BUTTON_EXIT | BUTTON_MENU | BUTTON_KEYBOARD, mainbar_button_event_cb, "mainbay button event" );
 
     mainbar_clear_history();
+}
+
+bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
+    lv_coord_t x,y;
+    uint32_t current_tile = -1;
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+    /**
+     * get the current tile number
+     */
+    lv_tileview_get_tile_act( mainbar, &x, &y );
+    for ( int i = 0 ; i < tile_entrys; i++ ) {
+        if ( tile_pos_table[ i ].x == x && tile_pos_table[ i ].y == y ) {
+            current_tile = i;
+        }
+    }
+    /**
+     * call hibernate callback for the current tile if exist
+     */
+    if ( current_tile != -1 ) {
+        if ( tile[ current_tile ].button_cb != NULL ) {
+            MAINBAR_INFO_LOG("call button cb for tile: %d", current_tile );
+            tile[ current_tile ].button_cb( event, arg );
+        }
+        else {
+            MAINBAR_INFO_LOG("no button cb for current tile: %d", current_tile );
+        }
+    }
+    /**
+     * trigger activity
+     */
+    lv_disp_trig_activity( NULL );
+    
+    return( true );
 }
 
 void mainbar_add_current_tile_to_history( lv_anim_enable_t anim ) {
@@ -255,6 +295,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     tile[ tile_entrys - 1 ].tile = my_tile;
     tile[ tile_entrys - 1 ].activate_cb = NULL;
     tile[ tile_entrys - 1 ].hibernate_cb = NULL;
+    tile[ tile_entrys - 1 ].button_cb = NULL;
     tile[ tile_entrys - 1 ].x = x;
     tile[ tile_entrys - 1 ].y = y;
     tile[ tile_entrys - 1 ].id = id;
@@ -307,6 +348,25 @@ bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC a
     }
 }
 
+bool mainbar_add_tile_button_cb( uint32_t tile_number, CALLBACK_FUNC button_cb ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
+    if ( tile_number < tile_entrys ) {
+        tile[ tile_number ].button_cb = button_cb;
+        return( true );
+    }
+    else {
+        log_e("tile number %d do not exist", tile_number );
+        return( false );
+    }
+}
+
 uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
     /*
      * check if mainbar already initialized
@@ -316,19 +376,28 @@ uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
         while( true );
     }
 
+    /*
+     * prevent tile x pos goes out of range ( uint16_t )
+     */
+    if( ( app_tile_x_pos + x ) * lv_disp_get_hor_res( NULL ) > 32000 ) {
+        log_i("max horz resolution, jump next vert line");
+        app_tile_x_pos = 0;
+        app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
+    }
+
     uint32_t retval = -1;
 
     for ( int hor = 0 ; hor < x ; hor++ ) {
         for ( int ver = 0 ; ver < y ; ver++ ) {
             if ( retval == -1 ) {
-                retval = mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START, id );
+                retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id );
             }
             else {
-                mainbar_add_tile( hor + app_tile_pos, ver + MAINBAR_APP_TILE_Y_START, id );
+                mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id );
             }
         }
     }
-    app_tile_pos = app_tile_pos + x + 1;
+    app_tile_x_pos = app_tile_x_pos + x + 1;
     return( retval );
 }
 

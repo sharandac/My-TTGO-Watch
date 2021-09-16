@@ -21,67 +21,39 @@
  */
 
 #include "config.h"
-#include <Arduino.h>
-#include "esp_bt.h"
-#include "esp_task_wdt.h"
-#include <TTGO.h>
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+    #include "esp_bt.h"
+    #include "esp_task_wdt.h"
+    #include "sdcard.h"
+#endif
 
-#include "sdcard.h"
 #include "powermgm.h"
-
-SPIClass *sdhander = nullptr;
 
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg );
 
 void sdcard_setup( void ) {
-    #if defined( LILYGO_WATCH_HAS_SDCARD )
-        /**
-         * as small hack to reduce internal heap memory
-         * consumption from 27k to 5k while using sd lib
-         */
-        heap_caps_malloc_extmem_enable( 1 );
-        if (!sdhander) {
-            sdhander = new SPIClass(HSPI);
-            sdhander->begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
-        }
-        if (!SD.begin(SD_CS, *sdhander)) {
-            log_e("SD Card Mount Failed");
-        }
-        heap_caps_malloc_extmem_enable( 16 * 1024 );
-
-        powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sdcard_powermgm_event_cb, "sdcard powermgm" );
-    #endif
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sdcard_powermgm_event_cb, "sdcard powermgm" );
 }
 
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     bool retval = false;
 
-    #if defined( LILYGO_WATCH_HAS_SDCARD )
-        switch( event ) {
-            case POWERMGM_SILENCE_WAKEUP:
-                log_i("go silence wakeup");
-                heap_caps_malloc_extmem_enable( 1 );
-                if ( !SD.begin( SD_CS, *sdhander) ) {
-                    log_e("SD Card Mount Failed");
-                }
-                heap_caps_malloc_extmem_enable( 16 * 1024 );
-                retval = true;
-                break;
-            case POWERMGM_STANDBY:
-                log_i("go standby");
-                SD.end();
-                retval = true;
-                break;
-            case POWERMGM_WAKEUP:
-                log_i("go wakeup");
-                heap_caps_malloc_extmem_enable( 1 );
-                if (!SD.begin( SD_CS, *sdhander)) {
-                    log_e("SD Card Mount Failed");
-                }
-                heap_caps_malloc_extmem_enable( 16 * 1024 );
-                retval = true;
-                break;
-        }
-    #endif
+    switch( event ) {
+        case POWERMGM_SILENCE_WAKEUP:
+            log_i("go silence wakeup");
+            retval = true;
+            break;
+        case POWERMGM_STANDBY:
+            log_i("go standby");
+            retval = true;
+            break;
+        case POWERMGM_WAKEUP:
+            log_i("go wakeup");
+            retval = true;
+            break;
+    }
     return( retval );
 }

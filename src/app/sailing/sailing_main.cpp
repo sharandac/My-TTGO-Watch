@@ -20,9 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <WiFi.h>
-#include <AsyncUDP.h>
 
 #include "sailing.h"
 #include "sailing_main.h"
@@ -38,7 +35,19 @@
 #include "hardware/wifictl.h"
 #include "hardware/display.h"
 
-AsyncUDP *udp = NULL;
+#ifdef NATIVE_64BIT
+    #include <string>
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+    #include <WiFi.h>
+    #include <AsyncUDP.h>
+    AsyncUDP *udp = NULL;
+#endif
 
 struct pack {
   float heading;
@@ -218,6 +227,9 @@ bool sailing_wifictl_event_cb( EventBits_t event, void *arg ) {
 
 void sailing_app_setup_udp( bool enable ) {
     if ( enable ) {
+#ifdef NATIVE_64BIT
+
+#else
         if ( !udp ) {
             udp = new AsyncUDP;
         }
@@ -251,6 +263,7 @@ void sailing_app_setup_udp( bool enable ) {
         else {
             SAILING_ERROR_LOG("create udp listner failed");
         }
+#endif
     }
 }
 
@@ -311,61 +324,70 @@ void sailing_task( lv_task_t * task ) {
 
 //Makes RMC phrase understandable
 void rmc(char dati[]){
-  
-  String info[12];
-  int i,j = 0;
-  
-  for(i = 0; i<12; i++){
-    info[i] = "";
-    do{
-      info[i].concat(dati[j]);
-      j++;
-    }while(dati[j] != ',');
-    j++;
-  }
+#ifdef NATIVE_64BIT
 
-  //passing RMC info to global struct
-  attuale.gspeed = info[7].toFloat();
-  attuale.heading = info[8].toFloat();
-  // Serial.println(attuale.gspeed);
+#else
+    String info[12];
+    int i,j = 0;
+
+    for(i = 0; i<12; i++){
+        info[i] = "";
+        do{
+            info[i].concat(dati[j]);
+            j++;
+        }while(dati[j] != ',');
+        j++;
+    }
+
+    //passing RMC info to global struct
+    attuale.gspeed = info[7].toFloat();
+    attuale.heading = info[8].toFloat();
+    // Serial.println(attuale.gspeed);
+#endif
 }
 
 //Makes RMB phrase understandable
 void rmb(char dati[]){
-  
-  String info[14];
-  int i,j = 0;
-  
-  for(i = 0; i<14; i++){
-    info[i] = "";
-    do{
-      info[i].concat(dati[j]);
-      j++;
-    }while(dati[j] != ',');
-    j++;
-  }
+#ifdef NATIVE_64BIT
 
-  //passing RMB info to global struct
-  attuale.distance = info[10].toFloat();
-  attuale.vmg = info[12].toFloat();
-  //Serial.println("Recieved RMB");
+#else
+    String info[14];
+    int i,j = 0;
+
+    for(i = 0; i<14; i++){
+        info[i] = "";
+        do{
+            info[i].concat(dati[j]);
+            j++;
+        }while(dati[j] != ',');
+        j++;
+    }
+
+    //passing RMB info to global struct
+    attuale.distance = info[10].toFloat();
+    attuale.vmg = info[12].toFloat();
+    //Serial.println("Recieved RMB");
+#endif
 }
 
 //Makes APB phrase understandable
 void apb(char dati[]){
-  
-  String info[14];
-  int i,j = 0;
-  
-  for(i = 0; i<14; i++){
-    info[i] = "";
-    do{
-      info[i].concat(dati[j]);
-      j++;
-    }while(dati[j] != ',');
-    j++;
-  }
+#ifdef NATIVE_64BIT
 
-  //passing APB info to global struct
-  attuale.track = info[13].toFloat();
+#else  
+    String info[14];
+    int i,j = 0;
+
+    for(i = 0; i<14; i++){
+        info[i] = "";
+        do{
+            info[i].concat(dati[j]);
+            j++;
+        }while(dati[j] != ',');
+        j++;
+    }
+
+    //passing APB info to global struct
+    attuale.track = info[13].toFloat();
+#endif
 }

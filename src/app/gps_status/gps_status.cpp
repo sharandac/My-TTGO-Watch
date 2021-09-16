@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "gps_status.h"
 #include "gps_status_main.h"
@@ -31,6 +30,12 @@
 #include "gui/statusbar.h"
 #include "gui/app.h"
 #include "gui/widget.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+
+#endif
 
 uint32_t gps_status_main_tile_num;
 uint32_t gps_status_setup_tile_num;

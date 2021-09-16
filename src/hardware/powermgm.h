@@ -22,8 +22,12 @@
 #ifndef _POWERMGM_H
     #define _POWERMGM_H
 
-    #include "TTGO.h"
     #include "callback.h"
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
+        #include <Arduino.h>
+    #endif // NATIVE_64BIT
 
     #define POWERMGM_STANDBY                    _BV(0)         /** @brief event mask for powermgm standby */
     #define POWERMGM_STANDBY_REQUEST            _BV(1)         /** @brief event mask for powermgm standby request */

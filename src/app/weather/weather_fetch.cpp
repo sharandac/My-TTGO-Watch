@@ -20,17 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "HTTPClient.h"
-
 #include "weather.h"
 #include "weather_fetch.h"
 #include "weather_forecast.h"
-
 #include "hardware/powermgm.h"
-
 #include "utils/json_psram_allocator.h"
+#include "utils/uri_load/uri_load.h"
 
-/* Utility function to convert numbers to directions */
+/**
+ * Utility function to convert numbers to directions
+ */
 static void weather_wind_to_string( weather_forcast_t* container, int speed, int directionDegree);
 
 int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *weather_today ) {
@@ -38,45 +37,55 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
     int httpcode = -1;
     const char* weather_units_symbol = weather_config->imperial ? "F" : "C";
     const char* weather_units_char = weather_config->imperial ? "imperial" : "metric";
-    
+    /**
+     * build uri string
+     */
     snprintf( url, sizeof( url ), "http://%s/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=%s", OWM_HOST, weather_config->lat, weather_config->lon, weather_config->apikey, weather_units_char);
+    log_d("http get: %s", url );
+    /**
+     * load uri file into ram
+     */
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+    /**
+     * if was success, pharse the json
+     */
+    if ( uri_load_dsc ) {
+        SpiRamJsonDocument doc( uri_load_dsc->size * 4 );
 
-    HTTPClient today_client;
+        DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
+        if (error) {
+            log_e("weather today deserializeJson() failed: %s", error.c_str() );
+            doc.clear();
+            uri_load_free_all( uri_load_dsc );
+            return( httpcode );
+        }
 
-    today_client.useHTTP10( true );
-    today_client.begin( url );
-    httpcode = today_client.GET();
+        if ( doc["cod"].as<uint32_t>() == 200 ) {
+            weather_today->valide = true;
+            snprintf( weather_today->temp, sizeof( weather_today->temp ), "%0.1f°%s", doc["main"]["temp"].as<float>(), weather_units_symbol);
+            snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
+            snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["pressure"].as<float>() );
+            strcpy( weather_today->icon, doc["weather"][0]["icon"] );
+            strcpy( weather_today->name, doc["name"] );
 
-    if ( httpcode != 200 ) {
-        log_e("HTTPClient error %d", httpcode, url );
-        today_client.end();
-        return( -1 );
-    }
-
-    SpiRamJsonDocument doc( today_client.getSize() * 2 );
-
-    DeserializationError error = deserializeJson( doc, today_client.getStream() );
-    if (error) {
-        log_e("weather today deserializeJson() failed: %s", error.c_str() );
+            int directionDegree = doc["wind"]["deg"].as<int>();
+            int speed = doc["wind"]["speed"].as<int>();
+            weather_wind_to_string( weather_today, speed, directionDegree );
+            httpcode = 200;
+        }
+        /**
+         * clear json
+         */
         doc.clear();
-        today_client.end();
-        return( -1 );
     }
+    else {
+        httpcode = -1;
+    }
+    /**
+     * clear uri dsc
+     */
+    uri_load_free_all( uri_load_dsc );
 
-    today_client.end();
-
-    weather_today->valide = true;
-    snprintf( weather_today->temp, sizeof( weather_today->temp ), "%0.1f°%s", doc["main"]["temp"].as<float>(), weather_units_symbol);
-    snprintf( weather_today->humidity, sizeof( weather_today->humidity ),"%f%%", doc["main"]["humidity"].as<float>() );
-    snprintf( weather_today->pressure, sizeof( weather_today->pressure ),"%fpha", doc["main"]["pressure"].as<float>() );
-    strcpy( weather_today->icon, doc["weather"][0]["icon"] );
-    strcpy( weather_today->name, doc["name"] );
-
-    int directionDegree = doc["wind"]["deg"].as<int>();
-    int speed = doc["wind"]["speed"].as<int>();
-    weather_wind_to_string( weather_today, speed, directionDegree );
-
-    doc.clear();
     return( httpcode );
 }
 
@@ -85,48 +94,58 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
     int httpcode = -1;
     const char* weather_units_symbol = weather_config->imperial ? "F" : "C";
     const char* weather_units_char = weather_config->imperial ? "imperial" : "metric";
-
+    /**
+     * build uri string
+     */
     snprintf( url, sizeof( url ), "http://%s/data/2.5/forecast?cnt=%d&lat=%s&lon=%s&appid=%s&units=%s", OWM_HOST, WEATHER_MAX_FORECAST, weather_config->lat, weather_config->lon, weather_config->apikey, weather_units_char);
+    log_d("http get: %s", url );
+    /**
+     * load uri file into ram
+     */
+    uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
+    /**
+     * if was success, pharse the json
+     */
+    if ( uri_load_dsc ) {
+        SpiRamJsonDocument doc( uri_load_dsc->size * 4 );
 
-    HTTPClient forecast_client;
+        DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
+        if (error) {
+            log_e("weather forecast deserializeJson() failed: %s", error.c_str() );
+            doc.clear();
+            uri_load_free_all( uri_load_dsc );
+            return( httpcode );
+        }
 
-    forecast_client.useHTTP10( true );
-    forecast_client.begin( url );
-    httpcode = forecast_client.GET();
+        if ( doc["cod"].as<uint32_t>() == 200 ) {
+            weather_forecast[0].valide = true;
+            for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
+                weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>() | 0;
+                snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°%s", doc["list"][i]["main"]["temp"].as<float>(), weather_units_symbol );
+                snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
+                snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
+                strncpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] | "n/a", sizeof(  weather_forecast[ i ].icon ) );
+                strncpy( weather_forecast[ i ].name, doc["city"]["name"] | "n/a", sizeof( weather_forecast[ i ].name ) );
 
-    if ( httpcode != 200 ) {
-        log_e("HTTPClient error %d", httpcode, url );
-        forecast_client.end();
-        return( -1 );
-    }
-
-    SpiRamJsonDocument doc( forecast_client.getSize() * 2 );
-
-    DeserializationError error = deserializeJson( doc, forecast_client.getStream() );
-    if (error) {
-        log_e("weather forecast deserializeJson() failed: %s", error.c_str() );
+                int directionDegree = doc["list"][i]["wind"]["deg"].as<int>() | 0;
+                int speed = doc["list"][i]["wind"]["speed"].as<int>() | 0;
+                weather_wind_to_string( &weather_forecast[i], speed, directionDegree );
+            }
+            httpcode = 200;
+        }
+        /**
+         * clear json
+         */
         doc.clear();
-        forecast_client.end();
-        return( -1 );
     }
-
-    forecast_client.end();
-
-    weather_forecast[0].valide = true;
-    for ( int i = 0 ; i < WEATHER_MAX_FORECAST ; i++ ) {
-        weather_forecast[ i ].timestamp = doc["list"][i]["dt"].as<long>() | 0;
-        snprintf( weather_forecast[ i ].temp, sizeof( weather_forecast[ i ].temp ),"%0.1f°%s", doc["list"][i]["main"]["temp"].as<float>(), weather_units_symbol );
-        snprintf( weather_forecast[ i ].humidity, sizeof( weather_forecast[ i ].humidity ),"%f%%", doc["list"][i]["main"]["humidity"].as<float>() );
-        snprintf( weather_forecast[ i ].pressure, sizeof( weather_forecast[ i ].pressure ),"%fpha", doc["list"][i]["main"]["pressure"].as<float>() );
-        strlcpy( weather_forecast[ i ].icon, doc["list"][i]["weather"][0]["icon"] | "n/a", sizeof(  weather_forecast[ i ].icon ) );
-        strlcpy( weather_forecast[ i ].name, doc["city"]["name"] | "n/a", sizeof( weather_forecast[ i ].name ) );
-
-        int directionDegree = doc["list"][i]["wind"]["deg"].as<int>() | 0;
-        int speed = doc["list"][i]["wind"]["speed"].as<int>() | 0;
-        weather_wind_to_string( &weather_forecast[i], speed, directionDegree );
+    else {
+        httpcode = -1;
     }
-
-    doc.clear();
+    /**
+     * clear uri dsc
+     */
+    uri_load_free_all( uri_load_dsc );
+    
     return( httpcode );
 }
 

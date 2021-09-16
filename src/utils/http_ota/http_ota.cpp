@@ -20,17 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <HTTPClient.h>
-#include <Update.h>
-
 #include "http_ota.h"
-
 #include "hardware/callback.h"
-#include "hardware/blectl.h"
-#include "hardware/pmu.h"
-#include "hardware/display.h"
-
 #include "utils/decompress/decompress.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <HTTPClient.h>
+    #include <Update.h>
+#endif
 
 callback_t *http_ota_callback = NULL;
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize );
@@ -48,8 +47,8 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
      * disable ble and set esp32 voltage to 3.3V to
      * prevent some issues
      */
-    blectl_off();
-    pmu_set_safe_voltage_for_update();
+//    blectl_off();
+//    pmu_set_safe_voltage_for_update();
     /*
      * if firmware an .gz file, take compressed ota otherwise
      * take a normal uncompressed firmware
@@ -67,7 +66,9 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
 
 bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwaresize ) {
     bool retval = false;
+#ifdef NATIVE_64BIT
 
+#else
     HTTPClient http;
     WiFiClientSecure *sslclient = NULL;
     http.setUserAgent( "ESP32-UPDATE-" __FIRMWARE__ );
@@ -131,17 +132,20 @@ bool http_ota_start_compressed( const char* url, const char* md5, int32_t firmwa
     if( sslclient ) {
         sslclient->stop();
     }
-
+#endif
     return( retval );
 }
 
 bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
+    bool ret = true;                                    /** @brief return value */
+#ifdef NATIVE_64BIT
+
+#else
     float downloaded = 0;                               /** @brief downloaded firmware size in bytes*/
     int32_t total = 1;                                  /** @brief total firmware size in bytes*/
     int32_t written = 0;                                /** @brief written firmware data block in bytes*/
     int32_t len = 1;                                    /** @brief remaining firmware data in bytes*/
     size_t size = sizeof( HTTP_OTA_BUFFER_SIZE );
-    bool ret = true;                                    /** @brief return value */
     uint8_t buff[ HTTP_OTA_BUFFER_SIZE ] = { 0 };       /** @brief firmware write buffer */
 
     HTTPClient http;
@@ -284,7 +288,7 @@ bool http_ota_start_uncompressed( const char* url, const char* md5 ) {
         log_e("Download firmware ... failed!");
         ret = false;
     }
-
+#endif
     return( ret );
 }
 
