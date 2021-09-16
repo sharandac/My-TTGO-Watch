@@ -22,8 +22,6 @@
 #ifndef _CORONA_APP_DETECTOR_MAIN_H
     #define _CORONA_APP_DETECTOR_MAIN_H
 
-    #include <TTGO.h>
-
     void corona_app_detector_main_setup( uint32_t tile_num );
 
 #endif // _CORONA_APP_DETECTOR_MAIN_H

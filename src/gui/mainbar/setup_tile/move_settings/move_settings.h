@@ -22,8 +22,6 @@
 #ifndef _MOVE_SETTINGS_H
     #define _MOVE_SETTINGS_H
 
-    #include <TTGO.h>
-
     void move_settings_tile_setup( void );
 
 #endif // _MOVE_SETTINGS_TILE_H

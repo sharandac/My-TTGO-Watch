@@ -22,8 +22,6 @@
 #ifndef _KEYBOARD_H
     #define _KEYBOARD_H
 
-    #include <TTGO.h>
-
     /**
      * @brief setup onscreen keyboard
      */

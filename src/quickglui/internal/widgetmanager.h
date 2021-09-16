@@ -8,7 +8,7 @@
 #ifndef WIDGETMANAGER_H_
 #define WIDGETMANAGER_H_
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include "widgethandle.h"
 
 // #ifndef MAX_WIDGET_HANDLES

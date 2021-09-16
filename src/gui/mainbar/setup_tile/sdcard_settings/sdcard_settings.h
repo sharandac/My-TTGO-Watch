@@ -23,8 +23,6 @@
 #ifndef _SDCARD_SETTINGS_H
     #define _SDCARD_SETTINGS_H
 
-    #include <TTGO.h>
-
     void sdcard_settings_tile_setup( void );
 
 #endif // _SDCARD_SETTINGS_H

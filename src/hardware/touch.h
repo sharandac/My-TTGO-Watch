@@ -22,7 +22,6 @@
 #ifndef _TOUCH_H
     #define _TOUCH_H
 
-    #include "TTGO.h"
     #include "callback.h"
 
     #define TOUCH_UPDATE        _BV(0)
@@ -53,5 +52,5 @@
      * @brief unlock the touch interface
      */
     void touch_lock_give( void );
-
+    
 #endif // _TOUCH_H

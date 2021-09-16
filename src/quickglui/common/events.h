@@ -8,7 +8,7 @@
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
-#include "lvgl/lvgl.h"
+#include "lvgl.h"
 #include <functional>
 
 enum SyncRequestSource {

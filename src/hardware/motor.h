@@ -22,7 +22,6 @@
 #ifndef _MOTOR_H
     #define _MOTOR_H
 
-    #include "TTGO.h"
     #include "hardware/config/motorconfig.h"
 
     /**

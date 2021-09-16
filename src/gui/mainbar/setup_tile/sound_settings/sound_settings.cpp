@@ -74,10 +74,10 @@ void sound_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( sound_settings_tile, "sound settings", exit_sound_setup_event_cb );
     lv_obj_align( header, sound_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *vibe_cont = wf_add_labeled_switch( sound_settings_tile, "enable vibe", &sound_vibe_onoff, motor_get_vibe_config(), sound_vibe_setup_event_cb );
+    lv_obj_t *vibe_cont = wf_add_labeled_switch( sound_settings_tile, "enable vibe", &sound_vibe_onoff, motor_get_vibe_config(), sound_vibe_setup_event_cb, ws_get_setup_tile_style() );
     lv_obj_align( vibe_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
-    lv_obj_t *sound_enable_cont = wf_add_labeled_switch( sound_settings_tile, "enable sound", &sound_enable, sound_get_enabled_config(), sound_enable_setup_event_cb );
+    lv_obj_t *sound_enable_cont = wf_add_labeled_switch( sound_settings_tile, "enable sound", &sound_enable, sound_get_enabled_config(), sound_enable_setup_event_cb, ws_get_setup_tile_style() );
     lv_obj_align( sound_enable_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_obj_t *sound_volume_cont = lv_obj_create( sound_settings_tile, NULL );

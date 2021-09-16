@@ -1,8 +1,6 @@
 #ifndef _WEATHER_FORECAST_H
     #define _WEATHER_FORECAST_H
 
-    #include <TTGO.h>
-
     #define WEATHER_FORECAST_SYNC_REQUEST   _BV(0)
     #define WEATHER_MAX_FORECAST            16
 

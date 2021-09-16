@@ -22,8 +22,6 @@
 #ifndef _BATTERY_SETTINGS_H
     #define _BATTERY_SETTINGS_H
 
-    #include <TTGO.h>
-
     void battery_settings_tile_setup( void );
 
 #endif // _BATTERY_SETTINGS_H

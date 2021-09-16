@@ -22,8 +22,6 @@
 #ifndef _BLUETOOTH_CALL_H
     #define _BLUETOOTH_CALL_H
 
-    #include <TTGO.h>
-
     void bluetooth_call_tile_setup( void );
 
 #endif // _BLUETOOTH_CALL_H

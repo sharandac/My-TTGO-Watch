@@ -18,17 +18,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include "Arduino.h"
-
 #include "blestepctl.h"
-
-#include <BLEServer.h>
-#include <BLE2902.h>
-
 #include "blectl.h"
 #include "bma.h"
 #include "bleupdater.h"
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+    #include <BLEServer.h>
+    #include <BLE2902.h>
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #else // NEW_HARDWARE_TAG
+    #endif
+#endif
 
 class StepcounterBleUpdater : public BleUpdater<int32_t> {
     public:

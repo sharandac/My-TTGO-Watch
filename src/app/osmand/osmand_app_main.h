@@ -22,7 +22,7 @@
 #ifndef _OSMAND_APP_MAIN_H
     #define _OSMAND_APP_MAIN_H
 
-    #include <TTGO.h>
+    #
 
     struct direction_t {
         const char direction[ 24 ];

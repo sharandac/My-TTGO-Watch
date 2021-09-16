@@ -20,44 +20,70 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <soc/rtc.h>
-#include <esp_wifi.h>
 #include <time.h>
-#include "driver/adc.h"
-#include "esp_err.h"
-#include "esp_pm.h"
-
-#include "pmu.h"
-#include "bma.h"
 #include "powermgm.h"
-#include "wifictl.h"
-#include "blectl.h"
-#include "timesync.h"
-#include "motor.h"
-#include "touch.h"
-#include "display.h"
-#include "rtcctl.h"
-#include "sound.h"
-#include "gpsctl.h"
+#include "callback.h"
+#include "button.h"
 
-EventGroupHandle_t powermgm_status = NULL;
-portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
+#ifdef NATIVE_64BIT 
+    #include <unistd.h>
+    #define SDL_MAIN_HANDLED        /*To fix SDL's "undefined reference to WinMain" issue*/
+    #include <SDL2/SDL.h>
+    #include "utils/io.h"
+    #include "utils/logging.h"
+
+    static EventBits_t powermgm_status;
+#else
+    #include "esp_err.h"
+    #include "esp_pm.h"
+    #include <Arduino.h>
+    #ifdef M5PAPER
+        #include <M5EPD.h>
+    #endif
+
+    EventGroupHandle_t powermgm_status = NULL;
+    portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
+    esp_pm_config_esp32_t pm_config;
+#endif
 
 callback_t *powermgm_callback = NULL;
 callback_t *powermgm_loop_callback = NULL;
 
-esp_pm_config_esp32_t pm_config;
-
+bool powermgm_button_event_cb( EventBits_t event, void *arg );
 bool powermgm_send_event_cb( EventBits_t event );
 bool powermgm_send_loop_event_cb( EventBits_t event );
 
 void powermgm_setup( void ) {
+
+#ifdef NATIVE_64BIT
+    powermgm_status = 0;
+#else
     powermgm_status = xEventGroupCreate();
+#endif
+    /*
+     * register powerbutton event
+     */
+    button_register_cb( BUTTON_PWR, powermgm_button_event_cb, "powermgm pwr button event");
+}
+
+bool powermgm_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_PWR:    powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                            powermgm_set_event( POWERMGM_POWER_BUTTON );
+                            break;     
+    }
+    return( true );
 }
 
 void powermgm_loop( void ) {
     static bool lighsleep = true;
+
+    #ifdef NATIVE_64BIT
+        /**
+         * delay loop fpr 5ms
+         */
+        SDL_Delay(5);
+    #endif // NATIVE_64BIT
     /*
      * check if power button was release
      */
@@ -74,7 +100,7 @@ void powermgm_loop( void ) {
      * when we are in wakeup and get an wakeup request, reset activity timer
      */
     if ( powermgm_get_event( POWERMGM_WAKEUP_REQUEST ) && powermgm_get_event( POWERMGM_WAKEUP ) ) {
-        lv_disp_trig_activity( NULL );
+        // lv_disp_trig_activity( NULL );
         powermgm_clear_event( POWERMGM_WAKEUP_REQUEST );
     }
 
@@ -110,8 +136,10 @@ void powermgm_loop( void ) {
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 160/80MHz with light sleep");
             #else
-                setCpuFrequencyMhz(80);
-                log_i("CPU speed = 80MHz");
+                #ifndef NATIVE_64BIT
+                    setCpuFrequencyMhz(80);
+                    log_i("CPU speed = 80MHz");
+                #endif
             #endif
         }
         else {
@@ -137,30 +165,26 @@ void powermgm_loop( void ) {
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 240/80MHz with light sleep");
             #else
-                setCpuFrequencyMhz(240);
-                log_i("CPU speed = 240MHz");
-            #endif
-            #if CORE_DEBUG_LEVEL > 3
-                // For debug, no interest for effective user
-                motor_vibe(3);
+                #ifndef NATIVE_64BIT
+                    setCpuFrequencyMhz(240);
+                    log_i("CPU speed = 240MHz");
+                #endif
             #endif
         }
-
-        log_i("Free heap: %d", ESP.getFreeHeap());
-        log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-        log_i("uptime: %d", millis() / 1000 );
-
+        #ifndef NATIVE_64BIT
+            log_i("Free heap: %d", ESP.getFreeHeap());
+            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
+            log_i("uptime: %d", millis() / 1000 );
+        #endif
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
         /*
          * avoid buzz when standby after silent wake
          */
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
-            #if CORE_DEBUG_LEVEL > 3
-                // For debug, no interest for effective user
-                motor_vibe(3);
+            #ifndef NATIVE_64BIT
+                delay( 100 );
             #endif
-            delay( 100 );
         }
         /*
          * clear powermgm state/request and send standby event
@@ -176,9 +200,11 @@ void powermgm_loop( void ) {
         /*
          * print some memory stats
          */
-        log_i("Free heap: %d", ESP.getFreeHeap());
-        log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-        log_i("uptime: %d", millis() / 1000 );
+        #ifndef NATIVE_64BIT
+            log_i("Free heap: %d", ESP.getFreeHeap());
+            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
+            log_i("uptime: %d", millis() / 1000 );
+        #endif
 
         if ( lighsleep ) {
             log_i("go standby");
@@ -189,13 +215,42 @@ void powermgm_loop( void ) {
              *          it is no difference in light sleep we have 80Mhz or 10Mhz
              *          CPU clock. Current is the same.
              */
-            setCpuFrequencyMhz( 80 );
-            log_i("CPU speed = 80MHz, start light sleep");
-            /*
-             * from here, the consumption is round about 2.5mA
-             * total standby time is 152h (6days) without use?
-             */
-            esp_light_sleep_start();
+            #ifdef NATIVE_64BIT
+
+            #else
+                setCpuFrequencyMhz( 80 );
+                log_i("CPU speed = 80MHz, start light sleep");
+                /*
+                * from here, the consumption is round about 2.5mA
+                * total standby time is 152h (6days) without use?
+                */
+                #ifdef M5PAPER
+                    while( M5.EPD.CheckAFSR() ){};
+                    M5.disableEPDPower();
+                    M5.disableEXTPower();
+                #endif
+                    esp_light_sleep_start();
+                #ifdef M5PAPER
+                    M5.enableEPDPower();
+                    M5.enableEXTPower();
+                    delay(50);
+                    M5.EPD.SetRotation( 90 );
+                    M5.EPD.Clear( true );
+                #endif
+                /**
+                 * check wakeup source
+                 */
+                switch( esp_sleep_get_wakeup_cause() ) {
+                    case ESP_SLEEP_WAKEUP_TIMER:    
+                        log_i("timer wakeup");
+                        powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                        break;
+                    default:
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                        log_i("gpio wakeup");
+                        break;
+                }
+            #endif
         }
         else {
             log_i("go standby blocked");
@@ -222,8 +277,10 @@ void powermgm_loop( void ) {
                  * from here, the consumption is round about 28mA with ble
                  * total standby time is 10h with a 350mAh battery
                  */
-                setCpuFrequencyMhz(80);
-                log_i("CPU speed = 80MHz");
+                #ifndef NATIVE_64BIT
+                    setCpuFrequencyMhz(80);
+                    log_i("CPU speed = 80MHz");
+                #endif
             #endif
         }
     }
@@ -239,8 +296,10 @@ void powermgm_loop( void ) {
          * note:    When change vTaskDelay to an higher value, please
          *          note that the reaction time to wake up increase.
          */
-        if ( !lighsleep )
-            vTaskDelay( 250 );
+        #ifndef NATIVE_64BIT
+            if ( !lighsleep )
+                vTaskDelay( 250 );
+        #endif
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
@@ -253,12 +312,10 @@ void powermgm_loop( void ) {
 
 void powermgm_shutdown( void ) {
     powermgm_send_event_cb( POWERMGM_SHUTDOWN );
-    pmu_shutdown();
 }
 
 void powermgm_reset( void ) {
     powermgm_send_event_cb( POWERMGM_RESET );
-    ESP.restart();
 }
 
 void powermgm_set_perf_mode( void ) {
@@ -268,7 +325,9 @@ void powermgm_set_perf_mode( void ) {
         pm_config.light_sleep_enable = false;
         ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
     #else
-        setCpuFrequencyMhz(240);
+        #ifndef NATIVE_64BIT
+            setCpuFrequencyMhz(240);
+        #endif
     #endif
 }
 
@@ -279,26 +338,40 @@ void powermgm_set_normal_mode( void ) {
         pm_config.light_sleep_enable = false;
         ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
     #else
-        setCpuFrequencyMhz(240);
+        #ifndef NATIVE_64BIT
+            setCpuFrequencyMhz(240);
+        #endif
     #endif
 }
 
 void powermgm_set_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&powermgmMux);
-    xEventGroupSetBits( powermgm_status, bits );
-    portEXIT_CRITICAL(&powermgmMux);
+    #ifdef NATIVE_64BIT
+        powermgm_status |= bits;
+    #else
+        portENTER_CRITICAL(&powermgmMux);
+        xEventGroupSetBits( powermgm_status, bits );
+        portEXIT_CRITICAL(&powermgmMux);
+    #endif
 }
 
 void powermgm_clear_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&powermgmMux);
-    xEventGroupClearBits( powermgm_status, bits );
-    portEXIT_CRITICAL(&powermgmMux);
+    #ifdef NATIVE_64BIT
+        powermgm_status &= ~bits;
+    #else
+        portENTER_CRITICAL(&powermgmMux);
+        xEventGroupClearBits( powermgm_status, bits );
+        portEXIT_CRITICAL(&powermgmMux);
+    #endif
 }
 
 EventBits_t powermgm_get_event( EventBits_t bits ) {
-    portENTER_CRITICAL(&powermgmMux);
-    EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
-    portEXIT_CRITICAL(&powermgmMux);
+    #ifdef NATIVE_64BIT
+        EventBits_t temp = powermgm_status & bits;
+    #else
+        portENTER_CRITICAL(&powermgmMux);
+        EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
+        portEXIT_CRITICAL(&powermgmMux);
+    #endif
     return( temp );
 }
 

@@ -22,10 +22,19 @@
 #include "config.h"
 
 #include "splashscreen.h"
-
 #include "hardware/display.h"
+#include "hardware/framebuffer.h"
 #include "gui/png_decoder/lv_png.h"
 #include "gui/sjpg_decoder/lv_sjpg.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/delay.h"
+#else
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
 
 lv_obj_t *logo = NULL;
 lv_obj_t *preload = NULL;
@@ -35,8 +44,6 @@ lv_style_t style;
 LV_IMG_DECLARE(hedgehog);
 
 void splash_screen_stage_one( void ) {
-
-    TTGOClass *ttgo = TTGOClass::getWatch();
 
     lv_split_jpeg_init();
     lv_png_init();
@@ -89,10 +96,18 @@ void splash_screen_stage_one( void ) {
 
     lv_task_handler();
 
-    for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
-        ttgo->bl->adjust( bl );
-        delay(5);
-    }    
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+            framebuffer_refresh();
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
+                ttgo->bl->adjust( bl );
+                delay(5);
+            }   
+        #endif
+    #endif
 }
 
 void splash_screen_stage_update( const char* msg, int value ) {
@@ -100,7 +115,6 @@ void splash_screen_stage_update( const char* msg, int value ) {
     lv_disp_trig_activity( NULL );
     lv_task_handler();
     delay(100);
-//    lv_bar_set_value( preload, value, LV_ANIM_ON );
     lv_bar_set_value( preload, 0, LV_ANIM_ON );
     lv_label_set_text( preload_label, msg );
     lv_obj_align( preload_label, preload, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
@@ -109,12 +123,18 @@ void splash_screen_stage_update( const char* msg, int value ) {
 }
 
 void splash_screen_stage_finish( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
 
-    for( int bl = display_get_brightness() ; bl >= 0 ; bl-- ) {
-        ttgo->bl->adjust( bl );
-        delay(5);
-    }
+            for( int bl = display_get_brightness() ; bl >= 0 ; bl-- ) {
+                ttgo->bl->adjust( bl );
+                delay(5);
+            }
+        #endif
+    #endif
     lv_obj_del( logo );
     lv_obj_del( preload );
     lv_obj_del( preload_label );

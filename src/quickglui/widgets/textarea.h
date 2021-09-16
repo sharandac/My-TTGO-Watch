@@ -10,6 +10,18 @@
 
 #include "widget.h"
 
+#ifdef NATIVE_64BIT
+    #include <string>
+    using namespace std;
+    #define String string
+#else
+        #include <Arduino.h>
+    #ifdef M5PAPER
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #endif
+#endif
+
+
 /*
 * @brief Represent TextArea LVGL widget.
 * Documentation:

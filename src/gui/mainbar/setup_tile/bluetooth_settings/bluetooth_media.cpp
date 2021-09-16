@@ -32,7 +32,13 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
 
 static bool bluetooth_media_play_state = false;
 

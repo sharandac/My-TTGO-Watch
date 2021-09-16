@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "stopwatch_app.h"
 #include "stopwatch_app_main.h"
@@ -31,6 +30,14 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+
+#ifdef NATIVE_64BIT
+    #include <time.h>
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+    #include <Arduino.h>
+#endif
 
 long stopwatch_milliseconds = 0;
 time_t prev_time;

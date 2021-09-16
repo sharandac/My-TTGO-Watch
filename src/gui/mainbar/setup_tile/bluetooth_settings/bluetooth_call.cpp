@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
+#include "ArduinoJson.h"
 #include "bluetooth_call.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -31,7 +32,7 @@
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 
-#include "quickglui/common/bluejsonrequest.h"
+#include "utils/bluejsonrequest.h"
 
 lv_obj_t *bluetooth_call_tile=NULL;
 lv_style_t bluetooth_call_style;

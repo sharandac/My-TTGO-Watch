@@ -22,7 +22,6 @@
 #ifndef _MAIL_TILE_H
     #define _MAIL_TILE_H
 
-    #include <TTGO.h>
     #include "gui/icon.h"
 
     #define MAX_WIDGET_NUM      3

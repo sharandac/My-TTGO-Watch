@@ -22,8 +22,12 @@
 #ifndef _WIFICTL_H
     #define _WIFICTL_H
 
-    #include "TTGO.h"
     #include "callback.h"
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
+        #include <Arduino.h>
+    #endif
 
     #define WIFICTL_DELAY               10
 
@@ -46,8 +50,9 @@
         WIFICTL_WPS_SUCCESS            = _BV(9),
         WIFICTL_WPS_FAILED             = _BV(10),
         WIFICTL_SCAN                   = _BV(11),
-        WIFICTL_FIRST_RUN              = _BV(12),
-        WIFICTL_AUTOON                 = _BV(13)
+        WIFICTL_SCAN_ENTRY             = _BV(12),
+        WIFICTL_FIRST_RUN              = _BV(13),
+        WIFICTL_AUTOON                 = _BV(14)
     };
 
     /**

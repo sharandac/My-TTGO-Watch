@@ -21,11 +21,16 @@
  */
 
 #include "config.h"
-
+#include "app.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 
-#include "app.h"
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+#endif
+
 
 icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
 

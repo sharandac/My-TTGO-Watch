@@ -22,6 +22,12 @@
 #include "updateconfig.h"
 #include "utils/alloc.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+
+#endif
+
 update_config_t::update_config_t() : BaseJsonConfig( UPDATE_JSON_COFIG_FILE ) {}
 
 bool update_config_t::onSave(JsonDocument& doc) {
@@ -45,9 +51,9 @@ bool update_config_t::onLoad(JsonDocument& doc) {
     }
     
     if ( doc["updateurl"] )
-        strlcpy( updateurl , doc["updateurl"], FIRMWARE_UPDATE_URL_LEN );
+        strncpy( updateurl , doc["updateurl"], FIRMWARE_UPDATE_URL_LEN );
     else
-        strlcpy( updateurl , FIRMWARE_UPDATE_URL, FIRMWARE_UPDATE_URL_LEN );
+        strncpy( updateurl , FIRMWARE_UPDATE_URL, FIRMWARE_UPDATE_URL_LEN );
 
     return true;
 }
@@ -62,7 +68,7 @@ bool update_config_t::onDefault( void ) {
             while( true ){};
         }
     }
-    strlcpy( updateurl , FIRMWARE_UPDATE_URL, FIRMWARE_UPDATE_URL_LEN );
+    strncpy( updateurl , FIRMWARE_UPDATE_URL, FIRMWARE_UPDATE_URL_LEN );
 
     return true;
 }

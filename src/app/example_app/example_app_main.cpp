@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "example_app.h"
 #include "example_app_main.h"
@@ -31,6 +30,12 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+
+#endif
 
 lv_obj_t *example_app_main_tile = NULL;
 lv_style_t example_app_main_style;

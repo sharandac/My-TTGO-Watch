@@ -21,9 +21,7 @@
  */
 #ifndef _UPDATE_CHECK_VERSION_H
     #define _UPDATE_CHECK_VERSION_H
-
-    #include <TTGO.h>
-
+    
     /**
      * @brief   get firmware discription file
      * 

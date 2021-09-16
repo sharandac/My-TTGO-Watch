@@ -22,7 +22,9 @@
 #ifndef _OSM_APP_MAIN_H
     #define _OSM_APP_MAIN_H
 
-    #include <TTGO.h>
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #endif
 
     #define OSMMAP_TASK_STACK_SIZE              5000
 

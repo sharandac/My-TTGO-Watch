@@ -22,6 +22,8 @@
 
 #include "alarm_clock.h"
 #include "alarm_in_progress.h"
+#include "config/alarm_clock_config.h"
+
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
 #include "gui/sound/piep.h"

@@ -1,7 +1,6 @@
 #include "config.h"
-#include <TTGO.h>
-#include "quickglui/quickglui.h"
 
+#include "quickglui/quickglui.h"
 #include "fx_rates.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"

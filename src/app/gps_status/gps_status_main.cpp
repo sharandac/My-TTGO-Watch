@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "gps_status.h"
 #include "gps_status_main.h"
@@ -37,6 +36,11 @@
 #include "hardware/display.h"
 #include "gui/mainbar/mainbar.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+
+#endif
 /*
  * tile  and style objects
  */
@@ -106,7 +110,7 @@ void gps_status_main_setup(uint32_t tile_num) {
     lv_obj_t *satfix_cont = lv_obj_create(gps_status_main_tile, NULL);
     lv_obj_set_size(satfix_cont, lv_disp_get_hor_res(NULL), STATUS_HEIGHT);
     lv_obj_add_style(satfix_cont, LV_OBJ_PART_MAIN, &gps_status_value_style);
-    lv_obj_align(satfix_cont, gps_status_main_tile, LV_ALIGN_IN_TOP_MID, 0, 25);
+    lv_obj_align(satfix_cont, gps_status_main_tile, LV_ALIGN_IN_TOP_MID, 0, STATUSBAR_HEIGHT );
     lv_obj_t *satfix_label = lv_label_create(satfix_cont, NULL);
     lv_obj_add_style(satfix_label, LV_OBJ_PART_MAIN, &gps_status_value_style);
     lv_label_set_text(satfix_label, "SatFix");

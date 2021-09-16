@@ -18,11 +18,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-#include <math.h>
-#include <lwip/sockets.h>
-
-#include "esp_wifi.h"
 
 #include "hardware/wifictl.h"
 #include "hardware/display.h"
@@ -38,6 +33,20 @@
 #include "gui/widget_styles.h"
 #include "gui/widget_factory.h"
 
+#ifdef NATIVE_64BIT
+    #include <time.h>
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+    #include <Arduino.h>
+    #include <math.h>
+    #include <lwip/sockets.h>
+    #include "esp_wifi.h"
+
+    void wifimon_sniffer_packet_handler( void* buff, wifi_promiscuous_pkt_type_t type );
+    static wifi_country_t wifi_country = {.cc="CN", .schan = 1, .nchan = 13}; 
+#endif
+
 lv_obj_t *wifimon_app_main_tile = NULL;
 lv_obj_t *chart = NULL;
 lv_obj_t *channel_select = NULL; 
@@ -52,7 +61,6 @@ LV_IMG_DECLARE(exit_dark_48px);
 LV_IMG_DECLARE(wifimon_app_32px);
 LV_FONT_DECLARE(Ubuntu_72px);
 
-void wifimon_sniffer_packet_handler( void* buff, wifi_promiscuous_pkt_type_t type );
 static void exit_wifimon_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void wifimon_sniffer_set_channel( uint8_t channel );
 static void wifimon_app_task( lv_task_t * task );
@@ -61,8 +69,10 @@ static void wifimon_hibernate_cb( void );
 
 uint8_t level = 0, channel = 1;
 int data = 0, mgmt = 0, misc = 0; 
-static wifi_country_t wifi_country = {.cc="CN", .schan = 1, .nchan = 13}; 
 
+#ifdef NATIVE_64BIT
+
+#else
 void wifimon_sniffer_packet_handler( void* buff, wifi_promiscuous_pkt_type_t type ) {
     switch( type ) {
         case WIFI_PKT_MGMT: 
@@ -76,9 +86,14 @@ void wifimon_sniffer_packet_handler( void* buff, wifi_promiscuous_pkt_type_t typ
             break;
     }
 }
+#endif
 
 static void wifimon_sniffer_set_channel( uint8_t channel ) {
+#ifdef NATIVE_64BIT
+
+#else
     esp_wifi_set_channel( channel, WIFI_SECOND_CHAN_NONE );
+#endif
     log_i("set wifi channel: %d", channel );
 }
 
@@ -101,7 +116,7 @@ void wifimon_app_main_setup( uint32_t tile_num ) {
      * add chart widget
      */
     chart = lv_chart_create( wifimon_app_main_tile, NULL );
-    lv_obj_set_size( chart, 240, 240 );
+    lv_obj_set_size( chart, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - THEME_ICON_SIZE );
     lv_obj_align( chart, NULL, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     lv_chart_set_type( chart, LV_CHART_TYPE_LINE );  
     lv_chart_set_point_count( chart, 32 );
@@ -118,15 +133,15 @@ void wifimon_app_main_setup( uint32_t tile_num ) {
     /**
      * add exit button
      */
-    lv_obj_t * exit_btn = wf_add_image_button( wifimon_app_main_tile, exit_dark_48px, exit_wifimon_app_main_event_cb, &wifimon_app_main_style );
-    lv_obj_align( exit_btn, wifimon_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( wifimon_app_main_tile, exit_wifimon_app_main_event_cb, &wifimon_app_main_style );
+    lv_obj_align( exit_btn, wifimon_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add channel select roller
      */
     channel_select = lv_roller_create(wifimon_app_main_tile, NULL);
     lv_roller_set_options( channel_select, "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13", LV_ROLLER_MODE_INIFINITE );
     lv_roller_set_visible_row_count( channel_select, 5 );
-    lv_obj_align( channel_select, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 0);
+    lv_obj_align( channel_select, NULL, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, THEME_ICON_PADDING );
     lv_obj_set_event_cb( channel_select, wifimon_channel_select_event_handler );
     /**
      * add chart series label
@@ -137,7 +152,7 @@ void wifimon_app_main_setup( uint32_t tile_num ) {
     lv_label_set_align( chart_series_label, LV_LABEL_ALIGN_RIGHT );       
     lv_label_set_text( chart_series_label, "#ffff00 - misc#\n#ff0000 - mgmt#\n#11ff00 - data#"); 
     lv_obj_set_width( chart_series_label, 70 );
-    lv_obj_align( chart_series_label, NULL, LV_ALIGN_IN_TOP_RIGHT, -5, 5);
+    lv_obj_align( chart_series_label, NULL, LV_ALIGN_IN_TOP_RIGHT, -THEME_ICON_PADDING, THEME_ICON_PADDING );
 
     mainbar_add_tile_activate_cb( tile_num, wifimon_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, wifimon_hibernate_cb );
@@ -155,7 +170,11 @@ static void wifimon_hibernate_cb( void ) {
         lv_task_del(_wifimon_app_task);
         _wifimon_app_task = NULL;
     }  
+#ifdef NATIVE_64BIT
+
+#else
     esp_wifi_set_promiscuous( false ); 
+#endif
     wifictl_off();
     /**
      * restore display timeout time
@@ -171,6 +190,9 @@ static void wifimon_activate_cb( void ) {
     /**
      * setup promiscuous mode
      */
+#ifdef NATIVE_64BIT
+
+#else
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init( &cfg );
     esp_wifi_set_country( &wifi_country );
@@ -180,10 +202,11 @@ static void wifimon_activate_cb( void ) {
     esp_wifi_set_promiscuous_rx_cb( &wifimon_sniffer_packet_handler );
     lv_roller_set_selected( channel_select, 0, LV_ANIM_OFF );
     wifimon_sniffer_set_channel( 1 );
+#endif
     /**
      * start stats fetch task
      */
-    _wifimon_app_task = lv_task_create( wifimon_app_task, 500, LV_TASK_PRIO_MID, NULL );
+    _wifimon_app_task = lv_task_create( wifimon_app_task, 1000, LV_TASK_PRIO_MID, NULL );
     /**
      * save display timeout time
      */

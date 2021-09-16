@@ -22,16 +22,21 @@
 
 #include "config.h"
 #include "wifictlconfig.h"
-#ifdef ENABLE_WEBSERVER
-    #include "utils/webserver/webserver.h"
-#endif
-#ifdef ENABLE_FTPSERVER
-    #include "utils/ftpserver/ftpserver.h"
-#endif
-#ifdef ENABLE_MQTT
-    #include "utils/mqtt/mqtt.h"
-#endif
 #include "utils/alloc.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #ifdef ENABLE_WEBSERVER
+        #include "utils/webserver/webserver.h"
+    #endif
+    #ifdef ENABLE_FTPSERVER
+        #include "utils/ftpserver/ftpserver.h"
+    #endif
+    #ifdef ENABLE_MQTT
+        #include "utils/mqtt/mqtt.h"
+    #endif
+#endif
 
 wifictl_config_t::wifictl_config_t() : BaseJsonConfig( WIFICTL_JSON_CONFIG_FILE ) {}
 
@@ -40,9 +45,8 @@ bool wifictl_config_t::onSave(JsonDocument& doc) {
      * save config structure into json file
      */
     doc["autoon"] = autoon;
-    doc["enable_on_standby"] = enable_on_standby;
-    doc["hostname"] = hostname;
 
+#ifndef NATIVE_64BIT
     #ifdef ENABLE_WEBSERVER
         doc["webserver"] = webserver;
     #endif
@@ -59,6 +63,10 @@ bool wifictl_config_t::onSave(JsonDocument& doc) {
         doc["mqttuser"] = mqttuser;
         doc["mqttpass"] = mqttpass;
     #endif
+#endif
+
+    doc["hostname"] = hostname;
+    doc["enable_on_standby"] = enable_on_standby;
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
         doc["networklist"][ i ]["ssid"] = networklist[ i ].ssid;
         doc["networklist"][ i ]["psk"] = networklist[ i ].password;
@@ -94,6 +102,7 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
         strlcpy( hostname, doc["hostname"], sizeof( hostname ) );
     }
 
+#ifndef NATIVE_64BIT
     #ifdef ENABLE_WEBSERVER
         webserver = doc["webserver"] | false;
     #endif
@@ -117,22 +126,23 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
     #ifdef ENABLE_MQTT
         mqtt = doc["mqtt"] | false;
         mqttssl = doc["mqttssl"] | false;
-        if ( doc["mqttserver"] ) {
-            strlcpy( mqttserver, doc["mqttserver"], sizeof( mqttserver ) );
+        if (doc["mqttserver"]) {
+            strlcpy(mqttserver, doc["mqttserver"], sizeof(mqttserver));
         }
         mqttport = doc["mqttport"] | 1883;
-        if ( doc["mqttuser"] ) {
-            strlcpy( mqttuser, doc["mqttuser"], sizeof( mqttuser ) );
+        if (doc["mqttuser"]) {
+            strlcpy(mqttuser, doc["mqttuser"], sizeof(mqttuser));
         }
-        if ( doc["mqttpass"] ) {
-            strlcpy( mqttpass, doc["mqttpass"], sizeof( mqttpass ) );
+        if (doc["mqttpass"]) {
+            strlcpy(mqttpass, doc["mqttpass"], sizeof(mqttpass));
         }
     #endif
+#endif
 
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
         if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
-            strlcpy( networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( networklist[ i ].ssid ) );
-            strlcpy( networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( networklist[ i ].password ) );
+            strncpy( networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( networklist[ i ].ssid ) );
+            strncpy( networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( networklist[ i ].password ) );
         }
     }
 
@@ -165,6 +175,7 @@ bool wifictl_config_t::onDefault( void ) {
     enable_on_standby = false;
     strlcpy( hostname, "", sizeof( hostname ) );
 
+#ifndef NATIVE_64BIT
     #ifdef ENABLE_WEBSERVER
         webserver = false;
     #endif
@@ -183,6 +194,7 @@ bool wifictl_config_t::onDefault( void ) {
         strlcpy( mqttuser, "", sizeof( mqttuser ) );
         strlcpy( mqttpass, "", sizeof( mqttpass ) );
     #endif
+#endif
 
     return( true );
 }

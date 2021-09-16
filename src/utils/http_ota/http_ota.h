@@ -2,6 +2,11 @@
     #define __HTTP_OTA_H
 
     #include "hardware/callback.h"
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
+        #include <Arduino.h>
+    #endif
 
     #define HTTP_OTA_START          _BV(0)      /** @brief http ota start event mask, callback arg is (char*) */
     #define HTTP_OTA_FINISH         _BV(1)      /** @brief http ota finish event mask, callback arg is (char*) */

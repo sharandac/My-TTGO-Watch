@@ -20,8 +20,6 @@
  */
 #pragma once
 
-#include <TTGO.h>
-
 void alarm_in_progress_tile_setup( void );
 void alarm_in_progress_start_alarm();
 void alarm_in_progress_finish_alarm();

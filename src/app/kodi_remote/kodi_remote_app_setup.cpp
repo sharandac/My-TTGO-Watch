@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
 
 #include "kodi_remote_app.h"
 #include "kodi_remote_app_setup.h"
@@ -30,6 +29,19 @@
 #include "gui/keyboard.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+    #include <string>
+
+    using namespace std;
+    #define String string
+#else
+    #include <Arduino.h>
+    #include <FS.h>
+    #include <SPIFFS.h>
+#endif
 
 lv_obj_t *kodi_remote_app_setup_tile = NULL;
 lv_style_t kodi_remote_app_setup_style;
@@ -60,7 +72,7 @@ void kodi_remote_app_setup_setup( uint32_t tile_num ) {
     lv_obj_t *kodi_remote_server_cont = lv_obj_create( kodi_remote_app_setup_tile, NULL );
     lv_obj_set_size( kodi_remote_server_cont, lv_disp_get_hor_res( NULL ) , 37);
     lv_obj_add_style( kodi_remote_server_cont, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
-    lv_obj_align( kodi_remote_server_cont, kodi_remote_app_setup_tile, LV_ALIGN_IN_TOP_MID, 0, 47 );
+    lv_obj_align( kodi_remote_server_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
     lv_obj_t *kodi_remote_server_label = lv_label_create( kodi_remote_server_cont, NULL);
     lv_obj_add_style( kodi_remote_server_label, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
     lv_label_set_text( kodi_remote_server_label, "host");
@@ -160,9 +172,9 @@ static void kodi_remote_num_textarea_event_cb( lv_obj_t * obj, lv_event_t event 
 
 void kodi_remote_setup_save_config( void ) {
     kodi_remote_config_t *kodi_remote_config = kodi_remote_get_config();
-    strlcpy( kodi_remote_config->host, lv_textarea_get_text( kodi_remote_host_textfield ), sizeof( kodi_remote_config->host ) );
-    strlcpy( kodi_remote_config->user, lv_textarea_get_text( kodi_remote_user_textfield ), sizeof( kodi_remote_config->user ) );
-    strlcpy( kodi_remote_config->pass, lv_textarea_get_text( kodi_remote_pass_textfield ), sizeof( kodi_remote_config->pass ) );
+    strncpy( kodi_remote_config->host, lv_textarea_get_text( kodi_remote_host_textfield ), sizeof( kodi_remote_config->host ) );
+    strncpy( kodi_remote_config->user, lv_textarea_get_text( kodi_remote_user_textfield ), sizeof( kodi_remote_config->user ) );
+    strncpy( kodi_remote_config->pass, lv_textarea_get_text( kodi_remote_pass_textfield ), sizeof( kodi_remote_config->pass ) );
     kodi_remote_config->port = atoi(lv_textarea_get_text( kodi_remote_port_textfield ));
     kodi_remote_save_config();
 }

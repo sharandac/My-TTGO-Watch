@@ -22,7 +22,6 @@
 #ifndef _TIME_SYNC_H
     #define _TIME_SYNC_H
 
-    #include <TTGO.h>
     #include "callback.h"
     #include "hardware/config/timesyncconfig.h"
 

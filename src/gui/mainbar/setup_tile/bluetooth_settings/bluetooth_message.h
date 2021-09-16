@@ -22,8 +22,7 @@
 #ifndef _BLUETOOTH_MESSAGE_H
     #define _BLUETOOTH_MESSAGE_H
 
-    #include <TTGO.h>
-    #include "lvgl/lvgl.h"
+    #include "lvgl.h"
 
     struct src_icon_t {
         const char src_name[ 24 ];

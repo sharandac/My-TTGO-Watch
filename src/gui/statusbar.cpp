@@ -23,14 +23,9 @@
 #include <stdio.h>
 
 #include "config.h"
-#include <Arduino.h>
 #include <time.h>
 #include "gui.h"
-#include <WiFi.h>
 #include "string.h"
-#include <Ticker.h>
-#include "FS.h"
-#include "SD.h"
 
 #include "statusbar.h"
 
@@ -47,13 +42,19 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 #include "gui/mainbar/mainbar.h"
-#include "gui/mainbar/setup_tile/wlan_settings/wlan_settings.h"
-#include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
-#include "gui/mainbar/setup_tile/sound_settings/sound_settings.h"
-#include "gui/mainbar/setup_tile/display_settings/display_settings.h"
-#include "gui/mainbar/setup_tile/gps_settings/gps_settings.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #include <Arduino.h>
+    #include <WiFi.h>
+    #include <Ticker.h>
+    #include "FS.h"
+    #include "SD.h"
+#endif
 
 static bool statusbar_init = false;
+static bool statusbar_expanded = false;
 static bool statusbar_refresh_update = false;
 static bool force_dark_mode = false;
 
@@ -77,10 +78,12 @@ LV_IMG_DECLARE(brightness_32px);
 LV_IMG_DECLARE(sound_32px);
 LV_IMG_DECLARE(sound_mute_32px);
 LV_IMG_DECLARE(gps_64px);
+LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_32px);
 
 lv_status_bar_t statusicon[ STATUSBAR_NUM ] = 
 {
-    { NULL, NULL, LV_ALIGN_IN_TOP_RIGHT, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
+    { NULL, NULL, LV_ALIGN_IN_RIGHT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BATTERY_FULL, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_BLUETOOTH, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
     { NULL, LV_SYMBOL_WIFI, LV_ALIGN_OUT_LEFT_MID, &statusbarstyle[ STATUSBAR_STYLE_WHITE ] },
@@ -127,6 +130,12 @@ void statusbar_setup( void )
         return;
     }
 
+#if defined( BIG_THEME )
+    const lv_font_t *statusbar_font = &lv_font_montserrat_32;
+#else
+    const lv_font_t *statusbar_font = &lv_font_montserrat_14;
+#endif
+
     /*Copy a built-in style to initialize the new style*/
     lv_style_init(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_radius(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, 0);
@@ -135,6 +144,7 @@ void statusbar_setup( void )
     lv_style_set_border_width(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
     lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
+    lv_style_set_text_font( &statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, statusbar_font );
 
     lv_style_copy( &statusbarstyle[ STATUSBAR_STYLE_WHITE ], &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_OPA_0);
@@ -191,7 +201,7 @@ void statusbar_setup( void )
         lv_obj_reset_style_list( statusicon[i].icon, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusicon[i].icon, LV_OBJ_PART_MAIN, statusicon[i].style );
         if ( i == 0 )
-            lv_obj_align(statusicon[i].icon, NULL, statusicon[i].align, -5, 4);
+            lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
         else
             lv_obj_align(statusicon[i].icon, statusicon[i-1].icon, statusicon[i].align, -5, 0);
     }
@@ -647,7 +657,7 @@ void statusbar_display_event_cb( lv_obj_t *display, lv_event_t event ){
     switch ( event ) {
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
-            mainbar_jump_to_tilenumber( display_get_setup_tile_num(), LV_ANIM_OFF);
+//            mainbar_jump_to_tilenumber( display_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
     statusbar_refresh_update = true;
@@ -677,7 +687,7 @@ void statusbar_sound_event_cb( lv_obj_t *sound, lv_event_t event ) {
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
-            mainbar_jump_to_tilenumber( sound_get_setup_tile_num(), LV_ANIM_OFF);
+//            mainbar_jump_to_tilenumber( sound_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
     statusbar_refresh_update = true;
@@ -706,7 +716,7 @@ void statusbar_wifi_event_cb( lv_obj_t *wifi, lv_event_t event ) {
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
-            mainbar_jump_to_tilenumber(wifi_get_setup_tile_num(), LV_ANIM_OFF);
+//            mainbar_jump_to_tilenumber(wifi_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
     statusbar_refresh_update = true;
@@ -733,7 +743,7 @@ void statusbar_gps_event_cb( lv_obj_t *gps, lv_event_t event ) {
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
-            mainbar_jump_to_tilenumber( gps_get_setup_tile_num() , LV_ANIM_OFF);
+//            mainbar_jump_to_tilenumber( gps_get_setup_tile_num() , LV_ANIM_OFF);
             statusbar_refresh_update = true;
             break;
     }
@@ -764,7 +774,7 @@ void statusbar_bluetooth_event_cb( lv_obj_t *bluetooth, lv_event_t event ) {
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
             statusbar_expand( false );
-            mainbar_jump_to_tilenumber(bluetooth_get_setup_tile_num(), LV_ANIM_OFF);
+//            mainbar_jump_to_tilenumber(bluetooth_get_setup_tile_num(), LV_ANIM_OFF);
             break;
     }
     statusbar_refresh_update = true;
@@ -882,10 +892,11 @@ void statusbar_refresh( void ) {
     }
 
     lv_obj_t *last_visible = NULL;
+
     for ( int i = 0 ; i < STATUSBAR_NUM ; i++ ) {
         if ( !lv_obj_get_hidden( statusicon[ i ].icon ) ) {
             if ( last_visible == NULL ) {
-                lv_obj_align( statusicon[ i ].icon, NULL, statusicon[ i ].align, -5, 4);
+                if ( !statusbar_expanded ) lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
             } else {
                 lv_obj_align( statusicon[ i ].icon, last_visible, statusicon[ i ].align, -5, 0);
             }
@@ -970,10 +981,12 @@ void statusbar_expand( bool expand ) {
     if ( expand ) {
         lv_obj_set_height( statusbar, STATUSBAR_EXPAND_HEIGHT );
         statusbar_set_dark( true );
+        statusbar_expanded = true;
     } 
     else {
         lv_obj_set_height( statusbar, STATUSBAR_HEIGHT );
         statusbar_set_dark( false );
+        statusbar_expanded = false;
         //Save config here if anything has changed
         if( should_save_brightness_config ){
             display_save_config();

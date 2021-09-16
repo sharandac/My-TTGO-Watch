@@ -28,7 +28,23 @@
     #define WEATHER_TODAY_BUFFER_SIZE       10000
     #define WEATHER_FORECAST_BUFFER_SIZE    40000
 
+    /**
+     * @brief fetch today weather information
+     * 
+     * @param weather_config    pointer to the weather config
+     * @param weather_today     pointer to the weather today structure
+     *
+     * @return  200 ok, otherwise failed
+     */
     int weather_fetch_today( weather_config_t * weather_config, weather_forcast_t * weather_today );
+    /**
+     * @brief fetch forecast weather information
+     * 
+     * @param weather_config    pointer to the weather config
+     * @param weather_forecast  pointer to the weather forecast structure
+     *
+     * @return  200 ok, otherwise failed
+     */
     int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t * weather_forecast );
 
 #endif // _WEATHER_FETCH_H

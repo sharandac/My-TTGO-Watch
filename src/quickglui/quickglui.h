@@ -22,8 +22,8 @@
 #include "common/jsonconfig.h"
 #include "common/jsonoptions.h"
 #include "common/jsonrequest.h"
-#include "common/bluejsonrequest.h"
-#include "common/bluejsonresponse.h"
+#include "utils/bluejsonrequest.h"
+#include "utils/bluejsonresponse.h"
 
 #include "os/appicon.h"
 

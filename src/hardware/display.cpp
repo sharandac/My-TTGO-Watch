@@ -20,14 +20,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <TTGO.h>
-
+#include "lvgl.h"
 #include "display.h"
 #include "powermgm.h"
-#include "motor.h"
-#include "bma.h"
 #include "framebuffer.h"
-#include "gui/gui.h"
+#include "bma.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+#else
+    #ifdef M5PAPER
+        #include <M5EPD.h>
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #include <TTGO.h>
+    #endif
+#endif
 
 display_config_t display_config;
 callback_t *display_callback = NULL;
@@ -47,15 +54,22 @@ void display_setup( void ) {
     /**
      * setup backlight and rotation
      */
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    ttgo->openBL();
-    ttgo->bl->adjust( 0 );
-    ttgo->tft->setRotation( display_config.rotation / 90 );
-    bma_set_rotate_tilt( display_config.rotation );
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            ttgo->tft->init();
+            ttgo->openBL();
+            ttgo->bl->adjust( 0 );
+            ttgo->tft->setRotation( display_config.rotation / 90 );
+            bma_set_rotate_tilt( display_config.rotation );
+        #endif
+    #endif
     /**
      * setup framebuffer
      */
-    framebuffer_setup( display_config.use_dma, display_config.use_double_buffering );
+    framebuffer_setup();
     /**
      * register powermgm and pwermgm loop callback functions
      */
@@ -81,31 +95,37 @@ bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
 }
 
 void display_loop( void ) {
-  TTGOClass *ttgo = TTGOClass::getWatch();
-    /**
-     * check if backlight adjust has change
-     */
-    if ( dest_brightness != brightness ) {
-        if ( brightness < dest_brightness ) {
-            brightness++;
-            ttgo->bl->adjust( brightness );
-        }
-        else {
-            brightness--;
-            ttgo->bl->adjust( brightness );
-        }
-  }
-  /**
-   * check timeout
-   */
-  if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
-        if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
-            dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
-        }
-        else {
-            dest_brightness = display_get_brightness();
-        }
-    }
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            /**
+             * check if backlight adjust has change
+             */
+            if ( dest_brightness != brightness ) {
+                if ( brightness < dest_brightness ) {
+                    brightness++;
+                    ttgo->bl->adjust( brightness );
+                }
+                else {
+                    brightness--;
+                    ttgo->bl->adjust( brightness );
+                }
+            }
+            /**
+             * check timeout
+             */
+            if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+                }
+                else {
+                    dest_brightness = display_get_brightness();
+                }
+            }
+        #endif
+    #endif
 }
 
 bool display_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
@@ -124,53 +144,76 @@ bool display_send_event_cb( EventBits_t event, void *arg ) {
 }
 
 void display_standby( void ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
-    log_i("go standby");
-    ttgo->bl->adjust( 0 );
-    ttgo->displaySleep();
-    ttgo->closeBL();
-    brightness = 0;
-    dest_brightness = 0;
-    #if defined( LILYGO_WATCH_2020_V2 )
-        ttgo->power->setLDO2Voltage( 3300 );
-        ttgo->power->setLDO3Voltage( 3300 );
-        ttgo->power->setPowerOutPut( AXP202_LDO2, false );
-        ttgo->power->setPowerOutPut( AXP202_LDO3, false );
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            ttgo->bl->adjust( 0 );
+            ttgo->displaySleep();
+            ttgo->closeBL();
+            brightness = 0;
+            dest_brightness = 0;
+            #if defined( LILYGO_WATCH_2020_V2 )
+                ttgo->power->setLDO2Voltage( 3300 );
+                ttgo->power->setLDO3Voltage( 3300 );
+                ttgo->power->setPowerOutPut( AXP202_LDO2, false );
+                ttgo->power->setPowerOutPut( AXP202_LDO3, false );
+            #endif
+        #endif
     #endif
+    log_i("go standby");
 }
 
 void display_wakeup( bool silence ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
     /**
      * wakeup with or without display
      */
     if ( silence ) {
-        log_i("go silence wakeup");
-        #if defined( LILYGO_WATCH_2020_V2 )
-            ttgo->power->setLDO2Voltage( 3300 );
-            ttgo->power->setLDO3Voltage( 3300 );
-            ttgo->power->setPowerOutPut( AXP202_LDO2, true );
-            ttgo->power->setPowerOutPut( AXP202_LDO3, true );
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+                M5.enableEPDPower();
+                delay(25);
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                #if defined( LILYGO_WATCH_2020_V2 )
+                    ttgo->power->setLDO2Voltage( 3300 );
+                    ttgo->power->setLDO3Voltage( 3300 );
+                    ttgo->power->setPowerOutPut( AXP202_LDO2, true );
+                    ttgo->power->setPowerOutPut( AXP202_LDO3, true );
+                #endif
+                ttgo->openBL();
+                ttgo->displayWakeup();
+                ttgo->bl->adjust( 0 );
+                brightness = 0;
+                dest_brightness = 0;
+            #endif
         #endif
-        ttgo->openBL();
-        ttgo->displayWakeup();
-        ttgo->bl->adjust( 0 );
-        brightness = 0;
-        dest_brightness = 0;
+        log_i("go silence wakeup");
     }
     else {
-        log_i("go wakeup");
-        #if defined( LILYGO_WATCH_2020_V2 )
-            ttgo->power->setLDO2Voltage( 3300 );
-            ttgo->power->setLDO3Voltage( 3300 );
-            ttgo->power->setPowerOutPut( AXP202_LDO2, true );
-            ttgo->power->setPowerOutPut( AXP202_LDO3, true );
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+                M5.enableEPDPower();
+                delay(25);
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                TTGOClass *ttgo = TTGOClass::getWatch();
+                #if defined( LILYGO_WATCH_2020_V2 )
+                    ttgo->power->setLDO2Voltage( 3300 );
+                    ttgo->power->setLDO3Voltage( 3300 );
+                    ttgo->power->setPowerOutPut( AXP202_LDO2, true );
+                    ttgo->power->setPowerOutPut( AXP202_LDO3, true );
+                #endif
+                ttgo->openBL();
+                ttgo->displayWakeup();
+                ttgo->bl->adjust( 0 );
+                brightness = 0;
+                dest_brightness = display_get_brightness();
+            #endif
         #endif
-        ttgo->openBL();
-        ttgo->displayWakeup();
-        ttgo->bl->adjust( 0 );
-        brightness = 0;
-        dest_brightness = display_get_brightness();
+        log_i("go wakeup");
     }
 }
 
@@ -215,7 +258,6 @@ bool display_get_use_double_buffering( void ) {
 
 void display_set_use_double_buffering( bool use_double_buffering ) {
     display_config.use_double_buffering = use_double_buffering;
-    framebuffer_setup( display_config.use_dma, display_config.use_double_buffering );
 }
 
 bool display_get_use_dma( void ) {
@@ -224,7 +266,6 @@ bool display_get_use_dma( void ) {
 
 void display_set_use_dma( bool use_dma ) {
     display_config.use_dma = use_dma;
-    framebuffer_setup( display_config.use_dma, display_config.use_double_buffering );
 }
 
 void display_set_block_return_maintile( bool block_return_maintile ) {
@@ -232,9 +273,16 @@ void display_set_block_return_maintile( bool block_return_maintile ) {
 }
 
 void display_set_rotation( uint32_t rotation ) {
-    TTGOClass *ttgo = TTGOClass::getWatch();
+    #ifdef NATIVE_64BIT
+    #else
+        #ifdef M5PAPER
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            display_config.rotation = rotation;
+            ttgo->tft->setRotation( rotation / 90 );
+        #endif
+    #endif
     display_config.rotation = rotation;
-    ttgo->tft->setRotation( rotation / 90 );
     lv_obj_invalidate( lv_scr_act() );
 }
 

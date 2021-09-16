@@ -32,7 +32,6 @@
 #include "hardware/gpsctl.h"
 
 lv_obj_t *gps_settings_tile = NULL;
-lv_style_t gps_settings_style;
 uint32_t gps_tile_num;
 
 lv_obj_t *autoon_onoff = NULL;
@@ -56,11 +55,8 @@ void gps_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
     gps_tile_num = mainbar_add_app_tile( 1, 1, "gps settings" );
     gps_settings_tile = mainbar_get_tile_obj( gps_tile_num );
-    lv_style_copy( &gps_settings_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &gps_settings_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &gps_settings_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &gps_settings_style, LV_OBJ_PART_MAIN, 0);
-    lv_obj_add_style( gps_settings_tile, LV_OBJ_PART_MAIN, &gps_settings_style );
+
+    lv_obj_add_style( gps_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
 
     icon_t *gps_setup_icon = setup_register( "gps", &gps_64px, enter_gps_setup_event_cb );
     setup_hide_indicator( gps_setup_icon );
@@ -72,26 +68,26 @@ void gps_settings_tile_setup( void ) {
     /**
      * add autoon switch
      */
-    lv_obj_t *autoon_cont = wf_add_labeled_switch( gps_settings_tile, "autoon", &autoon_onoff, gpsctl_get_autoon(), autoon_onoff_event_handler );
+    lv_obj_t *autoon_cont = wf_add_labeled_switch( gps_settings_tile, "autoon", &autoon_onoff, gpsctl_get_autoon(), autoon_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( autoon_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add enable on standby switch
      */
-    lv_obj_t *enable_on_standby_cont = wf_add_labeled_switch( gps_settings_tile, "enable on standby", &enable_on_standby_onoff, gpsctl_get_enable_on_standby(), enable_on_standby_onoff_event_handler );
+    lv_obj_t *enable_on_standby_cont = wf_add_labeled_switch( gps_settings_tile, "enable on standby", &enable_on_standby_onoff, gpsctl_get_enable_on_standby(), enable_on_standby_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( enable_on_standby_cont, autoon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add app use gps switch
      */
-    lv_obj_t *app_use_gps_cont = wf_add_labeled_switch( gps_settings_tile, "apps use gps", &app_use_gps_onoff, gpsctl_get_app_use_gps(), app_use_gps_onoff_event_handler );
+    lv_obj_t *app_use_gps_cont = wf_add_labeled_switch( gps_settings_tile, "apps use gps", &app_use_gps_onoff, gpsctl_get_app_use_gps(), app_use_gps_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( app_use_gps_cont, enable_on_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * add fake gps via ip switch
      */
-    lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler );
+    lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler, ws_get_setup_tile_style() );
     lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     gps_latlon_label = lv_label_create( gps_settings_tile, NULL);
-    lv_obj_add_style( gps_latlon_label, LV_OBJ_PART_MAIN, &gps_settings_style  );
+    lv_obj_add_style( gps_latlon_label, LV_OBJ_PART_MAIN, ws_get_mainbar_style()  );
     lv_label_set_text( gps_latlon_label, "fix: - lat: - lon: -");
     lv_obj_align( gps_latlon_label, gps_settings_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -5 );
 

@@ -16,7 +16,7 @@
 #ifndef _CALENDAR_APP_H
     #define _CALENDAR_APP_H
 
-    #include <TTGO.h>
+    #
     #define CALENDAR_INFO_LOG               log_i
     #define CALENDAR_DEBUG_LOG              log_d
     #define CALENDAR_ERROR_LOG              log_e

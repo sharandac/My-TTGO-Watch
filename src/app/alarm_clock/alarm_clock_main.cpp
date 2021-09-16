@@ -20,10 +20,9 @@
  */
 
 #include "config.h"
-#include <TTGO.h>
-
 #include "alarm_clock.h"
 #include "alarm_clock_main.h"
+#include "config/alarm_clock_config.h"
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/mainbar.h"
@@ -83,7 +82,6 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
 void alarm_clock_main_setup( uint32_t tile_num ) {
     lv_obj_t * main_tile = mainbar_get_tile_obj( tile_num );
     
-
     lv_obj_t * tile_container = wf_add_tile_container(main_tile, LV_LAYOUT_COLUMN_MID);
     lv_obj_t * footer_container = wf_add_tile_footer_container(main_tile, LV_LAYOUT_PRETTY_TOP);
 
@@ -103,21 +101,24 @@ void alarm_clock_main_setup( uint32_t tile_num ) {
     sunday_btn = wf_add_button(weekday_container, alarm_clock_get_week_day(0, true), day_btn_width, day_btn_height, NULL);
 
     lv_obj_t *roller_container = wf_add_container(tile_container, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT);
-    lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 10);
-    lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 10);
+    lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, THEME_ICON_PADDING);
+    lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, THEME_ICON_PADDING);
 
-    hour_roller = wf_add_roller(
-        roller_container, get_roller_content(24, false, !clock_format_24), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT
-    );
-    lv_obj_set_width(hour_roller, 90);
+    hour_roller = wf_add_roller( roller_container, get_roller_content(24, false, !clock_format_24), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT );
+    lv_obj_set_width( hour_roller, 90 );
+    lv_obj_set_height( hour_roller, 90 );
+
     wf_add_label(roller_container, ":");
-    minute_roller = wf_add_roller(
-        roller_container, get_roller_content(60, true, false), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT
-    );
-    lv_obj_set_width(minute_roller, 90);
 
-    wf_add_exit_button(footer_container);
-    wf_add_setup_button(footer_container, enter_alarm_clock_setup_event_cb);
+    minute_roller = wf_add_roller( roller_container, get_roller_content(60, true, false), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT );
+    lv_obj_set_width(minute_roller, 90);
+    lv_obj_set_height( minute_roller, 90 );
+
+    lv_obj_t *exit_btn = wf_add_exit_button( main_tile );
+    lv_obj_align(exit_btn, main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
+
+    lv_obj_t *setup_btn = wf_add_setup_button( main_tile, enter_alarm_clock_setup_event_cb );
+    lv_obj_align(setup_btn, main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 
 void alarm_clock_main_set_data_to_display(rtcctl_alarm_t *alarm_data, bool clock_24){

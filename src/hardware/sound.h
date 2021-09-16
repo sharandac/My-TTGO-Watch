@@ -22,10 +22,10 @@
 #ifndef _SOUND_H
     #define _SOUND_H
 
-    #include "TTGO.h"
     #include "callback.h"
     #include "hardware/config/soundconfig.h"
-
+    #include "utils/io.h"
+    
     #define SOUNDCTL_ENABLED           _BV(0)         /** @brief event mask for sound enabled/disable, callback arg is (bool*) */
     #define SOUNDCTL_VOLUME            _BV(1)         /** @brief event mask for sound volume change, callback arg is (uint8_t*)  */
 
