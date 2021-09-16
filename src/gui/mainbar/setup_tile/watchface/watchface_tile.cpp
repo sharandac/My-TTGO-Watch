@@ -142,7 +142,7 @@ void watchface_tile_setup( void ) {
 
     watchface_theme_config.load();
 
-    lv_style_copy( &watchface_app_tile_style, ws_get_mainbar_style() );
+    lv_style_copy( &watchface_app_tile_style, ws_get_app_style() );
     lv_style_set_radius( &watchface_app_tile_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &watchface_app_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &watchface_app_tile_style, LV_OBJ_PART_MAIN, LV_OPA_0 );
@@ -156,7 +156,7 @@ void watchface_tile_setup( void ) {
     lv_style_set_border_width( &watchface_app_image_style, LV_OBJ_PART_MAIN, 0 );
 
     lv_obj_t *watchface_cont = lv_obj_create( watchface_app_tile, NULL );
-    lv_obj_set_size( watchface_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
+    lv_obj_set_size( watchface_cont, 240, 240 );
     lv_obj_add_style( watchface_cont, LV_OBJ_PART_MAIN, &watchface_app_tile_style );
     lv_obj_align( watchface_cont, watchface_app_tile, LV_ALIGN_CENTER, 0, 0 );
     /**

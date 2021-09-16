@@ -95,10 +95,10 @@ void wlan_settings_tile_setup( void ) {
     setup_hide_indicator( wifi_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan" );
-    lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT  + THEME_ICON_PADDING );
 
     lv_obj_t *setup_btn = wf_add_setup_button( wifi_settings_tile, enter_wifi_setup_event_cb, &wifi_settings_style );
-    lv_obj_align( setup_btn, wifi_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( setup_btn, wifi_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
     /*Copy the first switch and turn it ON*/    
     wifi_onoff = wf_add_switch( wifi_settings_tile, false );
@@ -106,12 +106,12 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_set_event_cb( wifi_onoff, wifi_onoff_event_handler);
 
     wifiname_list = lv_list_create( wifi_settings_tile, NULL);
-    lv_obj_set_size( wifiname_list, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - STATUSBAR_HEIGHT - 40 );
+    lv_obj_set_size( wifiname_list, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - STATUSBAR_HEIGHT - THEME_ICON_SIZE );
     lv_style_init( &wifi_list_style  );
     lv_style_set_border_width( &wifi_list_style , LV_OBJ_PART_MAIN, 0);
     lv_style_set_radius( &wifi_list_style , LV_OBJ_PART_MAIN, 0);
     lv_obj_add_style( wifiname_list, LV_OBJ_PART_MAIN, &wifi_list_style  );
-    lv_obj_align( wifiname_list, wifi_settings_tile, LV_ALIGN_IN_TOP_MID, 0, 80);
+    lv_obj_align( wifiname_list, wifi_settings_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
 
     wlan_password_tile_setup( wifi_password_tile_num );
     wlan_setup_tile_setup( wifi_setup_tile_num );

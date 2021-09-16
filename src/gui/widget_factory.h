@@ -81,6 +81,16 @@ lv_obj_t * wf_add_tile_footer_container(lv_obj_t *parent_tile, lv_layout_t layou
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text);
+/**
+ * @brief   Creates and adds a label object to a container
+ *
+ * @param   parent  pointer to a parent container
+ * @param   text    label content
+ * @param   style   pointer to a style
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style );
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text);
 
 /**
@@ -226,6 +236,18 @@ lv_obj_t * wf_add_close_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_styl
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int height, lv_event_cb_t event_cb);
+
+/**
+ * @brief   Creates and adds header container for settings dialogs
+ *
+ * @param   parent  pointer to a parent container
+ * @param   title   dialog name (usually the app name)
+ * @param   ret_back_btn poiter to back button of the tile (it is expected that the click event will be managed externally)
+ * @param   style   pointer to a style
+ *
+ * @return  returns pointer to the added container
+ */
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style );
 
 /**
  * @brief   Creates and adds header container for settings dialogs

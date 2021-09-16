@@ -77,13 +77,13 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     weather_forecast_tile_num = tile_num;
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, ws_get_app_style() );
+    lv_obj_t * exit_btn = wf_add_exit_button( weather_forecast_tile, exit_weather_widget_event_cb, ws_get_mainbar_style() );
     lv_obj_align(exit_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = wf_add_setup_button( weather_forecast_tile, setup_weather_widget_event_cb, ws_get_app_style() );
+    lv_obj_t * setup_btn = wf_add_setup_button( weather_forecast_tile, setup_weather_widget_event_cb, ws_get_mainbar_style() );
     lv_obj_align(setup_btn, weather_forecast_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 
-    lv_obj_t * reload_btn = wf_add_refresh_button( weather_forecast_tile, refresh_weather_widget_event_cb, ws_get_app_style() );
+    lv_obj_t * reload_btn = wf_add_refresh_button( weather_forecast_tile, refresh_weather_widget_event_cb, ws_get_mainbar_style() );
     lv_obj_align(reload_btn, weather_forecast_tile, LV_ALIGN_IN_TOP_RIGHT, -10 , 10 );
 
     weather_forecast_location_label = lv_label_create( weather_forecast_tile , NULL);
@@ -98,11 +98,11 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 
     lv_obj_t * weater_forecast_cont = lv_obj_create( weather_forecast_tile, NULL );
     lv_obj_set_size( weater_forecast_cont, 240 , 96 );
-    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, ws_get_app_style()  );
+    lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, ws_get_mainbar_style()  );
     lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 0 );
 
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST / 4 ; i++ ) {
-        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, ws_get_app_style() );
+        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, ws_get_mainbar_style() );
         lv_obj_align( weather_forecast_icon_imgbtn[ i ], weater_forecast_cont, LV_ALIGN_IN_LEFT_MID, i*58, 0 );
 
         weather_forecast_temperature_label[ i ] = lv_label_create( weater_forecast_cont , NULL);

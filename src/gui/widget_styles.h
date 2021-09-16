@@ -105,3 +105,5 @@ lv_style_t *ws_get_arc_bg_style( void );
  * @return  pointer to the lv_style_t object
  */
 lv_style_t *ws_get_slider_style( void );
+
+lv_style_t *ws_get_setup_header_tile_style();

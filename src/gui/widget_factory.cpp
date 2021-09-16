@@ -123,6 +123,13 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text){
     return label;
 }
 
+lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style ){
+    lv_obj_t *label = lv_label_create( parent, NULL);
+    lv_label_set_text( label, text);
+    lv_obj_add_style( label, LV_OBJ_PART_MAIN, style );
+    return label;
+}
+
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {
     lv_obj_t *container = wf_add_container( parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     wf_add_label( container, text);
@@ -259,11 +266,21 @@ lv_obj_t * wf_add_close_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_styl
     return wf_add_image_button(parent, close_icon, event_cb, style);
 }
 
-lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn){
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
     if (title != NULL && strlen(title) > 0) {
-        wf_add_label(container, title);
+        wf_add_label(container, title, style?style:ws_get_setup_header_tile_style() );
+    }
+    *ret_back_btn = exit_btn;
+    return container;
+}
+
+lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn) {
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
+    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
+    if (title != NULL && strlen(title) > 0) {
+        wf_add_label(container, title, ws_get_setup_header_tile_style() );
     }
     *ret_back_btn = exit_btn;
     return container;

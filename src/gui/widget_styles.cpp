@@ -29,6 +29,7 @@ static lv_style_t mainbar_style;
 static lv_style_t app_style;
 static lv_style_t app_opa_style;
 static lv_style_t setup_tile_style;
+static lv_style_t setup_header_tile_style;
 static lv_style_t button_style;
 static lv_style_t img_button_style;
 static lv_style_t label_style;
@@ -45,6 +46,23 @@ LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
+#if defined( BIG_THEME )
+    lv_font_t *mainbar_font = &lv_font_montserrat_14;
+    lv_font_t *app_font = &lv_font_montserrat_14;
+    lv_font_t *setup_font = &lv_font_montserrat_14;
+    lv_font_t *setup_header_font = &lv_font_montserrat_32;
+#elif defined( MID_THEME )
+    lv_font_t *mainbar_font = &lv_font_montserrat_14;
+    lv_font_t *app_font = &lv_font_montserrat_14;
+    lv_font_t *setup_font = &lv_font_montserrat_14;
+    lv_font_t *setup_header_font = &lv_font_montserrat_14;
+#else
+    lv_font_t *mainbar_font = &lv_font_montserrat_14;
+    lv_font_t *app_font = &lv_font_montserrat_14;
+    lv_font_t *setup_font = &lv_font_montserrat_14;
+    lv_font_t *setup_header_font = &lv_font_montserrat_14;
+#endif
+
 static void define_styles(){
     lv_style_init( &mainbar_style );
     lv_style_set_radius( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
@@ -53,6 +71,7 @@ static void define_styles(){
     lv_style_set_border_width( &mainbar_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_image_recolor( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_style_set_text_font( &mainbar_style, LV_OBJ_PART_MAIN, mainbar_font );
 
     lv_style_init( &app_style );
     lv_style_set_radius( &app_style, LV_OBJ_PART_MAIN, 0 );
@@ -61,16 +80,25 @@ static void define_styles(){
     lv_style_set_border_width( &app_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_color( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_image_recolor( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_style_set_text_font( &app_style, LV_OBJ_PART_MAIN, app_font );
 
     lv_style_copy( &app_opa_style, &mainbar_style );
     lv_style_set_bg_color( &app_opa_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
     lv_style_set_bg_opa( &app_opa_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &app_opa_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font( &app_opa_style, LV_OBJ_PART_MAIN, app_font );
 
     lv_style_copy( &setup_tile_style, &mainbar_style );
     lv_style_set_bg_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
     lv_style_set_bg_opa( &setup_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &setup_tile_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font( &setup_tile_style, LV_OBJ_PART_MAIN, setup_font );
+
+    lv_style_copy( &setup_header_tile_style, &mainbar_style );
+    lv_style_set_bg_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
+    lv_style_set_bg_opa( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+    lv_style_set_border_width( &setup_header_tile_style, LV_OBJ_PART_MAIN, 0);
+    lv_style_set_text_font( &setup_header_tile_style, LV_OBJ_PART_MAIN, setup_header_font );
 
     lv_style_init( &button_style );
     lv_style_set_radius( &button_style, LV_STATE_DEFAULT, 3 );
@@ -138,6 +166,13 @@ lv_style_t *ws_get_setup_tile_style(){
          define_styles();
     }
     return &setup_tile_style;
+}
+
+lv_style_t *ws_get_setup_header_tile_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &setup_header_tile_style;
 }
 
 lv_style_t *ws_get_button_style(){
