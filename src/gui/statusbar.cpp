@@ -148,9 +148,13 @@ void statusbar_setup( void )
 
     lv_style_copy( &statusbarstyle[ STATUSBAR_STYLE_WHITE ], &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_OPA_0);
-    lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-    lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-
+#if M5PAPER
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+#else
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+#endif
     lv_style_copy( &statusbarstyle[ STATUSBAR_STYLE_BLACK ], &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_BLACK ], LV_OBJ_PART_MAIN, LV_OPA_0);
     lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_BLACK ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
@@ -963,9 +967,15 @@ void statusbar_set_dark( bool dark_mode ) {
         lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
 
+#ifdef M5PAPER
+        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+#else
         lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
         lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
         lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+#endif
     }
 }
 

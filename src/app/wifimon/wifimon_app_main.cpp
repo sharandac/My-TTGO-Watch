@@ -53,7 +53,6 @@ lv_obj_t *channel_select = NULL;
 lv_chart_series_t *ser1 = NULL;
 lv_chart_series_t *ser2 = NULL;
 lv_chart_series_t *ser3 = NULL;
-lv_style_t wifimon_app_main_style;
 lv_task_t *_wifimon_app_task = NULL;
 int wifimon_display_timeout = 0;
 
@@ -111,7 +110,6 @@ static void wifimon_channel_select_event_handler( lv_obj_t * obj, lv_event_t eve
 void wifimon_app_main_setup( uint32_t tile_num ) {
 
     wifimon_app_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &wifimon_app_main_style, ws_get_mainbar_style() );
     /**
      * add chart widget
      */
@@ -133,7 +131,7 @@ void wifimon_app_main_setup( uint32_t tile_num ) {
     /**
      * add exit button
      */
-    lv_obj_t * exit_btn = wf_add_exit_button( wifimon_app_main_tile, exit_wifimon_app_main_event_cb, &wifimon_app_main_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( wifimon_app_main_tile, exit_wifimon_app_main_event_cb );
     lv_obj_align( exit_btn, wifimon_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add channel select roller

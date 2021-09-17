@@ -124,7 +124,7 @@ void calendar_create_build_ui( void ) {
     /**
      * copy mainbar style and set it to calendar
      */
-    lv_style_copy( &calendar_create_date_select_style, ws_get_mainbar_style() );
+    lv_style_copy( &calendar_create_date_select_style, APP_STYLE );
     lv_style_set_radius( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
@@ -146,7 +146,7 @@ void calendar_create_build_ui( void ) {
     /**
      * add exit button
      */
-    lv_obj_t *date_select_exit_button = wf_add_exit_button( calendar_create_date_select_tile, calendar_create_exit_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *date_select_exit_button = wf_add_exit_button( calendar_create_date_select_tile, calendar_create_exit_event_cb );
     lv_obj_align( date_select_exit_button, calendar_create_date_select_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * 
@@ -190,17 +190,17 @@ void calendar_create_build_ui( void ) {
     /**
      * add exit button
      */
-    lv_obj_t *exit_button = wf_add_exit_button( calendar_create_tile, calendar_create_exit_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *exit_button = wf_add_exit_button( calendar_create_tile, calendar_create_exit_event_cb );
     lv_obj_align( exit_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add add button
      */
-    lv_obj_t *create_button = wf_add_add_button( calendar_create_tile, calendar_create_add_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *create_button = wf_add_add_button( calendar_create_tile, calendar_create_add_event_cb );
     lv_obj_align( create_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add trash button
      */
-    lv_obj_t *trash_button = wf_add_trash_button( calendar_create_tile, calendar_create_trash_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *trash_button = wf_add_trash_button( calendar_create_tile, calendar_create_trash_event_cb );
     lv_obj_align( trash_button, calendar_create_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_ICON_PADDING );
 }
 

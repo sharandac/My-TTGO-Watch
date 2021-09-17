@@ -39,7 +39,9 @@
     LV_IMG_DECLARE(close_96px);
     LV_IMG_DECLARE(check_96px);
     LV_IMG_DECLARE(download_96px);
+    LV_IMG_DECLARE(equal_96px);
 
+    const lv_img_dsc_t equal_icon = equal_96px;
     const lv_img_dsc_t download_icon = download_96px;
     const lv_img_dsc_t check_icon = check_96px;
     const lv_img_dsc_t close_icon = close_96px;
@@ -59,7 +61,9 @@
     LV_IMG_DECLARE(close_64px);
     LV_IMG_DECLARE(check_64px);
     LV_IMG_DECLARE(download_64px);
+    LV_IMG_DECLARE(equal_64px);
 
+    const lv_img_dsc_t equal_icon = equal_64px;
     const lv_img_dsc_t download_icon = download_64px;
     const lv_img_dsc_t check_icon = check_64px;
     const lv_img_dsc_t close_icon = close_64px;
@@ -79,7 +83,9 @@
     LV_IMG_DECLARE(close_32px);
     LV_IMG_DECLARE(check_32px);
     LV_IMG_DECLARE(download_32px);
+    LV_IMG_DECLARE(equal_32px);
 
+    const lv_img_dsc_t equal_icon = equal_32px;
     const lv_img_dsc_t download_icon = download_32px;
     const lv_img_dsc_t check_icon = check_32px;
     const lv_img_dsc_t close_icon = close_32px;
@@ -96,11 +102,10 @@
 
 static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event );
 
-lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding){
+lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding, lv_style_t *style ){
     lv_obj_t *container = lv_cont_create( parent_tile, NULL );
-    lv_obj_add_style( container, LV_OBJ_PART_MAIN, ws_get_container_style() );
+    lv_obj_add_style( container, LV_OBJ_PART_MAIN, style?style:APP_STYLE );
     lv_cont_set_fit2( container, hor_fit, ver_fit );
-
     lv_obj_set_style_local_pad_all( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, add_padding ? CLICKABLE_PADDING : 0 );
     lv_obj_set_style_local_pad_inner( container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, CONTAINER_INNER_PADDING );
     lv_cont_set_layout( container, layout );
@@ -108,12 +113,20 @@ lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t 
     return container;
 }
 
-lv_obj_t * wf_add_tile_container(lv_obj_t *parent_tile, lv_layout_t layout){
+lv_obj_t * wf_add_tile_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_style_t *style ){
     lv_obj_set_style_local_pad_all(parent_tile, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
-    lv_obj_t * container = wf_add_container(parent_tile, layout, LV_FIT_PARENT, LV_FIT_TIGHT, true);
+    lv_obj_t * container = wf_add_container(parent_tile, layout, LV_FIT_PARENT, LV_FIT_TIGHT, true, style?style:APP_STYLE );
     lv_obj_align( container, parent_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
     return container;
 }
+
+lv_obj_t * wf_add_tile_container(lv_obj_t *parent_tile, lv_layout_t layout){
+    lv_obj_set_style_local_pad_all(parent_tile, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
+    lv_obj_t * container = wf_add_container(parent_tile, layout, LV_FIT_PARENT, LV_FIT_TIGHT, true, NULL );
+    lv_obj_align( container, parent_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+    return container;
+}
+
 /**
  * unfortunately it is still not possible to add a "stretch gap"
  * according this discussion: https://forum.lvgl.io/t/how-can-i-have-some-layout-children-stretch-to-fill-remaining-space/2967
@@ -148,6 +161,12 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style )
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {
     lv_obj_t *container = wf_add_container( parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     wf_add_label( container, text);
+    return container;
+}
+
+lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text, lv_style_t *style ) {
+    lv_obj_t *container = wf_add_container( parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, style );
+    wf_add_label( container, text, style );
     return container;
 }
 
@@ -187,14 +206,14 @@ lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on){
 }
 
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj){
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     wf_add_label( container, text);
     *ret_switch_obj = wf_add_switch( container );
     return container;
 }
 
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj, bool state, lv_event_cb_t event_cb, lv_style_t *style  ){
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, style );
     wf_add_label( container, text, style );
     *ret_switch_obj = wf_add_switch( container, state );
     lv_obj_set_event_cb( *ret_switch_obj, event_cb );
@@ -226,7 +245,7 @@ lv_obj_t * wf_add_list(lv_obj_t *parent, const char* _options, lv_style_t *style
 }
 
 lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb ) {
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false );
     wf_add_label( container, text );
     *ret_list_obj = wf_add_list( container, options );
     lv_obj_set_event_cb( *ret_list_obj, event_cb );
@@ -234,9 +253,22 @@ lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** 
 }
 
 lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb, lv_style_t *style ) {
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, style );
     wf_add_label( container, text, style );
-    *ret_list_obj = wf_add_list( container, options );
+    if ( style == ws_get_setup_tile_style() ) {
+        *ret_list_obj = wf_add_list( container, options, ws_get_setup_dropdown_style() );
+    }
+    else {
+        *ret_list_obj = wf_add_list( container, options );
+    }
+    lv_obj_set_event_cb( *ret_list_obj, event_cb );
+    return container;
+}
+
+lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb, lv_style_t *style, lv_style_t *dropdown_style ) {
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, style );
+    wf_add_label( container, text, style );
+    *ret_list_obj = wf_add_list( container, options, dropdown_style );
     lv_obj_set_event_cb( *ret_list_obj, event_cb );
     return container;
 }
@@ -270,7 +302,8 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
     if (!style) {
         style = ws_get_img_button_style();
     }
-    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, style );
+    lv_obj_add_style( button, LV_OBJ_PART_MAIN, style );
+//    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, style );
     lv_obj_set_ext_click_area(button, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING);
 
     if (event_cb != NULL) {
@@ -280,66 +313,72 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
 }
 
 lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-        return wf_add_image_button(parent, exit_icon, event_cb, style);
+        return wf_add_image_button(parent, exit_icon, event_cb, style?style:SYSTEM_ICON_STYLE);
 }
 
 lv_obj_t * wf_add_exit_button(lv_obj_t *parent, lv_style_t *style){
-    return wf_add_exit_button(parent, exit_jump_back_event_cb, style);
+    return wf_add_exit_button(parent, exit_jump_back_event_cb, style?style:SYSTEM_ICON_STYLE);
 }
 
 lv_img_dsc_t const &wf_get_exit_img( void ) { return( exit_icon ); }
 
 lv_obj_t * wf_add_setup_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, setup_icon, event_cb, style);
+    return wf_add_image_button(parent, setup_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_setup_img( void ) { return( setup_icon ); }
 
 lv_obj_t * wf_add_add_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, add_icon, event_cb, style);
+    return wf_add_image_button(parent, add_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_add_img( void ) { return( add_icon ); }
 
 lv_obj_t * wf_add_trash_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, trash_icon, event_cb, style);
+    return wf_add_image_button(parent, trash_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_trash_img( void ) { return( trash_icon ); }
 
 lv_obj_t * wf_add_menu_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, menu_icon, event_cb, style);
+    return wf_add_image_button(parent, menu_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_menu_img( void ) { return( menu_icon ); }
 
 lv_obj_t * wf_add_refresh_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, refresh_icon, event_cb, style);
+    return wf_add_image_button(parent, refresh_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_refresh_img( void ) { return( refresh_icon ); }
 
 lv_obj_t * wf_add_close_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, close_icon, event_cb, style);
+    return wf_add_image_button(parent, close_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_close_img( void ) { return( close_icon ); }
 
 lv_obj_t * wf_add_check_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, check_icon, event_cb, style);
+    return wf_add_image_button(parent, check_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_check_img( void ) { return( check_icon ); }
 
 lv_obj_t * wf_add_download_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
-    return wf_add_image_button(parent, download_icon, event_cb, style);
+    return wf_add_image_button(parent, download_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+
+lv_img_dsc_t const &wf_get_equal_img( void ) { return( download_icon ); }
+
+lv_obj_t * wf_add_equal_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, equal_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 
 lv_img_dsc_t const &wf_get_download_img( void ) { return( download_icon ); }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
-    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, style?style:SETUP_STYLE );
+    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, style?style:SYSTEM_ICON_STYLE );
     if (title != NULL && strlen(title) > 0) {
         wf_add_label(container, title, style?style:ws_get_setup_header_tile_style() );
     }
@@ -348,8 +387,8 @@ lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t
 }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn) {
-    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
-    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, NULL);
+    lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, SETUP_STYLE );
+    lv_obj_t *exit_btn = wf_add_exit_button(container, NULL, SYSTEM_ICON_STYLE );
     if (title != NULL && strlen(title) > 0) {
         wf_add_label(container, title, ws_get_setup_header_tile_style() );
     }

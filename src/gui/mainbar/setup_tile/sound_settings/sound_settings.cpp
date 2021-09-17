@@ -62,7 +62,7 @@ void sound_settings_tile_setup( void ) {
         return;
     }
     // get an app tile and copy mainstyle
-    sound_tile_num = mainbar_add_app_tile( 1, 2, "sound setup" );
+    sound_tile_num = mainbar_add_setup_tile( 1, 2, "sound setup" );
     sound_settings_tile = mainbar_get_tile_obj( sound_tile_num );
 
     lv_style_copy( &sound_settings_style, ws_get_setup_tile_style() );

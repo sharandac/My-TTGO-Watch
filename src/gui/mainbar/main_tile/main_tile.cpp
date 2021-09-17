@@ -103,7 +103,7 @@ void main_tile_setup( void ) {
         return;
     }
 
-    main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
+    main_tile_num = mainbar_add_tile( 0, 0, "main tile", ws_get_mainbar_style() );
     main_cont = mainbar_get_tile_obj( main_tile_num );
     style = ws_get_mainbar_style();
 

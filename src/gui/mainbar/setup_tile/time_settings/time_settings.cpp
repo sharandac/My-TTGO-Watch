@@ -232,7 +232,7 @@ void time_settings_tile_setup( void ) {
     selected_location = time_settings_create_locationlist( region.c_str(), location.c_str() );
 
     // get an app tile and copy mainstyle
-    time_tile_num = mainbar_add_app_tile( 1, 1, "time setup" );
+    time_tile_num = mainbar_add_setup_tile( 1, 1, "time setup" );
     time_settings_tile = mainbar_get_tile_obj( time_tile_num );
     lv_obj_add_style( time_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
 

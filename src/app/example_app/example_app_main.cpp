@@ -38,7 +38,6 @@
 #endif
 
 lv_obj_t *example_app_main_tile = NULL;
-lv_style_t example_app_main_style;
 
 lv_task_t * _example_app_task;
 
@@ -52,22 +51,12 @@ void example_app_task( lv_task_t * task );
 void example_app_main_setup( uint32_t tile_num ) {
 
     example_app_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &example_app_main_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( example_app_main_tile, exit_example_app_main_event_cb, &example_app_main_style );
-    lv_obj_align(exit_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( example_app_main_tile, exit_example_app_main_event_cb );
+    lv_obj_align(exit_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
-    lv_obj_t * setup_btn = wf_add_setup_button( example_app_main_tile, enter_example_app_setup_event_cb, &example_app_main_style );
-    lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-
-    // uncomment the following block of code to remove the "myapp" label in background
-    lv_style_set_text_opa( &example_app_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
-    lv_style_set_text_font( &example_app_main_style, LV_STATE_DEFAULT, &Ubuntu_72px);
-    lv_obj_t *app_label = lv_label_create( example_app_main_tile, NULL);
-    lv_label_set_text( app_label, "myapp");
-    lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &example_app_main_style );
-    lv_obj_align( app_label, example_app_main_tile, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t * setup_btn = wf_add_setup_button( example_app_main_tile, enter_example_app_setup_event_cb );
+    lv_obj_align(setup_btn, example_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
     // create an task that runs every secound
     _example_app_task = lv_task_create( example_app_task, 1000, LV_TASK_PRIO_MID, NULL );

@@ -26,6 +26,7 @@
 #include "hardware/framebuffer.h"
 #include "gui/png_decoder/lv_png.h"
 #include "gui/sjpg_decoder/lv_sjpg.h"
+#include "widget_factory.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -49,13 +50,14 @@ void splash_screen_stage_one( void ) {
     lv_png_init();
     lv_img_cache_set_size(250);
 
-    lv_style_init( &style );
+    lv_style_copy( &style, MAINBAR_STYLE );
+    lv_style_set_bg_opa( &style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+/*
     lv_style_set_radius( &style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &style, LV_OBJ_PART_MAIN, LV_OPA_100 );
     lv_style_set_border_width( &style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-
+*/
     lv_obj_t *background = lv_bar_create(lv_scr_act(), NULL);
     lv_obj_set_size( background, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
     lv_obj_add_style( background, LV_OBJ_PART_MAIN, &style );

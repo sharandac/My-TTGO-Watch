@@ -95,50 +95,43 @@ LV_IMG_DECLARE(info_1_16px);
 void update_tile_setup( void ) {
     last_firmware_version = atoll( __FIRMWARE__ );
     // get an app tile and copy mainstyle
-    update_tile_num = mainbar_add_app_tile( 1, 2, "update setup" );
+    update_tile_num = mainbar_add_setup_tile( 1, 2, "update setup" );
     update_settings_tile = mainbar_get_tile_obj( update_tile_num );
 
     update_setup_tile_setup( update_tile_num + 1 );
 
-    lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
+    lv_obj_add_style( update_settings_tile, LV_OBJ_PART_MAIN, SETUP_STYLE );
 
     update_setup_icon = setup_register( "update", &update_64px, enter_update_setup_event_cb );
     setup_hide_indicator( update_setup_icon );
 
     lv_obj_t *header = wf_add_settings_header( update_settings_tile, "update" );
-    lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
+    lv_obj_align( header, update_settings_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, STATUSBAR_HEIGHT + THEME_PADDING );
 
-    lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb, ws_get_setup_tile_style() );
+    lv_obj_t *setup_btn = wf_add_setup_button( update_settings_tile, enter_update_setup_setup_event_cb );
     lv_obj_align( setup_btn, header, LV_ALIGN_IN_RIGHT_MID, 0, 0 );
 
-    lv_obj_t *update_version_cont = lv_obj_create( update_settings_tile, NULL );
-    lv_obj_set_size(update_version_cont, lv_disp_get_hor_res( NULL ) , 40);
-    lv_obj_add_style( update_version_cont, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
+    lv_obj_t *update_version_cont = wf_add_label( update_settings_tile, "firmware version", SETUP_STYLE );
     lv_obj_align( update_version_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
-    lv_obj_t *update_version_label = lv_label_create( update_version_cont, NULL);
-    lv_obj_add_style( update_version_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
-    lv_label_set_text( update_version_label, "firmware version" );
-    lv_obj_align( update_version_label, update_version_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
-    lv_obj_t *update_firmware_version_label = lv_label_create( update_version_cont, NULL);
-    lv_obj_add_style( update_firmware_version_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
-    lv_label_set_text( update_firmware_version_label, __FIRMWARE__ );
-    lv_obj_align( update_firmware_version_label, update_version_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+
+    lv_obj_t *update_firmware_version_cont = wf_add_label( update_settings_tile, __FIRMWARE__ , SETUP_STYLE );
+    lv_obj_align( update_firmware_version_cont, update_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
     update_btn = lv_btn_create( update_settings_tile, NULL);
     lv_obj_set_event_cb( update_btn, update_event_handler );
     lv_obj_add_style( update_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
-    lv_obj_align( update_btn, update_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
+    lv_obj_align( update_btn, update_firmware_version_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5);
     update_btn_label = lv_label_create( update_btn, NULL );
     lv_label_set_text( update_btn_label, "update");
 
     update_status_label = lv_label_create( update_settings_tile, NULL);
-    lv_obj_add_style( update_status_label, LV_OBJ_PART_MAIN, ws_get_setup_tile_style()  );
+    lv_obj_add_style( update_status_label, LV_OBJ_PART_MAIN, SETUP_STYLE  );
     lv_label_set_text( update_status_label, "" );
     lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     update_progressbar = lv_bar_create( update_settings_tile, NULL );
     lv_obj_set_size( update_progressbar, lv_disp_get_hor_res( NULL ) - 80, 20 );
-    lv_obj_add_style( update_progressbar, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );
+    lv_obj_add_style( update_progressbar, LV_OBJ_PART_MAIN, SETUP_STYLE );
     lv_obj_align( update_progressbar, update_status_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     lv_bar_set_anim_time( update_progressbar, 2000 );
     lv_bar_set_value( update_progressbar, 0, LV_ANIM_ON );

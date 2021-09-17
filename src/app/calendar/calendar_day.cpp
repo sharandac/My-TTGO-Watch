@@ -116,12 +116,12 @@ void calendar_day_build_ui( void ) {
     /**
      * add exit button
      */
-    lv_obj_t *exit_button = wf_add_exit_button( calendar_day_tile, calendar_day_exit_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *exit_button = wf_add_exit_button( calendar_day_tile, calendar_day_exit_event_cb );
     lv_obj_align( exit_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add exit button
      */
-    lv_obj_t *create_button = wf_add_add_button( calendar_day_tile, calendar_day_create_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *create_button = wf_add_add_button( calendar_day_tile, calendar_day_create_event_cb );
     lv_obj_align( create_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 

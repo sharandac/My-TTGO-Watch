@@ -26,6 +26,7 @@
 #include "statusbar.h"
 #include "quickbar.h"
 #include "screenshot.h"
+#include "widget_styles.h"
 #include "keyboard.h"
 #include "gui/lv_fs/lv_fs_spiffs.h"
 #include "mainbar/mainbar.h"
@@ -65,7 +66,8 @@
     #endif
 #endif
 
-lv_obj_t *img_bin;
+lv_obj_t *img_bin = NULL;
+
 static volatile bool force_redraw = false;
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );

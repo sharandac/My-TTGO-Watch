@@ -296,10 +296,19 @@ void powermgm_loop( void ) {
          * note:    When change vTaskDelay to an higher value, please
          *          note that the reaction time to wake up increase.
          */
-        #ifndef NATIVE_64BIT
-            if ( !lighsleep )
-                vTaskDelay( 250 );
+        #ifdef NATIVE_64BIT
+        #else
+            #ifdef M5PAPER
+                if ( !lighsleep ) {
+                    esp_sleep_enable_timer_wakeup( 250000 );
+                    esp_light_sleep_start();
+                }
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                if ( !lighsleep )
+                    vTaskDelay( 250 );
+            #endif
         #endif
+
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {

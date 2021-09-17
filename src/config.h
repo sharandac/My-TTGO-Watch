@@ -29,16 +29,19 @@
             #define RES_Y_MAX       LV_VER_RES_MAX
     #else
         #if defined( LILYGO_WATCH_2020_V1 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V1"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
         #elif defined( LILYGO_WATCH_2020_V2 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V2"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
         #elif defined( LILYGO_WATCH_2020_V3 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V3"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
@@ -64,7 +67,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021091602"
+    #define __FIRMWARE__            "2021091701"
     /**
      * Allows to include config.h from C code
      */

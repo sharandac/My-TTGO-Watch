@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+void widget_style_theme_set( int theme );
 /**
  * @brief   returns a common mainbar style
  */
@@ -107,5 +108,12 @@ lv_style_t *ws_get_arc_bg_style( void );
 lv_style_t *ws_get_slider_style( void );
 
 lv_style_t *ws_get_setup_header_tile_style();
+lv_style_t *ws_get_setup_dropdown_style();
+lv_style_t *ws_get_mainbar_dropdown_style();
+lv_style_t *ws_get_app_dropdown_style();
 
-lv_style_t *ws_get_dropdown_style();
+lv_style_t *ws_get_system_icon_style( void );
+lv_style_t *ws_get_app_icon_style( void );
+
+lv_style_t *ws_get_system_icon_label_style( void );
+lv_style_t *ws_get_app_icon_label_style( void );

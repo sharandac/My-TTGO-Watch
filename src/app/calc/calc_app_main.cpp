@@ -34,14 +34,12 @@
 #include "gui/widget_styles.h"
 
 lv_obj_t *calc_app_main_tile = NULL;
-lv_style_t calc_app_main_style;
 lv_style_t result_style;
 lv_obj_t *result_label;
 lv_style_t button_matrix_style;
 lv_style_t button_style;
 lv_obj_t *button_matrix;
 
-LV_IMG_DECLARE(equals_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 static const char* buttons[20] = {"1","2","3","+","\n","4","5","6","-","\n","7","8","9","*","\n","C/CE","0",".","/",""};
@@ -58,13 +56,12 @@ void calc_process_operator(char cmd, char op);
 void calc_app_main_setup( uint32_t tile_num ) {
 
     calc_app_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &calc_app_main_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( calc_app_main_tile, exit_calc_app_main_event_cb, &calc_app_main_style );
-    lv_obj_align(exit_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( calc_app_main_tile, exit_calc_app_main_event_cb );
+    lv_obj_align(exit_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
-    lv_obj_t * result_btn = wf_add_image_button( calc_app_main_tile, equals_32px, calc_result_event_cb, &calc_app_main_style );
-    lv_obj_align(result_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_t * result_btn = wf_add_equal_button( calc_app_main_tile, calc_result_event_cb );
+    lv_obj_align(result_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
     // result label
     lv_style_copy(&result_style, ws_get_label_style());

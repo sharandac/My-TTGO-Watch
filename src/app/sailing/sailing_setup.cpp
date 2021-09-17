@@ -39,7 +39,6 @@
 #endif
 
 lv_obj_t *sailing_setup_tile = NULL;
-lv_style_t sailing_setup_style;
 
 lv_obj_t *sailing_foobar_switch = NULL;
 lv_obj_t *sailing_track_switch = NULL;
@@ -55,14 +54,6 @@ void sailing_setup_setup( uint32_t tile_num ) {
      */
     sailing_setup_tile = mainbar_get_tile_obj( tile_num );
     /**
-     * get mainbar style, setup it and add it to setup tile
-     */
-    lv_style_copy( &sailing_setup_style, ws_get_mainbar_style() );
-    lv_style_set_bg_color( &sailing_setup_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-    lv_style_set_bg_opa( &sailing_setup_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width( &sailing_setup_style, LV_OBJ_PART_MAIN, 0);
-    lv_obj_add_style( sailing_setup_tile, LV_OBJ_PART_MAIN, &sailing_setup_style );
-    /**
      * add setup header with exit button
      */
     lv_obj_t *header = wf_add_settings_header( sailing_setup_tile, "Exit setup" );
@@ -70,12 +61,12 @@ void sailing_setup_setup( uint32_t tile_num ) {
     /**
      * setup always on display switch
      */
-    lv_obj_t *sailing_foobar_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Always on display", &sailing_foobar_switch, false, sailing_foobar_switch_event_cb, ws_get_setup_tile_style() );
+    lv_obj_t *sailing_foobar_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Always on display", &sailing_foobar_switch, false, sailing_foobar_switch_event_cb, SETUP_STYLE );
     lv_obj_align( sailing_foobar_switch_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
     /**
      * setup show track switch
      */
-    lv_obj_t *sailing_track_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Show track", &sailing_track_switch, false, sailing_track_switch_event_cb, ws_get_setup_tile_style() );
+    lv_obj_t *sailing_track_switch_cont = wf_add_labeled_switch( sailing_setup_tile, "Show track", &sailing_track_switch, false, sailing_track_switch_event_cb, SETUP_STYLE );
     lv_obj_align( sailing_track_switch_cont, sailing_foobar_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 }
 

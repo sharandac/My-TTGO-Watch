@@ -178,10 +178,10 @@ void alarm_clock_setup( void ) {
         add_main_tile_widget();
     }
     // register 2 vertical tiles and get the first tile number and save it for later use
-    main_tile_num = mainbar_add_app_tile( 1, 2, "alarm_clock");
-    create_alarm_main_tile(main_tile_num);
+    main_tile_num = mainbar_add_app_tile( 1, 1, "alarm_clock");
+    setup_tile_num = mainbar_add_setup_tile( 1, 1, "alarm_clock setup");
 
-    setup_tile_num = main_tile_num + 1;
+    create_alarm_main_tile(main_tile_num);
     create_alarm_setup_tile(setup_tile_num);
     create_alarm_in_progress_tile();
 

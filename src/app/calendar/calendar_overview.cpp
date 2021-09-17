@@ -123,7 +123,7 @@ void calendar_overview_build_ui( void ) {
     /**
      * copy mainbar style and set it to calendar
      */
-    lv_style_copy( &calendar_overview_style, ws_get_mainbar_style() );
+    lv_style_copy( &calendar_overview_style, APP_STYLE );
     lv_style_set_radius( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
@@ -148,7 +148,7 @@ void calendar_overview_build_ui( void ) {
     /**
      * add exit button
      */
-    lv_obj_t *exit_button = wf_add_exit_button( calendar_overview_tile, calendar_overview_exit_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *exit_button = wf_add_exit_button( calendar_overview_tile, calendar_overview_exit_event_cb );
     lv_obj_align( exit_button, calendar_overview_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 

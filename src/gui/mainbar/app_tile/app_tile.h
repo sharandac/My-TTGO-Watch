@@ -26,9 +26,9 @@
     #include "lvgl.h"
 
     #if defined( M5PAPER )
-        #define MAX_APPS_ICON_HORZ      5
+        #define MAX_APPS_ICON_HORZ      4
         #define MAX_APPS_ICON_VERT      5
-        #define APP_ICON_X_CLEARENCE    24
+        #define APP_ICON_X_CLEARENCE    48
         #define APP_ICON_Y_CLEARENCE    72
         #define MAX_APPS_TILES          1
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )

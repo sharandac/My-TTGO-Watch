@@ -58,8 +58,8 @@ static void enter_example_widget_event_cb( lv_obj_t * obj, lv_event_t event );
  */
 void example_app_setup( void ) {
     // register 2 vertical tiles and get the first tile number and save it for later use
-    example_app_main_tile_num = mainbar_add_app_tile( 1, 2, "example app" );
-    example_app_setup_tile_num = example_app_main_tile_num + 1;
+    example_app_main_tile_num = mainbar_add_app_tile( 1, 1, "example app" );
+    example_app_setup_tile_num = mainbar_add_setup_tile( 1, 1, "example app setup" );
 
     // register app icon on the app tile
     // set your own icon and register her callback to activate by an click

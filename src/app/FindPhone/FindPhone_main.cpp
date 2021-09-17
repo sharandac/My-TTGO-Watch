@@ -43,19 +43,19 @@
 
 #include "utils/bluejsonrequest.h"
 
-lv_obj_t *FindPhone_main_tile = NULL;
-lv_obj_t *FindPhone_main_iris = NULL;
-lv_style_t FindPhone_main_style;
-lv_obj_t *bluetooth_FindPhone_tile = NULL;
-lv_style_t bluetooth_FindPhone_style;
-lv_style_t bluetooth_FindPhone_exit_btn_style;
 uint32_t bluetooth_FindPhone_tile_num;
 
+lv_obj_t *FindPhone_main_tile = NULL;
+lv_obj_t *FindPhone_main_iris = NULL;
+lv_obj_t *bluetooth_FindPhone_tile = NULL;
 lv_obj_t *bluetooth_FindPhone_img = NULL;
 lv_obj_t *bluetooth_FindPhone_label = NULL;										   
 
+lv_style_t bluetooth_FindPhone_style;
+
 lv_task_t * _FindPhone_PhoneSearch_task; 
 lv_task_t * _FindPhone_WatchFind_task = nullptr;
+
 LV_IMG_DECLARE(eye_200px);
 LV_IMG_DECLARE(eye_lid_closed);
 LV_IMG_DECLARE(eye_lid_open);
@@ -88,13 +88,6 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_style_set_text_color(&bluetooth_FindPhone_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
     lv_obj_add_style(bluetooth_FindPhone_tile, LV_OBJ_PART_MAIN, &bluetooth_FindPhone_style);
 
-    lv_style_copy(&bluetooth_FindPhone_exit_btn_style, ws_get_mainbar_style());
-    lv_style_set_bg_color(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-    lv_style_set_bg_opa(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-    lv_style_set_border_width(&bluetooth_FindPhone_exit_btn_style, LV_OBJ_PART_MAIN, 0);
-    lv_style_set_text_font(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, &Ubuntu_32px);
-    lv_style_set_text_color(&bluetooth_FindPhone_exit_btn_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-
     bluetooth_FindPhone_img = lv_img_create(bluetooth_FindPhone_tile, NULL);
     lv_img_set_src(bluetooth_FindPhone_img, &eye_200px);
     lv_obj_align(bluetooth_FindPhone_img, bluetooth_FindPhone_tile, LV_ALIGN_CENTER, 0, 0);
@@ -111,14 +104,13 @@ void bluetooth_FindPhone_tile_setup(void)
 void FindPhone_main_setup( uint32_t tile_num ) {
 
     FindPhone_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &FindPhone_main_style, ws_get_mainbar_style() );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( FindPhone_main_tile, exit_FindPhone_main_event_cb, &bluetooth_FindPhone_exit_btn_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( FindPhone_main_tile, exit_FindPhone_main_event_cb, APP_STYLE );
     lv_obj_align( exit_btn, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
     // eye toggle button
 	lv_obj_t *FindPhone_main_go_btn = NULL;
-    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb, NULL );
+    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb, APP_STYLE );
 	lv_btn_set_checkable(FindPhone_main_go_btn, true);
     lv_btn_toggle(FindPhone_main_go_btn);
     lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
@@ -128,12 +120,10 @@ void FindPhone_main_setup( uint32_t tile_num ) {
 	lv_img_set_src (FindPhone_main_iris,&eye_iris);
 	lv_obj_set_hidden(FindPhone_main_iris,true);
     lv_obj_align( FindPhone_main_iris, NULL, LV_ALIGN_CENTER, 0, 0 );
-    lv_style_set_text_opa( &FindPhone_main_style, LV_OBJ_PART_MAIN, LV_OPA_70);
-    lv_style_set_text_font( &FindPhone_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);
     lv_obj_t *app_label = lv_label_create( FindPhone_main_tile, NULL);
     lv_label_set_text( app_label, "Find\nPhone");
     lv_obj_reset_style_list( app_label, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, &FindPhone_main_style );
+    lv_obj_add_style( app_label, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_align( app_label, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
     lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );
 }
