@@ -136,7 +136,6 @@
      * @brief   start an wifi wps peering
      */
     void wifictl_start_wps( void );
-    #ifdef ENABLE_WEBSERVER
     /**
      * @brief   get the current webserver configuration
      * 
@@ -149,8 +148,6 @@
      * @param   webserver   true means webserver enable, false means webserver disable
      */
     void wifictl_set_webserver( bool webserver );
-    #endif
-    #ifdef ENABLE_FTPSERVER
     /**
      * @brief   get the current webserver configuration
      * 
@@ -163,7 +160,6 @@
      * @param   ftpserver   true means ftpserver enable, false means ftpserver disable
      */
     void wifictl_set_ftpserver( bool ftpserver );
-    #endif
     /**
      * @brief   set wifi enable on standby
      * 

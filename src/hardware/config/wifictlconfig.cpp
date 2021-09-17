@@ -26,13 +26,8 @@
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
-#else
-    #ifdef ENABLE_WEBSERVER
-        #include "utils/webserver/webserver.h"
-    #endif
-    #ifdef ENABLE_FTPSERVER
-        #include "utils/ftpserver/ftpserver.h"
-    #endif
+    #include "utils/webserver/webserver.h"
+    #include "utils/ftpserver/ftpserver.h"
 #endif
 
 wifictl_config_t::wifictl_config_t() : BaseJsonConfig( WIFICTL_JSON_CONFIG_FILE ) {}
@@ -43,16 +38,10 @@ bool wifictl_config_t::onSave(JsonDocument& doc) {
      */
     doc["autoon"] = autoon;
 
-#ifndef NATIVE_64BIT
-    #ifdef ENABLE_WEBSERVER
-        doc["webserver"] = webserver;
-    #endif
-    #ifdef ENABLE_FTPSERVER
-        doc["ftpserver"] = ftpserver;
-        doc["ftpuser"] = ftpuser;
-        doc["ftppass"] = ftppass;
-    #endif
-#endif
+    doc["webserver"] = webserver;
+    doc["ftpserver"] = ftpserver;
+    doc["ftpuser"] = ftpuser;
+    doc["ftppass"] = ftppass;
 
     doc["enable_on_standby"] = enable_on_standby;
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
@@ -87,27 +76,21 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
     autoon = doc["autoon"] | true;
     enable_on_standby = doc["enable_on_standby"] | false;
 
-#ifndef NATIVE_64BIT
-    #ifdef ENABLE_WEBSERVER
-        webserver = doc["webserver"] | false;
-    #endif
+    webserver = doc["webserver"] | false;
 
-    #ifdef ENABLE_FTPSERVER
-        ftpserver = doc["ftpserver"] | false;
-        if ( doc["ftpuser"] ) {
-            strlcpy( ftpuser, doc["ftpuser"], sizeof( ftpuser ) );
-        }
-        else {
-            strlcpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
-        }
-        if ( doc["ftppass"] ) {
-            strlcpy( ftppass, doc["ftppass"], sizeof( ftppass ) );
-        }
-        else {
-            strlcpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
-        }
-    #endif
-#endif
+    ftpserver = doc["ftpserver"] | false;
+    if ( doc["ftpuser"] ) {
+        strncpy( ftpuser, doc["ftpuser"], sizeof( ftpuser ) );
+    }
+    else {
+        strncpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
+    }
+    if ( doc["ftppass"] ) {
+        strncpy( ftppass, doc["ftppass"], sizeof( ftppass ) );
+    }
+    else {
+        strncpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
+    }
 
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
         if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
@@ -144,17 +127,10 @@ bool wifictl_config_t::onDefault( void ) {
     autoon = true;
     enable_on_standby = false;
 
-#ifndef NATIVE_64BIT
-    #ifdef ENABLE_WEBSERVER
-        webserver = false;
-    #endif
-
-    #ifdef ENABLE_FTPSERVER
-        ftpserver = false;
-        strlcpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
-        strlcpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
-    #endif
-#endif
+    webserver = false;
+    ftpserver = false;
+    strncpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
+    strncpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
 
     return( true );
 }

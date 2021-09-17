@@ -19,32 +19,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#ifndef _STYLE_SETTINGS_H
+    #define _STYLE_SETTINGS_H
 
-#ifndef _ASYNCWEBSERVER_H
-    #define _ASYNCWEBSERVER_H
-    
-    #ifdef NATIVE_64BIT
-        void asyncwebserver_start(void);
-        void asyncwebserver_end(void);
-    #else
-        #include <FS.h>
+    void style_settings_tile_setup( void );
 
-        #define WEBSERVERPORT   80
-        #define UPNPPORT        80
-
-        #define DEV_NAME        "My-Watch" 
-        #define DEV_INFO        "Watch based on ESP32 from Espressif Systems"
-
-        /*
-        *  @brief setup builtin webserver, call after first wifi-connection. otherwise esp32 will crash
-        */
-        void asyncwebserver_start(void);
-        void asyncwebserver_end(void);
-        /*
-        *  @brief set a new filesystem for the SPIFFSEditor
-        */
-        void setFsEditorFilesystem(const fs::FS& fs);
-    #endif
-
-
-#endif // _ASYNCWEBSERVER_H
+#endif // _STYLE_SETTINGS_H

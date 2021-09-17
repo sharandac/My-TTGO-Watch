@@ -25,6 +25,8 @@
 
 static bool styles_defined = false;
 
+static lv_style_t background_style;
+
 static lv_style_t mainbar_style;
 static lv_style_t mainbar_dropdown_style;
 
@@ -77,7 +79,9 @@ LV_FONT_DECLARE(Ubuntu_48px);
 
 void widget_style_theme_set( int theme ) {
     switch( theme ) {
-        case( 0 ):      lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        case( 0 ):      lv_style_set_bg_color( &background_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+
+                        lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         
                         lv_style_set_bg_color( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
@@ -93,12 +97,13 @@ void widget_style_theme_set( int theme ) {
 
                         lv_style_set_image_recolor( &system_icon_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_text_color( &system_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-                        lv_style_set_image_recolor( &app_icon_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_text_color( &app_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
                         lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
                         break;
-        default:        lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        default:        lv_style_set_bg_color( &background_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+
+                        lv_style_set_bg_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_text_color( &mainbar_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         
                         lv_style_set_bg_color( &app_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
@@ -123,6 +128,13 @@ void widget_style_theme_set( int theme ) {
 }
 
 static void define_styles(){
+    /**
+     * background style
+     */
+    lv_style_init( &background_style );
+    lv_style_set_radius( &background_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_bg_color( &background_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_bg_opa( &background_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
     /**
      * mainbar theme
      */
@@ -268,6 +280,13 @@ static void define_styles(){
 #endif
 
     styles_defined = true;
+}
+
+lv_style_t *ws_get_background_style(){
+    if (!styles_defined){
+         define_styles();
+    }
+    return &background_style;
 }
 
 lv_style_t *ws_get_mainbar_style(){

@@ -24,6 +24,11 @@
 #include "config.h"
 
 void widget_style_theme_set( int theme );
+
+/**
+ * @brief   returns a common background style
+ */
+lv_style_t *ws_get_background_style();
 /**
  * @brief   returns a common mainbar style
  */

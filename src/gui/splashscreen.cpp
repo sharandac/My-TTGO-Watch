@@ -50,17 +50,9 @@ void splash_screen_stage_one( void ) {
     lv_png_init();
     lv_img_cache_set_size(250);
 
-    lv_style_copy( &style, MAINBAR_STYLE );
-    lv_style_set_bg_opa( &style, LV_OBJ_PART_MAIN, LV_OPA_100 );
-/*
-    lv_style_set_radius( &style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_bg_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_border_width( &style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_text_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-*/
     lv_obj_t *background = lv_bar_create(lv_scr_act(), NULL);
     lv_obj_set_size( background, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
-    lv_obj_add_style( background, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( background, LV_OBJ_PART_MAIN, BACKGROUND_STYLE );
     lv_obj_align( background, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     logo = lv_img_create( background , NULL );

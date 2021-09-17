@@ -32,19 +32,14 @@
 #include "hardware/motor.h"
 #include "hardware/blectl.h"
 #include "utils/bluejsonrequest.h"
+#include "utils/webserver/webserver.h"
+#include "utils/ftpserver/ftpserver.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
     #include <WiFi.h>
-
-    #ifdef ENABLE_WEBSERVER
-        #include "utils/webserver/webserver.h"
-    #endif
-    #ifdef ENABLE_FTPSERVER
-        #include "utils/ftpserver/ftpserver.h"
-    #endif
 #endif
 
 lv_obj_t *wifi_settings_tile=NULL;
@@ -240,22 +235,14 @@ static void exit_wifi_password_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 lv_obj_t *wifi_autoon_onoff = NULL;
-#ifdef ENABLE_WEBSERVER
 lv_obj_t *wifi_webserver_onoff = NULL;
-#endif
-#ifdef ENABLE_FTPSERVER
 lv_obj_t *wifi_ftpserver_onoff = NULL;
-#endif
 lv_obj_t *wifi_enabled_on_standby_onoff = NULL;
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#ifdef ENABLE_WEBSERVER
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#endif
-#ifdef ENABLE_FTPSERVER
 static void wifi_ftpserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#endif
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg );
 
@@ -316,32 +303,25 @@ static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) 
     }
 }
 
-#ifdef ENABLE_WEBSERVER
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_webserver( lv_switch_get_state( obj ) );
-    
-#ifndef ENABLE_WEBSERVER
-                                        if ( lv_switch_get_state( obj ) ) {
+                                            if ( lv_switch_get_state( obj ) ) {
                                             asyncwebserver_start();
                                         }
                                         else {
                                             asyncwebserver_end();
                                         }
-#endif
                                         break;
     }
 }
-#endif
 
-#ifdef ENABLE_FTPSERVER
 static void wifi_ftpserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_ftpserver( lv_switch_get_state( obj ) );
                                         break;
     }
 }
-#endif
 
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {

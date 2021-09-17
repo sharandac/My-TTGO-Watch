@@ -51,6 +51,7 @@
     #define     APP_ICON_STYLE              ws_get_app_icon_style()
     #define     SYSTEM_ICON_LABEL_STYLE     ws_get_system_icon_label_style()
     #define     APP_ICON_LABEL_STYLE        ws_get_app_icon_label_style()
+    #define     BACKGROUND_STYLE            ws_get_background_style()
 
 /**
  * @brief   Creates and adds container (lv_cont) to parent object as a layout member.
@@ -284,6 +285,55 @@ lv_img_dsc_t const &wf_get_download_img( void );
  */
 lv_obj_t * wf_add_equal_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL);
 lv_img_dsc_t const &wf_get_equal_img( void );
+
+/**
+ * @brief   Creates and adds an zoom in button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+
+lv_obj_t * wf_add_zoom_in_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_zoom_in_img( void );
+
+/**
+ * @brief   Creates and adds an zoom out button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_zoom_out_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *styl = NULL );
+lv_img_dsc_t const &wf_get_zoom_out_img( void );
+
+/**
+ * @brief   Creates and adds an right button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_right_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_right_img( void );
+
+/**
+ * @brief   Creates and adds an left button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_left_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_left_img( void );
 
 /**
  * @brief   Creates and adds an labeled button to a container
