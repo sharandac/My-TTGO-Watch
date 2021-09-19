@@ -39,7 +39,8 @@ AppPage& AppPage::addSettingsButton(WidgetAction onSettingsBtnClick)
 
 AppPage& AppPage::addRefreshButton(WidgetAction onRefreshBtnClick)
 {
-  btnRefresh = Button(this, refresh_32px, onRefreshBtnClick);
+    lv_obj_t *btnRefreshHandle = wf_add_refresh_button(this->handle(), NULL, NULL);
+  btnRefresh = Button(btnRefreshHandle).clicked(onRefreshBtnClick);
   btnRefresh.align(*this, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
 
   return *this;

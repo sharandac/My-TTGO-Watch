@@ -65,7 +65,7 @@ static void example_app_foobar_switch_event_cb( lv_obj_t * obj, lv_event_t event
 
 static void exit_example_app_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( example_app_get_app_main_tile_num(), LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

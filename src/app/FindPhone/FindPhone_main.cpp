@@ -105,12 +105,12 @@ void FindPhone_main_setup( uint32_t tile_num ) {
 
     FindPhone_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( FindPhone_main_tile, exit_FindPhone_main_event_cb, APP_STYLE );
+    lv_obj_t * exit_btn = wf_add_exit_button( FindPhone_main_tile, exit_FindPhone_main_event_cb );
     lv_obj_align( exit_btn, FindPhone_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
     // eye toggle button
 	lv_obj_t *FindPhone_main_go_btn = NULL;
-    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb, APP_STYLE );
+    FindPhone_main_go_btn = wf_add_image_button( FindPhone_main_tile, eye_lid_open, go_FindPhone_main_event_cb );
 	lv_btn_set_checkable(FindPhone_main_go_btn, true);
     lv_btn_toggle(FindPhone_main_go_btn);
     lv_obj_align( FindPhone_main_go_btn, NULL, LV_ALIGN_CENTER, 0, 0 );

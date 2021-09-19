@@ -31,12 +31,14 @@
         #define SETUP_ICON_X_CLEARENCE      48
         #define SETUP_ICON_Y_CLEARENCE      72
         #define MAX_SETUP_TILES             1
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         #define MAX_SETUP_ICON_HORZ         3
         #define MAX_SETUP_ICON_VERT         2
         #define SETUP_ICON_X_CLEARENCE      8
         #define SETUP_ICON_Y_CLEARENCE      36
         #define MAX_SETUP_TILES             4
+    #else
+        #error "no setup tiles set"
     #endif
 
     #define MAX_SETUP_ICON            ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT * MAX_SETUP_TILES )

@@ -68,6 +68,7 @@ LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 
+bool style_change_event_cb( EventBits_t event, void *arg );
 bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg );
 static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event);
 static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event);
@@ -79,16 +80,16 @@ void gps_status_main_setup(uint32_t tile_num) {
     gps_status_main_tile = mainbar_get_tile_obj(tile_num);
     lv_style_copy(&gps_status_main_style, ws_get_mainbar_style());
 
-    lv_obj_t * exit_btn = wf_add_exit_button( gps_status_main_tile, exit_gps_status_main_event_cb, &gps_status_main_style );
-    lv_obj_align(exit_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
+    lv_obj_t * exit_btn = wf_add_exit_button( gps_status_main_tile );
+    lv_obj_align(exit_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING);
 
-    lv_obj_t *setup_btn = wf_add_setup_button(gps_status_main_tile, enter_gps_status_setup_event_cb, &gps_status_main_style);
-    lv_obj_align(setup_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10);
+    lv_obj_t *setup_btn = wf_add_setup_button(gps_status_main_tile, enter_gps_status_setup_event_cb );
+    lv_obj_align(setup_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING);
     lv_obj_set_hidden(setup_btn, true);
 
     lv_style_copy(&gps_status_value_style, ws_get_mainbar_style());
     lv_style_set_bg_color(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-    lv_style_set_bg_opa(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_OPA_50);
+    lv_style_set_bg_opa(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_OPA_0);
     lv_style_set_border_width(&gps_status_value_style, LV_OBJ_PART_MAIN, 0);
     lv_style_set_text_font(&gps_status_value_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     /*
@@ -234,6 +235,19 @@ void gps_status_main_setup(uint32_t tile_num) {
     gps_status_block_return_maintile = display_get_block_return_maintile();
     mainbar_add_tile_activate_cb( tile_num, gps_status_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, gps_status_hibernate_cb );
+    styles_register_cb( STYLE_CHANGE, style_change_event_cb, "gps status style");
+}
+
+bool style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy(&gps_status_value_style, ws_get_mainbar_style());
+                            lv_style_set_bg_color(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
+                            lv_style_set_bg_opa(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_OPA_0);
+                            lv_style_set_border_width(&gps_status_value_style, LV_OBJ_PART_MAIN, 0);
+                            lv_style_set_text_font(&gps_status_value_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+                            break;
+    }
+    return( true );
 }
 
 static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {

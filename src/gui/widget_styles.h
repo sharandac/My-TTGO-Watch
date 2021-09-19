@@ -22,7 +22,21 @@
 #pragma once
 
 #include "config.h"
+#include "hardware/callback.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/io.h"
+#else
+    #include <Arduino.h>
+#endif
+
+#define STYLE_CHANGE                        _BV(0)
+#define STYLE_DARKMODE                      _BV(1)
+#define STYLE_LIGHTMODE                     _BV(2)
+
+#define ROLLER_TEXT_SPACE 8 //half of font size - good size for 4 lines roller on the small display
+
+bool styles_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 void widget_style_theme_set( int theme );
 
 /**

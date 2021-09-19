@@ -255,6 +255,7 @@ lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t *
 lv_obj_t * wf_add_list(lv_obj_t *parent, const char* _options ){
     lv_obj_t *_list = lv_dropdown_create( parent, NULL );
     lv_dropdown_set_options( _list, _options );
+    lv_obj_add_protect( _list, LV_PROTECT_CLICK_FOCUS);
     return _list;
 }
 
@@ -262,8 +263,17 @@ lv_obj_t * wf_add_list(lv_obj_t *parent, const char* _options, lv_style_t *style
     lv_obj_t *_list = lv_dropdown_create( parent, NULL );
     if ( style ) {
         lv_obj_add_style( _list, LV_DROPDOWN_PART_LIST, style );
+        lv_obj_add_style( _list, LV_DROPDOWN_PART_MAIN, style );
         lv_obj_add_style( _list, LV_OBJ_PART_MAIN, style );
+        lv_obj_add_style( _list, LV_STATE_DEFAULT, style );
+        lv_obj_add_style( _list, LV_STATE_CHECKED, style );
+        lv_obj_add_style( _list, LV_STATE_DISABLED, style );
+        lv_obj_add_style( _list, LV_STATE_EDITED, style );
+        lv_obj_add_style( _list, LV_STATE_FOCUSED, style );
+        lv_obj_add_style( _list, LV_STATE_HOVERED, style );
+        lv_obj_add_style( _list, LV_STATE_PRESSED, style );
     }
+    lv_obj_add_protect( _list, LV_PROTECT_CLICK_FOCUS);
     lv_dropdown_set_options( _list, _options );
     return _list;
 }

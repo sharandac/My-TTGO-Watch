@@ -179,13 +179,13 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_color(&osmmap_app_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
     lv_obj_t *osmmap_cont = lv_obj_create( osmmap_app_main_tile, NULL );
-    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
     lv_obj_add_style( osmmap_cont, LV_OBJ_PART_MAIN, &osmmap_app_main_style );
-    lv_obj_align( osmmap_cont, osmmap_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
+    lv_obj_align( osmmap_cont, osmmap_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
 
     osmmap_app_tile_img = lv_img_create( osmmap_cont, NULL );
-    lv_obj_set_width( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
-    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_width( osmmap_app_tile_img, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
+    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
     lv_img_set_src( osmmap_app_tile_img, osm_map_get_no_data_image() );
 #ifdef M5PAPER
     lv_img_set_zoom( osmmap_app_tile_img, 540 );

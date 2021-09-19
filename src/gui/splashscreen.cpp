@@ -71,17 +71,19 @@ void splash_screen_stage_one( void ) {
         lv_img_set_src( logo, &hedgehog );
     }
     lv_obj_align( logo, NULL, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_add_style( logo, LV_OBJ_PART_MAIN, SYSTEM_ICON_STYLE );
 
     preload = lv_bar_create( lv_scr_act(), NULL );
     lv_obj_set_size( preload, lv_disp_get_hor_res( NULL ) - 80, 20 );
-    lv_obj_add_style( preload, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( preload, LV_OBJ_PART_MAIN, SYSTEM_ICON_STYLE );
     lv_obj_align( preload, logo, LV_ALIGN_OUT_BOTTOM_MID, 0, 30 );
     lv_bar_set_anim_time( preload, 2000);
     lv_bar_set_value( preload, 0, LV_ANIM_ON);
+    lv_obj_set_hidden( preload, true );
 
     preload_label = lv_label_create( lv_scr_act(), NULL );
     lv_label_set_text( preload_label, "booting" );
-    lv_obj_add_style( preload_label, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( preload_label, LV_OBJ_PART_MAIN, SYSTEM_ICON_LABEL_STYLE );
     lv_obj_align( preload_label, preload, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_disp_trig_activity( NULL );

@@ -58,13 +58,15 @@ void note_tile_setup( void ) {
         return;
     }
 
-#if defined( M5PAPER )
-    note_tile_num = mainbar_add_tile( 0, 3, "note tile", ws_get_mainbar_style() );
-    note_cont = mainbar_get_tile_obj( note_tile_num );
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    note_tile_num = mainbar_add_tile( 0, 1, "note tile", ws_get_mainbar_style() );
-    note_cont = mainbar_get_tile_obj( note_tile_num );
-#endif 
+    #if defined( M5PAPER )
+        note_tile_num = mainbar_add_tile( 0, 3, "note tile", ws_get_mainbar_style() );
+        note_cont = mainbar_get_tile_obj( note_tile_num );
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
+        note_tile_num = mainbar_add_tile( 0, 1, "note tile", ws_get_mainbar_style() );
+        note_cont = mainbar_get_tile_obj( note_tile_num );
+    #else
+        #error "no note tiles setup"  
+    #endif 
     style = ws_get_mainbar_style();
 
     lv_style_copy( &notestyle, style);

@@ -20,8 +20,9 @@
  */
 
 #include "widget_styles.h"
+#include "hardware/callback.h"
 
-#define ROLLER_TEXT_SPACE 8 //half of font size - good size for 4 lines roller on the small display
+callback_t *styles_callback = NULL;
 
 static bool styles_defined = false;
 
@@ -77,6 +78,19 @@ LV_FONT_DECLARE(Ubuntu_48px);
     lv_font_t *setup_header_font = &lv_font_montserrat_14;
 #endif
 
+bool styles_send_event_cb( EventBits_t event, void *arg );
+
+bool styles_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( styles_callback == NULL ) {
+        styles_callback = callback_init( "styles" );
+    }
+    return( callback_register( styles_callback, event, callback_func, id ) );
+}
+
+bool styles_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( styles_callback, event, arg ) );
+}
+
 void widget_style_theme_set( int theme ) {
     switch( theme ) {
         case( 0 ):      lv_style_set_bg_color( &background_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
@@ -92,6 +106,12 @@ void widget_style_theme_set( int theme ) {
                         lv_style_set_text_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_image_recolor( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
+                        lv_style_set_bg_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+                        lv_style_set_bg_opa( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+                        lv_style_set_border_width( &setup_dropdown_style, LV_OBJ_PART_MAIN, 1 );
+                        lv_style_set_border_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+                        lv_style_set_text_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+
                         lv_style_set_bg_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_text_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
@@ -99,7 +119,14 @@ void widget_style_theme_set( int theme ) {
                         lv_style_set_text_color( &system_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_text_color( &app_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
+                        lv_style_set_radius( &button_style, LV_STATE_DEFAULT, 0 );
                         lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
+
+                        lv_style_set_bg_color( &switch_style, LV_STATE_CHECKED, LV_COLOR_BLACK );
+
+                        lv_style_set_bg_color( &slider_style, LV_STATE_DEFAULT, LV_COLOR_BLACK );
+                        styles_send_event_cb( STYLE_CHANGE, (void*)NULL );
+                        styles_send_event_cb( STYLE_DARKMODE, (void*)NULL );
                         break;
         default:        lv_style_set_bg_color( &background_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
@@ -114,6 +141,12 @@ void widget_style_theme_set( int theme ) {
                         lv_style_set_text_color( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_image_recolor( &setup_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
 
+                        lv_style_set_bg_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_MAKE( 0xa0, 0xa0, 0xa0 ) );
+                        lv_style_set_bg_opa( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
+                        lv_style_set_border_width( &setup_dropdown_style, LV_OBJ_PART_MAIN, 0 );
+                        lv_style_set_border_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_MAKE( 0xa0, 0xa0, 0xa0 ) );
+                        lv_style_set_text_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+
                         lv_style_set_bg_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
                         lv_style_set_text_color( &setup_header_tile_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
 
@@ -121,7 +154,14 @@ void widget_style_theme_set( int theme ) {
                         lv_style_set_text_color( &system_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_text_color( &app_icon_label_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
 
+                        lv_style_set_radius( &button_style, LV_STATE_DEFAULT, 3 );
                         lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
+
+                        lv_style_set_bg_color( &switch_style, LV_STATE_CHECKED, LV_COLOR_GREEN );
+
+                        lv_style_set_bg_color( &slider_style, LV_STATE_DEFAULT, LV_COLOR_GREEN );
+                        styles_send_event_cb( STYLE_CHANGE, (void*)NULL );
+                        styles_send_event_cb( STYLE_LIGHTMODE, (void*)NULL );
                         break;
 
     }
@@ -197,6 +237,8 @@ static void define_styles(){
     lv_style_set_bg_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_MAKE( 0xa0, 0xa0, 0xa0 ) );
     lv_style_set_bg_opa( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
     lv_style_set_border_width( &setup_dropdown_style, LV_OBJ_PART_MAIN, 0 );
+    lv_style_set_border_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_MAKE( 0xa0, 0xa0, 0xa0 ) );
+    lv_style_set_text_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
     lv_style_set_text_font( &setup_dropdown_style, LV_OBJ_PART_MAIN, setup_font );
     /**
      * general system icon style
@@ -277,6 +319,8 @@ static void define_styles(){
 
 #ifdef M5PAPER
     widget_style_theme_set( 0 );
+#else
+    widget_style_theme_set( ~0 );
 #endif
 
     styles_defined = true;

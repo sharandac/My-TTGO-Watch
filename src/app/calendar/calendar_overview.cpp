@@ -47,10 +47,14 @@ uint32_t calendar_ovreview_tile_num;                                            
  * calendar icon and fonts
  */
 LV_FONT_DECLARE(Ubuntu_32px);                                                       /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_16px);                                                       /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_12px);                                                       /** @brief calendar font */
-#if defined( M5PAPER )
+
+#if defined( BIG_THEME )
     lv_font_t *calandar_font = &Ubuntu_32px;
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+#elif defined( MID_THEME )
+    lv_font_t *calandar_font = &Ubuntu_16px;
+#else
     lv_font_t *calandar_font = &Ubuntu_12px;
 #endif
 

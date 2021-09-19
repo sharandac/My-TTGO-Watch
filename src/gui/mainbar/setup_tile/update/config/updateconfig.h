@@ -35,7 +35,10 @@
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v2.version.json"
     #elif defined( LILYGO_WATCH_2020_V3 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"
+    #elif defined( M5CORE2 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/m5stack-core2.version.json"
     #endif
+
     #if !defined( FIRMWARE_UPDATE_URL )
         #error "nohardware version defined"
     #endif

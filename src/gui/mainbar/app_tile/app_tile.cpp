@@ -55,11 +55,13 @@ void app_tile_setup( void ) {
      * add tiles to to main tile
      */
     for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
-#if defined( M5PAPER )
+    #if defined( M5PAPER )
         app_tile_num[ tiles ] = mainbar_add_tile( 0, 1 + tiles, "app tile", ws_get_mainbar_style() );
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
-#endif
+    #else
+        #error "no app tiles setup"        
+    #endif
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
         mainbar_add_tile_button_cb( app_tile_num[ tiles ], app_tile_button_event_cb );
     }

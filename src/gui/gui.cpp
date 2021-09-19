@@ -143,6 +143,10 @@ void gui_setup( void ) {
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
+
+#ifdef M5PAPER
+    widget_style_theme_set( 0 );
+#endif
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {

@@ -84,6 +84,7 @@ void rmc(char dati[]);
 void rmb(char dati[]);
 void apb(char dati[]);
 
+bool sailing_style_change_event_cb( EventBits_t event, void *arg );
 bool sailing_wifictl_event_cb( EventBits_t event, void *arg );
 void sailing_activate_cb( void );
 void sailing_hibernate_cb( void );
@@ -158,7 +159,18 @@ void sailing_main_setup( uint32_t tile_num ) {
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, sailing_wifictl_event_cb, "sailing data" );
     mainbar_add_tile_activate_cb( tile_num, sailing_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, sailing_hibernate_cb );
-    
+    styles_register_cb( STYLE_CHANGE, sailing_style_change_event_cb, "sailing style event" );
+}
+
+bool sailing_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &sailing_main_style, APP_STYLE );
+                            lv_style_set_text_font( &sailing_main_style, LV_STATE_DEFAULT, &Ubuntu_32px);    
+                            lv_style_copy( &heading_main_style, APP_STYLE );
+                            lv_style_set_text_font( &heading_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
+                            break;
+    }
+    return( true );
 }
 
 void sailing_activate_cb( void ) {

@@ -58,6 +58,12 @@ void style_settings_tile_setup( void ) {
     lv_obj_t *theme_cont = wf_add_labeled_list( style_settings_tile, "theme", &theme_list, "E-Ink\nColor", select_style_event_cb, SETUP_STYLE );
     lv_obj_align( theme_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
+#ifdef M5PAPER
+    lv_dropdown_set_selected( theme_list, 0 );
+#else
+    lv_dropdown_set_selected( theme_list, 1 );
+#endif
+
     lv_obj_t *hint_cont = wf_add_label( style_settings_tile, "Not all apps support\ntheme change on the fly.\nAt this time it is only\nfor testing.", SETUP_STYLE );
     lv_obj_align( hint_cont, theme_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 }

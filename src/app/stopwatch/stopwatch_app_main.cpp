@@ -54,6 +54,7 @@ lv_task_t * _stopwatch_app_task;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 
+bool stopwatch_style_change_event_cb( EventBits_t event, void *arg );
 static void exit_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void stop_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -110,8 +111,17 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( stopwatch_app_main_tile, exit_stopwatch_app_main_event_cb );
     lv_obj_align(exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
+    styles_register_cb( STYLE_CHANGE, stopwatch_style_change_event_cb, "staopwatch style change" );
 }
 
+bool stopwatch_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:      lv_style_copy( &stopwatch_app_main_stopwatchstyle, APP_STYLE );
+                                lv_style_set_text_font( &stopwatch_app_main_stopwatchstyle, LV_STATE_DEFAULT, &Ubuntu_72px);
+                                break;
+    }
+    return( true );
+}
 
 static void stopwatch_app_main_update_stopwatchlabel()
 {

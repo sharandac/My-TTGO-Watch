@@ -50,6 +50,10 @@
             #define RES_X_MAX       540
             #define RES_Y_MAX       960
             #define HARDWARE_NAME   "m5stack-fire"
+        #elif defined( M5CORE2 )
+            #define RES_X_MAX       320
+            #define RES_Y_MAX       240
+            #define HARDWARE_NAME   "m5stack-core2"
         #else
             #error "no destination hardware version defined"
         #endif
@@ -67,7 +71,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021091701"
+    #define __FIRMWARE__            "2021091801"
     /**
      * Allows to include config.h from C code
      */

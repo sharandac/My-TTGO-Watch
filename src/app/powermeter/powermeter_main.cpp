@@ -77,6 +77,7 @@ LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
+bool powermeter_style_change_event_cb( EventBits_t event, void *arg );
 bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
@@ -231,8 +232,24 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     powermeter_mqtt_client.setBufferSize( 512 );
 #endif
     wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_OFF_REQUEST | WIFICTL_OFF | WIFICTL_DISCONNECT , powermeter_wifictl_event_cb, "powermeter" );
+    styles_register_cb( STYLE_CHANGE, powermeter_style_change_event_cb, "powermeter style event ");
     // create an task that runs every secound
     _powermeter_main_task = lv_task_create( powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL );
+}
+
+bool powermeter_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &powermeter_main_style, APP_STYLE );
+                            lv_style_set_text_font( &powermeter_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
+                            lv_style_copy( &powermeter_id_style, APP_STYLE );
+                            lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+                            break;
+        case STYLE_DARKMODE:
+                            break;
+        case STYLE_LIGHTMODE:
+                            break;
+    }
+    return( true );
 }
 
 bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {

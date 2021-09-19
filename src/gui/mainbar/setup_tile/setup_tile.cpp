@@ -61,9 +61,11 @@ void setup_tile_setup( void ) {
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {
 #if defined( M5PAPER )
         setup_tile_num[ tiles ] = mainbar_add_tile( 0, 2 + tiles, "setup tile", ws_get_mainbar_style() );
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         setup_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles , 1, "setup tile", ws_get_mainbar_style() );
-#endif        
+#else
+    #error "no setup tiles set"
+#endif
         setup_cont[ tiles ] = mainbar_get_tile_obj( setup_tile_num[ tiles ] );
         mainbar_add_tile_button_cb( setup_tile_num[ tiles ], setup_tile_button_event_cb );
     }
