@@ -146,7 +146,7 @@ static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *are
     /**
      * check if screenshot memory allocated
      */
-    if ( raw_rgb == NULL ) {
+    if ( raw_rgb == NULL && raw_grey == NULL ) {
         log_e("no screenshot memory allocated");
         return;
     }

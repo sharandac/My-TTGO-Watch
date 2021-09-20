@@ -44,7 +44,11 @@
     LV_IMG_DECLARE(zoomout_96px);
     LV_IMG_DECLARE(left_96px);
     LV_IMG_DECLARE(right_96px);
+    LV_IMG_DECLARE(up_96px);
+    LV_IMG_DECLARE(down_96px);
 
+    const lv_img_dsc_t down_icon = down_96px;
+    const lv_img_dsc_t up_icon = up_96px;
     const lv_img_dsc_t right_icon = right_96px;
     const lv_img_dsc_t left_icon = left_96px;
     const lv_img_dsc_t zoomout_icon = zoomout_96px;
@@ -74,7 +78,11 @@
     LV_IMG_DECLARE(zoomout_64px);
     LV_IMG_DECLARE(left_64px);
     LV_IMG_DECLARE(right_64px);
+    LV_IMG_DECLARE(up_64px);
+    LV_IMG_DECLARE(down_64px);
 
+    const lv_img_dsc_t down_icon = down_64px;
+    const lv_img_dsc_t up_icon = up_64px;
     const lv_img_dsc_t right_icon = right_64px;
     const lv_img_dsc_t left_icon = left_64px;
     const lv_img_dsc_t zoomout_icon = zoomout_64px;
@@ -104,7 +112,11 @@
     LV_IMG_DECLARE(zoomout_32px);
     LV_IMG_DECLARE(left_32px);
     LV_IMG_DECLARE(right_32px);
+    LV_IMG_DECLARE(up_32px);
+    LV_IMG_DECLARE(down_32px);
 
+    const lv_img_dsc_t down_icon = down_32px;
+    const lv_img_dsc_t up_icon = up_32px;
     const lv_img_dsc_t right_icon = right_32px;
     const lv_img_dsc_t left_icon = left_32px;
     const lv_img_dsc_t zoomout_icon = zoomout_32px;

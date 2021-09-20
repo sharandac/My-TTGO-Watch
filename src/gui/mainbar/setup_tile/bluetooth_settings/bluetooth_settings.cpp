@@ -155,7 +155,8 @@ static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void down_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( bluetooth_tile_num_2, LV_ANIM_ON );
+        case( LV_EVENT_CLICKED ):       lv_dropdown_close( txpower_list );
+                                        mainbar_jump_to_tilenumber( bluetooth_tile_num_2, LV_ANIM_ON );
                                         break;
     }
 
@@ -163,7 +164,8 @@ static void down_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void up_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
+        case( LV_EVENT_CLICKED ):       lv_dropdown_close( txpower_list );
+                                        mainbar_jump_back();
                                         break;
     }
 

@@ -111,7 +111,7 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     lv_obj_t * exit_btn = wf_add_exit_button( stopwatch_app_main_tile, exit_stopwatch_app_main_event_cb );
     lv_obj_align(exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    styles_register_cb( STYLE_CHANGE, stopwatch_style_change_event_cb, "staopwatch style change" );
+    styles_register_cb( STYLE_CHANGE, stopwatch_style_change_event_cb, "stopwatch style change" );
 }
 
 bool stopwatch_style_change_event_cb( EventBits_t event, void *arg ) {

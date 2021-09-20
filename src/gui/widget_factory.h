@@ -44,14 +44,14 @@
         #define THEME_PADDING           5
     #endif
 
+    #define     BACKGROUND_STYLE            ws_get_background_style()
     #define     MAINBAR_STYLE               ws_get_mainbar_style()
     #define     APP_STYLE                   ws_get_app_style()
+    #define     APP_ICON_STYLE              ws_get_app_icon_style()
+    #define     APP_ICON_LABEL_STYLE        ws_get_app_icon_label_style()
     #define     SETUP_STYLE                 ws_get_setup_tile_style()
     #define     SYSTEM_ICON_STYLE           ws_get_system_icon_style()
-    #define     APP_ICON_STYLE              ws_get_app_icon_style()
     #define     SYSTEM_ICON_LABEL_STYLE     ws_get_system_icon_label_style()
-    #define     APP_ICON_LABEL_STYLE        ws_get_app_icon_label_style()
-    #define     BACKGROUND_STYLE            ws_get_background_style()
 
 /**
  * @brief   Creates and adds container (lv_cont) to parent object as a layout member.

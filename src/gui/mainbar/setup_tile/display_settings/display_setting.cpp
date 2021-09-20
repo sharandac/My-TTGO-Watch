@@ -155,7 +155,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_t *display_use_dma_cont = wf_add_labeled_switch( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "use DMA transfer", &display_use_dma_cont_onoff, display_get_use_dma(), display_use_dma_setup_event_cb, SETUP_STYLE );
     lv_obj_align( display_use_dma_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 */
-    lv_obj_t *display_background_image_cont = wf_add_labeled_list( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "BG image", &display_bg_img_list, "bg\nbg1\nbg2\nbg3\nblack\nbg.png", display_background_image_setup_event_cb, SETUP_STYLE );
+    lv_obj_t *display_background_image_cont = wf_add_labeled_list( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "BG image", &display_bg_img_list, "bg\nbg1\nbg2\nbg3\nnone\nbg.png", display_background_image_setup_event_cb, SETUP_STYLE );
     lv_obj_align( display_background_image_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
     lv_slider_set_value( display_brightness_slider, display_get_brightness(), LV_ANIM_OFF );
