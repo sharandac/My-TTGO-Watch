@@ -20,48 +20,47 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#
 
 #include "resolve_owm_icon.h"
 
-LV_IMG_DECLARE(owm_01d_64px);
-LV_IMG_DECLARE(owm_02d_64px);
-LV_IMG_DECLARE(owm_03d_64px);
-LV_IMG_DECLARE(owm_04d_64px);
-LV_IMG_DECLARE(owm_09d_64px);
-LV_IMG_DECLARE(owm_10d_64px);
-LV_IMG_DECLARE(owm_11d_64px);
-LV_IMG_DECLARE(owm_13d_64px);
-LV_IMG_DECLARE(owm_50d_64px);
-LV_IMG_DECLARE(owm_01n_64px);
-LV_IMG_DECLARE(owm_02n_64px);
-LV_IMG_DECLARE(owm_03n_64px);
-LV_IMG_DECLARE(owm_04n_64px);
-LV_IMG_DECLARE(owm_09n_64px);
-LV_IMG_DECLARE(owm_10n_64px);
-LV_IMG_DECLARE(owm_11n_64px);
-LV_IMG_DECLARE(owm_13n_64px);
-LV_IMG_DECLARE(owm_50n_64px);
+LV_IMG_DECLARE(owm01d_64px);
+LV_IMG_DECLARE(owm02d_64px);
+LV_IMG_DECLARE(owm03d_64px);
+LV_IMG_DECLARE(owm04d_64px);
+LV_IMG_DECLARE(owm09d_64px);
+LV_IMG_DECLARE(owm10d_64px);
+LV_IMG_DECLARE(owm11d_64px);
+LV_IMG_DECLARE(owm13d_64px);
+LV_IMG_DECLARE(owm50d_64px);
+LV_IMG_DECLARE(owm01n_64px);
+LV_IMG_DECLARE(owm02n_64px);
+LV_IMG_DECLARE(owm03n_64px);
+LV_IMG_DECLARE(owm04n_64px);
+LV_IMG_DECLARE(owm09n_64px);
+LV_IMG_DECLARE(owm10n_64px);
+LV_IMG_DECLARE(owm11n_64px);
+LV_IMG_DECLARE(owm13n_64px);
+LV_IMG_DECLARE(owm50n_64px);
 
 struct owm_icon owm_icon[ 18 ] = {
-    { "01d", &owm_01d_64px },
-    { "02d", &owm_02d_64px },
-    { "03d", &owm_03d_64px },
-    { "04d", &owm_04d_64px },
-    { "09d", &owm_09d_64px },
-    { "10d", &owm_10d_64px },
-    { "11d", &owm_11d_64px },
-    { "13d", &owm_13d_64px },
-    { "50d", &owm_50d_64px },
-    { "01n", &owm_01n_64px },
-    { "02n", &owm_02n_64px },
-    { "03n", &owm_03n_64px },
-    { "04n", &owm_04n_64px },
-    { "09n", &owm_09n_64px },
-    { "10n", &owm_10n_64px },
-    { "11n", &owm_11n_64px },
-    { "13n", &owm_13n_64px },
-    { "50n", &owm_50n_64px }
+    { "01d", &owm01d_64px },
+    { "02d", &owm02d_64px },
+    { "03d", &owm03d_64px },
+    { "04d", &owm04d_64px },
+    { "09d", &owm09d_64px },
+    { "10d", &owm10d_64px },
+    { "11d", &owm11d_64px },
+    { "13d", &owm13d_64px },
+    { "50d", &owm50d_64px },
+    { "01n", &owm01n_64px },
+    { "02n", &owm02n_64px },
+    { "03n", &owm03n_64px },
+    { "04n", &owm04n_64px },
+    { "09n", &owm09n_64px },
+    { "10n", &owm10n_64px },
+    { "11n", &owm11n_64px },
+    { "13n", &owm13n_64px },
+    { "50n", &owm50n_64px }
 };
 
 const void * resolve_owm_icon( char *iconname ) {
@@ -70,6 +69,6 @@ const void * resolve_owm_icon( char *iconname ) {
             return( owm_icon[ icon ].icon );
         }
     }
-    return( &owm_01d_64px );
+    return( &owm01d_64px );
 }
 

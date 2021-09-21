@@ -67,48 +67,48 @@ static bool osmand_block_return_maintile = false;
 
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(ahead_128px);
-LV_IMG_DECLARE(turn_left_128px);
-LV_IMG_DECLARE(turn_right_128px);
-LV_IMG_DECLARE(slightly_left_128px);
-LV_IMG_DECLARE(slightly_right_128px);
-LV_IMG_DECLARE(sharply_left_128px);
-LV_IMG_DECLARE(sharply_right_128px);
+LV_IMG_DECLARE(turnleft_128px);
+LV_IMG_DECLARE(turnright_128px);
+LV_IMG_DECLARE(slightlyleft_128px);
+LV_IMG_DECLARE(slightlyright_128px);
+LV_IMG_DECLARE(sharplyleft_128px);
+LV_IMG_DECLARE(sharplyright_128px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 struct direction_t direction[] = {
     // english directions
     { "ahead", "", &ahead_128px },
-    { "left", "slightly", &slightly_left_128px },
-    { "right", "slightly", &slightly_right_128px },
-    { "left", "sharply", &sharply_left_128px },
-    { "right", "sharply", &sharply_right_128px },
-    { "turn left", "", &turn_left_128px },
-    { "turn right", "", &turn_right_128px },
+    { "left", "slightly", &slightlyleft_128px },
+    { "right", "slightly", &slightlyright_128px },
+    { "left", "sharply", &sharplyleft_128px },
+    { "right", "sharply", &sharplyright_128px },
+    { "turn left", "", &turnleft_128px },
+    { "turn right", "", &turnright_128px },
     // german direction
     { "Geradeaus", "", &ahead_128px },
-    { "links abbiegen", "halb", &slightly_left_128px },
-    { "rechts abbiegen", "halb", &slightly_right_128px },
-    { "links abbiegen", "scharf", &sharply_left_128px },
-    { "rechts abbiegen", "scharf", &sharply_right_128px },
-    { "links abbiegen", "", &turn_left_128px },
-    { "rechts abbiegen", "", &turn_right_128px },
+    { "links abbiegen", "halb", &slightlyleft_128px },
+    { "rechts abbiegen", "halb", &slightlyright_128px },
+    { "links abbiegen", "scharf", &sharplyleft_128px },
+    { "rechts abbiegen", "scharf", &sharplyright_128px },
+    { "links abbiegen", "", &turnleft_128px },
+    { "rechts abbiegen", "", &turnright_128px },
     // french direction
     { "Avancez", "", &ahead_128px },
-    { "gauche et continuez", "vers la", &slightly_left_128px },
-    { "droite et continuez", "vers la", &slightly_right_128px },
-    { "gauche et continuez", "franchement", &sharply_left_128px },
-    { "droite et continuez", "franchement", &sharply_right_128px },
-    { "gauche et continuez", "", &turn_left_128px },
-    { "droite et continuez", "", &turn_right_128px },
+    { "gauche et continuez", "vers la", &slightlyleft_128px },
+    { "droite et continuez", "vers la", &slightlyright_128px },
+    { "gauche et continuez", "franchement", &sharplyleft_128px },
+    { "droite et continuez", "franchement", &sharplyright_128px },
+    { "gauche et continuez", "", &turnleft_128px },
+    { "droite et continuez", "", &turnright_128px },
         // italian direction
     { "Avanti", "", &ahead_128px },
-    { "sinistra", "leggermente", &slightly_left_128px },
-    { "destra", "leggermente", &slightly_right_128px },
-    { "sinistra", "bruscamente", &sharply_left_128px },
-    { "destra", "bruscamente", &sharply_right_128px },
-    { "gira a sinistra", "", &turn_left_128px },
-    { "gira a destra", "", &turn_right_128px },
+    { "sinistra", "leggermente", &slightlyleft_128px },
+    { "destra", "leggermente", &slightlyright_128px },
+    { "sinistra", "bruscamente", &sharplyleft_128px },
+    { "destra", "bruscamente", &sharplyright_128px },
+    { "gira a sinistra", "", &turnleft_128px },
+    { "gira a destra", "", &turnright_128px },
     { "", "", NULL }
 };
 

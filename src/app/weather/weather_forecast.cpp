@@ -60,7 +60,7 @@ void weather_forecast_sync_Task( void * pvParameters );
 bool weather_forecast_wifictl_event_cb( EventBits_t event, void *arg );
 
 LV_IMG_DECLARE(refresh_32px);
-LV_IMG_DECLARE(owm_01d_64px);
+LV_IMG_DECLARE(owm01d_64px);
 
 static void exit_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 static void setup_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -102,7 +102,7 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 0 );
 
     for ( int i = 0 ; i < WEATHER_MAX_FORECAST && i < WEATHER_MAX_FORECAST_DIV; i++ ) {
-        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, APP_STYLE );
+        weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm01d_64px, NULL, APP_STYLE );
         lv_obj_align( weather_forecast_icon_imgbtn[ i ], weater_forecast_cont, LV_ALIGN_IN_LEFT_MID, i*( 58 + WEATHER_FORCAST_ICON_SPACE ) , 0 );
 
         weather_forecast_temperature_label[ i ] = lv_label_create( weater_forecast_cont , NULL);
