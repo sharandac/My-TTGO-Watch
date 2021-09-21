@@ -103,7 +103,7 @@ void display_settings_tile_setup( void ) {
         header_2 = wf_add_settings_header( display_settings_tile_2, "display settings", exit_display_setup_event_cb );
         lv_obj_align( header_2, display_settings_tile_2, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-        lv_obj_t *down_btn_1 = wf_add_image_button( display_settings_tile_1, down_32px, down_display_setup_event_cb, SETUP_STYLE );
+        lv_obj_t *down_btn_1 = wf_add_down_button( display_settings_tile_1, down_display_setup_event_cb, SETUP_STYLE );
         lv_obj_align( down_btn_1, display_settings_tile_1, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
     }
 

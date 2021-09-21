@@ -59,6 +59,7 @@ static void powermeter_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void powermeter_num_textarea_event_cb( lv_obj_t * obj, lv_event_t event );
 static void powermeter_autoconnect_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 static void powermeter_widget_onoff_event_handler( lv_obj_t *obj, lv_event_t event );
+static void powermeter_setup_page_2_event_cb( lv_obj_t *obj, lv_event_t event );
 static void powermeter_setup_hibernate_callback ( void );
 
 void powermeter_setup_tile_setup( uint32_t tile_num ) {
@@ -73,6 +74,12 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
 
     lv_obj_t *header = wf_add_settings_header( powermeter_setup_tile, "powermeter setup" );
     lv_obj_align( header, powermeter_setup_tile, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, THEME_ICON_PADDING );
+
+    lv_obj_t *header_2 = wf_add_settings_header( powermeter_setup_tile_2, "powermeter setup" );
+    lv_obj_align( header_2, powermeter_setup_tile_2, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, THEME_ICON_PADDING );
+
+    lv_obj_t *setup_page_2 = wf_add_down_button( powermeter_setup_tile, powermeter_setup_page_2_event_cb );
+    lv_obj_align( setup_page_2, powermeter_setup_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_ICON_PADDING, THEME_ICON_PADDING );
 
     lv_obj_t *powermeter_server_cont = lv_obj_create( powermeter_setup_tile, NULL );
     lv_obj_set_size( powermeter_server_cont, lv_disp_get_hor_res( NULL ) , 37);
@@ -164,7 +171,7 @@ void powermeter_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_t *powermeter_autoconnect_onoff_cont = lv_obj_create( powermeter_setup_tile_2, NULL);
     lv_obj_set_size( powermeter_autoconnect_onoff_cont, lv_disp_get_hor_res( NULL ), 32);
     lv_obj_add_style( powermeter_autoconnect_onoff_cont, LV_OBJ_PART_MAIN, SETUP_STYLE );
-    lv_obj_align( powermeter_autoconnect_onoff_cont, powermeter_setup_tile_2, LV_ALIGN_IN_TOP_MID, 0, THEME_ICON_PADDING );
+    lv_obj_align( powermeter_autoconnect_onoff_cont, header_2, LV_ALIGN_OUT_BOTTOM_LEFT, -THEME_ICON_PADDING, THEME_ICON_PADDING );
     powermeter_autoconnect_onoff = wf_add_switch( powermeter_autoconnect_onoff_cont, false);
     lv_obj_align( powermeter_autoconnect_onoff, powermeter_autoconnect_onoff_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0);
     lv_obj_set_event_cb( powermeter_autoconnect_onoff, powermeter_autoconnect_onoff_event_handler );
@@ -225,6 +232,12 @@ static void powermeter_num_textarea_event_cb( lv_obj_t * obj, lv_event_t event )
     }
 }
 
+static void powermeter_setup_page_2_event_cb( lv_obj_t *obj, lv_event_t event ) {
+    if( event == LV_EVENT_CLICKED ) {
+        mainbar_jump_to_tilenumber( powermeter_setup_tile_num + 1, LV_ANIM_OFF );
+    }
+    
+}
 static void powermeter_autoconnect_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case (LV_EVENT_VALUE_CHANGED):      powermeter_config_t *powermeter_config = powermeter_get_config();

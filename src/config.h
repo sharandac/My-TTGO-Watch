@@ -27,6 +27,7 @@
     #ifdef NATIVE_64BIT
             #define RES_X_MAX       LV_HOR_RES_MAX
             #define RES_Y_MAX       LV_VER_RES_MAX
+            #define HARDWARE_NAME   "NATIVE 64BIT APP"
     #else
         #if defined( LILYGO_WATCH_2020_V1 )
             #undef LILYGO_WATCH_LVGL
@@ -71,7 +72,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021092001"
+    #define __FIRMWARE__            "2021092102"
     /**
      * Allows to include config.h from C code
      */

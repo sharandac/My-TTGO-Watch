@@ -101,7 +101,7 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     lv_obj_add_style( weater_forecast_cont, LV_OBJ_PART_MAIN, ws_get_mainbar_style()  );
     lv_obj_align( weater_forecast_cont, weather_forecast_tile, LV_ALIGN_CENTER, 0, 0 );
 
-    for ( int i = 0 ; i < WEATHER_MAX_FORECAST / WEATHER_MAX_FORECAST_DIV ; i++ ) {
+    for ( int i = 0 ; i < WEATHER_MAX_FORECAST && i < WEATHER_MAX_FORECAST_DIV; i++ ) {
         weather_forecast_icon_imgbtn[ i ] = wf_add_image_button( weater_forecast_cont, owm_01d_64px, NULL, APP_STYLE );
         lv_obj_align( weather_forecast_icon_imgbtn[ i ], weater_forecast_cont, LV_ALIGN_IN_LEFT_MID, i*( 58 + WEATHER_FORCAST_ICON_SPACE ) , 0 );
 
@@ -199,7 +199,7 @@ void weather_forecast_sync_Task( void * pvParameters ) {
 
                 lv_label_set_text( weather_forecast_location_label, weather_forecast[ 0 ].name );
 
-                for ( int i = 0 ; i < WEATHER_MAX_FORECAST / WEATHER_MAX_FORECAST_DIV ; i++ ) {
+                for ( int i = 0 ; i < WEATHER_MAX_FORECAST && i < WEATHER_MAX_FORECAST_DIV ; i++ ) {
                     lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_RELEASED, resolve_owm_icon( weather_forecast[ i * 2 ].icon ) );
                     lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_PRESSED, resolve_owm_icon( weather_forecast[ i * 2 ].icon ) );
                     lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_CHECKED_RELEASED, resolve_owm_icon( weather_forecast[ i * 2 ].icon ) );

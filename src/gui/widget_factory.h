@@ -336,6 +336,30 @@ lv_obj_t * wf_add_left_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
 lv_img_dsc_t const &wf_get_left_img( void );
 
 /**
+ * @brief   Creates and adds an up button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_up_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_up_img( void );
+
+/**
+ * @brief   Creates and adds an down button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_down_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_down_img( void );
+
+/**
  * @brief   Creates and adds an labeled button to a container
  *
  * @param   parent  pointer to a parent container

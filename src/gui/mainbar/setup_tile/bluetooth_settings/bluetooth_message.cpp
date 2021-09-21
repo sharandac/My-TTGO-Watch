@@ -363,7 +363,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      * allocate an widget if nor allocated
      */
     if ( messages_widget == NULL ) {
-        messages_widget = widget_register( "message", &message_48px, enter_bluetooth_messages_cb );
+        messages_widget = widget_register( "message", &message_64px, enter_bluetooth_messages_cb );
     }
     /*
      * set widget icon indicator

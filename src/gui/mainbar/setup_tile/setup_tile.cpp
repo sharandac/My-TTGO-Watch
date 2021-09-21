@@ -80,15 +80,12 @@ void setup_tile_setup( void ) {
         // create app icon container
         setup_entry[ setup ].icon_cont = mainbar_obj_create( setup_cont[ setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ) ] );
         lv_obj_reset_style_list( setup_entry[ setup ].icon_cont, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( setup_entry[ setup ].icon_cont, LV_OBJ_PART_MAIN, SYSTEM_ICON_STYLE );
         lv_obj_set_size( setup_entry[ setup ].icon_cont, SETUP_ICON_X_SIZE, SETUP_ICON_Y_SIZE );
         lv_obj_align( setup_entry[ setup ].icon_cont , setup_cont[ setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ) ], LV_ALIGN_IN_TOP_LEFT, setup_entry[ setup ].x, setup_entry[ setup ].y );
-
         // create app label
         setup_entry[ setup ].label = lv_label_create( setup_cont[ setup / ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT ) ], NULL );
         mainbar_add_slide_element(setup_entry[ setup ].label);
         lv_obj_reset_style_list( setup_entry[ setup ].label, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( setup_entry[ setup ].label, LV_OBJ_PART_MAIN, SYSTEM_ICON_LABEL_STYLE );
         lv_obj_set_size( setup_entry[ setup ].label, SETUP_LABEL_X_SIZE, SETUP_LABEL_Y_SIZE );
         lv_obj_align( setup_entry[ setup ].label , setup_entry[ setup ].icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 

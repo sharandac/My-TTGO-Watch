@@ -33,7 +33,11 @@
     #ifdef M5PAPER
 
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #include "TTGO.h"
+        #include <TTGO.h>
+        
+        #if defined( LILYGO_WATCH_HAS_SDCARD )
+            SPIClass *sdhander = nullptr;
+        #endif
     #endif
 #endif
 

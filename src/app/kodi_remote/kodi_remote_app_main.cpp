@@ -58,8 +58,6 @@ static uint64_t nextmillis = 0;
 
 lv_obj_t *kodi_remote_player_main_tile = NULL;
 lv_obj_t *kodi_remote_control_main_tile = NULL;
-lv_style_t kodi_remote_control_button_matrix_style;
-lv_style_t kodi_remote_control_button_style;
 
 lv_task_t * _kodi_remote_app_task;
 
@@ -109,10 +107,10 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     kodi_remote_player_main_tile = mainbar_get_tile_obj( tile_num );
 
     lv_obj_t * exit_btn_player = wf_add_exit_button( kodi_remote_player_main_tile, exit_kodi_remote_main_event_cb );
-    lv_obj_align(exit_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align(exit_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     lv_obj_t * setup_btn_player = wf_add_setup_button( kodi_remote_player_main_tile, enter_kodi_remote_setup_event_cb );
-    lv_obj_align(setup_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align(setup_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
     kodi_remote_play = wf_add_image_button( kodi_remote_player_main_tile, play_64px, kodi_remote_play_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_play, kodi_remote_player_main_tile, LV_ALIGN_CENTER, 0, -20 );
@@ -150,32 +148,22 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     kodi_remote_control_main_tile = mainbar_get_tile_obj( tile_num + 1 );
 
     lv_obj_t * exit_btn_control = wf_add_exit_button( kodi_remote_control_main_tile, exit_kodi_remote_main_event_cb );
-    lv_obj_align(exit_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align(exit_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     lv_obj_t * setup_btn_control = wf_add_setup_button( kodi_remote_control_main_tile, enter_kodi_remote_setup_event_cb );
-    lv_obj_align(setup_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-
-    lv_style_copy(&kodi_remote_control_button_matrix_style, ws_get_button_style());
-    lv_style_set_bg_opa(&kodi_remote_control_button_matrix_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
-    lv_style_set_border_width( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_radius( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
-
-    lv_style_copy(&kodi_remote_control_button_style, ws_get_button_style());
-    lv_style_set_bg_opa(&kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_OPA_90);
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_CHECKED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_FOCUSED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_PRESSED, LV_COLOR_SILVER );
+    lv_obj_align(setup_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
     lv_obj_t * button_matrix = lv_btnmatrix_create(kodi_remote_control_main_tile, NULL);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &kodi_remote_control_button_matrix_style);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &kodi_remote_control_button_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, APP_STYLE );
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, ws_get_button_style() );
 	lv_obj_set_pos(button_matrix, 0, 0);
 	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - THEME_ICON_SIZE );
 
 	lv_btnmatrix_set_map(button_matrix, buttons );
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_obj_set_event_cb(button_matrix, kodi_remote_button_event_cb);
+
+    mainbar_add_slide_element( button_matrix );
 
     // callbacks
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );

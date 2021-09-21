@@ -470,6 +470,20 @@ lv_obj_t * wf_add_left_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
     return wf_add_image_button(parent, left_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 lv_img_dsc_t const &wf_get_left_img( void ) { return( left_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_up_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, up_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_up_img( void ) { return( up_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_down_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, down_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_down_img( void ) { return( down_icon ); }
 
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {

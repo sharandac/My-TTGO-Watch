@@ -108,7 +108,7 @@ void widget_style_theme_set( int theme ) {
                         /** mainbar dropdown colors **/
                         lv_style_set_bg_color( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_bg_opa( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-                        lv_style_set_border_width( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, 1 );
+                        lv_style_set_border_width( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, 2 );
                         lv_style_set_text_font( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, mainbar_font );
                         lv_style_set_text_color( &mainbar_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         /** app colors **/
@@ -132,7 +132,7 @@ void widget_style_theme_set( int theme ) {
                         /** setup dropdown style **/
                         lv_style_set_bg_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
                         lv_style_set_bg_opa( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-                        lv_style_set_border_width( &setup_dropdown_style, LV_OBJ_PART_MAIN, 1 );
+                        lv_style_set_border_width( &setup_dropdown_style, LV_OBJ_PART_MAIN, 2 );
                         lv_style_set_border_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         lv_style_set_text_color( &setup_dropdown_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
                         /** setup header style **/

@@ -10,10 +10,10 @@ find | grep 96px.png > 96px-list.txt
 while read LINE
 do
 	echo $LINE
-	NAME=`echo $LINE | cut -d"9" -f1`
-	DEST64=`echo $NAME`64px.png
-	DEST48=`echo $NAME`48px.png
-	DEST32=`echo $NAME`32px.png
+	NAME=`echo $LINE | cut -d"_" -f1`
+	DEST64=`echo $NAME`_64px.png
+	DEST48=`echo $NAME`_48px.png
+	DEST32=`echo $NAME`_32px.png
 	convert $LINE -resize 64x64 $DEST64
 	convert $LINE -resize 48x48 $DEST48
 	convert $LINE -resize 32x32 $DEST32
@@ -31,8 +31,12 @@ while read LINE
 do
 	CNAME=`echo $LINE | cut -d"." -f2`
 	FILE=${CNAME##*/}
-	echo "$LINE -> $CNAME.c ($FILE)"
+	RESOLUTION=`echo $FILE | cut -d"_" -f2 | cut -d"p" -f1`
+	echo "$LINE -> $CNAME.c ($FILE) RESOLUTIOIN=$RESOLUTION"
 	curl POST -F img_file=@$LINE -F name=$FILE -F cf=true_color_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
+#	curl POST -F img_file=@$LINE -F name=$FILE -F cf=raw_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
+#	sed -i "s/.h = ,/.h = $RESOLUTION,/g" .$CNAME.c
+#	sed -i "s/.w = ,/.w = $RESOLUTION,/g" .$CNAME.c
 done < png-list.txt
 #
 # get a list of png file with *"96px.png"
