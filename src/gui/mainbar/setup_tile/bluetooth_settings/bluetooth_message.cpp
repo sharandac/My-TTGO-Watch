@@ -79,36 +79,97 @@ int32_t bluetooth_current_msg = -1;
 LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
+LV_FONT_DECLARE(Ubuntu_72px);
 
-LV_IMG_DECLARE(cancel_32px);
-LV_IMG_DECLARE(telegram_32px);
-LV_IMG_DECLARE(whatsapp_32px);
-LV_IMG_DECLARE(k9mail_32px);
-LV_IMG_DECLARE(email_32px);
 LV_IMG_DECLARE(message_32px);
 LV_IMG_DECLARE(message_48px);
 LV_IMG_DECLARE(message_64px);
-LV_IMG_DECLARE(osmand_32px);
-LV_IMG_DECLARE(youtube_32px);
-LV_IMG_DECLARE(instagram_32px);
-LV_IMG_DECLARE(tinder_32px);
-LV_IMG_DECLARE(trash_32px);
-LV_IMG_DECLARE(left_32px);
-LV_IMG_DECLARE(right_32px);
+LV_IMG_DECLARE(message_96px);
 
-src_icon_t src_icon[] = {
-    { "Telegram", &telegram_32px },
-    { "WhatsApp", &whatsapp_32px },
-    { "K-9 Mail", &k9mail_32px },
-    { "Gmail", &email_32px },
-    { "E-Mail", &message_32px },
-    { "OsmAnd", &osmand_32px },
-    { "YouTube", &youtube_32px },
-    { "Instagram", &instagram_32px },
-    { "Tinder", &tinder_32px },
-    { "", NULL }
-};
+#if defined( BIG_THEME )
+    #define default_msg_icon        &message_96px
 
+    LV_IMG_DECLARE(telegram_96px);
+    LV_IMG_DECLARE(whatsapp_96px);
+    LV_IMG_DECLARE(k9mail_96px);
+    LV_IMG_DECLARE(email_96px);
+    LV_IMG_DECLARE(osmand_96px);
+    LV_IMG_DECLARE(youtube_96px);
+    LV_IMG_DECLARE(instagram_96px);
+    LV_IMG_DECLARE(tinder_96px);
+
+    src_icon_t src_icon[] = {
+        { "Telegram", &telegram_96px },
+        { "WhatsApp", &whatsapp_96px },
+        { "K-9 Mail", &k9mail_96px },
+        { "Gmail", &email_96px },
+        { "E-Mail", &message_96px },
+        { "OsmAnd", &osmand_96px },
+        { "YouTube", &youtube_96px },
+        { "Instagram", &instagram_96px },
+        { "Tinder", &tinder_96px },
+        { "", NULL }
+    };
+
+    lv_font_t *message_title_font = &Ubuntu_72px;
+    lv_font_t *message_font = &Ubuntu_32px;
+#elif defined( MID_THEME )
+    #define default_msg_icon        &message_64px
+
+    LV_IMG_DECLARE(telegram_32px);
+    LV_IMG_DECLARE(whatsapp_32px);
+    LV_IMG_DECLARE(k9mail_32px);
+    LV_IMG_DECLARE(email_32px);
+    LV_IMG_DECLARE(osmand_32px);
+    LV_IMG_DECLARE(youtube_32px);
+    LV_IMG_DECLARE(instagram_32px);
+    LV_IMG_DECLARE(tinder_32px);
+
+    src_icon_t src_icon[] = {
+        { "Telegram", &telegram_32px },
+        { "WhatsApp", &whatsapp_32px },
+        { "K-9 Mail", &k9mail_32px },
+        { "Gmail", &email_32px },
+        { "E-Mail", &message_32px },
+        { "OsmAnd", &osmand_32px },
+        { "YouTube", &youtube_32px },
+        { "Instagram", &instagram_32px },
+        { "Tinder", &tinder_32px },
+        { "", NULL }
+    };
+
+    lv_font_t *message_title_font = &Ubuntu_32px;
+    lv_font_t *message_font = &Ubuntu_16px;
+#else
+    #define default_msg_icon        &message_32px
+
+    LV_IMG_DECLARE(telegram_32px);
+    LV_IMG_DECLARE(whatsapp_32px);
+    LV_IMG_DECLARE(k9mail_32px);
+    LV_IMG_DECLARE(email_32px);
+    LV_IMG_DECLARE(osmand_32px);
+    LV_IMG_DECLARE(youtube_32px);
+    LV_IMG_DECLARE(instagram_32px);
+    LV_IMG_DECLARE(tinder_32px);
+
+    src_icon_t src_icon[] = {
+        { "Telegram", &telegram_32px },
+        { "WhatsApp", &whatsapp_32px },
+        { "K-9 Mail", &k9mail_32px },
+        { "Gmail", &email_32px },
+        { "E-Mail", &message_32px },
+        { "OsmAnd", &osmand_32px },
+        { "YouTube", &youtube_32px },
+        { "Instagram", &instagram_32px },
+        { "Tinder", &tinder_32px },
+        { "", NULL }
+    };
+
+    lv_font_t *message_title_font = &Ubuntu_32px;
+    lv_font_t *message_font = &Ubuntu_16px;
+#endif
+
+bool bluetooth_message_style_change_event_cb( EventBits_t event, void *arg );
 static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_next_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -134,73 +195,88 @@ void bluetooth_message_tile_setup( void ) {
     bluetooth_message_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth message" );
     bluetooth_message_tile = mainbar_get_tile_obj( bluetooth_message_tile_num );
 
-    lv_style_copy( &bluetooth_message_style, ws_get_app_opa_style() );
-    lv_style_set_text_font( &bluetooth_message_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_style_copy( &bluetooth_message_style, APP_STYLE );
+    lv_style_set_text_font( &bluetooth_message_style, LV_STATE_DEFAULT, message_font );
     lv_obj_add_style( bluetooth_message_tile, LV_OBJ_PART_MAIN, &bluetooth_message_style );
 
     lv_style_copy( &bluetooth_message_sender_style, &bluetooth_message_style );
-    lv_style_set_text_font( &bluetooth_message_sender_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+    lv_style_set_text_font( &bluetooth_message_sender_style, LV_STATE_DEFAULT, message_title_font );
 
-    bluetooth_message_img = lv_img_create( bluetooth_message_tile, NULL );
-    lv_img_set_src( bluetooth_message_img, &cancel_32px );
-    lv_obj_align( bluetooth_message_img, bluetooth_message_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    lv_obj_t *bluettoth_message_img_cont = lv_cont_create( bluetooth_message_tile, NULL );
+    lv_obj_set_size( bluettoth_message_img_cont, THEME_ICON_SIZE, THEME_ICON_SIZE );
+    lv_obj_add_style( bluettoth_message_img_cont, LV_OBJ_PART_MAIN, APP_STYLE  );
+    lv_obj_align( bluettoth_message_img_cont, bluetooth_message_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
+
+    bluetooth_message_img = lv_img_create( bluettoth_message_img_cont, NULL );
+    lv_img_set_src( bluetooth_message_img, default_msg_icon );
+    lv_obj_align( bluetooth_message_img, bluettoth_message_img_cont, LV_ALIGN_CENTER, 0, 0 );
 
     bluetooth_message_notify_source_label = lv_label_create( bluetooth_message_tile, NULL);
     lv_obj_add_style( bluetooth_message_notify_source_label, LV_OBJ_PART_MAIN, &bluetooth_message_sender_style  );
-    lv_label_set_text( bluetooth_message_notify_source_label, "");
-    lv_obj_align( bluetooth_message_notify_source_label, bluetooth_message_img, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_label_set_text( bluetooth_message_notify_source_label, "E-Mail" );
+    lv_obj_align( bluetooth_message_notify_source_label, bluettoth_message_img_cont, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0 );
 
     bluetooth_message_time_label = lv_label_create( bluetooth_message_tile, NULL);
     lv_obj_add_style( bluetooth_message_time_label, LV_OBJ_PART_MAIN, &bluetooth_message_style  );
-    lv_label_set_text( bluetooth_message_time_label, "20:00");
-    lv_obj_align( bluetooth_message_time_label, bluetooth_message_img, LV_ALIGN_OUT_BOTTOM_LEFT, 5, 5 );
+    lv_label_set_text( bluetooth_message_time_label, "23:42");
+    lv_obj_align( bluetooth_message_time_label, bluettoth_message_img_cont, LV_ALIGN_OUT_BOTTOM_LEFT, THEME_PADDING, THEME_PADDING );
 
     bluetooth_message_sender_label = lv_label_create( bluetooth_message_tile, NULL);
     lv_obj_add_style( bluetooth_message_sender_label, LV_OBJ_PART_MAIN, &bluetooth_message_style  );
-    lv_label_set_text( bluetooth_message_sender_label, "");
-    lv_obj_align( bluetooth_message_sender_label, bluetooth_message_time_label, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
+    lv_label_set_text( bluetooth_message_sender_label, "foo");
+    lv_obj_align( bluetooth_message_sender_label, bluetooth_message_time_label, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0 );
 
     bluetooth_message_page = lv_page_create( bluetooth_message_tile, NULL);
-    lv_obj_set_size( bluetooth_message_page, lv_disp_get_hor_res( NULL ) - 20, 120 );
+    lv_obj_set_size( bluetooth_message_page, lv_disp_get_hor_res( NULL ) - ( 2 + THEME_PADDING), lv_disp_get_ver_res( NULL ) - ( 3 * THEME_ICON_SIZE ) );
     lv_obj_add_style( bluetooth_message_page, LV_OBJ_PART_MAIN, &bluetooth_message_style );
     lv_page_set_scrlbar_mode( bluetooth_message_page, LV_SCRLBAR_MODE_DRAG );
-    lv_obj_align( bluetooth_message_page, bluetooth_message_time_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 5 );
+    lv_obj_align( bluetooth_message_page, bluetooth_message_time_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_PADDING );
 
     bluetooth_message_msg_label = lv_label_create( bluetooth_message_page, NULL );
     lv_label_set_long_mode( bluetooth_message_msg_label, LV_LABEL_LONG_BREAK );
     lv_obj_set_width( bluetooth_message_msg_label, lv_page_get_width_fit ( bluetooth_message_page ) );
     lv_obj_add_style( bluetooth_message_msg_label, LV_OBJ_PART_MAIN, &bluetooth_message_style );
-    lv_label_set_text( bluetooth_message_msg_label, "");
+    lv_label_set_text( bluetooth_message_msg_label, "Test message from bar.");
 
-    lv_obj_t * exit_btn = wf_add_image_button( bluetooth_message_tile, cancel_32px, exit_bluetooth_message_event_cb, &bluetooth_message_style );
-    lv_obj_align( exit_btn, bluetooth_message_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( bluetooth_message_tile, exit_bluetooth_message_event_cb );
+    lv_obj_align( exit_btn, bluetooth_message_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
-    bluetooth_prev_msg_btn = wf_add_image_button( bluetooth_message_tile, left_32px, bluetooth_prev_message_event_cb, &bluetooth_message_style );
-    lv_obj_align( bluetooth_prev_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_LEFT, 5, -5 );
+    bluetooth_prev_msg_btn = wf_add_left_button( bluetooth_message_tile, bluetooth_prev_message_event_cb );
+    lv_obj_align( bluetooth_prev_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
-    bluetooth_next_msg_btn = wf_add_image_button( bluetooth_message_tile, right_32px, bluetooth_next_message_event_cb, &bluetooth_message_style );
-    lv_obj_align( bluetooth_next_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -5, -5 );
+    bluetooth_next_msg_btn = wf_add_right_button( bluetooth_message_tile, bluetooth_next_message_event_cb );
+    lv_obj_align( bluetooth_next_msg_btn, bluetooth_message_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
-    bluetooth_trash_msg_btn = wf_add_image_button( bluetooth_message_tile, trash_32px, bluetooth_del_message_event_cb, &bluetooth_message_style );
-    lv_obj_align( bluetooth_trash_msg_btn, bluetooth_prev_msg_btn, LV_ALIGN_OUT_RIGHT_MID, 15, 0 );
+    bluetooth_trash_msg_btn = wf_add_trash_button( bluetooth_message_tile, bluetooth_del_message_event_cb );
+    lv_obj_align( bluetooth_trash_msg_btn, bluetooth_prev_msg_btn, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0 );
 
     bluetooth_msg_entrys_label = lv_label_create( bluetooth_message_tile, NULL );
     lv_obj_add_style( bluetooth_msg_entrys_label, LV_OBJ_PART_MAIN, &bluetooth_message_sender_style );
     lv_label_set_text( bluetooth_msg_entrys_label, "1/1");
-    lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
+    lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -THEME_PADDING, 0 );
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_message_event_cb, "bluetooth_message" );
-
+    styles_register_cb( STYLE_CHANGE, bluetooth_message_style_change_event_cb, "bluetooth message style" );
     messages_app = app_register( "messages", &message_64px, enter_bluetooth_messages_cb );
 }
 
+bool bluetooth_message_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &bluetooth_message_style, APP_STYLE );
+                            lv_style_set_text_font( &bluetooth_message_style, LV_STATE_DEFAULT, message_font );
+                            lv_style_copy( &bluetooth_message_sender_style, &bluetooth_message_style );
+                            lv_style_set_text_font( &bluetooth_message_sender_style, LV_STATE_DEFAULT, message_title_font );
+                            break;
+    }
+    return( true );
+}
 static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
             if ( msg_chain_get_entrys( bluetooth_msg_chain ) > 0 ) {
-                statusbar_hide( true );
                 bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
                 mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
+                statusbar_hide( true );
             }
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
@@ -308,7 +384,7 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
             return( src_icon[ i ].img );
         }
     }
-    return( &message_32px );
+    return( default_msg_icon );
 }
 
 bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
@@ -457,7 +533,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
                 lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
             }
             else {
-                lv_img_set_src( bluetooth_message_img, &message_32px );
+                lv_img_set_src( bluetooth_message_img, default_msg_icon );
                 lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
             }
             /*
