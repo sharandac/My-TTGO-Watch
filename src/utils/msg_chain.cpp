@@ -20,11 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <sys/time.h>
 #include "alloc.h"
 #include "msg_chain.h"
 
 #ifdef NATIVE_64BIT
+    #include <time.h>
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
