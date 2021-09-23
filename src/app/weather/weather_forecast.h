@@ -2,18 +2,13 @@
     #define _WEATHER_FORECAST_H
 
     #define WEATHER_FORECAST_SYNC_REQUEST   _BV(0)
-    #define WEATHER_MAX_FORECAST            16
-
-    #if defined( M5PAPER )
-        #define WEATHER_MAX_FORECAST_DIV        8
-        #define WEATHER_FORCAST_ICON_SPACE      9
-    #elif defined( M5CORE2 )
-        #define WEATHER_MAX_FORECAST_DIV        5
-        #define WEATHER_FORCAST_ICON_SPACE      5
-    #else
-        #define WEATHER_MAX_FORECAST_DIV        4
-        #define WEATHER_FORCAST_ICON_SPACE      0
-    #endif
+    /**
+     * @brief calculate weather icon aligning
+     */
+    #define WEATHER_ICON_SIZE               64                                                                      /** @brief weather icon x/y size in px */
+    #define WEATHER_MAX_FORECAST_ICON       RES_X_MAX / WEATHER_ICON_SIZE                                           /** @brief max icon in a row */
+    #define WEATHER_FORCAST_ICON_SPACE      ( RES_X_MAX % WEATHER_ICON_SIZE ) / ( RES_X_MAX / WEATHER_ICON_SIZE )   /** @brief space between two icons in px */
+    #define WEATHER_MAX_FORECAST            WEATHER_MAX_FORECAST_ICON * 4
 
     void weather_forecast_tile_setup( uint32_t tile_num );
     void weather_forecast_sync_request( void );
