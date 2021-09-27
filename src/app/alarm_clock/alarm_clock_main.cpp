@@ -82,15 +82,14 @@ static char* get_roller_content(int count, bool zeros, bool am_pm_roller){
 void alarm_clock_main_setup( uint32_t tile_num ) {
     lv_obj_t * main_tile = mainbar_get_tile_obj( tile_num );
     
-    lv_obj_t * tile_container = wf_add_tile_container(main_tile, LV_LAYOUT_COLUMN_MID);
-    lv_obj_t * footer_container = wf_add_tile_footer_container(main_tile, LV_LAYOUT_PRETTY_TOP);
+    lv_obj_t * alarm_onoff_cont = wf_add_labeled_switch( main_tile, "Activated", &alarm_enabled_switch, true, NULL, APP_STYLE );
+    lv_obj_align( alarm_onoff_cont, main_tile, LV_ALIGN_IN_TOP_MID, THEME_ICON_PADDING, THEME_ICON_PADDING );
 
-    wf_add_labeled_switch(tile_container, "Activated", &alarm_enabled_switch);
+    lv_obj_t * weekday_container = wf_add_container(main_tile, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, APP_STYLE );
+    lv_obj_set_style_local_pad_inner( weekday_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
+    lv_obj_align( weekday_container, alarm_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
 
-    lv_obj_t * weekday_container = wf_add_container(tile_container, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT);
-    lv_obj_set_style_local_pad_inner( weekday_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 2);
-
-    static const int day_btn_width = 30;
+    static const int day_btn_width = 28;
     static const int day_btn_height = 29;
     monday_btn = wf_add_button(weekday_container, alarm_clock_get_week_day(1, true), day_btn_width, day_btn_height, NULL);
     tuesday_btn = wf_add_button(weekday_container, alarm_clock_get_week_day(2, true), day_btn_width, day_btn_height, NULL);
@@ -100,9 +99,10 @@ void alarm_clock_main_setup( uint32_t tile_num ) {
     saturday_btn = wf_add_button(weekday_container, alarm_clock_get_week_day(6, true), day_btn_width, day_btn_height, NULL);
     sunday_btn = wf_add_button(weekday_container, alarm_clock_get_week_day(0, true), day_btn_width, day_btn_height, NULL);
 
-    lv_obj_t *roller_container = wf_add_container(tile_container, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT);
-    lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, THEME_ICON_PADDING);
-    lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, THEME_ICON_PADDING);
+    lv_obj_t *roller_container = wf_add_container(main_tile, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, APP_STYLE );
+    lv_obj_set_style_local_pad_left( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
+    lv_obj_set_style_local_pad_right( roller_container, LV_CONT_PART_MAIN , LV_STATE_DEFAULT, 1);
+    lv_obj_align( roller_container, weekday_container, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     hour_roller = wf_add_roller( roller_container, get_roller_content(24, false, !clock_format_24), LV_ROLLER_MODE_INIFINITE, ROLLER_ROW_COUNT );
     lv_obj_set_width( hour_roller, 90 );

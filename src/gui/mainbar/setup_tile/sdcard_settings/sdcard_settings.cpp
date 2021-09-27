@@ -52,7 +52,7 @@ static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t even
 void sdcard_settings_tile_setup(void)
 {
     // get an app tile and copy mainstyle
-    sdcard_settings_tile_num = mainbar_add_app_tile(1, 1, "SD card setup");
+    sdcard_settings_tile_num = mainbar_add_setup_tile(1, 1, "SD card setup");
     sdcard_settings_tile = mainbar_get_tile_obj(sdcard_settings_tile_num);
     lv_style_copy(&sdcard_settings_style, ws_get_setup_tile_style());
     lv_obj_add_style(sdcard_settings_tile, LV_OBJ_PART_MAIN, &sdcard_settings_style);

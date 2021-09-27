@@ -67,51 +67,52 @@ static bool osmand_block_return_maintile = false;
 
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(ahead_128px);
-LV_IMG_DECLARE(turn_left_128px);
-LV_IMG_DECLARE(turn_right_128px);
-LV_IMG_DECLARE(slightly_left_128px);
-LV_IMG_DECLARE(slightly_right_128px);
-LV_IMG_DECLARE(sharply_left_128px);
-LV_IMG_DECLARE(sharply_right_128px);
+LV_IMG_DECLARE(turnleft_128px);
+LV_IMG_DECLARE(turnright_128px);
+LV_IMG_DECLARE(slightlyleft_128px);
+LV_IMG_DECLARE(slightlyright_128px);
+LV_IMG_DECLARE(sharplyleft_128px);
+LV_IMG_DECLARE(sharplyright_128px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 struct direction_t direction[] = {
     // english directions
     { "ahead", "", &ahead_128px },
-    { "left", "slightly", &slightly_left_128px },
-    { "right", "slightly", &slightly_right_128px },
-    { "left", "sharply", &sharply_left_128px },
-    { "right", "sharply", &sharply_right_128px },
-    { "turn left", "", &turn_left_128px },
-    { "turn right", "", &turn_right_128px },
+    { "left", "slightly", &slightlyleft_128px },
+    { "right", "slightly", &slightlyright_128px },
+    { "left", "sharply", &sharplyleft_128px },
+    { "right", "sharply", &sharplyright_128px },
+    { "turn left", "", &turnleft_128px },
+    { "turn right", "", &turnright_128px },
     // german direction
     { "Geradeaus", "", &ahead_128px },
-    { "links abbiegen", "halb", &slightly_left_128px },
-    { "rechts abbiegen", "halb", &slightly_right_128px },
-    { "links abbiegen", "scharf", &sharply_left_128px },
-    { "rechts abbiegen", "scharf", &sharply_right_128px },
-    { "links abbiegen", "", &turn_left_128px },
-    { "rechts abbiegen", "", &turn_right_128px },
+    { "links abbiegen", "halb", &slightlyleft_128px },
+    { "rechts abbiegen", "halb", &slightlyright_128px },
+    { "links abbiegen", "scharf", &sharplyleft_128px },
+    { "rechts abbiegen", "scharf", &sharplyright_128px },
+    { "links abbiegen", "", &turnleft_128px },
+    { "rechts abbiegen", "", &turnright_128px },
     // french direction
     { "Avancez", "", &ahead_128px },
-    { "gauche et continuez", "vers la", &slightly_left_128px },
-    { "droite et continuez", "vers la", &slightly_right_128px },
-    { "gauche et continuez", "franchement", &sharply_left_128px },
-    { "droite et continuez", "franchement", &sharply_right_128px },
-    { "gauche et continuez", "", &turn_left_128px },
-    { "droite et continuez", "", &turn_right_128px },
+    { "gauche et continuez", "vers la", &slightlyleft_128px },
+    { "droite et continuez", "vers la", &slightlyright_128px },
+    { "gauche et continuez", "franchement", &sharplyleft_128px },
+    { "droite et continuez", "franchement", &sharplyright_128px },
+    { "gauche et continuez", "", &turnleft_128px },
+    { "droite et continuez", "", &turnright_128px },
         // italian direction
     { "Avanti", "", &ahead_128px },
-    { "sinistra", "leggermente", &slightly_left_128px },
-    { "destra", "leggermente", &slightly_right_128px },
-    { "sinistra", "bruscamente", &sharply_left_128px },
-    { "destra", "bruscamente", &sharply_right_128px },
-    { "gira a sinistra", "", &turn_left_128px },
-    { "gira a destra", "", &turn_right_128px },
+    { "sinistra", "leggermente", &slightlyleft_128px },
+    { "destra", "leggermente", &slightlyright_128px },
+    { "sinistra", "bruscamente", &sharplyleft_128px },
+    { "destra", "bruscamente", &sharplyright_128px },
+    { "gira a sinistra", "", &turnleft_128px },
+    { "gira a destra", "", &turnright_128px },
     { "", "", NULL }
 };
 
+bool osmand_style_change_event_cb( EventBits_t event, void *arg );
 void osmand_app_main_tile_time_update_task( lv_task_t * task );
 static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg );
@@ -124,7 +125,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
 
     osmand_app_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &osmand_app_main_style, ws_get_app_opa_style() );
+    lv_style_copy( &osmand_app_main_style, APP_STYLE );
     lv_style_set_text_font( &osmand_app_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( osmand_app_main_tile, LV_OBJ_PART_MAIN, &osmand_app_main_style );
 
@@ -138,31 +139,46 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     lv_label_set_text(osmand_app_time_label, "00:00");
     lv_obj_reset_style_list( osmand_app_time_label, LV_OBJ_PART_MAIN );
     lv_obj_add_style( osmand_app_time_label, LV_OBJ_PART_MAIN, &osmand_app_time_style );
-    lv_obj_align( osmand_app_time_label, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 5 );
+    lv_obj_align( osmand_app_time_label, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, THEME_PADDING );
 
-    lv_obj_t * exit_btn = wf_add_image_button( osmand_app_main_tile, cancel_32px, exit_osmand_app_main_event_cb, &osmand_app_main_style );
-    lv_obj_align( exit_btn, osmand_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( osmand_app_main_tile, exit_osmand_app_main_event_cb );
+    lv_obj_align( exit_btn, osmand_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
     osmand_app_direction_img = lv_img_create( osmand_app_main_tile, NULL );
     lv_img_set_src( osmand_app_direction_img, &ahead_128px );
-    lv_obj_align( osmand_app_direction_img, osmand_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 32 );
-
-    osmand_app_distance_label = lv_label_create( osmand_app_main_tile, NULL);
-    lv_obj_add_style( osmand_app_distance_label, LV_OBJ_PART_MAIN, &osmand_app_distance_style  );
-    lv_label_set_text( osmand_app_distance_label, "n/a");
-    lv_obj_align( osmand_app_distance_label, osmand_app_direction_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_align( osmand_app_direction_img, osmand_app_main_tile, LV_ALIGN_CENTER, 0, 0 );
 
     osmand_app_info_label = lv_label_create( osmand_app_main_tile, NULL);
     lv_obj_add_style( osmand_app_info_label, LV_OBJ_PART_MAIN, &osmand_app_main_style  );
     lv_label_set_text( osmand_app_info_label, "no bluetooth connection");
-    lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_obj_align( osmand_app_info_label, osmand_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+
+    osmand_app_distance_label = lv_label_create( osmand_app_main_tile, NULL);
+    lv_obj_add_style( osmand_app_distance_label, LV_OBJ_PART_MAIN, &osmand_app_distance_style  );
+    lv_label_set_text( osmand_app_distance_label, "n/a");
+    lv_obj_align( osmand_app_distance_label, osmand_app_info_label, LV_ALIGN_OUT_TOP_MID, 0, 0 );
 
     mainbar_add_tile_activate_cb( tile_num, osmand_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmand_hibernate_cb );
 
     blectl_register_cb( BLECTL_MSG_JSON | BLECTL_CONNECT | BLECTL_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
-
+    styles_register_cb( STYLE_CHANGE, osmand_style_change_event_cb, "osmand style" );
     osmand_app_main_tile_task = lv_task_create( osmand_app_main_tile_time_update_task, 1000, LV_TASK_PRIO_MID, NULL );
+}
+
+bool osmand_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &osmand_app_main_style, APP_STYLE );
+                            lv_style_set_text_font( &osmand_app_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+
+                            lv_style_copy( &osmand_app_distance_style, &osmand_app_main_style );
+                            lv_style_set_text_font( &osmand_app_distance_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+
+                            lv_style_copy( &osmand_app_time_style, &osmand_app_main_style);
+                            lv_style_set_text_font( &osmand_app_time_style, LV_STATE_DEFAULT, &Ubuntu_16px);        
+                            break;
+    }
+    return( true );
 }
 
 void osmand_app_main_tile_time_update_task( lv_task_t * task ) {

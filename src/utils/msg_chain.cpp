@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
+#include <sys/time.h>
 #include "alloc.h"
 #include "msg_chain.h"
 
@@ -62,7 +63,7 @@ msg_chain_t * msg_chain_add_msg( msg_chain_t *msg_chain, const char *msg ) {
         }
         msg_chain_entry->prev_msg = NULL;
         msg_chain_entry->next_msg = NULL;
-        // time( &msg_chain_entry->timestamp );
+        time( &msg_chain_entry->timestamp );
         strcpy( (char*)msg_chain_entry->msg, msg );
     }
     

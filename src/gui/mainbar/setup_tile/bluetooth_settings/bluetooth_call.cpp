@@ -45,7 +45,19 @@ lv_obj_t *bluetooth_call_name_label = NULL;
 LV_IMG_DECLARE(cancel_32px);
 LV_IMG_DECLARE(call_ok_128px);
 LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_32px);
+LV_FONT_DECLARE(Ubuntu_72px);
 
+#if defined( BIG_THEME )
+    lv_font_t *caller_font = &Ubuntu_72px;
+#elif defined( MID_THEME )
+    lv_font_t *caller_font = &Ubuntu_32px;
+#else
+    lv_font_t *caller_font = &Ubuntu_16px;
+#endif
+
+
+bool bluetooth_call_style_change_event_cb( EventBits_t event, void *arg );
 static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event );
 bool bluetooth_call_event_cb( EventBits_t event, void *arg );
 static void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc );
@@ -55,8 +67,8 @@ void bluetooth_call_tile_setup( void ) {
     bluetooth_call_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth call" );
     bluetooth_call_tile = mainbar_get_tile_obj( bluetooth_call_tile_num );
 
-    lv_style_copy( &bluetooth_call_style, ws_get_app_opa_style() );
-    lv_style_set_text_font( &bluetooth_call_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_style_copy( &bluetooth_call_style, APP_STYLE );
+    lv_style_set_text_font( &bluetooth_call_style, LV_STATE_DEFAULT, caller_font );
     lv_obj_add_style( bluetooth_call_tile, LV_OBJ_PART_MAIN, &bluetooth_call_style );
 
     bluetooth_call_img = lv_img_create( bluetooth_call_tile, NULL );
@@ -65,13 +77,23 @@ void bluetooth_call_tile_setup( void ) {
 
     bluetooth_call_number_label = lv_label_create( bluetooth_call_tile, NULL);
     lv_obj_add_style( bluetooth_call_number_label, LV_OBJ_PART_MAIN, &bluetooth_call_style  );
-    lv_label_set_text( bluetooth_call_number_label, "");
-    lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+    lv_label_set_text( bluetooth_call_number_label, "foo bar");
+    lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
-    lv_obj_t * exit_btn = wf_add_image_button( bluetooth_call_tile, cancel_32px, exit_bluetooth_call_event_cb, &bluetooth_call_style );
-    lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_t * exit_btn = wf_add_exit_button( bluetooth_call_tile, exit_bluetooth_call_event_cb );
+    lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_call_event_cb, "bluetooth_call" );
+    styles_register_cb( STYLE_CHANGE, bluetooth_call_style_change_event_cb, "bluetooth call style" );
+}
+
+bool bluetooth_call_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &bluetooth_call_style, APP_STYLE );
+                            lv_style_set_text_font( &bluetooth_call_style, LV_STATE_DEFAULT, caller_font );
+                            break;
+    }
+    return( true );
 }
 
 bool bluetooth_call_event_cb( EventBits_t event, void *arg ) {

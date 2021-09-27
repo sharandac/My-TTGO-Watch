@@ -21,7 +21,7 @@
  */
 #include "config.h"
 #include "gui/mainbar/mainbar.h"
-#include "gui/widget_styles.h"
+#include "gui/widget_factory.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/note_tile/note_tile.h"
@@ -55,23 +55,16 @@ void app_tile_setup( void ) {
      * add tiles to to main tile
      */
     for ( int tiles = 0 ; tiles < MAX_APPS_TILES ; tiles++ ) {
-#if defined( M5PAPER )
-        app_tile_num[ tiles ] = mainbar_add_tile( 0 , 1 + tiles, "app tile" );
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile" );
-#endif
+    #if defined( M5PAPER )
+        app_tile_num[ tiles ] = mainbar_add_tile( 0, 1 + tiles, "app tile", ws_get_mainbar_style() );
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
+    #else
+        #error "no app tiles setup"        
+    #endif
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
         mainbar_add_tile_button_cb( app_tile_num[ tiles ], app_tile_button_event_cb );
     }
-    /**
-     * copy mainbar style
-     */
-    lv_style_copy( &app_label_style, ws_get_mainbar_style() );
-    lv_style_copy( &app_icon_style, ws_get_mainbar_style() );
-    lv_style_set_radius( &app_icon_style, LV_OBJ_PART_MAIN, 20 );
-    lv_style_set_bg_color( &app_icon_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY );
-    lv_style_set_bg_opa( &app_icon_style, LV_OBJ_PART_MAIN, LV_OPA_40 );
-    lv_style_set_border_width( &app_icon_style, LV_OBJ_PART_MAIN, 0 );
     /**
      * init all app icons
      */
@@ -88,7 +81,7 @@ void app_tile_setup( void ) {
         app_entry[ app ].icon_cont = lv_obj_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
         mainbar_add_slide_element( app_entry[ app ].icon_cont);
         lv_obj_reset_style_list( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN, &app_icon_style );
+        lv_obj_add_style( app_entry[ app ].icon_cont, LV_OBJ_PART_MAIN, APP_ICON_STYLE );
         lv_obj_set_size( app_entry[ app ].icon_cont, APP_ICON_X_SIZE, APP_ICON_Y_SIZE );
         lv_obj_align( app_entry[ app ].icon_cont , app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], LV_ALIGN_IN_TOP_LEFT, app_entry[ app ].x, app_entry[ app ].y );
         /*
@@ -97,7 +90,7 @@ void app_tile_setup( void ) {
         app_entry[ app ].label = lv_label_create( app_cont[ app / ( MAX_APPS_ICON_HORZ * MAX_APPS_ICON_VERT ) ], NULL );
         mainbar_add_slide_element(app_entry[ app ].label);
         lv_obj_reset_style_list( app_entry[ app ].label, LV_OBJ_PART_MAIN );
-        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, &app_label_style );
+        lv_obj_add_style( app_entry[ app ].label, LV_OBJ_PART_MAIN, APP_ICON_LABEL_STYLE );
         lv_obj_set_size( app_entry[ app ].label, APP_LABEL_X_SIZE, APP_LABEL_Y_SIZE );
         lv_obj_align( app_entry[ app ].label , app_entry[ app ].icon_cont, LV_ALIGN_OUT_BOTTOM_MID, 3, 0 );
         lv_obj_set_hidden( app_entry[ app ].icon_cont, true );

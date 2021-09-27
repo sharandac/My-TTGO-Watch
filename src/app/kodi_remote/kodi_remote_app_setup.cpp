@@ -44,7 +44,6 @@
 #endif
 
 lv_obj_t *kodi_remote_app_setup_tile = NULL;
-lv_style_t kodi_remote_app_setup_style;
 lv_obj_t *kodi_remote_host_textfield = NULL;
 lv_obj_t *kodi_remote_port_textfield = NULL;
 lv_obj_t *kodi_remote_user_textfield = NULL;
@@ -62,8 +61,6 @@ void kodi_remote_app_setup_setup( uint32_t tile_num ) {
     mainbar_add_tile_hibernate_cb( tile_num, kodi_remote_setup_hibernate_callback );
 
     kodi_remote_app_setup_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &kodi_remote_app_setup_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( kodi_remote_app_setup_tile, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style );
     
     lv_obj_t *header = wf_add_settings_header( kodi_remote_app_setup_tile, "kodi remote setup", exit_kodi_remote_app_setup_event_cb );
     lv_obj_align( header, kodi_remote_app_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
@@ -71,29 +68,29 @@ void kodi_remote_app_setup_setup( uint32_t tile_num ) {
     // config fields    
     lv_obj_t *kodi_remote_server_cont = lv_obj_create( kodi_remote_app_setup_tile, NULL );
     lv_obj_set_size( kodi_remote_server_cont, lv_disp_get_hor_res( NULL ) , 37);
-    lv_obj_add_style( kodi_remote_server_cont, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
-    lv_obj_align( kodi_remote_server_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( kodi_remote_server_cont, LV_OBJ_PART_MAIN, SETUP_STYLE  );
+    lv_obj_align( kodi_remote_server_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
     lv_obj_t *kodi_remote_server_label = lv_label_create( kodi_remote_server_cont, NULL);
-    lv_obj_add_style( kodi_remote_server_label, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
+    lv_obj_add_style( kodi_remote_server_label, LV_OBJ_PART_MAIN, SETUP_STYLE  );
     lv_label_set_text( kodi_remote_server_label, "host");
-    lv_obj_align( kodi_remote_server_label, kodi_remote_server_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_align( kodi_remote_server_label, kodi_remote_server_cont, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, 0 );
     kodi_remote_host_textfield = lv_textarea_create( kodi_remote_server_cont, NULL);
     lv_textarea_set_text( kodi_remote_host_textfield, kodi_remote_config->host );
     lv_textarea_set_pwd_mode( kodi_remote_host_textfield, false);
     lv_textarea_set_one_line( kodi_remote_host_textfield, true);
     lv_textarea_set_cursor_hidden( kodi_remote_host_textfield, true);
-    lv_obj_set_width( kodi_remote_host_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - 5 );
-    lv_obj_align( kodi_remote_host_textfield, kodi_remote_server_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_width( kodi_remote_host_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - THEME_ICON_PADDING );
+    lv_obj_align( kodi_remote_host_textfield, kodi_remote_server_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, 0 );
     lv_obj_set_event_cb( kodi_remote_host_textfield, kodi_remote_textarea_event_cb );
 
     lv_obj_t *kodi_remote_port_cont = lv_obj_create( kodi_remote_app_setup_tile, NULL );
     lv_obj_set_size( kodi_remote_port_cont, lv_disp_get_hor_res( NULL ) , 37);
-    lv_obj_add_style( kodi_remote_port_cont, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
-    lv_obj_align( kodi_remote_port_cont, kodi_remote_server_cont, LV_ALIGN_OUT_BOTTOM_MID, 0,  0 );
+    lv_obj_add_style( kodi_remote_port_cont, LV_OBJ_PART_MAIN, SETUP_STYLE  );
+    lv_obj_align( kodi_remote_port_cont, kodi_remote_server_cont, LV_ALIGN_OUT_BOTTOM_MID, 0,  THEME_ICON_PADDING );
     lv_obj_t *kodi_remote_port_label = lv_label_create( kodi_remote_port_cont, NULL);
-    lv_obj_add_style( kodi_remote_port_label, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
+    lv_obj_add_style( kodi_remote_port_label, LV_OBJ_PART_MAIN, SETUP_STYLE  );
     lv_label_set_text( kodi_remote_port_label, "port");
-    lv_obj_align( kodi_remote_port_label, kodi_remote_port_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_align( kodi_remote_port_label, kodi_remote_port_cont, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, 0 );
     kodi_remote_port_textfield = lv_textarea_create( kodi_remote_port_cont, NULL);
     char buf[10];
     sprintf(buf, "%d", kodi_remote_config->port );
@@ -101,42 +98,42 @@ void kodi_remote_app_setup_setup( uint32_t tile_num ) {
     lv_textarea_set_pwd_mode( kodi_remote_port_textfield, false);
     lv_textarea_set_one_line( kodi_remote_port_textfield, true);
     lv_textarea_set_cursor_hidden( kodi_remote_port_textfield, true);
-    lv_obj_set_width( kodi_remote_port_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - 5 );
-    lv_obj_align( kodi_remote_port_textfield, kodi_remote_port_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_width( kodi_remote_port_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - THEME_ICON_PADDING );
+    lv_obj_align( kodi_remote_port_textfield, kodi_remote_port_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, 0 );
     lv_obj_set_event_cb( kodi_remote_port_textfield, kodi_remote_num_textarea_event_cb );
 
     lv_obj_t *kodi_remote_user_cont = lv_obj_create( kodi_remote_app_setup_tile, NULL );
     lv_obj_set_size( kodi_remote_user_cont, lv_disp_get_hor_res( NULL ) , 37);
-    lv_obj_add_style( kodi_remote_user_cont, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
-    lv_obj_align( kodi_remote_user_cont, kodi_remote_port_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( kodi_remote_user_cont, LV_OBJ_PART_MAIN, SETUP_STYLE  );
+    lv_obj_align( kodi_remote_user_cont, kodi_remote_port_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
     lv_obj_t *kodi_remote_user_label = lv_label_create( kodi_remote_user_cont, NULL);
-    lv_obj_add_style( kodi_remote_user_label, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
+    lv_obj_add_style( kodi_remote_user_label, LV_OBJ_PART_MAIN, SETUP_STYLE  );
     lv_label_set_text( kodi_remote_user_label, "user");
-    lv_obj_align( kodi_remote_user_label, kodi_remote_user_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_align( kodi_remote_user_label, kodi_remote_user_cont, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, 0 );
     kodi_remote_user_textfield = lv_textarea_create( kodi_remote_user_cont, NULL);
     lv_textarea_set_text( kodi_remote_user_textfield, kodi_remote_config->user );
     lv_textarea_set_pwd_mode( kodi_remote_user_textfield, false);
     lv_textarea_set_one_line( kodi_remote_user_textfield, true);
     lv_textarea_set_cursor_hidden( kodi_remote_user_textfield, true);
-    lv_obj_set_width( kodi_remote_user_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - 5 );
-    lv_obj_align( kodi_remote_user_textfield, kodi_remote_user_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_width( kodi_remote_user_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - THEME_ICON_PADDING );
+    lv_obj_align( kodi_remote_user_textfield, kodi_remote_user_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, 0 );
     lv_obj_set_event_cb( kodi_remote_user_textfield, kodi_remote_textarea_event_cb );
 
     lv_obj_t *kodi_remote_password_cont = lv_obj_create( kodi_remote_app_setup_tile, NULL );
     lv_obj_set_size( kodi_remote_password_cont, lv_disp_get_hor_res( NULL ) , 37);
-    lv_obj_add_style( kodi_remote_password_cont, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
-    lv_obj_align( kodi_remote_password_cont, kodi_remote_user_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( kodi_remote_password_cont, LV_OBJ_PART_MAIN, SETUP_STYLE  );
+    lv_obj_align( kodi_remote_password_cont, kodi_remote_user_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
     lv_obj_t *kodi_remote_password_label = lv_label_create( kodi_remote_password_cont, NULL);
-    lv_obj_add_style( kodi_remote_password_label, LV_OBJ_PART_MAIN, &kodi_remote_app_setup_style  );
+    lv_obj_add_style( kodi_remote_password_label, LV_OBJ_PART_MAIN, SETUP_STYLE  );
     lv_label_set_text( kodi_remote_password_label, "pass");
-    lv_obj_align( kodi_remote_password_label, kodi_remote_password_cont, LV_ALIGN_IN_LEFT_MID, 5, 0 );
+    lv_obj_align( kodi_remote_password_label, kodi_remote_password_cont, LV_ALIGN_IN_LEFT_MID, THEME_ICON_PADDING, 0 );
     kodi_remote_pass_textfield = lv_textarea_create( kodi_remote_password_cont, NULL);
     lv_textarea_set_text( kodi_remote_pass_textfield, kodi_remote_config->pass );
     lv_textarea_set_pwd_mode( kodi_remote_pass_textfield, false);
     lv_textarea_set_one_line( kodi_remote_pass_textfield, true);
     lv_textarea_set_cursor_hidden( kodi_remote_pass_textfield, true);
-    lv_obj_set_width( kodi_remote_pass_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - 5 );
-    lv_obj_align( kodi_remote_pass_textfield, kodi_remote_password_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+    lv_obj_set_width( kodi_remote_pass_textfield, lv_disp_get_hor_res( NULL ) / 4 * 3  - THEME_ICON_PADDING );
+    lv_obj_align( kodi_remote_pass_textfield, kodi_remote_password_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_ICON_PADDING, 0 );
     lv_obj_set_event_cb( kodi_remote_pass_textfield, kodi_remote_textarea_event_cb );
     
     lv_tileview_add_element( kodi_remote_app_setup_tile, kodi_remote_server_cont );

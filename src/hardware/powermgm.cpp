@@ -296,10 +296,12 @@ void powermgm_loop( void ) {
          * note:    When change vTaskDelay to an higher value, please
          *          note that the reaction time to wake up increase.
          */
-        #ifndef NATIVE_64BIT
+        #ifdef NATIVE_64BIT
+        #else
             if ( !lighsleep )
                 vTaskDelay( 250 );
         #endif
+
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {

@@ -24,6 +24,8 @@
     #define _ASYNCWEBSERVER_H
     
     #ifdef NATIVE_64BIT
+        void asyncwebserver_start(void);
+        void asyncwebserver_end(void);
     #else
         #include <FS.h>
 

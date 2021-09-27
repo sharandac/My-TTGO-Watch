@@ -27,18 +27,22 @@
     #ifdef NATIVE_64BIT
             #define RES_X_MAX       LV_HOR_RES_MAX
             #define RES_Y_MAX       LV_VER_RES_MAX
+            #define HARDWARE_NAME   "NATIVE 64BIT APP"
     #else
         #if defined( LILYGO_WATCH_2020_V1 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V1"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
         #elif defined( LILYGO_WATCH_2020_V2 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V2"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
         #elif defined( LILYGO_WATCH_2020_V3 )
+            #undef LILYGO_WATCH_LVGL
             #define HARDWARE_NAME   "TTGO T-Watch 2020 V3"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
@@ -47,6 +51,10 @@
             #define RES_X_MAX       540
             #define RES_Y_MAX       960
             #define HARDWARE_NAME   "m5stack-fire"
+        #elif defined( M5CORE2 )
+            #define RES_X_MAX       320
+            #define RES_Y_MAX       240
+            #define HARDWARE_NAME   "m5stack-core2"
         #else
             #error "no destination hardware version defined"
         #endif
@@ -65,7 +73,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021091602"
+    #define __FIRMWARE__            "2021092202"
     /**
      * Allows to include config.h from C code
      */

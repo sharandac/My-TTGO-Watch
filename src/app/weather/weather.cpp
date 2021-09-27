@@ -46,9 +46,6 @@
     #define String string
 #else
     #include <Arduino.h>
-    #include <SPIFFS.h>
-    #include <FS.h>
-    #include "esp_task_wdt.h"
 
     EventGroupHandle_t weather_widget_event_handle = NULL;
     TaskHandle_t _weather_widget_sync_Task;
@@ -68,7 +65,7 @@ icon_t * weather_widget = NULL;
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(owm_01d_64px);
+LV_IMG_DECLARE(owm01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
 LV_IMG_DECLARE(info_fail_16px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -85,7 +82,7 @@ void weather_app_setup( void ) {
     weather_forecast_tile_setup( weather_app_tile_num );
     weather_setup_tile_setup( weather_app_setup_tile_num );
 
-    weather_app = app_register( "weather", &owm_01d_64px, enter_weather_widget_event_cb );    
+    weather_app = app_register( "weather", &owm01d_64px, enter_weather_widget_event_cb );    
 
     // register app and widget icon
     if ( weather_config.widget ) {
@@ -126,7 +123,7 @@ static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 void weather_add_widget( void ) {
-    weather_widget = widget_register( "n/a", &owm_01d_64px, enter_weather_widget_event_cb );
+    weather_widget = widget_register( "n/a", &owm01d_64px, enter_weather_widget_event_cb );
 }
 
 void weather_remove_widget( void ) {

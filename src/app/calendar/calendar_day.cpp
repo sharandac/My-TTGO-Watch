@@ -47,11 +47,14 @@ uint32_t calendar_day_tile_num;                 /** @brief allocated calendar ov
  * calendar icon
  */
 LV_FONT_DECLARE(Ubuntu_12px);                   /** @brief calendar font */
+LV_FONT_DECLARE(Ubuntu_16px);                   /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_32px);                   /** @brief calendar font */
 
-#if defined( M5PAPER )
+#if defined( BIG_THEME )
     lv_font_t *daylist_font = &Ubuntu_32px;
-#elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+#elif defined( MID_THEME )
+    lv_font_t *daylist_font = &Ubuntu_16px;
+#else
     lv_font_t *daylist_font = &Ubuntu_12px;
 #endif
 /**
@@ -116,12 +119,12 @@ void calendar_day_build_ui( void ) {
     /**
      * add exit button
      */
-    lv_obj_t *exit_button = wf_add_exit_button( calendar_day_tile, calendar_day_exit_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *exit_button = wf_add_exit_button( calendar_day_tile, calendar_day_exit_event_cb );
     lv_obj_align( exit_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
     /**
      * add exit button
      */
-    lv_obj_t *create_button = wf_add_add_button( calendar_day_tile, calendar_day_create_event_cb, ws_get_mainbar_style() );
+    lv_obj_t *create_button = wf_add_add_button( calendar_day_tile, calendar_day_create_event_cb );
     lv_obj_align( create_button, calendar_day_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 }
 

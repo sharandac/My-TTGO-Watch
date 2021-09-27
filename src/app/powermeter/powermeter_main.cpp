@@ -74,6 +74,8 @@ LV_IMG_DECLARE(refresh_32px);
 LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_48px);
 
+bool powermeter_style_change_event_cb( EventBits_t event, void *arg );
+bool powermeter_wifictl_event_cb( EventBits_t event, void *arg );
 bool powermeter_mqtt_event_cb( EventBits_t event, void *arg );
 static void enter_powermeter_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 void powermeter_main_task( lv_task_t * task );
@@ -153,17 +155,17 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
 
     powermeter_main_tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &powermeter_main_style, ws_get_app_opa_style() );
+    lv_style_copy( &powermeter_main_style, APP_STYLE );
     lv_style_set_text_font( &powermeter_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
     lv_obj_add_style( powermeter_main_tile, LV_OBJ_PART_MAIN, &powermeter_main_style );
 
-    lv_style_copy( &powermeter_id_style, ws_get_app_opa_style() );
+    lv_style_copy( &powermeter_id_style, APP_STYLE );
     lv_style_set_text_font( &powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
 
-    lv_obj_t * exit_btn = wf_add_exit_button( powermeter_main_tile, &powermeter_main_style );
+    lv_obj_t * exit_btn = wf_add_exit_button( powermeter_main_tile, SYSTEM_ICON_STYLE );
     lv_obj_align(exit_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    lv_obj_t * setup_btn = wf_add_setup_button( powermeter_main_tile, enter_powermeter_setup_event_cb, &powermeter_main_style );
+    lv_obj_t * setup_btn = wf_add_setup_button( powermeter_main_tile, enter_powermeter_setup_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align(setup_btn, powermeter_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 
     id_cont = lv_obj_create( powermeter_main_tile, NULL );
@@ -228,8 +230,24 @@ void powermeter_main_tile_setup( uint32_t tile_num ) {
     mqtt_register_cb(MQTTCTL_OFF | MQTTCTL_CONNECT | MQTTCTL_DISCONNECT, powermeter_mqtt_event_cb, "powermeter");
     mqtt_register_message_cb(powermeter_message_cb);
 #endif
+    styles_register_cb( STYLE_CHANGE, powermeter_style_change_event_cb, "powermeter style event ");
     // create an task that runs every secound
     _powermeter_main_task = lv_task_create(powermeter_main_task, 250, LV_TASK_PRIO_MID, NULL);
+}
+
+bool powermeter_style_change_event_cb(EventBits_t event, void* arg) {
+    switch (event) {
+    case STYLE_CHANGE:  lv_style_copy(&powermeter_main_style, APP_STYLE);
+        lv_style_set_text_font(&powermeter_main_style, LV_STATE_DEFAULT, &Ubuntu_48px);
+        lv_style_copy(&powermeter_id_style, APP_STYLE);
+        lv_style_set_text_font(&powermeter_id_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+        break;
+    case STYLE_DARKMODE:
+        break;
+    case STYLE_LIGHTMODE:
+        break;
+    }
+    return(true);
 }
 
 #ifdef NATIVE_64BIT

@@ -24,6 +24,8 @@
 #include "powermgm.h"
 #include "callback.h"
 #include "config/wifictlconfig.h"
+#include "utils/webserver/webserver.h"
+#include "utils/ftpserver/ftpserver.h"
 
 #ifdef NATIVE_64BIT
     #include <unistd.h>
@@ -38,13 +40,6 @@
     #include <WiFi.h>
     #include <esp_wifi.h>
     #include <esp_wps.h>
-
-    #ifdef ENABLE_WEBSERVER
-        #include "utils/webserver/webserver.h"
-    #endif
-    #ifdef ENABLE_FTPSERVER
-        #include "utils/ftpserver/ftpserver.h"
-    #endif
 
     EventGroupHandle_t wifictl_status = NULL;
     portMUX_TYPE DRAM_ATTR wifictlMux = portMUX_INITIALIZER_UNLOCKED;
@@ -301,39 +296,23 @@ void wifictl_set_enable_on_standby( bool enable ) {
     wifictl_save_config();
 }
 
-#ifdef ENABLE_WEBSERVER
 bool wifictl_get_webserver( void ) {
-#ifdef NATIVE_64BIT
-    return( false );
-#else
     return( wifictl_config.webserver );
-#endif
 }
 
 void wifictl_set_webserver( bool webserver ) {
-#ifndef NATIVE_64BIT
     wifictl_config.webserver = webserver;
-#endif
     wifictl_save_config();
 }
-#endif
 
-#ifdef ENABLE_FTPSERVER
 bool wifictl_get_ftpserver( void ) {
-#ifdef NATIVE_64BIT
-    return( false );
-#else
     return( wifictl_config.ftpserver );
-#endif
 }
 
 void wifictl_set_ftpserver( bool ftpserver ) {
-#ifndef NATIVE_64BIT
     wifictl_config.ftpserver = ftpserver;
-#endif
     wifictl_save_config();
 }
-#endif
 
 #ifdef ENABLE_MQTT
 bool wifictl_get_mqtt( void ) {

@@ -27,7 +27,11 @@
 bool button_send_cb( EventBits_t event, void *arg );
 
 #ifdef NATIVE_64BIT
+    /*
+     * To fix SDL's "undefined reference to WinMain" issue
+     */
     #include "utils/logging.h"
+    #include <SDL2/SDL.h>
 #else
     #include <Arduino.h>
     #ifdef M5PAPER
@@ -97,6 +101,33 @@ void button_setup( void ) {
 
 bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
 #ifdef NATIVE_64BIT
+    static bool left_button = false;
+    static bool right_button = false;
+    static bool quickbar_button = false;
+    static bool exit_button = false;
+
+    const uint8_t *state = SDL_GetKeyboardState( NULL );
+
+    if ( state[ SDL_SCANCODE_LEFT ] != left_button ) {
+        left_button = state[ SDL_SCANCODE_LEFT ];
+        if ( left_button ) button_send_cb( BUTTON_LEFT, (void*)NULL );
+    }
+
+    if ( state[ SDL_SCANCODE_RIGHT ] != right_button ) {
+        right_button = state[ SDL_SCANCODE_RIGHT ];
+        if ( right_button ) button_send_cb( BUTTON_RIGHT, (void*)NULL );
+    }
+
+    if ( state[ SDL_SCANCODE_RETURN ] != quickbar_button ) {
+        quickbar_button = state[ SDL_SCANCODE_RETURN ];
+        if ( quickbar_button ) button_send_cb( BUTTON_QUICKBAR, (void*)NULL );
+    }
+
+    if ( state[ SDL_SCANCODE_ESCAPE ] != exit_button ) {
+        exit_button = state[ SDL_SCANCODE_ESCAPE ];
+        if ( exit_button ) button_send_cb( BUTTON_EXIT, (void*)NULL );
+    }
+
 #else
     /*
      * handle IRQ event

@@ -26,6 +26,7 @@
 #include "statusbar.h"
 #include "quickbar.h"
 #include "screenshot.h"
+#include "widget_styles.h"
 #include "keyboard.h"
 #include "gui/lv_fs/lv_fs_spiffs.h"
 #include "mainbar/mainbar.h"
@@ -45,6 +46,7 @@
 #include "mainbar/setup_tile/time_settings/time_settings.h"
 #include "mainbar/setup_tile/watchface/watchface_manager.h"
 #include "mainbar/setup_tile/update/update.h"
+#include "mainbar/setup_tile/style_settings/style_settings.h"
 #include "hardware/powermgm.h"
 #include "hardware/framebuffer.h"
 #include "hardware/display.h"
@@ -65,7 +67,8 @@
     #endif
 #endif
 
-lv_obj_t *img_bin;
+lv_obj_t *img_bin = NULL;
+
 static volatile bool force_redraw = false;
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
@@ -115,6 +118,7 @@ void gui_setup( void ) {
     battery_settings_tile_setup();
     display_settings_tile_setup();
     move_settings_tile_setup();
+    style_settings_tile_setup();
     wlan_settings_tile_setup();
     bluetooth_settings_tile_setup();
     time_settings_tile_setup();
@@ -139,6 +143,10 @@ void gui_setup( void ) {
      */
     powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
+
+#ifdef M5PAPER
+    widget_style_theme_set( 0 );
+#endif
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {

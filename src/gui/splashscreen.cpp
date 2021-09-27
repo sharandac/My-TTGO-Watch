@@ -26,6 +26,7 @@
 #include "hardware/framebuffer.h"
 #include "gui/png_decoder/lv_png.h"
 #include "gui/sjpg_decoder/lv_sjpg.h"
+#include "widget_factory.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -49,16 +50,9 @@ void splash_screen_stage_one( void ) {
     lv_png_init();
     lv_img_cache_set_size(250);
 
-    lv_style_init( &style );
-    lv_style_set_radius( &style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_bg_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-    lv_style_set_bg_opa( &style, LV_OBJ_PART_MAIN, LV_OPA_100 );
-    lv_style_set_border_width( &style, LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_text_color( &style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-
     lv_obj_t *background = lv_bar_create(lv_scr_act(), NULL);
     lv_obj_set_size( background, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) );
-    lv_obj_add_style( background, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( background, LV_OBJ_PART_MAIN, BACKGROUND_STYLE );
     lv_obj_align( background, NULL, LV_ALIGN_CENTER, 0, 0 );
 
     logo = lv_img_create( background , NULL );
@@ -77,17 +71,19 @@ void splash_screen_stage_one( void ) {
         lv_img_set_src( logo, &hedgehog );
     }
     lv_obj_align( logo, NULL, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_add_style( logo, LV_OBJ_PART_MAIN, SYSTEM_ICON_STYLE );
 
     preload = lv_bar_create( lv_scr_act(), NULL );
     lv_obj_set_size( preload, lv_disp_get_hor_res( NULL ) - 80, 20 );
-    lv_obj_add_style( preload, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( preload, LV_OBJ_PART_MAIN, SYSTEM_ICON_STYLE );
     lv_obj_align( preload, logo, LV_ALIGN_OUT_BOTTOM_MID, 0, 30 );
     lv_bar_set_anim_time( preload, 2000);
     lv_bar_set_value( preload, 0, LV_ANIM_ON);
+    lv_obj_set_hidden( preload, true );
 
     preload_label = lv_label_create( lv_scr_act(), NULL );
     lv_label_set_text( preload_label, "booting" );
-    lv_obj_add_style( preload_label, LV_OBJ_PART_MAIN, &style );
+    lv_obj_add_style( preload_label, LV_OBJ_PART_MAIN, SYSTEM_ICON_LABEL_STYLE );
     lv_obj_align( preload_label, preload, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
 
     lv_disp_trig_activity( NULL );
