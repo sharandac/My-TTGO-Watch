@@ -51,6 +51,9 @@ LV_IMG_DECLARE(info_1_16px);
 static void enter_corona_app_detector_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void corona_app_detector_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     /**
      * register app main tile
      */

@@ -31,6 +31,9 @@
     #ifdef M5PAPER
         #include <M5EPD.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2021 )    
+    #else
+        #warning "not hardware driver for sensor"
     #endif
 #endif
 
@@ -94,6 +97,9 @@ bool sensor_powermgm_loop_cb( EventBits_t event, void *arg ) {
             retval = true;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;
+        #else
+            #warning "not sensor powermgm loop"
+            retval = true;
         #endif
     #endif
 
@@ -108,25 +114,28 @@ bool sensor_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #ifdef M5PAPER
             switch( event ) {
-                case POWERMGM_STANDBY:              log_i("sensor standby");
+                case POWERMGM_STANDBY:              log_i("go standby");
                                                     retval = true;
                                                     break;
-                case POWERMGM_WAKEUP:               log_i("sensor wakeup");
+                case POWERMGM_WAKEUP:               log_i("go wakeup");
                                                     M5.SHT30.UpdateData();
                                                     retval = true;
                                                     break;
-                case POWERMGM_SILENCE_WAKEUP:       log_i("sensor silence wakeup");
+                case POWERMGM_SILENCE_WAKEUP:       log_i("go silence wakeup");
                                                     M5.SHT30.UpdateData();
                                                     retval = true;
                                                     break;
-                case POWERMGM_ENABLE_INTERRUPTS:    log_i("sensor enable interrupts");
+                case POWERMGM_ENABLE_INTERRUPTS:    log_i("enable interrupts");
                                                     retval = true;
                                                     break;
-                case POWERMGM_DISABLE_INTERRUPTS:   log_i("sensor disable interrupts");
+                case POWERMGM_DISABLE_INTERRUPTS:   log_i("disable interrupts");
                                                     retval = true;
                                                     break;
             }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            retval = true;
+        #else
+            #warning "not sensor powermgm"
             retval = true;
         #endif
     #endif

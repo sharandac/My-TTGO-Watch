@@ -32,10 +32,17 @@
     volatile bool pmu_irq_flag = false;
     static bool pmu_update = true;
 #else
+    #include <Arduino.h>
     #ifdef M5PAPER
         #include <M5EPD.h>
+
+        static uint64_t next_wakeup = 0;
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
+    #elif defined( LILYGO_WATCH_2021 )
+        #include <twatch2021_config.h>
+    #else
+        #warning "not hardware driver for pmu"
     #endif
     #include <soc/rtc.h>
 
@@ -124,12 +131,20 @@ void pmu_setup( void ) {
         */
         pinMode( AXP202_INT, INPUT );
         attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
+    #elif defined( LILYGO_WATCH_2021 )    
+        pinMode( PWR_ON, OUTPUT );
+        digitalWrite( PWR_ON, HIGH );
+
+        pinMode( CHARGE, INPUT );
+
+        pinMode( BAT_ADC, INPUT );
     #endif
 #endif
     /*
      * register all powermem callback functions
      */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "powermgm pmu" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY , pmu_powermgm_event_cb, "powermgm pmu", CALL_CB_LAST );
+    powermgm_register_cb_with_prio( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "powermgm pmu", CALL_CB_FIRST );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "powermgm pmu loop" );
     /*
      * register blectl callback function
@@ -199,10 +214,17 @@ void pmu_loop( void ) {
     pmu_irq_flag = false;
     portEXIT_CRITICAL(&PMU_IRQ_Mux);
         
-    #ifdef M5PAPER
+    #if defined( M5PAPER ) || defined( M5CORE2 )
         static bool plug = false;
         static bool charging = false;
-        static bool battery = false;    
+        static bool battery = false;   
+
+        if ( next_wakeup != 0 ) {
+            if ( next_wakeup < millis() ) {
+                next_wakeup = 0;
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST ); 
+            }
+        }
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -308,6 +330,15 @@ void pmu_loop( void ) {
             ttgo->power->clearIRQ();
             pmu_update = true;
         }
+    #elif  defined( LILYGO_WATCH_2021 ) 
+        static bool plug = false;
+        static bool charging = digitalRead( CHARGE );
+        static bool battery = false;
+
+        if ( charging != digitalRead( CHARGE ) ) {
+            charging = digitalRead( CHARGE );
+            pmu_update = true;
+        }
     #endif
 #endif
     /*
@@ -407,12 +438,15 @@ void pmu_standby( void ) {
         /**
          * disable external power
          */
-        log_i("disable ext power");
+        log_i("disable epd/ext power");
+        while( M5.EPD.CheckAFSR() ){};
         M5.disableEXTPower();
+        M5.disableEPDPower();
         /**
          * set wakeup timer
          */
         if ( pmu_get_silence_wakeup() ) {
+            next_wakeup = millis() + pmu_config.silence_wakeup_interval * 60 * 1000;
             esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
             log_i("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
         }
@@ -426,11 +460,11 @@ void pmu_standby( void ) {
         if ( pmu_get_silence_wakeup() ) {
             if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
                 ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
-                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
+                log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
             }
             else {
                 ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
-                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
+                log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
             }
         }
 
@@ -439,11 +473,11 @@ void pmu_standby( void ) {
             */
         if ( pmu_get_experimental_power_save() ) {
             ttgo->power->setDCDC3Voltage( pmu_config.experimental_power_save_voltage );
-            log_d("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
+            log_i("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
         } 
         else {
             ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
-            log_d("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
+            log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
         }
         /*
             * disable LD02, sound?
@@ -466,14 +500,17 @@ void pmu_wakeup( void ) {
         /**
          * enable external power
          */
-        log_i("enable ext power");
+        log_i("enable epd/ext power");
+        M5.enableEPDPower();
         M5.enableEXTPower();
-        delay(100);
+        delay(50);
+        M5.EPD.SetRotation( 90 );
+//        M5.EPD.Clear( true );
         /**
          * hard shut down if battery voltage under 3.5V to
          * prevent RTC time lost
          */
-        if ( pmu_get_battery_voltage() < 3.4f ) {
+        if ( pmu_get_battery_voltage() < 3.2f ) {
             M5.shutdown();
         }
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
@@ -483,11 +520,11 @@ void pmu_wakeup( void ) {
         */
         if ( pmu_get_experimental_power_save() ) {
             ttgo->power->setDCDC3Voltage( pmu_config.experimental_normal_voltage );
-            log_d("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
+            log_i("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
         } 
         else {
             ttgo->power->setDCDC3Voltage( pmu_config.normal_voltage );
-            log_d("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
+            log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
         }
         /*
         * clear timer
@@ -628,6 +665,11 @@ int32_t pmu_get_battery_percent( void ) {
             else {
                 percent = ttgo->power->getBattPercentage();
             }
+        #elif defined( LILYGO_WATCH_2021 )  
+            uint16_t battery = analogRead( BAT_ADC );
+
+            float voltage = ( ( battery * 3.3 ) / 4096 + 0.1 );
+            percent = voltage < 1.4 ? 0 : ( voltage - 1.4 ) / 0.6 * 100;
         #endif
     #endif
     return( percent );
@@ -646,6 +688,10 @@ float pmu_get_battery_voltage( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getBattVoltage();
+        #elif defined( LILYGO_WATCH_2021 )  
+            uint16_t battery = analogRead( BAT_ADC );
+
+            voltage = ( ( battery * 3.3 ) / 4096 + 0.1 );
         #endif
     #endif
     return( voltage );

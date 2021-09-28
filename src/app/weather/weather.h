@@ -31,7 +31,7 @@
         #include <Arduino.h>
     #endif
 
-    #define WEATHER_WIDGET_SYNC_REQUEST    _BV(0)
+    #define WEATHER_SYNC_REQUEST    _BV(0)
 
     typedef struct {
         bool valide = false;
@@ -54,7 +54,7 @@
 
     void weather_jump_to_setup( void );
 
-    void weather_widget_sync_request( void );
+    void weather_sync_request( void );
 
     void weather_save_config( void );
 

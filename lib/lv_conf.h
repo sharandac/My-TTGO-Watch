@@ -28,6 +28,9 @@
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #define LV_HOR_RES_MAX          (240)
         #define LV_VER_RES_MAX          (240)
+    #elif defined( LILYGO_WATCH_2021 )
+        #define LV_HOR_RES_MAX          (240)
+        #define LV_VER_RES_MAX          (240)
     #endif
 #endif
 
@@ -41,7 +44,16 @@
 
 /* Swap the 2 bytes of RGB565 color.
  * Useful if the display has a 8 bit interface (e.g. SPI)*/
-#define LV_COLOR_16_SWAP   0
+#ifdef NATIVE_64BIT
+#else
+    #ifdef M5PAPER
+        #define LV_COLOR_16_SWAP   0
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #define LV_COLOR_16_SWAP   0
+    #elif defined( LILYGO_WATCH_2021 )
+        #define LV_COLOR_16_SWAP   1
+    #endif
+#endif
 
 /* 1: Enable screen transparency.
  * Useful for OSD or other overlapping GUIs.

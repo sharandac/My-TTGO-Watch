@@ -43,6 +43,9 @@ static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for application
  */
 void calendar_app_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     /**
      * register app icon on the app tile
      */

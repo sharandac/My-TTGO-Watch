@@ -68,4 +68,7 @@
      */
     int rtcctl_get_next_alarm_week_day( void );
 
+    void rtcctl_syncToSystem( void );
+    void rtcctl_syncToRtc( void );
+
 #endif // _RTCCTL_H

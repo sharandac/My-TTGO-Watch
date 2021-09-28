@@ -62,6 +62,14 @@
         void touch_lock_give( void ) {
             xSemaphoreGive( xSemaphores );
         }
+    #elif defined( LILYGO_WATCH_2021 )    
+        #include <Wire.h>
+        #include <twatch2021_config.h>
+        #include <CST8165/CST816S.h>
+
+        CST816S TouchSensor;
+    #else
+        #error "no hardware driver for touch, please setup minimal drivers ( framebuffer/touch )"
     #endif
 #endif
 
@@ -117,6 +125,9 @@ void touch_setup( void ) {
         */
         xSemaphores = xSemaphoreCreateMutex();
         attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
+    #elif defined( LILYGO_WATCH_2021 )    
+        if ( !TouchSensor.begin( Wire, Touch_Res, Touch_Int, CTP_SLAVER_ADDR ) )
+            log_e("touch controler failed");
     #endif
 #endif
     /**
@@ -172,7 +183,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             break;
         }
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER ) || defined( LILYGO_WATCH_2021 )
             switch( event ) {
                 case POWERMGM_STANDBY:          log_i("go standby");
                                                 break;
@@ -282,6 +293,20 @@ static bool touch_getXY( int16_t &x, int16_t &y ) {
             float temp_y = ( y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
             x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
             y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
+        #elif defined( LILYGO_WATCH_2021 )
+            static bool touchState;
+            touchState = TouchSensor.TouchInt();
+
+            if ( touchState == Press ) {
+                TouchSensor.ReadTouch();
+                x = TouchSensor.getX();
+                y = TouchSensor.getY();
+                touched = true;
+            }
+            else {
+                touched = false;
+                return( false );
+            }
         #endif
     #endif
     return( true );
@@ -349,6 +374,14 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
 //            else {
 //                data->state = LV_INDEV_STATE_REL;
 //            }
+        #elif defined( LILYGO_WATCH_2021 )
+            bool isTouch = TouchSensor.getTouchType();
+            data->state = isTouch ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+            TouchSensor.ReadTouch();
+            if ( TouchSensor.getX() != 0 && TouchSensor.getY() != 0 ) {
+                data->point.x = TouchSensor.getX();
+                data->point.y = TouchSensor.getY();
+            }
         #endif
     #endif
 

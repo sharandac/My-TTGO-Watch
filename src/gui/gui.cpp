@@ -51,6 +51,7 @@
 #include "hardware/framebuffer.h"
 #include "hardware/display.h"
 #include "hardware/hardware.h"
+#include "utils/filepath_convert.h"
 
 #ifdef NATIVE_64BIT
     #include <iostream>
@@ -62,9 +63,6 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
-    #ifdef M5PAPER
-        #include <M5EPD.h>
-    #endif
 #endif
 
 lv_obj_t *img_bin = NULL;
@@ -115,21 +113,25 @@ void gui_setup( void ) {
     /*
      * add setup tool to the setup tile
      */
+
     battery_settings_tile_setup();
     display_settings_tile_setup();
+
     move_settings_tile_setup();
     style_settings_tile_setup();
     wlan_settings_tile_setup();
-    bluetooth_settings_tile_setup();
     time_settings_tile_setup();
     gps_settings_tile_setup();
+    utilities_tile_setup();
+    sound_settings_tile_setup();
+    #if defined( BOARD_HAS_PSRAM )
+        bluetooth_settings_tile_setup();
+        update_tile_setup();
+        watchface_manager_setup();
+    #endif
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         sdcard_settings_tile_setup();
     #endif
-    update_tile_setup();
-    utilities_tile_setup();
-    sound_settings_tile_setup();
-    watchface_manager_setup();
     /*
      * trigger an activity
      */
@@ -141,8 +143,20 @@ void gui_setup( void ) {
     /*
      * register the main powermgm routine for the gui
      */
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, gui_powermgm_event_cb, "gui", CALL_CB_FIRST );
+    powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
+
+#if defined( NATIVE_64BIT ) && defined( ROUND_DISPLAY )
+    LV_IMG_DECLARE( rounddisplaymask_240px );
+
+    lv_obj_t *watch2021_mask_bin = lv_img_create( lv_scr_act() , NULL );
+    lv_obj_set_width( watch2021_mask_bin, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_height( watch2021_mask_bin, lv_disp_get_ver_res( NULL ) );
+    lv_obj_align( watch2021_mask_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+    lv_img_set_src( watch2021_mask_bin, &rounddisplaymask_240px );
+    lv_obj_align( watch2021_mask_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
+#endif
 
 #ifdef M5PAPER
     widget_style_theme_set( 0 );
@@ -159,13 +173,8 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go standby");                  
                                         #ifdef NATIVE_64BIT
                                         #else
-                                            #ifdef M5PAPER
-                                                log_i("refresh display before standby");
-                                                lv_obj_invalidate( lv_scr_act() );
-                                                lv_refr_now( NULL );
-                                                framebuffer_refresh(); 
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-                                            #endif
+                                            lv_obj_invalidate( lv_scr_act() );
+                                            lv_refr_now( NULL );
                                             hardware_detach_lvgl_ticker();
                                         #endif
                                         break;
@@ -175,9 +184,6 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
-                                            #ifdef M5PAPER
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-                                            #endif
                                             hardware_attach_lvgl_ticker();
                                         #endif
                                         lv_disp_trig_activity( NULL );
@@ -188,9 +194,6 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_i("go silence wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
-                                            #ifdef M5PAPER
-                                            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-                                            #endif
                                             hardware_attach_lvgl_ticker();
                                         #endif
                                         lv_disp_trig_activity( NULL );
@@ -245,11 +248,8 @@ void gui_set_background_image ( uint32_t background_image ) {
             break;
         case 5: {
             FILE* file;
-            char filename[256] = BACKGROUNDIMAGE;
-#ifdef NATIVE_64BIT
-            if ( getenv("HOME") )
-                snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, BACKGROUNDIMAGE );
-#endif
+            char filename[256] = "";
+            filepath_convert( filename, sizeof( filename ), BACKGROUNDIMAGE );
             file = fopen( filename, "rb" );
             if ( file ) {
                 log_i("set custom background image from spiffs");

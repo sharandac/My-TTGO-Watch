@@ -53,6 +53,9 @@ static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void FindPhone_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     // register 1 vertical tile and get the first tile number and save it for later use
     FindPhone_main_tile_num = mainbar_add_app_tile( 1, 1, "FindPhone" );
     FindPhone = app_register( "Find\nPhone", &eye_64px, enter_FindPhone_event_cb );

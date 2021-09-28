@@ -43,7 +43,7 @@
 #include "hardware/display.h"
 #include "hardware/touch.h"
 #include "hardware/pmu.h"
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 #include "hardware/wifictl.h"
 #include "utils/filepath_convert.h"
 

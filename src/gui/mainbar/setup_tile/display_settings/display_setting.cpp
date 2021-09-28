@@ -31,7 +31,7 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/display.h"
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 
 
 icon_t *display_setup_icon = NULL;

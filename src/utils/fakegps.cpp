@@ -33,8 +33,6 @@
 
     static EventBits_t fakegps_event = 0;
 #else
-    #include "HTTPClient.h"
-
     EventGroupHandle_t fakegps_event = NULL;
     TaskHandle_t _fakegps_get_location_Task = NULL;
 #endif
@@ -50,11 +48,11 @@ bool fakegps_gpsctl_event_cb( EventBits_t event, void *arg );
 void fakegps_start_task( void );
 
 void fakegps_setup( void ) {
-#ifdef NATIVE_64BIT
-    fakegps_event = 0;
-#else
-    fakegps_event = xEventGroupCreate();
-#endif
+    #ifdef NATIVE_64BIT
+        fakegps_event = 0;
+    #else
+        fakegps_event = xEventGroupCreate();
+    #endif
     fakegps_wifi_enable = false;
     wifictl_register_cb( WIFICTL_CONNECT_IP | WIFICTL_DISCONNECT | WIFICTL_OFF, fakegps_wifictl_event_cb, "wifictl fakegps");
     gpsctl_register_cb( GPSCTL_ENABLE, fakegps_gpsctl_event_cb, "gpsctl fakegps");
@@ -96,32 +94,32 @@ bool fakegps_wifictl_event_cb( EventBits_t event, void *arg ) {
 }
 
 void fakegps_start_task( void ) {
-#ifdef NATIVE_64BIT
-    if ( fakegps_event & FAKEGPS_SYNC_REQUEST ) {
-        return;
-    }
-    else {
-        if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
-            fakegps_event |= FAKEGPS_SYNC_REQUEST;
-            fakegps_get_location_Task( NULL );
+    #ifdef NATIVE_64BIT
+        if ( fakegps_event & FAKEGPS_SYNC_REQUEST ) {
+            return;
         }
-    }
-#else
-    if ( xEventGroupGetBits( fakegps_event ) & FAKEGPS_SYNC_REQUEST ) {
-        return;
-    }
-    else {
-        if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
-            xEventGroupSetBits( fakegps_event, FAKEGPS_SYNC_REQUEST );
-            xTaskCreate(    fakegps_get_location_Task,
-                            "fakegps update Task",
-                            5000,
-                            NULL,
-                            1,
-                            &_fakegps_get_location_Task );
+        else {
+            if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
+                fakegps_event |= FAKEGPS_SYNC_REQUEST;
+                fakegps_get_location_Task( NULL );
+            }
         }
-    }
-#endif
+    #else
+        if ( xEventGroupGetBits( fakegps_event ) & FAKEGPS_SYNC_REQUEST ) {
+            return;
+        }
+        else {
+            if ( gpsctl_get_gps_over_ip() && gpsctl_get_autoon() ) {
+                xEventGroupSetBits( fakegps_event, FAKEGPS_SYNC_REQUEST );
+                xTaskCreate(    fakegps_get_location_Task,
+                                "fakegps update Task",
+                                5000,
+                                NULL,
+                                1,
+                                &_fakegps_get_location_Task );
+            }
+        }
+    #endif
 }
 
 void fakegps_get_location_Task( void * pvParameters ) {

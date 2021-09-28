@@ -40,7 +40,11 @@
     static EventBits_t blectl_status;
 #else
     #ifdef M5PAPER
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+
+    #else
+        #warning "not hardware driver for blectl"
     #endif
     #include <Arduino.h>
     #include <BLEDevice.h>
@@ -246,7 +250,7 @@ void blectl_setup( void ) {
          * This is too long I think:
          * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
-        BLEDevice::init("Espruino (T-Watch2020)");
+        BLEDevice::init("Espruino (" HARDWARE_NAME ")" );
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
@@ -344,7 +348,8 @@ void blectl_setup( void ) {
     if ( blectl_get_autoon() ) {
         blectl_on();
     }
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "powermgm blectl" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, blectl_powermgm_event_cb, "powermgm blectl", CALL_CB_FIRST );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "powermgm blectl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "powermgm blectl loop" );
 }
 

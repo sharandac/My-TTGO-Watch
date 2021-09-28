@@ -32,8 +32,12 @@
     #include "utils/logging.h"
     #include "utils/delay.h"
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
+    #elif defined( M5CORE2 )
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2021 )
+    #else
+        #error "not splashscreen pre hardware setup"
     #endif
 #endif
 
@@ -102,6 +106,11 @@ void splash_screen_stage_one( void ) {
                 ttgo->bl->adjust( bl );
                 delay(5);
             }   
+        #elif defined( LILYGO_WATCH_2021 )   
+            for( int bl = 0 ; bl < display_get_brightness() ; bl++ ) {
+                ledcWrite(0, bl );
+                delay(5);
+            }            
         #endif
     #endif
 }
@@ -129,6 +138,11 @@ void splash_screen_stage_finish( void ) {
                 ttgo->bl->adjust( bl );
                 delay(5);
             }
+        #elif defined( LILYGO_WATCH_2021 )   
+            for( int bl = display_get_brightness() ; bl >= 0 ; bl-- ) {
+                ledcWrite(0, bl );
+                delay(5);
+            }   
         #endif
     #endif
     lv_obj_del( logo );

@@ -95,6 +95,7 @@ void wifictl_setup( void ) {
     /*
      * register WiFi events
      */
+
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_CONNECT );
@@ -209,7 +210,8 @@ void wifictl_setup( void ) {
     /*
      * register powermgm callback function
      */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "powermgm wifictl" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, wifictl_powermgm_event_cb, "powermgm wifictl", CALL_CB_FIRST );
+    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, wifictl_powermgm_event_cb, "powermgm wifictl" );
     /*
      * set default state after init
      */

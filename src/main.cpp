@@ -63,7 +63,7 @@ void setup() {
     fxrates_app_setup();
     powermeter_app_setup();
     example_app_setup();
-	FindPhone_setup();
+    FindPhone_setup();
     wifimon_app_setup();
     calc_app_setup();
     kodi_remote_app_setup();

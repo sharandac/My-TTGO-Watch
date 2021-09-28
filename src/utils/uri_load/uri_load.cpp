@@ -39,14 +39,14 @@
     #include <curl/curl.h>
 
     /**
-     * curl memory controll structure
+     * @brief curl memory control structure
      */
     struct MemoryStruct {
         char *memory;
         size_t size;
     };
     /**
-     * curl memory write callback function
+     * @brief curl memory write callback function
      */
     static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
         size_t realsize = size * nmemb;
@@ -425,7 +425,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 }
             }
             else {
-                URI_LOAD_ERROR_LOG("data alloc failed");
+                URI_LOAD_ERROR_LOG("data alloc failed, %d bytes", uri_load_dsc->size );
                 download_client.end();
                 uri_load_free_all( uri_load_dsc );
                 return( NULL );
@@ -643,7 +643,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 }
             }
             else {
-                URI_LOAD_ERROR_LOG("data alloc failed");
+                URI_LOAD_ERROR_LOG("data alloc failed, %d bytes", uri_load_dsc->size );
                 download_client.end();
                 client->stop();
                 uri_load_free_all( uri_load_dsc );
