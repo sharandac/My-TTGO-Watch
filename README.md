@@ -108,8 +108,8 @@ Cf. [contribution guide](CONTRIBUTING.md)
 ## TTGO T-Watch 2021 ( experimental )
 
 ![screenshot](images/twatch2021_img1.png)
-![screenshot](images/twatch2021_img1.png)
-![screenshot](images/twatch2021_img1.png)
+![screenshot](images/twatch2021_img2.png)
+![screenshot](images/twatch2021_img3.png)
 
 # Contributors
 
