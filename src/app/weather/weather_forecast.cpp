@@ -90,12 +90,20 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
     weather_forecast_location_label = lv_label_create( weather_forecast_tile , NULL);
     lv_label_set_text( weather_forecast_location_label, "n/a");
     lv_obj_reset_style_list( weather_forecast_location_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    #if defined( ROUND_DISPLAY )
+        lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
+    #else
+        lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    #endif
 
     weather_forecast_update_label = lv_label_create( weather_forecast_tile , NULL);
     lv_label_set_text( weather_forecast_update_label, "");
     lv_obj_reset_style_list( weather_forecast_update_label, LV_OBJ_PART_MAIN );
-    lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+    #if defined( ROUND_DISPLAY )
+        lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    #else
+        lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+    #endif
 
     lv_obj_t * weater_forecast_cont = lv_obj_create( weather_forecast_tile, NULL );
     lv_obj_set_size( weater_forecast_cont, lv_disp_get_hor_res( NULL ) , ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 );
@@ -169,6 +177,11 @@ void weather_forecast_sync( void  ) {
         char buf[64];
 
         lv_label_set_text( weather_forecast_location_label, weather_forecast[ 0 ].name );
+        #if defined( ROUND_DISPLAY )
+            lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
+        #else
+            lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+        #endif
 
         for ( int i = 0 ; i < WEATHER_MAX_FORECAST && i < WEATHER_MAX_FORECAST_ICON ; i++ ) {
             lv_imgbtn_set_src( weather_forecast_icon_imgbtn[ i ], LV_BTN_STATE_RELEASED, resolve_owm_icon( weather_forecast[ i * 2 ].icon ) );
@@ -197,6 +210,11 @@ void weather_forecast_sync( void  ) {
         localtime_r( &now, &info );
         strftime( buf, sizeof(buf), "updated: %d.%b %H:%M", &info );
         lv_label_set_text( weather_forecast_update_label, buf );
+        #if defined( ROUND_DISPLAY )
+            lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+        #else
+            lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+        #endif
         lv_obj_invalidate( lv_scr_act() );
     }
 }
