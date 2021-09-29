@@ -26,6 +26,7 @@
 #include "config/wifictlconfig.h"
 #include "utils/webserver/webserver.h"
 #include "utils/ftpserver/ftpserver.h"
+#include "utils/mqtt/mqtt.h"
 
 #ifdef NATIVE_64BIT
     #include <unistd.h>
