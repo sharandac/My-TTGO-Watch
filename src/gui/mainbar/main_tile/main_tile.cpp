@@ -224,6 +224,7 @@ bool main_tile_style_event_cb( EventBits_t event, void *arg ){
                                 lv_style_set_text_font( &iconstyle, LV_STATE_DEFAULT, icon_font );
                                 break;
     }
+    return( true );
 }
 
 static bool main_tile_sensor_event_cb( EventBits_t event, void *arg ) {

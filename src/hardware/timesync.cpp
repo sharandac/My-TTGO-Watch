@@ -29,14 +29,9 @@
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else  
-    #ifdef M5PAPER
-        #include <M5EPD.h>
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #include "TTGO.h"
-    #endif
-
     #include "wifictl.h"
     #include "blectl.h"
+    #include "rtcctl.h"
 
     EventGroupHandle_t time_event_handle = NULL;
     TaskHandle_t _timesync_Task;
@@ -56,17 +51,17 @@ void timesync_setup( void ) {
      * load config from json
      */
     timesync_config.load();
-#ifndef NATIVE_64BIT
-    /*
-     * create timesync event group
-     */
-    time_event_handle = xEventGroupCreate();
-    /*
-     * register wigi, ble and powermgm callback function
-     */
-    wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
-    blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
-#endif
+    #ifndef NATIVE_64BIT
+        /*
+        * create timesync event group
+        */
+        time_event_handle = xEventGroupCreate();
+        /*
+        * register wigi, ble and powermgm callback function
+        */
+        wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
+        blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
+    #endif
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "powermgm timesync" );
     /*
      * sync time from rtc to system
@@ -277,37 +272,7 @@ void timesyncToSystem( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
-        struct tm t_tm;
-        struct timeval val;
-        /**
-         * get GMT0 RTC time
-         */
-        rtc_time_t RTCtime;
-        rtc_date_t RTCDate;
-
-        M5.RTC.getTime(&RTCtime);
-        M5.RTC.getDate(&RTCDate);
-
-        t_tm.tm_hour = RTCtime.hour;
-        t_tm.tm_min = RTCtime.min;
-        t_tm.tm_sec = RTCtime.sec;
-        t_tm.tm_year = RTCDate.year - 1900;    //Year, whose value starts from 1900
-        t_tm.tm_mon = RTCDate.mon - 1;       //Month (starting from January, 0 for January) - Value range is [0,11]
-        t_tm.tm_mday = RTCDate.day;
-        val.tv_sec = mktime(&t_tm);
-        val.tv_usec = 0;
-        settimeofday(&val, NULL);
-
-        log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
-        log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
-        log_i("to --->");
-        log_i("GMT0-System - Time: %02d:%02d.%02d", t_tm.tm_hour, t_tm.tm_min, t_tm.tm_sec );
-        log_i("GMT0-System - Date: %02d.%02d.%04d", t_tm.tm_mday, t_tm.tm_mon, t_tm.tm_year + 1900 );
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->rtc->syncToSystem();
-    #endif
+    rtcctl_syncToSystem();
 #endif
     /**
      * set back TZ to local settings
@@ -326,37 +291,7 @@ void timesyncToRTC( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
-        time_t now;
-        struct tm  t_tm;
-        /**
-         * get GMT0 system time
-         */
-        time(&now);
-        localtime_r(&now, &t_tm);
-        /**
-         * store GMT0 System time to RTC
-         */
-        rtc_time_t RTCtime;
-        rtc_date_t RTCDate;
-
-        RTCtime.hour = t_tm.tm_hour;
-        RTCtime.min = t_tm.tm_min;
-        RTCtime.sec = t_tm.tm_sec;
-        M5.RTC.setTime(&RTCtime);
-
-        RTCDate.year = t_tm.tm_year + 1900;
-        RTCDate.mon = t_tm.tm_mon + 1;
-        RTCDate.day = t_tm.tm_mday;
-        M5.RTC.setDate(&RTCDate);
-
-        log_i("to --->");
-        log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
-        log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        TTGOClass *ttgo = TTGOClass::getWatch();
-        ttgo->rtc->syncToRtc();
-    #endif
+    rtcctl_syncToRtc();
 #endif
     /**
      * set back TZ to local settings

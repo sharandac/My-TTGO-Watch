@@ -91,6 +91,19 @@
      */
     bool powermgm_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP and POWERMGM_RTC_ALARM
+     * @param   callback_func       pointer to the callback function 
+     * @param   id                  pointer to an string
+     * @param   prio                prio from CALL_CB_FIRST to CALL_CB_LAST
+     * 
+     * @return  TRUE if successful, FALSE if not successful
+     * 
+     * @note  Your callback function return TRUE if all fine, FALSE when you want break, by example into to standby.
+     */
+    bool powermgm_register_cb_with_prio( EventBits_t event, CALLBACK_FUNC callback_func, const char *id, callback_prio_t prio );
+    /**
      * @brief registers a callback function which is called on a corresponding loop event
      * 
      * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP

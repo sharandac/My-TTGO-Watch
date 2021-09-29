@@ -33,7 +33,7 @@
 #include "hardware/wifictl.h"
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 #include "hardware/pmu.h"
 #include "hardware/sound.h"
 #include "hardware/display.h"
@@ -140,6 +140,12 @@ void statusbar_setup( void )
     const lv_font_t *statusbar_font = &lv_font_montserrat_14;
 #endif
 
+#if defined( ROUND_DISPLAY )
+    #define STATUSBAR_ICON_X_OFFSET     -70
+#else
+    #define STATUSBAR_ICON_X_OFFSET     -5
+#endif
+
     /*Copy a built-in style to initialize the new style*/
     lv_style_init(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_radius(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, 0);
@@ -204,10 +210,12 @@ void statusbar_setup( void )
         }
         lv_obj_reset_style_list( statusicon[i].icon, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusicon[i].icon, LV_OBJ_PART_MAIN, statusicon[i].style );
-        if ( i == 0 )
-            lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
-        else
+        if ( i == 0 ) {
+            lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, STATUSBAR_ICON_X_OFFSET, 0 );
+        }
+        else {
             lv_obj_align(statusicon[i].icon, statusicon[i-1].icon, statusicon[i].align, -5, 0);
+        }
     }
 
     static lv_style_t style;
@@ -915,7 +923,9 @@ void statusbar_refresh( void ) {
     for ( int i = 0 ; i < STATUSBAR_NUM ; i++ ) {
         if ( !lv_obj_get_hidden( statusicon[ i ].icon ) ) {
             if ( last_visible == NULL ) {
-                if ( !statusbar_expanded ) lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
+                if ( !statusbar_expanded ) {
+                    lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, STATUSBAR_ICON_X_OFFSET, 0 );
+                }
             } else {
                 lv_obj_align( statusicon[ i ].icon, last_visible, statusicon[ i ].align, -5, 0);
             }

@@ -19,8 +19,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BMA_H
-    #define _BMA_H
+#ifndef _MOTION_H
+    #define _MOTION_H
 
     #include "callback.h"
     #include "hardware/config/bmaconfig.h"
@@ -94,4 +94,4 @@
      */
     void bma_reset_stepcounter( void );
     
-#endif // _BMA_H
+#endif // _MOTION_H

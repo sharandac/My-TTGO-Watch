@@ -23,10 +23,12 @@
 #ifdef NATIVE_64BIT
 
 #else
+
     #include <HTTPClient.h>
     #include <Update.h>
     #define DEST_FS_USES_SPIFFS
     #include <ESP32-targz.h>
+
 #endif
 
 #include "decompress.h"

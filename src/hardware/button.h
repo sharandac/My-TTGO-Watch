@@ -40,11 +40,13 @@
     #define     BUTTON_EXIT             _BV(2)          /** @brief event mask for exit button */
     #define     BUTTON_MENU             _BV(3)          /** @brief event mask for menu button */
     #define     BUTTON_ENTER            _BV(4)          /** @brief event mask for enter button */
-    #define     BUTTON_UP               _BV(5)          /** @brief event mask for up button */
-    #define     BUTTON_DOWN             _BV(6)          /** @brief event mask for down button */
-    #define     BUTTON_LEFT             _BV(7)          /** @brief event mask for left button */
-    #define     BUTTON_RIGHT            _BV(8)          /** @brief event mask for right button */
-    #define     BUTTON_KEYBOARD         _BV(9)          /** @brief event mask for keyboard button, data as uint32_t */
+    #define     BUTTON_REFRESH          _BV(5)          /** @brief event mask for refresh button */
+    #define     BUTTON_SETUP            _BV(6)          /** @brief event mask for setup button */
+    #define     BUTTON_UP               _BV(7)          /** @brief event mask for up button */
+    #define     BUTTON_DOWN             _BV(8)          /** @brief event mask for down button */
+    #define     BUTTON_LEFT             _BV(9)          /** @brief event mask for left button */
+    #define     BUTTON_RIGHT            _BV(10)         /** @brief event mask for right button */
+    #define     BUTTON_KEYBOARD         _BV(11)         /** @brief event mask for keyboard button, data as uint32_t */
 
     /**
      * @brief button setup function

@@ -38,8 +38,6 @@ static bool apptile_init = false;
 icon_t app_entry[ MAX_APPS_ICON ];
 lv_obj_t *app_cont[ MAX_APPS_TILES ];
 uint32_t app_tile_num[ MAX_APPS_TILES ];
-static lv_style_t app_icon_style;
-static lv_style_t app_label_style;
 
 static bool app_tile_button_event_cb( EventBits_t event, void *arg );
 
@@ -58,6 +56,8 @@ void app_tile_setup( void ) {
     #if defined( M5PAPER )
         app_tile_num[ tiles ] = mainbar_add_tile( 0, 1 + tiles, "app tile", ws_get_mainbar_style() );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
+    #elif defined( LILYGO_WATCH_2021 )
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
     #else
         #error "no app tiles setup"        

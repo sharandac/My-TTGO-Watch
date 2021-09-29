@@ -38,6 +38,9 @@
             TinyGPSCustom TGC_sats_in_view_glonass;
             TinyGPSCustom TGC_sats_in_view_baidou;
         #endif
+    #elif defined( LILYGO_WATCH_2021 ) 
+    #else
+        #warning "not hardware driver for gpsctl"
     #endif
 #endif
 

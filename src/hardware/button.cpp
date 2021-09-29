@@ -54,6 +54,10 @@ bool button_send_cb( EventBits_t event, void *arg );
             }
             return( true );
         }
+    #elif defined( LILYGO_WATCH_2021 ) 
+        #include <twatch2021_config.h>
+    #else
+        #warning "not hardware driver for button"
     #endif
     /**
      * genreal allocated IRQ function
@@ -90,6 +94,10 @@ void button_setup( void ) {
              * to the pmu
              */
             pmu_register_cb( PMUCTL_SHORT_PRESS | PMUCTL_LONG_PRESS, button_pmu_event_cb, "button pmu event" );
+        #elif defined( LILYGO_WATCH_2021 ) 
+            pinMode( BTN_1, INPUT_PULLUP );
+            pinMode( BTN_2, INPUT );
+            pinMode( BTN_3, INPUT );
         #endif
     #endif
     /*
@@ -188,6 +196,79 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
         }
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #elif defined( LILYGO_WATCH_2021 ) 
+        static bool exit_button = digitalRead( BTN_1 );
+        static bool refresh_button = digitalRead( BTN_2 );
+        static bool setup_button = digitalRead( BTN_3 );
+        static uint64_t exit_button_time = 0;
+        static uint64_t refresh_button_time = 0;
+        static uint64_t setup_button_time = 0;
+        /**
+         * BTN_1 logic
+         */
+        if ( digitalRead( BTN_1 ) != exit_button ) {
+            exit_button = digitalRead( BTN_1 );
+
+            uint64_t press_time = 0;
+            if ( !exit_button ) {
+                exit_button_time = millis();
+            }
+            else {
+                press_time = millis() - exit_button_time;
+            }
+
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 ) {
+                    if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) )
+                        button_send_cb( BUTTON_PWR, (void *)NULL );
+                    else
+                        button_send_cb( BUTTON_EXIT, (void *)NULL );
+                }
+                else {
+                    button_send_cb( BUTTON_QUICKBAR, (void *)NULL );
+                }
+            }
+        }
+        /**
+         * BTN_2 logic
+         */
+        if ( digitalRead( BTN_2 ) != setup_button ) {
+            setup_button = digitalRead( BTN_2 );
+
+            uint64_t press_time = 0;
+            if ( setup_button )
+                setup_button_time = millis();
+            else
+                press_time = millis() - setup_button_time;
+
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 )
+                    button_send_cb( BUTTON_DOWN, (void*)NULL );
+                else
+                    button_send_cb( BUTTON_SETUP, (void *)NULL );
+            }
+        }
+        /**
+         * BTN_3 logic
+         */
+        if ( digitalRead( BTN_3 ) != refresh_button ) {
+            refresh_button = digitalRead( BTN_3 );
+
+            uint64_t press_time = 0;
+            if ( refresh_button )
+                refresh_button_time = millis();
+            else
+                press_time = millis() - refresh_button_time;
+
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 )
+                    button_send_cb( BUTTON_UP, (void*)NULL );
+                else
+                    button_send_cb( BUTTON_REFRESH, (void *)NULL );
+            }
+
+            if ( refresh_button ) button_send_cb( BUTTON_REFRESH, (void*)NULL );
+        }
     #endif
 #endif
     return( true );
@@ -226,6 +307,29 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
             }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;
+        #elif defined( LILYGO_WATCH_2021 ) 
+            switch( event ) {
+                case POWERMGM_STANDBY:              log_i("button standby");
+                                                    /*
+                                                    * enable GPIO in lightsleep for wakeup
+                                                    */
+                                                    gpio_wakeup_enable( (gpio_num_t)BTN_1, GPIO_INTR_LOW_LEVEL );
+                                                    esp_sleep_enable_gpio_wakeup ();
+                                                    retval = true;
+                                                    break;
+                case POWERMGM_WAKEUP:               log_i("button wakeup");
+                                                    retval = true;
+                                                    break;
+                case POWERMGM_SILENCE_WAKEUP:       log_i("button silence wakeup");
+                                                    retval = true;
+                                                    break;
+                case POWERMGM_ENABLE_INTERRUPTS:    log_i("button enable interrupts");
+                                                    retval = true;
+                                                    break;
+                case POWERMGM_DISABLE_INTERRUPTS:   log_i("button disable interrupts");
+                                                    retval = true;
+                                                    break;
+            }
         #endif
     #endif
 
@@ -250,6 +354,7 @@ bool button_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
 }
 
 bool button_send_cb( EventBits_t event, void *arg ) {
+    log_i("send button cb");
     /*
      * call all callbacks with her event mask
      */

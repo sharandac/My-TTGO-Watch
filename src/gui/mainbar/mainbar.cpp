@@ -74,9 +74,10 @@ void mainbar_setup( void ) {
     lv_tileview_set_edge_flash( mainbar, false);
     lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, mainbar_powermgm_event_cb, "mainbar powermgm", CALL_CB_FIRST );
+    powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm", CALL_CB_LAST );
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, mainbar_rtcctl_event_cb, "mainbar rtcctl" );
-    button_register_cb( BUTTON_UP | BUTTON_RIGHT | BUTTON_LEFT | BUTTON_DOWN | BUTTON_ENTER | BUTTON_EXIT | BUTTON_MENU | BUTTON_KEYBOARD, mainbar_button_event_cb, "mainbay button event" );
+    button_register_cb( BUTTON_UP | BUTTON_RIGHT | BUTTON_LEFT | BUTTON_DOWN | BUTTON_ENTER | BUTTON_EXIT | BUTTON_REFRESH | BUTTON_SETUP | BUTTON_MENU | BUTTON_KEYBOARD, mainbar_button_event_cb, "mainbay button event" );
 
     mainbar_clear_history();
 }
@@ -110,6 +111,9 @@ bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
         }
         else {
             MAINBAR_INFO_LOG("no button cb for current tile: %d", current_tile );
+            if ( event == BUTTON_EXIT ) {
+                mainbar_jump_back();
+            }
         }
     }
     /**

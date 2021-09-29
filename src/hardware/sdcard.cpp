@@ -38,6 +38,9 @@
         #if defined( LILYGO_WATCH_HAS_SDCARD )
             SPIClass *sdhander = nullptr;
         #endif
+    #elif defined( LILYGO_WATCH_2021 )    
+    #else
+        #warning "not hardware driver for sd_card"
     #endif
 #endif
 

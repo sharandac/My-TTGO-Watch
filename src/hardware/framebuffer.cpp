@@ -47,6 +47,13 @@
         static lv_coord_t min_y = FRAMEBUFFER_BUFFER_H, max_y = 0;          /** @brief screen area to refresh */
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
+    #elif defined( LILYGO_WATCH_2021 )
+        #include "TFT_eSPI.h"
+        #include <twatch2021_config.h>
+
+        TFT_eSPI tft = TFT_eSPI();
+    #else
+        #error "no hardware driver for framebuffer, please setup minimal drivers ( framebuffer/touch )"
     #endif
 #endif
 
@@ -82,15 +89,32 @@ void framebuffer_setup( void ) {
              */
             refreshdelay = 0;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-
+            /**
+             * enable DMA only for V1 and V2
+             */
             #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 )
                 framebuffer_use_dma = true;
             #endif
-
+            /**
+             * if dma enabled, initDMA
+             */
             if ( framebuffer_use_dma ) {
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->tft->initDMA();
             }
+        #elif defined( LILYGO_WATCH_2021 )
+            pinMode(TFT_LED, OUTPUT);
+            ledcSetup(0, 4000, 8);
+            ledcAttachPin(TFT_LED, 0);
+            ledcWrite(0, 0);
+
+            tft.init();
+            tft.setRotation(0);
+            tft.setTextSize(1);
+            tft.setTextColor(TFT_GREEN, TFT_BLACK);
+            tft.initDMA();
+
+            framebuffer_use_dma = true;
         #endif
     #endif
     /*
@@ -129,11 +153,20 @@ void framebuffer_setup( void ) {
     /**
      * setup powermgm events and loop
      */
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , framebuffer_powermgm_event_cb, "powermgm framebuffer" );
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP| POWERMGM_WAKEUP , framebuffer_powermgm_event_cb, "powermgm framebuffer" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , framebuffer_powermgm_loop_cb, "powermgm framebuffer loop" );
 }
 
 bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case POWERMGM_STANDBY:          log_i("go standby, refresh framebuffer");
+                                        framebuffer_refresh();
+                                        break;
+        case POWERMGM_WAKEUP:           log_i("go wakeup");
+                                        break;
+        case POWERMGM_SILENCE_WAKEUP:   log_i("go wakeup");
+                                        break;
+    }
     return( true );
 }
 
@@ -259,17 +292,41 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
             }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
-
+            /**
+             * get buffer size
+             */
             uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+            /**
+             * start data trnsmission
+             * set the working window
+             * and start DMA transfer if enabled
+             * stop transmission
+             */
             ttgo->tft->startWrite();
-            ttgo->tft->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
-            if ( framebuffer_use_dma ) {
+            ttgo->tft->setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
+            if ( framebuffer_use_dma )
                 ttgo->tft->pushPixelsDMA(( uint16_t *)color_p, size);
-            }
-            else {
+            else
                 ttgo->tft->pushPixels(( uint16_t *)color_p, size);
-            }
             ttgo->tft->endWrite();
+        #elif defined( LILYGO_WATCH_2021 )
+            /**
+             * get buffer size
+             */
+            uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+            /**
+             * start data trnsmission
+             * set the working window
+             * and start DMA transfer if enabled
+             * stop transmission
+             */
+            tft.startWrite();
+            tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
+            if ( framebuffer_use_dma )
+                tft.pushPixelsDMA(( uint16_t *)color_p, size);
+            else
+                tft.pushPixels(( uint16_t *)color_p, size);
+            tft.endWrite();
         #endif
     #endif
     lv_disp_flush_ready( disp_drv );

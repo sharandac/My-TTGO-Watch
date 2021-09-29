@@ -29,7 +29,6 @@ static lv_obj_t *kb_textarea = NULL;
 static lv_obj_t *kb = NULL;
 static lv_obj_t *nkb = NULL;
 static lv_obj_t *kb_user_textarea = NULL;
-static lv_style_t kb_style;
 static bool kb_style_initialized = false;
 
 static void kb_event_cb(lv_obj_t * ta, lv_event_t event);
@@ -61,11 +60,7 @@ void keyboard_setup( void ) {
     keyboard_prelim();
 
     kb = lv_keyboard_create( kb_screen , NULL);
-    #if defined( M5PAPER )
-        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
-        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
-    #endif
+    lv_obj_set_size( kb, lv_disp_get_hor_res( NULL ), ( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 ) > 240 ? 240:( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20 )  );
     lv_obj_align( kb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_add_style( kb, LV_OBJ_PART_ALL, SETUP_STYLE );
     lv_obj_add_style( kb, LV_KEYBOARD_PART_BTN, ws_get_button_style() );
@@ -84,11 +79,7 @@ void num_keyboard_setup( void ) {
 
     keyboard_prelim();
     nkb = lv_keyboard_create( kb_screen , NULL);
-    #if defined( M5PAPER )
-        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
-        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
-    #endif
+    lv_obj_set_size( nkb, lv_disp_get_hor_res( NULL ), ( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 ) > 200 ? 200:( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20 ) );
     lv_obj_align( nkb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_obj_add_style( nkb, LV_OBJ_PART_ALL, SETUP_STYLE );
     lv_obj_add_style( nkb, LV_KEYBOARD_PART_BTN, ws_get_button_style() );

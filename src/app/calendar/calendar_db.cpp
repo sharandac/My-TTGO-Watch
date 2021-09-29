@@ -18,6 +18,7 @@
     using namespace std;
     #define String string
 #else
+    #include <time.h>
     #include <Arduino.h>
 #endif
 /**

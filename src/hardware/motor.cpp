@@ -67,6 +67,42 @@
             static Adafruit_DRV2605 *drv = NULL;
             #define DRV2605_ADDRESS 0x5A
         #endif
+    #elif defined( LILYGO_WATCH_2021 )
+        #include <twatch2021_config.h>  
+        
+        volatile int DRAM_ATTR motor_run_time_counter=0;
+        hw_timer_t * timer = NULL;
+        portMUX_TYPE DRAM_ATTR timerMux = portMUX_INITIALIZER_UNLOCKED;
+
+        void IRAM_ATTR onTimer();
+        void IRAM_ATTR onTimer() {
+            /*
+            * set critical section
+            */
+            portENTER_CRITICAL_ISR(&timerMux);
+            /*
+            * check if timer counter > zero
+            */
+            if ( motor_run_time_counter >0 ) {
+                /*
+                * decrement timer counter and enable motor
+                */
+                motor_run_time_counter--;       
+                digitalWrite(MOTOR_PIN, HIGH );
+            }
+            else {
+                /*
+                * disable motor
+                */
+                digitalWrite(MOTOR_PIN, LOW );              
+            }
+            /*
+            * leave critical section
+            */
+            portEXIT_CRITICAL_ISR(&timerMux);
+        }
+    #else
+        #warning "not hardware driver for motor/vibe"
     #endif
 #endif
 
@@ -114,7 +150,7 @@ void motor_setup( void ) {
                 log_e("Motor init: I2C device not found, error %d", err);
                 drv = NULL;    
             }     
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) 
             pinMode(MOTOR_PIN, OUTPUT);
             timer = timerBegin(0, 80, true);
             timerAttachInterrupt(timer, &onTimer, true);
@@ -142,7 +178,7 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 )
             switch( event ) {
                 case POWERMGM_SILENCE_WAKEUP:   portENTER_CRITICAL(&timerMux);
                                                 motor_run_time_counter = 0;
@@ -182,7 +218,7 @@ void motor_vibe( int time, bool enforced ) {
     #else
         #if defined( M5PAPER )
 
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 )
             /*
             * set critical section
             */        

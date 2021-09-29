@@ -23,6 +23,7 @@
 #include <endian.h>
 #include "screenshot.h"
 #include "utils/alloc.h"
+#include "utils/filepath_convert.h"
 #include "gui/png_decoder/lv_png.h"
 
 #ifdef NATIVE_64BIT
@@ -35,10 +36,6 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
-
-    #ifdef M5PAPER
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    #endif
 #endif
 
 static raw_img_grey_t *raw_grey;
@@ -101,11 +98,8 @@ void screenshot_save( void ) {
     /**
      * genrate local filename + path
      */
-    char filename[256] = SCREENSHOT_FILE_NAME;
-#ifdef NATIVE_64BIT
-    if ( getenv("HOME") )
-        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, SCREENSHOT_FILE_NAME );
-#endif
+    char filename[256] = "";
+    filepath_convert( filename, sizeof( filename ), SCREENSHOT_FILE_NAME );
     /**
      * delete old screenshot
      */
@@ -130,7 +124,7 @@ void screenshot_save( void ) {
         /**
          * save img buffer as png
          */
-        lv_rgb_as_png( SCREENSHOT_FILE_NAME, (const uint8_t*)raw_rgb, RES_X_MAX, RES_Y_MAX );
+        lv_rgb_as_png( filename, (const uint8_t*)raw_rgb, RES_X_MAX, RES_Y_MAX );
         /**
          * free screenshot memory
          */

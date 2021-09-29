@@ -31,7 +31,7 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/display.h"
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 
 
 icon_t *display_setup_icon = NULL;
@@ -76,7 +76,7 @@ void display_settings_tile_setup( void ) {
     lv_obj_t *header_2 = NULL;
     // get an app tile and copy mainstyle
 
-    #if RES_Y_MAX < 241
+    #if RES_Y_MAX < 340
         display_tile_num_1 = mainbar_add_setup_tile( 1, 2, "display settings" );
         display_tile_num_2 = display_tile_num_1 + 1;
         display_settings_tile_1 = mainbar_get_tile_obj( display_tile_num_1 );

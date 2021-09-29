@@ -5,7 +5,7 @@
 #include "powermgm.h"
 #include "framebuffer.h"
 #include "touch.h"
-#include "bma.h"
+#include "motion.h"
 #include "display.h"
 #include "gpsctl.h"
 #include "timesync.h"
@@ -57,6 +57,11 @@
         #include <M5EPD.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
+    #elif defined( LILYGO_WATCH_2021 )    
+        #include <twatch2021_config.h>
+        #include <Wire.h>
+    #else
+        #error "no hardware init"
     #endif
 
     Ticker *tickTicker = nullptr;
@@ -123,6 +128,38 @@ void hardware_setup( void ) {
              * ttgo init
              */
             ttgo->begin();
+        #elif defined( LILYGO_WATCH_2021 )
+            heap_caps_malloc_extmem_enable( 32+1024 );
+            /**
+             * power all devices
+             */
+            pinMode( PWR_ON, OUTPUT );
+            digitalWrite( PWR_ON, HIGH );
+            /**
+             * reset touch controler
+             */
+            pinMode( Touch_Res, OUTPUT );
+            digitalWrite( Touch_Res, LOW );
+            delay(10);
+            digitalWrite( Touch_Res, HIGH );
+            delay(50);              
+            /**
+             * lvgl init
+             */
+            lv_init();
+            /**
+             * setup wire interface
+             */
+            Wire.begin( IICSDA, IICSCL, 1000000 );
+            /**
+             * scan i2c devices
+             */
+            for( uint8_t address = 1; address < 127; address++ ) {
+                Wire.beginTransmission(address);
+                if ( Wire.endTransmission() == 0 )
+                    log_i("I2C device at: 0x%02x", address );
+
+            }
         #endif
         /**
          * init lvgl ticker
@@ -155,6 +192,7 @@ void hardware_setup( void ) {
     #else
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )        
         #endif
         if ( !SPIFFS.begin() ) {
             splash_screen_stage_update( "format spiff", 30 );
@@ -176,8 +214,8 @@ void hardware_setup( void ) {
     bma_setup();
     wifictl_setup();
     touch_setup();
-    timesync_setup();
     rtcctl_setup();
+    timesync_setup();
     sensor_setup();
     blectl_read_config();
     sound_read_config();
@@ -212,7 +250,9 @@ void hardware_post_setup( void ) {
     sound_setup();
     gpsctl_setup();
     powermgm_set_event( POWERMGM_WAKEUP );
-    blectl_setup();
+    #if defined( BOARD_HAS_PSRAM )
+        blectl_setup();
+    #endif
 
     display_set_brightness( display_get_brightness() );
 

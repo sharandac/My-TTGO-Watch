@@ -7,7 +7,8 @@
 
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )  
+
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             #define MAX_IR_BUTTONS 96
 
@@ -46,7 +47,7 @@
             /**
              * NEW_HARDWARE_TAG or not defined
              */
-            #error "No destination hardware defined"
+            #warning "No destination hardware defined"
         #endif
     #endif
 #endif

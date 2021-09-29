@@ -57,6 +57,9 @@ static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void gps_status_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     // register 2 vertical tiles and get the first tile number and save it for later use
     gps_status_main_tile_num = mainbar_add_app_tile( 1, 1, "gps status" );
     gps_status_setup_tile_num = mainbar_add_setup_tile( 1, 1, "gps status" );

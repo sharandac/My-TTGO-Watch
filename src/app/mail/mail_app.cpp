@@ -45,6 +45,9 @@ static void enter_mail_app_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void mail_app_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     mail_app_main_tile_num = mainbar_add_app_tile( 1, 1, "mail" );
     mail_app = app_register( "mail", &email_64px, enter_mail_app_event_cb );
     // mail_app_main_setup( mail_app_main_tile_num );

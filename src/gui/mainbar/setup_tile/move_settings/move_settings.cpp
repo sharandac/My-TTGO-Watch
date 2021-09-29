@@ -29,7 +29,7 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 #include "hardware/motor.h"
 
 lv_obj_t *move_settings_tile=NULL;

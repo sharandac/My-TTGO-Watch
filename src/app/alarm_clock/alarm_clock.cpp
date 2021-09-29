@@ -171,6 +171,10 @@ bool powermgmt_callback( EventBits_t event, void *arg  ){
 
 // setup routine for example app
 void alarm_clock_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
+
     properties.load();
 
     create_alarm_app_icon();

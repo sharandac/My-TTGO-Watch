@@ -47,6 +47,7 @@ float inputs[2] = { NAN, NAN };
 char input[16] = "\0";
 char op = '\0';
 
+bool calc_mainbar_button_event_cb( EventBits_t event, void *arg );
 void calc_button_event_cb( lv_obj_t * obj, lv_event_t event );
 void calc_result_event_cb( lv_obj_t * obj, lv_event_t event );
 void calc_update_button();
@@ -58,10 +59,18 @@ void calc_app_main_setup( uint32_t tile_num ) {
     calc_app_main_tile = mainbar_get_tile_obj( tile_num );
 
     lv_obj_t * exit_btn = wf_add_exit_button( calc_app_main_tile, exit_calc_app_main_event_cb );
-    lv_obj_align(exit_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
+    #if defined( ROUND_DISPLAY )
+        lv_obj_align(exit_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, -( THEME_ICON_SIZE / 2 ), -THEME_ICON_PADDING );
+    #else
+        lv_obj_align(exit_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
+    #endif
 
     lv_obj_t * result_btn = wf_add_equal_button( calc_app_main_tile, calc_result_event_cb );
-    lv_obj_align(result_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
+    #if defined( ROUND_DISPLAY )
+        lv_obj_align(result_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, THEME_ICON_SIZE / 2, -THEME_ICON_PADDING );
+    #else
+        lv_obj_align(result_btn, calc_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
+    #endif
 
     // result label
     lv_style_copy(&result_style, ws_get_label_style());
@@ -74,8 +83,12 @@ void calc_app_main_setup( uint32_t tile_num ) {
 
     result_label = lv_label_create( calc_app_main_tile, NULL);
     lv_label_set_text(result_label, "");
-    lv_label_set_align(result_label, LV_LABEL_ALIGN_RIGHT);
-	lv_label_set_long_mode(result_label, LV_LABEL_LONG_CROP);
+    #if defined( ROUND_DISPLAY )
+        lv_label_set_align(result_label, LV_LABEL_ALIGN_CENTER );
+	#else
+        lv_label_set_align(result_label, LV_LABEL_ALIGN_RIGHT );
+    #endif
+    lv_label_set_long_mode(result_label, LV_LABEL_LONG_CROP);
     lv_obj_add_style(result_label, LV_OBJ_PART_MAIN, &result_style);
     lv_obj_align(result_label, calc_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 	lv_obj_set_size(result_label, lv_disp_get_hor_res( NULL ), 38 );
@@ -107,6 +120,19 @@ void calc_app_main_setup( uint32_t tile_num ) {
     lv_btnmatrix_set_btn_ctrl(button_matrix, 11, LV_BTNMATRIX_CTRL_CHECKABLE);
     lv_btnmatrix_set_btn_ctrl(button_matrix, 15, LV_BTNMATRIX_CTRL_CHECKABLE);
     lv_obj_set_event_cb(button_matrix, calc_button_event_cb);
+
+    mainbar_add_tile_button_cb( tile_num, calc_mainbar_button_event_cb );
+}
+
+bool calc_mainbar_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_EXIT:   mainbar_jump_back();
+                            break;
+        case BUTTON_SETUP:  calc_process_button('=');
+                            calc_update_button();
+                            break;
+    }
+    return( true );
 }
 
 void calc_button_event_cb( lv_obj_t * obj, lv_event_t event ) 

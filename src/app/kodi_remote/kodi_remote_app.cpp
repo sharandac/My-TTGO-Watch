@@ -69,6 +69,9 @@ static void enter_kodi_remote_app_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void kodi_remote_app_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     kodi_remote_load_config();
 
     // register 2 vertical tiles and get the first tile number and save it for later use
