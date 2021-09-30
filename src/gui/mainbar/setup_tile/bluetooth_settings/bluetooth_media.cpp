@@ -75,8 +75,13 @@ static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc );
 
 void bluetooth_media_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    //bluetooth_media_tile_num = mainbar_add_app_tile( 1, 1, "bluetooth media" );
-    bluetooth_media_tile_num = mainbar_add_tile( 0, 1, "bluetooth media", ws_get_app_style() );
+    #if defined( M5PAPER )
+        return; // not sure were to place it, so skip it for now
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( LILYGO_WATCH_2021 ) || defined( M5CORE2 )
+        bluetooth_media_tile_num = mainbar_add_tile( 1, 1, "bluetooth media", ws_get_app_style() );
+    #else
+        #error "no bluetooth media tiles setup"  
+    #endif 
     bluetooth_media_tile = mainbar_get_tile_obj( bluetooth_media_tile_num );
 
     lv_style_copy( &bluetooth_media_style, ws_get_mainbar_style() );
