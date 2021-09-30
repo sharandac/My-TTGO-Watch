@@ -121,28 +121,73 @@ void wifictl_setup( void ) {
         wifictl_set_event( WIFICTL_ACTIVE );
         wifictl_clear_event( WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_CONNECT | WIFICTL_WPS_REQUEST );
         int len = WiFi.scanComplete();
+        bool triedAny = false;
+
         /**
          * send scan done event
          */
         wifictl_send_event_cb( WIFICTL_SCAN, (void *)"scan done" );
-        /**
-         * connect if we discover an known network
-         */
-        for( int i = 0 ; i < len ; i++ ) {
-            for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
-                if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
-                    wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
-                    WiFi.setHostname(wifictl_config.hostname);
-                    WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
-                }
-            }
-        }
+
         /**
          * send all entry via event
          */
         for( int i = 0 ; i < len ; i++ ) {
             wifictl_send_event_cb( WIFICTL_SCAN_ENTRY, (void *)WiFi.SSID(i).c_str() );
-            log_i("set network name entry: %s", WiFi.SSID(i).c_str() );
+            log_i("found network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
+        }
+
+        /**
+         * connect if we discover a known network, but skip the ones that were already tried
+         */
+        for( int i = 0 ; i < len ; i++ ) {
+            if (triedAny) break;
+            for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+                if (triedAny) break;
+                if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) && strcmp( wifictl_config.networklist[ entry ].ssid,  wifictl_config.networklist_tried[ entry ].ssid ) ) {
+                    wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
+                    WiFi.setHostname(wifictl_config.hostname);
+                    WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
+                    log_i("try to connect to network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
+
+                    /*
+                    * remember that the connection to this network was tried
+                    */
+                    strncpy( wifictl_config.networklist_tried[ entry ].ssid, wifictl_config.networklist[ entry ].ssid, sizeof( wifictl_config.networklist_tried[ entry ].ssid ) );
+                    triedAny = true;
+                }
+            }
+        }
+
+        /*
+        * if every visible network was tried, start over from the first
+        */
+        if (!triedAny) {
+            /*
+            * clean tried networklist
+            */
+            for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+                wifictl_config.networklist_tried[ entry ].ssid[ 0 ] = '\0';
+                wifictl_config.networklist_tried[ entry ].password[ 0 ] = '\0';
+            }
+
+            /**
+             * connect if we discover an known network
+             */
+            for( int i = 0 ; i < len ; i++ ) {
+                if (triedAny) break;
+                for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+                    if (triedAny) break;
+                    if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) ) {
+                        wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
+                        WiFi.setHostname(wifictl_config.hostname);
+                        WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
+
+                        // remember the connection to this network was tried
+                        strncpy( wifictl_config.networklist_tried[ entry ].ssid, wifictl_config.networklist[ entry ].ssid, sizeof( wifictl_config.networklist_tried[ entry ].ssid ) );
+                        triedAny = true;
+                    }
+                }
+            }
         }
     }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
 
@@ -171,6 +216,14 @@ void wifictl_setup( void ) {
             mqtt_start( wifictl_config.hostname , wifictl_config.mqttssl , wifictl_config.mqttserver , wifictl_config.mqttport , wifictl_config.mqttuser , wifictl_config.mqttpass );
         }
         # endif
+
+        /*
+        * clean tried networklist
+        */
+        for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
+            wifictl_config.networklist_tried[ entry ].ssid[ 0 ] = '\0';
+            wifictl_config.networklist_tried[ entry ].password[ 0 ] = '\0';
+        }
     }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {

@@ -71,6 +71,13 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
             while(true);
         }
     }
+    if ( networklist_tried == NULL ) {
+        networklist_tried = ( wifictl_networklist* )CALLOC( sizeof( wifictl_networklist ) * NETWORKLIST_ENTRYS, 1 );
+        if( !networklist_tried ) {
+            log_e("wifictl_networklist_tried calloc faild");
+            while(true);
+        }
+    }
     /*
      * clean networklist
      */

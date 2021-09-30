@@ -58,7 +58,8 @@
         int32_t mqttport = 1883;                            /** @brief mqtt port*/
         char mqttuser[32] = "";                             /** @brief mqtt username*/
         char mqttpass[32] = "";                             /** @brief mqtt password*/
-        wifictl_networklist* networklist = NULL;                /** @brief network list config pointer */
+        wifictl_networklist* networklist = NULL;            /** @brief network list config pointer */
+        wifictl_networklist* networklist_tried = NULL;      /** @brief network list config pointer of networks a connection was tried */
 
         protected:
         ////////////// Available for overloading: //////////////
