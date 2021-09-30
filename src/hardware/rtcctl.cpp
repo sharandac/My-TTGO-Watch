@@ -35,6 +35,8 @@
     #if defined( M5PAPER )
         #include <M5EPD.h>
         #include <SPIFFS.h>
+    #elif defined( M5CORE2 )
+        #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
     #elif defined( LILYGO_WATCH_2021 )
@@ -75,6 +77,8 @@ void rtcctl_setup( void ) {
 #else
     #if defined( M5PAPER )
         M5.RTC.begin();
+    #elif defined( M5CORE2 )
+        M5.Rtc.begin();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         /**
          * fix issue #276
@@ -155,6 +159,8 @@ void set_next_alarm( void ) {
 #else
     #if defined( M5PAPER )
 //        M5.RTC.begin();
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
@@ -197,6 +203,8 @@ void set_next_alarm( void ) {
 #else
     #if defined( M5PAPER )
 
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         /*
          * it is better define alarm by day in month rather than weekday.
@@ -222,6 +230,8 @@ void rtcctl_set_next_alarm( void ) {
 #else
     #if defined( M5PAPER )
 //        M5.RTC.clearIRQ();
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->rtc->disableAlarm();
@@ -241,6 +251,8 @@ void rtcctl_set_next_alarm( void ) {
 #else
     #if defined( M5PAPER )
 //        M5.RTC.setAlarmIRQ();
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->rtc->enableAlarm();
@@ -260,6 +272,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
 
                                         #else
                                             #if defined( M5PAPER )
+                                            #elif defined( M5CORE2 )
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 gpio_wakeup_enable( (gpio_num_t)RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
                                                 esp_sleep_enable_gpio_wakeup ();
@@ -278,6 +291,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
 
                                         #else
                                             #if defined( M5PAPER )
+                                            #elif defined( M5CORE2 )
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
                                             #elif defined( LILYGO_WATCH_2021 )
@@ -291,6 +305,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
 
                                         #else
                                             #if defined( M5PAPER )
+                                            #elif defined( M5CORE2 )
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 detachInterrupt( RTC_INT_PIN );
                                             #elif defined( LILYGO_WATCH_2021 )
@@ -358,6 +373,9 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
 
         #else
             #if defined( M5PAPER )
+
+            #elif defined( M5CORE2 )
+
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->rtc->disableAlarm();
@@ -387,6 +405,9 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
 
         #else
             #if defined( M5PAPER )
+
+            #elif defined( M5CORE2 )
+
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->rtc->enableAlarm();
@@ -402,6 +423,9 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
 
         #else
             #if defined( M5PAPER )
+
+            #elif defined( M5CORE2 )
+
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 ttgo->rtc->enableAlarm();
@@ -432,7 +456,7 @@ void rtcctl_syncToSystem( void ) {
     #ifdef NATIVE_64BIT
     
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             struct tm t_tm;
             struct timeval val;
             /**
@@ -453,12 +477,28 @@ void rtcctl_syncToSystem( void ) {
             val.tv_sec = mktime(&t_tm);
             val.tv_usec = 0;
             settimeofday(&val, NULL);
+        #elif defined( M5CORE2 )
+            struct tm t_tm;
+            struct timeval val;
+            /**
+             * get GMT0 RTC time
+             */
+            
+            RTC_TimeTypeDef RTCtime;
+            RTC_DateTypeDef RTCDate;
 
-            log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
-            log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
-            log_i("to --->");
-            log_i("GMT0-System - Time: %02d:%02d.%02d", t_tm.tm_hour, t_tm.tm_min, t_tm.tm_sec );
-            log_i("GMT0-System - Date: %02d.%02d.%04d", t_tm.tm_mday, t_tm.tm_mon, t_tm.tm_year + 1900 );
+            M5.Rtc.GetTime( &RTCtime );
+            M5.Rtc.GetDate( &RTCDate );
+
+            t_tm.tm_hour = RTCtime.Hours;
+            t_tm.tm_min = RTCtime.Minutes;
+            t_tm.tm_sec = RTCtime.Seconds;
+            t_tm.tm_year = RTCDate.Year - 1900;    //Year, whose value starts from 1900
+            t_tm.tm_mon = RTCDate.Month - 1;       //Month (starting from January, 0 for January) - Value range is [0,11]
+            t_tm.tm_mday = RTCDate.Date;
+            val.tv_sec = mktime(&t_tm);
+            val.tv_usec = 0;
+            settimeofday(&val, NULL);
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->rtc->syncToSystem();
@@ -472,7 +512,7 @@ void rtcctl_syncToRtc( void ) {
     #ifdef NATIVE_64BIT
     
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             time_t now;
             struct tm  t_tm;
             /**
@@ -495,10 +535,29 @@ void rtcctl_syncToRtc( void ) {
             RTCDate.mon = t_tm.tm_mon + 1;
             RTCDate.day = t_tm.tm_mday;
             M5.RTC.setDate(&RTCDate);
+        #elif defined( M5CORE2 )
+            time_t now;
+            struct tm  t_tm;
+            /**
+             * get GMT0 system time
+             */
+            time(&now);
+            localtime_r(&now, &t_tm);
+            /**
+             * store GMT0 System time to RTC
+             */
+            RTC_TimeTypeDef RTCtime;
+            RTC_DateTypeDef RTCDate;
 
-            log_i("to --->");
-            log_i("GMT0-RTC - Time: %02d:%02d.%02d", RTCtime.hour, RTCtime.min, RTCtime.sec );
-            log_i("GMT0-RTC - Date: %02d.%02d.%04d", RTCDate.day, RTCDate.mon, RTCDate.year );
+            RTCtime.Hours = t_tm.tm_hour;
+            RTCtime.Minutes = t_tm.tm_min;
+            RTCtime.Seconds = t_tm.tm_sec;
+            M5.Rtc.SetTime( &RTCtime );
+
+            RTCDate.Year = t_tm.tm_year + 1900;
+            RTCDate.Month = t_tm.tm_mon + 1;
+            RTCDate.Date = t_tm.tm_mday;
+            M5.Rtc.SetDate( &RTCDate );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->rtc->syncToRtc();

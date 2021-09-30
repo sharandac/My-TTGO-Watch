@@ -19,9 +19,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MAIL_APP_MAIN_H
-    #define _MAIL_APP_MAIN_H
+#ifndef _MAIL_APP_SETUP_H
+    #define _MAIL_APP_SETUP_H
 
-    void mail_app_main_setup( uint32_t tile_num );
+    void mail_app_setup( uint32_t tile_num );
 
-#endif // _MAIL_APP_MAIN_H
+#endif // _MAIL_APP_SETUP_H

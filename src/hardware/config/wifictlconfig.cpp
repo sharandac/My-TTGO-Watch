@@ -23,11 +23,11 @@
 #include "config.h"
 #include "wifictlconfig.h"
 #include "utils/alloc.h"
+#include "utils/webserver/webserver.h"
+#include "utils/ftpserver/ftpserver.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
-    #include "utils/webserver/webserver.h"
-    #include "utils/ftpserver/ftpserver.h"
 #endif
 
 wifictl_config_t::wifictl_config_t() : BaseJsonConfig( WIFICTL_JSON_CONFIG_FILE ) {}

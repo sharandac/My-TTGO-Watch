@@ -14,6 +14,7 @@
 #include "app/osmand/osmand_app.h"
 #include "app/powermeter/powermeter_app.h"
 #include "app/osmmap/osmmap_app.h"
+#include "app/mail/mail_app.h"
 #include "app/sailing/sailing.h"
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/wifimon/wifimon_app.h"
@@ -56,6 +57,7 @@ void setup() {
     alarm_clock_setup();
     activity_app_setup();
     calendar_app_setup();
+    mail_app_setup();
     gps_status_setup();
     IRController_setup();
     sailing_setup();

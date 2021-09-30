@@ -34,7 +34,10 @@
     static uint32_t stepcounter_before_reset;               /** @brief stepcounter before reset */
     static uint32_t stepcounter;                            /** @brief stepcounter */
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
+
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )
@@ -84,13 +87,20 @@ void bma_setup( void ) {
      */
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * forec reset stepcounter on M5PAPER
              */
             stepcounter_valid = 0;
             stepcounter_before_reset = 0;
             stepcounter = 0;
+        #elif defined( M5CORE2 )
+            /**
+             * forec reset stepcounter on M5PAPER
+             */
+            stepcounter_valid = 0;
+            stepcounter_before_reset = 0;
+            stepcounter = 0;        
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             if ( stepcounter_valid != 0xa5a5a5a5 ) {

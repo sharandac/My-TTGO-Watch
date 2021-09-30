@@ -53,8 +53,10 @@
     #include "esp_task_wdt.h"
     #include "lvgl.h"
 
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         #include <M5EPD.h>
+    #elif defined( M5CORE2 )
+        #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )    
@@ -65,15 +67,13 @@
     #endif
 
     Ticker *tickTicker = nullptr;
-
-
 #endif
 
 void hardware_attach_lvgl_ticker( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
         tickTicker->attach_ms(5, []() {
@@ -86,7 +86,7 @@ void hardware_detach_lvgl_ticker( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
         tickTicker->detach();
@@ -109,13 +109,22 @@ void hardware_setup( void ) {
         * Create an SDL thread to do this*/
         SDL_CreateThread( tick_thread, "tick", NULL );
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * lvgl init
              */
             lv_init();
             /**
              * init M5paper hardware
+             */
+            M5.begin();
+        #elif defined( M5CORE2 )
+            /**
+             * LVGL init
+             */
+            lv_init();
+            /**
+             * init M5Core2 hardware
              */
             M5.begin();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
@@ -188,12 +197,7 @@ void hardware_setup( void ) {
      * work on SPIFFS
      */
     #ifdef NATIVE_64BIT
-
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #elif defined( LILYGO_WATCH_2021 )        
-        #endif
         if ( !SPIFFS.begin() ) {
             splash_screen_stage_update( "format spiff", 30 );
             log_i("format SPIFFS");
@@ -225,11 +229,7 @@ void hardware_setup( void ) {
     splash_screen_stage_finish();
 
     #ifdef NATIVE_64BIT
-
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         delay(500);
 
         log_i("Total heap: %d", ESP.getHeapSize());
@@ -250,18 +250,17 @@ void hardware_post_setup( void ) {
     sound_setup();
     gpsctl_setup();
     powermgm_set_event( POWERMGM_WAKEUP );
-    #if defined( BOARD_HAS_PSRAM )
+
+    #if defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )
+        log_i("Bluetooth disabled");
+    #else
         blectl_setup();
     #endif
 
     display_set_brightness( display_get_brightness() );
 
     #ifdef NATIVE_64BIT
-
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         delay(500);
 
         log_i("Total heap: %d", ESP.getHeapSize());
