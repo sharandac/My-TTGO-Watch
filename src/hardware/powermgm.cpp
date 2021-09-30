@@ -37,9 +37,6 @@
     #include "esp_err.h"
     #include "esp_pm.h"
     #include <Arduino.h>
-    #ifdef M5PAPER
-        #include <M5EPD.h>
-    #endif
 
     EventGroupHandle_t powermgm_status = NULL;
     portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
@@ -224,19 +221,7 @@ void powermgm_loop( void ) {
                 * from here, the consumption is round about 2.5mA
                 * total standby time is 152h (6days) without use?
                 */
-                #ifdef M5PAPER
-                    while( M5.EPD.CheckAFSR() ){};
-                    M5.disableEPDPower();
-                    M5.disableEXTPower();
-                #endif
-                    esp_light_sleep_start();
-                #ifdef M5PAPER
-                    M5.enableEPDPower();
-                    M5.enableEXTPower();
-                    delay(50);
-                    M5.EPD.SetRotation( 90 );
-                    M5.EPD.Clear( true );
-                #endif
+                esp_light_sleep_start();
                 /**
                  * check wakeup source
                  */
@@ -246,8 +231,6 @@ void powermgm_loop( void ) {
                         powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                         break;
                     default:
-                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                        log_i("gpio wakeup");
                         break;
                 }
             #endif
@@ -296,10 +279,12 @@ void powermgm_loop( void ) {
          * note:    When change vTaskDelay to an higher value, please
          *          note that the reaction time to wake up increase.
          */
-        #ifndef NATIVE_64BIT
+        #ifdef NATIVE_64BIT
+        #else
             if ( !lighsleep )
                 vTaskDelay( 250 );
         #endif
+
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
@@ -384,6 +369,17 @@ bool powermgm_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const
         }
     }    
     return( callback_register( powermgm_callback, event, callback_func, id ) );
+}
+
+bool powermgm_register_cb_with_prio( EventBits_t event, CALLBACK_FUNC callback_func, const char *id, callback_prio_t prio ) {
+    if ( powermgm_callback == NULL ) {
+        powermgm_callback = callback_init( "powermgm" );
+        if ( powermgm_callback == NULL ) {
+            log_e("powermgm callback alloc failed");
+            while(true);
+        }
+    }    
+    return( callback_register_with_prio( powermgm_callback, event, callback_func, id, prio ) );
 }
 
 bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {

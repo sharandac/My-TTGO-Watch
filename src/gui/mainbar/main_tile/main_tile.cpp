@@ -31,6 +31,7 @@
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/mainbar/note_tile/note_tile.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
+#include "gui/widget_styles.h"
 
 #include "hardware/timesync.h"
 #include "hardware/powermgm.h"
@@ -91,6 +92,7 @@ void main_tile_update_task( lv_task_t * task );
 void main_tile_align_widgets( void );
 bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
 bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg );
+bool main_tile_style_event_cb( EventBits_t event, void *arg );
 static bool main_tile_button_event_cb( EventBits_t event, void *arg );
 static bool main_tile_sensor_event_cb( EventBits_t event, void *arg );
 
@@ -103,7 +105,7 @@ void main_tile_setup( void ) {
         return;
     }
 
-    main_tile_num = mainbar_add_tile( 0, 0, "main tile" );
+    main_tile_num = mainbar_add_tile( 0, 0, "main tile", ws_get_mainbar_style() );
     main_cont = mainbar_get_tile_obj( main_tile_num );
     style = ws_get_mainbar_style();
 
@@ -197,8 +199,32 @@ void main_tile_setup( void ) {
     timesync_register_cb( TIME_SYNC_UPDATE, main_tile_time_update_ebent_cb, "main tile time sync" );
     sensor_register_cb( SENSOR_TEMPERATURE | SENSOR_RELHUMIDITY, main_tile_sensor_event_cb, "main tile sensor" );
     mainbar_add_tile_button_cb( main_tile_num, main_tile_button_event_cb );
+    styles_register_cb( STYLE_CHANGE, main_tile_style_event_cb, "main tile style event" );
 
     maintile_init = true;
+}
+
+bool main_tile_style_event_cb( EventBits_t event, void *arg ){
+    switch( event ) {
+        case STYLE_CHANGE:     style = ws_get_mainbar_style();
+
+                                lv_style_copy( &timestyle, style);
+                                lv_style_set_text_font( &timestyle, LV_STATE_DEFAULT, time_font );
+
+                                lv_style_copy( &datestyle, style);
+                                lv_style_set_text_font( &datestyle, LV_STATE_DEFAULT, date_font );
+
+                                lv_style_copy( &infostyle, style);
+                                lv_style_set_text_font( &infostyle, LV_STATE_DEFAULT, info_font );
+
+                                lv_style_copy( &tempstyle, style);
+                                lv_style_set_text_font( &tempstyle, LV_STATE_DEFAULT, temp_font );
+
+                                lv_style_copy( &iconstyle, style);
+                                lv_style_set_text_font( &iconstyle, LV_STATE_DEFAULT, icon_font );
+                                break;
+    }
+    return( true );
 }
 
 static bool main_tile_sensor_event_cb( EventBits_t event, void *arg ) {

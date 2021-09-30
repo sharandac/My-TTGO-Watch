@@ -74,9 +74,10 @@ void mainbar_setup( void ) {
     lv_tileview_set_edge_flash( mainbar, false);
     lv_obj_add_style( mainbar, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
     lv_page_set_scrlbar_mode( mainbar, LV_SCRLBAR_MODE_OFF);
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, mainbar_powermgm_event_cb, "mainbar powermgm", CALL_CB_FIRST );
+    powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, mainbar_powermgm_event_cb, "mainbar powermgm", CALL_CB_LAST );
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED, mainbar_rtcctl_event_cb, "mainbar rtcctl" );
-    button_register_cb( BUTTON_UP | BUTTON_RIGHT | BUTTON_LEFT | BUTTON_DOWN | BUTTON_ENTER | BUTTON_EXIT | BUTTON_MENU | BUTTON_KEYBOARD, mainbar_button_event_cb, "mainbay button event" );
+    button_register_cb( BUTTON_UP | BUTTON_RIGHT | BUTTON_LEFT | BUTTON_DOWN | BUTTON_ENTER | BUTTON_EXIT | BUTTON_REFRESH | BUTTON_SETUP | BUTTON_MENU | BUTTON_KEYBOARD, mainbar_button_event_cb, "mainbay button event" );
 
     mainbar_clear_history();
 }
@@ -110,6 +111,9 @@ bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
         }
         else {
             MAINBAR_INFO_LOG("no button cb for current tile: %d", current_tile );
+            if ( event == BUTTON_EXIT ) {
+                mainbar_jump_back();
+            }
         }
     }
     /**
@@ -246,7 +250,7 @@ bool mainbar_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
+uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *style ) {
     /*
      * check if mainbar already initialized
      */
@@ -300,8 +304,8 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id ) {
     tile[ tile_entrys - 1 ].y = y;
     tile[ tile_entrys - 1 ].id = id;
     lv_obj_set_size( tile[ tile_entrys - 1 ].tile, lv_disp_get_hor_res( NULL ), LV_VER_RES);
-    //lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
-    lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, ws_get_mainbar_style() );
+    // lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, style );
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
     lv_tileview_set_valid_positions( mainbar, tile_pos_table, tile_entrys );
@@ -390,10 +394,44 @@ uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
     for ( int hor = 0 ; hor < x ; hor++ ) {
         for ( int ver = 0 ; ver < y ; ver++ ) {
             if ( retval == -1 ) {
-                retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id );
+                retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_app_style() );
             }
             else {
-                mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id );
+                mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_app_style() );
+            }
+        }
+    }
+    app_tile_x_pos = app_tile_x_pos + x + 1;
+    return( retval );
+}
+
+uint32_t mainbar_add_setup_tile( uint16_t x, uint16_t y, const char *id ) {
+    /*
+     * check if mainbar already initialized
+     */
+    if ( !mainbar ) {
+        log_e("main not initialized");
+        while( true );
+    }
+
+    /*
+     * prevent tile x pos goes out of range ( uint16_t )
+     */
+    if( ( app_tile_x_pos + x ) * lv_disp_get_hor_res( NULL ) > 32000 ) {
+        log_i("max horz resolution, jump next vert line");
+        app_tile_x_pos = 0;
+        app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
+    }
+
+    uint32_t retval = -1;
+
+    for ( int hor = 0 ; hor < x ; hor++ ) {
+        for ( int ver = 0 ; ver < y ; ver++ ) {
+            if ( retval == -1 ) {
+                retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_setup_tile_style() );
+            }
+            else {
+                mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_setup_tile_style() );
             }
         }
     }

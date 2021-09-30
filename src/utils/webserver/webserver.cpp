@@ -23,7 +23,8 @@
 #include "config.h"
 
 #ifdef NATIVE_64BIT
-
+    void asyncwebserver_start(void){ return; };
+    void asyncwebserver_end(void){ return; }
 #else
     #include <WiFi.h>
     #include <WiFiClient.h>

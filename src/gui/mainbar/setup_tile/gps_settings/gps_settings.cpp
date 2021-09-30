@@ -53,7 +53,7 @@ bool gps_settings_latlon_update_cb( EventBits_t event, void *arg );
 
 void gps_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    gps_tile_num = mainbar_add_app_tile( 1, 1, "gps settings" );
+    gps_tile_num = mainbar_add_setup_tile( 1, 1, "gps settings" );
     gps_settings_tile = mainbar_get_tile_obj( gps_tile_num );
 
     lv_obj_add_style( gps_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );

@@ -30,30 +30,36 @@
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
+    #include <SPIFFS.h>
     /*
     * based on https://github.com/earlephilhower/ESP8266Audio
     */
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+    #if defined( M5PAPER )
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
+
+        #include "AudioFileSourceSPIFFS.h"
+        #include "AudioFileSourcePROGMEM.h"
+        #include "AudioFileSourceID3.h"
+        #include "AudioGeneratorMP3.h"
+        #include "AudioGeneratorWAV.h"
+        #include <AudioGeneratorMIDI.h>
+        #include "AudioOutputI2S.h"
+        #include <ESP8266SAM.h>
+
+        AudioFileSourceSPIFFS *spliffs_file;
+        AudioOutputI2S *out;
+        AudioFileSourceID3 *id3;
+
+        AudioGeneratorMP3 *mp3;
+        AudioGeneratorWAV *wav;
+        ESP8266SAM *sam;
+        AudioFileSourcePROGMEM *progmem_file;
+    #elif defined( LILYGO_WATCH_2020_V2 )
+    #elif defined( LILYGO_WATCH_2021 )    
+    #else
+        #warning "not hardware driver for sound"
     #endif
-    #include <SPIFFS.h>
-    #include "AudioFileSourceSPIFFS.h"
-    #include "AudioFileSourcePROGMEM.h"
-    #include "AudioFileSourceID3.h"
-    #include "AudioGeneratorMP3.h"
-    #include "AudioGeneratorWAV.h"
-    #include <AudioGeneratorMIDI.h>
-    #include "AudioOutputI2S.h"
-    #include <ESP8266SAM.h>
-
-    AudioFileSourceSPIFFS *spliffs_file;
-    AudioOutputI2S *out;
-    AudioFileSourceID3 *id3;
-
-    AudioGeneratorMP3 *mp3;
-    AudioGeneratorWAV *wav;
-    ESP8266SAM *sam;
-    AudioFileSourcePROGMEM *progmem_file;
 #endif
 
 bool sound_init = false;
@@ -112,7 +118,7 @@ void sound_setup( void ) {
             sound_send_event_cb( SOUNDCTL_VOLUME, (void *)&sound_config.volume );
 
             sound_init = true;
-        #elif defined( LILYGO_WATCH_2020_V2 )
+        #else
             sound_set_enabled( false );
             sound_init = false;
         #endif
@@ -124,10 +130,8 @@ bool sound_get_available( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #if defined( M5PAPER )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;
-        #elif defined( LILYGO_WATCH_2020_V2 )
         #endif
     #endif
 

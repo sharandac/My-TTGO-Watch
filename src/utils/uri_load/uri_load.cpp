@@ -19,6 +19,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include "config.h"
 #include "uri_load.h"
 #include "utils/alloc.h"
 
@@ -38,14 +39,14 @@
     #include <curl/curl.h>
 
     /**
-     * curl memory controll structure
+     * @brief curl memory control structure
      */
     struct MemoryStruct {
         char *memory;
         size_t size;
     };
     /**
-     * curl memory write callback function
+     * @brief curl memory write callback function
      */
     static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp) {
         size_t realsize = size * nmemb;
@@ -54,7 +55,7 @@
         char *ptr = (char*)REALLOC(mem->memory, mem->size + realsize + 1);
         if(!ptr) {
             /* out of memory! */
-            printf("not enough memory (realloc returned NULL)\n");
+            log_e("not enough memory (realloc returned NULL)");
             return 0;
         }
         
@@ -318,7 +319,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          * some servers don't like requests that are made without a user-agent
          * field, so we provide one
          */
-        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0" );
+        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, HARDWARE_NAME "-" __FIRMWARE__ );
         /**
          * get it!
          */
@@ -377,6 +378,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         download_client.setTimeout( 1500 );
         download_client.begin( uri_load_dsc->uri );
         download_client.collectHeaders( headerKeys, numberOfHeaders );
+        download_client.setUserAgent( HARDWARE_NAME "-" __FIRMWARE__ );
         int httpCode = download_client.GET();
         /**
          * request successfull?
@@ -423,7 +425,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 }
             }
             else {
-                URI_LOAD_ERROR_LOG("data alloc failed");
+                URI_LOAD_ERROR_LOG("data alloc failed, %d bytes", uri_load_dsc->size );
                 download_client.end();
                 uri_load_free_all( uri_load_dsc );
                 return( NULL );
@@ -528,7 +530,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          * some servers don't like requests that are made without a user-agent
          * field, so we provide one
          */
-        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0" );
+        curl_easy_setopt( curl_handle, CURLOPT_USERAGENT, HARDWARE_NAME "-" __FIRMWARE__ );
         /**
          * get it!
          */
@@ -592,6 +594,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         HTTPClient download_client;                                                 /** @brief http download client */
         download_client.begin( *client, uri_load_dsc->uri );
         download_client.collectHeaders( headerKeys, numberOfHeaders );
+        download_client.setUserAgent( HARDWARE_NAME "-" __FIRMWARE__ );
         int httpCode = download_client.GET();
         /**
          * request successfull?
@@ -640,7 +643,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 }
             }
             else {
-                URI_LOAD_ERROR_LOG("data alloc failed");
+                URI_LOAD_ERROR_LOG("data alloc failed, %d bytes", uri_load_dsc->size );
                 download_client.end();
                 client->stop();
                 uri_load_free_all( uri_load_dsc );

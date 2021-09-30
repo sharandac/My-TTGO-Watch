@@ -46,15 +46,13 @@
     #define String string
 #else
     #include <Arduino.h>
-    #include <SPIFFS.h>
-    #include <FS.h>
-    #include "esp_task_wdt.h"
 
-    EventGroupHandle_t weather_widget_event_handle = NULL;
-    TaskHandle_t _weather_widget_sync_Task;
+    EventGroupHandle_t weather_sync_event_handle = NULL;
+    TaskHandle_t _weather_sync_Task;
 #endif
 
-void weather_widget_sync_Task( void * pvParameters );
+void weather_widget_sync( void );
+void weather_sync_Task( void * pvParameters );
 
 weather_config_t weather_config;
 weather_forcast_t weather_today;
@@ -66,9 +64,9 @@ icon_t *weather_app = NULL;
 icon_t * weather_widget = NULL;
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
-bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg );
+bool weather_wifictl_event_cb( EventBits_t event, void *arg );
 
-LV_IMG_DECLARE(owm_01d_64px);
+LV_IMG_DECLARE(owm01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
 LV_IMG_DECLARE(info_fail_16px);
 LV_FONT_DECLARE(Ubuntu_16px);
@@ -85,7 +83,7 @@ void weather_app_setup( void ) {
     weather_forecast_tile_setup( weather_app_tile_num );
     weather_setup_tile_setup( weather_app_setup_tile_num );
 
-    weather_app = app_register( "weather", &owm_01d_64px, enter_weather_widget_event_cb );    
+    weather_app = app_register( "weather", &owm01d_64px, enter_weather_widget_event_cb );    
 
     // register app and widget icon
     if ( weather_config.widget ) {
@@ -99,16 +97,16 @@ void weather_app_setup( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    weather_widget_event_handle = xEventGroupCreate();
+    weather_sync_event_handle = xEventGroupCreate();
 #endif
 
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_widget_wifictl_event_cb, "weather" );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_wifictl_event_cb, "weather" );
 }
 
-bool weather_widget_wifictl_event_cb( EventBits_t event, void *arg ) {
+bool weather_wifictl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case WIFICTL_CONNECT:       if ( weather_config.autosync ) {
-                                        weather_widget_sync_request();
+                                        weather_sync_request();
                                     }
                                     break;
         case WIFICTL_OFF:           widget_hide_indicator( weather_widget );
@@ -126,7 +124,7 @@ static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 void weather_add_widget( void ) {
-    weather_widget = widget_register( "n/a", &owm_01d_64px, enter_weather_widget_event_cb );
+    weather_widget = widget_register( "n/a", &owm01d_64px, enter_weather_widget_event_cb );
 }
 
 void weather_remove_widget( void ) {
@@ -143,22 +141,22 @@ void weather_jump_to_setup( void ) {
     mainbar_jump_to_tilenumber( weather_app_setup_tile_num, LV_ANIM_ON );    
 }
 
-void weather_widget_sync_request( void ) {
+void weather_sync_request( void ) {
 #ifdef NATIVE_64BIT
-    weather_widget_sync_Task( NULL );
+    weather_sync_Task( NULL );
 #else
-    if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {
+    if ( xEventGroupGetBits( weather_sync_event_handle ) & WEATHER_SYNC_REQUEST ) {
         return;
     }
     else {
-        xEventGroupSetBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
+        xEventGroupSetBits( weather_sync_event_handle, WEATHER_SYNC_REQUEST );
         widget_hide_indicator( weather_widget );
-        xTaskCreate(    weather_widget_sync_Task,       /* Function to implement the task */
-                        "weather widget sync Task",     /* Name of the task */
+        xTaskCreate(    weather_sync_Task,              /* Function to implement the task */
+                        "weather sync Task",            /* Name of the task */
                         5000,                           /* Stack size in words */
                         NULL,                           /* Task input parameter */
                         1,                              /* Priority of the task */
-                        &_weather_widget_sync_Task );   /* Task handle. */
+                        &_weather_sync_Task );          /* Task handle. */
     }
 #endif
 }
@@ -167,35 +165,42 @@ weather_config_t *weather_get_config( void ) {
     return( &weather_config );
 }
 
-void weather_widget_sync_Task( void * pvParameters ) {
+void weather_sync_Task( void * pvParameters ) {
 #ifndef NATIVE_64BIT
     log_i("start weather widget task, heap: %d", ESP.getFreeHeap() );
     vTaskDelay( 250 );
-    if ( xEventGroupGetBits( weather_widget_event_handle ) & WEATHER_WIDGET_SYNC_REQUEST ) {       
+    if ( xEventGroupGetBits( weather_sync_event_handle ) & WEATHER_SYNC_REQUEST ) {       
 #endif
-        uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
-        if ( retval == 200 ) {
-            widget_set_label( weather_widget, weather_today.temp );
-            widget_set_icon( weather_widget, (lv_obj_t*)resolve_owm_icon( weather_today.icon ) );
-            widget_set_indicator( weather_widget, ICON_INDICATOR_OK );
 
-            if ( weather_config.showWind ) {
-                widget_set_extended_label( weather_widget, weather_today.wind );
-            }
-            else {
-                widget_set_extended_label( weather_widget, "" );
-            }
-        }
-        else {
-            widget_set_indicator( weather_widget, ICON_INDICATOR_FAIL );
-        }
-        lv_obj_invalidate( lv_scr_act() );
+    weather_widget_sync();
+    weather_forecast_sync();
+
 #ifndef NATIVE_64BIT
     }
-    xEventGroupClearBits( weather_widget_event_handle, WEATHER_WIDGET_SYNC_REQUEST );
+    xEventGroupClearBits( weather_sync_event_handle, WEATHER_SYNC_REQUEST );
     log_i("finish weather widget task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 #endif
+}
+
+void weather_widget_sync( void ) {
+    uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
+    if ( retval == 200 ) {
+        widget_set_label( weather_widget, weather_today.temp );
+        widget_set_icon( weather_widget, (lv_obj_t*)resolve_owm_icon( weather_today.icon ) );
+        widget_set_indicator( weather_widget, ICON_INDICATOR_OK );
+
+        if ( weather_config.showWind ) {
+            widget_set_extended_label( weather_widget, weather_today.wind );
+        }
+        else {
+            widget_set_extended_label( weather_widget, "" );
+        }
+    }
+    else {
+        widget_set_indicator( weather_widget, ICON_INDICATOR_FAIL );
+    }
+    lv_obj_invalidate( lv_scr_act() );
 }
 
 void weather_save_config( void ) {

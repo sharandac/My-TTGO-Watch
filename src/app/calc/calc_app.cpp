@@ -41,17 +41,8 @@ LV_IMG_DECLARE(calc_app_64px);
  * setup routine for example app
  */
 void calc_app_setup( void ) {
-    // register 2 vertical tiles and get the first tile number and save it for later use
     calc_app_main_tile_num = mainbar_add_app_tile( 1, 1, "calc app" );
-
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
     calc_app = app_register( "Calculator", &calc_app_64px, enter_calc_app_event_cb );
-
-    // init main and setup tile, see calc_app_main.cpp and calc_app_setup.cpp
     calc_app_main_setup( calc_app_main_tile_num );
 }
 

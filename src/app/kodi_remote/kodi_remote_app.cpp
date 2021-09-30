@@ -69,11 +69,14 @@ static void enter_kodi_remote_app_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void kodi_remote_app_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     kodi_remote_load_config();
 
     // register 2 vertical tiles and get the first tile number and save it for later use
-    kodi_remote_app_main_tile_num = mainbar_add_app_tile( 2, 2, "kodi remote" );
-    kodi_remote_app_setup_tile_num = kodi_remote_app_main_tile_num + 1;
+    kodi_remote_app_main_tile_num = mainbar_add_app_tile( 2, 1, "kodi remote" );
+    kodi_remote_app_setup_tile_num = mainbar_add_setup_tile( 1, 1, "kodi remote" );
 
     // register app icon on the app tile
     // set your own icon and register her callback to activate by an click

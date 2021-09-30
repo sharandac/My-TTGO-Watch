@@ -53,21 +53,14 @@ static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void FindPhone_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     // register 1 vertical tile and get the first tile number and save it for later use
     FindPhone_main_tile_num = mainbar_add_app_tile( 1, 1, "FindPhone" );
-    //FindPhone_setup_tile_num = FindPhone_main_tile_num + 1;//No use just yet
-
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
     FindPhone = app_register( "Find\nPhone", &eye_64px, enter_FindPhone_event_cb );
-    //app_set_indicator( FindPhone, ICON_INDICATOR_OK );
-
     // init main and setup tile, see FindPhone_main.cpp and FindPhone_setup.cpp
-    FindPhone_main_setup( FindPhone_main_tile_num );
-	
+    FindPhone_main_setup( FindPhone_main_tile_num );	
 	bluetooth_FindPhone_tile_setup();
 }
 

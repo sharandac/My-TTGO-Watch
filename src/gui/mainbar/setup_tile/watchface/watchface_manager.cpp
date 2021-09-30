@@ -55,6 +55,9 @@ static void enter_watchface_setup_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for watchface manager app
  */
 void watchface_manager_setup( void ) {
+    #if defined( ONLY_ESSENTIAL )
+        return;
+    #endif
     /**
      * register 1 app tile
      */
@@ -63,7 +66,7 @@ void watchface_manager_setup( void ) {
     /*
      * register 1 tiles for setup
      */
-    watchface_setup_tile_num = mainbar_add_app_tile( 1, 1, "WatchFace Setup" );
+    watchface_setup_tile_num = mainbar_add_setup_tile( 1, 1, "WatchFace Setup" );
     watchface_setup = setup_register( "watchface", &watchface_64px, enter_watchface_setup_event_cb );
     /*
      * init main tile, see example_app_main.cpp and example_app_setup.cpp

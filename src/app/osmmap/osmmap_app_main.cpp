@@ -98,6 +98,7 @@ lv_obj_t *osmmap_sub_menu_layers = NULL;
 lv_obj_t *osmmap_sub_menu_setting = NULL;                       /** @brief osm style list box */
 
 lv_style_t osmmap_app_main_style;                               /** @brief osm main styte obj */
+lv_style_t osmmap_app_btn_style;                                /** @brief osm main styte obj */
 lv_style_t osmmap_app_label_style;                              /** @brief osm main styte obj */
 lv_style_t osmmap_app_nav_style;                                /** @brief osm main styte obj */
 
@@ -165,6 +166,10 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_style_copy( &osmmap_app_main_style, ws_get_mainbar_style() );
     lv_obj_add_style( osmmap_app_main_tile, LV_OBJ_PART_MAIN, &osmmap_app_main_style );
 
+    lv_style_copy( &osmmap_app_btn_style, ws_get_mainbar_style() );
+    lv_style_set_image_recolor( &osmmap_app_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+    lv_style_set_image_recolor_opa( &osmmap_app_btn_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+
     lv_style_copy( &osmmap_app_nav_style, ws_get_mainbar_style() );
     lv_style_set_radius( &osmmap_app_nav_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &osmmap_app_nav_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
@@ -174,13 +179,13 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_style_set_text_color(&osmmap_app_label_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
 
     lv_obj_t *osmmap_cont = lv_obj_create( osmmap_app_main_tile, NULL );
-    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL ), lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_size(osmmap_cont, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
     lv_obj_add_style( osmmap_cont, LV_OBJ_PART_MAIN, &osmmap_app_main_style );
-    lv_obj_align( osmmap_cont, osmmap_app_main_tile, LV_ALIGN_IN_TOP_RIGHT, 0, 0 );
+    lv_obj_align( osmmap_cont, osmmap_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 0 );
 
     osmmap_app_tile_img = lv_img_create( osmmap_cont, NULL );
-    lv_obj_set_width( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
-    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_hor_res( NULL ) );
+    lv_obj_set_width( osmmap_app_tile_img, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
+    lv_obj_set_height( osmmap_app_tile_img, lv_disp_get_hor_res( NULL )>512?lv_disp_get_hor_res( NULL ):240 );
     lv_img_set_src( osmmap_app_tile_img, osm_map_get_no_data_image() );
 #ifdef M5PAPER
     lv_img_set_zoom( osmmap_app_tile_img, 540 );
@@ -197,16 +202,16 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_obj_align( osmmap_lonlat_label, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 3, 0 );
     lv_label_set_text( osmmap_lonlat_label, "0 / 0" );
 
-    osmmap_layers_btn = wf_add_image_button( osmmap_cont, layers_dark_48px, layers_btn_app_main_event_cb, &osmmap_app_main_style );
+    osmmap_layers_btn = wf_add_menu_button( osmmap_cont, layers_btn_app_main_event_cb, &osmmap_app_btn_style );
     lv_obj_align( osmmap_layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
-    osmmap_exit_btn = wf_add_image_button( osmmap_cont, exit_dark_48px, exit_osmmap_app_main_event_cb, &osmmap_app_main_style );
+    osmmap_exit_btn = wf_add_exit_button( osmmap_cont, exit_osmmap_app_main_event_cb, &osmmap_app_btn_style );
     lv_obj_align( osmmap_exit_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
 
-    osmmap_zoom_in_btl = wf_add_image_button( osmmap_cont, zoom_in_dark_48px, zoom_in_osmmap_app_main_event_cb, &osmmap_app_main_style );
+    osmmap_zoom_in_btl = wf_add_zoom_in_button( osmmap_cont, zoom_in_osmmap_app_main_event_cb, &osmmap_app_btn_style );
     lv_obj_align( osmmap_zoom_in_btl, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
 
-    osmmap_zoom_out_btl = wf_add_image_button( osmmap_cont, zoom_out_dark_48px, zoom_out_osmmap_app_main_event_cb, &osmmap_app_main_style );
+    osmmap_zoom_out_btl = wf_add_zoom_out_button( osmmap_cont, zoom_out_osmmap_app_main_event_cb, &osmmap_app_btn_style );
     lv_obj_align( osmmap_zoom_out_btl, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
 
     osmmap_north_btn = lv_btn_create( osmmap_cont, NULL );

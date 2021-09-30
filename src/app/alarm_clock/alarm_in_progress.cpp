@@ -50,11 +50,21 @@ static uint32_t tile_num = 0;
 static bool in_progress = false;
 static bool highlighted = false;
 static lv_obj_t *label = NULL;
-static lv_style_t popup_style;
 static lv_style_t label_style;
 static int brightness = 0;
 static int vibe_delay_coutdown = 0;
 static int beep_often_countown = 0;
+
+bool alarm_in_progress_style_change_event_cb( EventBits_t event, void *arg );
+
+bool alarm_in_progress_style_change_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &label_style, APP_ICON_LABEL_STYLE );
+                            lv_style_set_text_font( &label_style, LV_STATE_DEFAULT, &Ubuntu_72px);
+                            break;
+    }
+    return( true );
+}
 
 static void exit_event_callback( lv_obj_t * obj, lv_event_t event ){
     switch( event ) {
@@ -126,6 +136,7 @@ void alarm_in_progress_start_alarm(){
     statusbar_hide( true );
 
     lv_label_set_text(label, alarm_clock_get_clock_label(false));
+    lv_obj_align( label, tile, LV_ALIGN_CENTER, 0, 0 );
 
     highlighted = true;
     in_progress = true;
@@ -144,25 +155,20 @@ void alarm_in_progress_tile_setup( void ) {
     tile_num = mainbar_add_app_tile( 1, 1, "alarm in progress" );
     tile = mainbar_get_tile_obj( tile_num );
 
-    lv_style_copy( &popup_style, ws_get_popup_style());
-    lv_obj_add_style( tile, LV_OBJ_PART_MAIN, &popup_style );
-    lv_style_set_bg_opa(&popup_style, LV_OBJ_PART_MAIN, LV_OPA_10);
-    lv_style_set_bg_color( &popup_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
-
-    lv_obj_t *tile_container = wf_add_tile_container(tile, LV_LAYOUT_COLUMN_MID);
-    lv_obj_t * cancel_container = wf_add_container(tile_container, LV_LAYOUT_ROW_MID, LV_FIT_PARENT);
-    lv_obj_t * cancel_btm = wf_add_image_button(cancel_container, cancel_32px, exit_event_callback);
-    static lv_style_t cancel_btn_style;
-    lv_style_init(&cancel_btn_style);
-    lv_style_set_image_recolor_opa(&cancel_btn_style, LV_OBJ_PART_MAIN, LV_OPA_COVER);
-    lv_style_set_image_recolor(&cancel_btn_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-    lv_obj_add_style(cancel_btm, LV_OBJ_PART_MAIN, &cancel_btn_style);
-
-    label = wf_add_label(tile_container, "00:00");
-    lv_style_copy( &label_style, ws_get_label_style() );
-    lv_style_set_text_color( &label_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+    lv_obj_add_style( tile, LV_OBJ_PART_MAIN, APP_STYLE );
+    lv_style_copy( &label_style, APP_ICON_LABEL_STYLE );
     lv_style_set_text_font( &label_style, LV_STATE_DEFAULT, &Ubuntu_72px);
-    lv_obj_add_style( label, LV_OBJ_PART_MAIN, &label_style );
+
+    lv_obj_t * cancel_btm = wf_add_close_button( tile, exit_event_callback, SYSTEM_ICON_STYLE );
+    lv_obj_align( cancel_btm, tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
+
+    label = wf_add_label( tile, "00:00" );
     lv_label_set_align(label, LV_LABEL_ALIGN_CENTER);
-    wf_add_image( tile_container, alarm_clock_64px);
+    lv_obj_add_style( label, LV_OBJ_PART_MAIN, &label_style );
+    lv_obj_align( label, tile, LV_ALIGN_CENTER, 0, 0 );
+
+    lv_obj_t *alarm_icon = wf_add_image( tile, alarm_clock_64px);
+    lv_obj_align( alarm_icon, label, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+    styles_register_cb( STYLE_CHANGE, alarm_in_progress_style_change_event_cb, "alarm in progress style change event" );
 }

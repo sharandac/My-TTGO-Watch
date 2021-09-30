@@ -57,11 +57,7 @@ int16_t kodi_remote_pictureplayer_id = 0;
 static uint64_t nextmillis = 0;
 
 lv_obj_t *kodi_remote_player_main_tile = NULL;
-lv_style_t kodi_remote_player_main_style;
 lv_obj_t *kodi_remote_control_main_tile = NULL;
-lv_style_t kodi_remote_control_main_style;
-lv_style_t kodi_remote_control_button_matrix_style;
-lv_style_t kodi_remote_control_button_style;
 
 lv_task_t * _kodi_remote_app_task;
 
@@ -109,85 +105,65 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_activate_cb( tile_num, kodi_remote_setup_activate_callback );
     mainbar_add_tile_hibernate_cb( tile_num, kodi_remote_setup_hibernate_callback );
     kodi_remote_player_main_tile = mainbar_get_tile_obj( tile_num );
-    lv_style_copy( &kodi_remote_player_main_style, ws_get_mainbar_style() );
-    
-    lv_style_copy( &kodi_remote_player_main_style, ws_get_mainbar_style() );
-    lv_style_set_text_font( &kodi_remote_player_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-    lv_obj_add_style( kodi_remote_player_main_tile, LV_OBJ_PART_MAIN, &kodi_remote_player_main_style );
 
-    lv_obj_t * exit_btn_player = wf_add_exit_button( kodi_remote_player_main_tile, exit_kodi_remote_main_event_cb, &kodi_remote_player_main_style );
-    lv_obj_align(exit_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_t * exit_btn_player = wf_add_exit_button( kodi_remote_player_main_tile, exit_kodi_remote_main_event_cb );
+    lv_obj_align(exit_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
-    lv_obj_t * setup_btn_player = wf_add_setup_button( kodi_remote_player_main_tile, enter_kodi_remote_setup_event_cb, &kodi_remote_player_main_style );
-    lv_obj_align(setup_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_t * setup_btn_player = wf_add_setup_button( kodi_remote_player_main_tile, enter_kodi_remote_setup_event_cb );
+    lv_obj_align(setup_btn_player, kodi_remote_player_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
-    kodi_remote_play = wf_add_image_button( kodi_remote_player_main_tile, play_64px, kodi_remote_play_event_cb, &kodi_remote_player_main_style );
+    kodi_remote_play = wf_add_image_button( kodi_remote_player_main_tile, play_64px, kodi_remote_play_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_play, kodi_remote_player_main_tile, LV_ALIGN_CENTER, 0, -20 );
 
-    kodi_remote_next = wf_add_image_button( kodi_remote_player_main_tile, next_32px, kodi_remote_next_event_cb, &kodi_remote_player_main_style );
+    kodi_remote_next = wf_add_image_button( kodi_remote_player_main_tile, next_32px, kodi_remote_next_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_next, kodi_remote_play, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
 
-    kodi_remote_prev = wf_add_image_button( kodi_remote_player_main_tile, prev_32px, kodi_remote_prev_event_cb, &kodi_remote_player_main_style );
+    kodi_remote_prev = wf_add_image_button( kodi_remote_player_main_tile, prev_32px, kodi_remote_prev_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_prev, kodi_remote_play, LV_ALIGN_OUT_LEFT_MID, -32, 0 );
 
     kodi_remote_artist = lv_label_create( kodi_remote_player_main_tile, NULL);
-    lv_obj_add_style( kodi_remote_artist, LV_OBJ_PART_MAIN, &kodi_remote_player_main_style  );
+    lv_obj_add_style( kodi_remote_artist, LV_OBJ_PART_MAIN, APP_STYLE  );
     lv_label_set_text( kodi_remote_artist, "");
     lv_label_set_long_mode( kodi_remote_artist, LV_LABEL_LONG_SROLL_CIRC );
     lv_obj_set_width( kodi_remote_artist, lv_disp_get_hor_res( NULL ) - 60 );
     lv_obj_align( kodi_remote_artist, kodi_remote_player_main_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
 
     kodi_remote_title = lv_label_create( kodi_remote_player_main_tile, NULL);
-    lv_obj_add_style( kodi_remote_title, LV_OBJ_PART_MAIN, &kodi_remote_player_main_style  );
+    lv_obj_add_style( kodi_remote_title, LV_OBJ_PART_MAIN, APP_STYLE  );
     lv_label_set_text( kodi_remote_title, "");
     lv_label_set_long_mode( kodi_remote_title, LV_LABEL_LONG_SROLL_CIRC );
     lv_obj_set_width( kodi_remote_title, lv_disp_get_hor_res( NULL ) - 20 );
     lv_obj_align( kodi_remote_title, kodi_remote_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
 
-    lv_obj_t *kodi_remote_speaker = wf_add_image_button( kodi_remote_player_main_tile, sound_32px, NULL, &kodi_remote_player_main_style );
+    lv_obj_t *kodi_remote_speaker = wf_add_image_button( kodi_remote_player_main_tile, sound_32px, NULL, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_speaker, kodi_remote_play, LV_ALIGN_OUT_BOTTOM_MID, 0, 16 );
 
-    lv_obj_t *kodi_remote_volume_down = wf_add_image_button( kodi_remote_player_main_tile, down_32px, kodi_remote_volume_down_event_cb, &kodi_remote_player_main_style );
+    lv_obj_t *kodi_remote_volume_down = wf_add_image_button( kodi_remote_player_main_tile, down_32px, kodi_remote_volume_down_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_volume_down, kodi_remote_speaker, LV_ALIGN_OUT_LEFT_MID, -32, 0 );
 
-    lv_obj_t *kodi_remote_volume_up = wf_add_image_button( kodi_remote_player_main_tile, up_32px, kodi_remote_volume_up_event_cb, &kodi_remote_player_main_style );
+    lv_obj_t *kodi_remote_volume_up = wf_add_image_button( kodi_remote_player_main_tile, up_32px, kodi_remote_volume_up_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( kodi_remote_volume_up, kodi_remote_speaker, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
 
     // Control Tile
-    kodi_remote_control_main_tile = mainbar_get_tile_obj( tile_num + 2 );
-    lv_style_copy( &kodi_remote_control_main_style, ws_get_mainbar_style() );
+    kodi_remote_control_main_tile = mainbar_get_tile_obj( tile_num + 1 );
 
-    lv_style_copy( &kodi_remote_control_main_style, ws_get_mainbar_style() );
-    lv_style_set_text_font( &kodi_remote_control_main_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-    lv_obj_add_style( kodi_remote_control_main_tile, LV_OBJ_PART_MAIN, &kodi_remote_control_main_style );
+    lv_obj_t * exit_btn_control = wf_add_exit_button( kodi_remote_control_main_tile, exit_kodi_remote_main_event_cb );
+    lv_obj_align(exit_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
-    lv_obj_t * exit_btn_control = wf_add_exit_button( kodi_remote_control_main_tile, exit_kodi_remote_main_event_cb, &kodi_remote_control_main_style );
-    lv_obj_align(exit_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
-
-    lv_obj_t * setup_btn_control = wf_add_setup_button( kodi_remote_control_main_tile, enter_kodi_remote_setup_event_cb, &kodi_remote_control_main_style );
-    lv_obj_align(setup_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
-
-    lv_style_copy(&kodi_remote_control_button_matrix_style, ws_get_button_style());
-    lv_style_set_bg_opa(&kodi_remote_control_button_matrix_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
-    lv_style_set_border_width( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
-    lv_style_set_radius( &kodi_remote_control_button_matrix_style , LV_OBJ_PART_MAIN, 0 );
-
-    lv_style_copy(&kodi_remote_control_button_style, ws_get_button_style());
-    lv_style_set_bg_opa(&kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_OPA_90);
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_CHECKED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_FOCUSED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &kodi_remote_control_button_style, LV_STATE_PRESSED, LV_COLOR_SILVER );
+    lv_obj_t * setup_btn_control = wf_add_setup_button( kodi_remote_control_main_tile, enter_kodi_remote_setup_event_cb );
+    lv_obj_align(setup_btn_control, kodi_remote_control_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
     lv_obj_t * button_matrix = lv_btnmatrix_create(kodi_remote_control_main_tile, NULL);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &kodi_remote_control_button_matrix_style);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &kodi_remote_control_button_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, APP_STYLE );
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, ws_get_button_style() );
 	lv_obj_set_pos(button_matrix, 0, 0);
-	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - 50 );
+	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - THEME_ICON_SIZE );
 
 	lv_btnmatrix_set_map(button_matrix, buttons );
 	lv_btnmatrix_set_one_check(button_matrix, false);
     lv_obj_set_event_cb(button_matrix, kodi_remote_button_event_cb);
+
+    mainbar_add_slide_element( button_matrix );
 
     // callbacks
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );

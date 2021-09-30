@@ -33,7 +33,7 @@
 #include "hardware/wifictl.h"
 #include "hardware/blectl.h"
 #include "hardware/rtcctl.h"
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 #include "hardware/pmu.h"
 #include "hardware/sound.h"
 #include "hardware/display.h"
@@ -70,6 +70,9 @@ static lv_obj_t *statusbar_brightness_slider = NULL;
 static lv_obj_t *statusbar_sound_icon = NULL;
 static lv_obj_t *statusbar_brightness_icon = NULL;
 static lv_style_t statusbarstyle[ STATUSBAR_STYLE_NUM ];
+
+lv_color_t statusbar_retracted_color = LV_COLOR_WHITE;
+lv_color_t statusbar_extended_color = LV_COLOR_BLACK;
 
 LV_IMG_DECLARE(wifi_64px);
 LV_IMG_DECLARE(bluetooth_64px);
@@ -113,6 +116,7 @@ bool statusbar_rtcctl_event_cb( EventBits_t event, void *arg );
 bool statusbar_bmactl_event_cb( EventBits_t event, void *arg );
 bool statusbar_pmuctl_event_cb( EventBits_t event, void *arg );
 bool statusbar_displayctl_event_cb( EventBits_t event, void *arg );
+bool statusbar_style_event_cb( EventBits_t event, void *arg );
 
 void statusbar_wifi_set_state( bool state, const char *wifiname );
 void statusbar_wifi_set_ip_state( bool state, const char *ip );
@@ -136,6 +140,12 @@ void statusbar_setup( void )
     const lv_font_t *statusbar_font = &lv_font_montserrat_14;
 #endif
 
+#if defined( ROUND_DISPLAY )
+    #define STATUSBAR_ICON_X_OFFSET     -70
+#else
+    #define STATUSBAR_ICON_X_OFFSET     -5
+#endif
+
     /*Copy a built-in style to initialize the new style*/
     lv_style_init(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_radius(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, 0);
@@ -148,8 +158,8 @@ void statusbar_setup( void )
 
     lv_style_copy( &statusbarstyle[ STATUSBAR_STYLE_WHITE ], &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_OPA_0);
-    lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-    lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
+    lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_retracted_color );
+    lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_retracted_color );
 
     lv_style_copy( &statusbarstyle[ STATUSBAR_STYLE_BLACK ], &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
     lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_BLACK ], LV_OBJ_PART_MAIN, LV_OPA_0);
@@ -200,10 +210,12 @@ void statusbar_setup( void )
         }
         lv_obj_reset_style_list( statusicon[i].icon, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusicon[i].icon, LV_OBJ_PART_MAIN, statusicon[i].style );
-        if ( i == 0 )
-            lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
-        else
+        if ( i == 0 ) {
+            lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, STATUSBAR_ICON_X_OFFSET, 0 );
+        }
+        else {
             lv_obj_align(statusicon[i].icon, statusicon[i-1].icon, statusicon[i].align, -5, 0);
+        }
     }
 
     static lv_style_t style;
@@ -320,6 +332,7 @@ void statusbar_setup( void )
     pmu_register_cb( PMUCTL_STATUS, statusbar_pmuctl_event_cb, "statusbar pmu");
     display_register_cb( DISPLAYCTL_BRIGHTNESS, statusbar_displayctl_event_cb, "statusbar display" );
     gpsctl_register_cb( GPSCTL_ENABLE | GPSCTL_DISABLE | GPSCTL_FIX | GPSCTL_NOFIX, statusbar_gpsctl_event_cb, "statusbar gps" );
+    styles_register_cb( STYLE_DARKMODE | STYLE_LIGHTMODE, statusbar_style_event_cb, "statusbar style event" );
 
     statusbar_task = lv_task_create( statusbar_update_task, 250, LV_TASK_PRIO_MID, NULL );
 
@@ -344,6 +357,20 @@ void statusbar_update_task( lv_task_t * task ) {
         statusbar_refresh();
         statusbar_refresh_update = false;
     }
+}
+
+bool statusbar_style_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_LIGHTMODE:   statusbar_retracted_color = LV_COLOR_WHITE;
+                                statusbar_extended_color = LV_COLOR_BLACK;
+                                statusbar_set_dark( false );
+                                break;
+        case STYLE_DARKMODE:    statusbar_retracted_color = LV_COLOR_BLACK;
+                                statusbar_extended_color = LV_COLOR_BLACK;
+                                statusbar_set_dark( true );
+    }
+    
+    return( true );
 }
 
 bool statusbar_gpsctl_event_cb( EventBits_t event, void *arg ) {
@@ -896,7 +923,9 @@ void statusbar_refresh( void ) {
     for ( int i = 0 ; i < STATUSBAR_NUM ; i++ ) {
         if ( !lv_obj_get_hidden( statusicon[ i ].icon ) ) {
             if ( last_visible == NULL ) {
-                if ( !statusbar_expanded ) lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, -5, 0 );
+                if ( !statusbar_expanded ) {
+                    lv_obj_align(statusicon[i].icon, statusbar, statusicon[i].align, STATUSBAR_ICON_X_OFFSET, 0 );
+                }
             } else {
                 lv_obj_align( statusicon[ i ].icon, last_visible, statusicon[ i ].align, -5, 0);
             }
@@ -954,18 +983,18 @@ void statusbar_set_dark( bool dark_mode ) {
         lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
 
-        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
-        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_BLACK );
+        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_extended_color );
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_extended_color );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_extended_color );
     }
     else {
         lv_style_set_bg_opa(&statusbarstyle[ STATUSBAR_STYLE_NORMAL ], LV_OBJ_PART_MAIN, LV_OPA_20);
         lv_obj_reset_style_list( statusbar, LV_OBJ_PART_MAIN );
         lv_obj_add_style( statusbar, LV_OBJ_PART_MAIN, &statusbarstyle[ STATUSBAR_STYLE_NORMAL ] );
 
-        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
+        lv_style_set_bg_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_retracted_color );
+        lv_style_set_text_color(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_retracted_color );
+        lv_style_set_image_recolor(&statusbarstyle[ STATUSBAR_STYLE_WHITE ], LV_OBJ_PART_MAIN, statusbar_retracted_color );
     }
 }
 

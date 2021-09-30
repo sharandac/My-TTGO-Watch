@@ -78,12 +78,14 @@
     /**
      * @brief add a tile at a specific position
      * 
-     * @param   x   x position
-     * @param   y   y position
+     * @param   x       x position
+     * @param   y       y position
+     * @param   id      id string
+     * @param   style   lv_style
      * 
      * @return  tile number
      */
-    uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id );
+    uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *style );
     /**
      * @brief add a independent app tile formation
      * 
@@ -95,7 +97,7 @@
      *  | 4 | 5 | 6 |           5..6 = setup tile
      *  +---+---+---+
      * 
-     *  app tile
+     *  app/setup tile
      * 
      *  +---+---+    +---+   +---+---+
      *  | n |n+1|    | n |   | n |n+1|
@@ -105,10 +107,37 @@
      * 
      * @param   x   x size in tiles
      * @param   y   y size in tiles
+     * @param   id      id string
      * 
      * @return  tile number, if get more than 1 tile it is the first tile number
      */
     uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id );
+    /**
+     * @brief add a independent setup tile formation
+     * 
+     *  predefine tiles
+     * 
+     *  +---+---+---+---+       0 = main tile
+     *  | 0 | 1 | 2 | 3 |       1..3 = app tile
+     *  +---+---+---+---+       4 = note tile
+     *  | 4 | 5 | 6 |           5..6 = setup tile
+     *  +---+---+---+
+     * 
+     *  app/setup tile
+     * 
+     *  +---+---+    +---+   +---+---+
+     *  | n |n+1|    | n |   | n |n+1|
+     *  +---+---+    +---+   +---+---+
+     *  |n+2|n+3|    |n+1|
+     *  +---+---+    +---+
+     * 
+     * @param   x   x size in tiles
+     * @param   y   y size in tiles
+     * @param   id      id string
+     * 
+     * @return  tile number, if get more than 1 tile it is the first tile number
+     */
+    uint32_t mainbar_add_setup_tile( uint16_t x, uint16_t y, const char *id );
     /**
      * @brief get the lv_obj_t for a specific tile number
      *

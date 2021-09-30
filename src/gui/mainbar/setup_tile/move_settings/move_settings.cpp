@@ -29,7 +29,7 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-#include "hardware/bma.h"
+#include "hardware/motion.h"
 #include "hardware/motor.h"
 
 lv_obj_t *move_settings_tile=NULL;
@@ -51,7 +51,7 @@ static void daily_stepcounter_onoff_event_handler(lv_obj_t * obj, lv_event_t eve
 
 void move_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    move_tile_num = mainbar_add_app_tile( 1, 1, "move settings" );
+    move_tile_num = mainbar_add_setup_tile( 1, 1, "move settings" );
     move_settings_tile = mainbar_get_tile_obj( move_tile_num );
 
     lv_obj_add_style( move_settings_tile, LV_OBJ_PART_MAIN, ws_get_setup_tile_style() );

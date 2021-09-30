@@ -32,23 +32,17 @@
 #include "hardware/motor.h"
 #include "hardware/blectl.h"
 #include "utils/bluejsonrequest.h"
+#include "utils/webserver/webserver.h"
+#include "utils/ftpserver/ftpserver.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
     #include <WiFi.h>
-
-    #ifdef ENABLE_WEBSERVER
-        #include "utils/webserver/webserver.h"
-    #endif
-    #ifdef ENABLE_FTPSERVER
-        #include "utils/ftpserver/ftpserver.h"
-    #endif
 #endif
 
 lv_obj_t *wifi_settings_tile=NULL;
-lv_style_t wifi_settings_style;
 lv_style_t wifi_list_style;
 uint32_t wifi_settings_tile_num;
 icon_t *wifi_setup_icon = NULL;
@@ -81,13 +75,11 @@ LV_IMG_DECLARE(wifi_64px);
 
 void wlan_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
-    wifi_settings_tile_num = mainbar_add_app_tile( 2, 2, "wifi setup" );
+    wifi_settings_tile_num = mainbar_add_setup_tile( 2, 2, "wifi setup" );
     wifi_password_tile_num = wifi_settings_tile_num + 1;
     wifi_setup_tile_num = wifi_settings_tile_num + 2;
 
     wifi_settings_tile = mainbar_get_tile_obj( wifi_settings_tile_num );
-    lv_style_copy( &wifi_settings_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( wifi_settings_tile, LV_OBJ_PART_MAIN, &wifi_settings_style );
 
     wifi_setup_icon = setup_register( "wifi", &wifi_64px, enter_wifi_settings_event_cb );
     setup_hide_indicator( wifi_setup_icon );
@@ -95,7 +87,7 @@ void wlan_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( wifi_settings_tile, "wlan" );
     lv_obj_align( header, wifi_settings_tile, LV_ALIGN_IN_TOP_LEFT, THEME_ICON_PADDING, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
-    lv_obj_t *setup_btn = wf_add_setup_button( wifi_settings_tile, enter_wifi_setup_event_cb, &wifi_settings_style );
+    lv_obj_t *setup_btn = wf_add_setup_button( wifi_settings_tile, enter_wifi_setup_event_cb, SETUP_STYLE );
     lv_obj_align( setup_btn, wifi_settings_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_ICON_PADDING, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
     /*Copy the first switch and turn it ON*/    
@@ -177,8 +169,6 @@ static void delete_wifi_password_event_cb(  lv_obj_t * obj, lv_event_t event );
 void wlan_password_tile_setup( uint32_t wifi_password_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_password_tile = mainbar_get_tile_obj( wifi_password_tile_num );
-    lv_style_copy( &wifi_password_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( wifi_password_tile, LV_OBJ_PART_MAIN, &wifi_password_style );
 
     lv_obj_t *header = wf_add_settings_header( wifi_password_tile, "wlan setting", exit_wifi_password_event_cb );
     lv_obj_align( header, wifi_password_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
@@ -245,44 +235,34 @@ static void exit_wifi_password_event_cb( lv_obj_t * obj, lv_event_t event ) {
 }
 
 lv_obj_t *wifi_autoon_onoff = NULL;
-#ifdef ENABLE_WEBSERVER
 lv_obj_t *wifi_webserver_onoff = NULL;
-#endif
-#ifdef ENABLE_FTPSERVER
 lv_obj_t *wifi_ftpserver_onoff = NULL;
-#endif
 lv_obj_t *wifi_enabled_on_standby_onoff = NULL;
 
 static void wps_start_event_handler( lv_obj_t * obj, lv_event_t event );
 static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#ifdef ENABLE_WEBSERVER
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#endif
-#ifdef ENABLE_FTPSERVER
 static void wifi_ftpserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
-#endif
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event );
 bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg );
 
 void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
     // get an app tile and copy mainstyle
     wifi_setup_tile = mainbar_get_tile_obj( wifi_setup_tile_num );
-    lv_style_copy( &wifi_setup_style, ws_get_setup_tile_style() );
-    lv_obj_add_style( wifi_setup_tile, LV_OBJ_PART_MAIN, &wifi_setup_style );
 
     lv_obj_t *header = wf_add_settings_header( wifi_setup_tile, "wlan settings" );
     lv_obj_align( header, wifi_setup_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + THEME_ICON_PADDING );
 
-    lv_obj_t *wifi_autoon_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable on wakeup", &wifi_autoon_onoff, wifictl_get_autoon(), wifi_autoon_onoff_event_handler, ws_get_setup_tile_style() );
+    lv_obj_t *wifi_autoon_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable on wakeup", &wifi_autoon_onoff, wifictl_get_autoon(), wifi_autoon_onoff_event_handler,SETUP_STYLE );
     lv_obj_align( wifi_autoon_onoff_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
 
-    lv_obj_t *wifi_enabled_on_standby_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable on standby", &wifi_enabled_on_standby_onoff, wifictl_get_enable_on_standby(), wifi_enabled_on_standby_onoff_event_handler, ws_get_setup_tile_style() );
+    lv_obj_t *wifi_enabled_on_standby_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable on standby", &wifi_enabled_on_standby_onoff, wifictl_get_enable_on_standby(), wifi_enabled_on_standby_onoff_event_handler, SETUP_STYLE );
     lv_obj_align( wifi_enabled_on_standby_onoff_cont, wifi_autoon_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
 
-    lv_obj_t *wifi_webserver_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable webserver", &wifi_webserver_onoff, wifictl_get_webserver(), wifi_webserver_onoff_event_handler, ws_get_setup_tile_style() );
+    lv_obj_t *wifi_webserver_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable webserver", &wifi_webserver_onoff, wifictl_get_webserver(), wifi_webserver_onoff_event_handler, SETUP_STYLE );
     lv_obj_align( wifi_webserver_onoff_cont, wifi_enabled_on_standby_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
 
-    lv_obj_t *wifi_ftpserver_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable ftpserver", &wifi_ftpserver_onoff, wifictl_get_ftpserver(), wifi_ftpserver_onoff_event_handler, ws_get_setup_tile_style() );
+    lv_obj_t *wifi_ftpserver_onoff_cont = wf_add_labeled_switch( wifi_setup_tile, "enable ftpserver", &wifi_ftpserver_onoff, wifictl_get_ftpserver(), wifi_ftpserver_onoff_event_handler, SETUP_STYLE );
     lv_obj_align( wifi_ftpserver_onoff_cont, wifi_webserver_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
 
     lv_obj_t *wps_btn = lv_btn_create( wifi_setup_tile, NULL);
@@ -323,32 +303,25 @@ static void wifi_autoon_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) 
     }
 }
 
-#ifdef ENABLE_WEBSERVER
 static void wifi_webserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_webserver( lv_switch_get_state( obj ) );
-    
-#ifndef ENABLE_WEBSERVER
-                                        if ( lv_switch_get_state( obj ) ) {
+                                            if ( lv_switch_get_state( obj ) ) {
                                             asyncwebserver_start();
                                         }
                                         else {
                                             asyncwebserver_end();
                                         }
-#endif
                                         break;
     }
 }
-#endif
 
-#ifdef ENABLE_FTPSERVER
 static void wifi_ftpserver_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {
         case (LV_EVENT_VALUE_CHANGED):  wifictl_set_ftpserver( lv_switch_get_state( obj ) );
                                         break;
     }
 }
-#endif
 
 static void wifi_enabled_on_standby_onoff_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch (event) {

@@ -24,7 +24,7 @@
 #include "display.h"
 #include "powermgm.h"
 #include "framebuffer.h"
-#include "bma.h"
+#include "motion.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -33,6 +33,10 @@
         #include <M5EPD.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
+    #elif defined( LILYGO_WATCH_2021 )
+        #include <twatch2021_config.h>
+    #else
+        #error "not hardware driver for display"
     #endif
 #endif
 
@@ -64,6 +68,11 @@ void display_setup( void ) {
             ttgo->bl->adjust( 0 );
             ttgo->tft->setRotation( display_config.rotation / 90 );
             bma_set_rotate_tilt( display_config.rotation );
+        #elif defined( LILYGO_WATCH_2021 )
+            pinMode(TFT_LED, OUTPUT);
+            ledcSetup(0, 4000, 8);
+            ledcAttachPin(TFT_LED, 0);
+            ledcWrite(0, 0XFF);
         #endif
     #endif
     /**
@@ -73,6 +82,7 @@ void display_setup( void ) {
     /**
      * register powermgm and pwermgm loop callback functions
      */
+//    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
     powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "powermgm display loop" );
 }
@@ -124,6 +134,31 @@ void display_loop( void ) {
                     dest_brightness = display_get_brightness();
                 }
             }
+        #elif defined( LILYGO_WATCH_2021 )   
+            /**
+             * check if backlight adjust has change
+             */
+            if ( dest_brightness != brightness ) {
+                if ( brightness < dest_brightness ) {
+                    brightness++;
+                    ledcWrite(0, brightness );
+                }
+                else {
+                    brightness--;
+                    ledcWrite(0, brightness );
+                }
+            }
+            /**
+             * check timeout
+             */
+            if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+                }
+                else {
+                    dest_brightness = display_get_brightness();
+                }
+            }
         #endif
     #endif
 }
@@ -160,6 +195,8 @@ void display_standby( void ) {
                 ttgo->power->setPowerOutPut( AXP202_LDO2, false );
                 ttgo->power->setPowerOutPut( AXP202_LDO3, false );
             #endif
+        #elif defined( LILYGO_WATCH_2021 )   
+            ledcWrite( 0, 0 );
         #endif
     #endif
     log_i("go standby");
@@ -188,6 +225,10 @@ void display_wakeup( bool silence ) {
                 ttgo->bl->adjust( 0 );
                 brightness = 0;
                 dest_brightness = 0;
+            #elif defined( LILYGO_WATCH_2021 )   
+                ledcWrite( 0, 0 );
+                brightness = 0;
+                dest_brightness = 0;
             #endif
         #endif
         log_i("go silence wakeup");
@@ -211,6 +252,10 @@ void display_wakeup( bool silence ) {
                 ttgo->bl->adjust( 0 );
                 brightness = 0;
                 dest_brightness = display_get_brightness();
+            #elif defined( LILYGO_WATCH_2021 )   
+                ledcWrite( 0, 0 );
+                brightness = 0;
+                dest_brightness = display_get_brightness();;
             #endif
         #endif
         log_i("go wakeup");

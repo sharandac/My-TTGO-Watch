@@ -32,7 +32,8 @@
 
     #ifdef M5PAPER
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    #else // NEW_HARDWARE_TAG
+    #else
+        #warning "not hardware driver for blebatctl"
     #endif
 
     class BleBattLevelUpdater : public BleUpdater<uint8_t> {

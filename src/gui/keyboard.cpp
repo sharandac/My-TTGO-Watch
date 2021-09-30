@@ -21,40 +21,34 @@
  */
 #include "config.h"
 #include "keyboard.h"
+#include "statusbar.h"
+#include "widget_factory.h"
 
 static lv_obj_t *kb_screen = NULL;
 static lv_obj_t *kb_textarea = NULL;
 static lv_obj_t *kb = NULL;
 static lv_obj_t *nkb = NULL;
 static lv_obj_t *kb_user_textarea = NULL;
-static lv_style_t kb_style;
 static bool kb_style_initialized = false;
 
 static void kb_event_cb(lv_obj_t * ta, lv_event_t event);
 
 void keyboard_prelim( void ) {
     if( !kb_style_initialized ) {
-        lv_style_init( &kb_style );
-        lv_style_set_radius( &kb_style, LV_OBJ_PART_MAIN, 0);
-        lv_style_set_bg_color( &kb_style, LV_OBJ_PART_MAIN, LV_COLOR_GRAY);
-        lv_style_set_bg_opa( &kb_style, LV_OBJ_PART_MAIN, LV_OPA_100);
-        lv_style_set_border_width( &kb_style, LV_OBJ_PART_MAIN, 0);
-        lv_style_set_text_color( &kb_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-        lv_style_set_image_recolor( &kb_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE);
-            
         kb_screen = lv_cont_create( lv_scr_act(), NULL );
-        lv_obj_add_style( kb_screen, LV_OBJ_PART_MAIN, &kb_style );
-        lv_obj_set_size( kb_screen, lv_disp_get_hor_res( NULL ) , lv_disp_get_ver_res( NULL ) - 20 );
-        lv_obj_align( kb_screen, lv_scr_act(), LV_ALIGN_CENTER, 0, 20);
+        lv_obj_add_style( kb_screen, LV_OBJ_PART_MAIN, SETUP_STYLE );
+        lv_obj_set_size( kb_screen, lv_disp_get_hor_res( NULL ) , lv_disp_get_ver_res( NULL ) );
+        lv_obj_align( kb_screen, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, STATUSBAR_HEIGHT );
         
         kb_textarea = lv_textarea_create( kb_screen, NULL );
-        lv_obj_add_protect( kb_textarea, LV_PROTECT_CLICK_FOCUS);
-        lv_obj_set_size( kb_textarea, lv_disp_get_hor_res( NULL ) - 10, 60 );
+        lv_obj_add_protect( kb_textarea, LV_PROTECT_CLICK_FOCUS );
+        lv_obj_set_size( kb_textarea, lv_disp_get_hor_res( NULL ) - THEME_PADDING, 40 );
         lv_textarea_set_one_line( kb_textarea, true);
-        lv_obj_align( kb_textarea, kb_screen, LV_ALIGN_IN_TOP_MID, 0, 5 );
+        lv_obj_align( kb_textarea, kb_screen, LV_ALIGN_IN_TOP_MID, 0, THEME_PADDING );
         kb_style_initialized = true;
     }
 }
+
 
 void keyboard_setup( void ) {
     /*
@@ -65,13 +59,11 @@ void keyboard_setup( void ) {
 
     keyboard_prelim();
 
-    kb = lv_keyboard_create( lv_scr_act() , NULL);
-    #if defined( M5PAPER )
-        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
-        lv_obj_set_size (kb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
-    #endif
-    lv_obj_align( kb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    kb = lv_keyboard_create( kb_screen , NULL);
+    lv_obj_set_size( kb, lv_disp_get_hor_res( NULL ), ( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 ) > 240 ? 240:( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20 )  );
+    lv_obj_align( kb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( kb, LV_OBJ_PART_ALL, SETUP_STYLE );
+    lv_obj_add_style( kb, LV_KEYBOARD_PART_BTN, ws_get_button_style() );
     lv_keyboard_set_cursor_manage( kb, true);
     lv_obj_set_event_cb( kb, kb_event_cb );
 
@@ -86,13 +78,11 @@ void num_keyboard_setup( void ) {
         return;
 
     keyboard_prelim();
-    nkb = lv_keyboard_create( lv_scr_act() , NULL);
-    #if defined( M5PAPER )
-        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 1 - 20);
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V1 )
-        lv_obj_set_size (nkb, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20);
-    #endif
-    lv_obj_align( nkb, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    nkb = lv_keyboard_create( kb_screen , NULL);
+    lv_obj_set_size( nkb, lv_disp_get_hor_res( NULL ), ( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 ) > 200 ? 200:( ( lv_disp_get_ver_res( NULL ) / 4 ) * 3 - 20 ) );
+    lv_obj_align( nkb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( nkb, LV_OBJ_PART_ALL, SETUP_STYLE );
+    lv_obj_add_style( nkb, LV_KEYBOARD_PART_BTN, ws_get_button_style() );
     lv_keyboard_set_mode( nkb, LV_KEYBOARD_MODE_NUM);
     lv_keyboard_set_cursor_manage( nkb, true);
     lv_obj_set_event_cb( nkb, kb_event_cb );
@@ -166,6 +156,10 @@ void keyboard_show( void ) {
     lv_obj_set_hidden( kb_screen, false );
     lv_obj_set_hidden( kb_textarea, false );
     lv_obj_set_hidden( kb, false );
+    lv_obj_align( kb_screen, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:STATUSBAR_HEIGHT );
+    lv_obj_align( kb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:-STATUSBAR_HEIGHT );
+    lv_obj_align( nkb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:-STATUSBAR_HEIGHT );
+
 }
 
 void num_keyboard_show( void ) {
@@ -177,4 +171,7 @@ void num_keyboard_show( void ) {
     lv_obj_set_hidden( kb_screen, false );
     lv_obj_set_hidden( kb_textarea, false );
     lv_obj_set_hidden( nkb, false );
-}
+    lv_obj_align( kb_screen, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:STATUSBAR_HEIGHT );
+    lv_obj_align( kb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:-STATUSBAR_HEIGHT );
+    lv_obj_align( nkb, kb_screen, LV_ALIGN_IN_BOTTOM_MID, 0, statusbar_get_hidden_state()?0:-STATUSBAR_HEIGHT );
+ }

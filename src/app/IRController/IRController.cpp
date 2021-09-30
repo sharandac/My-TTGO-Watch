@@ -33,7 +33,7 @@
         return;
     }
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER ) ||  defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )    
         void IRController_setup( void ) {
             return;
         }
@@ -231,6 +231,9 @@
             return true;
         }
     #else // NEW_HARDWARE_TAG
+        void IRController_setup( void ) {
+            return;
+        }
     #endif
 #endif
 

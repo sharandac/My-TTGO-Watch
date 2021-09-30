@@ -50,7 +50,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
      * if was success, pharse the json
      */
     if ( uri_load_dsc ) {
-        SpiRamJsonDocument doc( uri_load_dsc->size * 4 );
+        SpiRamJsonDocument doc( uri_load_dsc->size * 3 );
 
         DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
         if (error) {
@@ -107,7 +107,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
      * if was success, pharse the json
      */
     if ( uri_load_dsc ) {
-        SpiRamJsonDocument doc( uri_load_dsc->size * 4 );
+        SpiRamJsonDocument doc( uri_load_dsc->size * 3 );
 
         DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
         if (error) {
