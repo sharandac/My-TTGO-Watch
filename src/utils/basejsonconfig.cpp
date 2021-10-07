@@ -17,6 +17,7 @@
 #endif
 
 #include "basejsonconfig.h"
+#include "utils/filepath_convert.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
 
@@ -35,6 +36,10 @@ BaseJsonConfig::BaseJsonConfig(const char* configFileName) {
         localpath[0] = '/';
         snprintf( localpath, sizeof( localpath ), "spiffs/%s", configFileName );
     }
+    /**
+     * convert from local device path to machine path
+     */
+    filepath_convert( fileName, sizeof( fileName ), localpath );
 #else
     if (configFileName[0] == '/')
         strncpy( fileName, configFileName, MAX_CONFIG_FILE_NAME_LENGTH);

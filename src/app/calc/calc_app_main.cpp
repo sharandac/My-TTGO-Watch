@@ -42,7 +42,7 @@ lv_obj_t *button_matrix;
 
 LV_FONT_DECLARE(Ubuntu_32px);
 
-static const char* buttons[20] = {"1","2","3","+","\n","4","5","6","-","\n","7","8","9","*","\n","C/CE","0",".","/",""};
+static const char* buttons[20] = {"7","8","9","/","\n","4","5","6","*","\n","1","2","3","-","\n","0","C/CE",".","+",""};
 float inputs[2] = { NAN, NAN };
 char input[16] = "\0";
 char op = '\0';
@@ -82,7 +82,7 @@ void calc_app_main_setup( uint32_t tile_num ) {
 	lv_style_set_pad_right(&result_style, LV_STATE_DEFAULT, 3);
 
     result_label = lv_label_create( calc_app_main_tile, NULL);
-    lv_label_set_text(result_label, "");
+    lv_label_set_text(result_label, "0");
     #if defined( ROUND_DISPLAY )
         lv_label_set_align(result_label, LV_LABEL_ALIGN_CENTER );
 	#else
