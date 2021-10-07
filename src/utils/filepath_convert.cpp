@@ -1,6 +1,7 @@
 #include "filepath_convert.h"
 
 #ifdef NATIVE_64BIT
+    #include <dirent.h>
     #include <iostream>
     #include <fstream>
     #include <string.h>
@@ -21,8 +22,6 @@ char *filepath_convert( char * dst_str, int max_len, const char* local_path ) {
 
     #ifdef NATIVE_64BIT
         char hedge_config_path[512] = "";
-        struct stat st = {0};
-
         /**
          * check config path
          */
@@ -31,7 +30,7 @@ char *filepath_convert( char * dst_str, int max_len, const char* local_path ) {
         /**
          * create config dir if not exist
          */
-        if ( stat( hedge_config_path, &st ) == -1) {
+        if ( !opendir( hedge_config_path ) ) {
             log_i("create config path and dir");
             mkdir( hedge_config_path, 0700 );
             snprintf( hedge_config_path, sizeof( hedge_config_path ), "%s/.hedge/spiffs", getpwuid(getuid())->pw_dir );
@@ -39,7 +38,9 @@ char *filepath_convert( char * dst_str, int max_len, const char* local_path ) {
             snprintf( hedge_config_path, sizeof( hedge_config_path ), "%s/.hedge/sd", getpwuid(getuid())->pw_dir );
             mkdir( hedge_config_path, 0700 );
         }
-
+        /**
+         * convert local path to native machine path
+         */
         if ( getenv("HOME") )
             snprintf( dst_str, max_len, "%s/.hedge/%s", getpwuid(getuid())->pw_dir, local_path );
     #else

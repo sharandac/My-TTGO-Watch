@@ -54,7 +54,7 @@ Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGA
 If you are interested in native Linux support, please install sdl2, curl and mosquitto dev lib and change the env to emulator_* in platformIO.
 
 ```bash
-sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev
+sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
 ```
 
 # Telegram chatgroup

@@ -45,6 +45,7 @@
 #include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "mainbar/setup_tile/time_settings/time_settings.h"
 #include "mainbar/setup_tile/watchface/watchface_manager.h"
+#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
 #include "mainbar/setup_tile/update/update.h"
 #include "mainbar/setup_tile/style_settings/style_settings.h"
 #include "hardware/powermgm.h"
@@ -116,7 +117,6 @@ void gui_setup( void ) {
 
     battery_settings_tile_setup();
     display_settings_tile_setup();
-
     move_settings_tile_setup();
     style_settings_tile_setup();
     wlan_settings_tile_setup();
@@ -124,10 +124,13 @@ void gui_setup( void ) {
     gps_settings_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
-    #if defined( BOARD_HAS_PSRAM )
+    #if defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )
+        log_i("bluetooth and watchface disabled");
+    #else
         bluetooth_settings_tile_setup();
         update_tile_setup();
         watchface_manager_setup();
+        watchface_expr_setup();
     #endif
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         sdcard_settings_tile_setup();
