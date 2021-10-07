@@ -19,7 +19,6 @@
 #endif
 
 char *filepath_convert( char * dst_str, int max_len, const char* local_path ) {
-
     #ifdef NATIVE_64BIT
         char hedge_config_path[512] = "";
         /**
