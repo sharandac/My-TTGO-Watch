@@ -124,17 +124,21 @@ void gui_setup( void ) {
     gps_settings_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
-    #if defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )
-        log_i("bluetooth and watchface disabled");
-    #else
-        bluetooth_settings_tile_setup();
+    #ifndef NO_UPDATES
         update_tile_setup();
+    #endif
+    #ifndef NO_BLUETOOTH
+        bluetooth_settings_tile_setup();
+    #endif
+    #ifndef NO_WATCHFACE
         watchface_manager_setup();
         watchface_expr_setup();
     #endif
+
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         sdcard_settings_tile_setup();
     #endif
+
     /*
      * trigger an activity
      */

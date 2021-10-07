@@ -221,9 +221,12 @@ void hardware_setup( void ) {
     rtcctl_setup();
     timesync_setup();
     sensor_setup();
-    blectl_read_config();
     sound_read_config();
     fakegps_setup();
+
+    #ifndef NO_BLUETOOTH
+        blectl_read_config();
+    #endif
 
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
@@ -250,10 +253,8 @@ void hardware_post_setup( void ) {
     sound_setup();
     gpsctl_setup();
     powermgm_set_event( POWERMGM_WAKEUP );
-
-    #if defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )
-        log_i("Bluetooth disabled");
-    #else
+    
+    #ifndef NO_BLUETOOTH
         blectl_setup();
     #endif
 
