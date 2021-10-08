@@ -102,7 +102,7 @@
             portEXIT_CRITICAL_ISR(&timerMux);
         }
     #else
-        #warning "not hardware driver for motor/vibe"
+        #warning "no hardware driver for motor/vibe"
     #endif
 #endif
 
