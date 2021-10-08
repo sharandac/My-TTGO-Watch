@@ -38,13 +38,17 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         #include <M5EPD.h>
 
         M5EPD_Canvas canvas(&M5.EPD);
         static uint64_t refreshdelay = 0;                                   /** @brief refresh delay counter to mark next screen refresh */
         static lv_coord_t min_x = FRAMEBUFFER_BUFFER_W, max_x = 0;          /** @brief screen area to refresh */
         static lv_coord_t min_y = FRAMEBUFFER_BUFFER_H, max_y = 0;          /** @brief screen area to refresh */
+    #elif defined( M5CORE2 )
+        #include <utility/In_eSPI.h>
+
+        TFT_eSPI tft = TFT_eSPI();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )
@@ -75,7 +79,7 @@ void framebuffer_setup( void ) {
          */
         monitor_init();
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * setup e-ink display and clear it
              */
@@ -88,6 +92,11 @@ void framebuffer_setup( void ) {
              * cleat next screen refresh time
              */
             refreshdelay = 0;
+        #elif defined( M5CORE2 )
+            tft.init();
+            tft.setRotation(1);
+            tft.setTextSize(1);
+            tft.setTextColor(TFT_GREEN, TFT_BLACK);
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             /**
              * enable DMA only for V1 and V2
@@ -173,7 +182,7 @@ bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
 bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg ) {
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * check if a refresh delay is set
              */
@@ -213,7 +222,7 @@ bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg ) {
 void framebuffer_refresh( void ) {
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * do a full screen refresh
              */
@@ -256,7 +265,7 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
             monitor_flush( disp_drv, area, color_p );
         #endif
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             lv_color_t *color = color_p;
             /**
              * set/update area to freshing
@@ -290,6 +299,21 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
             if ( refreshdelay == 0 ) {
                 refreshdelay = millis() + FRAMEBUFFER_REFRESH_DELAY;
             }
+        #elif defined( M5CORE2 )
+            /**
+             * get buffer size
+             */
+            uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+            /**
+             * start data trnsmission
+             * set the working window
+             * and start DMA transfer if enabled
+             * stop transmission
+             */
+            tft.startWrite();
+            tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
+            tft.pushColors( ( uint16_t *)color_p, size );
+            tft.endWrite();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             /**

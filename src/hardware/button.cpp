@@ -34,8 +34,14 @@ bool button_send_cb( EventBits_t event, void *arg );
     #include <SDL2/SDL.h>
 #else
     #include <Arduino.h>
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         #include <M5EPD.h>
+    #elif defined( M5CORE2 )
+        #include <M5Core2.h>
+
+        HotZone left_btn( 0, 240, 106, 300 );
+        HotZone power_btn( 106, 240, 212, 300 );
+        HotZone right_btn( 213, 240, 319, 300 );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "pmu.h"
         /**
@@ -83,11 +89,12 @@ void button_setup( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             /**
              * set push button IO
              */
             attachInterrupt( M5EPD_KEY_PUSH_PIN, button_irq, FALLING );
+        #elif defined( M5CORE2 )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             /**
              * special case: on ttgo watch 2020 the button is connected 
@@ -195,6 +202,79 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 button_send_cb( BUTTON_RIGHT, (void *)NULL );
             }
         }
+    #elif defined( M5CORE2 )
+        TouchPoint_t pos = M5.Touch.getPressPoint();
+
+        static bool left_button = left_btn.inHotZone( pos );
+        static bool power_button = power_btn.inHotZone( pos );
+        static bool right_button = right_btn.inHotZone( pos );
+        static uint64_t left_button_time = 0;
+        static uint64_t power_button_time = 0;
+        static uint64_t right_button_time = 0;
+        
+        if( left_button != left_btn.inHotZone( pos ) ) {
+            left_button = left_btn.inHotZone( pos );
+            uint64_t press_time = 0;
+            /**
+             * start timer
+             */
+            if ( left_button )
+                left_button_time = millis();
+            else
+                press_time = millis() - left_button_time;
+            /**
+             * check timer
+             */
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 )
+                    button_send_cb( BUTTON_LEFT, (void*)NULL );
+                else
+                    button_send_cb( BUTTON_EXIT, (void *)NULL );
+            }
+        } 
+
+        if( power_button != power_btn.inHotZone( pos ) ) {
+            power_button = power_btn.inHotZone( pos );
+            uint64_t press_time = 0;
+            /**
+             * start timer
+             */
+            if ( power_button )
+                power_button_time = millis();
+            else
+                press_time = millis() - power_button_time;
+            /**
+             * check timer
+             */
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 )
+                    button_send_cb( BUTTON_PWR, (void*)NULL );
+                else
+                    button_send_cb( BUTTON_QUICKBAR, (void *)NULL );
+            }
+        } 
+
+        if( right_button != right_btn.inHotZone( pos ) ) {
+            right_button = right_btn.inHotZone( pos );
+            uint64_t press_time = 0;
+            /**
+             * start timer
+             */
+            if ( right_button )
+                right_button_time = millis();
+            else
+                press_time = millis() - right_button_time;
+            /**
+             * check timer
+             */
+            if ( press_time != 0 ) {
+                if ( press_time < 1000 )
+                    button_send_cb( BUTTON_RIGHT, (void*)NULL );
+                else
+                    button_send_cb( BUTTON_SETUP, (void *)NULL );
+            }
+        } 
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #elif defined( LILYGO_WATCH_2021 ) 
         static bool exit_button = digitalRead( BTN_1 );

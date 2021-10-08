@@ -28,5 +28,6 @@
 
     void mail_app_setup( void );
     uint32_t mail_app_get_app_main_tile_num( void );
-
+    uint32_t mail_app_get_app_setup_tile_num( void );
+    
 #endif // _MAIL_APP_H

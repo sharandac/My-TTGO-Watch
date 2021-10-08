@@ -62,6 +62,9 @@
             #define RES_Y_MAX       240
             #define ONLY_ESSENTIAL
             #define ROUND_DISPLAY
+            #define NO_BLUETOOTH
+            #define NO_WATCHFACE
+            #define NO_UPDATES
         #elif defined( M5PAPER )
             #define HARDWARE_NAME   "m5stack-fire"
             #define RES_X_MAX       540
@@ -69,6 +72,7 @@
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define ENABLE_MQTT                             /** @brief To disable built-in mqtt, comment this line */
+            #define NO_WATCHFACE
         #elif defined( M5CORE2 )
             #define HARDWARE_NAME   "m5stack-core2"
             #define RES_X_MAX       320
@@ -76,6 +80,7 @@
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define ENABLE_MQTT                             /** @brief To disable built-in mqtt, comment this line */
+            #define NO_BLUETOOTH
         #else
             #error "no destination hardware version defined"
         #endif
@@ -87,7 +92,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021092801"
+    #define __FIRMWARE__            "2021100702"
     /**
      * Allows to include config.h from C code
      */

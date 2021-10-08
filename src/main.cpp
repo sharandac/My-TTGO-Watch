@@ -1,8 +1,6 @@
 #include "lvgl.h"
 #include "gui/gui.h"
 
-#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
-
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
 
@@ -14,6 +12,7 @@
 #include "app/osmand/osmand_app.h"
 //#include "app/powermeter/powermeter_app.h"
 #include "app/osmmap/osmmap_app.h"
+#include "app/mail/mail_app.h"
 //#include "app/sailing/sailing.h"
 #include "app/stopwatch/stopwatch_app.h"
 #include "app/wifimon/wifimon_app.h"
@@ -84,7 +83,7 @@ void setup() {
     wifimon_app_setup();
     tic_tac_toe_game_setup();
     pong_game_setup();
-    watchface_expr_setup();
+    mail_app_setup();
     /**
      * post hardware setup
      */

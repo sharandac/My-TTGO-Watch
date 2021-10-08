@@ -52,5 +52,14 @@
      * @brief unlock the touch interface
      */
     void touch_lock_give( void );
+    /**
+     * @brief get the current touch pos
+     * 
+     * @param   x   pointer to an int16_t variable thats holds the x pos
+     * @param   y   pointer to an int16_t variable thats holds the y pos
+     * 
+     * @return  true if position valid and touch pressed, false if not valid
+     */
+    bool touch_getXY( int16_t &x, int16_t &y );
     
 #endif // _TOUCH_H
