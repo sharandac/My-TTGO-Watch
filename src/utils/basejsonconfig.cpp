@@ -17,6 +17,7 @@
 #endif
 
 #include "basejsonconfig.h"
+#include "utils/filepath_convert.h"
 #include "json_psram_allocator.h"
 #include "alloc.h"
 
@@ -24,18 +25,21 @@ BaseJsonConfig::BaseJsonConfig(const char* configFileName) {
 
 #ifdef NATIVE_64BIT
     const char *homedir;
-
-    if ( ( homedir = getenv("HOME") ) == NULL ) {
-        homedir = getpwuid(getuid())->pw_dir;
+    char localpath[128] = "";
+    /**
+     * get local device path for config files
+     */
+    if ( configFileName[0] == '/') {
+        snprintf( localpath, sizeof( localpath ), "spiffs%s", configFileName );
     }
-  
-    if ( configFileName[0] == '/')
-        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs%s", homedir, configFileName );
-    else
-    {
-        fileName[0] = '/';
-        snprintf( fileName, sizeof( fileName ), "%s/.hedge/spiffs/%s", homedir, configFileName );
+    else {
+        localpath[0] = '/';
+        snprintf( localpath, sizeof( localpath ), "spiffs/%s", configFileName );
     }
+    /**
+     * convert from local device path to machine path
+     */
+    filepath_convert( fileName, sizeof( fileName ), localpath );
 #else
     if (configFileName[0] == '/')
         strncpy( fileName, configFileName, MAX_CONFIG_FILE_NAME_LENGTH);

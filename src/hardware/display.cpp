@@ -29,8 +29,10 @@
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         #include <M5EPD.h>
+    #elif defined( M5CORE2 )
+        #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
     #elif defined( LILYGO_WATCH_2021 )
@@ -60,7 +62,10 @@ void display_setup( void ) {
      */
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+
+        #elif defined( M5CORE2 )
+            M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->tft->init();
@@ -107,7 +112,10 @@ bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
 void display_loop( void ) {
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+
+        #elif defined( M5CORE2 )
+
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             /**
@@ -181,7 +189,10 @@ bool display_send_event_cb( EventBits_t event, void *arg ) {
 void display_standby( void ) {
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+
+        #elif defined( M5CORE2 )
+            M5.Lcd.sleep();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             ttgo->bl->adjust( 0 );
@@ -209,9 +220,13 @@ void display_wakeup( bool silence ) {
     if ( silence ) {
         #ifdef NATIVE_64BIT
         #else
-            #ifdef M5PAPER
+            #if defined( M5PAPER )
                 M5.enableEPDPower();
                 delay(25);
+            #elif defined( M5CORE2 )
+                M5.Lcd.begin();
+                M5.Lcd.wakeup();
+                M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 #if defined( LILYGO_WATCH_2020_V2 )
@@ -236,9 +251,13 @@ void display_wakeup( bool silence ) {
     else {
         #ifdef NATIVE_64BIT
         #else
-            #ifdef M5PAPER
+            #if defined( M5PAPER )
                 M5.enableEPDPower();
                 delay(25);
+            #elif defined( M5CORE2 )
+                M5.Lcd.begin();
+                M5.Lcd.wakeup();
+                M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 #if defined( LILYGO_WATCH_2020_V2 )
@@ -286,6 +305,13 @@ uint32_t display_get_brightness( void ) {
 void display_set_brightness( uint32_t brightness ) {
     display_config.brightness = brightness;
     dest_brightness = brightness;
+    #ifdef NATIVE_64BIT
+
+    #else
+        #if defined ( M5CORE2 )
+        M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
+        #endif
+    #endif
     display_send_event_cb( DISPLAYCTL_BRIGHTNESS, (void *)brightness );
 }
 
@@ -320,7 +346,9 @@ void display_set_block_return_maintile( bool block_return_maintile ) {
 void display_set_rotation( uint32_t rotation ) {
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            M5.Lcd.setRotation( rotation / 90 );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             display_config.rotation = rotation;

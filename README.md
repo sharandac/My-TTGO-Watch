@@ -11,7 +11,7 @@ This repository only represents the state of my own T-Watch. I will implement so
 
 # My-TTGO-Watch
 
-A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), M5Paper and native Linux support for testing.
+A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021, M5Paper, M5Core2 and native Linux support for testing.
 
 ## Features
 
@@ -56,7 +56,7 @@ Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGA
 If you are interested in native Linux support, please install sdl2, curl and mosquitto dev lib and change the env to emulator_* in platformIO.
 
 ```bash
-sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev
+sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
 ```
 
 # Telegram chatgroup
@@ -106,6 +106,13 @@ Cf. [contribution guide](CONTRIBUTING.md)
 ![screenshot](images/image1.png)
 ![screenshot](images/image2.png)
 ![screenshot](images/image3.png)
+
+## M5Core2 ( experimental )
+
+![screenshot](images/m5core2_img1.png)
+![screenshot](images/m5core2_img2.png)
+![screenshot](images/m5core2_img3.png)
+![screenshot](images/m5core2_img4.png)
 
 ## TTGO T-Watch 2021 ( experimental )
 

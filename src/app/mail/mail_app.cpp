@@ -22,6 +22,7 @@
 #include "config.h"
 #include "mail_app.h"
 #include "mail_app_main.h"
+#include "mail_app_setup.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -29,6 +30,7 @@
 #include "gui/widget.h"
 
 uint32_t mail_app_main_tile_num = 0;
+uint32_t mail_app_setup_tile_num = 0;
 /*
  * app icon
  */
@@ -36,7 +38,7 @@ icon_t *mail_app = NULL;
 /*
  * declare you images or fonts you need
  */
-LV_IMG_DECLARE(email_64px);
+LV_IMG_DECLARE(mail_64px);
 /*
  * declare callback functions
  */
@@ -48,13 +50,26 @@ void mail_app_setup( void ) {
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif
+
+    #ifndef M5PAPER
+//        return;
+    #endif
+
     mail_app_main_tile_num = mainbar_add_app_tile( 1, 1, "mail" );
-    mail_app = app_register( "mail", &email_64px, enter_mail_app_event_cb );
-    // mail_app_main_setup( mail_app_main_tile_num );
+    mail_app_setup_tile_num = mainbar_add_setup_tile( 1, 1, "mail setup" );
+
+    mail_app = app_register( "mail", &mail_64px, enter_mail_app_event_cb );
+
+    mail_app_main_setup( mail_app_main_tile_num );
+    mail_app_setup( mail_app_setup_tile_num );
 }
 
 uint32_t mail_app_get_app_main_tile_num( void ) {
     return( mail_app_main_tile_num );
+}
+
+uint32_t mail_app_get_app_setup_tile_num( void ) {
+    return( mail_app_setup_tile_num );
 }
 
 static void enter_mail_app_event_cb( lv_obj_t * obj, lv_event_t event ) {

@@ -23,12 +23,14 @@
     #define _MAIL_TILE_H
 
     #include "gui/icon.h"
+    #include "config.h"
 
-    #define MAX_WIDGET_NUM      3
     #define WIDGET_X_SIZE       64
     #define WIDGET_Y_SIZE       80
     #define WIDGET_LABEL_Y_SIZE 16
     #define WIDGET_X_CLEARENCE  16
+
+    #define MAX_WIDGET_NUM      RES_X_MAX / ( WIDGET_X_SIZE + WIDGET_X_CLEARENCE )
 
     /**
      * @brief setup the app tile

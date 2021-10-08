@@ -33,10 +33,11 @@
     static bool pmu_update = true;
 #else
     #include <Arduino.h>
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         #include <M5EPD.h>
-
         static uint64_t next_wakeup = 0;
+    #elif defined( M5CORE2 )
+        #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
     #elif defined( LILYGO_WATCH_2021 )
@@ -81,8 +82,11 @@ void pmu_setup( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         M5.BatteryADCBegin();
+    #elif defined( M5CORE2 )
+        M5.Axp.SetSpkEnable( true );
+        M5.Axp.SetCHGCurrent( true );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
@@ -158,34 +162,43 @@ bool pmu_powermgm_loop_cb( EventBits_t event, void *arg ) {
 }
 
 bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
+    bool retval = false;
+    
     switch( event ) {
         case POWERMGM_STANDBY:          pmu_standby();
+                                        retval = true;
                                         break;
         case POWERMGM_WAKEUP:           pmu_wakeup();
+                                        retval = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   pmu_wakeup();
+                                        retval = true;
                                         break;
         #ifdef NATIVE_64BIT
 
         #else
-            #ifdef M5PAPER
+            #if defined( M5PAPER )
                 case POWERMGM_ENABLE_INTERRUPTS:
                                                 attachInterrupt( M5EPD_KEY_PUSH_PIN, &pmu_irq, FALLING );
+                                                retval = true;
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( M5EPD_KEY_PUSH_PIN );
+                                                retval = true;
                                                 break;
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 case POWERMGM_ENABLE_INTERRUPTS:
                                                 attachInterrupt( AXP202_INT, &pmu_irq, FALLING );
+                                                retval = true;
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( AXP202_INT );
+                                                retval = true;
                                                 break; 
             #endif
         #endif
     }
-    return( true );
+    return( retval );
 }
 
 bool pmu_blectl_event_cb( EventBits_t event, void *arg ) {
@@ -214,7 +227,7 @@ void pmu_loop( void ) {
     pmu_irq_flag = false;
     portEXIT_CRITICAL(&PMU_IRQ_Mux);
         
-    #if defined( M5PAPER ) || defined( M5CORE2 )
+    #if defined( M5PAPER )
         static bool plug = false;
         static bool charging = false;
         static bool battery = false;   
@@ -225,6 +238,31 @@ void pmu_loop( void ) {
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST ); 
             }
         }
+
+        if ( temp_pmu_irq_flag ) {
+            log_e("hello Mc Fly, witch PMU irq on M5Paper?");
+        }
+
+    #elif defined( M5CORE2 )
+        static bool plug = false;
+        static bool charging = false;
+        static bool battery = false;   
+
+        charging = M5.Axp.isCharging();
+        plug = M5.Axp.isACIN();
+        battery = M5.Axp.isVBUS();
+
+        if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
+            if ( ( millis() / 1000 ) % 5 )
+                M5.Axp.SetLed( 0 );
+            else
+                M5.Axp.SetLed( 1 );
+        }
+
+        if ( temp_pmu_irq_flag ) {
+            log_e("hello Mc Fly, witch AXP irq on M5Core2?");
+        }
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -339,6 +377,11 @@ void pmu_loop( void ) {
             charging = digitalRead( CHARGE );
             pmu_update = true;
         }
+
+        if ( temp_pmu_irq_flag ) {
+            log_e("hello Mc Fly, witch PMU irq on T-Watch2021?");
+        }
+
     #endif
 #endif
     /*
@@ -419,10 +462,12 @@ void pmu_shutdown( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         M5.disableEPDPower();
         M5.disableEXTPower();
         M5.disableMainPower();
+    #elif defined( M5CORE2 )
+        M5.shutdown();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         ttgo->power->shutdown();
@@ -434,7 +479,7 @@ void pmu_standby( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         /**
          * disable external power
          */
@@ -450,6 +495,8 @@ void pmu_standby( void ) {
             esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
             log_i("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
         }
+    #elif defined( M5CORE2 )
+        M5.Axp.PrepareToSleep();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -496,7 +543,7 @@ void pmu_wakeup( void ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
         /**
          * enable external power
          */
@@ -513,6 +560,8 @@ void pmu_wakeup( void ) {
         if ( pmu_get_battery_voltage() < 3.2f ) {
             M5.shutdown();
         }
+    #elif defined( M5CORE2 )
+        M5.Axp.RestoreFromLightSleep();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
@@ -572,8 +621,10 @@ void pmu_set_high_charging_target_voltage( bool value ) {
 #ifdef NATIVE_64BIT
 
 #else
-    #ifdef M5PAPER
-    
+    #if defined( M5PAPER )
+
+    #elif defined( M5CORE2 )
+
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -625,7 +676,9 @@ void pmu_set_safe_voltage_for_update( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+
+        #elif defined( M5CORE2 )
         
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
@@ -643,7 +696,8 @@ int32_t pmu_get_battery_percent( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+
             float voltage = pmu_get_battery_voltage();
             if ( voltage > 3.3f ) {
                 percent = ( voltage - 3.3f ) * 100;
@@ -651,7 +705,14 @@ int32_t pmu_get_battery_percent( void ) {
             else {
                 percent = 0;
             }
-            log_i("battery percent = %d%%", percent );    
+        #elif defined( M5CORE2 )
+            float voltage = pmu_get_battery_voltage();
+            if ( voltage > 3.2f ) {
+                percent = ( voltage - 3.2f ) * 100;
+            }
+            else {
+                percent = 0;
+            }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -681,10 +742,12 @@ float pmu_get_battery_voltage( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             voltage = M5.getBatteryVoltage();
             voltage = voltage / 1000;
             log_i("battery voltage = %.3fV", voltage );
+        #elif defined( M5CORE2 )
+            voltage = M5.Axp.GetBatVoltage();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getBattVoltage();
@@ -703,7 +766,9 @@ float pmu_get_battery_charge_current( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            current = M5.Axp.GetBatChargeCurrent();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattChargeCurrent();
@@ -719,7 +784,9 @@ float pmu_get_battery_discharge_current( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            current = M5.Axp.GetBatCurrent();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattDischargeCurrent();
@@ -735,7 +802,9 @@ float pmu_get_vbus_voltage( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            voltage = M5.Axp.GetVBusVoltage();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getCoulombData();
@@ -751,7 +820,9 @@ float pmu_get_coulumb_data( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            coulumb_data = M5.Axp.GetCoulombData();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             coulumb_data = ttgo->power->getCoulombData();
@@ -767,7 +838,9 @@ bool pmu_is_charging( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            charging = M5.Axp.isCharging();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             charging = ttgo->power->isChargeing();
@@ -783,7 +856,9 @@ bool pmu_is_vbus_plug( void ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+            plug = M5.Axp.isVBUS();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             plug = ttgo->power->isVBUSPlug();

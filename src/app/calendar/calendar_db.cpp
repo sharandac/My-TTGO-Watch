@@ -1,7 +1,6 @@
 #include "config.h"
-
 #include "utils/sqlite3/sqlite3.h"
-
+#include "utils/filepath_convert.h"
 #include "calendar_db.h"
 
 #ifdef NATIVE_64BIT
@@ -43,10 +42,7 @@ void calendar_db_setup( void ) {
      * create calendar db filename
      */
     char filename[256] = CALENDAR_DB_FILE;
-#ifdef NATIVE_64BIT
-    if ( getenv("HOME") )
-        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, CALENDAR_DB_FILE );
-#endif
+    filepath_convert( filename, sizeof( filename ), CALENDAR_DB_FILE );
     /**
      * open calendar db
      */
@@ -139,10 +135,7 @@ bool calendar_db_open( void ) {
      * create calendar db filename
      */
     char filename[256] = CALENDAR_DB_FILE;
-#ifdef NATIVE_64BIT
-    if ( getenv("HOME") )
-        snprintf( filename, sizeof( filename ), "%s/.hedge%s", getpwuid(getuid())->pw_dir, CALENDAR_DB_FILE );
-#endif
+    filepath_convert( filename, sizeof( filename ), CALENDAR_DB_FILE );
     /**
      * open database
      */
@@ -180,26 +173,40 @@ void calendar_db_close( void ) {
 }
 
 static int calendar_db_exec_callback( void *data, int argc, char **argv, char **azColName ) {
-   String Result = "";
-   for ( int i = 0; i < argc ; i++ ) {
-       Result += i != 0 ? "," : "";
-       Result += azColName[i];
-       Result += "=";
-       Result += argv[i] ? argv[i] : "NULL";
-   }
-   CALENDAR_DB_DEBUG_LOG("Result = %s", Result.c_str() );
-   return 0;
+    /**
+     * exit if no database is open
+     */
+    if ( !calendar_db ) {
+        return( 0 );
+    }
+
+    String Result = "";
+    for ( int i = 0; i < argc ; i++ ) {
+        Result += i != 0 ? "," : "";
+        Result += azColName[i];
+        Result += "=";
+        Result += argv[i] ? argv[i] : "NULL";
+    }
+    CALENDAR_DB_DEBUG_LOG("Result = %s", Result.c_str() );
+    return 0;
 }
 
 static int calendar_db_version_callback( void *data, int argc, char **argv, char **azColName ) {
-   String Result = "";
-   for ( int i = 0; i < argc ; i++ ) {
-       if ( !strcmp( azColName[i], "version" ) ) {
-           calendar_db_version = atoi( argv[i] );
-           CALENDAR_DB_INFO_LOG("calendar_db_version = %d", calendar_db_version );
-       }
-   }
-   return 0;
+    /**
+     * exit if no database is open
+     */
+    if ( !calendar_db ) {
+        return( 0 );
+    }
+
+    String Result = "";
+    for ( int i = 0; i < argc ; i++ ) {
+        if ( !strcmp( azColName[i], "version" ) ) {
+            calendar_db_version = atoi( argv[i] );
+            CALENDAR_DB_INFO_LOG("calendar_db_version = %d", calendar_db_version );
+        }
+    }
+    return 0;
 }
 
 bool calendar_db_exec( SQL_CALLBACK_FUNC callback, const char *sql ) {
@@ -211,7 +218,7 @@ bool calendar_db_exec( SQL_CALLBACK_FUNC callback, const char *sql ) {
      * check if database already open
      */
     if ( !calendar_db ) {
-        return( 0 );
+        return( retval );
     }
     /**
      * query sql request

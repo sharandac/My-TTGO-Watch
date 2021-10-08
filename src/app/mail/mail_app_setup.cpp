@@ -19,9 +19,17 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _MAIL_APP_MAIN_H
-    #define _MAIL_APP_MAIN_H
+#include "config.h"
+#include "mail_app_setup.h"
+#include "gui/mainbar/mainbar.h"
+#include "gui/widget_factory.h"
 
-    void mail_app_main_setup( uint32_t tile_num );
+lv_obj_t *mail_app_setup_tile = NULL;
 
-#endif // _MAIL_APP_MAIN_H
+void mail_app_setup( uint32_t tile_num ) {
+
+    mail_app_setup_tile = mainbar_get_tile_obj( tile_num );
+    
+    lv_obj_t *header = wf_add_settings_header( mail_app_setup_tile, "mail setup" );
+    lv_obj_align( header, mail_app_setup_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
+}
