@@ -36,16 +36,20 @@
 lv_obj_t *calc_app_main_tile = NULL;
 lv_style_t result_style;
 lv_obj_t *result_label;
+lv_style_t history_style;
+lv_obj_t *history_label;
 lv_style_t button_matrix_style;
 lv_style_t button_style;
 lv_obj_t *button_matrix;
 
+LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 static const char* buttons[20] = {"7","8","9","/","\n","4","5","6","*","\n","1","2","3","-","\n","0","C/CE",".","+",""};
 float inputs[2] = { NAN, NAN };
 char input[16] = "\0";
 char op = '\0';
+char oop = '\0';
 
 bool calc_mainbar_button_event_cb( EventBits_t event, void *arg );
 void calc_button_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -53,6 +57,8 @@ void calc_result_event_cb( lv_obj_t * obj, lv_event_t event );
 void calc_update_button();
 void calc_process_button(char cmd);
 void calc_process_operator(char cmd, char op);
+void calc_show_result(float output);
+void calc_show_history(float left, char op, float right, bool showLeft, bool showRight, bool showEquals = false);
 
 void calc_app_main_setup( uint32_t tile_num ) {
 
@@ -78,6 +84,7 @@ void calc_app_main_setup( uint32_t tile_num ) {
     lv_style_set_bg_color(&result_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
     lv_style_set_bg_opa(&result_style, LV_STATE_DEFAULT, LV_OPA_80);
     lv_style_set_text_font(&result_style, LV_STATE_DEFAULT, &Ubuntu_32px);
+	lv_style_set_pad_top(&result_style, LV_STATE_DEFAULT, 10);
 	lv_style_set_pad_left(&result_style, LV_STATE_DEFAULT, 3);
 	lv_style_set_pad_right(&result_style, LV_STATE_DEFAULT, 3);
 
@@ -91,7 +98,29 @@ void calc_app_main_setup( uint32_t tile_num ) {
     lv_label_set_long_mode(result_label, LV_LABEL_LONG_CROP);
     lv_obj_add_style(result_label, LV_OBJ_PART_MAIN, &result_style);
     lv_obj_align(result_label, calc_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
-	lv_obj_set_size(result_label, lv_disp_get_hor_res( NULL ), 38 );
+	lv_obj_set_size(result_label, lv_disp_get_hor_res( NULL ), 45 );
+
+    // history label
+    lv_style_copy(&history_style, ws_get_label_style());
+    lv_style_set_text_color(&history_style, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    lv_style_set_bg_color(&history_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+    lv_style_set_bg_opa(&history_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
+    lv_style_set_text_opa(&history_style, LV_STATE_DEFAULT, LV_OPA_50);
+    lv_style_set_text_font(&history_style, LV_STATE_DEFAULT, &Ubuntu_12px);
+	lv_style_set_pad_left(&history_style, LV_STATE_DEFAULT, 3);
+	lv_style_set_pad_right(&history_style, LV_STATE_DEFAULT, 3);
+
+    history_label = lv_label_create( calc_app_main_tile, NULL);
+    lv_label_set_text(history_label, "");
+    #if defined( ROUND_DISPLAY )
+        lv_label_set_align(history_label, LV_LABEL_ALIGN_CENTER );
+	#else
+        lv_label_set_align(history_label, LV_LABEL_ALIGN_RIGHT );
+    #endif
+    lv_label_set_long_mode(history_label, LV_LABEL_LONG_CROP);
+    lv_obj_add_style(history_label, LV_OBJ_PART_MAIN, &history_style);
+    lv_obj_align(history_label, calc_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, -2 );
+	lv_obj_set_size(history_label, lv_disp_get_hor_res( NULL ), 15 );
 
     // buttons
     lv_style_copy(&button_matrix_style, ws_get_button_style());
@@ -110,7 +139,7 @@ void calc_app_main_setup( uint32_t tile_num ) {
     button_matrix = lv_btnmatrix_create(calc_app_main_tile, NULL);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &button_matrix_style);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &button_style);
-	lv_obj_set_pos( button_matrix, 0, 38);
+	lv_obj_set_pos( button_matrix, 0, 45);
 	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - 38 - THEME_ICON_SIZE );
 
 	lv_btnmatrix_set_map(button_matrix, buttons);
@@ -212,7 +241,6 @@ void calc_update_button()
 */
 void calc_process_button(char cmd)
 {
-    bool showResult = false;
     switch( cmd ) {
         case '0':
         case '1':
@@ -227,53 +255,72 @@ void calc_process_button(char cmd)
         case '.':
             if ( op == '=') {
                 inputs[1] = NAN;
+                oop = '\0';
                 op = '\0';
+                calc_show_history(inputs[1], oop, inputs[0], false, false);
             }
             input[strlen(input)] = cmd;
             input[strlen(input)] = '\0';
             inputs[0] = atof(input);
+            calc_show_result(inputs[0]);
             break;
         case '+':
-            showResult = true;
             calc_process_operator(cmd, op);
+            oop = cmd;
             op = cmd;
+            calc_show_result(inputs[1]);
+            calc_show_history(inputs[1], oop, inputs[0], true, false);
             break;
         case '-':
-            showResult = true;
             calc_process_operator(cmd, op);
+            oop = cmd;
             op = cmd;
+            calc_show_result(inputs[1]);
+            calc_show_history(inputs[1], oop, inputs[0], true, false);
             break;
         case '*':
-            showResult = true;
             calc_process_operator(cmd, op);
+            oop = cmd;
             op = cmd;
+            calc_show_result(inputs[1]);
+            calc_show_history(inputs[1], oop, inputs[0], true, false);
             break;
         case '/':
-            showResult = true;
             calc_process_operator(cmd, op);
+            oop = cmd;
             op = cmd;
+            calc_show_result(inputs[1]);
+            calc_show_history(inputs[1], oop, inputs[0], true, false);
             break;
         case 'C':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[0] = NAN;
+            if ( op == '=') {
+                inputs[1] = NAN;
+                oop = '\0';
+                op = '\0';
+                calc_show_history(inputs[1], oop, inputs[0], false, false);
+            } else {
+                inputs[0] = NAN;
+                calc_show_history(inputs[1], oop, inputs[0], true, false);
+            }
+            calc_show_result(inputs[0]);
             break;
         case 'D':
             memset(input, '\0', sizeof(input)/sizeof(char));
             inputs[1] = NAN;
             inputs[0] = NAN;
+            oop = '\0';
             op = '\0';
+            calc_show_result(inputs[0]);
+            calc_show_history(inputs[1], oop, inputs[0], false, false);
             break;
         case '=':
-            showResult = true;
+            calc_show_history(inputs[1], oop, inputs[0], true, true, true);
             calc_process_operator(cmd, op);
             op = cmd;
+            calc_show_result(inputs[1]);
             break;
     }
-
-    char temp[16];
-    snprintf(temp, sizeof(temp), "%g", showResult ? (isnan(inputs[1]) ? 0.0 : inputs[1]) : (isnan(inputs[0]) ? 0.0 : inputs[0]));
-    lv_label_set_text(result_label, temp);
-    lv_event_send_refresh(result_label);
 }
 
 /*
@@ -312,4 +359,26 @@ void calc_process_operator(char cmd, char op)
             inputs[0] = NAN;
             break;
     }
+}
+
+void calc_show_result(float output)
+{
+    char temp[16];
+    snprintf(temp, sizeof(temp), "%g", isnan(output) ? 0.00 : output);
+    lv_label_set_text(result_label, temp);
+    lv_event_send_refresh(result_label);
+}
+
+void calc_show_history(float left, char op, float right, bool showLeft, bool showRight, bool showEquals)
+{
+    char temp[16];
+    if (showLeft && showRight && op != '\0') {
+        snprintf(temp, sizeof(temp), showEquals ? "%g %c %g =" : "%g %c %g", isnan(left) ? 0.00 : left, op, isnan(right) ? 0.00 : right);
+    } else if (showLeft && op != '\0') {
+        snprintf(temp, sizeof(temp), "%g %c", isnan(left) ? 0.00 : left, op);
+    } else {
+        memset(temp, '\0', sizeof(temp)/sizeof(char));
+    }
+    lv_label_set_text(history_label, temp);
+    lv_event_send_refresh(history_label);
 }
