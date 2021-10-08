@@ -172,25 +172,25 @@ void calc_result_event_cb( lv_obj_t * obj, lv_event_t event )
 void calc_update_button()
 {
     switch( op ) {
-        case '+':
+        case '/':
             lv_btnmatrix_set_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 7, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 11, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 15, LV_BTNMATRIX_CTRL_CHECK_STATE);
             break;
-        case '-':
+        case '*':
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_set_btn_ctrl(button_matrix, 7, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 11, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 15, LV_BTNMATRIX_CTRL_CHECK_STATE);
             break;
-        case '*':
+        case '-':
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 7, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_set_btn_ctrl(button_matrix, 11, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 15, LV_BTNMATRIX_CTRL_CHECK_STATE);
             break;
-        case '/':
+        case '+':
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 3, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 7, LV_BTNMATRIX_CTRL_CHECK_STATE);
             lv_btnmatrix_clear_btn_ctrl(button_matrix, 11, LV_BTNMATRIX_CTRL_CHECK_STATE);

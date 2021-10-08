@@ -255,6 +255,8 @@ Some improvements might come in the future.
 ## Calc
 
 A simple calculator.
+Beware that the button C/CE has two functions. A short touch uses CE, which clears only the
+recent input. A longer touch uses C, which clears all inputs and basically resets the calculator.
 
 ![screenshot](images/calc.png)
 
