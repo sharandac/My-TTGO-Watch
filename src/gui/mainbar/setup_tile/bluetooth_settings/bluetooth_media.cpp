@@ -22,6 +22,7 @@
 #include "config.h"
 #include "bluetooth_media.h"
 
+#include "gui/app.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
@@ -42,6 +43,7 @@
 
 static bool bluetooth_media_play_state = false;
 
+icon_t *bluetooth_media_app = NULL;
 lv_obj_t *bluetooth_media_tile = NULL;
 lv_style_t bluetooth_media_style;
 uint32_t bluetooth_media_tile_num;
@@ -65,12 +67,15 @@ LV_FONT_DECLARE(Ubuntu_16px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 bool bluetooth_media_event_cb( EventBits_t event, void *arg );
-static void exit_bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event );
+bool bluetooth_media_style_cb( EventBits_t event, void *arg );
+static void enter_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event );
+static void exit_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event );
+static void bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event );
 static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc );
 
 void bluetooth_media_tile_setup( void ) {
@@ -79,50 +84,81 @@ void bluetooth_media_tile_setup( void ) {
     // bluetooth_media_tile_num = mainbar_add_tile( 0, 1, "bluetooth media", ws_get_app_style() );
     bluetooth_media_tile = mainbar_get_tile_obj( bluetooth_media_tile_num );
 
-    lv_style_copy( &bluetooth_media_style, ws_get_mainbar_style() );
+    lv_style_copy( &bluetooth_media_style, APP_STYLE );
     lv_style_set_text_font( &bluetooth_media_style, LV_STATE_DEFAULT, &Ubuntu_16px);
     lv_obj_add_style( bluetooth_media_tile, LV_OBJ_PART_MAIN, &bluetooth_media_style );
 
-    lv_obj_t *exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_event_cb, &bluetooth_media_style);
+    lv_obj_t *exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( exit_btn, bluetooth_media_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
-    bluetooth_media_play = wf_add_image_button( bluetooth_media_tile, play_64px, exit_bluetooth_media_play_event_cb, &bluetooth_media_style );
+    bluetooth_media_play = wf_add_image_button( bluetooth_media_tile, play_64px, bluetooth_media_play_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( bluetooth_media_play, bluetooth_media_tile, LV_ALIGN_CENTER, 0, 0 );
 
-    bluetooth_media_next = wf_add_image_button( bluetooth_media_tile, next_32px, exit_bluetooth_media_next_event_cb, &bluetooth_media_style );
-    lv_obj_align( bluetooth_media_next, bluetooth_media_play, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
+    bluetooth_media_next = wf_add_image_button( bluetooth_media_tile, next_32px, bluetooth_media_next_event_cb, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_media_next, bluetooth_media_play, LV_ALIGN_OUT_RIGHT_MID, THEME_ICON_SIZE, 0 );
 
-    bluetooth_media_prev = wf_add_image_button( bluetooth_media_tile, prev_32px, exit_bluetooth_media_prev_event_cb, &bluetooth_media_style );
-    lv_obj_align( bluetooth_media_prev, bluetooth_media_play, LV_ALIGN_OUT_LEFT_MID, -32, 0 );
+    bluetooth_media_prev = wf_add_image_button( bluetooth_media_tile, prev_32px, bluetooth_media_prev_event_cb, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_media_prev, bluetooth_media_play, LV_ALIGN_OUT_LEFT_MID, -THEME_ICON_SIZE, 0 );
 
     bluetooth_media_artist = lv_label_create( bluetooth_media_tile, NULL);
     lv_obj_add_style( bluetooth_media_artist, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
-    lv_label_set_text( bluetooth_media_artist, "");
+    lv_label_set_text( bluetooth_media_artist, "artist");
     lv_label_set_long_mode( bluetooth_media_artist, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - 60 );
+    lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE );
     lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
 
     bluetooth_media_title = lv_label_create( bluetooth_media_tile, NULL);
     lv_obj_add_style( bluetooth_media_title, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
-    lv_label_set_text( bluetooth_media_title, "");
+    lv_label_set_text( bluetooth_media_title, "title");
     lv_label_set_long_mode( bluetooth_media_title, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_title, lv_disp_get_hor_res( NULL ) - 20 );
-    lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
+    lv_obj_set_width( bluetooth_media_title, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE );
+    lv_obj_align( bluetooth_media_title, bluetooth_media_artist, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
-    lv_obj_t *bluetooth_media_speaker = wf_add_image_button( bluetooth_media_tile, sound_32px, NULL, &bluetooth_media_style );
-    lv_obj_align( bluetooth_media_speaker, bluetooth_media_play, LV_ALIGN_OUT_BOTTOM_MID, 0, 32 );
+    lv_obj_t *bluetooth_media_speaker = wf_add_image_button( bluetooth_media_tile, sound_32px, NULL, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_media_speaker, bluetooth_media_play, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_SIZE );
 
-    lv_obj_t *bluetooth_media_volume_down = wf_add_image_button( bluetooth_media_tile, down_32px, exit_bluetooth_media_volume_down_event_cb, &bluetooth_media_style );
-    lv_obj_align( bluetooth_media_volume_down, bluetooth_media_speaker, LV_ALIGN_OUT_LEFT_MID, -32, 0 );
+    lv_obj_t *bluetooth_media_volume_down = wf_add_image_button( bluetooth_media_tile, down_32px, bluetooth_media_volume_down_event_cb, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_media_volume_down, bluetooth_media_speaker, LV_ALIGN_OUT_LEFT_MID, -THEME_ICON_SIZE, 0 );
 
-    lv_obj_t *bluetooth_media_volume_up = wf_add_image_button( bluetooth_media_tile, up_32px, exit_bluetooth_media_volume_up_event_cb, &bluetooth_media_style );
-    lv_obj_align( bluetooth_media_volume_up, bluetooth_media_speaker, LV_ALIGN_OUT_RIGHT_MID, 32, 0 );
+    lv_obj_t *bluetooth_media_volume_up = wf_add_image_button( bluetooth_media_tile, up_32px, bluetooth_media_volume_up_event_cb, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_media_volume_up, bluetooth_media_speaker, LV_ALIGN_OUT_RIGHT_MID, THEME_ICON_SIZE, 0 );
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_media_event_cb, "bluetooth media" );
+    styles_register_cb( STYLE_CHANGE, bluetooth_media_style_cb, "bluetooth media player" );
+    bluetooth_media_app = app_register( "media\nplayer", &play_64px, enter_bluetooth_media_cb );
 }
 
+bool bluetooth_media_style_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case STYLE_CHANGE:  lv_style_copy( &bluetooth_media_style, APP_STYLE );
+                            lv_style_set_text_font( &bluetooth_media_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+                            lv_obj_add_style( bluetooth_media_tile, LV_OBJ_PART_MAIN, &bluetooth_media_style );
+                            break;
+    }
+    return( true );
+}
 
-static void exit_bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void enter_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       
+            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF );
+            statusbar_hide( true );
+            break;
+        case ( LV_EVENT_LONG_PRESSED ):             
+            log_e("long press not implement!\r\n");
+            break;
+    }    
+}
+
+static void exit_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       
+            mainbar_jump_back();
+            break;
+    }    
+}
+
+static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             if( bluetooth_media_play_state == true ) {
@@ -145,7 +181,7 @@ static void exit_bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event
     }
 }
 
-static void exit_bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"volumeup\"}\r\n" );
@@ -153,7 +189,7 @@ static void exit_bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t 
     }
 }
 
-static void exit_bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"volumedown\"}\r\n" );
@@ -161,7 +197,7 @@ static void exit_bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_
     }
 }
 
-static void exit_bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"next\"}\r\n" );
@@ -169,7 +205,7 @@ static void exit_bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event
     }
 }
 
-static void exit_bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"previous\"}\r\n" );
@@ -177,7 +213,7 @@ static void exit_bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event
     }
 }
 
-static void exit_bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event ) {
+static void bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
