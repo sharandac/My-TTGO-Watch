@@ -54,7 +54,6 @@ static void battery_silence_wakeup_switch_event_handler( lv_obj_t * obj, lv_even
 static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 static void battery_high_voltage_switch_event_handler( lv_obj_t * obj, lv_event_t event );
-static void battery_logging_switch_event_handler( lv_obj_t * obj, lv_event_t event );
 void battery_set_experimental_indicator( void );
 
 void battery_settings_tile_setup( void ) {
@@ -72,10 +71,7 @@ void battery_settings_tile_setup( void ) {
 
     lv_obj_t *battery_silence_wakeup_switch_cont = wf_add_labeled_switch( battery_settings_tile, "silence wakeup", &battery_silence_wakeup_switch, pmu_get_silence_wakeup(), battery_silence_wakeup_switch_event_handler, SETUP_STYLE );
     lv_obj_align( battery_silence_wakeup_switch_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 2 );
-/*
-    lv_obj_t *battery_logging_switch_cont = wf_add_labeled_switch( battery_settings_tile, "write pmu stats", &battery_logging_switch, pmu_get_logging(), battery_logging_switch_event_handler, SETUP_STYLE );
-    lv_obj_align( battery_logging_switch_cont, battery_silence_wakeup_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 2 );
-*/
+
     lv_obj_t *battery_setup_label_cont = wf_add_label_container( battery_settings_tile, "experimental functions", SETUP_STYLE );
     lv_obj_align( battery_setup_label_cont, battery_silence_wakeup_switch_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 2 );
 
@@ -118,13 +114,6 @@ static void battery_percent_switch_event_handler( lv_obj_t * obj, lv_event_t eve
 static void battery_high_voltage_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ): pmu_set_high_charging_target_voltage( lv_switch_get_state( obj ) );
-                                        break;
-    }
-}
-
-static void battery_logging_switch_event_handler( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ): pmu_set_logging( lv_switch_get_state( obj ) );
                                         break;
     }
 }

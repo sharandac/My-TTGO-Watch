@@ -122,6 +122,7 @@ bool stopwatch_button_event_cb( EventBits_t event, void *arg ) {
         case BUTTON_EXIT:   mainbar_jump_back();
                             break;
     }
+    return( true );
 }
 
 bool stopwatch_style_change_event_cb( EventBits_t event, void *arg ) {

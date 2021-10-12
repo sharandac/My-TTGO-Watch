@@ -43,7 +43,7 @@
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
     #else
-        #warning "not hardware driver for pmu"
+        #warning "no hardware driver for pmu"
     #endif
     #include <soc/rtc.h>
 

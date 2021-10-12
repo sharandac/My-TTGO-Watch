@@ -58,7 +58,7 @@
     #elif defined( LILYGO_WATCH_2020_V2 )
     #elif defined( LILYGO_WATCH_2021 )    
     #else
-        #warning "not hardware driver for sound"
+        #warning "no hardware driver for sound"
     #endif
 #endif
 
