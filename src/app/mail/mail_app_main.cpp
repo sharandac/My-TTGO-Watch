@@ -94,6 +94,7 @@ bool mail_main_style_event_cb( EventBits_t event, void *arg ) {
             lv_style_set_pad_all( &mail_main_cell_style, LV_TABLE_PART_BG, 0 );
             break;
     }
+    return( true );
 }
 
 bool mail_main_button_event_cb( EventBits_t event, void *arg ) {

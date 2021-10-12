@@ -61,14 +61,12 @@ LV_IMG_DECLARE(info_update_16px);
 static void enter_display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void down_display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void up_display_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 bool display_displayctl_brightness_event_cb( EventBits_t event, void *arg );
 static void display_brightness_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_timeout_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_rotation_event_handler(lv_obj_t * obj, lv_event_t event);
 static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_event_t event );
-static void display_use_dma_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void display_background_image_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void display_settings_tile_setup( void ) {
@@ -151,10 +149,7 @@ void display_settings_tile_setup( void ) {
 
     lv_obj_t *block_return_maintile_cont = wf_add_labeled_switch( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "block maintile", &display_block_return_maintile_onoff, display_get_block_return_maintile(), display_block_return_maintile_setup_event_cb, SETUP_STYLE );
     lv_obj_align( block_return_maintile_cont, vibe_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
-/*
-    lv_obj_t *display_use_dma_cont = wf_add_labeled_switch( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "use DMA transfer", &display_use_dma_cont_onoff, display_get_use_dma(), display_use_dma_setup_event_cb, SETUP_STYLE );
-    lv_obj_align( display_use_dma_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
-*/
+
     lv_obj_t *display_background_image_cont = wf_add_labeled_list( display_settings_tile_2?display_settings_tile_2:display_settings_tile_1, "BG image", &display_bg_img_list, "bg\nbg1\nbg2\nbg3\nnone\nbg.png", display_background_image_setup_event_cb, SETUP_STYLE );
     lv_obj_align( display_background_image_cont, block_return_maintile_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 8 );
 
@@ -207,14 +202,6 @@ static void down_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 }
 
-static void up_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
-                                        break;
-    }
-
-}
-
 static void exit_display_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_back();
@@ -233,13 +220,6 @@ static void display_vibe_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void display_block_return_maintile_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     display_set_block_return_maintile( lv_slider_get_value( obj ) );
-                                            break;
-    }
-}
-
-static void display_use_dma_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_VALUE_CHANGED ):     display_set_use_dma( lv_slider_get_value( obj ) );
                                             break;
     }
 }

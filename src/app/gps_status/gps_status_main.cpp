@@ -70,7 +70,6 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 bool style_change_event_cb( EventBits_t event, void *arg );
 bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg );
-static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event);
 static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event);
 void gps_status_task(lv_task_t *task);
 void gps_status_hibernate_cb(void);
@@ -256,14 +255,6 @@ static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {
         case (LV_EVENT_CLICKED):
             statusbar_hide(true);
             mainbar_jump_to_tilenumber(gps_status_get_app_setup_tile_num(), LV_ANIM_OFF );
-            break;
-    }
-}
-
-static void exit_gps_status_main_event_cb(lv_obj_t *obj, lv_event_t event) {
-    switch (event) {
-        case (LV_EVENT_CLICKED):
-            mainbar_jump_back();
             break;
     }
 }

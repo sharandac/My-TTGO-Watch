@@ -40,7 +40,7 @@
         #endif
     #elif defined( LILYGO_WATCH_2021 )    
     #else
-        #warning "not hardware driver for sd_card"
+        #warning "no hardware driver for sd_card"
     #endif
 #endif
 

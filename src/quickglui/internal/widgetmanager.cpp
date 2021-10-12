@@ -39,7 +39,7 @@ WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj) {
     lv_obj_type_t buf;
     lv_obj_get_type(obj, &buf);
     auto type = buf.type[0] != NULL ? buf.type[0] : "lv_obj";
-    log_d("WidgetHandle allocated for %s. Total count: %d", type, ++current);
+    log_i("WidgetHandle allocated for %s. Total count: %d", type, ++current);
     
     auto addr = MALLOC(sizeof(WidgetHandle));
     return new(addr) WidgetHandle();

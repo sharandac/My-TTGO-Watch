@@ -50,7 +50,7 @@
         BMA *bma = NULL;
 */
     #else
-        #warning "not hardware driver for bma/axis sensor"
+        #warning "no hardware driver for bma/axis sensor"
     #endif
     #include <soc/rtc.h>
 

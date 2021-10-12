@@ -63,7 +63,7 @@ bool button_send_cb( EventBits_t event, void *arg );
     #elif defined( LILYGO_WATCH_2021 ) 
         #include <twatch2021_config.h>
     #else
-        #warning "not hardware driver for button"
+        #warning "no hardware driver for button"
     #endif
     /**
      * genreal allocated IRQ function

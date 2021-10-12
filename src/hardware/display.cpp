@@ -38,7 +38,7 @@
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
     #else
-        #error "not hardware driver for display"
+        #error "no hardware driver for display"
     #endif
 #endif
 

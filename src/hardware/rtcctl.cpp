@@ -44,7 +44,7 @@
 
         PCF8563_Class rtc;
     #else
-        #warning "not hardware driver for rtcctl"
+        #warning "no hardware driver for rtcctl"
     #endif
     #include <sys/time.h>
 

@@ -44,7 +44,7 @@
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
 
     #else
-        #warning "not hardware driver for blectl"
+        #warning "no hardware driver for blectl"
     #endif
     #include <Arduino.h>
     #include <BLEDevice.h>

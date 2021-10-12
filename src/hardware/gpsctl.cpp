@@ -40,7 +40,7 @@
         #endif
     #elif defined( LILYGO_WATCH_2021 ) 
     #else
-        #warning "not hardware driver for gpsctl"
+        #warning "no hardware driver for gpsctl"
     #endif
 #endif
 

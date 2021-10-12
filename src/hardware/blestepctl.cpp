@@ -35,7 +35,7 @@
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
 
     #else
-        #warning "not hardware driver for blestepctl"
+        #warning "no hardware driver for blestepctl"
     #endif
 #endif
 
