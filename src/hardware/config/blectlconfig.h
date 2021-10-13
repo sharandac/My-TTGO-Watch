@@ -41,12 +41,12 @@
     class blectl_config_t : public BaseJsonConfig {
         public:
         blectl_config_t();
-        bool autoon = true;                     /** @brief auto on/off */
-        bool advertising = true;                /** @brief advertising on/off */
-        bool enable_on_standby = false;         /** @brief enable on standby on/off */
-        bool disable_only_disconnected = false; /** @brief disable only when disconnected on/off */
-        bool show_notification = true;          /** @brief enable show notifications */
-        int32_t txpower = 1;                    /** @brief tx power, valide values are from 0 to 4 */
+        bool autoon = true;                                     /** @brief auto on/off */
+        bool advertising = true;                                /** @brief advertising on/off */
+        bool enable_on_standby = false;                         /** @brief enable on standby on/off */
+        bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
+        bool show_notification = true;                          /** @brief enable show notifications */
+        int32_t txpower = 1;                                    /** @brief tx power, valide values are from 0 to 4 */
         blectl_custom_audio* custom_audio_notifications = NULL; /** @brief custom audio notifications config pointer */
 
         protected:

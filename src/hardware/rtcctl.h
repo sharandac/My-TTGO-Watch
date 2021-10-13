@@ -67,8 +67,17 @@
      * @brief if alarm is set, returns day of week number where sunday=0, othervise is returned DAY_NOT_SET 
      */
     int rtcctl_get_next_alarm_week_day( void );
-
+    /**
+     * @brief sync OS time from RTC
+     * 
+     * @note The RTC holds the time GM0
+     */
     void rtcctl_syncToSystem( void );
+    /**
+     * @brief sync OS time to RTC
+     * 
+     * @note The RTC holds the time GM0
+     */
     void rtcctl_syncToRtc( void );
 
 #endif // _RTCCTL_H

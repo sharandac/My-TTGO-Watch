@@ -64,7 +64,6 @@
  *
  * @return  returns pointer to the added object
  */
-// lv_obj_t * wf_add_container(lv_obj_t *parent, lv_layout_t layout, lv_fit_t hor_fit=LV_FIT_TIGHT, lv_fit_t ver_fit=LV_FIT_TIGHT, bool add_padding=false );
 lv_obj_t * wf_add_container(lv_obj_t *parent, lv_layout_t layout,lv_fit_t hor_fit=LV_FIT_TIGHT, lv_fit_t ver_fit=LV_FIT_TIGHT, bool add_padding=false, lv_style_t *style=NULL );
 
 /**
@@ -77,6 +76,7 @@ lv_obj_t * wf_add_container(lv_obj_t *parent, lv_layout_t layout,lv_fit_t hor_fi
  */
 lv_obj_t * wf_add_tile_container(lv_obj_t *parent_tile, lv_layout_t layout);
 lv_obj_t * wf_add_tile_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_style_t *style );
+
 /**
  * @brief   Creates and add a container placed on on a tile bottom (out of main tile container)
  *
@@ -144,6 +144,7 @@ lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t *
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj, bool state, lv_event_cb_t event_cb );
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj, bool state, lv_event_cb_t event_cb, lv_style_t *style  );
 lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb, lv_style_t *style, lv_style_t *dropdown_style );
+
 /**
  * @brief   Creates and adds an image button to a container
  *
@@ -417,7 +418,29 @@ lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_style
  */
 lv_obj_t * wf_add_image(lv_obj_t *parent, lv_img_dsc_t const &image);
 
+/**
+ * @brief create and adds a list to a container
+ * 
+ * @param   parent  pointer to a parent container
+ * @param   options pointer to a option list
+ * @param   style   pointer to a lv_style strcuture
+ *
+ * @return pointer to the new list object
+ */
 lv_obj_t * wf_add_list(lv_obj_t *parent, const char* _options );
 lv_obj_t * wf_add_list(lv_obj_t *parent, const char* _options, lv_style_t *style );
+
+/**
+ * @brief create and adds a labled list to a container
+ * 
+ * @param   parent          pointer to a parent container
+ * @param   text            label text
+ * @param   ret_list_obj    pointer to a list pointer
+ * @param   options         pointer to a option list
+ * @param   event_cb        pointer to a call back function when a list entry is clicked
+ * @param   style           pointer to a lv_style strcuture
+ *
+ * @return pointer to the new list object
+ */
 lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb );
 lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** ret_list_obj, const char *options, lv_event_cb_t event_cb, lv_style_t *style );

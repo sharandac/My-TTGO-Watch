@@ -83,7 +83,7 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
     autoon = doc["autoon"] | true;
     enable_on_standby = doc["enable_on_standby"] | false;
     if ( doc["hostname"] ) {
-        strlcpy( hostname, doc["hostname"], sizeof( hostname ) );
+        strncpy( hostname, doc["hostname"], sizeof( hostname ) );
     }
 
     webserver = doc["webserver"] | false;
