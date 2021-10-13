@@ -247,6 +247,10 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
         #elif defined( M5CORE2 )
             switch( event ) {
                 case POWERMGM_STANDBY:          log_i("go standby");
+                                                /**
+                                                 * block standby so is there no another option to handle
+                                                 * wakeup by touch. no real button :(
+                                                 */
                                                 retval = false;
                                                 break;
                 case POWERMGM_WAKEUP:           log_i("go wakeup");
@@ -470,7 +474,7 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             float temp_y = ( data->point.y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
             data->point.x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
             data->point.y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
-            
+
         #elif defined( LILYGO_WATCH_2021 )
             bool isTouch = TouchSensor.getTouchType();
             data->state = isTouch ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
