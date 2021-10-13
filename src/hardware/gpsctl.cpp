@@ -29,7 +29,19 @@
     #include "utils/millis.h"
 #else
     #if defined( M5PAPER )
+        #include <M5EPD.h>
+        #include <TinyGPS++.h>
+        #include <SoftwareSerial.h>
 
+        static const int RXPin = GPIO_NUM_32, TXPin = GPIO_NUM_25;
+        static const uint32_t GPSBaud = 9600;
+
+        TinyGPSPlus gps;
+        TinyGPSCustom TGC_sats_in_view_gps;
+        TinyGPSCustom TGC_sats_in_view_glonass;
+        TinyGPSCustom TGC_sats_in_view_baidou;
+
+        SoftwareSerial softserial( RXPin, TXPin );
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
         #include <TinyGPS++.h>
@@ -87,10 +99,7 @@ void gpsctl_setup( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #if defined( M5PAPER )
-
-        #elif defined( M5CORE2 )
-            M5.Axp.SetSpkEnable( 1 );
+        #if defined( M5PAPER ) || defined( M5CORE2 )
             /**
              * init tinyGPS++
              */
@@ -146,7 +155,7 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     #ifdef NATIVE_64BIT
 
     #else
-        #if defined( M5CORE2 )
+        #if defined( M5PAPER ) || defined( M5CORE2 )
             /**
              * check serial
              */
@@ -173,9 +182,7 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
         }
         #ifdef NATIVE_64BIT
         #else
-            #if defined( M5PAPER )
-
-            #elif defined( M5CORE2 )
+            #if defined( M5PAPER ) || defined( M5CORE2 )
                 /*
                 * store valid state
                 */
@@ -444,7 +451,7 @@ bool gpsctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
     if ( gpsctl_callback == NULL ) {
         gpsctl_callback = callback_init( "pmu" );
         if ( gpsctl_callback == NULL ) {
-            GPSCTL_ERROR_LOG("pmu_callback alloc failed");
+            GPSCTL_ERROR_LOG("gpsctl_callback alloc failed");
             while( true );
         }
     }
