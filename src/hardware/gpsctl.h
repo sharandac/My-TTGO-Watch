@@ -27,7 +27,7 @@
     #include "utils/io.h"
     
     #define GPSCTL_INFO_LOG                 log_i
-    #define GPSCTL_DEBUG_LOG                log_i
+    #define GPSCTL_DEBUG_LOG                log_d
     #define GPSCTL_ERROR_LOG                log_e
 
     #define GPSCTL_INTERVAL                 1000           /** @brief gps data intervall in milliseconds */
