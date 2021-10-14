@@ -46,7 +46,7 @@ LV_FONT_DECLARE(Ubuntu_12px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
 static const char* buttons[20] = {"7","8","9","/","\n","4","5","6","*","\n","1","2","3","-","\n","0","C/CE",".","+",""};
-float inputs[2] = { NAN, NAN };
+float inputs[2] = { 0, 0 };
 char input[16] = "\0";
 char op = '\0';
 char oop = '\0';
@@ -253,7 +253,7 @@ void calc_process_button(char cmd)
         case '9':
         case '.':
             if ( op == '=') {
-                inputs[1] = NAN;
+                inputs[1] = 0;
                 oop = '\0';
                 op = '\0';
                 calc_show_history(inputs[1], oop, inputs[0], false, false);
@@ -294,20 +294,20 @@ void calc_process_button(char cmd)
         case 'C':
             memset(input, '\0', sizeof(input)/sizeof(char));
             if ( op == '=') {
-                inputs[1] = NAN;
+                inputs[1] = 0;
                 oop = '\0';
                 op = '\0';
                 calc_show_history(inputs[1], oop, inputs[0], false, false);
             } else {
-                inputs[0] = NAN;
+                inputs[0] = 0;
                 calc_show_history(inputs[1], oop, inputs[0], true, false);
             }
             calc_show_result(inputs[0]);
             break;
         case 'D':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[1] = NAN;
-            inputs[0] = NAN;
+            inputs[1] = 0;
+            inputs[0] = 0;
             oop = '\0';
             op = '\0';
             calc_show_result(inputs[0]);
@@ -330,32 +330,32 @@ void calc_process_operator(char cmd, char op)
     switch( op ) {
         case '+':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] + inputs[0];
-            inputs[0] = NAN;
+            inputs[1] = inputs[1] + inputs[0];
+            inputs[0] = 0;
             break;
         case '-':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] - inputs[0];
-            inputs[0] = NAN;
+            inputs[1] = inputs[1] - inputs[0];
+            inputs[0] = 0;
             break;
         case '*':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] * inputs[0];
-            inputs[0] = NAN;
+            inputs[1] = inputs[1] * inputs[0];
+            inputs[0] = 0;
             break;
         case '/':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            if (!isnan(inputs[0]) && !isnan(inputs[1])) inputs[1] = inputs[1] / inputs[0];
-            inputs[0] = NAN;
+            inputs[1] = inputs[1] / inputs[0];
+            inputs[0] = 0;
             break;
         case '=':
             memset(input, '\0', sizeof(input)/sizeof(char));
-            inputs[0] = NAN;
+            inputs[0] = 0;
             break;
         case '\0':
             memset(input, '\0', sizeof(input)/sizeof(char));
             inputs[1] = inputs[0];
-            inputs[0] = NAN;
+            inputs[0] = 0;
             break;
     }
 }
@@ -363,7 +363,7 @@ void calc_process_operator(char cmd, char op)
 void calc_show_result(float output)
 {
     char temp[16];
-    snprintf(temp, sizeof(temp), "%g", isnan(output) ? 0.00 : output);
+    snprintf(temp, sizeof(temp), "%g", output);
     lv_label_set_text(result_label, temp);
     lv_event_send_refresh(result_label);
 }
@@ -372,9 +372,9 @@ void calc_show_history(float left, char op, float right, bool showLeft, bool sho
 {
     char temp[16];
     if (showLeft && showRight && op != '\0') {
-        snprintf(temp, sizeof(temp), showEquals ? "%g %c %g =" : "%g %c %g", isnan(left) ? 0.00 : left, op, isnan(right) ? 0.00 : right);
+        snprintf(temp, sizeof(temp), showEquals ? "%g %c %g =" : "%g %c %g", left, op, right);
     } else if (showLeft && op != '\0') {
-        snprintf(temp, sizeof(temp), "%g %c", isnan(left) ? 0.00 : left, op);
+        snprintf(temp, sizeof(temp), "%g %c", left, op);
     } else {
         memset(temp, '\0', sizeof(temp)/sizeof(char));
     }
