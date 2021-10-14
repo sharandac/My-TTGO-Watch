@@ -45,9 +45,9 @@
     class wifictl_config_t : public BaseJsonConfig {
         public:
         wifictl_config_t();
-        bool autoon = true;                                     /** @brief enable on auto on/off an wakeup and standby */
-        bool enable_on_standby = false;                         /** @brief enable on standby */
-        char hostname[32] = "T-Watch";
+        bool autoon = true;                                 /** @brief enable on auto on/off an wakeup and standby */
+        char hostname[32] = "T-Watch";                      /** @brief default hostname */
+        bool enable_on_standby = false;                     /** @brief enable on standby */
         bool webserver = false;                             /** @brief enable on webserver */
         bool ftpserver = false;                             /** @brief enable on ftpserver */
         char ftpuser[32] = FTPSERVER_USER;                  /** @brief ftpserver username*/

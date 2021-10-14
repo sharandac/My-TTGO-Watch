@@ -25,10 +25,9 @@
     #include "callback.h"
     #include "hardware/config/timesyncconfig.h"
 
-    #define TIME_SYNC_REQUEST       _BV(0)
-    #define TIME_SYNC_OK            _BV(1)
-    #define TIME_SYNC_UPDATE        _BV(2)
-
+    #define TIME_SYNC_REQUEST       _BV(0)              /** @brief event mask to start a time sync request */
+    #define TIME_SYNC_OK            _BV(1)              /** @brief event mask for time sync ok */
+    #define TIME_SYNC_UPDATE        _BV(2)              /** @brief event mask for time sync is started */
     /**
      * @brief setup display
      */

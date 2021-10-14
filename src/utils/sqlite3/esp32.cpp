@@ -181,10 +181,12 @@ static int ESP32Read(
     return rc;
   }
 
-  ofst = fseek(p->fp, iOfst, SEEK_SET); //lseek(p->fd, iOfst, SEEK_SET);
-  if( ofst != 0 ){
-    return SQLITE_IOERR_READ;
-  }
+  ofst = fseek(p->fp, iOfst, SEEK_SET); // lseek(p->fd, iOfst, SEEK_SET);
+  /*
+    if( ofst != 0 ){
+        return SQLITE_IOERR_READ;
+    }
+  */
   nRead = fread(zBuf, 1, iAmt, p->fp); // read(p->fd, zBuf, iAmt);
 
   if( nRead==iAmt ){

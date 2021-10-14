@@ -24,14 +24,15 @@
 
     #include "callback.h"
 
-    #define TOUCH_UPDATE        _BV(0)
-
+    #define TOUCH_UPDATE        _BV(0)      /** @brief event mask for touch update information */
+    /**
+     * @brief touch info structure 
+     */
     typedef struct {
-        bool touched;
-        int16_t x_coor;
-        int16_t y_coor;
+        bool touched;           /** @brief true if touched or false if not */
+        int16_t x_coor;         /** @brief x coordinate when touched */
+        int16_t y_coor;         /** @brief y coordinate when touched */
     } touch_t;
-
     /**
      * @brief setup touch
      */

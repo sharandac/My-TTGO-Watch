@@ -229,19 +229,28 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
         #if defined( M5PAPER ) || defined( LILYGO_WATCH_2021 )
             switch( event ) {
                 case POWERMGM_STANDBY:          log_i("go standby");
+                                                retval = true;
                                                 break;
                 case POWERMGM_WAKEUP:           log_i("go wakeup");
+                                                retval = true;
                                                 break;
                 case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                                                retval = true;
                                                 break;
                 case POWERMGM_ENABLE_INTERRUPTS:
+                                                retval = true;
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
+                                                retval = true;
                                                 break;
             }
         #elif defined( M5CORE2 )
             switch( event ) {
                 case POWERMGM_STANDBY:          log_i("go standby");
+                                                /**
+                                                 * block standby so is there no another option to handle
+                                                 * wakeup by touch. no real button :(
+                                                 */
                                                 retval = false;
                                                 break;
                 case POWERMGM_WAKEUP:           log_i("go wakeup");
@@ -367,13 +376,6 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
                 if ( display_get_vibe() )
                     motor_vibe( 3 );
             }
-            /*
-            * issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
-            */
-            float temp_x = ( x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * 1.15;
-            float temp_y = ( y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
-            x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
-            y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
         #elif defined( LILYGO_WATCH_2021 )
             static bool touchState;
             touchState = TouchSensor.TouchInt();
@@ -394,8 +396,10 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
 }
 
 static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
+    bool retval = false;
+    
     #ifdef NATIVE_64BIT
-        return( mouse_read( drv, data ) );
+        retval = mouse_read( drv, data );
     #else
         #if defined( M5PAPER )
             if ( M5.TP.avaliable() ) {
@@ -452,35 +456,25 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             /*
             * check for an touch interrupt
             */
-//            if ( touched ) {
-                data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
-                touched = digitalRead( TOUCH_INT ) == LOW;
-                if ( !touched ) {
-                    /*
-                    * Save power by switching to monitor mode now instead of waiting for 30 seconds.
-                    */
-                    if ( touch_lock_take() ) {
-                        TTGOClass::getWatch()->touchToMonitor();
-                        touch_lock_give();
-                    }
+            data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+            touched = digitalRead( TOUCH_INT ) == LOW;
+            if ( !touched ) {
+                /*
+                * Save power by switching to monitor mode now instead of waiting for 30 seconds.
+                */
+                if ( touch_lock_take() ) {
+                    TTGOClass::getWatch()->touchToMonitor();
+                    touch_lock_give();
                 }
-                /**
-                 * send touch event
-                 */
-                touch_t touch;
-                touch.touched = touched;
-                touch.x_coor = data->point.x;
-                touch.y_coor = data->point.y;
-                /**
-                 * discard when callback return true
-                 */
-                if ( touch_send_event_cb( TOUCH_UPDATE, (void*)&touch ) ) {
-                    data->state = LV_INDEV_STATE_REL;
-                }
-//            }
-//            else {
-//                data->state = LV_INDEV_STATE_REL;
-//            }
+            }
+            /*
+            * issue https://github.com/sharandac/My-TTGO-Watch/issues/18 fix
+            */
+            float temp_x = ( data->point.x - ( lv_disp_get_hor_res( NULL ) / 2 ) ) * 1.15;
+            float temp_y = ( data->point.y - ( lv_disp_get_ver_res( NULL ) / 2 ) ) * 1.0;
+            data->point.x = temp_x + ( lv_disp_get_hor_res( NULL ) / 2 );
+            data->point.y = temp_y + ( lv_disp_get_ver_res( NULL ) / 2 );
+
         #elif defined( LILYGO_WATCH_2021 )
             bool isTouch = TouchSensor.getTouchType();
             data->state = isTouch ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
@@ -491,6 +485,19 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             }
         #endif
     #endif
+    /**
+     * send touch event
+     */
+    touch_t touch;
+    touch.touched = data->state;
+    touch.x_coor = data->point.x;
+    touch.y_coor = data->point.y;
+    /**
+     * discard when callback return true
+     */
+    if ( touch_send_event_cb( TOUCH_UPDATE, (void*)&touch ) ) {
+        data->state = LV_INDEV_STATE_REL;
+    }
 
-    return( false );
+    return( retval );
 }

@@ -51,5 +51,8 @@
      * @brief setup framebuffer
      */
     void framebuffer_setup( void );
+    /**
+     * @brief force framebuffer refresh to screen/display
+     */
     void framebuffer_refresh( void );
 #endif // _FRAMEBUFFER_H
