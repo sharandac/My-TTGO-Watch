@@ -25,25 +25,32 @@
     #include "config.h"
 
     #define SCREENSHOT_FILE_NAME    "/spiffs/screen.png"
-
+    /**
+     * @brief rgba pixel structure
+     */
     typedef struct {
         uint8_t r;
         uint8_t g;
         uint8_t b;
-    } rgba_t;
-
+    } rgb_t;
+    /**
+     * @brief grey pixel structure
+     */
     typedef struct {
         uint8_t grey;
     } grey_t;
-
+    /**
+     * @brief rgba image structure
+     */
     typedef struct {
-        rgba_t data[ RES_X_MAX * RES_Y_MAX ];
+        rgb_t data[ RES_X_MAX * RES_Y_MAX ];
     } raw_img_rgb_t;
-
+    /**
+     * @brief grey image structure
+     */
     typedef struct {
         grey_t data[ RES_X_MAX * RES_Y_MAX ];
     } raw_img_grey_t;
-
     /**
      * @brief setup screenshot
      */

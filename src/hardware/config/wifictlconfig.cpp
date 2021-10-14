@@ -38,7 +38,7 @@ bool wifictl_config_t::onSave(JsonDocument& doc) {
      * save config structure into json file
      */
     doc["autoon"] = autoon;
-
+    doc["hostname"] = hostname;
     doc["webserver"] = webserver;
     doc["ftpserver"] = ftpserver;
     doc["ftpuser"] = ftpuser;
@@ -91,11 +91,10 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
     autoon = doc["autoon"] | true;
     enable_on_standby = doc["enable_on_standby"] | false;
     if ( doc["hostname"] ) {
-        strlcpy( hostname, doc["hostname"], sizeof( hostname ) );
+        strncpy( hostname, doc["hostname"], sizeof( hostname ) );
     }
 
     webserver = doc["webserver"] | false;
-
     ftpserver = doc["ftpserver"] | false;
     if ( doc["ftpuser"] ) {
         strncpy( ftpuser, doc["ftpuser"], sizeof( ftpuser ) );

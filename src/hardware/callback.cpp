@@ -229,6 +229,7 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
                  * call callback an check the returnvalue
                  */
                 if ( !callback->table[ entry ].callback_func( event, arg ) ) {
+                    log_i("cb %s returns false", callback->table[ entry ].id );
                     retval = false;
                 }
             }
