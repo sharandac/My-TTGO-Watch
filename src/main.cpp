@@ -58,32 +58,32 @@ void setup() {
     /**
      * apps here
      */
-    osmmap_app_setup();
-    weather_app_setup();
+    mail_app_setup();
     stopwatch_app_setup();
     alarm_clock_setup();
+    weather_app_setup();
+    weather_station_app_setup();
+    gps_status_setup();
     activity_app_setup();
     calendar_app_setup();
     calc_app_setup();
     //sailing_setup();
-    weather_station_app_setup();
+    osmmap_app_setup();
     osmand_app_setup();
-    gps_status_setup();
     tiltmouse_app_setup();
+    kodi_remote_app_setup();
+    mqtt_player_app_setup();
+    mqtt_control_app_setup();
     IRController_setup();
     //fxrates_app_setup();
     //powermeter_app_setup();
     FindPhone_setup();
-    kodi_remote_app_setup();
-    mqtt_player_app_setup();
-    mqtt_control_app_setup();
     NetTools_setup();
     ping_app_setup();
     wireless_app_setup();
     wifimon_app_setup();
     tic_tac_toe_game_setup();
     pong_game_setup();
-    mail_app_setup();
     /**
      * post hardware setup
      */
