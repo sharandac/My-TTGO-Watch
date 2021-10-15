@@ -167,5 +167,19 @@
      * @param gps_source gps source enum
      */
     const char *gpsctl_get_source_str( gps_source_t gps_source );
+    /**
+     * @brief set rx and tx pin configuration
+     * 
+     * @param   rx      rx gpio pin ( rx < -1 means disabled )
+     * @param   tx      tx gpio pin ( tx < -1 means disabled )
+     */
+    void gpsctl_set_gps_rx_tx_pin( int8_t rx, int8_t tx );
+    /**
+     * @brief get rx and tx pin configuration
+     * 
+     * @param   rx      pointer to a rx variable
+     * @param   tx      pointer to a tx variable
+     */
+    void gpsctl_get_gps_rx_tx_pin( int8_t *rx, int8_t *tx );
 
 #endif // _GPSCTL_H
