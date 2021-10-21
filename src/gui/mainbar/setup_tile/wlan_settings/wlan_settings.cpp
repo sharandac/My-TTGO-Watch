@@ -128,7 +128,6 @@ bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
         case    WIFICTL_SCAN_ENTRY:
                     lv_obj_t * wifiname_list_btn = lv_list_add_btn( wifiname_list, wifictl_is_known( (const char*)arg )?&unlock_16px:&lock_16px , (const char*)arg );
                     lv_obj_set_event_cb( wifiname_list_btn, wifi_settings_enter_pass_event_cb);
-                    log_i("index = %d", lv_list_get_size( wifiname_list ) );
                     break;
     }
     return( true );
@@ -156,7 +155,6 @@ void wifi_settings_enter_pass_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):   lv_label_set_text( wifi_password_name_label, lv_list_get_btn_text(obj) );
                                     lv_textarea_set_text( wifi_password_pass_textfield, "");
-                                    log_i("list index = %d", lv_list_get_btn_index( wifiname_list, obj ) );
                                     mainbar_jump_to_tilenumber( wifi_password_tile_num, LV_ANIM_ON );
     }
 }

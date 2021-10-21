@@ -36,6 +36,8 @@
         bool enable_on_standby = false;         /** @brief enable on standby on/off */
         bool app_use_gps = false;               /** @brief permission for apps, to get gps location */
         bool gps_over_ip = false;               /** @brief enable gps over ip */
+        int32_t TXPin = -1;                     /** @brief enable gps modules on M5stack use PIN as TX*/
+        int32_t RXPin = -1;                     /** @brief enable gps modules on M5stack use PIN as RX */
 
         protected:
         ////////////// Available for overloading: //////////////

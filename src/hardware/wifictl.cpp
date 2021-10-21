@@ -132,7 +132,7 @@ void wifictl_setup( void ) {
          */
         for( int i = 0 ; i < len ; i++ ) {
             wifictl_send_event_cb( WIFICTL_SCAN_ENTRY, (void *)WiFi.SSID(i).c_str() );
-            log_i("found network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
+            log_d("found network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
         }
         /**
          * connect if we discover a known network, but skip the ones that were already tried
@@ -149,7 +149,7 @@ void wifictl_setup( void ) {
                     wifictl_send_event_cb( WIFICTL_SCAN, (void *)"connecting ..." );
                     WiFi.setHostname(wifictl_config.hostname);
                     WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
-                    log_i("try to connect to network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
+                    log_d("try to connect to network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
                     /**
                      * remember that the connection to this network was tried
                      */
