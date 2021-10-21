@@ -38,6 +38,7 @@
         static uint64_t next_wakeup = 0;
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
+        static uint64_t next_wakeup = 0;
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
     #elif defined( LILYGO_WATCH_2021 )
@@ -252,6 +253,13 @@ void pmu_loop( void ) {
         plug = M5.Axp.isACIN();
         battery = M5.Axp.isVBUS();
 
+        if ( next_wakeup != 0 ) {
+            if ( next_wakeup < millis() ) {
+                next_wakeup = 0;
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST ); 
+            }
+        }
+        
         if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
             if ( ( millis() / 1000 ) % 5 )
                 M5.Axp.SetLed( 0 );
@@ -497,6 +505,14 @@ void pmu_standby( void ) {
         }
     #elif defined( M5CORE2 )
         M5.Axp.PrepareToSleep();
+        /**
+         * set wakeup timer
+         */
+        if ( pmu_get_silence_wakeup() ) {
+            next_wakeup = millis() + pmu_config.silence_wakeup_interval * 60 * 1000;
+            esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
+            log_i("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
+        }
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
