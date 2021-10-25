@@ -53,7 +53,6 @@
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
-            #define NO_BLUETOOTH
         #elif defined( LILYGO_WATCH_2021 )
             #define HARDWARE_NAME   "T-Watch2021"
             #define RES_X_MAX       240
@@ -89,7 +88,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021102101"
+    #define __FIRMWARE__            "2021102501"
     /**
      * Allows to include config.h from C code
      */

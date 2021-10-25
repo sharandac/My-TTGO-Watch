@@ -24,6 +24,7 @@
 #include "mail_app_main.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_factory.h"
+#include "utils/msg_chain.h"
 
 #if defined( NATIVE_64BIT )
     #include "utils/logging.h"
@@ -36,6 +37,7 @@
 #endif
 
 IMAPSession imap;
+msg_chain_t *mail_uid = NULL;
 
 uint32_t mail_main_tile_num = 0;
 lv_obj_t *mail_main_tile = NULL;
@@ -104,6 +106,8 @@ void mail_app_main_setup( uint32_t tile_num ) {
 #else
     mail_sync_event_handle = xEventGroupCreate();
 #endif
+
+    msg_chain_delete( mail_uid );
 }
 
 bool mail_main_style_event_cb( EventBits_t event, void *arg ) {
@@ -121,7 +125,7 @@ static void mail_main_selected_mail_event_cb( lv_obj_t * obj, lv_event_t event )
         case LV_EVENT_CLICKED:
                 uint16_t row, col;
                 lv_table_get_pressed_cell( obj, &row, &col );
-                MAIL_APP_INFO_LOG("row %d clicked", row );
+                MAIL_APP_INFO_LOG("row %d clicked, uid = %s", row, msg_chain_get_msg_entry( mail_uid, row - 1 )?msg_chain_get_msg_entry( mail_uid, row - 1 ):"n/a" );
             break;
         default:
             break;
@@ -230,7 +234,7 @@ void mail_main_refresh( void ) {
     config.limit.msg_size = mail_config->max_msg_size;
     config.storage.saved_path = "/mail";
     config.storage.type = esp_mail_file_storage_type_flash;
-    imap.headerOnly();
+    // imap.headerOnly();
     /**
      * start connections
      */
@@ -240,7 +244,7 @@ void mail_main_refresh( void ) {
         snprintf( tmp_str, sizeof( tmp_str ), "imap connect abort: %s", imap.errorReason().c_str() );
         MAIL_APP_ERROR_LOG("%s", tmp_str );
         lv_label_set_text( mail_main_header_label, tmp_str );
-        return;
+        goto mail_refresh_exit;
     }
     MAIL_APP_DEBUG_LOG("imap connected");
     /**
@@ -252,16 +256,18 @@ void mail_main_refresh( void ) {
         snprintf( tmp_str, sizeof( tmp_str ), "imap select folder abort; %s", imap.errorReason().c_str() );
         MAIL_APP_ERROR_LOG("%s", tmp_str );
         lv_label_set_text( mail_main_header_label, tmp_str );
-        return;
+        goto mail_refresh_exit;
     }
     MAIL_APP_DEBUG_LOG("imap folder selected, max msg %d (%d bytes)", config.limit.search, config.limit.msg_size );
     /**
      * clear mail list
      */
     mail_main_clear_overview();
+    mail_uid = msg_chain_delete( mail_uid );
     /**
      * get all email headers
      */
+    MAIL_APP_INFO_LOG("mail sync task, heap: %d", ESP.getFreeHeap() );
     lv_label_set_text( mail_main_header_label, "get mail header" );
     if ( MailClient.readMail( &imap ) ) {
         snprintf( tmp_str, sizeof( tmp_str ), "mail %d/%d", imap.selectedFolder().availableMessages(), imap.selectedFolder().msgCount() );
@@ -271,6 +277,8 @@ void mail_main_refresh( void ) {
     }
     MAIL_APP_DEBUG_LOG("%s", tmp_str );
     lv_label_set_text( mail_main_header_label, tmp_str );
+
+mail_refresh_exit:
 
     imap.empty();
     imap.closeSession();
@@ -286,8 +294,19 @@ void mail_main_imapCallback( IMAP_Status status ) {
         IMAP_MSG_List msgList = imap.data();
 
         for (size_t i = 0; i < msgList.msgItems.size(); i++) {
+            /**
+             * set mail table text entry
+             */
             IMAP_MSG_Item msg = msgList.msgItems[i];
             mail_main_add_mail_entry( msg.from, msg.date );
+            /**
+             * store mail uid in a extra list
+             */
+            char tmp_str[32] = "";
+            snprintf( tmp_str, sizeof( tmp_str ), "%d", msg.UID );
+            mail_uid = msg_chain_add_msg( mail_uid, tmp_str );
+
+            log_i("msg-body: %s", msg.text.content );
         }
         /* Clear all stored data in IMAPSession object */
         imap.empty();
@@ -295,7 +314,6 @@ void mail_main_imapCallback( IMAP_Status status ) {
 }
 
 void mail_main_clear_overview( void ) {
-    MAIL_APP_DEBUG_LOG("delete/vlear table");
     lv_table_set_col_cnt( mail_main_overview, 2 );
     lv_table_set_row_cnt( mail_main_overview, 1 );
     lv_table_set_cell_type( mail_main_overview, 0, 0, 1 );
@@ -305,7 +323,6 @@ void mail_main_clear_overview( void ) {
     lv_table_set_col_width( mail_main_overview, 0, ( lv_page_get_width_fit(mail_main_overview_page) / 16 ) * 11 - THEME_PADDING );
     lv_table_set_col_width( mail_main_overview, 1, ( lv_page_get_width_fit(mail_main_overview_page) / 16 ) * 5 );
     lv_obj_align( mail_main_overview, mail_main_overview_page, LV_ALIGN_IN_TOP_MID, 0, 0 );
-
 }
 
 void mail_main_add_mail_entry( const char *from, const char *date ) {

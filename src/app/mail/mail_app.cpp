@@ -56,8 +56,8 @@ void mail_app_setup( void ) {
         return;
     #endif
 
-    #ifndef M5PAPER
-//        return;
+    #ifndef NO_BLUETOOTH
+        return;
     #endif
 
     mail_app_main_tile_num = mainbar_add_app_tile( 1, 1, "mail" );
