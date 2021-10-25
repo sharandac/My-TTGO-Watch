@@ -49,10 +49,12 @@
         WIFICTL_WPS_REQUEST            = _BV(8),
         WIFICTL_WPS_SUCCESS            = _BV(9),
         WIFICTL_WPS_FAILED             = _BV(10),
-        WIFICTL_SCAN                   = _BV(11),
-        WIFICTL_SCAN_ENTRY             = _BV(12),
-        WIFICTL_FIRST_RUN              = _BV(13),
-        WIFICTL_AUTOON                 = _BV(14)
+        WIFICTL_MSG                    = _BV(12),
+        WIFICTL_SCAN                   = _BV(13),
+        WIFICTL_SCAN_DONE              = _BV(14),
+        WIFICTL_SCAN_ENTRY             = _BV(15),
+        WIFICTL_FIRST_RUN              = _BV(16),
+        WIFICTL_AUTOON                 = _BV(17)
     };
 
     /**

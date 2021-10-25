@@ -23,6 +23,7 @@
 #include "mail_app.h"
 #include "mail_app_main.h"
 #include "mail_app_setup.h"
+#include "config/mail_config.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -44,6 +45,10 @@ LV_IMG_DECLARE(mail_64px);
  */
 static void enter_mail_app_event_cb( lv_obj_t * obj, lv_event_t event );
 /*
+ *
+ */
+mail_config_t mail_config;
+/*
  * setup routine for example app
  */
 void mail_app_setup( void ) {
@@ -58,7 +63,9 @@ void mail_app_setup( void ) {
     mail_app_main_tile_num = mainbar_add_app_tile( 1, 1, "mail" );
     mail_app_setup_tile_num = mainbar_add_setup_tile( 1, 1, "mail setup" );
 
-    mail_app = app_register( "mail", &mail_64px, enter_mail_app_event_cb );
+    mail_app = app_register( "mail\n(alpha)", &mail_64px, enter_mail_app_event_cb );
+
+    mail_config.load();
 
     mail_app_main_setup( mail_app_main_tile_num );
     mail_app_setup( mail_app_setup_tile_num );
@@ -78,4 +85,8 @@ static void enter_mail_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
                                         statusbar_hide( true );
                                         break;
     }    
+}
+
+mail_config_t *mail_app_get_config( void ) {
+    return( &mail_config );
 }

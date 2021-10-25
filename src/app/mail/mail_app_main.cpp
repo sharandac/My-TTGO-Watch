@@ -29,22 +29,32 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
+    #include <ESP_Mail_Client.h>
+
+    EventGroupHandle_t mail_sync_event_handle = NULL;
+    TaskHandle_t _mail_sync_Task;
 #endif
+
+IMAPSession imap;
 
 uint32_t mail_main_tile_num = 0;
 lv_obj_t *mail_main_tile = NULL;
 lv_obj_t *mail_main_overview_page = NULL;
 lv_obj_t *mail_main_overview = NULL;
+lv_obj_t *mail_main_header_label = NULL;
 lv_style_t mail_main_cell_style;
 
 bool mail_main_style_event_cb( EventBits_t event, void *arg );
+static void mail_main_selected_mail_event_cb( lv_obj_t * obj, lv_event_t event );
 static void mail_main_refresh_event_cb( lv_obj_t *obj, lv_event_t event );
 static void mail_main_setup_event_cb( lv_obj_t *obj, lv_event_t event );
 bool mail_main_button_event_cb( EventBits_t event, void *arg );
+void mail_sync_Task( void * pvParameters );
+void mail_sync_request( void );
 void mail_main_refresh( void );
-void mail_main_setup( void );
 void mail_main_clear_overview( void );
 void mail_main_add_mail_entry( const char *from, const char *date );
+void mail_main_imapCallback( IMAP_Status status );
 
 void mail_app_main_setup( uint32_t tile_num ) {
     /**
@@ -65,7 +75,7 @@ void mail_app_main_setup( uint32_t tile_num ) {
      */
     lv_obj_t *mail_main_exit_btn = wf_add_exit_button( mail_main_tile );
     lv_obj_align( mail_main_exit_btn, mail_main_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
-    lv_obj_t *mail_main_header_label = lv_label_create( mail_main_tile, NULL );
+    mail_main_header_label = lv_label_create( mail_main_tile, NULL );
     lv_label_set_text( mail_main_header_label, "mail" );
     lv_obj_add_style( mail_main_header_label, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_align( mail_main_header_label, mail_main_exit_btn, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0 );
@@ -84,7 +94,16 @@ void mail_app_main_setup( uint32_t tile_num ) {
     mail_main_overview = lv_table_create( mail_main_overview_page, NULL );
     lv_obj_add_style( mail_main_overview, LV_OBJ_PART_MAIN, &mail_main_cell_style );
     lv_page_glue_obj(mail_main_overview, true);
+    lv_obj_set_event_cb( mail_main_overview, mail_main_selected_mail_event_cb );
     mail_main_clear_overview();
+
+    imap.callback( mail_main_imapCallback );
+
+#ifdef NATIVE_64BIT
+
+#else
+    mail_sync_event_handle = xEventGroupCreate();
+#endif
 }
 
 bool mail_main_style_event_cb( EventBits_t event, void *arg ) {
@@ -97,6 +116,18 @@ bool mail_main_style_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
+static void mail_main_selected_mail_event_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch ( event ) {
+        case LV_EVENT_CLICKED:
+                uint16_t row, col;
+                lv_table_get_pressed_cell( obj, &row, &col );
+                MAIL_APP_INFO_LOG("row %d clicked", row );
+            break;
+        default:
+            break;
+    }
+}
+
 bool mail_main_button_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BUTTON_EXIT:
@@ -106,7 +137,7 @@ bool mail_main_button_event_cb( EventBits_t event, void *arg ) {
             mail_main_refresh();
             break;
         case BUTTON_SETUP:
-            mail_main_setup();
+            // mail_main_setup();
         case BUTTON_LEFT:
             lv_page_scroll_ver(mail_main_overview_page, lv_disp_get_ver_res( NULL ) / 8 );
             break;
@@ -120,7 +151,7 @@ bool mail_main_button_event_cb( EventBits_t event, void *arg ) {
 static void mail_main_refresh_event_cb( lv_obj_t *obj, lv_event_t event ) {
     switch( event ) {
         case LV_EVENT_CLICKED:
-            mail_main_add_mail_entry( "mail@foo.bar", "23:42" );
+            mail_sync_request();
             break;
     }
 }
@@ -133,16 +164,138 @@ static void mail_main_setup_event_cb( lv_obj_t *obj, lv_event_t event ) {
     }    
 }
 
-void mail_main_refresh( void ) {
-    mail_main_clear_overview();
+void mail_sync_request( void ) {
+#ifdef NATIVE_64BIT
+    mail_sync_Task( NULL );
+#else
+    if ( xEventGroupGetBits( mail_sync_event_handle ) & MAIL_SYNC_REQUEST ) {
+        return;
+    }
+    else {
+        xEventGroupSetBits( mail_sync_event_handle, MAIL_SYNC_REQUEST );
+        xTaskCreate(    mail_sync_Task,              /* Function to implement the task */
+                        "mail sync Task",            /* Name of the task */
+                        10000,                           /* Stack size in words */
+                        NULL,                           /* Task input parameter */
+                        1,                              /* Priority of the task */
+                        &_mail_sync_Task );          /* Task handle. */
+    }
+#endif
 }
 
-void mail_main_setup( void ) {
+void mail_sync_Task( void * pvParameters ) {
+    #ifndef NATIVE_64BIT
+        log_i("start mail sync task, heap: %d", ESP.getFreeHeap() );
+        vTaskDelay( 250 );
+        if ( xEventGroupGetBits( mail_sync_event_handle ) & MAIL_SYNC_REQUEST ) {       
+    #endif
 
+    mail_main_refresh();
+
+    #ifndef NATIVE_64BIT
+        }
+        xEventGroupClearBits( mail_sync_event_handle, MAIL_SYNC_REQUEST );
+        log_i("finish mail sync task, heap: %d", ESP.getFreeHeap() );
+        vTaskDelete( NULL );
+    #endif
+}
+
+void mail_main_refresh( void ) {
+#if defined( NATIVE_64BIT )
+    mail_main_clear_overview();
+    mail_main_add_mail_entry( "no native imap supported", "23:42" );
+#else
+    char tmp_str[128] = "";
+    ESP_Mail_Session session;
+    IMAP_Config config;
+    mail_config_t *mail_config = mail_app_get_config();
+    /**
+     * connectio/session settings
+     */
+    session.server.host_name = mail_config->imap_server;
+    session.server.port = mail_config->imap_port;
+    session.login.email = mail_config->username;
+    session.login.password = mail_config->password;
+    /**
+     * imap config
+     */
+    config.search.criteria = "UID SEARCH ALL";
+    config.search.unseen_msg = true;
+    config.fetch.uid = "";
+    config.enable.html = true;
+    config.enable.text = true;
+    config.enable.recent_sort = true;
+    config.enable.download_status = true;
+    config.limit.search = mail_config->max_msg;
+    config.limit.msg_size = mail_config->max_msg_size;
+    config.storage.saved_path = "/mail";
+    config.storage.type = esp_mail_file_storage_type_flash;
+    imap.headerOnly();
+    /**
+     * start connections
+     */
+    snprintf( tmp_str, sizeof( tmp_str ), "connect to %s", mail_config->imap_server );
+    lv_label_set_text( mail_main_header_label, tmp_str );
+    if ( !imap.connect( &session, &config ) ) {
+        snprintf( tmp_str, sizeof( tmp_str ), "imap connect abort: %s", imap.errorReason().c_str() );
+        MAIL_APP_ERROR_LOG("%s", tmp_str );
+        lv_label_set_text( mail_main_header_label, tmp_str );
+        return;
+    }
+    MAIL_APP_DEBUG_LOG("imap connected");
+    /**
+     * select folder folders
+     */
+    snprintf( tmp_str, sizeof( tmp_str ), "set imap folder %s", mail_config->inbox_folder );
+    lv_label_set_text( mail_main_header_label, tmp_str );
+    if ( !imap.selectFolder( mail_config->inbox_folder ) ) {
+        snprintf( tmp_str, sizeof( tmp_str ), "imap select folder abort; %s", imap.errorReason().c_str() );
+        MAIL_APP_ERROR_LOG("%s", tmp_str );
+        lv_label_set_text( mail_main_header_label, tmp_str );
+        return;
+    }
+    MAIL_APP_DEBUG_LOG("imap folder selected, max msg %d (%d bytes)", config.limit.search, config.limit.msg_size );
+    /**
+     * clear mail list
+     */
+    mail_main_clear_overview();
+    /**
+     * get all email headers
+     */
+    lv_label_set_text( mail_main_header_label, "get mail header" );
+    if ( MailClient.readMail( &imap ) ) {
+        snprintf( tmp_str, sizeof( tmp_str ), "mail %d/%d", imap.selectedFolder().availableMessages(), imap.selectedFolder().msgCount() );
+    }
+    else {
+        snprintf( tmp_str, sizeof( tmp_str ), "imap read mail header abort: %s", imap.errorReason().c_str() );
+    }
+    MAIL_APP_DEBUG_LOG("%s", tmp_str );
+    lv_label_set_text( mail_main_header_label, tmp_str );
+
+    imap.empty();
+    imap.closeSession();
+#endif
+}
+
+void mail_main_imapCallback( IMAP_Status status ) {
+    /* Show the result when reading finished */
+    if (status.success())
+    {
+        /* Print the result */
+        /* Get the message list from the message list data */
+        IMAP_MSG_List msgList = imap.data();
+
+        for (size_t i = 0; i < msgList.msgItems.size(); i++) {
+            IMAP_MSG_Item msg = msgList.msgItems[i];
+            mail_main_add_mail_entry( msg.from, msg.date );
+        }
+        /* Clear all stored data in IMAPSession object */
+        imap.empty();
+    }    
 }
 
 void mail_main_clear_overview( void ) {
-    log_i("delete/vlear table");
+    MAIL_APP_DEBUG_LOG("delete/vlear table");
     lv_table_set_col_cnt( mail_main_overview, 2 );
     lv_table_set_row_cnt( mail_main_overview, 1 );
     lv_table_set_cell_type( mail_main_overview, 0, 0, 1 );
