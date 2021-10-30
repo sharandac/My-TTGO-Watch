@@ -224,8 +224,6 @@ void display_wakeup( bool silence ) {
                 M5.enableEPDPower();
                 delay(25);
             #elif defined( M5CORE2 )
-                M5.Lcd.begin();
-                M5.Lcd.wakeup();
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 #if defined( LILYGO_WATCH_2020_V2 )

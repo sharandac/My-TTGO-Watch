@@ -31,14 +31,9 @@
 #else
     #include <Arduino.h>
     #include <ESP_Mail_Client.h>
-
-    EventGroupHandle_t mail_sync_event_handle = NULL;
-    TaskHandle_t _mail_sync_Task;
 #endif
 
-IMAPSession imap;
 msg_chain_t *mail_uid = NULL;
-
 uint32_t mail_main_tile_num = 0;
 lv_obj_t *mail_main_tile = NULL;
 lv_obj_t *mail_main_overview_page = NULL;
@@ -56,7 +51,41 @@ void mail_sync_request( void );
 void mail_main_refresh( void );
 void mail_main_clear_overview( void );
 void mail_main_add_mail_entry( const char *from, const char *date );
-void mail_main_imapCallback( IMAP_Status status );
+
+#if defined( NATIVE_64BIT )
+
+#else
+    EventGroupHandle_t mail_sync_event_handle = NULL;
+    TaskHandle_t _mail_sync_Task;
+    IMAPSession imap;
+
+    void mail_main_imapCallback( IMAP_Status status );
+    void mail_main_imapCallback( IMAP_Status status ) {
+        /* Show the result when reading finished */
+        if (status.success())
+        {
+            /* Print the result */
+            /* Get the message list from the message list data */
+            IMAP_MSG_List msgList = imap.data();
+
+            for (size_t i = 0; i < msgList.msgItems.size(); i++) {
+                /**
+                 * set mail table text entry
+                 */
+                IMAP_MSG_Item msg = msgList.msgItems[i];
+                mail_main_add_mail_entry( msg.from, msg.date );
+                /**
+                 * store mail uid in a extra list
+                 */
+                char tmp_str[32] = "";
+                snprintf( tmp_str, sizeof( tmp_str ), "%d", msg.UID );
+                mail_uid = msg_chain_add_msg( mail_uid, tmp_str );
+            }
+            /* Clear all stored data in IMAPSession object */
+            imap.empty();
+        }    
+    }
+#endif
 
 void mail_app_main_setup( uint32_t tile_num ) {
     /**
@@ -99,13 +128,12 @@ void mail_app_main_setup( uint32_t tile_num ) {
     lv_obj_set_event_cb( mail_main_overview, mail_main_selected_mail_event_cb );
     mail_main_clear_overview();
 
-    imap.callback( mail_main_imapCallback );
+    #ifdef NATIVE_64BIT
 
-#ifdef NATIVE_64BIT
-
-#else
-    mail_sync_event_handle = xEventGroupCreate();
-#endif
+    #else
+        mail_sync_event_handle = xEventGroupCreate();
+        imap.callback( mail_main_imapCallback );
+    #endif
 
     msg_chain_delete( mail_uid );
 }
@@ -172,18 +200,22 @@ void mail_sync_request( void ) {
 #ifdef NATIVE_64BIT
     mail_sync_Task( NULL );
 #else
-    if ( xEventGroupGetBits( mail_sync_event_handle ) & MAIL_SYNC_REQUEST ) {
-        return;
-    }
-    else {
-        xEventGroupSetBits( mail_sync_event_handle, MAIL_SYNC_REQUEST );
-        xTaskCreate(    mail_sync_Task,              /* Function to implement the task */
-                        "mail sync Task",            /* Name of the task */
-                        10000,                           /* Stack size in words */
-                        NULL,                           /* Task input parameter */
-                        1,                              /* Priority of the task */
-                        &_mail_sync_Task );          /* Task handle. */
-    }
+    #if defined( M5PAPER )
+        mail_main_refresh();
+    #else
+        if ( xEventGroupGetBits( mail_sync_event_handle ) & MAIL_SYNC_REQUEST ) {
+            return;
+        }
+        else {
+            xEventGroupSetBits( mail_sync_event_handle, MAIL_SYNC_REQUEST );
+            xTaskCreate(    mail_sync_Task,              /* Function to implement the task */
+                            "mail sync Task",            /* Name of the task */
+                            10000,                           /* Stack size in words */
+                            NULL,                           /* Task input parameter */
+                            1,                              /* Priority of the task */
+                            &_mail_sync_Task );          /* Task handle. */
+        }
+    #endif
 #endif
 }
 
@@ -234,7 +266,7 @@ void mail_main_refresh( void ) {
     config.limit.msg_size = mail_config->max_msg_size;
     config.storage.saved_path = "/mail";
     config.storage.type = esp_mail_file_storage_type_flash;
-    // imap.headerOnly();
+    imap.headerOnly();
     /**
      * start connections
      */
@@ -283,34 +315,6 @@ mail_refresh_exit:
     imap.empty();
     imap.closeSession();
 #endif
-}
-
-void mail_main_imapCallback( IMAP_Status status ) {
-    /* Show the result when reading finished */
-    if (status.success())
-    {
-        /* Print the result */
-        /* Get the message list from the message list data */
-        IMAP_MSG_List msgList = imap.data();
-
-        for (size_t i = 0; i < msgList.msgItems.size(); i++) {
-            /**
-             * set mail table text entry
-             */
-            IMAP_MSG_Item msg = msgList.msgItems[i];
-            mail_main_add_mail_entry( msg.from, msg.date );
-            /**
-             * store mail uid in a extra list
-             */
-            char tmp_str[32] = "";
-            snprintf( tmp_str, sizeof( tmp_str ), "%d", msg.UID );
-            mail_uid = msg_chain_add_msg( mail_uid, tmp_str );
-
-            log_i("msg-body: %s", msg.text.content );
-        }
-        /* Clear all stored data in IMAPSession object */
-        imap.empty();
-    }    
 }
 
 void mail_main_clear_overview( void ) {

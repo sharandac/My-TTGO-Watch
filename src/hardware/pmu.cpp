@@ -256,7 +256,7 @@ void pmu_loop( void ) {
         if ( next_wakeup != 0 ) {
             if ( next_wakeup < millis() ) {
                 next_wakeup = 0;
-                powermgm_set_event( POWERMGM_WAKEUP_REQUEST ); 
+                powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST ); 
             }
         }
         
