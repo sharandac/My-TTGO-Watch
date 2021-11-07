@@ -73,6 +73,7 @@
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define ENABLE_MQTT                             /** @brief To disable built-in mqtt, comment this line */
             #define NO_WATCHFACE
+            #define NO_BLUETOOTH
         #elif defined( M5CORE2 )
             #define HARDWARE_NAME   "m5stack-core2"
             #define RES_X_MAX       320
@@ -92,7 +93,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2021102101"
+    #define __FIRMWARE__            "2021110701"
     /**
      * Allows to include config.h from C code
      */

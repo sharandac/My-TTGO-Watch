@@ -24,7 +24,7 @@
 
     #include "utils/basejsonconfig.h"
 
-    #define ALARM_CLOCK_JSON_CONFIG_FILE   "/blectl.json"   /** @brief defines json config file name */
+    #define ALARM_CLOCK_JSON_CONFIG_FILE   "/alaram.json"   /** @brief defines json config file name */
 
     #define VERSION_KEY "version"
     #define BEEP_KEY "beep"
