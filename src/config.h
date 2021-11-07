@@ -69,6 +69,7 @@
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define NO_WATCHFACE
+            #define NO_BLUETOOTH
         #elif defined( M5CORE2 )
             #define HARDWARE_NAME   "m5stack-core2"
             #define RES_X_MAX       320
@@ -87,7 +88,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "20211010701"
+    #define __FIRMWARE__            "202111701"
     /**
      * Allows to include config.h from C code
      */
