@@ -31,9 +31,8 @@
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
     #endif
-
 	/**
-     * buttons events mask
+     * @brief buttons events mask
      */
     #define     BUTTON_PWR              _BV(0)          /** @brief event mask for power button */
     #define     BUTTON_QUICKBAR         _BV(1)          /** @brief event mask for quickbar button */
@@ -47,7 +46,6 @@
     #define     BUTTON_LEFT             _BV(9)          /** @brief event mask for left button */
     #define     BUTTON_RIGHT            _BV(10)         /** @brief event mask for right button */
     #define     BUTTON_KEYBOARD         _BV(11)         /** @brief event mask for keyboard button, data as uint32_t */
-
     /**
      * @brief button setup function
      */

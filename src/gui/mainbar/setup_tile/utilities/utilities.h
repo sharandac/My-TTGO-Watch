@@ -22,6 +22,9 @@
 #ifndef _UTILITIES_H
     #define _UTILITIES_H
 
+    /**
+     * @brief system utilities setup
+     */
     void utilities_tile_setup( void );
 
 #endif // _UTILITIES_H

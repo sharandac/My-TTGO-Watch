@@ -22,6 +22,9 @@
 #ifndef _GPS_SETTINGS_H
     #define _GPS_SETTINGS_H
 
+    /**
+     * @brief system gps config tile setup
+     */
     void gps_settings_tile_setup( void );
     /**
      * @brief get the gps setup tile number

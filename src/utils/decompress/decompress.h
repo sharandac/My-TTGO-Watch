@@ -24,6 +24,15 @@
 
     typedef void (*ProgressCallback)( uint8_t progress );
 
+    /**
+     * @brief decompress a file from spiffs to spiffs
+     * 
+     * @param filename      pointer to a path/filename
+     * @param dest          pointer to a destination path
+     * @param cb            callback function for progress
+     * @return true 
+     * @return false 
+     */
     bool decompress_file_into_spiffs( const char*filename, const char *dest, ProgressCallback cb );
     #ifdef NATIVE_64BIT
         bool decompress_stream_into_flash( void *stream, const char* md5, int32_t firmwaresize, ProgressCallback cb );

@@ -22,6 +22,9 @@
 #ifndef _MOVE_SETTINGS_H
     #define _MOVE_SETTINGS_H
 
+    /**
+     * @brief system move setup
+     */
     void move_settings_tile_setup( void );
 
 #endif // _MOVE_SETTINGS_TILE_H

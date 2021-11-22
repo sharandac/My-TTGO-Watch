@@ -171,7 +171,7 @@ void powermgm_loop( void ) {
         #ifndef NATIVE_64BIT
             log_i("Free heap: %d", ESP.getFreeHeap());
             log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
+            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
@@ -200,7 +200,7 @@ void powermgm_loop( void ) {
         #ifndef NATIVE_64BIT
             log_i("Free heap: %d", ESP.getFreeHeap());
             log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("uptime: %d", millis() / 1000 );
+            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
 
         if ( lighsleep ) {

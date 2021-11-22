@@ -22,6 +22,9 @@
 #ifndef _TIME_SETTINGS_H
     #define _TIME_SETTINGS_H
 
+    /**
+     * @brief system time settings setup
+     */
     void time_settings_tile_setup( void );
 
 #endif // _TIME_SETTINGS_H

@@ -22,6 +22,9 @@
 #ifndef _DISPLAY_SETTINGS_H
     #define _DISPLAY_SETTINGS_H
 
+    /**
+     * @brief system display config setup
+     */
     void display_settings_tile_setup( void );
     /**
      * @brief   get the display setup tile number
