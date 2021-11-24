@@ -360,7 +360,7 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
     #ifdef NATIVE_64BIT
         retval = true;
     #else
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
             switch( event ) {
                 case POWERMGM_STANDBY:              log_i("button standby");
                                                     /*
@@ -385,6 +385,12 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                     retval = true;
                                                     break;
             }
+        #elif defined( M5CORE2 )
+            switch( event ) {
+                case POWERMGM_STANDBY:              log_i("standby blocked");
+                                                    retval = false;
+                                                    break;
+            }            
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;
         #elif defined( LILYGO_WATCH_2021 ) 
