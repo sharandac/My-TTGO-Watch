@@ -123,7 +123,7 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
         /*
          * check for an incoming call
          */
-        if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "accept" ) ) {
+        if( !strcmp( doc["t"], "call" ) && (!strcmp( doc["cmd"], "accept" ) || strlen(doc["cmd"]) == 0) ) {
             /*
              * hide statusbar and save current powerstate for later use after a call
              */

@@ -27,6 +27,7 @@
     #include "utils/basejsonconfig.h"
     #include "utils/webserver/webserver.h"
     #include "utils/ftpserver/ftpserver.h"
+    #include "utils/mqtt/mqtt.h"
     #define NETWORKLIST_ENTRYS          20
     #define WIFICTL_JSON_CONFIG_FILE    "/wificfg.json"
 
@@ -51,6 +52,12 @@
         bool ftpserver = false;                             /** @brief enable on ftpserver */
         char ftpuser[32] = FTPSERVER_USER;                  /** @brief ftpserver username*/
         char ftppass[32] = FTPSERVER_PASSWORD;              /** @brief ftpserver password*/
+        bool mqtt = false;                                  /** @brief enable on mqtt */
+        bool mqttssl = false;                               /** @brief mqtt ssl */
+        char mqttserver[64] = "";                           /** @brief mqtt server*/
+        int32_t mqttport = 1883;                            /** @brief mqtt port*/
+        char mqttuser[32] = "";                             /** @brief mqtt username*/
+        char mqttpass[32] = "";                             /** @brief mqtt password*/
         wifictl_networklist* networklist = NULL;            /** @brief network list config pointer */
         wifictl_networklist* networklist_tried = NULL;      /** @brief network list config pointer of networks a connection was tried */
 
