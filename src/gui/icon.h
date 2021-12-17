@@ -29,7 +29,9 @@
     LV_IMG_DECLARE(info_2_16px);
     LV_IMG_DECLARE(info_3_16px);
     LV_IMG_DECLARE(info_n_16px);
-
+    /**
+     * @brief indicator sets
+     */
     typedef enum {
         ICON_INDICATOR_OK = 0,
         ICON_INDICATOR_FAIL,

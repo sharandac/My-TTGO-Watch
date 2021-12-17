@@ -638,7 +638,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                     download_client.end();
                     client->stop();
                     uri_load_free_all( uri_load_dsc );
-                    heap_caps_malloc_extmem_enable( 16+1024 );
+                    heap_caps_malloc_extmem_enable( 16 * 1024 );
                     return( NULL );
                 }
             }
@@ -647,7 +647,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
                 download_client.end();
                 client->stop();
                 uri_load_free_all( uri_load_dsc );
-                heap_caps_malloc_extmem_enable( 16+1024 );
+                heap_caps_malloc_extmem_enable( 16 * 1024 );
                 return( NULL );
             }
         }
@@ -708,7 +708,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          */
         download_client.end();
         client->stop();
-        heap_caps_malloc_extmem_enable( 16+1024 );
+        heap_caps_malloc_extmem_enable( 16 * 1024 );
     }
     else {
         URI_LOAD_ERROR_LOG("uri_load_dsc: alloc failed");

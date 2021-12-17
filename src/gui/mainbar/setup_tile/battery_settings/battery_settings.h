@@ -22,6 +22,9 @@
 #ifndef _BATTERY_SETTINGS_H
     #define _BATTERY_SETTINGS_H
 
+    /**
+     * @brief system battery setup
+     */
     void battery_settings_tile_setup( void );
 
 #endif // _BATTERY_SETTINGS_H

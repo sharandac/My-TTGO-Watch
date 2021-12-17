@@ -36,6 +36,9 @@
         #define STATUSBAR_EXPAND_HEIGHT         200
     #endif
 
+    /**
+     * @brief statusbar item config stucture
+     */
     typedef struct {
         lv_obj_t *icon;
         const void *symbol;
@@ -43,6 +46,9 @@
         lv_style_t *style;
     } lv_status_bar_t;
 
+    /**
+     * @brief statusbar icon set
+     */
     typedef enum {
         STATUSBAR_BATTERY_PERCENT = 0,
         STATUSBAR_BATTERY,
@@ -56,6 +62,9 @@
         STATUSBAR_NUM
     } statusbar_icon_t;
     
+    /**
+     * @brief statusbar style set
+     */
     typedef enum {
         STATUSBAR_STYLE_NORMAL = 0,
         STATUSBAR_STYLE_BLACK,

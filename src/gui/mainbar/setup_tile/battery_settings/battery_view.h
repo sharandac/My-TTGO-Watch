@@ -22,6 +22,11 @@
 #ifndef _BATTERY_VIEW_H
     #define _BATTERY_VIEW_H
 
+    /**
+     * @brief system battery view tile setup
+     * 
+     * @param tile_num 
+     */
     void battery_view_tile_setup( uint32_t tile_num );
 
 #endif // _BATTERY_VIEW_H

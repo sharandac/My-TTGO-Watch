@@ -22,6 +22,9 @@
 #ifndef _BLUETOOTH_SETTINGS_H
     #define _BLUETOOTH_SETTINGS_H
 
+    /**
+     * @brief system bluetooth settings setup
+     */
     void bluetooth_settings_tile_setup( void );
     /**
      * @brief   get the bluetooth tile number

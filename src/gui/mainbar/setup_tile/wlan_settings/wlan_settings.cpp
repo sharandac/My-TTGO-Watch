@@ -106,7 +106,7 @@ void wlan_settings_tile_setup( void ) {
     wlan_password_tile_setup( wifi_password_tile_num );
     wlan_setup_tile_setup( wifi_setup_tile_num );
 
-    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN | WIFICTL_SCAN_ENTRY, wifi_setup_wifictl_event_cb, "wifi network scan" );
+    wifictl_register_cb( WIFICTL_ON | WIFICTL_OFF | WIFICTL_SCAN_DONE | WIFICTL_SCAN_ENTRY, wifi_setup_wifictl_event_cb, "wifi network scan" );
 }
 
 uint32_t wifi_get_setup_tile_num( void ) {
@@ -122,7 +122,7 @@ bool wifi_setup_wifictl_event_cb( EventBits_t event, void *arg ) {
                     lv_switch_off( wifi_onoff, LV_ANIM_OFF );
                     while ( lv_list_remove( wifiname_list, 0 ) );
                     break;
-        case    WIFICTL_SCAN:
+        case    WIFICTL_SCAN_DONE:
                     while ( lv_list_remove( wifiname_list, 0 ) );
                     break;
         case    WIFICTL_SCAN_ENTRY:

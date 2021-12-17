@@ -22,6 +22,9 @@
 #ifndef _SDCARD_H
     #define _SDCARD_H
 
+    /**
+     * @brief init and setup sd card and register all powermgm routines
+     */
     void sdcard_setup( void );
 
 #endif // _SDCARD_H

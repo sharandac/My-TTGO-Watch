@@ -26,10 +26,33 @@
     #define OSMMAP_APP_LOG          log_d
     #define OSMMAP_APP_ERROR_LOG    log_e
 
+    /**
+     * @brief osmmap app setup
+     */
     void osmmap_app_setup( void );
+    /**
+     * @brief show/hide osmmap app icons
+     * 
+     * @param show true means hide and false means show
+     */
     void osmmap_app_hide_app_icon_info( bool show );
+    /**
+     * @brief show/hide osmmap widget icon
+     * 
+     * @param show true means hide and false means show
+     */
     void osmmap_app_hide_widget_icon_info( bool show );
+    /**
+     * @brief get osmmap setup tile number
+     * 
+     * @return uint32_t
+     */
     uint32_t osmmap_app_get_app_setup_tile_num( void );
+    /**
+     * @brief get osmmap app tile number
+     * 
+     * @return uint32_t 
+     */
     uint32_t osmmap_app_get_app_main_tile_num( void );
 
 #endif // _OSM_APP_H

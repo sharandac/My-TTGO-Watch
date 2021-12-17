@@ -75,7 +75,6 @@ static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t eve
 static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event );
-static void bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event );
 static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc );
 
 void bluetooth_media_tile_setup( void ) {
@@ -210,13 +209,6 @@ static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):
             blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"previous\"}\r\n" );
             break;
-    }
-}
-
-static void bluetooth_media_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
-                                        break;
     }
 }
 

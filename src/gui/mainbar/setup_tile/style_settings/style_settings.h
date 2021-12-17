@@ -22,6 +22,9 @@
 #ifndef _STYLE_SETTINGS_H
     #define _STYLE_SETTINGS_H
 
+    /**
+     * @brief system style theme setup
+     */
     void style_settings_tile_setup( void );
 
 #endif // _STYLE_SETTINGS_H

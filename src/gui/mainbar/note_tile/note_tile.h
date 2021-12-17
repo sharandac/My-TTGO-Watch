@@ -22,6 +22,9 @@
 #ifndef _NOTE_TILE_H
     #define _NOTE_TILE_H
 
+    /**
+     * @brief setup note tile
+     */
     void note_tile_setup( void );
     /**
      * @brief get the tile number for the note tile

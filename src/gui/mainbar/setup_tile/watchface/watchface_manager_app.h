@@ -1,15 +1,15 @@
 #ifndef _WATCHFACE_MANAGER_APP_H
     #define _WATCHFACE_MANAGER_APP_H
 
-#ifdef NATIVE_64BIT
-    #include "utils/io.h"
-    #include <string>
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+        #include <string>
 
-    using namespace std;
-    #define String string
-#else
-    #include <Arduino.h>
-#endif
+        using namespace std;
+        #define String string
+    #else
+        #include <Arduino.h>
+    #endif
 
     #define WATCHFACE_MANAGER_APP_INFO_LOG                  log_i
     #define WATCHFACE_MANAGER_APP_DEBUG_LOG                 log_d
@@ -23,6 +23,9 @@
     #define WATCHFACE_MANAGER_APP_INSTALL_THEME             _BV(5)
     #define WATCHFACE_MANAGER_APP_TASK_EXIT_REQUEST         _BV(8)
 
+    /**
+     * @brief watchface theme config stucture
+     */
     typedef struct {
         char *watchface_theme_json_list = NULL;
         String watchface_manager_theme_name = "";

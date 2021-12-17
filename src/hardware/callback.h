@@ -42,7 +42,6 @@
      * @return          true if success or false if failed
      */
     typedef bool ( * CALLBACK_FUNC ) ( EventBits_t event, void *arg );
-
     /**
      * @brief callback table entry structure
      */
@@ -53,7 +52,6 @@
         callback_prio_t prio;               /** @brief order to call cb functions, CALL_CB_FIRST means first */
         uint64_t counter;                   /** @brief callback function call counter thair returned true */
     } callback_table_t;
-
     /**
      * @brief callback head structure
      */
@@ -64,7 +62,6 @@
         const char *name;                   /** @brief id for the callback structure */
         callback_t *next_callback_t;        
     } callback_t;
-
     /**
      * @brief init the callback structure
      * 
