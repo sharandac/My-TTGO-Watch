@@ -104,6 +104,7 @@
                 for (int j = 0; j < irConfig.totalCount(); j++)
                 {
                     auto btnConfig = irConfig.get(j);
+                    if (btnConfig == nullptr) continue;
                     if (btnConfig->page != i) continue;
 
                     if (btnConfig->uiButton.isCreated()) {
@@ -116,7 +117,7 @@
 
                     Button btn(button);
                     btn.size(irConfig.defBtnWidth, irConfig.defBtnHeight);
-                    btn.text(btnConfig->name.c_str());
+                    btn.text(btnConfig->name);
                     btn.clicked([btnConfig](Widget& btn) {
                         execute_ir_cmd(btnConfig);
                     });
@@ -141,59 +142,63 @@
             pinMode(TWATCH_2020_IR_PIN, OUTPUT);
             digitalWrite(TWATCH_2020_IR_PIN, LOW); // No Current Limiting so keep it off (!!!)
 
-            switch (config->mode)
-            {
-            case RC5:
-                irsend.sendRC5(config->code);
-                break;
-            case RC6:
-                irsend.sendRC6(config->code);
-                break;
-            case NEC:
-                irsend.sendNEC(config->code);
-                break;
-            case SONY:
-                if (config->bits > 0)
-                    irsend.sendSony(config->code, config->bits);
-                else
-                    irsend.sendSony(config->code);
-                break;
-            case PANASONIC:
-                irsend.sendPanasonic64(config->code);
-                break;
-            case JVC:
-                irsend.sendJVC(config->code);
-                break;
-            case SAMSUNG:
-                irsend.sendSAMSUNG(config->code);
-                break;
-            case SAMSUNG36:
-                irsend.sendSamsung36(config->code);
-                break;
-            case LG:
-                irsend.sendLG(config->code);
-                break;
-            case SHARP:
-                irsend.sendSharpRaw(config->code);
-                break;
-            case RAW:
-                if (config->raw != nullptr && config->rawLength > 0)
-                    irsend.sendRaw(config->raw, config->rawLength, 38);
-                break;
-            default:
-                log_e("IR Protocol %d not supported, please add it first!", (int)config->mode);
-                break;
+            for (size_t i = 0; i < config->commandCount; i++) {
+                auto command = config->commands[i];
+                if (i > 0) delay(100);
+                
+                switch (command->mode)
+                {
+                    case RC5:
+                        irsend.sendRC5(command->code);
+                        break;
+                    case RC6:
+                        irsend.sendRC6(command->code);
+                        break;
+                    case NEC:
+                        irsend.sendNEC(command->code);
+                        break;
+                    case SONY:
+                        if (command->bits > 0)
+                            irsend.sendSony(command->code, command->bits);
+                        else
+                            irsend.sendSony(command->code);
+                        break;
+                    case PANASONIC:
+                        irsend.sendPanasonic64(command->code);
+                        break;
+                    case JVC:
+                        irsend.sendJVC(command->code);
+                        break;
+                    case SAMSUNG:
+                        irsend.sendSAMSUNG(command->code);
+                        break;
+                    case SAMSUNG36:
+                        irsend.sendSamsung36(command->code);
+                        break;
+                    case LG:
+                        irsend.sendLG(command->code);
+                        break;
+                    case SHARP:
+                        irsend.sendSharpRaw(command->code);
+                        break;
+                    case RAW:
+                        if (command->raw != nullptr && command->rawLength > 0)
+                            irsend.sendRaw(command->raw, command->rawLength, 38);
+                        break;
+                    default:
+                        log_e("IR Protocol %d not supported, please add it first!", (int)command->mode);
+                        break;
+                }
             }
 
             delay(50);
             digitalWrite(TWATCH_2020_IR_PIN, LOW); // No Current Limiting so keep it off (!!!)
-            log_i("IR button clicked: %s", config->name);
+            log_i("IR button with %d commands clicked: %s", config->commandCount, config->name);
         }
 
         bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
             if (event != BLECTL_MSG_JSON) return false; // Not supported
 
-            InfraButton* btn = nullptr;
             BluetoothJsonRequest &request = *(BluetoothJsonRequest *)arg;
 
             if (request.isRequest() && request.isForApplication("ir"))
@@ -207,17 +212,17 @@
                     String name = request["v"];
                     if (cmd == "save") {
                         // Update button data:
-                        btn = irConfig.get(0, name.c_str());
-                        if (btn != nullptr) {
+                        auto btn = irConfig.get(0, name.c_str());
+                        if (btn != nullptr){
                             JsonObject obj = request.as<JsonObject>();
                             btn->loadFrom(obj);
-                            irConfig.save();
                         }
+                        irConfig.save();
                     }
                     irConfig.sendButtonEdit(response, 0, name.c_str());
                 } else if (cmd == "add") {
                     String name = request["v"];
-                    btn = irConfig.add(0, name.c_str());
+                    irConfig.add(0, name.c_str());
                     irConfig.sendListNames(response);
                     IRController_build_UI(IRControlSettingsAction::Save);
                 } else if (cmd == "del") {
