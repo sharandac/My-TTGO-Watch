@@ -232,7 +232,7 @@ void weather_station_app_main_setup( uint32_t tile_num ) {
 	lv_obj_set_size(weather_station_tank2_label, 75, 20);
 
     // callbacks
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT, weather_station_main_wifictl_event_cb, "weather station main" );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT_IP, weather_station_main_wifictl_event_cb, "weather station main" );
 
     // create an task that runs every second
     _weather_station_app_task = lv_task_create( weather_station_app_task, 1000, LV_TASK_PRIO_MID, NULL );
@@ -240,7 +240,7 @@ void weather_station_app_main_setup( uint32_t tile_num ) {
 
 static bool weather_station_main_wifictl_event_cb( EventBits_t event, void *arg ) {    
     switch( event ) {
-        case WIFICTL_CONNECT:       weather_station_state = true;
+        case WIFICTL_CONNECT_IP:    weather_station_state = true;
                                     weather_station_app_hide_indicator();
                                     break;
         case WIFICTL_DISCONNECT:    weather_station_state = false;
@@ -293,15 +293,17 @@ void weather_station_refresh() {
 
     HTTPClient http_client;
     WiFiClientSecure *sslclient = NULL;
+    
+    http_client.setConnectTimeout(2000);
+    http_client.setTimeout(3000);
+    http_client.useHTTP10( true );
 
     if( strstr( weather_station_config->url, "http://" ) ) {
-        http_client.useHTTP10( true );
         http_client.begin( weather_station_config->url );
     }
     else if( strstr( weather_station_config->url, "https://" ) ) {
         sslclient = new WiFiClientSecure;
         sslclient->setInsecure();
-        http_client.useHTTP10( true );
         http_client.begin( *sslclient, weather_station_config->url );
     }
 

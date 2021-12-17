@@ -166,7 +166,7 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     mainbar_add_slide_element( button_matrix );
 
     // callbacks
-    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT | WIFICTL_DISCONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );
+    wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT_IP | WIFICTL_DISCONNECT, kodi_remote_main_wifictl_event_cb, "kodi remote main" );
 
     // create an task that runs every secound
     _kodi_remote_app_task = lv_task_create( kodi_remote_app_task, 1000, LV_TASK_PRIO_MID, NULL );
@@ -184,7 +184,7 @@ static void kodi_remote_setup_hibernate_callback ( void ) {
 
 static bool kodi_remote_main_wifictl_event_cb( EventBits_t event, void *arg ) {    
     switch( event ) {
-        case WIFICTL_CONNECT:       kodi_remote_state = true;
+        case WIFICTL_CONNECT_IP:    kodi_remote_state = true;
                                     kodi_remote_app_hide_indicator();
                                     break;
         case WIFICTL_DISCONNECT:    kodi_remote_state = false;
@@ -515,6 +515,8 @@ int kodi_remote_publish(const char* method, const char* params, SpiRamJsonDocume
     snprintf( payload, sizeof( payload ), "{ \"jsonrpc\": \"2.0\", \"method\": \"%s\", \"params\": %s, \"id\": \"%d\" }", method, params, kodi_remote_id );
 
     HTTPClient publish_client;
+    publish_client.setConnectTimeout(1000);
+    publish_client.setTimeout(2000);
     publish_client.useHTTP10( true );
     publish_client.begin( url );
     publish_client.addHeader("Content-Type", "application/json");
