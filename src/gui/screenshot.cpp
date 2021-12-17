@@ -51,7 +51,9 @@ void screenshot_setup( void ) {
 void screenshot_take( void ) {
     lv_disp_drv_t driver;
     lv_disp_t *system_disp;
-    
+    /**
+     * force reflush lvgl image cache
+     */
     lv_img_cache_set_size( 1 );
     lv_img_cache_set_size( 256 );
     /**

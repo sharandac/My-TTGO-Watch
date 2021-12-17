@@ -22,12 +22,15 @@
 #ifndef _MAIL_APP_H
     #define _MAIL_APP_H
 
+    #include "config/mail_config.h"
+
     #define MAIL_APP_INFO_LOG     log_i
-    #define MAIL_APP_LOG          log_i
+    #define MAIL_APP_DEBUG_LOG    log_i
     #define MAIL_APP_ERROR_LOG    log_i
 
     void mail_app_setup( void );
     uint32_t mail_app_get_app_main_tile_num( void );
     uint32_t mail_app_get_app_setup_tile_num( void );
-    
+    mail_config_t *mail_app_get_config( void );
+
 #endif // _MAIL_APP_H

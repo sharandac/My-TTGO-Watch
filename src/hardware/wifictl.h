@@ -37,24 +37,28 @@
     #define ESP_MODEL_NAME              "LILYGO T-WATCH2020 V1"
     #define ESP_DEVICE_NAME             "ESP STATION"
 
+    /**
+     * @brief wifi event enum
+     */
     enum wifictl_event_t {
-        WIFICTL_CONNECT                = _BV(0),
-        WIFICTL_CONNECT_IP             = _BV(1),
-        WIFICTL_DISCONNECT             = _BV(2),
-        WIFICTL_ON                     = _BV(3),
-        WIFICTL_OFF                    = _BV(4),
-        WIFICTL_ACTIVE                 = _BV(5),
-        WIFICTL_ON_REQUEST             = _BV(6),
-        WIFICTL_OFF_REQUEST            = _BV(7),
-        WIFICTL_WPS_REQUEST            = _BV(8),
-        WIFICTL_WPS_SUCCESS            = _BV(9),
-        WIFICTL_WPS_FAILED             = _BV(10),
-        WIFICTL_SCAN                   = _BV(11),
-        WIFICTL_SCAN_ENTRY             = _BV(12),
-        WIFICTL_FIRST_RUN              = _BV(13),
-        WIFICTL_AUTOON                 = _BV(14)
+        WIFICTL_CONNECT                = _BV(0),            /** @brief wifi connect event */
+        WIFICTL_CONNECT_IP             = _BV(1),            /** @brief wifi connect and got ip event */
+        WIFICTL_DISCONNECT             = _BV(2),            /** @brief wifi disconnect event */
+        WIFICTL_ON                     = _BV(3),            /** @brief wifi switch on connect event */
+        WIFICTL_OFF                    = _BV(4),            /** @brief wifi dwitch off connect event */
+        WIFICTL_ACTIVE                 = _BV(5),            /** @brief wifi active event */
+        WIFICTL_ON_REQUEST             = _BV(6),            /** @brief wifi switch on reguest event */
+        WIFICTL_OFF_REQUEST            = _BV(7),            /** @brief wifi switch off request event */
+        WIFICTL_WPS_REQUEST            = _BV(8),            /** @brief wifi wps auth rewuest event */
+        WIFICTL_WPS_SUCCESS            = _BV(9),            /** @brief wifi wps auth request success event */
+        WIFICTL_WPS_FAILED             = _BV(10),           /** @brief wifi wps auth request failed event */
+        WIFICTL_MSG                    = _BV(12),           /** @brief wifi info msg event */
+        WIFICTL_SCAN                   = _BV(13),           /** @brief wifi scan event */
+        WIFICTL_SCAN_DONE              = _BV(14),           /** @brief wifi scan done event */
+        WIFICTL_SCAN_ENTRY             = _BV(15),           /** @brief wifi scan entry event */
+        WIFICTL_FIRST_RUN              = _BV(16),           /** @brief wifi first run preventer */
+        WIFICTL_AUTOON                 = _BV(17)            /** @brief wifi autoon event */
     };
-
     /**
      * @brief setup wifi controller routine
      */

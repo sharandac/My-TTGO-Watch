@@ -31,7 +31,6 @@
     #define     SENSOR_HUMIDITY         _BV(1)          /** @brief event mask for humidity */
     #define     SENSOR_RELHUMIDITY      _BV(2)          /** @brief event mask for relative humidity */
     #define     SENSOR_PRESSURE         _BV(3)          /** @brief event mask for pressure */
-
     /**
      * @brief button setup function
      */

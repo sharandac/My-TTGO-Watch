@@ -34,14 +34,17 @@
         #define THEME_ICON_SIZE         112
         #define THEME_ICON_PADDING      10
         #define THEME_PADDING           10
+        #define THEME_CONT_HEIGHT       60
     #elif defined( MID_THEME )
         #define THEME_ICON_SIZE         72
         #define THEME_ICON_PADDING      10
         #define THEME_PADDING           10
+        #define THEME_CONT_HEIGHT       45
     #else
         #define THEME_ICON_SIZE         42
         #define THEME_ICON_PADDING      5
         #define THEME_PADDING           5
+        #define THEME_CONT_HEIGHT       35
     #endif
 
     #define     BACKGROUND_STYLE            ws_get_background_style()

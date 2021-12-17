@@ -34,16 +34,16 @@
     #include <Arduino.h>
 #endif
 
-    #define WATCHFACE_JSON_COFIG_FILE           "/watchface.json"   /** @brief defines json config file name */
+    #define WATCHFACE_JSON_COFIG_FILE               "/watchface.json"   /** @brief defines json config file name */
     /**
      * define all theme download and compressed theme file
      */
-    #define WATCHFACE_THEME_URL                 "https://raw.githubusercontent.com/sharandac/My-TTGO-Watchfaces/main"
-    #define WATCHFACE_THEME_LIST_FILE           "/watchface_theme_list.json"
-    #define WATCHFACE_THEME_FILE                "/watchface.tar.gz"
-    #define WATCHFACE_THEME_PREV                "/watchface_theme_prev_120px.png"
+    #define WATCHFACE_THEME_URL                     "https://raw.githubusercontent.com/sharandac/My-TTGO-Watchfaces/main"
+    #define WATCHFACE_THEME_LIST_FILE               "/watchface_theme_list.json"
+    #define WATCHFACE_THEME_FILE                    "/watchface.tar.gz"
+    #define WATCHFACE_THEME_PREV                    "/watchface_theme_prev_120px.png"
 
-    #define WATCHFACE_MAX_ENTRYS                50
+    #define WATCHFACE_MAX_ENTRYS                    50
     /**
      * @brief blectl config structure
      */
@@ -52,7 +52,7 @@
         watchface_config_t();
         bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
         bool watchface_antialias = true;            /** @brief setup antialias */
-        String watchface_theme_url = "";
+        String watchface_theme_url = "";            /** @brief theme url */
 
         protected:
         ////////////// Available for overloading: //////////////

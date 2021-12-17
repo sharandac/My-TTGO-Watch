@@ -326,7 +326,7 @@ void statusbar_setup( void )
     statusbar_style_icon( STATUSBAR_BLUETOOTH, STATUSBAR_STYLE_GRAY );
 
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, statusbar_blectl_event_cb, "statusbar bluetooth" );
-    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_SCAN | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
+    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON | WIFICTL_MSG | WIFICTL_WPS_SUCCESS | WIFICTL_WPS_FAILED | WIFICTL_CONNECT_IP, statusbar_wifictl_event_cb, "statusbar wifi" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, statusbar_rtcctl_event_cb, "statusbar rtc" );
     bma_register_cb( BMACTL_STEPCOUNTER, statusbar_bmactl_event_cb, "statusbar stepcounter" );
     pmu_register_cb( PMUCTL_STATUS, statusbar_pmuctl_event_cb, "statusbar pmu");
@@ -622,7 +622,7 @@ bool statusbar_wifictl_event_cb( EventBits_t event, void *arg ) {
                                     statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;
-        case WIFICTL_SCAN:          statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
+        case WIFICTL_MSG:           statusbar_style_icon( STATUSBAR_WIFI, STATUSBAR_STYLE_GRAY );
                                     statusbar_wifi_set_state( true, (char *)arg );
                                     statusbar_show_icon( STATUSBAR_WIFI );
                                     break;

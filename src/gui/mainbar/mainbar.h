@@ -29,12 +29,11 @@
 
     #define MAINBAR_INFO_LOG            log_d
 
-    #define MAINBAR_APP_TILE_X_START    0
-    #define MAINBAR_APP_TILE_Y_START    8
-    #define MAINBAR_MAX_HISTORY         16
-    #define STATUSBAR_HIDE              true
-    #define STATUSBAR_SHOW              false
-
+    #define MAINBAR_APP_TILE_X_START    0                       /** @brief x start pos for app tiles **/
+    #define MAINBAR_APP_TILE_Y_START    8                       /** @brief y start for app tiles **/
+    #define MAINBAR_MAX_HISTORY         16                      /** @brief max tile history deep **/
+    #define STATUSBAR_HIDE              true                    /** @brief hide statusbar **/
+    #define STATUSBAR_SHOW              false                   /** @brief show statusbar **/
     /**
      * @brief mainbar history structure
      */

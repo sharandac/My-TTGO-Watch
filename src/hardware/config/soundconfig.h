@@ -32,14 +32,14 @@
     class sound_config_t : public BaseJsonConfig {
         public:
         sound_config_t();
-        uint8_t volume = 50;            /** @brief sound value from 0..100 */
-        bool enable = true;             /** @brief sound on/off */
+        uint8_t volume = 50;                            /** @brief sound value from 0..100 */
+        bool enable = true;                             /** @brief sound on/off */
 
-        bool silence_timeframe = false; /** @brief silence sound time frame enabled/disabled */
-        int silence_start_hour = 0;     /** @brief silence sound frame start hour */
-        int silence_start_minute = 0;   /** @brief silence sound frame start min */
-        int silence_end_hour = 0;       /** @brief silence sound frame end hour */
-        int silence_end_minute = 0;     /** @brief silence sound frame end min */
+        bool silence_timeframe = false;                 /** @brief silence sound time frame enabled/disabled */
+        int silence_start_hour = 0;                     /** @brief silence sound frame start hour */
+        int silence_start_minute = 0;                   /** @brief silence sound frame start min */
+        int silence_end_hour = 0;                       /** @brief silence sound frame end hour */
+        int silence_end_minute = 0;                     /** @brief silence sound frame end min */
 
         protected:
         ////////////// Available for overloading: //////////////

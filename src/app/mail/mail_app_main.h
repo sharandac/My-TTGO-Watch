@@ -22,6 +22,15 @@
 #ifndef _MAIL_APP_MAIN_H
     #define _MAIL_APP_MAIN_H
 
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+        #include <time.h>
+    #else
+        #include <Arduino.h>
+    #endif
+
+    #define MAIL_SYNC_REQUEST       _BV(0)
+
     void mail_app_main_setup( uint32_t tile_num );
 
 #endif // _MAIL_APP_MAIN_H

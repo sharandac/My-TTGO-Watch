@@ -32,6 +32,11 @@
     #define OSM_APP_LOAD_AHEAD_REQUEST          _BV(1)      /** @brief set tile image update flag */
     #define OSM_APP_TASK_EXIT_REQUEST           _BV(2)      /** @brief set task exit flag */
 
+    /**
+     * @brief osmmap app main setup routine
+     * 
+     * @param tile_num 
+     */
     void osmmap_app_main_setup( uint32_t tile_num );
 
 #endif // _OSM_APP_MAIN_H

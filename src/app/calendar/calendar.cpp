@@ -49,7 +49,7 @@ void calendar_app_setup( void ) {
     /**
      * register app icon on the app tile
      */
-    calendar_icon = app_register( "Calendar\n(beta)", &calendar_64px, calendar_enter_event_cb );
+    calendar_icon = app_register( "Calendar", &calendar_64px, calendar_enter_event_cb );
     /**
      * check and init database
      */

@@ -22,6 +22,9 @@
 #ifndef _BLUETOOTH_PAIRING_H
     #define _BLUETOOTH_PAIRING_H
 
+    /**
+     * @brief setup bluetooth pairing tile
+     */
     void bluetooth_pairing_tile_setup( void );
 
 #endif // _BLUETOOTH_PAIRING_H

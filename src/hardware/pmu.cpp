@@ -256,7 +256,7 @@ void pmu_loop( void ) {
         if ( next_wakeup != 0 ) {
             if ( next_wakeup < millis() ) {
                 next_wakeup = 0;
-                powermgm_set_event( POWERMGM_WAKEUP_REQUEST ); 
+                powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST ); 
             }
         }
         
@@ -286,8 +286,8 @@ void pmu_loop( void ) {
                 * delete old charging logfile when plug in and
                 * set variable plug to true
                 */
+                log_i("AXP202: VBusPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                SPIFFS.remove( PMU_CHARGE_LOG_FILENAME );
                 plug = true;
             }
             if ( ttgo->power->isVbusRemoveIRQ() ) {
@@ -296,8 +296,8 @@ void pmu_loop( void ) {
                 * remove old discharging log file when unplug
                 * set variable plug and chargingto false
                 */
+                log_i("AXP202: VBusRemoteInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                SPIFFS.remove( PMU_DISCHARGE_LOG_FILENAME );
                 charging = false;
                 plug = false;
             }
@@ -306,6 +306,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to true
                 */
+                log_i("AXP202: ChargingIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 charging = true;
             }
@@ -314,6 +315,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to false
                 */
+                log_i("AXP202: ChargingDoneIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 charging = false;
             }
@@ -322,6 +324,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to false
                 */
+                log_i("AXP202: BattPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = true;
             }
@@ -330,6 +333,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to false
                 */
+                log_i("AXP202: BattRemoveIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = false;
             }
@@ -341,6 +345,7 @@ void pmu_loop( void ) {
                 * fast return for faster wakeup
                 */
                 ttgo->power->clearIRQ();
+                log_i("AXP202: PEKShortPressIRQ");
                 pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
                 return;
             }
@@ -352,6 +357,7 @@ void pmu_loop( void ) {
                 * fast return for faster wakeup
                 */
                 ttgo->power->clearIRQ();
+                log_i("AXP202: PEKLongtPressIRQ");
                 pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
                 return;
             }
@@ -365,6 +371,7 @@ void pmu_loop( void ) {
                 ttgo->power->clearTimerStatus();
                 ttgo->power->offTimer();
                 ttgo->power->clearIRQ();
+                log_i("AXP202: TimerTimeoutIRQ");
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                 pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
                 return;
