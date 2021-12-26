@@ -134,7 +134,7 @@
 
         // Increase buttons treshold further and leave space for adding buttons via bluetooth
         if (jsonButtonCount > IR_BUTTONS_START - IR_BUTTONS_TRESHOLD) {
-            free(buttons);
+            if (buttons != nullptr) free(buttons);
             buttons = (InfraButton**)MALLOC(sizeof( InfraButton* ) * (jsonButtonCount + IR_BUTTONS_TRESHOLD));
             if (buttons) {
                 log_d("alloc more infrared buttons from %d to %d successful", IR_BUTTONS_START, (jsonButtonCount + IR_BUTTONS_TRESHOLD));
@@ -143,6 +143,8 @@
                 log_e("alloc more infrared buttons failed");
                 while( true );
             }
+        } else if (buttons == nullptr) {
+            buttons = (InfraButton**)MALLOC(sizeof( InfraButton* ) * IR_BUTTONS_START);
         }
 
         for (size_t i = 0; i < pageCount; i++)
