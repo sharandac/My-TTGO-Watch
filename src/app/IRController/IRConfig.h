@@ -41,7 +41,7 @@
                 virtual size_t getJsonBufferSize() { return 48000; }
 
                 protected:
-                InfraButton** buttons = (InfraButton**)MALLOC(sizeof( InfraButton* ) * IR_BUTTONS_START);
+                InfraButton** buttons = nullptr;
                 size_t buttonCount = 0;
             };
         #else
