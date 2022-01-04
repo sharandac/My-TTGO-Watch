@@ -24,6 +24,7 @@
 #include "app/alarm_clock/alarm_clock.h"
 #include "app/mqtt_player/mqtt_player_app.h"
 #include "app/mqtt_control/mqtt_control_app.h"
+#include "app/printer3d/printer3d_app.h"
 #include "app/tiltmouse/tiltmouse_app.h"
 #include "app/weather_station/weather_station_app.h"
 #include "app/NetTools/NetTools.h"
@@ -64,6 +65,7 @@ void setup() {
     calendar_app_setup();
     mail_app_setup();
     calc_app_setup();
+    printer3d_app_setup();
     weather_app_setup();
     weather_station_app_setup();
     IRController_setup();
