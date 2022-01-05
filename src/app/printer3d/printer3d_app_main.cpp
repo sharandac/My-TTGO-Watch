@@ -54,7 +54,23 @@ lv_obj_t *printer3d_app_main_tile = NULL;
 
 lv_task_t * _printer3d_app_task;
 
+lv_style_t printer3d_heading_big_style;
+lv_style_t printer3d_heading_small_style;
+lv_style_t printer3d_line_meter_style;
+lv_obj_t* printer3d_heading_name;
+lv_obj_t* printer3d_heading_version;
+lv_obj_t* printer3d_progress_linemeter;
+lv_obj_t* printer3d_progress_percent;
+lv_obj_t* printer3d_progress_state;
+lv_obj_t* printer3d_extruder_label;
+lv_obj_t* printer3d_extruder_temp;
+lv_obj_t* printer3d_printbed_label;
+lv_obj_t* printer3d_printbed_temp;
+
 LV_IMG_DECLARE(refresh_32px);
+
+LV_FONT_DECLARE(Ubuntu_12px);
+LV_FONT_DECLARE(Ubuntu_16px);
 
 static void printer3d_setup_activate_callback ( void );
 static void printer3d_setup_hibernate_callback ( void );
@@ -72,17 +88,95 @@ void printer3d_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_hibernate_cb( tile_num, printer3d_setup_hibernate_callback );
     printer3d_app_main_tile = mainbar_get_tile_obj( tile_num );
 
+    // menu buttons
     lv_obj_t * exit_btn = wf_add_exit_button( printer3d_app_main_tile, exit_printer3d_app_main_event_cb );
     lv_obj_align(exit_btn, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
     lv_obj_t * setup_btn = wf_add_setup_button( printer3d_app_main_tile, enter_printer3d_app_setup_event_cb );
     lv_obj_align(setup_btn, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_ICON_PADDING, -THEME_ICON_PADDING );
 
+    // headings
+    printer3d_heading_name = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_style_copy(&printer3d_heading_big_style, APP_STYLE);
+    lv_style_set_text_font(&printer3d_heading_big_style, LV_STATE_DEFAULT, &Ubuntu_16px);
+    lv_obj_add_style( printer3d_heading_name, LV_OBJ_PART_MAIN, &printer3d_heading_big_style );
+    lv_label_set_text( printer3d_heading_name, "3D Printer");
+    lv_label_set_long_mode( printer3d_heading_name, LV_LABEL_LONG_SROLL_CIRC );
+    lv_obj_set_width( printer3d_heading_name, lv_disp_get_hor_res( NULL ) - 20 );
+    lv_obj_align( printer3d_heading_name, printer3d_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    
+    printer3d_heading_version = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_style_copy(&printer3d_heading_small_style, APP_STYLE);
+    lv_style_set_text_font(&printer3d_heading_small_style, LV_STATE_DEFAULT, &Ubuntu_12px);
+    lv_obj_add_style( printer3d_heading_version, LV_OBJ_PART_MAIN, &printer3d_heading_small_style );
+    lv_label_set_text( printer3d_heading_version, "");
+    lv_label_set_long_mode( printer3d_heading_version, LV_LABEL_LONG_SROLL_CIRC );
+    lv_obj_set_width( printer3d_heading_version, lv_disp_get_hor_res( NULL ) - 20 );
+    lv_obj_align( printer3d_heading_version, printer3d_heading_name, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
+
+    // progress
+	printer3d_progress_linemeter = lv_linemeter_create(printer3d_app_main_tile, NULL);
+    lv_style_copy(&printer3d_line_meter_style, APP_STYLE);
+	lv_style_set_line_rounded(&printer3d_line_meter_style, LV_STATE_DEFAULT, 1);
+	lv_style_set_line_color(&printer3d_line_meter_style, LV_STATE_DEFAULT, lv_color_hex(0xffffff));
+	lv_style_set_scale_grad_color(&printer3d_line_meter_style, LV_STATE_DEFAULT, lv_color_hex(0xffffff));
+	lv_style_set_scale_end_color(&printer3d_line_meter_style, LV_STATE_DEFAULT, lv_color_hex(0x666666));
+	lv_obj_add_style(printer3d_progress_linemeter, LV_OBJ_PART_MAIN, &printer3d_line_meter_style);
+	lv_linemeter_set_range(printer3d_progress_linemeter, 0, 100);
+	lv_linemeter_set_scale(printer3d_progress_linemeter, 270, 20);
+	lv_linemeter_set_value(printer3d_progress_linemeter, 0);
+	lv_obj_set_size(printer3d_progress_linemeter, 120, 120);
+    lv_obj_align( printer3d_progress_linemeter, printer3d_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 30 );
+
+    printer3d_progress_percent = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_progress_percent, LV_OBJ_PART_MAIN, &printer3d_heading_big_style );
+	lv_label_set_align(printer3d_progress_percent, LV_LABEL_ALIGN_CENTER);
+    lv_label_set_text( printer3d_progress_percent, "--%");
+    lv_obj_set_width( printer3d_progress_percent, 20 );
+    lv_obj_align( printer3d_progress_percent, printer3d_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 80 );
+
+    printer3d_progress_state = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_progress_state, LV_OBJ_PART_MAIN, &printer3d_heading_big_style );
+	lv_label_set_align(printer3d_progress_state, LV_LABEL_ALIGN_CENTER);
+    lv_label_set_text( printer3d_progress_state, "LOADING");
+    lv_label_set_long_mode( printer3d_progress_state, LV_LABEL_LONG_SROLL_CIRC );
+    lv_obj_set_width( printer3d_progress_state, lv_disp_get_hor_res( NULL ) - 20 );
+    lv_obj_align( printer3d_progress_state, printer3d_app_main_tile, LV_ALIGN_IN_TOP_MID, 0, 130 );
+
+    // temperatures
+    printer3d_extruder_label = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_extruder_label, LV_OBJ_PART_MAIN, &printer3d_heading_small_style );
+	lv_label_set_align(printer3d_extruder_label, LV_LABEL_ALIGN_LEFT);
+    lv_label_set_text( printer3d_extruder_label, "Extruder");
+    lv_obj_set_width( printer3d_extruder_label, 100 );
+    lv_obj_align( printer3d_extruder_label, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -50 );
+    
+    printer3d_extruder_temp = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_extruder_temp, LV_OBJ_PART_MAIN, &printer3d_heading_big_style );
+	lv_label_set_align(printer3d_extruder_temp, LV_LABEL_ALIGN_LEFT);
+    lv_label_set_text( printer3d_extruder_temp, "--°C");
+    lv_obj_set_width( printer3d_extruder_temp, 100 );
+    lv_obj_align( printer3d_extruder_temp, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -65 );
+    
+    printer3d_printbed_label = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_printbed_label, LV_OBJ_PART_MAIN, &printer3d_heading_small_style );
+	lv_label_set_align(printer3d_printbed_label, LV_LABEL_ALIGN_RIGHT);
+    lv_label_set_text( printer3d_printbed_label, "Printbed");
+    lv_obj_set_width( printer3d_printbed_label, 100 );
+    lv_obj_align( printer3d_printbed_label, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -50 );
+    
+    printer3d_printbed_temp = lv_label_create( printer3d_app_main_tile, NULL);
+    lv_obj_add_style( printer3d_printbed_temp, LV_OBJ_PART_MAIN, &printer3d_heading_big_style );
+	lv_label_set_align(printer3d_printbed_temp, LV_LABEL_ALIGN_RIGHT);
+    lv_label_set_text( printer3d_printbed_temp, "  --°C");
+    lv_obj_set_width( printer3d_printbed_temp, 100 );
+    lv_obj_align( printer3d_printbed_temp, printer3d_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -65 );
+
     // callbacks
     wifictl_register_cb( WIFICTL_OFF | WIFICTL_CONNECT_IP | WIFICTL_DISCONNECT, printer3d_main_wifictl_event_cb, "printer3d main" );
 
-    // create an task that runs every fifteen seconds
-    _printer3d_app_task = lv_task_create( printer3d_app_task, 15000, LV_TASK_PRIO_MID, NULL );
+    // create an task that runs every second
+    _printer3d_app_task = lv_task_create( printer3d_app_task, 1000, LV_TASK_PRIO_MID, NULL );
 }
 
 static void printer3d_setup_activate_callback ( void ) {
@@ -185,14 +279,12 @@ bool printer3d_refresh() {
 
         char* generalInfoType = strstr(generalInfo, "Machine Type:");
         if ( generalInfoType != NULL && strlen(generalInfoType) > 0 && sscanf( generalInfoType, "Machine Type: %s", machineType ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter Type: %s", machineType);
+            lv_label_set_text( printer3d_heading_name, machineType);
         }
 
         char* generalInfoVersion = strstr(generalInfo, "Firmware:");
         if ( generalInfoVersion != NULL && strlen(generalInfoVersion) > 0 && sscanf( generalInfoVersion, "Firmware: %s", machineVersion ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter Version: %s", machineVersion);
+            lv_label_set_text( printer3d_heading_version, machineVersion);
         }
     }
     free( generalInfo );
@@ -202,14 +294,12 @@ bool printer3d_refresh() {
 
         char* stateInfoMachine = strstr(stateInfo, "MachineStatus:");
         if ( stateInfoMachine != NULL && strlen(stateInfoMachine) > 0 && sscanf( stateInfoMachine, "MachineStatus: %s", stateMachine ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter State: %s", stateMachine);
+            lv_label_set_text( printer3d_progress_state, stateMachine);
         }
 
         char* stateInfoMove = strstr(stateInfo, "MoveMode:");
         if ( stateInfoMove != NULL && strlen(stateInfoMove) > 0 && sscanf( stateInfoMove, "MoveMode: %s", stateMove ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter Move: %s", stateMove);
+            // currently unused
         }
     }
     free( stateInfo );
@@ -218,10 +308,18 @@ bool printer3d_refresh() {
         int extruderTemp, printbedTemp;
         
         char* tempInfoLine = strstr(tempInfo, "T0:");
-        if ( tempInfoLine != NULL && strlen(tempInfoLine) > 0 && sscanf( tempInfoLine, "T0:%d /0 B:%d/0", &extruderTemp, &printbedTemp ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter Extruder: %d°C", extruderTemp);
-            log_i("3dprinter PrintBed: %d°C", printbedTemp);
+        if ( tempInfoLine != NULL && strlen(tempInfoLine) > 0 && sscanf( tempInfoLine, "T0:%d /%*d B:%d/%*d", &extruderTemp, &printbedTemp ) > 0 ) {
+            char val[8];
+
+            if (extruderTemp >= 0 && extruderTemp <= 350) {
+                snprintf( val, sizeof(val), "%d°C", extruderTemp );
+                lv_label_set_text(printer3d_extruder_temp, val);
+            }
+            
+            if (printbedTemp >= 0 && printbedTemp <= 100) {
+                snprintf( val, sizeof(val), "%d°C", printbedTemp );
+                lv_label_set_text(printer3d_printbed_temp, val);
+            }
         }
     }
     free( tempInfo );
@@ -231,8 +329,15 @@ bool printer3d_refresh() {
         
         char* printInfoLine = strstr(printInfo, "byte ");
         if ( printInfoLine != NULL && strlen(printInfoLine) > 0 && sscanf( printInfoLine, "byte %d/%d", &printProgress, &printMax ) > 0 ) {
-            //TODO: Use the values to display them in the GUI
-            log_i("3dprinter Progress: %d/%d", printProgress, printMax);
+            char val[8];
+
+            if (printMax > 0) lv_linemeter_set_range(printer3d_progress_linemeter, 0, printMax);
+            if (printProgress >= 0 && printProgress <= printMax) lv_linemeter_set_value(printer3d_progress_linemeter, printProgress);
+
+            if (printProgress >= 0 && printProgress <= 100) {
+                snprintf( val, sizeof(val), "%d%%", printProgress );
+                lv_label_set_text(printer3d_progress_percent, val);
+            }
         }
     }
     free( printInfo );
