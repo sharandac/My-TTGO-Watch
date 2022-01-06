@@ -24,6 +24,11 @@
 powermeter_config_t::powermeter_config_t() : BaseJsonConfig( POWERMETER_JSON_CONFIG_FILE ) {}
 
 bool powermeter_config_t::onSave(JsonDocument& doc) {
+    doc["powermeter"]["server"] = server;
+    doc["powermeter"]["port"] = port;
+    doc["powermeter"]["ssl"] = ssl;
+    doc["powermeter"]["user"] = user;
+    doc["powermeter"]["password"] = password;
     doc["powermeter"]["topic"] = topic;
     doc["powermeter"]["autoconnect"] = autoconnect;
     doc["powermeter"]["widget"] = widget;
@@ -32,6 +37,11 @@ bool powermeter_config_t::onSave(JsonDocument& doc) {
 }
 
 bool powermeter_config_t::onLoad(JsonDocument& doc) {
+    strncpy( server, doc["powermeter"]["server"] | "", sizeof( server ) );
+    port = doc["powermeter"]["port"] | 1883;
+    ssl = doc["powermeter"]["ssl"] | false;
+    strncpy( user, doc["powermeter"]["user"] | "", sizeof( user ) );
+    strncpy( password, doc["powermeter"]["password"] | "", sizeof( password ) );
     strncpy( topic, doc["powermeter"]["topic"] | "", sizeof( topic ) );
     autoconnect = doc["powermeter"]["autoconnect"] | false;
     widget = doc["powermeter"]["widget"] | false;
@@ -40,6 +50,11 @@ bool powermeter_config_t::onLoad(JsonDocument& doc) {
 }
 
 bool powermeter_config_t::onDefault( void ) {
+    strncpy( server, "", sizeof( server ) );
+    port = 1883;
+    ssl = false;
+    strncpy( user, "", sizeof( user ) );
+    strncpy( password, "", sizeof( password ) );
     strncpy( topic, "", sizeof( topic ) );
     autoconnect = false;
     widget = false;

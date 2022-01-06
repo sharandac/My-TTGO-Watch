@@ -342,9 +342,6 @@ lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int he
     if (height != -1){
         lv_obj_set_height(button, height);
     }
-    if (event_cb != NULL) {
-        lv_obj_set_event_cb( button, event_cb );
-    }
     return button;
 }
 /**

@@ -68,7 +68,7 @@ static void enter_corona_app_detector_setup_event_cb( lv_obj_t * obj, lv_event_t
 
 static void exit_corona_app_detector_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
                                         break;
     }
 }

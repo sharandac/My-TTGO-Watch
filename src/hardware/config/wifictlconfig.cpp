@@ -25,7 +25,6 @@
 #include "utils/alloc.h"
 #include "utils/webserver/webserver.h"
 #include "utils/ftpserver/ftpserver.h"
-#include "utils/mqtt/mqtt.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -43,14 +42,7 @@ bool wifictl_config_t::onSave(JsonDocument& doc) {
     doc["ftpserver"] = ftpserver;
     doc["ftpuser"] = ftpuser;
     doc["ftppass"] = ftppass;
-    doc["mqtt"] = mqtt;
-    doc["mqttssl"] = mqttssl;
-    doc["mqttserver"] = mqttserver;
-    doc["mqttport"] = mqttport;
-    doc["mqttuser"] = mqttuser;
-    doc["mqttpass"] = mqttpass;
 
-    doc["hostname"] = hostname;
     doc["enable_on_standby"] = enable_on_standby;
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
         doc["networklist"][ i ]["ssid"] = networklist[ i ].ssid;
@@ -109,19 +101,6 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
         strncpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
     }
 
-    mqtt = doc["mqtt"] | false;
-    mqttssl = doc["mqttssl"] | false;
-    if (doc["mqttserver"]) {
-        strlcpy(mqttserver, doc["mqttserver"], sizeof(mqttserver));
-    }
-    mqttport = doc["mqttport"] | 1883;
-    if (doc["mqttuser"]) {
-        strlcpy(mqttuser, doc["mqttuser"], sizeof(mqttuser));
-    }
-    if (doc["mqttpass"]) {
-        strlcpy(mqttpass, doc["mqttpass"], sizeof(mqttpass));
-    }
-
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
         if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
             strncpy( networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( networklist[ i ].ssid ) );
@@ -156,19 +135,11 @@ bool wifictl_config_t::onDefault( void ) {
      */
     autoon = true;
     enable_on_standby = false;
-    strlcpy( hostname, "", sizeof( hostname ) );
 
     webserver = false;
     ftpserver = false;
     strncpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
     strncpy( ftppass, FTPSERVER_PASSWORD, sizeof( ftppass ) );
-
-    mqtt = false;
-    mqttssl = false;
-    strlcpy(mqttserver, "", sizeof(mqttserver));
-    mqttport = 1883;
-    strlcpy(mqttuser, "", sizeof(mqttuser));
-    strlcpy(mqttpass, "", sizeof(mqttpass));
 
     return( true );
 }

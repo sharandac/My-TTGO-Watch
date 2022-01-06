@@ -1,6 +1,5 @@
 .pio
 .vscode
-.vs
 deploy.sh
 .gitignore
 data/tile_map.ods

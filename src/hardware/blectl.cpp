@@ -198,17 +198,11 @@ void blectl_loop( void );
                                                     gbmsg += 3;
                                                     BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
                                                     if ( request.isValid() ) {
-                                                        if (powermgm_get_event(POWERMGM_STANDBY)) {
-                                                            log_i("silent wakeup just before ble message");
-                                                            powermgm_set_event(POWERMGM_SILENCE_WAKEUP);
-                                                            powermgm_loop();
-                                                        }
-
                                                         blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
                                                     }
                                                     else {
                                                         blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
-                                                    }
+                                                    }        
                                                     request.clear();
                                                 }
                                                 else {
