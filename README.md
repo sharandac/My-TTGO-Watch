@@ -14,7 +14,7 @@ Currently Supported Features:
 - Txt notification
 - Chat app notification
 - Weather Notification
-- Weather widget via Amazfish Weather Service message
+- Weather widget via Amazfish Weather Service message "Stay on" MUST be enabled in the Watch firmware settings due to the method with which Amazfish sends Weather (immediately instead of caching the message and sending on connect)
 
 All other features on the watch side are untouched and remain the same as with Sharandac's firmware.
 
