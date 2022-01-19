@@ -51,8 +51,6 @@
     #include <BLEServer.h>
     #include <BLEUtils.h>
     #include <BLE2902.h>
-    #include "blebatctl.h"
-    #include "blestepctl.h"
 
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
@@ -250,7 +248,7 @@ void blectl_setup( void ) {
          * This is too long I think:
          * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
-        BLEDevice::init("Espruino (" HARDWARE_NAME ")" );
+        BLEDevice::init("Bangle.js" );
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
@@ -310,34 +308,6 @@ void blectl_setup( void ) {
         BLEAdvertising *pAdvertising = pServer->getAdvertising();
         pAdvertising->addServiceUUID( pService->getUUID() );
         pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
-        /*
-         * Create device information service
-         */
-        BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
-        /*
-         * Create manufacturer name string Characteristic - 
-         */
-        BLECharacteristic* pManufacturerNameStringCharacteristic = pDeviceInformationService->createCharacteristic( MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
-        pManufacturerNameStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pManufacturerNameStringCharacteristic->addDescriptor( new BLE2902() );
-        pManufacturerNameStringCharacteristic->setValue("Lily Go");
-        /*
-         * Create manufacturer name string Characteristic - 
-         */
-        BLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
-        pFirmwareRevisionStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pFirmwareRevisionStringCharacteristic->addDescriptor( new BLE2902() );
-        pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
-        /*
-         * Start battery service
-         */
-        pDeviceInformationService->start();
-        /*
-         * Start advertising battery service
-         */
-        pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
-        blebatctl_setup(pServer);
-        blestepctl_setup();
         /*
          * Slow advertising interval for battery life
          */
