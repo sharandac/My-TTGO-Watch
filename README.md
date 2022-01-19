@@ -3,6 +3,10 @@ A fork of Sharandac's excellent firmware. This implimentation is adapted to work
 Amazfish:
 https://github.com/piggz/harbour-amazfish
 
+Further modifications are to optimize the layout with the information provided by Amazfish. See here for further ref (https://github.com/piggz/harbour-amazfish/blob/master/daemon/src/devices/banglejsdevice.cpp)
+
+Weather App. While the Weather App provded by Sharandac's firmware is nice, it relies on wifi to update. I have almost completed a weather widget that utilizes Amazfish's built in weather fetch service. Visually it looks the same as the Weather app widget (maybe not as customizable). It should also work with Gadgetbridge. I will open a pull request once I have it wrapped up so all can benefit.
+
 Features are limited due to a limited feature set supported in Amazfish.
 
 Currently Supported Features:
@@ -10,10 +14,11 @@ Currently Supported Features:
 - Txt notification
 - Chat app notification
 - Weather Notification
-- Weather widget via Amazfish Weather Service
-- Step Counter (local only, Amazfish does not support sync)
+- Weather widget via Amazfish Weather Service message
 
-DISCLAIMER: This is very much a work in progress and my coding isn't fantastic. I take no responsiility for any damage caused by you running this firmware. It shouldn't damage anyhting, but if you are concerned feel free to go through my code. I run this firmware myself on a TTGO T-watch 2020 v1.
+All other features on the watch side are untouched and remain the same as with Sharandac's firmware.
+
+DISCLAIMER: This is very much a work in progress and my coding isn't fantastic. I take no responsiility for any damage caused by you running this firmware. It shouldn't damage anyhting, but if you are concerned feel free to go through my code. I run this firmware myself on a TTGO T-watch 2020 v1 with Amazfish 2.0.3 on SailfishOS 4.2.
 
 # My-TTGO-Watch
 
