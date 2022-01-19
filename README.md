@@ -7,6 +7,23 @@
 </p>
 <hr/>
 
+A fork of Sharandac's excellent firmware. This implimentation is adapted to work with Adam Piggz's Amazfish companion app on linux phone distros via the Bangle.js Device type.
+
+Amazfish:
+https://github.com/piggz/harbour-amazfish
+
+Features are limited due to a limited feature set supported in Amazfish.
+
+Currently Supported Features:
+- Call Notification
+- Txt notification
+- Chat app notification
+- Weather Notification
+- Weather via Amazfish Weather Service
+- Step Counter (local only, Amazfish does not support sync)
+
+DISCLAIMER: This is very much a work in progress and my coding isn't fantastic. I take no responsiility for any damage caused by you running this firmware. It shouldn't damage anyhting, but if you are concerned feel free to go through my code. I run this firmware myself on a TTGO T-watch 2020 v1.
+
 # My-TTGO-Watch
 
 A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021, M5Paper, M5Core2 and native Linux support for testing.
@@ -71,52 +88,6 @@ https://t.me/TTGO_Watch
 
 Cf. [Usage](USAGE.md)
 
-# Forks that are recommended
-
-[FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
-[NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
-[linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
-[d03n3rfr1tz3](https://github.com/d03n3rfr1tz3/TTGO.T-Watch.2020)<br>
-
-# for the programmers
-
-Cf. [contribution guide](CONTRIBUTING.md)
-
-# Interface
-
-## TTGO T-Watch 2020
-
-![screenshot](images/screen1.png)
-![screenshot](images/screen2.png)
-![screenshot](images/screen3.png)
-![screenshot](images/screen4.png)
-![screenshot](images/screen5.png)
-![screenshot](images/screen6.png)
-![screenshot](images/screen7.png)
-![screenshot](images/screen8.png)
-![screenshot](images/screen9.png)
-![screenshot](images/screen10.png)
-![screenshot](images/screen11.png)
-![screenshot](images/screen12.png)
-
-## M5Paper ( downscaled )
-
-![screenshot](images/image1.png)
-![screenshot](images/image2.png)
-![screenshot](images/image3.png)
-
-## M5Core2 ( experimental )
-
-![screenshot](images/m5core2_img1.png)
-![screenshot](images/m5core2_img2.png)
-![screenshot](images/m5core2_img3.png)
-![screenshot](images/m5core2_img4.png)
-
-## TTGO T-Watch 2021 ( experimental )
-
-![screenshot](images/twatch2021_img1.png)
-![screenshot](images/twatch2021_img2.png)
-![screenshot](images/twatch2021_img3.png)
 
 # Contributors
 
