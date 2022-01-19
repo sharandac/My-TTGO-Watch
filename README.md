@@ -10,10 +10,11 @@ Weather App. While the Weather App provded by Sharandac's firmware is nice, it r
 Features are limited due to a limited feature set supported in Amazfish.
 
 Currently Supported Features:
-- Call Notification
+- Call notification
 - Txt notification
+- Email notification
 - Chat app notification
-- Weather Notification
+- Weather notification
 - Weather widget via Amazfish Weather Service message "Stay on" MUST be enabled in the Watch firmware settings due to the method with which Amazfish sends Weather (immediately instead of caching the message and sending on connect)
 
 All other features on the watch side are untouched and remain the same as with Sharandac's firmware.
