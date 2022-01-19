@@ -5,7 +5,7 @@ https://github.com/piggz/harbour-amazfish
 
 Further modifications are to optimize the layout with the information provided by Amazfish. See here for further ref (https://github.com/piggz/harbour-amazfish/blob/master/daemon/src/devices/banglejsdevice.cpp)
 
-Weather App. While the Weather App provded by Sharandac's firmware is nice, it relies on wifi to update. I have almost completed a weather widget that utilizes Amazfish's built in weather fetch service. Visually it looks the same as the Weather app widget (maybe not as customizable). It should also work with Gadgetbridge. I will open a pull request once I have it wrapped up so all can benefit.
+Weather App. While the Weather App provded by Sharandac's firmware is nice, it relies on wifi to update. I have almost completed a weather widget that utilizes Amazfish's built in weather service messages. Visually it looks the same as the Weather app widget (maybe not as customizable). It should also work with Gadgetbridge. I will open a pull request once I have it close to wrapped up so all can benefit. May still need a few tweaks.
 
 Features are limited due to a limited feature set supported in Amazfish.
 
