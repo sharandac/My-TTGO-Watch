@@ -10,7 +10,7 @@ Currently Supported Features:
 - Txt notification
 - Chat app notification
 - Weather Notification
-- Weather via Amazfish Weather Service
+- Weather widget via Amazfish Weather Service
 - Step Counter (local only, Amazfish does not support sync)
 
 DISCLAIMER: This is very much a work in progress and my coding isn't fantastic. I take no responsiility for any damage caused by you running this firmware. It shouldn't damage anyhting, but if you are concerned feel free to go through my code. I run this firmware myself on a TTGO T-watch 2020 v1.
