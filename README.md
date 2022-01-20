@@ -5,7 +5,7 @@ https://github.com/piggz/harbour-amazfish
 
 Further modifications are to optimize the layout with the information provided by Amazfish. See here for further ref (https://github.com/piggz/harbour-amazfish/blob/master/daemon/src/devices/banglejsdevice.cpp)
 
-Weather App. While the Weather App provded by Sharandac's firmware is nice, it relies on wifi to update. I have almost completed a weather widget that utilizes Amazfish's built in weather service messages. Visually it looks the same as the Weather app widget (maybe not as customizable). It should also work with Gadgetbridge. I will open a pull request once I have it close to wrapped up so all can benefit. May still need a few tweaks.
+Weather App. While the Weather App provded by Sharandac's firmware is nice, it relies on wifi to update. I have completed a weather widget that utilizes Amazfish's built in weather service messages. Visually it looks the same as the Weather app widget (maybe not as customizable). It should also work well (even better) with Gadgetbridge. I will open a pull request once I have it close to wrapped up so all can benefit. May still need a few tweaks.
 
 Features are limited due to a limited feature set supported in Amazfish.
 
@@ -15,8 +15,12 @@ Currently Supported Features:
 - Email notification
 - Chat app notification
 - Weather notification
-- Weather widget via Amazfish Weather Service message "Stay on" MUST be enabled in the Watch firmware settings due to the method with which Amazfish sends Weather (immediately instead of caching the message and sending on connect)
+- Weather widget via Amazfish Weather Service message. "Stay on" MUST be enabled in the Watch firmware settings due to the method with which Amazfish sends Weather (immediately instead of caching the message and sending on connect).
 - Music Control IS implimented in Amazfish, but I have little interest in fixing it to work. Maybe in the future.
+
+To Do:
+- Trigger for Night icons with Weather Widget
+- Optimize BLE for Amazfish weather. Some sort of timer to set BLE to "Stay on" for a certain amount of time, then go back to just wakeups. Should help battery life since it is only 10H with "stay on" enabled which keeps it out of deep sleep.
 
 All other features on the watch side are untouched and remain the same as with Sharandac's firmware.
 
