@@ -55,6 +55,7 @@
 // messages app and widget
 icon_t *messages_app = NULL;
 icon_t *messages_widget = NULL;
+icon_t *weather_widget = NULL;
 
 lv_obj_t *bluetooth_message_tile=NULL;
 lv_style_t bluetooth_message_style;
@@ -97,6 +98,15 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(youtube_96px);
     LV_IMG_DECLARE(instagram_96px);
     LV_IMG_DECLARE(tinder_96px);
+    LV_IMG_DECLARE(owm01d_64px);
+    LV_IMG_DECLARE(owm02d_64px);
+    LV_IMG_DECLARE(owm03d_64px);
+    LV_IMG_DECLARE(owm04d_64px);
+    LV_IMG_DECLARE(owm09d_64px);
+    LV_IMG_DECLARE(owm10d_64px);
+    LV_IMG_DECLARE(owm11d_64px);
+    LV_IMG_DECLARE(owm13d_64px);
+    LV_IMG_DECLARE(owm50d_64px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_96px },
@@ -108,6 +118,59 @@ LV_IMG_DECLARE(message_96px);
         { "YouTube", &youtube_96px },
         { "Instagram", &instagram_96px },
         { "Tinder", &tinder_96px },
+        { "clear sky", &owm01d_64px },
+        { "few clouds", &owm02d_64px },
+        { "scattered clouds", &owm03d_64px },
+        { "overcast clouds", &owm04d_64px },
+        { "broken clouds", &owm04d_64px },
+        { "shower rain", &owm09d_64px },
+        { "light intensity drizzle", &owm09d_64px },
+        { "drizzle", &owm09d_64px },
+        { "heavy intensity drizzle", &owm09d_64px },
+        { "drizzle rain", &owm09d_64px },
+        { "shower rain and drizzle", &owm09d_64px },
+        { "heavy shower rain and", &owm09d_64px },
+        { "shower drizzle", &owm09d_64px },
+        { "light rain", &owm10d_64px },
+        { "moderate rain", &owm10d_64px },
+        { "light intensity shower", &owm09d_64px },
+        { "heavy intensity rain", &owm10d_64px },
+        { "very heavy rain", &owm10d_64px },
+        { "extreme rain", &owm10d_64px },
+        { "shower rain", &owm09d_64px },
+        { "heavy intensity shower", &owm09d_64px },
+        { "ragged shower rain", &owm09d_64px },
+        { "rain", &owm10d_64px },
+        { "thunderstorm", &owm11d_64px },
+        { "thunderstorm with light", &owm11d_64px },
+        { "thunderstorm with rain", &owm11d_64px },
+        { "thunderstorm with heavy", &owm11d_64px },
+        { "light thunderstorm", &owm11d_64px },
+        { "heavy thunderstorm", &owm11d_64px },
+        { "ragged thunderstorm", &owm11d_64px },
+        { "thunderstorm with", &owm11d_64px },
+        { "snow", &owm13d_64px },
+        { "light snow", &owm13d_64px },
+        { "heavy snow", &owm13d_64px },
+        { "sleet", &owm13d_64px },
+        { "light shower sleet", &owm13d_64px },
+        { "shower sleet", &owm13d_64px },
+        { "light rain and snow", &owm13d_64px },
+        { "rain and snow", &owm13d_64px },
+        { "light shower snow", &owm13d_64px },
+        { "shower snow", &owm13d_64px },
+        { "heavy shower snow", &owm13d_64px },
+        { "freezing rain", &owm13d_64px },
+        { "mist", &owm50d_64px },
+        { "smoke", &owm50d_64px },
+        { "haze", &owm50d_64px },
+        { "sand/ dust whirls", &owm50d_64px },
+        { "fog", &owm50d_64px },
+        { "sand", &owm50d_64px },
+        { "dust", &owm50d_64px },
+        { "volcanic ash", &owm50d_64px },
+        { "squalls", &owm50d_64px },
+        { "tornado", &owm50d_64px },
         { "", NULL }
     };
 
@@ -124,6 +187,15 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(youtube_32px);
     LV_IMG_DECLARE(instagram_32px);
     LV_IMG_DECLARE(tinder_32px);
+    LV_IMG_DECLARE(owm01d_64px);
+    LV_IMG_DECLARE(owm02d_64px);
+    LV_IMG_DECLARE(owm03d_64px);
+    LV_IMG_DECLARE(owm04d_64px);
+    LV_IMG_DECLARE(owm09d_64px);
+    LV_IMG_DECLARE(owm10d_64px);
+    LV_IMG_DECLARE(owm11d_64px);
+    LV_IMG_DECLARE(owm13d_64px);
+    LV_IMG_DECLARE(owm50d_64px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_32px },
@@ -135,6 +207,59 @@ LV_IMG_DECLARE(message_96px);
         { "YouTube", &youtube_32px },
         { "Instagram", &instagram_32px },
         { "Tinder", &tinder_32px },
+        { "clear sky", &owm01d_64px },
+        { "few clouds", &owm02d_64px },
+        { "scattered clouds", &owm03d_64px },
+        { "overcast clouds", &owm04d_64px },
+        { "broken clouds", &owm04d_64px },
+        { "shower rain", &owm09d_64px },
+        { "light intensity drizzle", &owm09d_64px },
+        { "drizzle", &owm09d_64px },
+        { "heavy intensity drizzle", &owm09d_64px },
+        { "drizzle rain", &owm09d_64px },
+        { "shower rain and drizzle", &owm09d_64px },
+        { "heavy shower rain and", &owm09d_64px },
+        { "shower drizzle", &owm09d_64px },
+        { "light rain", &owm10d_64px },
+        { "moderate rain", &owm10d_64px },
+        { "light intensity shower", &owm09d_64px },
+        { "heavy intensity rain", &owm10d_64px },
+        { "very heavy rain", &owm10d_64px },
+        { "extreme rain", &owm10d_64px },
+        { "shower rain", &owm09d_64px },
+        { "heavy intensity shower", &owm09d_64px },
+        { "ragged shower rain", &owm09d_64px },
+        { "rain", &owm10d_64px },
+        { "thunderstorm", &owm11d_64px },
+        { "thunderstorm with light", &owm11d_64px },
+        { "thunderstorm with rain", &owm11d_64px },
+        { "thunderstorm with heavy", &owm11d_64px },
+        { "light thunderstorm", &owm11d_64px },
+        { "heavy thunderstorm", &owm11d_64px },
+        { "ragged thunderstorm", &owm11d_64px },
+        { "thunderstorm with", &owm11d_64px },
+        { "snow", &owm13d_64px },
+        { "light snow", &owm13d_64px },
+        { "heavy snow", &owm13d_64px },
+        { "sleet", &owm13d_64px },
+        { "light shower sleet", &owm13d_64px },
+        { "shower sleet", &owm13d_64px },
+        { "light rain and snow", &owm13d_64px },
+        { "rain and snow", &owm13d_64px },
+        { "light shower snow", &owm13d_64px },
+        { "shower snow", &owm13d_64px },
+        { "heavy shower snow", &owm13d_64px },
+        { "freezing rain", &owm13d_64px },
+        { "mist", &owm50d_64px },
+        { "smoke", &owm50d_64px },
+        { "haze", &owm50d_64px },
+        { "sand/ dust whirls", &owm50d_64px },
+        { "fog", &owm50d_64px },
+        { "sand", &owm50d_64px },
+        { "dust", &owm50d_64px },
+        { "volcanic ash", &owm50d_64px },
+        { "squalls", &owm50d_64px },
+        { "tornado", &owm50d_64px },
         { "", NULL }
     };
 
@@ -151,6 +276,15 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(youtube_32px);
     LV_IMG_DECLARE(instagram_32px);
     LV_IMG_DECLARE(tinder_32px);
+    LV_IMG_DECLARE(owm01d_64px);
+    LV_IMG_DECLARE(owm02d_64px);
+    LV_IMG_DECLARE(owm03d_64px);
+    LV_IMG_DECLARE(owm04d_64px);
+    LV_IMG_DECLARE(owm09d_64px);
+    LV_IMG_DECLARE(owm10d_64px);
+    LV_IMG_DECLARE(owm11d_64px);
+    LV_IMG_DECLARE(owm13d_64px);
+    LV_IMG_DECLARE(owm50d_64px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_32px },
@@ -162,10 +296,63 @@ LV_IMG_DECLARE(message_96px);
         { "YouTube", &youtube_32px },
         { "Instagram", &instagram_32px },
         { "Tinder", &tinder_32px },
+        { "clear sky", &owm01d_64px },
+        { "few clouds", &owm02d_64px },
+        { "scattered clouds", &owm03d_64px },
+        { "overcast clouds", &owm04d_64px },
+        { "broken clouds", &owm04d_64px },
+        { "shower rain", &owm09d_64px },
+        { "light intensity drizzle", &owm09d_64px },
+        { "drizzle", &owm09d_64px },
+        { "heavy intensity drizzle", &owm09d_64px },
+        { "drizzle rain", &owm09d_64px },
+        { "shower rain and drizzle", &owm09d_64px },
+        { "heavy shower rain and", &owm09d_64px },
+        { "shower drizzle", &owm09d_64px },
+        { "light rain", &owm10d_64px },
+        { "moderate rain", &owm10d_64px },
+        { "light intensity shower", &owm09d_64px },
+        { "heavy intensity rain", &owm10d_64px },
+        { "very heavy rain", &owm10d_64px },
+        { "extreme rain", &owm10d_64px },
+        { "shower rain", &owm09d_64px },
+        { "heavy intensity shower", &owm09d_64px },
+        { "ragged shower rain", &owm09d_64px },
+        { "rain", &owm10d_64px },
+        { "thunderstorm", &owm11d_64px },
+        { "thunderstorm with light", &owm11d_64px },
+        { "thunderstorm with rain", &owm11d_64px },
+        { "thunderstorm with heavy", &owm11d_64px },
+        { "light thunderstorm", &owm11d_64px },
+        { "heavy thunderstorm", &owm11d_64px },
+        { "ragged thunderstorm", &owm11d_64px },
+        { "thunderstorm with", &owm11d_64px },
+        { "snow", &owm13d_64px },
+        { "light snow", &owm13d_64px },
+        { "heavy snow", &owm13d_64px },
+        { "sleet", &owm13d_64px },
+        { "light shower sleet", &owm13d_64px },
+        { "shower sleet", &owm13d_64px },
+        { "light rain and snow", &owm13d_64px },
+        { "rain and snow", &owm13d_64px },
+        { "light shower snow", &owm13d_64px },
+        { "shower snow", &owm13d_64px },
+        { "heavy shower snow", &owm13d_64px },
+        { "freezing rain", &owm13d_64px },
+        { "mist", &owm50d_64px },
+        { "smoke", &owm50d_64px },
+        { "haze", &owm50d_64px },
+        { "sand/ dust whirls", &owm50d_64px },
+        { "fog", &owm50d_64px },
+        { "sand", &owm50d_64px },
+        { "dust", &owm50d_64px },
+        { "volcanic ash", &owm50d_64px },
+        { "squalls", &owm50d_64px },
+        { "tornado", &owm50d_64px },
         { "", NULL }
     };
 
-    lv_font_t *message_title_font = &Ubuntu_32px;
+    lv_font_t *message_title_font = &Ubuntu_16px;
     lv_font_t *message_font = &Ubuntu_16px;
 #endif
 
@@ -203,7 +390,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_style_set_text_font( &bluetooth_message_sender_style, LV_STATE_DEFAULT, message_title_font );
 
     lv_obj_t *bluettoth_message_img_cont = lv_cont_create( bluetooth_message_tile, NULL );
-    lv_obj_set_size( bluettoth_message_img_cont, THEME_ICON_SIZE, THEME_ICON_SIZE );
+    lv_obj_set_size( bluettoth_message_img_cont, 78, 78 );
     lv_obj_add_style( bluettoth_message_img_cont, LV_OBJ_PART_MAIN, APP_STYLE  );
     lv_obj_align( bluettoth_message_img_cont, bluetooth_message_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 
@@ -502,8 +689,13 @@ void bluetooth_message_show_msg( int32_t entry ) {
     }
     else {
         /*
-         * if msg an notify msg?
+         * if msg a weather message destroy weather widget for icon sourcing
          */
+        if (!strcmp( doc["t"], "weather" ) ) {
+            if ( doc["txt"] ) {
+                weather_widget = widget_remove( weather_widget );
+              
+            }
         if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
             /*
              * set the receive time string
@@ -526,11 +718,16 @@ void bluetooth_message_show_msg( int32_t entry ) {
              */
             statusbar_hide( true );
             /*
-             * set notify source icon if msg src known
+             * set notify source icon if msg src known, set weather widget (if weather) based on txt description, set Notify Source label to weather location if weather
              */
             if ( doc["src"] ) {
                 lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
                 lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
+            }
+            else if ( doc["txt"] ) {
+                lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["txt"] ) ); 
+                lv_label_set_text( bluetooth_message_notify_source_label,  doc["loc"].as<String>().c_str() );
+                lv_obj_align( bluetooth_message_notify_source_label, bluetooth_message_img, LV_ALIGN_OUT_RIGHT_MID, 0, 0 );
             }
             else {
                 lv_img_set_src( bluetooth_message_img, default_msg_icon );
@@ -548,12 +745,29 @@ void bluetooth_message_show_msg( int32_t entry ) {
             }
             else if ( doc["temp"] ) {
                 /*
-                 * add special case when a weather information is set
+                 * Create weather widget with resolved weather icon set. Widget is destroyed each weather message so it should always be NULL after weather message is recieved
                  */
+                if ( weather_widget == NULL ) {
+                weather_widget = widget_register( "weather", bluetooth_message_find_img( doc["txt"]), NULL);
+                }
+                /*
+                * Modify original Weather message in Sharandac's fw to include resolved weather icon, and adjust layout a bit
+                */
                 int temperature = doc["temp"];
                 const char temp_str[128] = "";
-                snprintf( (char*)temp_str, sizeof( temp_str ), "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
+                snprintf( (char*)temp_str, sizeof( temp_str ), " %d °C and %s", temperature - 273, doc["txt"].as<String>().c_str() );
                 lv_label_set_text( bluetooth_message_msg_label, temp_str );
+                /*
+                * Set Weather widget label as temp, align label with resolved weather icon, set indicator to off. Widget persists even if Weather message is deleted.
+                */
+                const char tmp_str[64] = "";
+                snprintf( (char*)tmp_str, sizeof( tmp_str ), " %d °C", temperature - 273);
+                lv_label_set_text( weather_widget->label, tmp_str );
+                lv_obj_align( weather_widget->label , weather_widget->icon_cont, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+                lv_label_set_align( weather_widget->label, LV_LABEL_ALIGN_CENTER );
+                lv_obj_set_hidden( weather_widget->icon_indicator, true );
+                
+                lv_obj_invalidate( lv_scr_act() );
             }
             else {
                 lv_label_set_text( bluetooth_message_msg_label, "" );
@@ -575,6 +789,9 @@ void bluetooth_message_show_msg( int32_t entry ) {
             }
             else if( doc["tel"] ) {
                 lv_label_set_text( bluetooth_message_sender_label, doc["tel"] );
+            }
+            else if (doc["txt"] ) {
+                lv_label_set_text( bluetooth_message_sender_label, "Weather" );
             }
             else {
                 lv_label_set_text( bluetooth_message_sender_label, "n/a" );
