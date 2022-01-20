@@ -20,6 +20,9 @@ Currently Supported Features:
 Can Work, but doesn't:
 - Music Control IS implimented in Amazfish, but I have little interest in fixing it to work. Maybe in the future.
 
+Will not work unless implimented on Amazfish:
+- Navigation
+
 To Do:
 - Trigger for Night icons with Weather Widget
 - Due to the const char setup for icon sourcing I piggybacked on, some of the longer descriptions are just too long and needed to be shortened. Hopefully that wont cause issues but it needs further testing.
