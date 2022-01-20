@@ -22,6 +22,7 @@ Can Work, but doesn't:
 
 To Do:
 - Trigger for Night icons with Weather Widget
+- Due to the const char setup for icon sourcing I piggybacked on, some of the longer descriptions are just too long and needed to be shortened. Hopefully that wont cause issues but it needs further testing.
 - Optimize BLE for Amazfish weather. Some sort of timer to set BLE to "Stay on" for a certain amount of time, then go back to just wakeups. Should help battery life since it is only 10H with "stay on" enabled which keeps it out of deep sleep.
 
 All other features on the watch side are untouched and remain the same as with Sharandac's firmware.
