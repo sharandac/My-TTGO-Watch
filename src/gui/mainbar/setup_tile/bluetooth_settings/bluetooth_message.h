@@ -28,7 +28,7 @@
      * @brief src icon structure
      */
     struct src_icon_t {
-        const char src_name[ 24 ];
+        const char src_name[ 32 ];
         const lv_img_dsc_t *img;
     };
 
