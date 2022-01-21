@@ -813,6 +813,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
     }        
     doc.clear();
 }
+}
 
 void bluetooth_message_play_audio( int32_t entry ) {
     bool found = false;
