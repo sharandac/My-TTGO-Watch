@@ -399,7 +399,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_style_set_text_font( &bluetooth_message_sender_style, LV_STATE_DEFAULT, message_title_font );
 
     lv_obj_t *bluettoth_message_img_cont = lv_cont_create( bluetooth_message_tile, NULL );
-    lv_obj_set_size( bluettoth_message_img_cont, 78, 78 );
+    lv_obj_set_size( bluettoth_message_img_cont, 80, 80 );
     lv_obj_add_style( bluettoth_message_img_cont, LV_OBJ_PART_MAIN, APP_STYLE  );
     lv_obj_align( bluettoth_message_img_cont, bluetooth_message_tile, LV_ALIGN_IN_TOP_LEFT, 0, 0 );
 
