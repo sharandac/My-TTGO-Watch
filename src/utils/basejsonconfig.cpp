@@ -25,16 +25,19 @@ BaseJsonConfig::BaseJsonConfig(const char* configFileName) {
 
 #ifdef NATIVE_64BIT
     const char *homedir;
-    char localpath[128] = "";
+    char localpath[256] = "";
     /**
-     * get local device path for config files
+     * get home dir and build full path to file
      */
+    if ( ( homedir = getenv("HOME") ) == NULL ) {
+        homedir = getpwuid(getuid())->pw_dir;
+    }
     if ( configFileName[0] == '/') {
-        snprintf( localpath, sizeof( localpath ), "spiffs%s", configFileName );
+        snprintf( localpath, sizeof( localpath ), "%s/.hedge/spiffs%s", homedir, configFileName );
     }
     else {
         localpath[0] = '/';
-        snprintf( localpath, sizeof( localpath ), "spiffs/%s", configFileName );
+        snprintf( localpath, sizeof( localpath ), "%s/.hedge/spiffs/%s", homedir, configFileName );
     }
     /**
      * convert from local device path to machine path
