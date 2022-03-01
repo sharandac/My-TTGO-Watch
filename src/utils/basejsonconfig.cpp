@@ -51,94 +51,6 @@ BaseJsonConfig::BaseJsonConfig(const char* configFileName) {
 #endif
 }
 
-bool BaseJsonConfig::load() {
-    bool result = false;
-    /*
-     * load config if exsits
-     */
-#ifdef NATIVE_64BIT
-    std::fstream file;
-
-    file.open( fileName, std::fstream::in );
-    /*
-        * check if open was success
-        */
-    if (!file) {
-        log_e("Can't open file: %s!", fileName);
-    }
-    else {
-        /*
-            * get filesize
-            */
-        file.seekg( 0, file.end );
-        int filesize = file.tellg();
-        file.seekg( 0, file.beg );
-        /*
-            * create json structure
-            */
-        SpiRamJsonDocument doc( filesize*4 );
-        DeserializationError error = deserializeJson( doc, file );
-        /*
-            * check if create json structure was successfull
-            */
-        if ( error || filesize == 0 ) {
-            log_e("json config deserializeJson() failed: %s, file: %s", error.c_str(), fileName );
-        }
-        else {
-            log_i("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
-            result = onLoad(doc);
-        }
-        doc.clear();
-    }
-    file.close();
-#else
-    if ( SPIFFS.exists(fileName) ) {
-        /*
-         * open file
-         */
-        fs::File file = SPIFFS.open(fileName, FILE_READ);
-        /*
-         * check if open was success
-         */
-        if (!file) {
-            log_e("Can't open file: %s!", fileName);
-        }
-        else {
-            /*
-             * get filesize
-             */
-            int filesize = file.size();
-            /*
-             * create json structure
-             */
-            SpiRamJsonDocument doc( filesize*4 );
-            DeserializationError error = deserializeJson( doc, file );
-            /*
-             * check if create json structure was successfull
-             */
-            if ( error || filesize == 0 ) {
-                log_e("json config deserializeJson() failed: %s, file: %s", error.c_str(), fileName );
-            }
-            else {
-                log_i("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
-                result = onLoad(doc);
-            }
-            doc.clear();
-        }
-        file.close();
-    }
-#endif
-    /*
-     * check if read from json is failed
-     */
-    if ( !result ) {
-        log_i("reading json failed, call defaults, file: %s", fileName );
-        result = onDefault();
-    }
-
-    return result;
-}
-
 bool BaseJsonConfig::load( uint32_t size ) {
     bool result = false;
     /*
@@ -157,6 +69,18 @@ bool BaseJsonConfig::load( uint32_t size ) {
         log_e("Can't open file: %s!", fileName);
     }
     else {
+        if (size == 0) {
+            /*
+            * get filesize
+            */
+            file.seekg( 0, file.end );
+            int filesize = file.tellg();
+            file.seekg( 0, file.beg );
+            /*
+             * compute size to allocate
+             */
+            size = filesize*4;
+        }
         /*
             * create json structure
             */
@@ -189,6 +113,16 @@ bool BaseJsonConfig::load( uint32_t size ) {
             log_e("Can't open file: %s!", fileName);
         }
         else {
+            if (size == 0) {
+                /*
+                * get filesize
+                */
+                int filesize = file.size();
+                /*
+                * compute size to allocate
+                */
+                size = filesize*4;
+            }
             /*
              * create json structure
              */
@@ -230,6 +164,9 @@ bool BaseJsonConfig::save( uint32_t size ) {
         log_e("Can't open file: %s!", fileName);
     }
     else {
+        if (size == 0) {
+            size = getJsonBufferSize();
+        }
         SpiRamJsonDocument doc( size );
         result = onSave(doc);
 
@@ -261,6 +198,9 @@ bool BaseJsonConfig::save( uint32_t size ) {
         log_e("Can't open file: %s!", fileName);
     }
     else {
+        if (size == 0) {
+            size = getJsonBufferSize();
+        }
         SpiRamJsonDocument doc( size );
         result = onSave(doc);
 
@@ -280,78 +220,6 @@ bool BaseJsonConfig::save( uint32_t size ) {
         }
         else {
             log_i("json config serializeJson() success: %s", fileName );
-        }
-        
-        doc.clear();
-    }
-    file.close();
-#endif
-    return result;
-}
-
-bool BaseJsonConfig::save() {
-    bool result = false;
-#ifdef NATIVE_64BIT
-    std::fstream file;
-
-    file.open(fileName, std::fstream::out );
-
-    if (!file) {
-        log_e("Can't open file: %s!", fileName);
-    }
-    else {
-        auto size = getJsonBufferSize();
-        SpiRamJsonDocument doc( size );
-        result = onSave(doc);
-
-        if ( doc.overflowed() ) {
-            log_e("json to large, some value are missing. use doc.save( uint32_t size )");
-        }
-        
-        size_t outSize = 0;
-        if (prettyJson)
-            outSize = serializeJsonPretty(doc, file);
-        else
-            outSize = serializeJson(doc, file);
-
-        if (result == true && outSize == 0) {
-            log_e("Failed to write config file %s", fileName);
-            result = false;
-        }
-        else {
-            log_i("json config serializeJson() success: %s", fileName );            
-        }
-        
-        doc.clear();
-    }
-    file.close();
-#else
-    fs::File file = SPIFFS.open(fileName, FILE_WRITE );
-
-    if (!file) {
-        log_e("Can't open file: %s!", fileName);
-    }
-    else {
-        auto size = getJsonBufferSize();
-        SpiRamJsonDocument doc( size );
-        result = onSave(doc);
-
-        if ( doc.overflowed() ) {
-            log_e("json to large, some value are missing. use doc.save( uint32_t size )");
-        }
-        
-        size_t outSize = 0;
-        if (prettyJson)
-        outSize = serializeJsonPretty(doc, file);
-        else
-        outSize = serializeJson(doc, file);
-
-        if (result == true && outSize == 0) {
-            log_e("Failed to write config file %s", fileName);
-            result = false;
-        }
-        else {
-            log_i("json config serializeJson() success: %s", fileName );            
         }
         
         doc.clear();

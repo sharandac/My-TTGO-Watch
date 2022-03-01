@@ -19,21 +19,13 @@ class BaseJsonConfig {
 public:
   BaseJsonConfig(const char* configFileName);
   /**
-   * @brief Load settings from file
+   * @brief Load settings from file with a custom json size, use 0 for automatic sizing
    */
-  bool load();
+  bool load( uint32_t size = 0 );
   /**
-   * @brief Load settings from file with a custom json size
+   * @brief Save settings to file with a custom json size, use 0 for automatic sizing
    */
-  bool load( uint32_t size );
-  /**
-   * @brief Save settings to file
-   */
-  bool save();
-  /**
-   * @brief Save settings to file with a custom json size
-   */
-  bool save( uint32_t size );
+  bool save( uint32_t size = 0 );
   /**
    * @brief print out json
    */
