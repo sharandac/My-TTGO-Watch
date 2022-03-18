@@ -35,6 +35,7 @@ jobs:
         pip install --upgrade platformio
     - name: Install native libs
       run: |
+        sudo apt-get update
         sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
     - name: Run PlatformIO
       run: pio run
