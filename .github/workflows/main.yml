@@ -16,6 +16,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        env: [emulator_m5paper, emulator_m5core2, emulator_twatch2021, emulator_twatch2020, m5paper, m5core2, t-watch2021, t-watch2020-v1, t-watch2020-v2, t-watch2020-v3]
+
     steps:
     - uses: actions/checkout@v2
     - name: Cache pip
@@ -40,4 +44,5 @@ jobs:
       run: |
         sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
     - name: Run PlatformIO
-      run: pio run
+      run: pio run -e ${{ matrix.env }}
+      
