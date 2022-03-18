@@ -19,21 +19,30 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _KODI_REMOTE_H
-    #define _KODI_REMOTE_H
+#ifndef _KODI_REMOTE_CONFIG_H
+    #define _KODI_REMOTE_CONFIG_H
 
-    #include "gui/icon.h"
-    #include "kodi_remote_config.h"
+    #include "utils/basejsonconfig.h"
 
-    void kodi_remote_app_setup( void );
-    uint32_t kodi_remote_app_get_app_setup_tile_num( void );
-    uint32_t kodi_remote_app_get_app_main_tile_num( void );
+    #define KODI_REMOTE_JSON_CONFIG_FILE        "/kodi_remote.json"
 
-    void kodi_remote_app_set_indicator(icon_indicator_t indicator);
-    void kodi_remote_app_hide_indicator();
+    /**
+     * @brief kodi remote config structure
+     */
+    class kodi_remote_config_t : public BaseJsonConfig {
+        public:
+        kodi_remote_config_t();
+        char host[32] = "";
+        uint16_t port = 8080;
+        char user[32] = "";
+        char pass[32] = "";
 
-    kodi_remote_config_t *kodi_remote_get_config( void );
-    void kodi_remote_save_config( void );
-    void kodi_remote_load_config( void );
-
-#endif // _KODI_REMOTE_H
+        protected:
+        ////////////// Available for overloading: //////////////
+        virtual bool onLoad(JsonDocument& document);
+        virtual bool onSave(JsonDocument& document);
+        virtual bool onDefault( void );
+        virtual size_t getJsonBufferSize() { return 1000; }
+    } ;
+    
+#endif // _KODI_REMOTE_CONFIG_H
