@@ -33,6 +33,7 @@
 #include "hardware/motor.h"
 #include "hardware/display.h"
 #include "hardware/gpsctl.h"
+#include "hardware/pmu.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -247,7 +248,9 @@ static void format_SPIFFS_utilities_event_cb( lv_obj_t * obj, lv_event_t event )
 }
 
 static void format_SPIFFS(void){
-#ifndef NATIVE_64BIT
+#ifdef NATIVE_64BIT
+
+#else
     log_i("SPIFFS Format by User");
     motor_vibe(20);
     delay(20);
@@ -270,15 +273,17 @@ static void format_SPIFFS(void){
 static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-#ifndef NATIVE_64BIT
-                                        log_i("System reboot by user");
-                                        motor_vibe(20);
-                                        delay(20);
-                                        display_standby();
-                                        SPIFFS.end();
-                                        log_i("SPIFFS unmounted!");
-                                        delay(500);
-                                        ESP.restart();
+#ifdef NATIVE_64BIT
+
+#else
+            log_i("System reboot by user");
+            motor_vibe(20);
+            delay(20);
+            display_standby();
+            SPIFFS.end();
+            log_i("SPIFFS unmounted!");
+            delay(500);
+            ESP.restart();
 #endif
                                         break;
     }
@@ -288,13 +293,16 @@ static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void poweroff_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       
-#ifndef NATIVE_64BIT
-                                        log_i("System poweroff by user");
-                                        motor_vibe(20);
-                                        delay(20);
-                                        SPIFFS.end();
-                                        log_i("SPIFFS unmounted!");
-                                        delay(500);
+#ifdef NATIVE_64BIT
+
+#else
+            log_i("System poweroff by user");
+            motor_vibe(20);
+            delay(20);
+            SPIFFS.end();
+            log_i("SPIFFS unmounted!");
+            delay(500);
+            pmu_shutdown();
 #endif
                                         break;
     }

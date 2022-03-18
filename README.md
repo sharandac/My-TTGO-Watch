@@ -73,6 +73,7 @@ Cf. [Usage](USAGE.md)
 
 # Forks that are recommended
 
+[Pickelhaupt](https://github.com/Pickelhaupt/EUC-Dash-ESP32)<br>
 [FantasyFactory](https://github.com/FantasyFactory/My-TTGO-Watch)<br>
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
 [linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>

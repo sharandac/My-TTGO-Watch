@@ -19,21 +19,28 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _KODI_REMOTE_H
-    #define _KODI_REMOTE_H
+#include "kodi_remote_config.h"
 
-    #include "gui/icon.h"
-    #include "kodi_remote_config.h"
+kodi_remote_config_t::kodi_remote_config_t() : BaseJsonConfig( KODI_REMOTE_JSON_CONFIG_FILE ) {}
 
-    void kodi_remote_app_setup( void );
-    uint32_t kodi_remote_app_get_app_setup_tile_num( void );
-    uint32_t kodi_remote_app_get_app_main_tile_num( void );
+bool kodi_remote_config_t::onSave(JsonDocument& doc) {
+    doc["host"] = host;
+    doc["user"] = user;
+    doc["pass"] = pass;
+    doc["port"] = port;
 
-    void kodi_remote_app_set_indicator(icon_indicator_t indicator);
-    void kodi_remote_app_hide_indicator();
+    return true;
+}
 
-    kodi_remote_config_t *kodi_remote_get_config( void );
-    void kodi_remote_save_config( void );
-    void kodi_remote_load_config( void );
+bool kodi_remote_config_t::onLoad(JsonDocument& doc) {
+    strncpy( host, doc["host"], sizeof( host ) );
+    strncpy( user, doc["user"], sizeof( user ) );
+    strncpy( pass, doc["pass"], sizeof( pass ) );
+    port = (uint16_t)doc["port"];
 
-#endif // _KODI_REMOTE_H
+    return true;
+}
+
+bool kodi_remote_config_t::onDefault() {
+    return true;
+}
