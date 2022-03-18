@@ -1,9 +1,5 @@
-name: PlatformIO CI
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on pull request events but only for the master or experimental branch
-  pull_request:
+  push:
     branches: 
       - master
       - experimental
@@ -11,15 +7,12 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+name: Prepare Release Asset
+
 jobs:
   build:
-
+    name: Prepare Release Asset
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        env: [emulator_m5paper, emulator_m5core2, emulator_twatch2021, emulator_twatch2020, m5paper, m5core2, t-watch2021, t-watch2020-v1, t-watch2020-v2, t-watch2020-v3]
-
     steps:
     - uses: actions/checkout@v2
     - name: Cache pip
@@ -42,7 +35,7 @@ jobs:
         pip install --upgrade platformio
     - name: Install native libs
       run: |
+        sudo apt-get update
         sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
     - name: Run PlatformIO
-      run: pio run -e ${{ matrix.env }}
-      
+      run: pio run
