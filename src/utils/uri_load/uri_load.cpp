@@ -452,7 +452,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * if we have a new location, try it
              */
-            if ( location.isEmpty() ) {
+            if ( !location.isEmpty() ) {
                 /**
                  * get new location data
                  */
@@ -673,7 +673,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * if we have a new location, try it
              */
-            if ( location.isEmpty() ) {
+            if ( !location.isEmpty() ) {
                 /**
                  * get new location data
                  */
