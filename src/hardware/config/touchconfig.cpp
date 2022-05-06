@@ -32,8 +32,8 @@ bool touch_config_t::onSave( JsonDocument& doc ) {
 }
 
 bool touch_config_t::onLoad( JsonDocument& doc ) {
-    x_scale = doc["x_scale"] | 1.15;
-    y_scale = doc["y_scale"] | 1.0;
+    x_scale = doc["x_scale"] | TOUCH_X_SCALE;
+    y_scale = doc["y_scale"] | TOUCH_Y_SCALE;
 
     return true;
 }
