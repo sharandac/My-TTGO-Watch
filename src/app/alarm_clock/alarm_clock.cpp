@@ -164,9 +164,11 @@ bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
 bool powermgmt_callback( EventBits_t event, void *arg  ){
     switch( event ) {
         case( POWERMGM_WAKEUP ):
+            rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );
             update_main_tile_widget_label();
             break;
         case( POWERMGM_STANDBY ):
+            rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );
             update_main_tile_widget_label();
             alarm_in_progress_finish_alarm();
             break;
@@ -196,7 +198,7 @@ void alarm_clock_setup( void ) {
 
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm_clock");
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP, powermgmt_callback, "alarm_clock");
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP, powermgmt_callback, "alarm_clock", CALL_CB_LAST );
 
     alarm_clock_main_set_data_to_display( rtcctl_get_alarm_data(), timesync_get_24hr() );
     rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );

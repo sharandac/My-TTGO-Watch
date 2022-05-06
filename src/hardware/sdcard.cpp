@@ -56,7 +56,6 @@ void sdcard_setup( void ) {
 
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #if defined( LILYGO_WATCH_HAS_SDCARD )
-            TTGOClass *ttgo = TTGOClass::getWatch();
             /**
              * as small hack to reduce internal heap memory
              * consumption from 27k to 5k while using sd lib

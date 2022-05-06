@@ -57,11 +57,6 @@ If you are interested in native Linux support, please install sdl2, curl and mos
 sudo apt-get install libsdl2-dev libcurl4-gnutls-dev libmosquitto-dev build-essential
 ```
 
-# Telegram chatgroup
-
-Telegram chatgroup is here:
-https://t.me/TTGO_Watch
-
 # known issues
 
 * the webserver crashes the ESP32 really often

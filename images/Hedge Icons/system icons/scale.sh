@@ -33,7 +33,10 @@ do
 	FILE=${CNAME##*/}
 	RESOLUTION=`echo $FILE | cut -d"_" -f2 | cut -d"p" -f1`
 	echo "$LINE -> $CNAME.c ($FILE) RESOLUTIOIN=$RESOLUTION"
-	curl POST -F img_file=@$LINE -F name=$FILE -F cf=true_color_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
+	php ../../lv_utils/img_conv_core.php "name=$FILE&img=$LINE&cf=true_color_alpha&format=c_array"
+	mv $FILE.c .$CNAME.c
+#	echo "cp $FILE.c $CNAME.c"
+#	curl POST -F img_file=@$LINE -F name=$FILE -F cf=true_color_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
 #	curl POST -F img_file=@$LINE -F name=$FILE -F cf=raw_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
 #	sed -i "s/.h = ,/.h = $RESOLUTION,/g" .$CNAME.c
 #	sed -i "s/.w = ,/.w = $RESOLUTION,/g" .$CNAME.c

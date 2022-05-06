@@ -44,6 +44,7 @@
 #include "mainbar/setup_tile/bluetooth_settings/bluetooth_settings.h"
 #include "mainbar/setup_tile/wlan_settings/wlan_settings.h"
 #include "mainbar/setup_tile/time_settings/time_settings.h"
+#include "mainbar/setup_tile/touch_settings/touch_settings.h"
 #include "mainbar/setup_tile/watchface/watchface_manager.h"
 #include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
 #include "mainbar/setup_tile/update/update.h"
@@ -120,6 +121,7 @@ void gui_setup( void ) {
     move_settings_tile_setup();
     style_settings_tile_setup();
     wlan_settings_tile_setup();
+    touch_settings_tile_setup();
     time_settings_tile_setup();
     gps_settings_tile_setup();
     utilities_tile_setup();
