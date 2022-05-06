@@ -22,6 +22,7 @@
 #ifndef _TOUCH_H
     #define _TOUCH_H
 
+    #include "hardware/config/touchconfig.h"
     #include "callback.h"
 
     #define TOUCH_UPDATE        _BV(0)      /** @brief event mask for touch update information */
@@ -53,6 +54,30 @@
      * @brief unlock the touch interface
      */
     void touch_lock_give( void );
+    /**
+     * @brief 
+     * 
+     * @return float 
+     */
+    float touch_get_x_scale( void );
+    /**
+     * @brief 
+     * 
+     * @return float 
+     */
+    float touch_get_y_scale( void );
+    /**
+     * @brief 
+     * 
+     * @param value 
+     */
+    void touch_set_x_scale( float value );
+    /**
+     * @brief 
+     * 
+     * @param value 
+     */
+    void touch_set_y_scale( float value );
     /**
      * @brief get the current touch pos
      * 

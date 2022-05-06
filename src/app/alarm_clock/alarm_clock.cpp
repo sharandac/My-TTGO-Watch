@@ -116,7 +116,6 @@ static void remove_main_tile_widget(){
 static void add_main_tile_widget(){
     alarm_clock_widget = widget_register( alarm_clock_get_clock_label(true), &alarm_clock_48px, enter_alarm_clock_event_cb );
     widget_hide_indicator(alarm_clock_widget);
-    update_main_tile_widget_label();
 }
 
 static void setup_tile_hibernate_callback (){
@@ -124,6 +123,8 @@ static void setup_tile_hibernate_callback (){
     if (alarm_clock_setup_is_main_tile_switch_on() != properties.show_on_main_tile) {
         if (alarm_clock_setup_is_main_tile_switch_on()){
             add_main_tile_widget();
+            update_main_tile_widget_label();
+            
         }
         else{
             remove_main_tile_widget();
@@ -162,7 +163,13 @@ bool alarm_occurred_event_event_callback ( EventBits_t event, void *arg  ){
 
 bool powermgmt_callback( EventBits_t event, void *arg  ){
     switch( event ) {
+        case( POWERMGM_WAKEUP ):
+            rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );
+            update_main_tile_widget_label();
+            break;
         case( POWERMGM_STANDBY ):
+            rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );
+            update_main_tile_widget_label();
             alarm_in_progress_finish_alarm();
             break;
     }
@@ -191,7 +198,10 @@ void alarm_clock_setup( void ) {
 
     rtcctl_register_cb( RTCCTL_ALARM_OCCURRED , alarm_occurred_event_event_callback, "alarm_clock");
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED| RTCCTL_ALARM_TERM_SET , alarm_term_changed_cb, "alarm_clock");
-    powermgm_register_cb( POWERMGM_STANDBY, powermgmt_callback, "alarm_clock");
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP, powermgmt_callback, "alarm_clock", CALL_CB_LAST );
+
+    alarm_clock_main_set_data_to_display( rtcctl_get_alarm_data(), timesync_get_24hr() );
+    rtcctl_set_alarm( alarm_clock_main_get_data_to_store() );
 }
 
 uint32_t alarm_clock_get_app_main_tile_num( void ) {

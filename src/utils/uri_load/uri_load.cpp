@@ -383,7 +383,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         /**
          * request successfull?
          */
-        if ( httpCode > 0 && httpCode == HTTP_CODE_OK  ) {
+        if ( httpCode == HTTP_CODE_OK  ) {
             /**
              * get file size and alloc memory for the file
              */
@@ -452,7 +452,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * if we have a new location, try it
              */
-            if ( location ) {
+            if ( !location.isEmpty() ) {
                 /**
                  * get new location data
                  */
@@ -599,7 +599,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         /**
          * request successfull?
          */
-        if ( httpCode > 0 && httpCode == HTTP_CODE_OK  ) {
+        if ( httpCode == HTTP_CODE_OK  ) {
             /**
              * get file size and alloc memory for the file
              */
@@ -673,7 +673,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
             /**
              * if we have a new location, try it
              */
-            if ( location ) {
+            if ( !location.isEmpty() ) {
                 /**
                  * get new location data
                  */
