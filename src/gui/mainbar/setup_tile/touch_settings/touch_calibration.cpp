@@ -38,25 +38,25 @@
     #include <Arduino.h>
 #endif
 
-lv_obj_t *touch_calibration_tile = NULL;
-lv_obj_t *touch_location_icon = NULL;
-lv_obj_t *touch_location_done_arc = NULL;
-lv_obj_t *touch_location_done_icon = NULL;
-lv_style_t touch_calibration_style;
-lv_style_t touch_calibration_arc_style;
-uint32_t touch_calibration_tile_num;
+lv_obj_t *touch_calibration_tile = NULL;                    /** @brief touch calibration tile lv_obj_t pointer */
+lv_obj_t *touch_location_icon = NULL;                       /** @brief touch calibration icon lv_obj_t pointer */
+lv_obj_t *touch_location_done_arc = NULL;                   /** @brief touch calibration done arv lv_obj_t pointer*/
+lv_obj_t *touch_location_done_icon = NULL;                  /** @brief touch calibration done icon lv_obj_t pointer*/
+lv_style_t touch_calibration_style;                         /** @brief touch calibration lv_style_t pointer */
+lv_style_t touch_calibration_arc_style;                     /** @brief touch calibration arv lv_style_t pointer */
+uint32_t touch_calibration_tile_num;                        /** @brief touch calibration tile number */
 
-bool touch_calibration_active = false;
-float touch_calibration_x_scale = 0.0;
-float touch_calibration_y_scale = 0.0;
+bool touch_calibration_active = false;                      /** @brief touch calibration active flag */
+float touch_calibration_x_scale = 0.0;                      /** @brief touch x scale */
+float touch_calibration_y_scale = 0.0;                      /** @brief touch y scale */
 
-uint32_t touch_calibration_state = CALIBRATION_STATE_NONE;
-uint32_t touch_calibration_press_counter = 0;
-uint32_t display_rotation = 0; 
-float touch_calibration_min_x_value = 0.0;
-float touch_calibration_min_y_value = 0.0;
-float touch_calibration_max_x_value = 0.0;
-float touch_calibration_max_y_value = 0.0;
+uint32_t touch_calibration_state = CALIBRATION_STATE_NONE;  /** @brief calibration sequence state*/
+uint32_t touch_calibration_press_counter = 0;               /** @brief calibration presse counter */
+uint32_t display_rotation = 0;                              /** @brief old display rotation for restoration */
+float touch_calibration_min_x_value = 0.0;                  /** @brief touch min x */
+float touch_calibration_min_y_value = 0.0;                  /** @brief touch min y */
+float touch_calibration_max_x_value = 0.0;                  /** @brief touch max x */
+float touch_calibration_max_y_value = 0.0;                  /** @brief touch max y */
 
 LV_IMG_DECLARE(touch_64px);
 LV_IMG_DECLARE(location_32px);
@@ -128,7 +128,7 @@ void touch_calibration_hibernate_cb( void ) {
 }
 
 bool touch_calibration_event_cb( EventBits_t event, void *arg ) {
-    static bool touch_pressed = false;
+    static bool touch_pressed = false;      /** @brief touch pressed flag */
 
     if( touch_calibration_active == false ) {
         return( false );
