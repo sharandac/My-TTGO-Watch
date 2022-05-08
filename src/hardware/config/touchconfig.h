@@ -25,15 +25,33 @@
     #include "utils/basejsonconfig.h"
 
     #define TOUCH_JSON_CONFIG_FILE    "/touch.json"     /** @brief defines json config file name */
-    
+
+    #ifdef NATIVE_64BIT
+        #define TOUCH_X_SCALE       1.0
+        #define TOUCH_Y_SCALE       1.0
+    #else
+        #if defined( M5PAPER )
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
+        #elif defined( M5CORE2 )
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            #define TOUCH_X_SCALE       1.15
+            #define TOUCH_Y_SCALE       1.0
+        #elif defined( LILYGO_WATCH_2021 )
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
+        #endif
+    #endif
     /**
      * @brief touch config structure
      */
     class touch_config_t : public BaseJsonConfig {
         public:
         touch_config_t();
-        float x_scale = 1.15;        /** @brief x-scale factor */
-        float y_scale = 1.0;        /** @brief y-scale factor */
+        float x_scale = TOUCH_X_SCALE;        /** @brief x-scale factor */
+        float y_scale = TOUCH_Y_SCALE;        /** @brief y-scale factor */
 
         protected:
         ////////////// Available for overloading: //////////////
