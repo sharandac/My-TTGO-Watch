@@ -38,6 +38,13 @@ Set color, background, touch feedback with vibrations...
 ![screenshot](images/display_1.png)
 ![screenshot](images/display_2.png)
 
+## Touch
+
+Touch calibration menu.
+
+![screenshot](images/touch1.png)
+![screenshot](images/touch2.png)
+
 ## Move
 
 Enable:
