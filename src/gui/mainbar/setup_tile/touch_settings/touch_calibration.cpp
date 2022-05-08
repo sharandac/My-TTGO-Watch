@@ -105,6 +105,8 @@ uint32_t touch_calibration_get_tile_num( void ) {
 void touch_calibration_activate_cb( void ) {
     display_rotation = display_get_rotation();
     display_set_rotation( 180 );
+    touch_set_x_scale( 1.0 );
+    touch_set_y_scale( 1.0 );
     touch_calibration_state = CALIBRATION_STATE_START;
     touch_calibration_press_counter = 2;
     lv_arc_set_end_angle( touch_location_done_arc, 360 );
@@ -152,34 +154,48 @@ bool touch_calibration_event_cb( EventBits_t event, void *arg ) {
                             touch_calibration_max_y_value = 0.0;
                             break;
                         case CALIBRATION_STATE_BOTTOM_LEFT:
-                            touch_calibration_min_x_value =+ touch->x_coor;
-                            touch_calibration_max_y_value =+ touch->y_coor;
+                            touch_calibration_min_x_value = touch_calibration_min_x_value + touch->x_coor;
+                            touch_calibration_max_y_value = touch_calibration_max_y_value + touch->y_coor;
                             break;
                         case CALIBRATION_STATE_TOP_LEFT:
-                            touch_calibration_min_x_value =+ touch->x_coor;
-                            touch_calibration_min_y_value =+ touch->y_coor;
+                            touch_calibration_min_x_value = touch_calibration_min_x_value + touch->x_coor;
+                            touch_calibration_min_y_value = touch_calibration_min_y_value + touch->y_coor;
                             break;
                         case CALIBRATION_STATE_TOP_RIGHT:
-                            touch_calibration_max_x_value =+ touch->x_coor;
-                            touch_calibration_min_y_value =+ touch->y_coor;
+                            touch_calibration_max_x_value = touch_calibration_max_x_value + touch->x_coor;
+                            touch_calibration_min_y_value = touch_calibration_min_y_value + touch->y_coor;
                             break;
                         case CALIBRATION_STATE_BOTTOM_RIGHT:
-                            touch_calibration_max_x_value =+ touch->x_coor;
-                            touch_calibration_max_y_value =+ touch->y_coor;
+                            touch_calibration_max_x_value = touch_calibration_max_x_value + touch->x_coor;
+                            touch_calibration_max_y_value = touch_calibration_max_y_value + touch->y_coor;
                             break;
                         case CALIBRATION_STATE_DONE:
-                            log_i("min x = %.1f", touch_calibration_min_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
-                            log_i("max x = %.1f", touch_calibration_max_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
-                            log_i("min y = %.1f", touch_calibration_min_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
-                            log_i("max y = %.1f", touch_calibration_max_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
+                            touch_calibration_min_x_value = touch_calibration_min_x_value / 6.0;
+                            touch_calibration_min_y_value = touch_calibration_min_y_value / 6.0;
+                            touch_calibration_max_x_value = touch_calibration_max_x_value / 6.0;
+                            touch_calibration_max_y_value = touch_calibration_max_y_value / 6.0;
+
+                            log_i("measured min x = %.1f", touch_calibration_min_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
+                            log_i("measured max x = %.1f", touch_calibration_max_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
+                            log_i("measured min y = %.1f", touch_calibration_min_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
+                            log_i("measured max y = %.1f", touch_calibration_max_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
                             
-                            log_i("min x = %d", - ( lv_disp_get_hor_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) );
-                            log_i("max x = %d", ( lv_disp_get_hor_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) );
-                            log_i("min y = %d", - ( lv_disp_get_ver_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) );
-                            log_i("max y = %d", ( lv_disp_get_ver_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) );
+                            log_i("calculated min x = %d", - ( lv_disp_get_hor_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) );
+                            log_i("calculated max x = %d", ( lv_disp_get_hor_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) );
+                            log_i("calculated min y = %d", - ( lv_disp_get_ver_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) );
+                            log_i("calculated max y = %d", ( lv_disp_get_ver_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) );
 
                             touch_calibration_x_scale = ( - ( lv_disp_get_hor_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) ) / ( touch_calibration_min_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
                             touch_calibration_y_scale = ( - ( lv_disp_get_ver_res( NULL ) / 2 ) + ( LOCATION_ICON_SIZE / 2 ) ) / ( touch_calibration_min_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
+
+                            touch_calibration_x_scale = touch_calibration_x_scale + ( ( lv_disp_get_hor_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) ) / ( touch_calibration_max_x_value - ( lv_disp_get_hor_res( NULL ) / 2 ) );
+                            touch_calibration_y_scale = touch_calibration_y_scale + ( ( lv_disp_get_ver_res( NULL ) / 2 ) - ( LOCATION_ICON_SIZE / 2 ) ) / ( touch_calibration_max_y_value - ( lv_disp_get_ver_res( NULL ) / 2 ) );
+
+                            touch_calibration_x_scale = touch_calibration_x_scale / 2.0;
+                            touch_calibration_y_scale = touch_calibration_y_scale / 2.0;
+
+                            log_i("x scale = %.2f", touch_calibration_x_scale );
+                            log_i("y scale = %.2f", touch_calibration_y_scale );
 
                             if( touch_calibration_x_scale < 0.0 )
                                 touch_calibration_x_scale = touch_calibration_x_scale * -1.0;
