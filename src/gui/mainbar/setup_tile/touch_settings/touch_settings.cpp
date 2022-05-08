@@ -46,6 +46,8 @@ float touch_y_scale = 0.0;
 LV_IMG_DECLARE(touch_64px);
 LV_IMG_DECLARE(location_32px);
 
+void touch_settings_activate_cb( void );
+void touch_settings_hibernate_cb( void );
 bool touch_settings_event_cb( EventBits_t event, void *arg );
 static void touch_settings_calibration_btn_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_touch_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -83,11 +85,38 @@ void touch_settings_tile_setup( void ) {
     lv_label_set_text( touch_coor_label, "" );
     lv_obj_align( touch_coor_label, touch_settings_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -5 );
 
+    mainbar_add_tile_activate_cb( touch_tile_num, touch_settings_activate_cb );
+    mainbar_add_tile_hibernate_cb( touch_tile_num, touch_settings_hibernate_cb );
+
     touch_register_cb( TOUCH_CONFIG_CHANGE | TOUCH_UPDATE, touch_settings_event_cb, "touch config change");
     /**
      * create touch calibration tile and call calibration tile setup
      */
     touch_calibration_tile_setup();
+}
+
+void touch_settings_activate_cb( void ) {
+    touch_x_scale = touch_get_x_scale();
+    touch_y_scale = touch_get_y_scale();
+
+    char scale_label[64]="";
+    snprintf( scale_label, sizeof( scale_label ), "x/y scale: %.2f/%.2f", touch_x_scale, touch_y_scale );
+    lv_label_set_text( touch_scale_label, scale_label );
+    lv_obj_align( touch_scale_label, calibrate_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+
+    touch_active = true;
+}
+
+void touch_settings_hibernate_cb( void ) {
+    touch_x_scale = touch_get_x_scale();
+    touch_y_scale = touch_get_y_scale();
+
+    char scale_label[64]="";
+    snprintf( scale_label, sizeof( scale_label ), "x/y scale: %.2f/%.2f", touch_x_scale, touch_y_scale );
+    lv_label_set_text( touch_scale_label, scale_label );
+    lv_obj_align( touch_scale_label, calibrate_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+
+    touch_active = false;
 }
 
 bool touch_settings_event_cb( EventBits_t event, void *arg ) {

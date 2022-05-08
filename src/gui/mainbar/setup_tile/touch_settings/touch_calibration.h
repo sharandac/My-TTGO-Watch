@@ -24,6 +24,8 @@
     
     #include "config.h"
 
+    #define     LOCATION_ICON_SIZE      32
+
     enum {
         CALIBRATION_STATE_NONE = 0,
         CALIBRATION_STATE_START,
