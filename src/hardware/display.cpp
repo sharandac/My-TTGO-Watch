@@ -345,7 +345,6 @@ void display_set_rotation( uint32_t rotation ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-            M5.Lcd.setRotation( rotation / 90 );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             display_config.rotation = rotation;
