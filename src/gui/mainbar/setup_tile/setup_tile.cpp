@@ -30,6 +30,8 @@
 #include "gui/mainbar/note_tile/note_tile.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 
+#include "utils/alloc.h"
+
 #include "hardware/motor.h"
 
 #ifdef NATIVE_64BIT
@@ -40,7 +42,7 @@
 
 static bool setuptile_init = false;
 
-icon_t setup_entry[ MAX_SETUP_ICON ];
+icon_t *setup_entry = NULL;
 
 lv_obj_t *setup_cont[ MAX_SETUP_TILES ];
 uint32_t setup_tile_num[ MAX_SETUP_TILES ];
@@ -56,6 +58,12 @@ void setup_tile_setup( void ) {
     if ( setuptile_init ) {
         log_e("setuptile already initialized");
         return;
+    }
+
+    setup_entry = (icon_t*)MALLOC( sizeof( icon_t ) * MAX_SETUP_ICON );
+    if( !setup_entry ) {
+        log_e("error while alloc");
+        while( 1 ){};
     }
 
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {

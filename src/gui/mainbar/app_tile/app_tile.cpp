@@ -27,6 +27,8 @@
 #include "gui/mainbar/note_tile/note_tile.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 
+#include "utils/alloc.h"
+
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
 #else
@@ -35,7 +37,7 @@
 
 static bool apptile_init = false;
 
-icon_t app_entry[ MAX_APPS_ICON ];
+icon_t *app_entry = NULL;
 lv_obj_t *app_cont[ MAX_APPS_TILES ];
 uint32_t app_tile_num[ MAX_APPS_TILES ];
 
@@ -48,6 +50,11 @@ void app_tile_setup( void ) {
     if ( apptile_init ) {
         log_e("apptile already initialized");
         return;
+    }
+    app_entry = (icon_t*)MALLOC( sizeof( icon_t ) * MAX_APPS_ICON );
+    if( !app_entry ) {
+        log_e("error while alloc");
+        while( 1 ){};
     }
     /**
      * add tiles to to main tile

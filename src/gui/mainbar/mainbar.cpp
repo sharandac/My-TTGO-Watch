@@ -45,7 +45,7 @@
     #include <Arduino.h>
 #endif
 
-mainbar_history_t mainbar_history;
+mainbar_history_t *mainbar_history = NULL;
 
 static lv_obj_t *mainbar = NULL;
 
@@ -68,6 +68,12 @@ void mainbar_setup( void ) {
     if ( mainbar ) {
         log_e("main already initialized");
         return;
+    }
+
+    mainbar_history = (mainbar_history_t*)MALLOC( sizeof( mainbar_history_t ) );
+    if( !mainbar_history ) {
+        log_e("error while alloc");
+        while( 1 ){};
     }
 
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
@@ -134,17 +140,17 @@ void mainbar_add_current_tile_to_history( lv_anim_enable_t anim ) {
         while( true );
     }
 
-    if ( mainbar_history.entrys < MAINBAR_MAX_HISTORY ) {
+    if ( mainbar_history->entrys < MAINBAR_MAX_HISTORY ) {
         lv_tileview_get_tile_act( mainbar, &x, &y );
         /**
          * only store in history when the last entry is not the current
          */
-        if ( mainbar_history.tile[ mainbar_history.entrys ].x != x || mainbar_history.tile[ mainbar_history.entrys ].y != y ) {
-            mainbar_history.entrys++;
-            mainbar_history.tile[ mainbar_history.entrys ].x = x;
-            mainbar_history.tile[ mainbar_history.entrys ].y = y;
-            mainbar_history.statusbar[ mainbar_history.entrys ] = statusbar_get_hidden_state();
-            mainbar_history.anim[ mainbar_history.entrys ] = anim;
+        if ( mainbar_history->tile[ mainbar_history->entrys ].x != x || mainbar_history->tile[ mainbar_history->entrys ].y != y ) {
+            mainbar_history->entrys++;
+            mainbar_history->tile[ mainbar_history->entrys ].x = x;
+            mainbar_history->tile[ mainbar_history->entrys ].y = y;
+            mainbar_history->statusbar[ mainbar_history->entrys ] = statusbar_get_hidden_state();
+            mainbar_history->anim[ mainbar_history->entrys ] = anim;
             MAINBAR_INFO_LOG("store tile to history: %d, %d, %d, %d", x, y, statusbar_get_hidden_state(), anim );
         }
     }
@@ -159,10 +165,10 @@ void mainbar_clear_history( void ) {
         while( true );
     }
 
-    mainbar_history.entrys = 0;
-    mainbar_history.tile[ 0 ].x = 0;
-    mainbar_history.tile[ 0 ].y = 0;
-    mainbar_history.statusbar[ 0 ] = true;
+    mainbar_history->entrys = 0;
+    mainbar_history->tile[ 0 ].x = 0;
+    mainbar_history->tile[ 0 ].y = 0;
+    mainbar_history->statusbar[ 0 ] = true;
     MAINBAR_INFO_LOG("clear mainbar history");
 }
 
@@ -176,7 +182,7 @@ void mainbar_jump_back( void ) {
         while( true );
     }
 
-    if ( mainbar_history.entrys > 0 ) {
+    if ( mainbar_history->entrys > 0 ) {
         /**
          * get the current tile pos for later use
          */
@@ -184,9 +190,9 @@ void mainbar_jump_back( void ) {
         /**
          * jump back
          */
-        MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.statusbar[ mainbar_history.entrys ] );
-        lv_tileview_set_tile_act( mainbar, mainbar_history.tile[ mainbar_history.entrys ].x, mainbar_history.tile[ mainbar_history.entrys ].y, mainbar_history.anim[ mainbar_history.entrys ] );
-        statusbar_hide( mainbar_history.statusbar[ mainbar_history.entrys ] );
+        MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history->tile[ mainbar_history.entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->statusbar[ mainbar_history.entrys ] );
+        lv_tileview_set_tile_act( mainbar, mainbar_history->tile[ mainbar_history->entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->anim[ mainbar_history->entrys ] );
+        statusbar_hide( mainbar_history->statusbar[ mainbar_history->entrys ] );
         gui_force_redraw( true );
         /**
          * search for the hibernate cb
@@ -206,7 +212,7 @@ void mainbar_jump_back( void ) {
          * search for the activation cb
          */
         for ( int tile_number = 0 ; tile_number < tile_entrys; tile_number++ ) {
-            if ( tile_pos_table[ tile_number ].x == mainbar_history.tile[ mainbar_history.entrys ].x && tile_pos_table[ tile_number ].y == mainbar_history.tile[ mainbar_history.entrys ].y ) {
+            if ( tile_pos_table[ tile_number ].x == mainbar_history->tile[ mainbar_history->entrys ].x && tile_pos_table[ tile_number ].y == mainbar_history->tile[ mainbar_history->entrys ].y ) {
                 /**
                  * call hibernate callback for the current tile if exist
                  */
@@ -216,7 +222,7 @@ void mainbar_jump_back( void ) {
                 }
             }
         }
-        mainbar_history.entrys--;
+        mainbar_history->entrys--;
     }
     else {
         mainbar_jump_to_maintile( LV_ANIM_OFF );

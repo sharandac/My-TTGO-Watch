@@ -23,6 +23,7 @@
 #include "gpsctl.h"
 #include "powermgm.h"
 #include "callback.h"
+#include <math.h>
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -187,6 +188,7 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
             gps_data.valid_speed = gps.speed.isValid();
             gps_data.valid_satellite = gps.satellites.isValid();
             gps_data.valid_altitude = gps.altitude.isValid();
+            gps_data.valid_course = gps.course.isValid();
             /*
             * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
             */
@@ -235,6 +237,12 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 gps_data.altitude_meters = gps.altitude.meters();
                 gpsctl_send_cb( GPSCTL_UPDATE_ALTITUDE, (void*)&gps_data );
                 GPSCTL_DEBUG_LOG("new altitude: %fmeters / %ffeed", gps_data.altitude_meters, gps_data.altitude_feed );
+            }
+            if( gps.course.isUpdated() ) {
+                gps_data.gps_source = GPS_SOURCE_GPS;
+                gps_data.course = gps.course.value();
+                gpsctl_send_cb( GPSCTL_UPDATE_COURSE, (void*)&gps_data );
+                GPSCTL_DEBUG_LOG("new course: %f", gps_data.course );
             }
             if ( gps.satellites.isUpdated() ) {
                 if ( gps_data.satellites != gps.satellites.value() ) {
@@ -569,4 +577,14 @@ const char *gpsctl_get_source_str( gps_source_t gps_source ) {
     }
 
     return( ret_val );
+}
+
+double gpsctl_distance( double lat1, double long1, double lat2, double long2, double earth_radius ) {
+    double dlong = ( long2 - long1 ) * M_PI / 180.0;
+    double dlat = ( lat2 - lat1 ) * M_PI / 180.0;
+    double a = pow( sin( dlat / 2.0 ), 2 ) + cos( lat1 * M_PI / 180.0 ) * cos( lat2 * M_PI / 180.0 ) * pow( sin( dlong / 2.0 ), 2 );
+    double c = 2 * atan2( sqrt( a ), sqrt( 1 - a ) );
+    double d = earth_radius * c;
+
+    return( d );
 }
