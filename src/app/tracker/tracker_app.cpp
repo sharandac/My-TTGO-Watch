@@ -65,7 +65,7 @@ void tracker_app_setup( void ) {
     tracker_app_main_tile = mainbar_get_tile_obj( tracker_app_main_tile_num );
     tracker_app_setup_tile = mainbar_get_tile_obj( tracker_app_setup_tile_num );
 
-    tracker_app = app_register( "tracker", &tracker_64px, tracker_enter_app_event_cb );
+    tracker_app = app_register( "gps tracker\n(alpha)", &tracker_64px, tracker_enter_app_event_cb );
 
     tracker_app_main_setup( tracker_app_main_tile_num );
 }

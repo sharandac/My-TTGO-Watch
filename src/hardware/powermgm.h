@@ -126,5 +126,18 @@
      * @brief set normal mode 240/80Mhz (only custom framework)
      */
     void powermgm_set_normal_mode( void );
+    /**
+     * @brief enable CPU lightsleep mode
+     * 
+     * @param enable 
+     */
+    void powermgm_set_lightsleep( bool enable );
+    /**
+     * @brief get if CPU lightsleep enaled
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool powermgm_get_lightsleep( void );
 
 #endif // _POWERMGM_H

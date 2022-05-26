@@ -22,6 +22,8 @@
 #ifndef _OSM_APP_MAIN_H
     #define _OSM_APP_MAIN_H
 
+    #include "config.h"
+
     #ifdef NATIVE_64BIT
         #include "utils/io.h"
     #endif
@@ -31,7 +33,6 @@
     #define OSM_APP_UPDATE_REQUEST              _BV(0)      /** @brief set tile image update flag */
     #define OSM_APP_LOAD_AHEAD_REQUEST          _BV(1)      /** @brief set tile image update flag */
     #define OSM_APP_TASK_EXIT_REQUEST           _BV(2)      /** @brief set task exit flag */
-
     /**
      * @brief osmmap app main setup routine
      * 

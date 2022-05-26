@@ -46,6 +46,8 @@
 
 #include "powermgm.h"
 
+static bool sdcard_mounted = false;
+static bool sdcard_block_unmount = false;
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg );
 
 void sdcard_setup( void ) {
@@ -69,6 +71,8 @@ void sdcard_setup( void ) {
                 log_e("SD Card Mount Failed");
             }
             heap_caps_malloc_extmem_enable( 16 * 1024 );
+
+            sdcard_mounted = true;
         #endif    
     #endif
 #endif
@@ -82,25 +86,37 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:
                 log_i("go silence wakeup");
-                heap_caps_malloc_extmem_enable( 1 );
-                if ( !SD.begin( SD_CS, *sdhander) ) {
-                    log_e("SD Card Mount Failed");
+                if( !sdcard_mounted ) {
+                    heap_caps_malloc_extmem_enable( 1 );
+                    if ( !SD.begin( SD_CS, *sdhander) ) {
+                        log_e("SD Card Mount Failed");
+                    }
+                    heap_caps_malloc_extmem_enable( 16 * 1024 );
+                    sdcard_mounted = true;
                 }
-                heap_caps_malloc_extmem_enable( 16 * 1024 );
                 retval = true;
                 break;
             case POWERMGM_STANDBY:
-                log_i("go standby");
-                SD.end();
+                if( sdcard_mounted && !sdcard_block_unmount ) {
+                    log_i("go standby");
+                    SD.end();
+                    sdcard_mounted = false;
+                }
+                else {
+                    log_i("go standby without unmount");
+                }
                 retval = true;
                 break;
             case POWERMGM_WAKEUP:
                 log_i("go wakeup");
-                heap_caps_malloc_extmem_enable( 1 );
-                if (!SD.begin( SD_CS, *sdhander)) {
-                    log_e("SD Card Mount Failed");
+                if( !sdcard_mounted ) {
+                    heap_caps_malloc_extmem_enable( 1 );
+                    if (!SD.begin( SD_CS, *sdhander)) {
+                        log_e("SD Card Mount Failed");
+                    }
+                    heap_caps_malloc_extmem_enable( 16 * 1024 );
+                    sdcard_mounted = true;
                 }
-                heap_caps_malloc_extmem_enable( 16 * 1024 );
                 retval = true;
                 break;
         }
@@ -121,4 +137,8 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
         }
     #endif
     return( retval );
+}
+
+void sdcard_block_unmounting( bool block_unmount ) {
+    sdcard_block_unmount = block_unmount;
 }

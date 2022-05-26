@@ -26,27 +26,33 @@ tracker_config_t::tracker_config_t() : BaseJsonConfig( TRACKER_JSON_COFIG_FILE )
 
 bool tracker_config_t::onSave(JsonDocument& doc) {
     doc["gps_autoon"] = gps_autoon;
+    doc["interval"] = interval;
     doc["gps_on_standby"] = gps_on_standby;
     doc["track_on_fix"] = track_on_fix;
     doc["vibe_on_fix"] = vibe_on_fix;
     doc["piep_on_fix"] = piep_on_fix;
+    doc["storage"] = storage;
     return true;
 }
 
 bool tracker_config_t::onLoad(JsonDocument& doc) {
     gps_autoon = doc["gps_autoon"] | true;
+    interval = doc["interval"] | 10;
     gps_on_standby = doc["gps_on_standby"] | false;
     track_on_fix = doc["track_on_fix"] | true;
     vibe_on_fix = doc["vibe_on_fix"] | false;
     piep_on_fix = doc["piep_on_fix"] | false;
+    strncpy( storage, doc["storage"] | "/spiffs", sizeof( storage ) );
     return true;
 }
 
 bool tracker_config_t::onDefault( void ) {
     gps_autoon = true;
+    interval = 10;
     gps_on_standby = false;
     track_on_fix = true;
     vibe_on_fix = false;
     piep_on_fix = false;
+    strncpy( storage, "/spiffs", sizeof( storage ) );
     return true;
 }

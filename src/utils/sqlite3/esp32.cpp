@@ -454,7 +454,8 @@ static int ESP32Open(
   //p->fd = open(zName, oflags, 0600);
   //p->fd = open(zName, oflags, S_IRUSR | S_IWUSR);
   p->fp = fopen(zName, mode);
-  if( p->fp<=0){
+//  if( p->fp <= 0 ){
+  if( !p->fp ){
     if (aBuf)
       sqlite3_free(aBuf);
     //Serial.println("Can't open");
@@ -496,7 +497,8 @@ static int ESP32Delete(sqlite3_vfs *pVfs, const char *zPath, int dirSync){
 
     /* Open a file-descriptor on the directory. Sync. Close. */
     dfd = fopen(zDir, "r");
-    if( dfd<=0 ){
+//    if( dfd<=0 ){
+    if( !dfd ){
       rc = -1;
     }else{
       rc = fflush(dfd);

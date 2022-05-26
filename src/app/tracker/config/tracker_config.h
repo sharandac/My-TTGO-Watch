@@ -33,10 +33,12 @@
         public:
         tracker_config_t();
         bool gps_autoon = true;             /** @brief gps auto on/off */
+        int interval = 10;                  /** @brief track point interval */
         bool gps_on_standby = false;        /** @brief enable gps on standby */
         bool track_on_fix = true;           /** @brief track when fix */
         bool vibe_on_fix = true;            /** @brief vibe when fix */
         bool piep_on_fix = true;            /** @brief piep when fix */
+        char storage[32] = "/spiffs";      /** @brief file storage prefix */
 
         protected:
         ////////////// Available for overloading: //////////////

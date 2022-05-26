@@ -190,7 +190,7 @@ void mainbar_jump_back( void ) {
         /**
          * jump back
          */
-        MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history->tile[ mainbar_history.entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->statusbar[ mainbar_history.entrys ] );
+        MAINBAR_INFO_LOG("jump back to tile: %d, %d, %d", mainbar_history->tile[ mainbar_history->entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->statusbar[ mainbar_history->entrys ] );
         lv_tileview_set_tile_act( mainbar, mainbar_history->tile[ mainbar_history->entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->anim[ mainbar_history->entrys ] );
         statusbar_hide( mainbar_history->statusbar[ mainbar_history->entrys ] );
         gui_force_redraw( true );

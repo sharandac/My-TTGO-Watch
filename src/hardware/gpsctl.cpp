@@ -138,7 +138,7 @@ bool gpsctl_get_available( void ) {
 }
 
 bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
-    static uint64_t lastmillis = millis();
+    static uint64_t nextmillis = millis();
     /*
      * check if gpsctl already init or turn off
      */
@@ -151,34 +151,28 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     #ifdef NATIVE_64BIT
 
     #else
+        powermgm_set_perf_mode();
         /**
          * abort if we have no softserial init
          */
         if ( softserial ) {
+            uint32_t bytes = 0;
             /**
              * check for serial data and read
              */
-            if ( softserial->available() > 0 ) {
-                GPSCTL_DEBUG_LOG("new gps data (%d bytes)", softserial->available() );
-                while ( softserial->available() > 0 )
-                    gps.encode( softserial->read() );
+            while ( softserial->available() > 0 ) {
+                bytes++;
+                gps.encode( softserial->read() );
             }
+            if( bytes )
+                GPSCTL_DEBUG_LOG("new gps data (%d bytes)", bytes );
         }
     #endif
     /**
      * run any second
      */
-    if ( millis() - lastmillis > GPSCTL_INTERVAL ) {
-        /*
-         * check if the last update is more than 2 times away
-         * to avoid callback bombing
-         */
-        if ( ( millis() - lastmillis ) > GPSCTL_INTERVAL * 2 ) {
-            lastmillis = millis();
-        }
-        else {
-            lastmillis =+ GPSCTL_INTERVAL;
-        }
+    if ( nextmillis < millis() ) {
+        nextmillis = millis() + GPSCTL_INTERVAL;
         #ifdef NATIVE_64BIT
         #else
             /*
@@ -325,7 +319,7 @@ bool gpsctl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
      * check if an callback table exist, if not allocate a callback table
      */
     if ( gpsctl_callback == NULL ) {
-        gpsctl_callback = callback_init( "pmu" );
+        gpsctl_callback = callback_init( "gpsctl" );
         if ( gpsctl_callback == NULL ) {
             GPSCTL_ERROR_LOG("gpsctl_callback alloc failed");
             while( true );
@@ -345,67 +339,84 @@ bool gpsctl_send_cb( EventBits_t event, void *arg ) {
 }
 
 void gpsctl_on( void ) {
-    #ifdef NATIVE_64BIT
-    #else
-        #if defined( M5PAPER )
+    /**
+     * enable gps if gps disabled
+     */
+    if( !gpsctl_enable ) {
+        powermgm_set_lightsleep( false );
+        #ifdef NATIVE_64BIT
+        #else
+            #if defined( M5PAPER )
 
-        #elif defined( M5CORE2 )
+            #elif defined( M5CORE2 )
 
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            #if defined( LILYGO_WATCH_HAS_GPS )
-                TTGOClass *ttgo = TTGOClass::getWatch();
-                ttgo->trunOnGPS();
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #if defined( LILYGO_WATCH_HAS_GPS )
+                    TTGOClass *ttgo = TTGOClass::getWatch();
+                    ttgo->trunOnGPS();
+                #endif
             #endif
         #endif
-    #endif
-    gps_data.gpsfix = false;
-    gps_data.valid_location = false;
-    gps_data.valid_speed = false;
-    gps_data.valid_altitude = false;
-    gps_data.valid_satellite = false;
-    gps_data.satellite_types.gps_satellites = 0;
-    gps_data.satellite_types.glonass_satellites = 0;
-    gps_data.satellite_types.baidou_satellites = 0;
-    gpsctl_config.autoon = true;
-    gpsctl_config.save();
-    gpsctl_enable = true;
-    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
-    gpsctl_send_cb( GPSCTL_ENABLE, NULL );
-    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+        /**
+         * force gps data update
+         */
+        gps_data.gpsfix = false;
+        gps_data.valid_location = false;
+        gps_data.valid_speed = false;
+        gps_data.valid_altitude = false;
+        gps_data.valid_satellite = false;
+        gps_data.satellite_types.gps_satellites = 0;
+        gps_data.satellite_types.glonass_satellites = 0;
+        gps_data.satellite_types.baidou_satellites = 0;
+        gpsctl_config.autoon = true;
+        gpsctl_config.save();
+        gpsctl_enable = true;
+        gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
+        gpsctl_send_cb( GPSCTL_ENABLE, NULL );
+        gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+    }
 }
 
 void gpsctl_off( void ) {
-    #ifdef NATIVE_64BIT
-    #else
-        #if defined( M5PAPER )
+    /**
+     * disable gps if gps enabled
+     */
+    if( gpsctl_enable ) {
+        powermgm_set_lightsleep( true );
+        #ifdef NATIVE_64BIT
+        #else
+            #if defined( M5PAPER )
 
-        #elif defined( M5CORE2 )
+            #elif defined( M5CORE2 )
 
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            #if defined( LILYGO_WATCH_HAS_GPS )
-                TTGOClass *ttgo = TTGOClass::getWatch();
-                ttgo->turnOffGPS();
+            #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #if defined( LILYGO_WATCH_HAS_GPS )
+                    TTGOClass *ttgo = TTGOClass::getWatch();
+                    ttgo->turnOffGPS();
+                #endif
             #endif
         #endif
-    #endif
-    gps_data.gpsfix = false;
-    gps_data.valid_location = false;
-    gps_data.valid_speed = false;
-    gps_data.valid_altitude = false;
-    gps_data.valid_satellite = false;
-    gps_data.satellite_types.gps_satellites = 0;
-    gps_data.satellite_types.glonass_satellites = 0;
-    gps_data.satellite_types.baidou_satellites = 0;
-    gpsctl_config.autoon = false;
-    gpsctl_config.save();
-    gpsctl_enable = false;
-    gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
-    gpsctl_send_cb( GPSCTL_NOFIX, NULL );
-    gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+        /**
+         * force gps data update
+         */
+        gps_data.gpsfix = false;
+        gps_data.valid_location = false;
+        gps_data.valid_speed = false;
+        gps_data.valid_altitude = false;
+        gps_data.valid_satellite = false;
+        gps_data.satellite_types.gps_satellites = 0;
+        gps_data.satellite_types.glonass_satellites = 0;
+        gps_data.satellite_types.baidou_satellites = 0;
+        gpsctl_config.autoon = false;
+        gpsctl_config.save();
+        gpsctl_enable = false;
+        gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
+        gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+        gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    }
 }
 
 void gpsctl_autoon_on( void ) {
-
     gps_data.gpsfix = false;
     gps_data.valid_location = false;
     gps_data.valid_speed = false;
@@ -433,12 +444,14 @@ void gpsctl_autoon_on( void ) {
             gpsctl_enable = true;
             gpsctl_send_cb( GPSCTL_ENABLE, NULL );
             gpsctl_send_cb( GPSCTL_NOFIX, NULL );
+            powermgm_set_lightsleep( false );
         }
     }
     else {
         gpsctl_enable = false;
         gpsctl_send_cb( GPSCTL_NOFIX, NULL );
         gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+        powermgm_set_lightsleep( true );
     }
 }
 
@@ -467,6 +480,7 @@ void gpsctl_autoon_off( void ) {
     gps_data.satellite_types.baidou_satellites = 0;
     gpsctl_send_cb( GPSCTL_NOFIX, NULL );
     gpsctl_send_cb( GPSCTL_DISABLE, NULL );
+    powermgm_set_lightsleep( true );
 }
 
 bool gpsctl_get_app_use_gps( void ) {

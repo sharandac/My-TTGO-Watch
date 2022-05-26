@@ -112,6 +112,7 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text);
 lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style );
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text);
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text, lv_style_t *style );
+void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coord_t x, lv_coord_t y, const char *format, ... );
 
 /**
  * @brief   Creates and adds a roller object to a container

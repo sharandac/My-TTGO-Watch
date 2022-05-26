@@ -131,6 +131,8 @@ Here you can find some finish watchface packages:
 [![hal9000](images/watchface/hal9000/watchface_theme_prev.png)](images/watchface/hal9000/watchface.tar.gz)
 [![black](images/watchface/black/watchface_theme_prev.png)](images/watchface/black/watchface.tar.gz)
 
+alternative [watchfaces](https://github.com/PGNetHun/PG-TTGO-Watchfaces)
+
 # Applications
 
 ![screenshot](images/screen7.png)

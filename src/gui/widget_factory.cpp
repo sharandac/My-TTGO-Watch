@@ -22,6 +22,8 @@
 #include "widget_factory.h"
 #include "widget_styles.h"
 #include "mainbar/mainbar.h"
+#include "utils/alloc.h"
+#include <stdarg.h>
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -198,6 +200,21 @@ lv_obj_t * wf_add_label(lv_obj_t *parent, char const * text, lv_style_t *style )
     else
         lv_obj_add_style( label, LV_OBJ_PART_MAIN, ws_get_label_style() );
     return label;
+}
+
+void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coord_t x, lv_coord_t y, const char *format, ... ) {
+    va_list args;
+    va_start(args, format);
+
+    char *buffer;
+    vasprintf( &buffer, format, args );
+    va_end(args);
+
+    lv_label_set_text( label, buffer );
+    lv_obj_align( label, base, align, x, y );
+
+    free( buffer );
+    return;
 }
 
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {

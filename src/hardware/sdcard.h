@@ -26,5 +26,6 @@
      * @brief init and setup sd card and register all powermgm routines
      */
     void sdcard_setup( void );
+    void sdcard_block_unmounting( bool block_unmount );
 
 #endif // _SDCARD_H
