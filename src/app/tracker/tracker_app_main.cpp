@@ -109,14 +109,27 @@ void tracker_app_main_setup( uint32_t tile ) {
     mainbar_add_tile_hibernate_cb( tile, tracker_app_main_hibernate_cb );
 }
 
+/**
+ * @brief lv task
+ * 
+ * @param task 
+ */
 static void tracker_app_task( lv_task_t * task ) {
     wf_label_printf( tracker_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_TOP_RIGHT, 0, THEME_PADDING, "%f/%f/%.1fm", tracker_gps_data->lat, tracker_gps_data->lon, tracker_gps_data->altitude_meters );
 }
 
+/**
+ * @brief call back function if the current tile activate
+ * 
+ */
 void tracker_app_main_activate_cb( void ) {
     tracker_config.load();
 }
 
+/**
+ * @brief call back function if the current tile hibernate
+ * 
+ */
 void tracker_app_main_hibernate_cb( void ) {
     tracker_config.save();
 }
@@ -199,6 +212,13 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
+/**
+ * @brief write a .gpx log file.
+ * 
+ * @param start         true open a new file or continue the old file, false close the current file
+ * @param gps_data      gpx_data_t pointer
+ * @return const char*  pointer to a current file or NULL
+ */
 const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
     static bool logging = false;
     static char *filename = NULL;
