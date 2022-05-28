@@ -42,30 +42,17 @@ lv_obj_t *discharge_view_current;
 lv_obj_t *vbus_view_voltage;
 lv_task_t *battery_view_task;
 
-static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event );
-static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event );
 void battery_view_update_task( lv_task_t *task );
 void battery_activate_cb( void );
 void battery_hibernate_cb( void );
 
 void battery_view_tile_setup( uint32_t tile_num ) {
     // get an app tile and copy mainstyle
-    battery_view_tile_num = tile_num;
+    battery_view_tile_num = tile_num + 1;
     battery_view_tile = mainbar_get_tile_obj( battery_view_tile_num );
 
     lv_style_copy( &battery_view_style, ws_get_setup_tile_style() );
     lv_obj_add_style( battery_view_tile, LV_OBJ_PART_MAIN, &battery_view_style );
-
-    lv_obj_t *exit_btn = wf_add_exit_button( battery_view_tile, exit_battery_view_event_cb, &battery_view_style );
-    lv_obj_align( exit_btn, battery_view_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
-    
-    lv_obj_t *setup_btn = wf_add_setup_button( battery_view_tile, enter_battery_settings_event_cb, &battery_view_style );
-    lv_obj_align( setup_btn, battery_view_tile, LV_ALIGN_IN_TOP_RIGHT, -10, STATUSBAR_HEIGHT + 10 );
-
-    lv_obj_t *exit_label = lv_label_create( battery_view_tile, NULL);
-    lv_obj_add_style( exit_label, LV_OBJ_PART_MAIN, &battery_view_style );
-    lv_label_set_text( exit_label, "battery / energy");
-    lv_obj_align( exit_label, exit_btn, LV_ALIGN_OUT_RIGHT_MID, 5, 0 );
 
     lv_obj_t *battery_design_cont = lv_obj_create( battery_view_tile, NULL );
     lv_obj_set_size( battery_design_cont, lv_disp_get_hor_res( NULL ) , 25 );
@@ -145,10 +132,10 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( vbus_view_voltage, "2.4mV");
     lv_obj_align( vbus_view_voltage, vbus_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
 
-    mainbar_add_tile_activate_cb( battery_view_tile_num, battery_activate_cb );
-    mainbar_add_tile_activate_cb( battery_view_tile_num + 1, battery_activate_cb );
-    mainbar_add_tile_hibernate_cb( battery_view_tile_num, battery_hibernate_cb );
-    mainbar_add_tile_hibernate_cb( battery_view_tile_num + 1, battery_hibernate_cb );
+    mainbar_add_tile_activate_cb( tile_num, battery_activate_cb );
+    mainbar_add_tile_activate_cb( tile_num + 1, battery_activate_cb );
+    mainbar_add_tile_hibernate_cb( tile_num, battery_hibernate_cb );
+    mainbar_add_tile_hibernate_cb( tile_num + 1, battery_hibernate_cb );
 }
 
 void battery_activate_cb( void ) {
@@ -158,22 +145,6 @@ void battery_activate_cb( void ) {
 void battery_hibernate_cb( void ) {
     lv_task_del( battery_view_task );
 }
-
-static void enter_battery_settings_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_view_tile_num + 1, LV_ANIM_OFF );
-                                        break;
-    }
-
-}
-
-static void exit_battery_view_event_cb( lv_obj_t * obj, lv_event_t event ) {
-    switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( setup_get_tile_num() , LV_ANIM_OFF );
-                                        break;
-    }
-}
-
 
 void battery_view_update_task( lv_task_t *task ) {
     char temp[16]="";

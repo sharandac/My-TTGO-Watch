@@ -371,8 +371,8 @@ void gps_test_data_task( lv_task_t * task ) {
                 lon = atof( (const char*)line );
                 lat = atof( (const char*)strchr( (const char*)line, ',' ) + 1 );
                 altitude = atof( (const char*)(const char*)strrchr( (const char*)line, ',' ) + 1 );
-                gpsctl_set_location( lat, lon, altitude, GPS_SOURCE_FAKE, false );
-                log_d("gps-data: %s (%f,%f,%f)", line, lon, lat, altitude );
+                gpsctl_set_location( lat, lon, altitude, altitude, GPS_SOURCE_FAKE, false );
+                log_d("gps-data: %s (%f,%f,%f,%f)", line, lon, lat, altitude, altitude );
             }
         }
     }

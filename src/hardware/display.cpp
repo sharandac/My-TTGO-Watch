@@ -88,7 +88,8 @@ void display_setup( void ) {
      * register powermgm and pwermgm loop callback functions
      */
 //    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
-    powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY, display_powermgm_event_cb, "powermgm display", CALL_CB_FIRST );
+    powermgm_register_cb_with_prio( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, display_powermgm_event_cb, "powermgm display", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP, display_powermgm_loop_cb, "powermgm display loop" );
 }
 

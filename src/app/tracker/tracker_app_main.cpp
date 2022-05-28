@@ -26,6 +26,7 @@
 
 #include "tracker_app.h"
 #include "tracker_app_main.h"
+#include "tracker_app_view.h"
 #include "config/tracker_config.h"
 
 #include "gui/mainbar/mainbar.h"
@@ -40,21 +41,28 @@
 #include "hardware/motor.h"
 #include "hardware/gpsctl.h"
 #include "hardware/sdcard.h"
+#include "hardware/display.h"
+#include "hardware/blectl.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "utils/millis.h"
 #else
     #include <Arduino.h>
+    #include "gui/mainbar/setup_tile/watchface/watchface_tile.h"
 #endif
 
 /**
  * global state variable
  */
-bool tracker_logging_state = false;
-bool tracker_logging_gps_state = false;
+static volatile bool tracker_block_return_maintile = false;     /** @brief osm block to maintile state store */
+static volatile bool tracker_block_show_messages = false;       /** @brief osm show messages state store */
+static volatile bool tracker_block_watchface = false;           /** @brief osm statusbar force dark mode state store */
+static volatile bool tracker_gps_on_standby_state = false;      /** @brief osm gps on standby on enter osmmap */
+static volatile bool tracker_logging_state = false;             /** @brief logging state, true for logging and false for inactive */
+static volatile bool tracker_logging_gps_state = false;         /** @brief gps state, true for fix, false for no fix */
+static volatile double distance = 0.0f;
 gps_data_t *tracker_gps_data = NULL;
-lv_task_t *_tracker_app_task = NULL;
 tracker_config_t tracker_config;
 /**
  * local lv obj 
@@ -62,7 +70,6 @@ tracker_config_t tracker_config;
 lv_obj_t *tracker_progress_arc = NULL;
 lv_obj_t *tracker_info_label = NULL;
 lv_obj_t *tracker_file_info_label = NULL;
-lv_style_t tracker_progress_arc_style;
 /**
  * call back functions
  */
@@ -73,6 +80,10 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data );
 static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg );
 static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event );
 static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event );
+/*
+ *
+ */
+LV_FONT_DECLARE(Ubuntu_32px);
 /*
  * setup routine for wifimon app
  */
@@ -86,7 +97,7 @@ void tracker_app_main_setup( uint32_t tile ) {
     lv_arc_set_rotation( tracker_progress_arc, 90 );
     lv_arc_set_end_angle( tracker_progress_arc, 0 );
     lv_obj_add_style( tracker_progress_arc, LV_OBJ_PART_MAIN, APP_STYLE );
-    lv_obj_set_style_local_line_width( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, 30 );
+    lv_obj_set_style_local_line_width( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, 45 );
     lv_obj_set_style_local_line_color( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, LV_COLOR_RED );
     /**
      * add exit, menu and setup button to the main app tile
@@ -102,20 +113,18 @@ void tracker_app_main_setup( uint32_t tile ) {
     lv_obj_set_hidden( tracker_location_icon, false );
 
     tracker_info_label = wf_add_label( mainbar_get_tile_obj( tile ), "", APP_ICON_LABEL_STYLE );
+    lv_obj_set_style_local_text_font(tracker_info_label, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &Ubuntu_32px );
     tracker_file_info_label = wf_add_label( mainbar_get_tile_obj( tile ), "", APP_ICON_LABEL_STYLE );
 
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_DISABLE | GPSCTL_ENABLE | GPSCTL_UPDATE_LOCATION | GPSCTL_UPDATE_ALTITUDE | GPSCTL_UPDATE_SOURCE | GPSCTL_UPDATE_SPEED | GPSCTL_UPDATE_SATELLITE, tracker_app_main_gps_event_cb, "tracker gps" );
     mainbar_add_tile_activate_cb( tile, tracker_app_main_activate_cb );
     mainbar_add_tile_hibernate_cb( tile, tracker_app_main_hibernate_cb );
-}
 
-/**
- * @brief lv task
- * 
- * @param task 
- */
-static void tracker_app_task( lv_task_t * task ) {
-    wf_label_printf( tracker_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_TOP_RIGHT, 0, THEME_PADDING, "%f/%f/%.1fm", tracker_gps_data->lat, tracker_gps_data->lon, tracker_gps_data->altitude_meters );
+    mainbar_add_slide_element( tracker_progress_arc );
+    mainbar_add_slide_element( tracker_exit_btn );
+    mainbar_add_slide_element( tracker_trash_btn );
+    mainbar_add_slide_element( tracker_info_label );
+    mainbar_add_slide_element( tracker_file_info_label );
 }
 
 /**
@@ -123,6 +132,17 @@ static void tracker_app_task( lv_task_t * task ) {
  * 
  */
 void tracker_app_main_activate_cb( void ) {
+#ifdef NATIVE_64BIT
+#else
+    tracker_block_watchface = watchface_get_enable_tile_after_wakeup();
+    watchface_enable_tile_after_wakeup( false );
+#endif
+    tracker_block_show_messages = blectl_get_show_notification();
+    blectl_set_show_notification( false );
+    
+    tracker_block_return_maintile = display_get_block_return_maintile();
+    display_set_block_return_maintile( true );
+
     tracker_config.load();
 }
 
@@ -131,6 +151,14 @@ void tracker_app_main_activate_cb( void ) {
  * 
  */
 void tracker_app_main_hibernate_cb( void ) {
+#ifdef NATIVE_64BIT
+#else
+    watchface_enable_tile_after_wakeup( tracker_block_watchface );
+#endif
+    blectl_set_show_notification( tracker_block_show_messages );
+
+    display_set_block_return_maintile( tracker_block_return_maintile );
+
     tracker_config.save();
 }
 
@@ -147,15 +175,12 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
     static int counter = 0;
 
     if( !tracker_gps_data )
-        tracker_gps_data = (gps_data_t*)MALLOC( sizeof( gps_data_t ) );
+        tracker_gps_data = (gps_data_t*)CALLOC( 1, sizeof( gps_data_t ) );
 
     if( !tracker_gps_data ) {
         TRACKER_APP_ERROR_LOG("tracker gps data alloc failed");
         while( true );
     }
-
-    if( gps_data )
-        memcpy( tracker_gps_data, gps_data, sizeof( gps_data_t ) );
 
     switch( event ) {
         case GPSCTL_FIX:
@@ -185,17 +210,31 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
             TRACKER_APP_LOG("gps disabled");
             break;
         case GPSCTL_UPDATE_LOCATION:
-            TRACKER_APP_LOG("location: %f/%f", tracker_gps_data->lat, tracker_gps_data->lon );
-            TRACKER_APP_LOG("altitude: %f", tracker_gps_data->altitude_meters );
-            TRACKER_APP_LOG("speed: %f", tracker_gps_data->speed_kmh );
-            TRACKER_APP_LOG("satellite: %d", tracker_gps_data->satellites );
+            TRACKER_APP_LOG("location: %f/%f", gps_data->lat, gps_data->lon );
+            TRACKER_APP_LOG("altitude: %f", gps_data->altitude_meters );
+            TRACKER_APP_LOG("speed: %f", gps_data->speed_kmh );
+            TRACKER_APP_LOG("satellite: %d", gps_data->satellites );
+            TRACKER_APP_LOG("distance: %.3f", distance );
             if( tracker_logging_gps_state && tracker_logging_state ) {
+                /**
+                 * calc distance between current gps pos and last gpx pos and avoid large distance jumps
+                 */
+                if( gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM ) < 1.0f ) {
+                    TRACKER_APP_LOG("lat1 = %f, lon1 = %f, lat2 = %f, lon2 = %f, distance = %f", tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM ) );
+                    distance += gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM );
+                }
+                /**
+                 * store gpx pos into gpx file at current interval /tracker.json -> interval in sec.
+                 */
                 if( counter >= tracker_config.interval ) {
-                    wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, tracker_app_main_logging( true, gps_data ), tracker_gps_data->lat, tracker_gps_data->lon, tracker_gps_data->altitude_meters );
+                    tracker_app_main_logging( true, gps_data );
+                    tracker_app_view_add_data( gps_data );
                     counter = 0;
                 }
                 counter++;
+                wf_label_printf( tracker_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_TOP_MID, 0, THEME_PADDING, "%.3fkm", distance );
             }
+            memcpy( tracker_gps_data, gps_data, sizeof( gps_data_t ) );
             break;
         case GPSCTL_UPDATE_ALTITUDE:
             break;
@@ -209,6 +248,7 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
             TRACKER_APP_LOG("event not implement: %x", event );
             break;
     }
+
     return( true );
 }
 
@@ -268,6 +308,7 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
                 size += fprintf( fp, GPX_TRACK_SEGMENT_START );
                 fclose( fp );
                 logging = true;
+                wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
                 TRACKER_APP_LOG("write logfile header, start and metadata (%d bytes)", size );
             }
             else {
@@ -296,6 +337,7 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
                 size += fprintf( fp, timestamp );
                 size += fprintf( fp, GPX_TRACK_SEGMENT_POINT_END );
                 fclose( fp );
+                wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
                 TRACKER_APP_LOG("write logfile track segmant (%d bytes)", size );
             }
             else {
@@ -317,6 +359,7 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
             size += fprintf( fp, GPX_TRACK_END );
             size += fprintf( fp, GPX_END );
             fclose( fp );
+            wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
             TRACKER_APP_INFO_LOG("write logfile end (overall %d bytes)", size );
         }
         else {
@@ -355,20 +398,20 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
                 if( !tracker_logging_state ) {
                     TRACKER_APP_LOG("start logging");
                     tracker_logging_state = true;
+                    distance = 0.0f;
                     gpsctl_on();
                     sdcard_block_unmounting( true );
                     tracker_app_main_logging( true, NULL );
-                    _tracker_app_task = lv_task_create( tracker_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+                    tracker_app_view_clean_data();
+                    tracker_gps_on_standby_state = gpsctl_get_enable_on_standby();
+                    gpsctl_set_enable_on_standby( true );
                 }
                 else {
                     TRACKER_APP_LOG("stop logging");
                     tracker_logging_state = false;
                     gpsctl_off();
                     sdcard_block_unmounting( false );
-                    if( _tracker_app_task != NULL ) {
-                        lv_task_del( _tracker_app_task );
-                        _tracker_app_task = NULL;
-                    }
+                    gpsctl_set_enable_on_standby( tracker_gps_on_standby_state );
                     tracker_app_main_logging( false, NULL );
                 }
                 motor_vibe( 250, false );
@@ -422,6 +465,7 @@ static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) 
             #endif
 
             if( d ) {
+                int file_count = 0;
                 while( ( dir = readdir( d ) ) != NULL ) {
                     if( strstr( dir->d_name, ".gpx" ) ) {
                         char filename[ 256 ] = "";
@@ -429,11 +473,12 @@ static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) 
                         filepath_convert( filename, sizeof( filename ), path );
                         TRACKER_APP_INFO_LOG("remove %s", filename );
                         remove( filename );
+                        file_count++;
                     }
                 }
                 closedir( d );
+                wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "remove %d files", file_count );
             }
-
             break;    
         }
     }

@@ -163,10 +163,11 @@
      * @param   lat set lat
      * @param   lon set lon
      * @param   altitude set altitude
+     * @param   speed set speed
      * @param   gps_source gps data source
      * @param   app_location true to inform app for a new location like weather app
      */
-    void gpsctl_set_location( double lat, double lon, double altitude, gps_source_t gps_source , bool app_location );
+    void gpsctl_set_location( double lat, double lon, double altitude, double speed, gps_source_t gps_source , bool app_location );
     /**
      * @brief get gps source string
      * 

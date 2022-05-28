@@ -136,7 +136,7 @@ bool BaseJsonConfig::save( uint32_t size ) {
         result = onSave(doc);
 
         if ( doc.overflowed() ) {
-            log_e("json to large, some value are missing. use another size");
+            log_e("json (%s) to large, some value are missing. use another size", fileName );
         }
         
         size_t outSize = 0;

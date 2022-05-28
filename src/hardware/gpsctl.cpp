@@ -535,7 +535,7 @@ void gpsctl_set_enable_on_standby( bool enable_on_standby ) {
     gpsctl_send_cb( GPSCTL_UPDATE_CONFIG, NULL );
 }
 
-void gpsctl_set_location( double lat, double lon, double altitude, gps_source_t gps_source , bool app_location ) {
+void gpsctl_set_location( double lat, double lon, double altitude, double speed, gps_source_t gps_source , bool app_location ) {
     /*
      * setup gps_data structure and send events
      */
@@ -548,12 +548,13 @@ void gpsctl_set_location( double lat, double lon, double altitude, gps_source_t 
         gpsctl_send_cb( GPSCTL_UPDATE_SOURCE, (void*)&gps_data );        
     }
     gps_data.valid_location = true;
-    gps_data.valid_speed = false;
+    gps_data.valid_speed = true;
     gps_data.valid_satellite = false;
     gps_data.valid_altitude = true;
     gps_data.lat = lat;
     gps_data.lon = lon;
     gps_data.altitude_meters = altitude;
+    gps_data.speed_kmh = speed;
     /*
      * send FIX, UPDATE_SOURCE and UPDATE_LOCATION
      */

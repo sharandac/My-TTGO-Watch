@@ -32,8 +32,8 @@
     #define PMUCTL_SHORT_PRESS              _BV(1)              /** @brief event mask for pmuctl short press, no callback arg */
     #define PMUCTL_LONG_PRESS               _BV(2)              /** @brief event mask for pmuctl long press, nocallback arg */
     #define PMUCTL_TIMER_TIMEOUT            _BV(3)              /** @brief event mask for pmuctl timer timeout, no callback arg */
-    #define PMUCTL_UP_PRESS                 _BV(1)              /** @brief event mask for pmuctl up press, no callback arg */
-    #define PMUCTL_DOWN                     _BV(1)              /** @brief event mask for pmuctl down press, no callback arg */
+    #define PMUCTL_UP_PRESS                 _BV(4)              /** @brief event mask for pmuctl up press, no callback arg */
+    #define PMUCTL_DOWN                     _BV(5)              /** @brief event mask for pmuctl down press, no callback arg */
     /**
      * PMU status mask
      */

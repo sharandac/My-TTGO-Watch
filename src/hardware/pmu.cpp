@@ -830,7 +830,7 @@ float pmu_get_vbus_voltage( void ) {
             voltage = M5.Axp.GetVBusVoltage();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
-            voltage = ttgo->power->getCoulombData();
+            voltage = ttgo->power->getVbusVoltage();
         #endif
     #endif
 

@@ -19,23 +19,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _TRACKER_UTIL_LOGER_H
-    #define _TRACKER_UTIL_LOGER_H
+#ifndef _TRACKER_APP_VIEW_H
+    #define _TRACKER_APP_VIEW_H
 
-    typedef struct gps_logger_t {
-        bool fix = true;
-        double lon = 0.0;
-        double lat = 0.0;
-        double altitude = 0.0;
-        char *filename = NULL;
-    } gps_logger_t;
-
+    #include "config.h"
+    #include "hardware/gpsctl.h"
     /**
-     * @brief init gps logger structure
-     * 
-     * @return pointer to a new gps logger structure
+     * @brief tracker main setup function
      */
-    gps_logger_t *gps_logger_init( void );
-    void gps_logger_set_filename( gps_logger_t *gps_logger, const char *filename );
+    void tracker_app_view_setup( uint32_t tile );
+    void tracker_app_view_add_data( gps_data_t *gps_data );
+    void tracker_app_view_clean_data( void );
 
-#endif // _TRACKER_UTIL_LOGER_H
+#endif // _TRACKER_APP_VIEW_H

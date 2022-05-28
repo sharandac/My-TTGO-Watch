@@ -54,7 +54,7 @@
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
         virtual bool onDefault( void );
-        virtual size_t getJsonBufferSize() { return 2000; }
+        virtual size_t getJsonBufferSize() { return 4000; }
     } ;
 
 #endif // _BLECTL_CONFIG_H

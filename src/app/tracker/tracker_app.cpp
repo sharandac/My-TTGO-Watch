@@ -23,6 +23,7 @@
 
 #include "tracker_app.h"
 #include "tracker_app_main.h"
+#include "tracker_app_view.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -68,6 +69,7 @@ void tracker_app_setup( void ) {
     tracker_app = app_register( "gps tracker\n(alpha)", &tracker_64px, tracker_enter_app_event_cb );
 
     tracker_app_main_setup( tracker_app_main_tile_num );
+    tracker_app_view_setup( tracker_app_main_tile_num + 1 );
 }
 
 uint32_t tracker_app_get_app_main_tile_num( void ) {
