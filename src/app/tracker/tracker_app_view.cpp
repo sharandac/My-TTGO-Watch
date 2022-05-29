@@ -144,7 +144,6 @@ void tracker_app_view_add_data( gps_data_t *gps_data ) {
         wf_label_printf( tracker_altitude_min_label, tracker_altitude_chart, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING * 2, -THEME_PADDING  * 2, "%dm", tracker_altitude_min );
         wf_label_printf( tracker_altitude_max_label, tracker_altitude_chart, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING * 2, THEME_PADDING  * 2, "%dm", tracker_altitude_max );
     }
-
 }
 
 void tracker_app_view_clean_data( void ) {

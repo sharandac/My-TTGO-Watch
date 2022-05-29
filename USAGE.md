@@ -233,6 +233,14 @@ A long press in the middle centers the map to the current gps position.
 
 In connection with [OsmAnd](https://osmand.net) the watch can also be used for navigation. Please use the osmand app, otherwise a lot of messages will be displayed.
 
+## gps tracker
+
+![screenshot](images/tracker1.png)
+![screenshot](images/tracker2.png)
+
+gps tracker that generates .gpx files. Only works properly with watches that have GPS. A long press on the crosshairs starts and stops the logging. The .gpx files can be downloaded via FTP and imported directly into e.g. GoogleMaps or OSM. The trash icon deletes all files to save space.
+
+
 ## Activity tracker
 
 ![screenshot](images/screen12.png)
