@@ -399,7 +399,7 @@ void main_tile_update_time( bool force ) {
     }
     /*
      * Time:
-     * only update while time changes or force ist set
+     * only update while time changes or force is set
      * Display has a minute resolution
      */
     if ( last == 0 || info.tm_min != last_info.tm_min || info.tm_hour != last_info.tm_hour || force ) {
