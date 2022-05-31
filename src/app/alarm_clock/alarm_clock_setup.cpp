@@ -27,10 +27,10 @@
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
 
-lv_obj_t * vibe_switch = NULL;
-lv_obj_t * fade_switch = NULL;
-lv_obj_t * beep_switch = NULL;
-lv_obj_t * main_tile_switch = NULL;
+static lv_obj_t * vibe_switch = NULL;
+static lv_obj_t * fade_switch = NULL;
+static lv_obj_t * beep_switch = NULL;
+static lv_obj_t * main_tile_switch = NULL;
 
 void alarm_clock_setup_setup( uint32_t tile_num ) {
     lv_obj_t *tile = mainbar_get_tile_obj( tile_num );

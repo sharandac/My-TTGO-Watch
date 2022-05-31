@@ -41,7 +41,7 @@
 #endif
 
 long stopwatch_milliseconds = 0;
-time_t prev_time;
+static time_t prev_time;
 
 lv_obj_t *stopwatch_app_main_tile = NULL;
 lv_obj_t *stopwatch_app_main_stopwatchlabel = NULL;
