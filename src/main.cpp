@@ -15,6 +15,7 @@
 #include "app/mail/mail_app.h"
 #include "app/sailing/sailing.h"
 #include "app/stopwatch/stopwatch_app.h"
+#include "app/astro/astro_app.h"
 #include "app/wifimon/wifimon_app.h"
 #include "app/calendar/calendar.h"
 #include "app/weather/weather.h"
@@ -53,6 +54,7 @@ void setup() {
     osmmap_app_setup();
     weather_app_setup();
     stopwatch_app_setup();
+    astro_app_setup();
     tracker_app_setup();
     alarm_clock_setup();
     activity_app_setup();
