@@ -82,36 +82,18 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style( stopwatch_app_main_stopwatchlabel, LV_OBJ_PART_MAIN, &stopwatch_app_main_stopwatchstyle );
     lv_obj_align(stopwatch_app_main_stopwatchlabel, NULL, LV_ALIGN_CENTER, 0, 0);
 
-    stopwatch_app_main_start_btn = lv_btn_create(stopwatch_app_main_tile, NULL);  
-    lv_obj_set_size(stopwatch_app_main_start_btn, 50, 50);
-    lv_obj_add_style(stopwatch_app_main_start_btn, LV_IMGBTN_PART_MAIN, APP_STYLE );
-    lv_obj_align(stopwatch_app_main_start_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-    lv_obj_set_event_cb( stopwatch_app_main_start_btn, start_stopwatch_app_main_event_cb );
+    stopwatch_app_main_start_btn = wf_add_play_button( stopwatch_app_main_tile, start_stopwatch_app_main_event_cb );
+    lv_obj_align(stopwatch_app_main_start_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING );
 
-    lv_obj_t *stopwatch_app_main_start_btn_label = lv_label_create(stopwatch_app_main_start_btn, NULL);
-    lv_label_set_text(stopwatch_app_main_start_btn_label, LV_SYMBOL_PLAY);
-
-    stopwatch_app_main_stop_btn = lv_btn_create(stopwatch_app_main_tile, NULL);  
-    lv_obj_set_size(stopwatch_app_main_stop_btn, 50, 50);
-    lv_obj_add_style(stopwatch_app_main_stop_btn, LV_IMGBTN_PART_MAIN, APP_STYLE );
-    lv_obj_align(stopwatch_app_main_stop_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
-    lv_obj_set_event_cb( stopwatch_app_main_stop_btn, stop_stopwatch_app_main_event_cb );
+    stopwatch_app_main_stop_btn = wf_add_stop_button( stopwatch_app_main_tile, stop_stopwatch_app_main_event_cb );
+    lv_obj_align(stopwatch_app_main_stop_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING );
     lv_obj_set_hidden(stopwatch_app_main_stop_btn, true);
 
-    lv_obj_t *stopwatch_app_main_stop_btn_label = lv_label_create(stopwatch_app_main_stop_btn, NULL);
-    lv_label_set_text(stopwatch_app_main_stop_btn_label, LV_SYMBOL_STOP);
-
-    stopwatch_app_main_reset_btn = lv_btn_create(stopwatch_app_main_tile, NULL);  
-    lv_obj_set_size(stopwatch_app_main_reset_btn, 50, 50);
-    lv_obj_add_style(stopwatch_app_main_reset_btn, LV_IMGBTN_PART_MAIN, APP_STYLE );
-    lv_obj_align(stopwatch_app_main_reset_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT,  -20, 0 );
-    lv_obj_set_event_cb( stopwatch_app_main_reset_btn, reset_stopwatch_app_main_event_cb );
-
-    lv_obj_t *stopwatch_app_main_reset_btn_label = lv_label_create(stopwatch_app_main_reset_btn, NULL);
-    lv_label_set_text(stopwatch_app_main_reset_btn_label, LV_SYMBOL_EJECT);
+    stopwatch_app_main_reset_btn = wf_add_eject_button( stopwatch_app_main_tile, reset_stopwatch_app_main_event_cb );
+    lv_obj_align(stopwatch_app_main_reset_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
     lv_obj_t * exit_btn = wf_add_exit_button( stopwatch_app_main_tile, exit_stopwatch_app_main_event_cb );
-    lv_obj_align(exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align(exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     styles_register_cb( STYLE_CHANGE, stopwatch_style_change_event_cb, "stopwatch style change" );
     mainbar_add_tile_button_cb( tile_num, stopwatch_button_event_cb );

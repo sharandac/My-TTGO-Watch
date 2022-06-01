@@ -49,6 +49,9 @@
     LV_IMG_DECLARE(up_96px);
     LV_IMG_DECLARE(down_96px);
     LV_IMG_DECLARE(location_96px);
+    LV_IMG_DECLARE(play_96px);
+    LV_IMG_DECLARE(stop_96px);
+    LV_IMG_DECLARE(eject_96px);
 
     const lv_img_dsc_t down_icon = down_96px;
     const lv_img_dsc_t up_icon = up_96px;
@@ -67,6 +70,9 @@
     const lv_img_dsc_t menu_icon = menu_96px;
     const lv_img_dsc_t refresh_icon = refresh_96px;
     const lv_img_dsc_t location_icon = location_96px;
+    const lv_img_dsc_t play_icon = play_96px;
+    const lv_img_dsc_t stop_icon = stop_96px;
+    const lv_img_dsc_t eject_icon = eject_96px;
 #elif defined( MID_THEME )
     LV_IMG_DECLARE(menu_64px);
     LV_IMG_DECLARE(setup_64px);
@@ -85,6 +91,9 @@
     LV_IMG_DECLARE(up_64px);
     LV_IMG_DECLARE(down_64px);
     LV_IMG_DECLARE(location_64px);
+    LV_IMG_DECLARE(play_64px);
+    LV_IMG_DECLARE(stop_64px);
+    LV_IMG_DECLARE(eject_64px);
 
     const lv_img_dsc_t down_icon = down_64px;
     const lv_img_dsc_t up_icon = up_64px;
@@ -103,6 +112,9 @@
     const lv_img_dsc_t menu_icon = menu_64px;
     const lv_img_dsc_t refresh_icon = refresh_64px;
     const lv_img_dsc_t location_icon = location_64px;
+    const lv_img_dsc_t play_icon = play_64px;
+    const lv_img_dsc_t stop_icon = stop_64px;
+    const lv_img_dsc_t eject_icon = eject_64px;
 #else
     LV_IMG_DECLARE(menu_32px);
     LV_IMG_DECLARE(setup_32px);
@@ -121,6 +133,9 @@
     LV_IMG_DECLARE(up_32px);
     LV_IMG_DECLARE(down_32px);
     LV_IMG_DECLARE(location_32px);
+    LV_IMG_DECLARE(play_32px);
+    LV_IMG_DECLARE(stop_32px);
+    LV_IMG_DECLARE(eject_32px);
 
     const lv_img_dsc_t down_icon = down_32px;
     const lv_img_dsc_t up_icon = up_32px;
@@ -139,6 +154,10 @@
     const lv_img_dsc_t menu_icon = menu_32px;
     const lv_img_dsc_t refresh_icon = refresh_32px;
     const lv_img_dsc_t location_icon = location_32px;
+    const lv_img_dsc_t play_icon = play_32px;
+    const lv_img_dsc_t stop_icon = stop_32px;
+    const lv_img_dsc_t eject_icon = eject_32px;
+
 #endif
 
 #define CLICKABLE_PADDING 6
@@ -514,7 +533,27 @@ lv_obj_t * wf_add_location_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_s
     return wf_add_image_button(parent, location_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 lv_img_dsc_t const &wf_get_location_img( void ) { return( location_icon ); }
-
+/**
+ * 
+ */
+lv_obj_t * wf_add_play_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, play_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_play_img( void ) { return( play_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_stop_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, stop_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_stop_img( void ) { return( stop_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_eject_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, eject_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_eject_img( void ) { return( eject_icon ); }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, style?style:SETUP_STYLE );
