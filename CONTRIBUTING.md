@@ -11,12 +11,12 @@ or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGA
 ## Applications
 
 For quick clock application development use the new QuickGLUI - high level API. See [here](https://github.com/sharandac/My-TTGO-Watch/pull/163).
-Or follow the [My-TTGO-Watch-Dev](https://github.com/linuxthor/My-TTGO-Watch-Dev) instruction from [linuxthor](https://github.com/linuxthor) to use native LVGL and the present framework. Native LVGL is more powerful but also more difficult to learn. And don't forget to take a look in to inline documentation and the online [LVGL](https://docs.lvgl.io/v7/en/html/) documentaion.
+Or follow the [My-TTGO-Watch-Dev](https://github.com/linuxthor/My-TTGO-Watch-Dev) instruction from [linuxthor](https://github.com/linuxthor) to use native LVGL and the present framework. Native LVGL is more powerful but also more difficult to learn. And don't forget to take a look in to inline documentation and the online [LVGL](https://docs.lvgl.io/v7/en/html/) documentation.
 
 ### Activate/Hibernate
 
 To run actions when application is activated or hibernatedn use `mainbar_add_tile_activate_cb(...)` and `mainbar_add_tile_hibernate_cb(...)`.
-Thess callbacks are called when entering or exiting a Tile ID. By example:
+These callbacks are called when entering or exiting a Tile ID. For example:
 
 ```C
 #include "gui/mainbar/mainbar.h"

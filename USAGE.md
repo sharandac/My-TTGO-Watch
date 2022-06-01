@@ -2,7 +2,7 @@
 
 ![screenshot](images/screen1.png)
 
-On startup you see the main screen (time tile). It show the time and widgets.
+On startup you see the main screen (time tile). It shows the time and widgets.
 
 Widgets are:
 
