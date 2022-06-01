@@ -53,7 +53,7 @@ lv_obj_t *astro_app_main_reset_btn = NULL;
 
 lv_style_t astro_app_main_astrostyle;
 
-lv_task_t * _astro_app_task;
+lv_task_t * _astro_app_task = NULL;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_32px);
@@ -158,7 +158,8 @@ static void start_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
                                         prev_time = time(0);
-                                        _astro_app_task = lv_task_create( astro_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+                                        if( !_astro_app_task )
+                                            _astro_app_task = lv_task_create( astro_app_task, 1000, LV_TASK_PRIO_MID, NULL );
                                         lv_obj_set_hidden(astro_app_main_start_btn, true);
                                         lv_obj_set_hidden(astro_app_main_stop_btn, false);
                                         astro_add_widget();
@@ -171,6 +172,7 @@ static void stop_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
                                         lv_task_del(_astro_app_task);
+                                        _astro_app_task = NULL;
                                         lv_obj_set_hidden(astro_app_main_start_btn, false);
                                         lv_obj_set_hidden(astro_app_main_stop_btn, true);
                                         astro_remove_widget();
