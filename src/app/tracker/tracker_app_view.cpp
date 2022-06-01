@@ -65,7 +65,7 @@ void tracker_app_view_setup( uint32_t tile ) {
     lv_obj_set_size( tracker_speed_chart, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) / 2 );
     lv_obj_align( tracker_speed_chart, NULL, LV_ALIGN_IN_TOP_MID, 0, 0 );
     lv_chart_set_type( tracker_speed_chart, LV_CHART_TYPE_LINE );  
-    lv_chart_set_point_count( tracker_speed_chart, 100 );
+    lv_chart_set_point_count( tracker_speed_chart, lv_disp_get_hor_res( NULL ) / 2 );
     lv_chart_set_div_line_count( tracker_speed_chart, 1, 1 );
     lv_obj_add_style( tracker_speed_chart, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_set_style_local_size( tracker_speed_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 1 );
@@ -78,7 +78,7 @@ void tracker_app_view_setup( uint32_t tile ) {
     lv_obj_set_size( tracker_altitude_chart, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) / 2 );
     lv_obj_align( tracker_altitude_chart, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_chart_set_type( tracker_altitude_chart, LV_CHART_TYPE_LINE );  
-    lv_chart_set_point_count( tracker_altitude_chart, 100 );
+    lv_chart_set_point_count( tracker_altitude_chart, lv_disp_get_hor_res( NULL ) / 2 );
     lv_chart_set_div_line_count( tracker_altitude_chart, 1, 1 );
     lv_obj_add_style( tracker_altitude_chart, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_set_style_local_size( tracker_altitude_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 1 );

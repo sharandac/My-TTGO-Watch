@@ -88,6 +88,7 @@ void pmu_setup( void ) {
     #elif defined( M5CORE2 )
         M5.Axp.SetSpkEnable( true );
         M5.Axp.SetCHGCurrent( true );
+        M5.Axp.EnableCoulombcounter();
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
