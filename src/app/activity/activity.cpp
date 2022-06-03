@@ -125,8 +125,8 @@ void build_main_page()
     arcStepcounter.start(0).end(0).rotation(90)
         .style(ws_get_arc_style(), LV_ARC_PART_INDIC, false )
         .style(ws_get_arc_bg_style(), LV_ARC_PART_BG, false )
-        .size(120, 120)
-        .alignInParentBottomLeft(0, -42);
+        .size(lv_disp_get_ver_res( NULL ) > lv_disp_get_hor_res( NULL ) ? lv_disp_get_hor_res( NULL ) / 2 : lv_disp_get_ver_res( NULL ) / 2, lv_disp_get_ver_res( NULL ) > lv_disp_get_hor_res( NULL ) ? lv_disp_get_hor_res( NULL ) / 2 : lv_disp_get_ver_res( NULL ) / 2 )
+        .alignInParentLeftMid(0, 0);
 
     lblStepcounter = Label(&screen);
     lblStepcounter.text("0")
@@ -142,8 +142,8 @@ void build_main_page()
     arcDistance.start(0).end(0).rotation(90)
         .style(ws_get_arc_style(), LV_ARC_PART_INDIC, false )
         .style(ws_get_arc_bg_style(), LV_ARC_PART_BG, false )
-        .size(120, 120)
-        .alignInParentBottomRight(0, -42);
+        .size(lv_disp_get_ver_res( NULL ) > lv_disp_get_hor_res( NULL ) ? lv_disp_get_hor_res( NULL ) / 2 : lv_disp_get_ver_res( NULL ) / 2, lv_disp_get_ver_res( NULL ) > lv_disp_get_hor_res( NULL ) ? lv_disp_get_hor_res( NULL ) / 2 : lv_disp_get_ver_res( NULL ) / 2 )
+        .alignInParentRightMid(0, 0);
 
     lblDistance = Label(&screen);
     lblDistance.text("0")

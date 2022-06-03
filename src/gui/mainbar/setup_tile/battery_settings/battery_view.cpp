@@ -21,6 +21,8 @@
  */
 #include "config.h"
 #include "battery_settings.h"
+#include "battery_view.h"
+#include "battery_history.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"

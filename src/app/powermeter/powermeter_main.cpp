@@ -90,6 +90,7 @@ void powermeter_main_task( lv_task_t * task );
         if(reason_code != 0){
             mosquitto_disconnect(mosq);
         }
+        log_i("subscripe: %s", powermeter_config->topic );
         rc = mosquitto_subscribe(mosq, NULL, powermeter_config->topic, 1);
         if(rc != MOSQ_ERR_SUCCESS){
             log_i( "Error subscribing: %s\n", mosquitto_strerror( rc ) );
@@ -113,6 +114,8 @@ void powermeter_main_task( lv_task_t * task );
         return;
     }
     memcpy( mqttmsg, payload, length );
+
+    log_i("mqtt-msg: %s", mqttmsg );
 
     SpiRamJsonDocument doc( strlen( mqttmsg ) * 2 );
     DeserializationError error = deserializeJson( doc, mqttmsg );
@@ -289,7 +292,7 @@ bool powermeter_wifictl_event_cb( EventBits_t event, void *arg ) {
         case WIFICTL_OFF:
         case WIFICTL_DISCONNECT:    
 #ifdef NATIVE_64BIT
-
+                                    mosquitto_disconnect(mosq);
 #else
                                     if ( powermeter_mqtt_client.connected() ) {
                                         log_i("disconnect from mqtt server %s", powermeter_config->server );

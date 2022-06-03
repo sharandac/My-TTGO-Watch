@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# sudo apt-get install php php-gd
+#
 # get a list of png file with *"96px.png"
 #
 find | grep 96px.png > 96px-list.txt

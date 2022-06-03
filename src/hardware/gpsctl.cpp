@@ -47,7 +47,11 @@
     TinyGPSCustom TGC_sats_in_view_glonass;
     TinyGPSCustom TGC_sats_in_view_baidou;
 
-    SoftwareSerial *softserial = NULL;
+    #if defined( USE_SOFTWARE_SERIAL )
+        SoftwareSerial *gps_serial = NULL;
+    #else
+        HardwareSerial *gps_serial = NULL;
+    #endif
 #endif
 
 static bool gpsctl_init = false;
@@ -105,8 +109,15 @@ void gpsctl_setup( void ) {
          * init tinyGPS++ if we have a valid RX/TX config
          */
         if( gpsctl_config.RXPin > 0 && gpsctl_config.TXPin > 0 ) {
-            softserial = new SoftwareSerial( gpsctl_config.RXPin, gpsctl_config.TXPin );
-            softserial->begin( GPSBaud );
+            
+            #if defined( USE_SOFTWARE_SERIAL )
+                gps_serial = new SoftwareSerial( gpsctl_config.RXPin, gpsctl_config.TXPin );
+                gps_serial->begin( GPSBaud );
+            #else
+                gps_serial = &Serial2;
+                gps_serial->begin( GPSBaud, SERIAL_8N1, gpsctl_config.RXPin, gpsctl_config.TXPin );
+            #endif
+
             TGC_sats_in_view_gps.begin( gps, "GPGSV", 3);
             TGC_sats_in_view_glonass.begin( gps, "GLGSV", 3);
             TGC_sats_in_view_baidou.begin( gps, "BDGSV", 3);
@@ -128,7 +139,7 @@ bool gpsctl_get_available( void ) {
     #ifdef NATIVE_64BIT
         return( false );
     #else
-        if ( softserial ) {
+        if ( gps_serial ) {
             return( true );
         }
         else {
@@ -155,14 +166,14 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
         /**
          * abort if we have no softserial init
          */
-        if ( softserial ) {
+        if ( gps_serial ) {
             uint32_t bytes = 0;
             /**
              * check for serial data and read
              */
-            while ( softserial->available() > 0 ) {
+            while ( gps_serial->available() > 0 ) {
                 bytes++;
-                gps.encode( softserial->read() );
+                gps.encode( gps_serial->read() );
             }
             if( bytes )
                 GPSCTL_DEBUG_LOG("new gps data (%d bytes)", bytes );
@@ -343,7 +354,7 @@ void gpsctl_on( void ) {
      * enable gps if gps disabled
      */
     if( !gpsctl_enable ) {
-        powermgm_set_lightsleep( false );
+        powermgm_set_lightsleep( true );
         #ifdef NATIVE_64BIT
         #else
             #if defined( M5PAPER )
@@ -444,7 +455,7 @@ void gpsctl_autoon_on( void ) {
             gpsctl_enable = true;
             gpsctl_send_cb( GPSCTL_ENABLE, NULL );
             gpsctl_send_cb( GPSCTL_NOFIX, NULL );
-            powermgm_set_lightsleep( false );
+            powermgm_set_lightsleep( true );
         }
     }
     else {
