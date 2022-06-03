@@ -89,6 +89,7 @@ void pmu_setup( void ) {
         M5.Axp.SetSpkEnable( true );
         M5.Axp.SetCHGCurrent( true );
         M5.Axp.EnableCoulombcounter();
+        M5.Axp.SetAdcState( true );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
@@ -730,12 +731,17 @@ int32_t pmu_get_battery_percent( void ) {
                 percent = 0;
             }
         #elif defined( M5CORE2 )
-            float voltage = pmu_get_battery_voltage();
-            if ( voltage > 3.2f ) {
-                percent = ( voltage - 3.2f ) * 100;
+            if ( pmu_get_calculated_percent() ) {
+                percent = ( pmu_get_coulumb_data() / pmu_config.designed_battery_cap ) * 100;
             }
             else {
-                percent = 0;
+                float voltage = pmu_get_battery_voltage();
+                if ( voltage > 3.2f ) {
+                    percent = ( voltage - 3.2f ) * 100;
+                }
+                else {
+                    percent = 0;
+                }
             }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();

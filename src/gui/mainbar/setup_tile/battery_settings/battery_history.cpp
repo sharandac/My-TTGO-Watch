@@ -33,6 +33,13 @@
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+
+#endif
+
 lv_obj_t *battery_history_tile=NULL;
 lv_style_t battery_history_style;
 uint32_t battery_history_tile_num;
@@ -43,7 +50,6 @@ lv_chart_series_t *battery_history_voltage_series = NULL;
 lv_chart_series_t *battery_history_charge_series = NULL;
 lv_chart_series_t *battery_history_discharge_series = NULL;
 
-void battery_history_activate_cb( void );
 static bool battery_history_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void battery_history_tile_setup( uint32_t tile_num ) {
@@ -69,7 +75,7 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_obj_align( battery_history_current_chart, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
     lv_chart_set_type( battery_history_current_chart, LV_CHART_TYPE_LINE );  
     lv_chart_set_point_count( battery_history_current_chart, lv_disp_get_hor_res( NULL ) / 2 );
-    lv_chart_set_div_line_count( battery_history_current_chart, 6, 1 );
+    lv_chart_set_div_line_count( battery_history_current_chart, 5, 1 );
     lv_obj_add_style( battery_history_current_chart, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_set_style_local_size( battery_history_current_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 1 );
     lv_obj_set_style_local_bg_opa( battery_history_current_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, LV_OPA_100 );
@@ -96,35 +102,32 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_obj_t *battery_history_current_min_label = wf_add_label( battery_history_current_chart, "0mA", APP_ICON_LABEL_STYLE );
     lv_obj_align( battery_history_current_min_label, battery_history_current_chart, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING * 2, -THEME_PADDING * 2 );
 
-    lv_obj_t *battery_history_current_max_label = wf_add_label( battery_history_current_chart, "350mA", APP_ICON_LABEL_STYLE );
+    lv_obj_t *battery_history_current_max_label = wf_add_label( battery_history_current_chart, "300mA", APP_ICON_LABEL_STYLE );
     lv_obj_align( battery_history_current_max_label, battery_history_current_chart, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING * 2, THEME_PADDING * 2 );
 
     lv_chart_set_y_range( battery_history_voltage_chart, lv_chart_get_series_axis( battery_history_voltage_chart, battery_history_voltage_series ), 3000, 4400 );
-    lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_charge_series ), 0, 350 );
-    lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_discharge_series ), 0, 350 );
+    lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_charge_series ), 0, 300 );
+    lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_discharge_series ), 0, 300 );
 
     mainbar_add_slide_element( battery_history_voltage_chart );
     mainbar_add_slide_element( battery_history_current_chart );
-
-//    mainbar_add_tile_activate_cb( battery_history_tile_num, battery_history_activate_cb );
-    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, battery_history_powermgm_loop_cb, "powermgm battery history" );
 }
 
-void battery_history_activate_cb( void ) {
+void battery_history_start_chart_logging( void ) {
     static bool activate = false;
 
     if( !activate ) {
         powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, battery_history_powermgm_loop_cb, "powermgm battery history" );
         activate = true;
-        log_i("battery history log activate");
+        log_i("start battery logging into chart");
     }
 }
 
 static bool battery_history_powermgm_loop_cb( EventBits_t event, void *arg ) {
-    static uint64_t NextMillis = millis() + 1000;
+    static uint64_t NextMillis = millis() + 5000;
 
     if( millis() > NextMillis ) {
-        NextMillis = millis() + 1000;
+        NextMillis = millis() + 5000;
         lv_chart_set_next( battery_history_voltage_chart, battery_history_voltage_series, pmu_get_battery_voltage() );
         lv_chart_set_next( battery_history_current_chart, battery_history_charge_series, pmu_get_battery_charge_current() );
         lv_chart_set_next( battery_history_current_chart, battery_history_discharge_series, pmu_get_battery_discharge_current() );

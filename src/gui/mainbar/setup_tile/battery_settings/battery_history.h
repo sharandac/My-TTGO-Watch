@@ -28,5 +28,9 @@
      * @param tile_num 
      */
     void battery_history_tile_setup( uint32_t tile_num );
+    /**
+     * @brief start battery logging into a chart
+     */
+    void battery_history_start_chart_logging( void );
 
 #endif // _BATTERY_HISTROY_H

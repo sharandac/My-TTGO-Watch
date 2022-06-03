@@ -32,6 +32,13 @@
 #include "hardware/pmu.h"
 #include "hardware/motor.h"
 
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+
+#endif
+
 lv_obj_t *battery_view_tile=NULL;
 lv_style_t battery_view_style;
 uint32_t battery_view_tile_num;

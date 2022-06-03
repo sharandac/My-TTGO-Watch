@@ -24,7 +24,6 @@
 #include "battery_view.h"
 #include "battery_history.h"
 
-
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/statusbar.h"
@@ -35,6 +34,14 @@
 #include "hardware/display.h"
 #include "hardware/motor.h"
 #include "hardware/pmu.h"
+
+#ifdef NATIVE_64BIT
+    #include "utils/logging.h"
+    #include "utils/millis.h"
+#else
+
+#endif
+
 
 icon_t *battery_setup_icon = NULL;
 
@@ -132,7 +139,8 @@ static void battery_experimental_switch_event_handler( lv_obj_t * obj, lv_event_
 
 static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( battery_settings_tile_num, LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       battery_history_start_chart_logging();
+                                        mainbar_jump_to_tilenumber( battery_settings_tile_num, LV_ANIM_OFF );
                                         break;
     }
 
