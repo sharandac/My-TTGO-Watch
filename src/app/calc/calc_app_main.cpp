@@ -38,8 +38,6 @@ lv_style_t result_style;
 lv_obj_t *result_label;
 lv_style_t history_style;
 lv_obj_t *history_label;
-lv_style_t button_matrix_style;
-lv_style_t button_style;
 lv_obj_t *button_matrix;
 
 LV_FONT_DECLARE(Ubuntu_12px);
@@ -121,24 +119,11 @@ void calc_app_main_setup( uint32_t tile_num ) {
     lv_obj_add_style(history_label, LV_OBJ_PART_MAIN, &history_style);
     lv_obj_align(history_label, calc_app_main_tile, LV_ALIGN_IN_TOP_LEFT, 0, -2 );
 	lv_obj_set_size(history_label, lv_disp_get_hor_res( NULL ), 15 );
-
-    // buttons
-    lv_style_copy(&button_matrix_style, ws_get_button_style());
-    lv_style_set_bg_opa(&button_matrix_style, LV_STATE_DEFAULT, LV_OPA_TRANSP);
-    lv_style_set_border_width( &button_matrix_style , LV_OBJ_PART_MAIN, 1 );
-    lv_style_set_border_side(&button_matrix_style, LV_STATE_DEFAULT, LV_BORDER_SIDE_TOP);
-    lv_style_set_radius( &button_matrix_style , LV_OBJ_PART_MAIN, 0 );
-
-    lv_style_copy(&button_style, ws_get_button_style());
-    lv_style_set_bg_opa(&button_style, LV_STATE_DEFAULT, LV_OPA_90);
-    lv_style_set_border_color( &button_style, LV_STATE_DEFAULT, LV_COLOR_WHITE );
-    lv_style_set_border_color( &button_style, LV_STATE_CHECKED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &button_style, LV_STATE_FOCUSED, LV_COLOR_SILVER );
-    lv_style_set_border_color( &button_style, LV_STATE_PRESSED, LV_COLOR_SILVER );
     
     button_matrix = lv_btnmatrix_create(calc_app_main_tile, NULL);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, &button_matrix_style);
-	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, &button_style);
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, APP_STYLE );
+	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, ws_get_button_style() );
+    lv_obj_set_style_local_bg_opa( button_matrix, LV_BTNMATRIX_PART_BTN, LV_STATE_DEFAULT, LV_OPA_80 );
 	lv_obj_set_pos( button_matrix, 0, 45);
 	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - 38 - THEME_ICON_SIZE );
 

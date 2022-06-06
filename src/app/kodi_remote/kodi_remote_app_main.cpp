@@ -156,6 +156,7 @@ void kodi_remote_app_main_setup( uint32_t tile_num ) {
     lv_obj_t * button_matrix = lv_btnmatrix_create(kodi_remote_control_main_tile, NULL);
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BG, APP_STYLE );
 	lv_obj_add_style(button_matrix, LV_BTNMATRIX_PART_BTN, ws_get_button_style() );
+    lv_obj_set_style_local_bg_opa( button_matrix, LV_BTNMATRIX_PART_BTN, LV_STATE_DEFAULT, LV_OPA_80 );
 	lv_obj_set_pos(button_matrix, 0, 0);
 	lv_obj_set_size(button_matrix, lv_disp_get_hor_res( NULL ), lv_disp_get_ver_res( NULL ) - THEME_ICON_SIZE );
 

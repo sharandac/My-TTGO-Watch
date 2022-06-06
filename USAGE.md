@@ -252,6 +252,12 @@ gps tracker that generates .gpx files. Only works properly with watches that hav
 
 ![screenshot](images/astro.png)
 
+## powermeter
+
+![screenshot](images/powermeter.png)
+
+Get realtime data from a [powermeter](https://github.com/sharandac/powermeter) over mqtt.
+
 ## wfif mon
 
 ![screenshot](images/wifi_mon.png)
