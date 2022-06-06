@@ -25,6 +25,7 @@
 #include "utils/alloc.h"
 #include "utils/filepath_convert.h"
 #include "gui/png_decoder/lv_png.h"
+#include "hardware/motor.h"
 
 #ifdef NATIVE_64BIT
     #include <iostream>
@@ -133,6 +134,8 @@ void screenshot_save( void ) {
         free( raw_rgb );
         raw_rgb = NULL;
     }
+
+    motor_vibe( 10, true );
 }
 
 static void screenshot_disp_flush( lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p ) {
