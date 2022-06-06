@@ -47,6 +47,7 @@ uint32_t calendar_ovreview_tile_num;                                            
 /**
  * calendar icon and fonts
  */
+LV_FONT_DECLARE(Ubuntu_48px);                                                       /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_32px);                                                       /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_16px);                                                       /** @brief calendar font */
 LV_FONT_DECLARE(Ubuntu_12px);                                                       /** @brief calendar font */

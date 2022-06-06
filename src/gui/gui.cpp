@@ -67,6 +67,38 @@
     #include <Arduino.h>
 #endif
 
+#if defined( M5CORE2 )
+    LV_IMG_DECLARE( bg_320px );
+    LV_IMG_DECLARE( bg1_320px );
+    LV_IMG_DECLARE( bg2_320px );
+    LV_IMG_DECLARE( bg3_320px );
+
+    const lv_img_dsc_t bg = bg_320px;
+    const lv_img_dsc_t bg1 = bg1_320px;
+    const lv_img_dsc_t bg2 = bg2_320px;
+    const lv_img_dsc_t bg3 = bg3_320px;
+#elif defined( M5PAPER )
+    LV_IMG_DECLARE( bg_540px );
+    LV_IMG_DECLARE( bg1_540px );
+    LV_IMG_DECLARE( bg2_540px );
+    LV_IMG_DECLARE( bg3_540px );
+
+    const lv_img_dsc_t bg = bg_540px;
+    const lv_img_dsc_t bg1 = bg1_540px;
+    const lv_img_dsc_t bg2 = bg2_540px;
+    const lv_img_dsc_t bg3 = bg3_540px;
+#else
+    LV_IMG_DECLARE( bg_240px );
+    LV_IMG_DECLARE( bg1_240px );
+    LV_IMG_DECLARE( bg2_240px );
+    LV_IMG_DECLARE( bg3_240px );
+
+    const lv_img_dsc_t bg = bg_240px;
+    const lv_img_dsc_t bg1 = bg1_240px;
+    const lv_img_dsc_t bg2 = bg2_240px;
+    const lv_img_dsc_t bg3 = bg3_240px;
+#endif
+
 lv_obj_t *img_bin = NULL;
 
 static volatile bool force_redraw = false;
@@ -229,27 +261,29 @@ void gui_force_redraw( bool force ) {
 }
 
 void gui_set_background_image ( uint32_t background_image ) {
+    /**
+     * force reflush lvgl image cache
+     */
+    lv_img_cache_set_size( 1 );
+    lv_img_cache_set_size( 256 );
+
     switch ( background_image ) {
         case 0:
-            LV_IMG_DECLARE( bg );
             lv_img_set_src( img_bin, &bg );
             lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
             lv_obj_set_hidden( img_bin, false );
             break;
         case 1:
-            LV_IMG_DECLARE( bg1 );
             lv_img_set_src( img_bin, &bg1 );
             lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
             lv_obj_set_hidden( img_bin, false );
             break;
         case 2:
-            LV_IMG_DECLARE( bg2 );
             lv_img_set_src( img_bin, &bg2 );
             lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
             lv_obj_set_hidden( img_bin, false );
             break;
         case 3:
-            LV_IMG_DECLARE( bg3 );
             lv_img_set_src( img_bin, &bg3 );
             lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
             lv_obj_set_hidden( img_bin, false );
