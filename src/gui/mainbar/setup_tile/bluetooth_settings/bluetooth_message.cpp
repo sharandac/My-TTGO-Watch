@@ -116,25 +116,25 @@ LV_IMG_DECLARE(message_96px);
 #elif defined( MID_THEME )
     #define default_msg_icon        &message_64px
 
-    LV_IMG_DECLARE(telegram_32px);
-    LV_IMG_DECLARE(whatsapp_32px);
-    LV_IMG_DECLARE(k9mail_32px);
-    LV_IMG_DECLARE(email_32px);
-    LV_IMG_DECLARE(osmand_32px);
-    LV_IMG_DECLARE(youtube_32px);
-    LV_IMG_DECLARE(instagram_32px);
-    LV_IMG_DECLARE(tinder_32px);
+    LV_IMG_DECLARE(telegram_64px);
+    LV_IMG_DECLARE(whatsapp_64px);
+    LV_IMG_DECLARE(k9mail_64px);
+    LV_IMG_DECLARE(email_64px);
+    LV_IMG_DECLARE(osmand_64px);
+    LV_IMG_DECLARE(youtube_64px);
+    LV_IMG_DECLARE(instagram_64px);
+    LV_IMG_DECLARE(tinder_64px);
 
     src_icon_t src_icon[] = {
-        { "Telegram", &telegram_32px },
-        { "WhatsApp", &whatsapp_32px },
-        { "K-9 Mail", &k9mail_32px },
-        { "Gmail", &email_32px },
-        { "E-Mail", &message_32px },
-        { "OsmAnd", &osmand_32px },
-        { "YouTube", &youtube_32px },
-        { "Instagram", &instagram_32px },
-        { "Tinder", &tinder_32px },
+        { "Telegram", &telegram_64px },
+        { "WhatsApp", &whatsapp_64px },
+        { "K-9 Mail", &k9mail_64px },
+        { "Gmail", &email_64px },
+        { "E-Mail", &message_64px },
+        { "OsmAnd", &osmand_64px },
+        { "YouTube", &youtube_64px },
+        { "Instagram", &instagram_64px },
+        { "Tinder", &tinder_64px },
         { "", NULL }
     };
 
@@ -528,7 +528,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
             /*
              * set notify source icon if msg src known
              */
-            if ( doc["src"] ) {
+            if ( doc.containsKey("src") ) {
                 lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
                 lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
             }
@@ -540,13 +540,13 @@ void bluetooth_message_show_msg( int32_t entry ) {
              * set message if body known or set title and if no other information
              * available set an emty msg
              */
-            if ( doc["body"] ) {
+            if ( doc.containsKey("body") ) {
                 lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
             }
-            else if ( doc["title"] ) {
+            else if ( doc.containsKey("title") ) {
                 lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
             }
-            else if ( doc["temp"] ) {
+            else if ( doc.containsKey("temp") ) {
                 /*
                  * add special case when a weather information is set
                  */
@@ -567,13 +567,13 @@ void bluetooth_message_show_msg( int32_t entry ) {
             /*
              * set sender label from available source
              */
-            if ( doc["title"] ) {
+            if ( doc.containsKey("title") ) {
                 lv_label_set_text( bluetooth_message_sender_label, doc["title"] );
             }
-            else if ( doc["sender"] ) {
+            else if ( doc.containsKey("sender") ) {
                 lv_label_set_text( bluetooth_message_sender_label, doc["sender"] );
             }
-            else if( doc["tel"] ) {
+            else if( doc.containsKey("tel") ) {
                 lv_label_set_text( bluetooth_message_sender_label, doc["tel"] );
             }
             else {
@@ -634,10 +634,10 @@ void bluetooth_message_play_audio( int32_t entry ) {
     else {
         const char *message = "";
 
-        if ( doc["body"] ) {
+        if ( doc.containsKey("body") ) {
             message = doc["body"];
         }
-        else if ( doc["title"] ) {
+        else if ( doc.containsKey("title") ) {
             message = doc["title"];
         }
 

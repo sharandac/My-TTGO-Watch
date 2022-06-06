@@ -60,16 +60,18 @@ static void tracker_enter_app_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for wifimon app
  */
 void tracker_app_setup( void ) {
-    tracker_app_main_tile_num = mainbar_add_app_tile( 2, 1, "gps tracker" );
-    tracker_app_setup_tile_num = tracker_app_main_tile_num + 1;
+    #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( NATIVE_64BIT )
+        tracker_app_main_tile_num = mainbar_add_app_tile( 2, 1, "gps tracker" );
+        tracker_app_setup_tile_num = tracker_app_main_tile_num + 1;
 
-    tracker_app_main_tile = mainbar_get_tile_obj( tracker_app_main_tile_num );
-    tracker_app_setup_tile = mainbar_get_tile_obj( tracker_app_setup_tile_num );
+        tracker_app_main_tile = mainbar_get_tile_obj( tracker_app_main_tile_num );
+        tracker_app_setup_tile = mainbar_get_tile_obj( tracker_app_setup_tile_num );
 
-    tracker_app = app_register( "gps tracker\n(alpha)", &tracker_64px, tracker_enter_app_event_cb );
+        tracker_app = app_register( "gps tracker\n(alpha)", &tracker_64px, tracker_enter_app_event_cb );
 
-    tracker_app_main_setup( tracker_app_main_tile_num );
-    tracker_app_view_setup( tracker_app_main_tile_num + 1 );
+        tracker_app_main_setup( tracker_app_main_tile_num );
+        tracker_app_view_setup( tracker_app_main_tile_num + 1 );
+    #endif
 }
 
 uint32_t tracker_app_get_app_main_tile_num( void ) {

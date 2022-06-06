@@ -131,6 +131,7 @@ static void astro_app_main_update_astrolabel()
 
     lv_label_set_text(astro_app_main_astrolabel, msg);
     lv_obj_align(astro_app_main_astrolabel, NULL, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_align( astro_app_main_astrolabel, LV_LABEL_ALIGN_CENTER);
     astro_app_update_widget_label( msg );
 }
 

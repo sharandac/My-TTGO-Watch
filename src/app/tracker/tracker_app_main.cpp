@@ -62,6 +62,8 @@ static volatile bool tracker_gps_on_standby_state = false;      /** @brief osm g
 static volatile bool tracker_logging_state = false;             /** @brief logging state, true for logging and false for inactive */
 static volatile bool tracker_logging_gps_state = false;         /** @brief gps state, true for fix, false for no fix */
 static volatile double distance = 0.0f;
+static volatile double course = 0.0f;
+
 gps_data_t *tracker_gps_data = NULL;
 tracker_config_t tracker_config;
 /**
@@ -73,7 +75,6 @@ lv_obj_t *tracker_file_info_label = NULL;
 /**
  * call back functions
  */
-static void tracker_app_task( lv_task_t * task );
 void tracker_app_main_activate_cb( void );
 void tracker_app_main_hibernate_cb( void );
 const char *tracker_app_main_logging( bool start, gps_data_t *gps_data );
@@ -215,13 +216,14 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
             TRACKER_APP_LOG("speed: %f", gps_data->speed_kmh );
             TRACKER_APP_LOG("satellite: %d", gps_data->satellites );
             TRACKER_APP_LOG("distance: %.3f", distance );
+            TRACKER_APP_LOG("course: %.3f", course );
             if( tracker_logging_gps_state && tracker_logging_state ) {
                 /**
                  * calc distance between current gps pos and last gpx pos and avoid large distance jumps
                  */
                 if( gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM ) < 1.0f ) {
-                    TRACKER_APP_LOG("lat1 = %f, lon1 = %f, lat2 = %f, lon2 = %f, distance = %f", tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM ) );
                     distance += gpsctl_distance( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon, EARTH_RADIUS_KM );
+                    course = gpsctl_courseTo( tracker_gps_data->lat, tracker_gps_data->lon, gps_data->lat, gps_data->lon );
                 }
                 /**
                  * store gpx pos into gpx file at current interval /tracker.json -> interval in sec.
@@ -232,7 +234,8 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
                     counter = 0;
                 }
                 counter++;
-                wf_label_printf( tracker_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_TOP_MID, 0, THEME_PADDING, "%.3fkm", distance );
+                wf_label_printf( tracker_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_TOP_MID, 0, THEME_PADDING, "%.3fkm\n%.0f°", distance, course );
+                lv_label_set_align( tracker_info_label, LV_LABEL_ALIGN_CENTER);
             }
             memcpy( tracker_gps_data, gps_data, sizeof( gps_data_t ) );
             break;

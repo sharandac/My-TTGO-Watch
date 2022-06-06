@@ -24,10 +24,20 @@
 #include "powermgm.h"
 #include "callback.h"
 #include <math.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "utils/millis.h"
+
+    #define DEG_TO_RAD 0.017453292519943295769236907684886
+    #define RAD_TO_DEG 57.295779513082320876798154814105
+
+    #define radians(deg) ((deg)*DEG_TO_RAD)
+    #define degrees(rad) ((rad)*RAD_TO_DEG)
+
 #else
     #if defined( M5PAPER )
         #include <M5EPD.h>
@@ -613,4 +623,21 @@ double gpsctl_distance( double lat1, double long1, double lat2, double long2, do
     double d = earth_radius * c;
 
     return( d );
+}
+
+
+double gpsctl_courseTo( double lat1, double long1, double lat2, double long2 ) {
+    double dlong = radians(long2-long1);
+    lat1 = radians(lat1);
+    lat2 = radians(lat2);
+    double a1 = sin(dlong) * cos(lat2);
+    double a2 = sin(lat1) * cos(lat2) * cos(dlong);
+    a2 = cos(lat1) * sin(lat2) - a2;
+    a2 = atan2(a1, a2);
+    
+    if (a2 < 0.0) {
+        a2 += ( M_PI * 2 );
+    }
+    
+    return degrees(a2);
 }

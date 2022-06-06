@@ -279,7 +279,7 @@ void update_check_version( void ) {
     }
 #else
     if ( xEventGroupGetBits( update_event ) & ( UPDATE_GET_VERSION_REQUEST | UPDATE_REQUEST ) ) {
-        log_i("update blocked");
+        log_i("check version blocked");
         return;
     }
     else {

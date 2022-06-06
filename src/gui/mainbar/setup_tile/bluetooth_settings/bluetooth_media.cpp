@@ -247,14 +247,14 @@ bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
         retval = true;
     }
     if( !strcmp( doc["t"], "musicinfo" ) ) {
-        if ( doc["track"] ) {
+        if ( doc.containsKey("track") ) {
             lv_label_set_text( bluetooth_media_title, doc["track"] );
-            lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -16 );
+            lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -THEME_PADDING );
         }
         
-        if ( doc["artist"] ) {
+        if ( doc.containsKey("artist") ) {
             lv_label_set_text( bluetooth_media_artist, doc["artist"] );
-            lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+            lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
         }
 
         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );

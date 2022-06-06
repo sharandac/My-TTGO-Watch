@@ -58,7 +58,7 @@ int64_t update_check_new_version( char *url ) {
             return( httpcode );
         }
 
-        if ( doc["host"] ) {
+        if ( doc.containsKey("host") ) {
             if ( firmwarehost == NULL ) {
                 firmwarehost = (char*)CALLOC( strlen( doc["host"] ) + 1, 1 );
                 if ( firmwarehost == NULL ) {
@@ -78,7 +78,7 @@ int64_t update_check_new_version( char *url ) {
             log_d("firmwarehost: %s", firmwarehost );
         }
 
-        if ( doc["file"] ) {
+        if ( doc.containsKey("file") ) {
             if ( firmwarefile == NULL ) {
                 firmwarefile = (char*)CALLOC( strlen( doc["file"] ) + 1, 1 );
                 if ( firmwarefile == NULL ) {
@@ -98,7 +98,7 @@ int64_t update_check_new_version( char *url ) {
             log_d("firmwarefile: %s", firmwarefile );
         }
 
-        if ( doc["gzipfile"] ) {
+        if ( doc.containsKey("gzipfile") ) {
             if ( firmwarefile == NULL ) {
                 firmwarefile = (char*)CALLOC( strlen( doc["gzipfile"] ) + 1, 1 );
                 if ( firmwarefile == NULL ) {
@@ -138,17 +138,17 @@ int64_t update_check_new_version( char *url ) {
             log_d("firmwareurl: %s", firmwareurl );
         }
 
-        if ( doc["version"] ) {
+        if ( doc.containsKey("version") ) {
             firmwareversion = atoll( doc["version"] );
             log_d("firmwareversion: %ld", firmwareversion );
         }
 
-        if ( doc["size"] ) {
+        if ( doc.containsKey("size") ) {
             firmwaresize = atoi( doc["size"] );
             log_d("firmwaresize: %d", firmwaresize );
         }
 
-        if ( doc["md5"] ) {
+        if ( doc.containsKey("md5") ) {
             if ( firmwaremd5 == NULL ) {
                 firmwaremd5 = (char*)CALLOC( strlen( doc["md5"] ) + 1, 1 );
                 if ( firmwaremd5 == NULL ) {
@@ -168,7 +168,7 @@ int64_t update_check_new_version( char *url ) {
             log_d("md5: %s", firmwaremd5 );
         }
 
-        if ( doc["comment"] ) {
+        if ( doc.containsKey("comment") ) {
             if ( firmwarecomment == NULL ) {
                 firmwarecomment = (char*)CALLOC( strlen( doc["comment"] ) + 1, 1 );
                 if ( firmwarecomment == NULL ) {

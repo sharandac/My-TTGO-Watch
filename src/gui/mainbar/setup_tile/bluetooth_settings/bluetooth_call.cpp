@@ -119,7 +119,7 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
     /*
      * check if type and cmd available
      */
-    if ( doc["t"] && doc["cmd"] ) {
+    if ( doc.containsKey("t") && doc.containsKey("cmd") ) {
         /*
          * check for an incoming call
          */
@@ -142,8 +142,8 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
             /*
              * set caller information
              */
-            if ( doc["number"] ) {
-                if ( doc["name"] ) {
+            if ( doc.containsKey("number") ) {
+                if ( doc.containsKey("name") ) {
                     lv_label_set_text( bluetooth_call_number_label, doc["name"] );
                 }
                 else {

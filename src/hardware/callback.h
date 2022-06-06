@@ -31,7 +31,8 @@
     typedef enum {
         CALL_CB_FIRST = 0,
         CALL_CB_MIDDLE,
-        CALL_CB_LAST
+        CALL_CB_LAST,
+        CALL_CB_NUM
     } callback_prio_t;
     /**
      * @brief typedef for the callback function call
@@ -49,6 +50,7 @@
         EventBits_t event;                  /** @brief event mask */
         CALLBACK_FUNC callback_func;        /** @brief pointer to a callback function */
         const char *id;                     /** @brief id for the callback */
+        bool active;                        /** @brief true if callback function is activated, false is deactivated */
         callback_prio_t prio;               /** @brief order to call cb functions, CALL_CB_FIRST means first */
         uint64_t counter;                   /** @brief callback function call counter thair returned true */
     } callback_table_t;

@@ -777,12 +777,14 @@ static void osmmap_tile_server_event_cb( lv_obj_t * obj, lv_event_t event ) {
                 OSMMAP_APP_ERROR_LOG("osm server list deserializeJson() failed: %s", error.c_str() );
             }
             else {
-                const char *tile_server = doc[ lv_list_get_btn_text( obj ) ];
-                OSMMAP_APP_INFO_LOG("new tile server url: %s", tile_server );
-                osm_map_set_tile_server( osmmap_location, tile_server );
-                strncpy( osmmap_config.osmmap, lv_list_get_btn_text( obj ), sizeof( osmmap_config.osmmap ) );
-                osmmap_add_tile_server_list( osmmap_sub_menu_layers );
-                osmmap_update_request();
+                if( doc.containsKey( lv_list_get_btn_text( obj ) ) ) {
+                    const char *tile_server = doc[ lv_list_get_btn_text( obj ) ];
+                    OSMMAP_APP_INFO_LOG("new tile server url: %s", tile_server );
+                    osm_map_set_tile_server( osmmap_location, tile_server );
+                    strncpy( osmmap_config.osmmap, lv_list_get_btn_text( obj ), sizeof( osmmap_config.osmmap ) );
+                    osmmap_add_tile_server_list( osmmap_sub_menu_layers );
+                    osmmap_update_request();
+                }
             }
             doc.clear();
             lv_obj_set_hidden( osmmap_sub_menu_layers, true );            

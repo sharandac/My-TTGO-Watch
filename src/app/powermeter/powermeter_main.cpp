@@ -115,8 +115,6 @@ void powermeter_main_task( lv_task_t * task );
     }
     memcpy( mqttmsg, payload, length );
 
-    log_i("mqtt-msg: %s", mqttmsg );
-
     SpiRamJsonDocument doc( strlen( mqttmsg ) * 2 );
     DeserializationError error = deserializeJson( doc, mqttmsg );
 
@@ -124,7 +122,7 @@ void powermeter_main_task( lv_task_t * task );
         log_e("powermeter message deserializeJson() failed: %s", error.c_str() );
     }
     else  {
-        if ( doc["id"] ) {
+        if ( doc.containsKey("id") ) {
             lv_label_set_text( id_label, doc["id"] );
         }
         if ( doc["all"]["power"] ) {

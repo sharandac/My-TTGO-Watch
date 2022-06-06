@@ -199,5 +199,15 @@
      * @return double 
      */
     double gpsctl_distance( double lat1, double long1, double lat2, double long2, double earth_radius );
+    /**
+     * @brief calculate the direction based on two coordinates
+     * 
+     * @param lat1 
+     * @param long1 
+     * @param lat2 
+     * @param long2 
+     * @return double 
+     */
+    double gpsctl_courseTo( double lat1, double long1, double lat2, double long2 );
 
 #endif // _GPSCTL_H

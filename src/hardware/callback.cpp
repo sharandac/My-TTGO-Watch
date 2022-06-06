@@ -104,6 +104,17 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
         return( retval );
     }
     /**
+     *  check if callback function already exist
+     */
+    if( callback->entrys > 0 ) {
+        for( int i = 0 ; i < callback->entrys; i++ ) {
+            if( callback->table[ i ].callback_func == callback_func && callback->table[ i ].prio == CALL_CB_MIDDLE ) {
+                log_e("callback (%s) already exist", id );
+                while( true );
+            }
+        }
+    }
+    /**
      * increment callback entry counter
      */
     callback->entrys++;
@@ -119,6 +130,9 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
         retval = true;
     }
     else {
+        /**
+         * create a new callback entry
+         */
         callback_table_t *new_callback_table = NULL;
         new_callback_table = ( callback_table_t * )REALLOC( callback->table, sizeof( callback_table_t ) * callback->entrys );
         if ( new_callback_table == NULL ) {
@@ -134,6 +148,7 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
     callback->table[ callback->entrys - 1 ].event = event;
     callback->table[ callback->entrys - 1 ].callback_func = callback_func;
     callback->table[ callback->entrys - 1 ].id = id;
+    callback->table[ callback->entrys - 1 ].active = true;
     callback->table[ callback->entrys - 1 ].prio = CALL_CB_MIDDLE;
     callback->table[ callback->entrys - 1 ].counter = 0;
     if ( callback->debug ) {
@@ -152,6 +167,17 @@ bool callback_register_with_prio( callback_t *callback, EventBits_t event, CALLB
         return( retval );
     }
     /**
+     *  check if callback function already exist
+     */
+    if( callback->entrys > 0 ) {
+        for( int i = 0 ; i < callback->entrys; i++ ) {
+            if( callback->table[ i ].callback_func == callback_func  && callback->table[ i ].prio == prio ) {
+                log_e("callback (%s) already exist", id );
+                while( true );
+            }
+        }
+    }
+    /**
      * increment callback entry counter
      */
     callback->entrys++;
@@ -167,6 +193,9 @@ bool callback_register_with_prio( callback_t *callback, EventBits_t event, CALLB
         retval = true;
     }
     else {
+        /**
+         * create a new callback entry
+         */
         callback_table_t *new_callback_table = NULL;
         new_callback_table = ( callback_table_t * )REALLOC( callback->table, sizeof( callback_table_t ) * callback->entrys );
         if ( new_callback_table == NULL ) {

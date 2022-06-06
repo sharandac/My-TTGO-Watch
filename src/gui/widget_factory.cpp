@@ -225,14 +225,18 @@ void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coor
     va_list args;
     va_start(args, format);
 
-    char *buffer;
-    vasprintf( &buffer, format, args );
+    char *buffer = NULL;
+    int size = vasprintf( &buffer, format, args );
     va_end(args);
 
-    lv_label_set_text( label, buffer );
-    lv_obj_align( label, base, align, x, y );
+    if( size > 0 ) {
+        lv_label_set_text( label, buffer );
+        lv_obj_align( label, base, align, x, y );
+    }
 
-    free( buffer );
+    if( buffer )
+        free( buffer );
+    
     return;
 }
 
