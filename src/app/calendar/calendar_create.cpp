@@ -131,7 +131,7 @@ void calendar_create_build_ui( void ) {
     lv_style_set_radius( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    lv_style_set_bg_opa( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+    lv_style_set_bg_opa( &calendar_create_date_select_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
     /**
      * 
      */

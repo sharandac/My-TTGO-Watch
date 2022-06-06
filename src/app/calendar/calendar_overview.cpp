@@ -52,10 +52,13 @@ LV_FONT_DECLARE(Ubuntu_16px);                                                   
 LV_FONT_DECLARE(Ubuntu_12px);                                                       /** @brief calendar font */
 
 #if defined( BIG_THEME )
+    lv_font_t *calandar_header_font = &Ubuntu_48px;
     lv_font_t *calandar_font = &Ubuntu_32px;
 #elif defined( MID_THEME )
+    lv_font_t *calandar_header_font = &Ubuntu_24px;
     lv_font_t *calandar_font = &Ubuntu_16px;
 #else
+    lv_font_t *calandar_header_font = &Ubuntu_16px;
     lv_font_t *calandar_font = &Ubuntu_12px;
 #endif
 
@@ -132,7 +135,7 @@ void calendar_overview_build_ui( void ) {
     lv_style_set_radius( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_border_width( &calendar_overview_style, LV_OBJ_PART_MAIN, 0 );
     lv_style_set_bg_color( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_COLOR_WHITE );
-    lv_style_set_bg_opa( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_OPA_100 );
+    lv_style_set_bg_opa( &calendar_overview_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
     /**
      * create calendar object
      */
@@ -144,12 +147,12 @@ void calendar_overview_build_ui( void ) {
     /**
      * Make the date number smaller to be sure they fit into their area
      */
-    lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, calandar_font );
+    lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, calandar_header_font );
     lv_obj_set_style_local_text_color( calendar_overview, LV_CALENDAR_PART_HEADER, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_obj_set_style_local_text_font( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, calandar_font );
     lv_obj_set_style_local_text_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_DEFAULT, LV_COLOR_BLACK );
     lv_obj_set_style_local_bg_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_CHECKED, LV_COLOR_RED );
-    lv_obj_set_style_local_bg_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_FOCUSED, LV_COLOR_BLUE );
+    lv_obj_set_style_local_bg_color( calendar_overview, LV_CALENDAR_PART_DATE, LV_STATE_FOCUSED, LV_COLOR_GREEN );
     /**
      * add exit button
      */

@@ -110,6 +110,7 @@ void calendar_day_build_ui( void ) {
     lv_style_set_border_width( &calendar_day_list_style , LV_OBJ_PART_MAIN, 0 );
     lv_style_set_radius( &calendar_day_list_style , LV_OBJ_PART_MAIN, 0 );
     lv_style_set_text_font( &calendar_day_list_style , LV_OBJ_PART_MAIN, daylist_font );
+    lv_style_set_bg_opa( &calendar_day_list_style, LV_OBJ_PART_MAIN, LV_OPA_80 );
     /**
      * day date list
      */

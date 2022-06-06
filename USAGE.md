@@ -145,9 +145,13 @@ For the weather app you need an openweather.com api-id. http://openweathermap.or
 
 ## Stopwatch
 
+![screenshot](images/stopwatch.png)
+
 Click play to start.
 
 ## Alarm
+
+![screenshot](images/alarm.png)
 
 You can set an alarm, by setting time and day(s) of the week.
 
@@ -240,6 +244,17 @@ In connection with [OsmAnd](https://osmand.net) the watch can also be used for n
 
 gps tracker that generates .gpx files. Only works properly with watches that have GPS. A long press on the crosshairs starts and stops the logging. The .gpx files can be downloaded via FTP and imported directly into e.g. GoogleMaps or OSM. The trash icon deletes all files to save space.
 
+## gps status
+
+![screenshot](images/gps_status.png)
+
+## astro
+
+![screenshot](images/astro.png)
+
+## wfif mon
+
+![screenshot](images/wifi_mon.png)
 
 ## Activity tracker
 
@@ -257,6 +272,8 @@ The trash can button allows to reset step counter.
 Useful when starting a new activity an keeping exact track of it.
 
 ## Sailing
+
+![screenshot](images/sailing.png)
 
 This app connects to your [OpenPlotter](https://openmarine.net/openplotter) and shows some of your boat stats.
 
