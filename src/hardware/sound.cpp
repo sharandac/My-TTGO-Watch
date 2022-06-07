@@ -148,13 +148,13 @@ bool sound_powermgm_event_cb( EventBits_t event, void *arg ) {
 
     switch( event ) {
         case POWERMGM_STANDBY:          sound_set_enabled( false );
-                                        log_i("go standby");
+                                        log_d("go standby");
                                         break;
         case POWERMGM_WAKEUP:           sound_set_enabled( sound_config.enable );
-                                        log_i("go wakeup");
+                                        log_d("go wakeup");
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   sound_set_enabled( sound_config.enable );
-                                        log_i("go wakeup");
+                                        log_d("go wakeup");
                                         break;
     }
     return( true );
@@ -174,11 +174,11 @@ bool sound_powermgm_loop_cb( EventBits_t event, void *arg ) {
         if ( sound_config.enable && sound_init ) {
             // we call sound_set_enabled(false) to ensure the PMU stops all power
             if ( mp3->isRunning() && !mp3->loop() ) {
-                log_i("stop playing mp3 sound");
+                log_d("stop playing mp3 sound");
                 mp3->stop();
             }
             if ( wav->isRunning() && !wav->loop() ) {
-                log_i("stop playing wav sound");
+                log_d("stop playing wav sound");
                 wav->stop(); 
             }
         }
@@ -285,12 +285,12 @@ void sound_play_spiffs_mp3( const char *filename ) {
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
-            log_i("playing file %s from SPIFFS", filename);
+            log_d("playing file %s from SPIFFS", filename);
             spliffs_file = new AudioFileSourceSPIFFS(filename);
             id3 = new AudioFileSourceID3(spliffs_file);
             mp3->begin(id3, out);
         } else {
-            log_i("Cannot play mp3, sound is disabled");
+            log_d("Cannot play mp3, sound is disabled");
         }
     #endif
 #endif
@@ -309,11 +309,11 @@ void sound_play_progmem_wav( const void *data, uint32_t len ) {
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
-            log_i("playing audio (size %d) from PROGMEM ", len );
+            log_d("playing audio (size %d) from PROGMEM ", len );
             progmem_file = new AudioFileSourcePROGMEM( data, len );
             wav->begin(progmem_file, out);
         } else {
-            log_i("Cannot play wav, sound is disabled");
+            log_d("Cannot play wav, sound is disabled");
         }
     #endif
 #endif
@@ -332,13 +332,13 @@ void sound_speak( const char *str ) {
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
         if ( sound_config.enable && sound_init && !sound_is_silenced() ) {
             sound_set_enabled( sound_config.enable );
-            log_i("Speaking text", str);
+            log_d("Speaking text", str);
             is_speaking = true;
             sam->Say(out, str);
             is_speaking = false;
         }
         else {
-            log_i("Cannot speak, sound is disabled");
+            log_d("Cannot speak, sound is disabled");
         }
     #endif
 #endif
@@ -421,7 +421,7 @@ void sound_set_volume_config( uint8_t volume ) {
 #else
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V3 )
         if ( sound_config.enable && sound_init ) {
-            log_i("Setting sound volume to: %d", volume);
+            log_d("Setting sound volume to: %d", volume);
             // limiting max gain to 3.5 (max gain is 4.0)
             out->SetGain(3.5f * ( sound_config.volume / 100.0f ));
         }
@@ -433,7 +433,7 @@ void sound_set_volume_config( uint8_t volume ) {
 
 bool sound_is_silenced( void ) {
     if ( !sound_config.silence_timeframe ) {
-        log_i("no silence sound timeframe");
+        log_d("no silence sound timeframe");
         return( false );
     }
 

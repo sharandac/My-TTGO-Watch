@@ -114,21 +114,21 @@ bool sensor_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #ifdef M5PAPER
             switch( event ) {
-                case POWERMGM_STANDBY:              log_i("go standby");
+                case POWERMGM_STANDBY:              log_d("go standby");
                                                     retval = true;
                                                     break;
-                case POWERMGM_WAKEUP:               log_i("go wakeup");
+                case POWERMGM_WAKEUP:               log_d("go wakeup");
                                                     M5.SHT30.UpdateData();
                                                     retval = true;
                                                     break;
-                case POWERMGM_SILENCE_WAKEUP:       log_i("go silence wakeup");
+                case POWERMGM_SILENCE_WAKEUP:       log_d("go silence wakeup");
                                                     M5.SHT30.UpdateData();
                                                     retval = true;
                                                     break;
-                case POWERMGM_ENABLE_INTERRUPTS:    log_i("enable interrupts");
+                case POWERMGM_ENABLE_INTERRUPTS:    log_d("enable interrupts");
                                                     retval = true;
                                                     break;
-                case POWERMGM_DISABLE_INTERRUPTS:   log_i("disable interrupts");
+                case POWERMGM_DISABLE_INTERRUPTS:   log_d("disable interrupts");
                                                     retval = true;
                                                     break;
             }

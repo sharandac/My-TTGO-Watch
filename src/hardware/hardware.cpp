@@ -227,18 +227,6 @@ void hardware_setup( void ) {
 
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
-
-    #ifdef NATIVE_64BIT
-    #else
-        delay(500);
-
-        log_i("Total heap: %d", ESP.getHeapSize());
-        log_i("Free heap: %d", ESP.getFreeHeap());
-        log_i("Total PSRAM: %d", ESP.getPsramSize());
-        log_i("Free PSRAM: %d", ESP.getFreePsram());
-
-        disableCore0WDT();
-    #endif
 }
 
 void hardware_post_setup( void ) {
@@ -256,16 +244,4 @@ void hardware_post_setup( void ) {
     #endif
 
     display_set_brightness( display_get_brightness() );
-
-    #ifdef NATIVE_64BIT
-    #else
-        delay(500);
-
-        log_i("Total heap: %d", ESP.getHeapSize());
-        log_i("Free heap: %d", ESP.getFreeHeap());
-        log_i("Total PSRAM: %d", ESP.getPsramSize());
-        log_i("Free PSRAM: %d", ESP.getFreePsram());
-
-        disableCore0WDT();
-    #endif
 }

@@ -131,11 +131,11 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
+                log_d("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
             #else
                 #ifndef NATIVE_64BIT
                     setCpuFrequencyMhz(80);
-                    log_i("CPU speed = 80MHz");
+                    log_d("CPU speed = 80MHz");
                 #endif
             #endif
         }
@@ -160,18 +160,18 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
+                log_d("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
             #else
                 #ifndef NATIVE_64BIT
                     setCpuFrequencyMhz(240);
-                    log_i("CPU speed = 240MHz");
+                    log_d("CPU speed = 240MHz");
                 #endif
             #endif
         }
         #ifndef NATIVE_64BIT
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
+            log_d("Free heap: %d", ESP.getFreeHeap());
+            log_d("Free PSRAM heap: %d", ESP.getFreePsram());
+            log_d("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
@@ -198,9 +198,9 @@ void powermgm_loop( void ) {
          * print some memory stats
          */
         #ifndef NATIVE_64BIT
-            log_i("Free heap: %d", ESP.getFreeHeap());
-            log_i("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
+            log_d("Free heap: %d", ESP.getFreeHeap());
+            log_d("Free PSRAM heap: %d", ESP.getFreePsram());
+            log_d("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
 
         if ( standby ) {
@@ -216,7 +216,7 @@ void powermgm_loop( void ) {
 
             #else
                 setCpuFrequencyMhz( 80 );
-                log_i("CPU speed = 80MHz, start light sleep");
+                log_d("CPU speed = 80MHz, start light sleep");
                 /*
                 * from here, the consumption is round about 2.5mA
                 * total standby time is 152h (6days) without use?
@@ -227,10 +227,10 @@ void powermgm_loop( void ) {
                  */
                 switch( esp_sleep_get_wakeup_cause() ) {
                     case ESP_SLEEP_WAKEUP_TIMER:
-                        log_i("timer wakeup");
+                        log_d("timer wakeup");
                         powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                         esp_sleep_disable_wakeup_source( ESP_SLEEP_WAKEUP_TIMER );
-                        log_i("disable wakeup timer");
+                        log_d("disable wakeup timer");
                         break;
                     default:
                         break;
@@ -243,17 +243,17 @@ void powermgm_loop( void ) {
                     pm_config.min_freq_mhz = 80;
                     pm_config.light_sleep_enable = lighsleep ? false : true ;
                     ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                    log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
+                    log_d("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
                 #else
                     #ifndef NATIVE_64BIT
                         setCpuFrequencyMhz(240);
-                        log_i("CPU speed = 240MHz");
+                        log_d("CPU speed = 240MHz");
                     #endif
                 #endif
             #endif
         }
         else {
-            log_i("go standby blocked");
+            log_w("go standby blocked");
             /*
              * set cpu speed
              * 
@@ -271,7 +271,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
+                log_d("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );
             #else
                 /*
                  * from here, the consumption is round about 28mA with ble
@@ -279,7 +279,7 @@ void powermgm_loop( void ) {
                  */
                 #ifndef NATIVE_64BIT
                     setCpuFrequencyMhz(80);
-                    log_i("CPU speed = 80MHz");
+                    log_d("CPU speed = 80MHz");
                 #endif
             #endif
         }

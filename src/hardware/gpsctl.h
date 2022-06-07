@@ -26,7 +26,7 @@
     #include "hardware/config/gpsctlconfig.h"
     #include "utils/io.h"
     
-    #define GPSCTL_INFO_LOG                 log_i
+    #define GPSCTL_INFO_LOG                 log_d
     #define GPSCTL_DEBUG_LOG                log_d
     #define GPSCTL_ERROR_LOG                log_e
 

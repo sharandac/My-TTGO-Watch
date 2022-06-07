@@ -119,7 +119,7 @@ callback_t *callback_init( const char *name ) {
             }
             callback_counter->next_callback_t = callback;
         }
-        log_i("init callback_t structure success for: %s", name );
+        log_d("init callback_t structure success for: %s", name );
     }
     return( callback );
 }
@@ -311,7 +311,7 @@ bool callback_send( callback_t *callback, EventBits_t event, void *arg ) {
                  * call callback an check the returnvalue
                  */
                 if ( !callback->table[ entry ].callback_func( event, arg ) ) {
-                    log_i("cb %s returns false", callback->table[ entry ].id );
+                    log_d("cb %s returns false", callback->table[ entry ].id );
                     retval = false;
                 }
             }

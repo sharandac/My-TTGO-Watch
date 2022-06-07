@@ -85,7 +85,7 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:
-                log_i("go silence wakeup");
+                log_d("go silence wakeup");
                 if( !sdcard_mounted ) {
                     heap_caps_malloc_extmem_enable( 1 );
                     if ( !SD.begin( SD_CS, *sdhander) ) {
@@ -98,17 +98,17 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
                 break;
             case POWERMGM_STANDBY:
                 if( sdcard_mounted && !sdcard_block_unmount ) {
-                    log_i("go standby");
+                    log_d("go standby");
                     SD.end();
                     sdcard_mounted = false;
                 }
                 else {
-                    log_i("go standby without unmount");
+                    log_w("go standby without unmount");
                 }
                 retval = true;
                 break;
             case POWERMGM_WAKEUP:
-                log_i("go wakeup");
+                log_d("go wakeup");
                 if( !sdcard_mounted ) {
                     heap_caps_malloc_extmem_enable( 1 );
                     if (!SD.begin( SD_CS, *sdhander)) {
@@ -123,15 +123,15 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:
-                log_i("go silence wakeup");
+                log_d("go silence wakeup");
                 retval = true;
                 break;
             case POWERMGM_STANDBY:
-                log_i("go standby");
+                log_d("go standby");
                 retval = true;
                 break;
             case POWERMGM_WAKEUP:
-                log_i("go wakeup");
+                log_d("go wakeup");
                 retval = true;
                 break;
         }

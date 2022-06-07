@@ -64,13 +64,13 @@ void Application::onBuildMainPage(lv_obj_t* tile) {
 }
 
 void Application::onBuildSettingsPage(lv_obj_t* tile) {
-    log_i("build Settings page");
+    log_d("build Settings page");
     auto title = name + " settings";
     settings.init(tile, title.c_str(), [this](Widget btn) { onButtonCloseSettingsClicked(); });
 }
 
 void Application::onButtonOpenSettingsClicked() {
-    log_i("enter settings");
+    log_d("enter settings");
     if (configuration != nullptr)
         configuration->load();
     statusbar_hide(true);
@@ -78,7 +78,7 @@ void Application::onButtonOpenSettingsClicked() {
 }
 
 void Application::onButtonCloseSettingsClicked() {
-    log_i("leave settings");
+    log_d("leave settings");
     if (configuration != nullptr) {
         configuration->applyFromUI();
         configuration->save();

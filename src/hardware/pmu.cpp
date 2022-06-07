@@ -114,12 +114,12 @@ void pmu_setup( void ) {
         if ( ttgo->power->EnableCoulombcounter() ) 
             log_e("enable coulumb counter failed!");    
         if ( pmu_config.high_charging_target_voltage ) {
-            log_i("set target voltage to 4.36V");
+            log_d("set target voltage to 4.36V");
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
                 log_e("target voltage 4.36V set failed!");
         }
         else {
-            log_i("set target voltage to 4.2V");
+            log_d("set target voltage to 4.2V");
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
                 log_e("target voltage 4.2V set failed!");
         }
@@ -288,7 +288,7 @@ void pmu_loop( void ) {
                 * delete old charging logfile when plug in and
                 * set variable plug to true
                 */
-                log_i("AXP202: VBusPlugInIRQ");
+                log_d("AXP202: VBusPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 plug = true;
             }
@@ -298,7 +298,7 @@ void pmu_loop( void ) {
                 * remove old discharging log file when unplug
                 * set variable plug and chargingto false
                 */
-                log_i("AXP202: VBusRemoteInIRQ");
+                log_d("AXP202: VBusRemoteInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 charging = false;
                 plug = false;
@@ -308,17 +308,32 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to true
                 */
-                log_i("AXP202: ChargingIRQ");
+                log_d("AXP202: ChargingIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                charging = true;
+                if ( pmu_config.high_charging_target_voltage ) {
+                    log_w("set target voltage to 4.36V for high target charging");
+                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
+                        log_e("target voltage 4.36V set failed!");
+                }
+                else {
+                    log_d("set target voltage to 4.20V for charging");
+                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                        log_e("target voltage 4.20V set failed!");
+                }
+                 charging = true;
             }
             if ( ttgo->power->isChargingDoneIRQ() ) {
                 /*
                 * set an wakeup request and
                 * set variable charging to false
                 */
-                log_i("AXP202: ChargingDoneIRQ");
+                log_d("AXP202: ChargingDoneIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                if ( pmu_config.high_charging_target_voltage ) {
+                    log_w("set target voltage to 4.20V after high target charging");
+                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                        log_e("target voltage 4.20V set failed!");
+                }
                 charging = false;
             }
             if ( ttgo->power->isBattPlugInIRQ() ) {
@@ -326,7 +341,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to false
                 */
-                log_i("AXP202: BattPlugInIRQ");
+                log_d("AXP202: BattPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = true;
             }
@@ -335,7 +350,7 @@ void pmu_loop( void ) {
                 * set an wakeup request and
                 * set variable charging to false
                 */
-                log_i("AXP202: BattRemoveIRQ");
+                log_d("AXP202: BattRemoveIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 battery = false;
             }
@@ -347,7 +362,7 @@ void pmu_loop( void ) {
                 * fast return for faster wakeup
                 */
                 ttgo->power->clearIRQ();
-                log_i("AXP202: PEKShortPressIRQ");
+                log_d("AXP202: PEKShortPressIRQ");
                 pmu_send_cb( PMUCTL_SHORT_PRESS, NULL );
                 return;
             }
@@ -359,7 +374,7 @@ void pmu_loop( void ) {
                 * fast return for faster wakeup
                 */
                 ttgo->power->clearIRQ();
-                log_i("AXP202: PEKLongtPressIRQ");
+                log_d("AXP202: PEKLongtPressIRQ");
                 pmu_send_cb( PMUCTL_LONG_PRESS, NULL );
                 return;
             }
@@ -373,7 +388,7 @@ void pmu_loop( void ) {
                 ttgo->power->clearTimerStatus();
                 ttgo->power->offTimer();
                 ttgo->power->clearIRQ();
-                log_i("AXP202: TimerTimeoutIRQ");
+                log_d("AXP202: TimerTimeoutIRQ");
                 powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
                 pmu_send_cb( PMUCTL_TIMER_TIMEOUT, NULL );
                 return;
@@ -500,7 +515,7 @@ void pmu_standby( void ) {
         /**
          * disable external power
          */
-        log_i("disable epd/ext power");
+        log_d("disable epd/ext power");
         while( M5.EPD.CheckAFSR() ){};
         M5.disableEXTPower();
         M5.disableEPDPower();
@@ -510,7 +525,7 @@ void pmu_standby( void ) {
         if ( pmu_get_silence_wakeup() ) {
             next_wakeup = millis() + pmu_config.silence_wakeup_interval * 60 * 1000;
             esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
-            log_i("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
+            log_d("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
         }
     #elif defined( M5CORE2 )
         M5.Axp.PrepareToSleep();
@@ -520,7 +535,7 @@ void pmu_standby( void ) {
         if ( pmu_get_silence_wakeup() ) {
             next_wakeup = millis() + pmu_config.silence_wakeup_interval * 60 * 1000;
             esp_sleep_enable_timer_wakeup( pmu_config.silence_wakeup_interval * 60 * 1000000 );
-            log_i("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
+            log_d("enable wakeup timer (%d sec)", pmu_config.silence_wakeup_interval * 60 );
         }
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
@@ -532,11 +547,11 @@ void pmu_standby( void ) {
         if ( pmu_get_silence_wakeup() ) {
             if ( ttgo->power->isChargeing() || ttgo->power->isVBUSPlug() ) {
                 ttgo->power->setTimer( pmu_config.silence_wakeup_interval_vbplug );
-                log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
+                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval_vbplug );
             }
             else {
                 ttgo->power->setTimer( pmu_config.silence_wakeup_interval );
-                log_i("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
+                log_d("enable silence wakeup timer, %dmin", pmu_config.silence_wakeup_interval );
             }
         }
 
@@ -545,11 +560,11 @@ void pmu_standby( void ) {
             */
         if ( pmu_get_experimental_power_save() ) {
             ttgo->power->setDCDC3Voltage( pmu_config.experimental_power_save_voltage );
-            log_i("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
+            log_d("go standby, enable %dmV standby voltage", pmu_config.experimental_power_save_voltage );
         } 
         else {
             ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
-            log_i("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
+            log_d("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
         }
         /*
             * disable LD02, sound?
@@ -572,7 +587,7 @@ void pmu_wakeup( void ) {
         /**
          * enable external power
          */
-        log_i("enable epd/ext power");
+        log_d("enable epd/ext power");
         M5.enableEPDPower();
         M5.enableEXTPower();
         delay(50);
@@ -594,11 +609,11 @@ void pmu_wakeup( void ) {
         */
         if ( pmu_get_experimental_power_save() ) {
             ttgo->power->setDCDC3Voltage( pmu_config.experimental_normal_voltage );
-            log_i("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
+            log_d("go wakeup, enable %dmV voltage", pmu_config.experimental_normal_voltage );
         } 
         else {
             ttgo->power->setDCDC3Voltage( pmu_config.normal_voltage );
-            log_i("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
+            log_d("go wakeup, enable %dmV voltage", pmu_config.normal_voltage );
         }
         /*
         * clear timer
@@ -661,7 +676,7 @@ void pmu_set_high_charging_target_voltage( bool value ) {
                 log_e("target voltage 4.36V set failed!");
         }
         else {
-            log_i("set target voltage to 4.2V");
+            log_d("set target voltage to 4.2V");
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
                 log_e("target voltage 4.2V set failed!");
         }
@@ -775,7 +790,7 @@ float pmu_get_battery_voltage( void ) {
         #if defined( M5PAPER )
             voltage = M5.getBatteryVoltage();
             voltage = voltage / 1000;
-            log_i("battery voltage = %.3fV", voltage );
+            log_d("battery voltage = %.3fV", voltage );
         #elif defined( M5CORE2 )
             voltage = M5.Axp.GetBatVoltage();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )

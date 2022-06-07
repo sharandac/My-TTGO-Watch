@@ -217,13 +217,13 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
 
     #ifdef NATIVE_64BIT
         switch( event ) {
-            case POWERMGM_STANDBY:              log_i("go standby");
+            case POWERMGM_STANDBY:              log_d("go standby");
                                                 retval = true;
                                                 break;
-            case POWERMGM_WAKEUP:               log_i("go wakeup");
+            case POWERMGM_WAKEUP:               log_d("go wakeup");
                                                 retval = true;
                                                 break;
-            case POWERMGM_SILENCE_WAKEUP:       log_i("go silence wakeup");
+            case POWERMGM_SILENCE_WAKEUP:       log_d("go silence wakeup");
                                                 retval = true;
                                                 break;
             case POWERMGM_ENABLE_INTERRUPTS:    retval = true;
@@ -234,13 +234,13 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
     #else
         #if defined( M5PAPER ) || defined( LILYGO_WATCH_2021 )
             switch( event ) {
-                case POWERMGM_STANDBY:          log_i("go standby");
+                case POWERMGM_STANDBY:          log_d("go standby");
                                                 retval = true;
                                                 break;
-                case POWERMGM_WAKEUP:           log_i("go wakeup");
+                case POWERMGM_WAKEUP:           log_d("go wakeup");
                                                 retval = true;
                                                 break;
-                case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
                                                 retval = true;
                                                 break;
                 case POWERMGM_ENABLE_INTERRUPTS:
@@ -252,17 +252,17 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
             }
         #elif defined( M5CORE2 )
             switch( event ) {
-                case POWERMGM_STANDBY:          log_i("go standby");
+                case POWERMGM_STANDBY:          log_d("go standby");
                                                 /**
                                                  * block standby so is there no another option to handle
                                                  * wakeup by touch. no real button :(
                                                  */
                                                 retval = false;
                                                 break;
-                case POWERMGM_WAKEUP:           log_i("go wakeup");
+                case POWERMGM_WAKEUP:           log_d("go wakeup");
                                                 retval = true;
                                                 break;
-                case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
                                                 retval = true;
                                                 break;
                 case POWERMGM_ENABLE_INTERRUPTS:
@@ -275,14 +275,14 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             switch( event ) {
-                case POWERMGM_STANDBY:          log_i("go standby");
+                case POWERMGM_STANDBY:          log_d("go standby");
                                                 if ( touch_lock_take() ) {
                                                     ttgo->touchToMonitor();
                                                     touch_lock_give();
                                                 }
                                                 retval = true;
                                                 break;
-                case POWERMGM_WAKEUP:           log_i("go wakeup");
+                case POWERMGM_WAKEUP:           log_d("go wakeup");
 
                                                 if ( touch_lock_take() ) {
                                                     #if defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
@@ -293,7 +293,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 }
                                                 retval = true;
                                                 break;
-                case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+                case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
                                                 retval = true;
                                                 break;
                 case POWERMGM_ENABLE_INTERRUPTS:

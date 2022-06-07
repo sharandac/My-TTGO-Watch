@@ -134,7 +134,7 @@ void motor_setup( void ) {
             Wire.beginTransmission( DRV2605_ADDRESS );
             uint8_t err = Wire.endTransmission();
             if ( err == 0 ) {
-                log_i("Motor init: I2C device found at address %p", DRV2605_ADDRESS);
+                log_d("Motor init: I2C device found at address %p", DRV2605_ADDRESS);
                 TTGOClass * ttgo = TTGOClass::getWatch(); 
                 ttgo->enableDrv2650( true );
                 drv = ttgo->drv;

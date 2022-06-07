@@ -108,7 +108,7 @@ void bma_setup( void ) {
                 stepcounter_before_reset = 0;
                 stepcounter_valid = 0xa5a5a5a5;
                 bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
-                log_i("stepcounter not valid. reset");
+                log_w("stepcounter not valid. reset");
             }
             stepcounter = stepcounter + stepcounter_before_reset;
         #elif defined( LILYGO_WATCH_2021 )
@@ -118,7 +118,7 @@ void bma_setup( void ) {
                 stepcounter_before_reset = 0;
                 stepcounter_valid = 0xa5a5a5a5;
                 bma_send_event_cb( BMACTL_STEPCOUNTER_RESET, NULL );
-                log_i("stepcounter not valid. reset");
+                log_w("stepcounter not valid. reset");
             }
             stepcounter = stepcounter + stepcounter_before_reset;
 */
@@ -323,7 +323,7 @@ void bma_notify_stepcounter( void ) {
 }
 
 void bma_standby( void ) {
-    log_i("go standby");
+    log_d("go standby");
     /*
      * disable stepcounter interrupt to avoid
      * wakeup in standby mode
@@ -357,7 +357,7 @@ void bma_standby( void ) {
 }
 
 void bma_wakeup( void ) {
-    log_i("go wakeup");
+    log_d("go wakeup");
     /*
      * enable stepcounter interrupt for updates
      * when the user interacts with the watch
@@ -398,7 +398,7 @@ void bma_wakeup( void ) {
          * check if day has change
          */
         if ( info.tm_yday != old_info.tm_yday ) {
-            log_i("reset setcounter: %d != %d", info.tm_yday, old_info.tm_yday );
+            log_d("reset setcounter: %d != %d", info.tm_yday, old_info.tm_yday );
             #ifdef NATIVE_64BIT
             #else
                 #ifdef M5PAPER
@@ -570,7 +570,7 @@ uint32_t bma_get_stepcounter( void ) {
 }
 
 void bma_reset_stepcounter( void ) {
-    log_i("reset step counter");
+    log_d("reset step counter");
     #ifdef NATIVE_64BIT
     #else
         #ifdef M5PAPER

@@ -670,13 +670,13 @@ lv_obj_t *wf_get_settings_header_title(lv_obj_t *parent) {
         lv_obj_type_t buf;
         lv_obj_get_type(child, &buf);
         if (!strcmp(buf.type[0], "lv_label")) {
-            log_i("header_title found");
+            log_d("header_title found");
             /* found */
             title = child;
             /* Break the loop */
             child = NULL;
         } else {
-            log_i("header_title not found");
+            log_d("header_title not found");
             /* continue the loop */
             child = lv_obj_get_child(parent, child);
         }

@@ -88,13 +88,13 @@ void blectl_loop( void );
             blectl_set_event( BLECTL_AUTHWAIT );
             blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
             xQueueReset( blectl_msg_queue );
-            log_i("BLE authwait");
+            log_d("BLE authwait");
             blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"authwait" );
             pServer->getAdvertising()->stop();
         };
 
         void onDisconnect(BLEServer* pServer) {
-            log_i("BLE disconnected");
+            log_d("BLE disconnected");
             blectl_set_event( BLECTL_DISCONNECT );
             blectl_clear_event( BLECTL_CONNECT | BLECTL_AUTHWAIT );
             blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
@@ -103,7 +103,7 @@ void blectl_loop( void );
 
             if ( blectl_get_advertising() ) {
                 pServer->getAdvertising()->start();
-                log_i("BLE advertising...");
+                log_d("BLE advertising...");
             }
         }
     };
@@ -111,24 +111,24 @@ void blectl_loop( void );
     class BtlCtlSecurity : public BLESecurityCallbacks {
 
         uint32_t onPassKeyRequest() {
-            log_i("BLECTL pass key request");
+            log_d("BLECTL pass key request");
             return 123456;
         }
         void onPassKeyNotify( uint32_t pass_key ){
             char pin[16]="";
             snprintf( pin, sizeof( pin ), "%06d", pass_key );
-            log_i("BLECTL pairing request, PIN: %s", pin );
+            log_d("BLECTL pairing request, PIN: %s", pin );
             blectl_set_event( BLECTL_PIN_AUTH );
             blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
         }
         bool onConfirmPIN( uint32_t pass_key ) {
             char pin[16]="";
             snprintf( pin, sizeof( pin ), "%06d", pass_key );
-            log_i("BLECTL confirm PIN: %s", pin );
+            log_d("BLECTL confirm PIN: %s", pin );
             return false;
         }
         bool onSecurityRequest() {
-            log_i("BLECTL security request");
+            log_d("BLECTL security request");
             return true;
         }
 
@@ -136,13 +136,13 @@ void blectl_loop( void );
 
             if( cmpl.success ){
                 if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-                    log_i("BLECTL pairing successful");
+                    log_d("BLECTL pairing successful");
                     blectl_clear_event( BLECTL_PIN_AUTH );
                     blectl_send_event_cb( BLECTL_PAIRING_SUCCESS, (void *)"success" );
                     return;
                 }
                 if ( blectl_get_event( BLECTL_AUTHWAIT ) ) {
-                    log_i("BLECTL authentication successful, client connected");
+                    log_d("BLECTL authentication successful, client connected");
                     blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_DISCONNECT );
                     blectl_set_event( BLECTL_CONNECT );
                     blectl_send_event_cb( BLECTL_CONNECT, (void *) "connected" );
@@ -151,14 +151,14 @@ void blectl_loop( void );
             }
             else {
                 if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-                    log_i("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
+                    log_d("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
                     blectl_clear_event( BLECTL_PIN_AUTH );
                     blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
                     pServer->startAdvertising();
                     return;
                 }
                 if ( blectl_get_event( BLECTL_AUTHWAIT | BLECTL_CONNECT ) ) {
-                    log_i("BLECTL authentication unsuccessful, client disconnected, reason: %02x", cmpl.fail_reason );
+                    log_d("BLECTL authentication unsuccessful, client disconnected, reason: %02x", cmpl.fail_reason );
                     blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
                     blectl_set_event( BLECTL_DISCONNECT );
                     blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
@@ -177,23 +177,23 @@ void blectl_loop( void );
             size_t msgLen = pCharacteristic->getValue().length();
             const char *msg = pCharacteristic->getValue().c_str();
 
-            log_i("receive %d bytes msg chunk", msgLen );
+            log_d("receive %d bytes msg chunk", msgLen );
 
             for ( int i = 0 ; i < msgLen ; i++ ) {
                 switch( msg[ i ] ) {
                     case EndofText:         gadgetbridge_msg.clear();
-                                            log_i("attention, new link establish");
+                                            log_d("attention, new link establish");
                                             blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
                                             break;
                     case DataLinkEscape:    gadgetbridge_msg.clear();
-                                            log_i("attention, new message");
+                                            log_d("attention, new message");
                                             break;
                     case LineFeed:          {
-                                                log_i("attention, message complete");
+                                                log_d("attention, message complete");
                                                 const char *gbmsg = gadgetbridge_msg.c_str();
-                                                log_i( "msg: %s", gbmsg );
+                                                log_d( "msg: %s", gbmsg );
                                                 if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
-                                                    log_i("gadgetbridge message identified, cut down to json");
+                                                    log_d("gadgetbridge message identified, cut down to json");
                                                     gadgetbridge_msg.erase( gadgetbridge_msg.length() - 1 );
                                                     gbmsg += 3;
                                                     BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
@@ -217,7 +217,7 @@ void blectl_loop( void );
 
         void onRead( BLECharacteristic* pCharacteristic ) {
             std::string msg = pCharacteristic->getValue();
-            log_i("BLE received: %s, %i\n", msg.c_str(), msg.length() );
+            log_d("BLE received: %s, %i\n", msg.c_str(), msg.length() );
         }
     };
 #endif
@@ -367,14 +367,14 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
                 log_w("standby blocked by \"disable_only_disconnected\" option");
             }
             else {
-                log_i("go standby");
+                log_d("go standby");
             }
             break;
         case POWERMGM_WAKEUP:           
-            log_i("go wakeup");
+            log_d("go wakeup");
             break;
         case POWERMGM_SILENCE_WAKEUP:   
-            log_i("go silence wakeup");
+            log_d("go silence wakeup");
             break;
     }
     return( retval );
@@ -682,7 +682,7 @@ static void blectl_send_chunk ( int32_t len ) {
         }
     }
     chunk_msg[ len ] = '\0';
-    log_i("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
+    log_d("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
 }
 
 void blectl_loop ( void ) {

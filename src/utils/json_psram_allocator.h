@@ -19,12 +19,12 @@ struct SpiRamAllocator {
         }
         else {
             #ifdef NATIVE_64BIT
-                log_e("allocate %ld bytes (%p) json psram failed", size, ram );
+                log_d("allocate %ld bytes (%p) json psram failed", size, ram );
             #else
-                log_e("allocate %d bytes (%p) json psram failed", size, ram );
+                log_d("allocate %d bytes (%p) json psram failed", size, ram );
             #endif
             if ( size == 0 ) {
-                log_e("allocate zero bytes? really? abort");
+                log_d("allocate zero bytes? really? abort");
             }
             return( ram );
         }
@@ -39,12 +39,12 @@ struct SpiRamAllocator {
         }
         else {
             #ifdef NATIVE_64BIT
-                log_e("rallocate %ld bytes (%p) json psram failed", size, ram );
+                log_d("rallocate %ld bytes (%p) json psram failed", size, ram );
             #else
-                log_e("rallocate %d bytes (%p) json psram failed", size, ram );
+                log_d("rallocate %d bytes (%p) json psram failed", size, ram );
             #endif
             if ( size == 0 ) {
-                log_e("rallocate zero bytes? really? abort");
+                log_d("rallocate zero bytes? really? abort");
             }
             return( ram );
         }

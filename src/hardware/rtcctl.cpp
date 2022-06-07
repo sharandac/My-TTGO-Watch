@@ -86,7 +86,7 @@ void rtcctl_setup( void ) {
          */
         TTGOClass *ttgo = TTGOClass::getWatch();
         if ( ttgo->rtc->isTimerActive() || ttgo->rtc->isTimerEnable() ) {
-            log_i("clear/disable rtc timer");
+            log_d("clear/disable rtc timer");
             ttgo->rtc->clearTimer();
             ttgo->rtc->disableTimer();
         }
@@ -97,7 +97,7 @@ void rtcctl_setup( void ) {
     #elif defined( LILYGO_WATCH_2021 )
         rtc.begin();
         if ( rtc.isTimerActive() || rtc.isTimerEnable() ) {
-            log_i("clear/disable rtc timer");
+            log_d("clear/disable rtc timer");
             rtc.clearTimer();
             rtc.disableTimer();
         }
@@ -181,7 +181,7 @@ void set_next_alarm( void ) {
 
     // get local time and set alarm time
     localtime_r(&alarm_time, &alarm_tm);
-    log_i("local time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+    log_d("local time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
     alarm_tm.tm_hour = alarm_data.hour;
     alarm_tm.tm_min = alarm_data.minute;
     alarm_time = mktime( &alarm_tm );
@@ -194,9 +194,9 @@ void set_next_alarm( void ) {
     /*
      * convert local alarm time into GMT0 alarm time, it is necessary sine rtc store time in GMT0
      */
-    log_i("next local alarm time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+    log_d("next local alarm time: %02d:%02d day: %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
     gmtime_r( &alarm_time, &alarm_tm );
-    log_i("next GMT0 alarm time: %02d:%02d day %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
+    log_d("next GMT0 alarm time: %02d:%02d day %d", alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday );
 
 #ifdef NATIVE_64BIT
 
@@ -267,7 +267,7 @@ void rtcctl_set_next_alarm( void ) {
 
 bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          log_i("go standby");
+        case POWERMGM_STANDBY:          log_d("go standby");
                                         #ifdef NATIVE_64BIT
 
                                         #else
@@ -282,9 +282,9 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #endif
                                         #endif
                                         break;
-        case POWERMGM_WAKEUP:           log_i("go wakeup");
+        case POWERMGM_WAKEUP:           log_d("go wakeup");
                                         break;
-        case POWERMGM_SILENCE_WAKEUP:   log_i("go silence wakeup");
+        case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
                                         break;
         case POWERMGM_ENABLE_INTERRUPTS:
                                         #ifdef NATIVE_64BIT

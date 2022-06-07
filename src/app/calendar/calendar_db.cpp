@@ -212,8 +212,6 @@ static int calendar_db_version_callback( void *data, int argc, char **argv, char
 bool calendar_db_exec( SQL_CALLBACK_FUNC callback, const char *sql ) {
     char *zErrMsg = NULL;
     bool retval = false;
-    long query_start = millis();
-    long query_time = 0;
     /**
      * check if database already open
      */
@@ -232,7 +230,5 @@ bool calendar_db_exec( SQL_CALLBACK_FUNC callback, const char *sql ) {
     else {
         retval = true;
     }
-    query_time = millis() - query_start;
-    CALENDAR_DB_INFO_LOG("query time = %ldms", query_time );
     return retval;
 }

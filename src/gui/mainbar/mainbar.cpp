@@ -390,7 +390,7 @@ uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
      * prevent tile x pos goes out of range ( uint16_t )
      */
     if( ( app_tile_x_pos + x ) * lv_disp_get_hor_res( NULL ) > 32000 ) {
-        log_i("max horz resolution, jump next vert line");
+        MAINBAR_INFO_LOG("max horz resolution, jump next vert line");
         app_tile_x_pos = 0;
         app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
     }
@@ -424,7 +424,7 @@ uint32_t mainbar_add_setup_tile( uint16_t x, uint16_t y, const char *id ) {
      * prevent tile x pos goes out of range ( uint16_t )
      */
     if( ( app_tile_x_pos + x ) * lv_disp_get_hor_res( NULL ) > 32000 ) {
-        log_i("max horz resolution, jump next vert line");
+        MAINBAR_INFO_LOG("max horz resolution, jump next vert line");
         app_tile_x_pos = 0;
         app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
     }
@@ -505,7 +505,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
     }
 
     if( current_tile == tile_number ) {
-        log_e("the destination tile is the current tile");
+        log_w("the destination tile is the current tile");
         return;
     }
     /**

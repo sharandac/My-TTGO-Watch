@@ -231,7 +231,7 @@ void display_standby( void ) {
             ledcWrite( 0, 0 );
         #endif
     #endif
-    log_i("go standby");
+    log_d("go standby");
 }
 
 void display_wakeup( bool silence ) {
@@ -267,7 +267,7 @@ void display_wakeup( bool silence ) {
                 dest_brightness = 0;
             #endif
         #endif
-        log_i("go silence wakeup");
+        log_d("go silence wakeup");
     }
     else {
         #ifdef NATIVE_64BIT
@@ -298,7 +298,7 @@ void display_wakeup( bool silence ) {
                 dest_brightness = display_get_brightness();;
             #endif
         #endif
-        log_i("go wakeup");
+        log_d("go wakeup");
     }
 }
 

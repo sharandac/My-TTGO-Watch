@@ -153,7 +153,7 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
                 lv_label_set_text( bluetooth_call_number_label, "n/a" );
             }
             lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
-            motor_vibe(100);            
+            motor_vibe(250);            
         }
         else {
             /*

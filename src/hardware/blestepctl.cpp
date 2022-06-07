@@ -57,7 +57,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
         bool ret = blectl_send_msg( msg );
-        log_i("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
+        log_d("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
     }
 };
@@ -106,7 +106,7 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
                      * TODO_ affect power loop rate
                      */
                     time_t timeout = request["int"].as<time_t>(); // Requested timeout, in seconds
-                    log_i("RECEIVED timeout: %d seconds", timeout);
+                    log_d("RECEIVED timeout: %d seconds", timeout);
                     stepcounter_ble_updater.setTimeout(timeout);
                 }
                 retval = true;

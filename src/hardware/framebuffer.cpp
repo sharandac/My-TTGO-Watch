@@ -155,9 +155,9 @@ void framebuffer_setup( void ) {
      * log info about framebuffer
      */
     #ifdef NATIVE_64BIT
-        log_i("framebuffer: 0x%p (%ld bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
+        log_d("framebuffer: 0x%p (%ld bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
     #else
-        log_i("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
+        log_d("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
     #endif
     /**
      * setup powermgm events and loop
@@ -168,12 +168,12 @@ void framebuffer_setup( void ) {
 
 bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case POWERMGM_STANDBY:          log_i("go standby, refresh framebuffer");
+        case POWERMGM_STANDBY:          log_d("go standby, refresh framebuffer");
                                         framebuffer_refresh();
                                         break;
-        case POWERMGM_WAKEUP:           log_i("go wakeup");
+        case POWERMGM_WAKEUP:           log_d("go wakeup");
                                         break;
-        case POWERMGM_SILENCE_WAKEUP:   log_i("go wakeup");
+        case POWERMGM_SILENCE_WAKEUP:   log_d("go wakeup");
                                         break;
     }
     return( true );

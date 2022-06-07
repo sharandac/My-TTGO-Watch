@@ -19,7 +19,7 @@
     // #define CALENDAR_DB_FORCE_CREATE_DB
     #define CALENDAR_DB_CREATE_TEST_DATA
 
-    #define CALENDAR_DB_INFO_LOG    log_i
+    #define CALENDAR_DB_INFO_LOG    log_d
     #define CALENDAR_DB_DEBUG_LOG   log_d
     #define CALENDAR_DB_ERROR_LOG   log_e
 

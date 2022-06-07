@@ -210,7 +210,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                          * get back to maintile if configure and
                                          * stop all LVGL activitys and tasks
                                          */
-                                        log_i("go standby");                  
+                                        log_d("go standby");                  
                                         #ifdef NATIVE_64BIT
                                         #else
                                             lv_obj_invalidate( lv_scr_act() );
@@ -221,7 +221,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_WAKEUP:           /*
                                          * resume all LVGL activitys and tasks
                                          */
-                                        log_i("go wakeup");
+                                        log_d("go wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
                                             hardware_attach_lvgl_ticker();
@@ -231,7 +231,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
         case POWERMGM_SILENCE_WAKEUP:   /*
                                          * resume all LVGL activitys and tasks
                                          */
-                                        log_i("go silence wakeup");
+                                        log_d("go silence wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
                                             hardware_attach_lvgl_ticker();
@@ -294,14 +294,14 @@ void gui_set_background_image ( uint32_t background_image ) {
             filepath_convert( filename, sizeof( filename ), BACKGROUNDIMAGE );
             file = fopen( filename, "rb" );
             if ( file ) {
-                log_i("set custom background image from spiffs");
+                log_d("set custom background image from spiffs");
                 fclose( file );
                 lv_img_set_src( img_bin, filename );
                 lv_obj_align( img_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
                 lv_obj_set_hidden( img_bin, false );
             }
             else {
-                log_i("not custom background image found on spiffs, set to black");
+                log_d("not custom background image found on spiffs, set to black");
                 lv_obj_set_hidden( img_bin, true );
             }
             break;

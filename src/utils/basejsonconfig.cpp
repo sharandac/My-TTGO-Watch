@@ -97,10 +97,10 @@ bool BaseJsonConfig::load( uint32_t size ) {
         * check if create json structure was successfull
         */
         if ( error || size == 0 ) {
-            log_e("json config deserializeJson() failed: %s, file: %s", error.c_str(), fileName );
+            log_d("json config deserializeJson() failed: %s, file: %s", error.c_str(), fileName );
         }
         else {
-            log_i("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
+            log_d("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
             result = onLoad(doc);
         }
         doc.clear();
@@ -110,7 +110,7 @@ bool BaseJsonConfig::load( uint32_t size ) {
      * check if read from json is failed
      */
     if ( !result ) {
-        log_i("reading json failed, call defaults, file: %s", fileName );
+        log_w("reading json failed, call defaults, file: %s", fileName );
         result = onDefault();
     }
     return result;
@@ -150,7 +150,7 @@ bool BaseJsonConfig::save( uint32_t size ) {
             result = false;
         }
         else {
-            log_i("json config serializeJson() success: %s", fileName );
+            log_d("json config serializeJson() success: %s", fileName );
         }
         
         doc.clear();
