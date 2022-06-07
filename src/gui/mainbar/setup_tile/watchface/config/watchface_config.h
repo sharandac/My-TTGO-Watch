@@ -52,6 +52,7 @@
         watchface_config_t();
         bool watchface_enable = false;              /** @brief enable the watchface on wakeup */
         bool watchface_antialias = true;            /** @brief setup antialias */
+        bool watchface_show_notifications = true;   /** @brief allow watchface to show notifications */
         String watchface_theme_url = "";            /** @brief theme url */
 
         protected:

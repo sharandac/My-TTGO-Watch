@@ -275,8 +275,7 @@ static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):       
             if ( msg_chain_get_entrys( bluetooth_msg_chain ) > 0 ) {
                 bluetooth_message_show_msg( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 );
-                mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
-                statusbar_hide( true );
+                mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
             }
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
@@ -316,7 +315,7 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
                 bluetooth_current_msg--;
                 app_hide_indicator( messages_app );
                 messages_widget = widget_remove( messages_widget );
-                mainbar_jump_to_maintile( LV_ANIM_OFF );
+                mainbar_jump_back();
             }
             else {
                 if ( bluetooth_current_msg == ( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 ) ) {
@@ -361,7 +360,7 @@ static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event ) 
                     widget_set_indicator( messages_widget, ICON_INDICATOR_N );
                     app_set_indicator( messages_app, ICON_INDICATOR_N );
             }
-            mainbar_jump_to_maintile( LV_ANIM_OFF );
+            mainbar_jump_back();
             break;
     }
 }
@@ -423,9 +422,10 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      */
     int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     if ( blectl_get_show_notification() ) {
+        log_i("force message view");
         bluetooth_message_show_msg( entry );
         bluetooth_message_play_audio( entry );
-        mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF );
+        mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
     } else {
         bluetooth_message_play_audio( entry );
     }
@@ -521,10 +521,6 @@ void bluetooth_message_show_msg( int32_t entry ) {
             snprintf( msg_num, sizeof( msg_num ), "%d/%d", entry + 1, msg_chain_get_entrys( bluetooth_msg_chain ) );
             lv_label_set_text( bluetooth_msg_entrys_label, msg_num );
             lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
-            /*
-             * hide statusbar
-             */
-            statusbar_hide( true );
             /*
              * set notify source icon if msg src known
              */

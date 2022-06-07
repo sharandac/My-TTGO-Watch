@@ -64,8 +64,7 @@ uint32_t osmand_app_get_app_main_tile_num( void ) {
 
 static void enter_osmand_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( osmand_app_main_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( true );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( osmand_app_main_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }

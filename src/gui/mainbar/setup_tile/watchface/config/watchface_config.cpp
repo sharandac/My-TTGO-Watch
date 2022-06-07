@@ -27,12 +27,14 @@ bool watchface_config_t::onSave(JsonDocument& doc) {
     doc["watchface_enable"] = watchface_enable;
     doc["watchface_antialias"] = watchface_antialias;
     doc["watchface_theme_url"] = watchface_theme_url;
+    doc["watchface_show_notifications"] = watchface_show_notifications;
     return true;
 }
 
 bool watchface_config_t::onLoad(JsonDocument& doc) {
     watchface_enable = doc["watchface_enable"] | false;
     watchface_antialias = doc["watchface_antialias"] | true;
+    watchface_show_notifications = doc["watchface_show_notifications"] | true;
     /**
      * force use own theme url on alpha/beta tests
      */
@@ -44,6 +46,7 @@ bool watchface_config_t::onLoad(JsonDocument& doc) {
 bool watchface_config_t::onDefault( void ) {
     watchface_enable = false;
     watchface_antialias = true;
+    watchface_show_notifications = true;
     watchface_theme_url = WATCHFACE_THEME_URL;
     return true;
 }

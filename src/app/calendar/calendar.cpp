@@ -65,8 +65,7 @@ void calendar_app_setup( void ) {
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-               mainbar_jump_to_tilenumber( calendar_overview_get_tile(), LV_ANIM_OFF );
-               statusbar_hide( true );
+               mainbar_jump_to_tilenumber( calendar_overview_get_tile(), LV_ANIM_OFF, true );
                break;
     }
 }

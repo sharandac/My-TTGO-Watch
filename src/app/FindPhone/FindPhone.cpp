@@ -84,8 +84,7 @@ uint32_t FindPhone_get_app_setup_tile_num( void ) {
 static void enter_FindPhone_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       app_hide_indicator( FindPhone );
-                                        mainbar_jump_to_tilenumber( FindPhone_main_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( true );
+                                        mainbar_jump_to_tilenumber( FindPhone_main_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }

@@ -235,8 +235,7 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
         log_i("FindPhone screen active");
         powermgm_get_event(POWERMGM_STANDBY);          
         powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
-        mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF);
-        statusbar_hide(true);
+        mainbar_jump_to_tilenumber(bluetooth_FindPhone_tile_num, LV_ANIM_OFF, true );
         lv_label_set_text(bluetooth_FindPhone_label, "Looking for me?");
         lv_obj_invalidate(lv_scr_act());
         _FindPhone_WatchFind_task = lv_task_create( FindPhone_WatchFind_task, 1500, LV_TASK_PRIO_MID, NULL );           

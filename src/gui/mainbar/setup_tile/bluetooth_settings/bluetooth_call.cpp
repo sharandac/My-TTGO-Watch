@@ -115,12 +115,11 @@ static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
     static bool standby = false;
-
-    log_i("incoming call, json");
     /*
      * check if type and cmd available
      */
     if ( doc.containsKey("t") && doc.containsKey("cmd") ) {
+        log_i("incoming call, json");
         /*
          * check for an incoming call
          */
@@ -128,7 +127,6 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
             /*
              * hide statusbar and save current powerstate for later use after a call
              */
-            statusbar_hide( true );
             if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
                 standby = true;
             }
@@ -139,7 +137,7 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
              * wake up and jup to call tile
              */
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            mainbar_jump_to_tilenumber( bluetooth_call_tile_num, LV_ANIM_OFF );
+            mainbar_jump_to_tilenumber( bluetooth_call_tile_num, LV_ANIM_OFF, true );
             /*
              * set caller information
              */

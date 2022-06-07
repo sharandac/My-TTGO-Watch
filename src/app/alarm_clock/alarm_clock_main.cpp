@@ -163,8 +163,7 @@ rtcctl_alarm_t *alarm_clock_main_get_data_to_store(){
 static void enter_alarm_clock_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            statusbar_hide( true );
-            mainbar_jump_to_tilenumber( alarm_clock_get_app_setup_tile_num(), LV_ANIM_ON );
+            mainbar_jump_to_tilenumber( alarm_clock_get_app_setup_tile_num(), LV_ANIM_ON, true );
             break;
     }
 }

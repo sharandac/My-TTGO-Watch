@@ -793,7 +793,7 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
              */
             if ( watchface_enable_after_wakeup ) {
                 watchface_app_tile_update();
-                mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF );
+                mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF, true );
                 lv_obj_invalidate( lv_scr_act() );
                 lv_refr_now( NULL );
                 /**
@@ -815,11 +815,7 @@ void watchface_avtivate_cb( void ) {
      * save block show messages state
      */
     watchface_tile_block_show_messages = blectl_get_show_notification();
-    blectl_set_show_notification( false );
-    /**
-     * hide statusbar
-     */
-    statusbar_hide( true );
+    blectl_set_show_notification( blectl_get_show_notification() ? watchface_setup_get_allow_notifications() : false );
     /**
      * set full cpu clock
      */

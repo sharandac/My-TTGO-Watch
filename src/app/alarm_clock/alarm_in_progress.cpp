@@ -132,8 +132,7 @@ static void alarm_task_function(lv_task_t * task){
 }
 
 void alarm_in_progress_start_alarm(){
-    mainbar_jump_to_tilenumber( tile_num, LV_ANIM_OFF );
-    statusbar_hide( true );
+    mainbar_jump_to_tilenumber( tile_num, LV_ANIM_OFF, true );
 
     lv_label_set_text(label, alarm_clock_get_clock_label(false));
     lv_obj_align( label, tile, LV_ALIGN_CENTER, 0, 0 );

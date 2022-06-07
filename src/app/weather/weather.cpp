@@ -117,8 +117,7 @@ bool weather_wifictl_event_cb( EventBits_t event, void *arg ) {
 
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( true );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }
@@ -132,13 +131,11 @@ void weather_remove_widget( void ) {
 }
 
 void weather_jump_to_forecast( void ) {
-    statusbar_hide( true );
-    mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_ON );
+    mainbar_jump_to_tilenumber( weather_app_tile_num, LV_ANIM_ON, true );
 }
 
 void weather_jump_to_setup( void ) {
-    statusbar_hide( true );
-    mainbar_jump_to_tilenumber( weather_app_setup_tile_num, LV_ANIM_ON );    
+    mainbar_jump_to_tilenumber( weather_app_setup_tile_num, LV_ANIM_ON, true );    
 }
 
 void weather_sync_request( void ) {

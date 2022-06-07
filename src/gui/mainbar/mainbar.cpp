@@ -503,6 +503,11 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
             current_tile = i;
         }
     }
+
+    if( current_tile == tile_number ) {
+        log_e("the destination tile is the current tile");
+        return;
+    }
     /**
      * jump
      */
@@ -510,9 +515,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
         /**
          * store current tile and statusbar state
          */
-        if ( tile_number != current_tile ) {
-            mainbar_add_current_tile_to_history( anim );
-        }
+        mainbar_add_current_tile_to_history( anim );
         statusbar_hide( statusbar );
         /**
          * jump into tile
@@ -541,58 +544,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
 }
 
 void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim ) {
-    lv_coord_t x,y;
-    uint32_t current_tile = 0;
-    /*
-     * check if mainbar already initialized
-     */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-    /**
-     * get the current tile number
-     */
-    lv_tileview_get_tile_act( mainbar, &x, &y );
-    for ( int i = 0 ; i < tile_entrys; i++ ) {
-        if ( tile_pos_table[ i ].x == x && tile_pos_table[ i ].y == y ) {
-            current_tile = i;
-        }
-    }
-    /**
-     * jump
-     */
-    if ( tile_number < tile_entrys ) {
-        /**
-         * store current tile and statusbar state
-         */
-        if ( tile_number != current_tile ) {
-            mainbar_add_current_tile_to_history( anim );
-        }
-        /**
-         * jump into tile
-         */
-        MAINBAR_INFO_LOG("jump to tile %d from tile %d", tile_number, current_tile );
-        lv_tileview_set_tile_act( mainbar, tile_pos_table[ tile_number ].x, tile_pos_table[ tile_number ].y, anim );
-        gui_force_redraw( true );       
-        /**
-         * call hibernate callback for the current tile if exist
-         */
-        if ( tile[ current_tile ].hibernate_cb != NULL ) {
-            MAINBAR_INFO_LOG("call hibernate cb for tile: %d", current_tile );
-            tile[ current_tile ].hibernate_cb();
-        }
-        /**
-         * call activate callback for the new tile if exist
-         */
-        if ( tile[ tile_number ].activate_cb != NULL ) { 
-            MAINBAR_INFO_LOG("call activate cb for tile: %d", tile_number );
-            tile[ tile_number ].activate_cb();
-        }
-    }
-    else {
-        log_e( "tile number %d do not exist", tile_number );
-    }
+    mainbar_jump_to_tilenumber( tile_number, anim, statusbar_get_hidden_state() );
 }
 
 lv_obj_t * mainbar_obj_create(lv_obj_t *parent) {

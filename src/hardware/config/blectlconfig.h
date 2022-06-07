@@ -24,7 +24,7 @@
 
     #include "utils/basejsonconfig.h"
 
-    #define CUSTOM_AUDIO_ENTRYS            20
+    #define CUSTOM_AUDIO_ENTRYS            5
     #define BLECTL_JSON_COFIG_FILE         "/blectl.json"   /** @brief defines json config file name */
 
     /**
@@ -46,7 +46,7 @@
         bool enable_on_standby = false;                         /** @brief enable on standby on/off */
         bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
         bool show_notification = true;                          /** @brief enable show notifications */
-        int32_t txpower = 1;                                    /** @brief tx power, valide values are from 0 to 4 */
+        int txpower = 1;                                        /** @brief tx power, valide values are from 0 to 4 */
         blectl_custom_audio* custom_audio_notifications = NULL; /** @brief custom audio notifications config pointer */
 
         protected:
@@ -54,7 +54,7 @@
         virtual bool onLoad(JsonDocument& document);
         virtual bool onSave(JsonDocument& document);
         virtual bool onDefault( void );
-        virtual size_t getJsonBufferSize() { return 4000; }
+        virtual size_t getJsonBufferSize() { return 12000; }
     } ;
 
 #endif // _BLECTL_CONFIG_H

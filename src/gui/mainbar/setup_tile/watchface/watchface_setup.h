@@ -35,5 +35,6 @@
     void watchface_setup_tile_setup( uint32_t tile_num );
     void watchface_setup_set_info_label( const char *text );
     String watchface_setup_get_theme_url( void );
+    bool watchface_setup_get_allow_notifications( void );
 
 #endif // _WATCHFACE_APP_MAIN_H

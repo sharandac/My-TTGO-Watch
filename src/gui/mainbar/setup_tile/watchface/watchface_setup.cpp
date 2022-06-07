@@ -87,12 +87,17 @@ void watchface_setup_tile_setup( uint32_t tile_num ) {
     lv_obj_t *watchface_onoff_cont = wf_add_labeled_switch( watchface_setup_tile, "enable watchface", &watchface_onoff, watchface_config.watchface_enable, watchface_setup_enable_event_cb, SETUP_STYLE );
     lv_obj_align( watchface_onoff_cont, watchface_setup_header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
     /**
+     * switch container
+     */
+    lv_obj_t *watchface_onoff_show_notifications_cont = wf_add_labeled_switch( watchface_setup_tile, "enable notifications", &watchface_onoff, watchface_config.watchface_show_notifications, watchface_setup_enable_event_cb, SETUP_STYLE );
+    lv_obj_align( watchface_onoff_show_notifications_cont, watchface_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_PADDING );
+    /**
      * btn container
      */
     lv_obj_t *watchface_btn_cont = lv_obj_create( watchface_setup_tile, NULL );
     lv_obj_set_size( watchface_btn_cont, lv_disp_get_hor_res( NULL ) - THEME_ICON_PADDING * 2, 90 );
     lv_obj_add_style( watchface_btn_cont, LV_OBJ_PART_MAIN, SETUP_STYLE );
-    lv_obj_align( watchface_btn_cont, watchface_onoff_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );
+    lv_obj_align( watchface_btn_cont, watchface_onoff_show_notifications_cont, LV_ALIGN_OUT_BOTTOM_LEFT, 0, THEME_ICON_PADDING );
 
     lv_obj_t *watchface_reload_and_test_btn = lv_btn_create( watchface_btn_cont, NULL );
     lv_obj_set_size( watchface_reload_and_test_btn, lv_disp_get_hor_res( NULL ) / 2 - THEME_ICON_PADDING * 2, 40 );
@@ -184,4 +189,8 @@ static void watchface_setup_enable_event_cb( lv_obj_t *obj, lv_event_t event ) {
                                             watchface_config.save();
                                             break;
     }
+}
+
+bool watchface_setup_get_allow_notifications( void ) {
+    return( watchface_config.watchface_show_notifications );
 }

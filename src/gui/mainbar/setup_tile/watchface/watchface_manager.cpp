@@ -86,16 +86,14 @@ uint32_t watchface_manager_get_setup_tile_num( void ) {
 
 static void enter_watchface_manager_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( watchface_manager_app_main_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( true );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( watchface_manager_app_main_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }
 
 static void enter_watchface_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( watchface_setup_tile_num, LV_ANIM_OFF );
-                                        statusbar_hide( false );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( watchface_setup_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }

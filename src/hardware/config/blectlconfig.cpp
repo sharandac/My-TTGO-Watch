@@ -34,13 +34,13 @@ bool blectl_config_t::onSave(JsonDocument& doc) {
     doc["advertising"] = advertising;
     doc["enable_on_standby"] = enable_on_standby;
     doc["disable_only_disconnected"] = disable_only_disconnected;
-    doc["tx_power"] = txpower;
     doc["show_notification"] = show_notification;
+    doc["tx_power"] = txpower;
+
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
         doc["custom_audio_notifications"][ i ]["text"] = custom_audio_notifications[ i ].text;
         doc["custom_audio_notifications"][ i ]["value"] = custom_audio_notifications[ i ].value;
     }
-
     return true;
 }
 
