@@ -48,6 +48,7 @@ lv_obj_t *stopwatch_app_main_stopwatchlabel = NULL;
 lv_obj_t *stopwatch_app_main_start_btn = NULL;
 lv_obj_t *stopwatch_app_main_stop_btn = NULL;
 lv_obj_t *stopwatch_app_main_reset_btn = NULL;
+lv_obj_t * stopwatch_app_main_exit_btn = NULL;
 
 lv_style_t stopwatch_app_main_stopwatchstyle;
 
@@ -55,6 +56,7 @@ lv_task_t * _stopwatch_app_task;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 
+static void stopwatch_activate_event_cb( void );
 bool stopwatch_button_event_cb( EventBits_t event, void *arg );
 bool stopwatch_style_change_event_cb( EventBits_t event, void *arg );
 static void exit_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -92,11 +94,19 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
     stopwatch_app_main_reset_btn = wf_add_eject_button( stopwatch_app_main_tile, reset_stopwatch_app_main_event_cb );
     lv_obj_align(stopwatch_app_main_reset_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( stopwatch_app_main_tile, exit_stopwatch_app_main_event_cb );
-    lv_obj_align(exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
+    stopwatch_app_main_exit_btn = wf_add_exit_button( stopwatch_app_main_tile, exit_stopwatch_app_main_event_cb );
+    lv_obj_align(stopwatch_app_main_exit_btn, stopwatch_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     styles_register_cb( STYLE_CHANGE, stopwatch_style_change_event_cb, "stopwatch style change" );
     mainbar_add_tile_button_cb( tile_num, stopwatch_button_event_cb );
+    mainbar_add_tile_activate_cb( tile_num, stopwatch_activate_event_cb );
+}
+
+static void stopwatch_activate_event_cb( void ) {
+    wf_image_button_fade_in(stopwatch_app_main_exit_btn, 300, 0 );
+    wf_image_button_fade_in(stopwatch_app_main_start_btn, 300, 100 );
+    wf_image_button_fade_in(stopwatch_app_main_stop_btn, 300, 100 );
+    wf_image_button_fade_in(stopwatch_app_main_reset_btn, 300, 200 );
 }
 
 bool stopwatch_button_event_cb( EventBits_t event, void *arg ) {

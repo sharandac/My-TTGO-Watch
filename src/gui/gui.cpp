@@ -27,6 +27,7 @@
 #include "quickbar.h"
 #include "screenshot.h"
 #include "widget_styles.h"
+#include "widget_factory.h"
 #include "keyboard.h"
 #include "gui/lv_fs/lv_fs_spiffs.h"
 #include "mainbar/mainbar.h"
@@ -199,10 +200,6 @@ void gui_setup( void ) {
     lv_obj_align( watch2021_mask_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
     lv_img_set_src( watch2021_mask_bin, &rounddisplaymask_240px );
     lv_obj_align( watch2021_mask_bin, NULL, LV_ALIGN_CENTER, 0, 0 );
-#endif
-
-#ifdef M5PAPER
-    widget_style_theme_set( 0 );
 #endif
 }
 

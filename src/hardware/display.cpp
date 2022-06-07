@@ -316,7 +316,7 @@ uint32_t display_get_timeout( void ) {
 
 void display_set_timeout( uint32_t timeout ) {
     display_config.timeout = timeout;
-    display_send_event_cb( DISPLAYCTL_TIMEOUT, (void *)timeout );
+    display_send_event_cb( DISPLAYCTL_TIMEOUT, (void *)&display_config.timeout );
 }
 
 uint32_t display_get_brightness( void ) {
@@ -333,7 +333,7 @@ void display_set_brightness( uint32_t brightness ) {
         M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
         #endif
     #endif
-    display_send_event_cb( DISPLAYCTL_BRIGHTNESS, (void *)brightness );
+    display_send_event_cb( DISPLAYCTL_BRIGHTNESS, (void *)&display_config.brightness );
 }
 
 uint32_t display_get_rotation( void ) {

@@ -161,6 +161,42 @@ lv_obj_t * wf_add_labeled_list(lv_obj_t *parent, char const * text, lv_obj_t ** 
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style=NULL);
+/**
+ * @brief   Creates and adds an image button to a container and used overleyed images
+ *
+ * @param   parent   pointer to a parent container
+ * @param   image    reference to image description
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style);
+
+/**
+ * @brief fade a img button in from 0 to full size
+ * 
+ * @param button    button
+ * @param duration  duration time in ms
+ * @param duration  delayed start time in ms
+ */
+void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t  );
+
+/**
+ * @brief fade a img button in from full size to 0
+ * 
+ * @param button    button
+ * @param duration  duration time in ms
+ * @param duration  delayed start time in ms
+ */
+void wf_image_button_fade_out( lv_obj_t *button, uint32_t duration, uint32_t  );
+
+/**
+ * @brief enabled/disabled image button anim
+ * 
+ * @param enable    true means enabled, false disabled
+ */
+void wf_enable_anim( bool enable );
 
 /**
  * @brief   Creates and adds an exit button to a container

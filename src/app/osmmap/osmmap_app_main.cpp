@@ -203,16 +203,16 @@ void osmmap_app_main_setup( uint32_t tile_num ) {
     lv_label_set_text( osmmap_lonlat_label, "0 / 0" );
 
     osmmap_layers_btn = wf_add_menu_button( osmmap_cont, layers_btn_app_main_event_cb, &osmmap_app_btn_style );
-    lv_obj_align( osmmap_layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, 10, 10 );
+    lv_obj_align( osmmap_layers_btn, osmmap_cont, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
 
     osmmap_exit_btn = wf_add_exit_button( osmmap_cont, exit_osmmap_app_main_event_cb, &osmmap_app_btn_style );
-    lv_obj_align( osmmap_exit_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10 );
+    lv_obj_align( osmmap_exit_btn, osmmap_cont, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     osmmap_zoom_in_btl = wf_add_zoom_in_button( osmmap_cont, zoom_in_osmmap_app_main_event_cb, &osmmap_app_btn_style );
-    lv_obj_align( osmmap_zoom_in_btl, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -10, 10 );
+    lv_obj_align( osmmap_zoom_in_btl, osmmap_cont, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
     osmmap_zoom_out_btl = wf_add_zoom_out_button( osmmap_cont, zoom_out_osmmap_app_main_event_cb, &osmmap_app_btn_style );
-    lv_obj_align( osmmap_zoom_out_btl, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -10, -10 );
+    lv_obj_align( osmmap_zoom_out_btl, osmmap_cont, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
     osmmap_north_btn = lv_btn_create( osmmap_cont, NULL );
     lv_obj_set_width( osmmap_north_btn, 80 );
@@ -894,6 +894,11 @@ void osmmap_activate_cb( void ) {
     osmmap_update_request();
     lv_img_cache_invalidate_src( osmmap_app_tile_img );
     powermgm_set_perf_mode();
+
+    wf_image_button_fade_in( osmmap_exit_btn, 300, 0 );
+    wf_image_button_fade_in( osmmap_zoom_in_btl, 300, 100 );
+    wf_image_button_fade_in( osmmap_zoom_out_btl, 300, 200 );
+    wf_image_button_fade_in( osmmap_layers_btn, 300, 300 );
 }
 
 void osmmap_hibernate_cb( void ) {

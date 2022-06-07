@@ -265,9 +265,10 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
 
     lv_obj_t *wps_btn = lv_btn_create( wifi_setup_tile, NULL);
     lv_obj_set_event_cb( wps_btn, wps_start_event_handler );
-    lv_obj_align( wps_btn, wifi_ftpserver_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_add_style( wps_btn, LV_BTN_PART_MAIN, ws_get_button_style() );
     lv_obj_t *wps_btn_label = lv_label_create( wps_btn, NULL );
     lv_label_set_text( wps_btn_label, "start WPS");
+    lv_obj_align( wps_btn, wifi_ftpserver_onoff_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
     #ifndef ENABLE_WEBSERVER
         lv_obj_set_hidden( wifi_webserver_onoff_cont, true );

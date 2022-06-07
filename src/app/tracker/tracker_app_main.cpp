@@ -69,6 +69,9 @@ tracker_config_t tracker_config;
 /**
  * local lv obj 
  */
+lv_obj_t *tracker_exit_btn = NULL;
+lv_obj_t *tracker_trash_btn = NULL;
+lv_obj_t *tracker_location_icon = NULL;
 lv_obj_t *tracker_progress_arc = NULL;
 lv_obj_t *tracker_info_label = NULL;
 lv_obj_t *tracker_file_info_label = NULL;
@@ -103,13 +106,13 @@ void tracker_app_main_setup( uint32_t tile ) {
     /**
      * add exit, menu and setup button to the main app tile
      */
-    lv_obj_t *tracker_exit_btn = wf_add_exit_button( mainbar_get_tile_obj( tile ) );
+    tracker_exit_btn = wf_add_exit_button( mainbar_get_tile_obj( tile ) );
     lv_obj_align( tracker_exit_btn, mainbar_get_tile_obj( tile ), LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
-    lv_obj_t *tracker_trash_btn = wf_add_trash_button( mainbar_get_tile_obj( tile ), tracker_app_main_enter_trash_cb );
+    tracker_trash_btn = wf_add_trash_button( mainbar_get_tile_obj( tile ), tracker_app_main_enter_trash_cb );
     lv_obj_align( tracker_trash_btn, mainbar_get_tile_obj( tile ), LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
     
-    lv_obj_t *tracker_location_icon = wf_add_location_button( mainbar_get_tile_obj( tile ), tracker_app_main_enter_location_cb );
+    tracker_location_icon = wf_add_location_button( mainbar_get_tile_obj( tile ), tracker_app_main_enter_location_cb );
     lv_obj_align( tracker_location_icon, mainbar_get_tile_obj( tile ), LV_ALIGN_CENTER, 0, 0 );
     lv_obj_set_hidden( tracker_location_icon, false );
 
@@ -145,6 +148,10 @@ void tracker_app_main_activate_cb( void ) {
     display_set_block_return_maintile( true );
 
     tracker_config.load();
+
+    wf_image_button_fade_in( tracker_exit_btn, 300, 0 );
+    wf_image_button_fade_in( tracker_trash_btn, 300, 100 );
+    wf_image_button_fade_in( tracker_location_icon, 300, 200 );
 }
 
 /**

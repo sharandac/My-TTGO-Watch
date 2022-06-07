@@ -226,9 +226,11 @@ void powermgm_loop( void ) {
                  * check wakeup source
                  */
                 switch( esp_sleep_get_wakeup_cause() ) {
-                    case ESP_SLEEP_WAKEUP_TIMER:    
+                    case ESP_SLEEP_WAKEUP_TIMER:
                         log_i("timer wakeup");
                         powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                        esp_sleep_disable_wakeup_source( ESP_SLEEP_WAKEUP_TIMER );
+                        log_i("disable wakeup timer");
                         break;
                     default:
                         break;

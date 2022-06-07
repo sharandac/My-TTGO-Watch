@@ -230,7 +230,7 @@ void statusbar_setup( void )
     lv_style_set_image_recolor_opa( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_OPA_100 );
     lv_style_set_image_recolor( &style, LV_BTN_STATE_CHECKED_PRESSED, LV_COLOR_GREEN );
 
-    statusbar_wifi = wf_add_image_button( statusbar, wifi_64px, statusbar_wifi_event_cb, &style );
+    statusbar_wifi = wf_add_image_button_old( statusbar, wifi_64px, statusbar_wifi_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_wifi, true );
     lv_obj_align( statusbar_wifi, statusbar, LV_ALIGN_IN_TOP_MID, 0, STATUSBAR_HEIGHT );
     lv_imgbtn_set_state( statusbar_wifi, LV_BTN_STATE_CHECKED_PRESSED );
@@ -249,12 +249,12 @@ void statusbar_setup( void )
     lv_label_set_text(statusbar_wifiiplabel, "");
     lv_obj_align(statusbar_wifiiplabel, statusbar_wifilabel, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
-    statusbar_bluetooth = wf_add_image_button( statusbar, bluetooth_64px, statusbar_bluetooth_event_cb, &style );
+    statusbar_bluetooth = wf_add_image_button_old( statusbar, bluetooth_64px, statusbar_bluetooth_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_bluetooth, true );
     lv_obj_align( statusbar_bluetooth, statusbar, LV_ALIGN_IN_TOP_RIGHT, -8, STATUSBAR_HEIGHT );
     lv_imgbtn_set_state( statusbar_bluetooth, LV_BTN_STATE_CHECKED_PRESSED );
 
-    statusbar_gps = wf_add_image_button( statusbar, gps_64px, statusbar_gps_event_cb, &style );
+    statusbar_gps = wf_add_image_button_old( statusbar, gps_64px, statusbar_gps_event_cb, &style );
     lv_imgbtn_set_checkable (statusbar_gps, true );
     lv_obj_align( statusbar_gps, statusbar, LV_ALIGN_IN_TOP_LEFT, 8, STATUSBAR_HEIGHT );
     lv_imgbtn_set_state( statusbar_gps, LV_BTN_STATE_CHECKED_PRESSED );

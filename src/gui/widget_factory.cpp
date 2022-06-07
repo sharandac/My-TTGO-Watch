@@ -163,6 +163,8 @@
 #define CLICKABLE_PADDING 6
 #define CONTAINER_INNER_PADDING CLICKABLE_PADDING * 2
 
+static bool wf_anim_enabled = true;
+
 static void exit_jump_back_event_cb( lv_obj_t * obj, lv_event_t event );
 
 lv_obj_t * wf_add_container(lv_obj_t *parent_tile, lv_layout_t layout, lv_fit_t hor_fit, lv_fit_t ver_fit, bool add_padding, lv_style_t *style ){
@@ -390,10 +392,45 @@ lv_obj_t * wf_add_button(lv_obj_t *parent, char const * label, int width, int he
     }
     return button;
 }
-/**
- * 
- */
-lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
+
+void wf_enable_anim( bool enable ) {
+    wf_anim_enabled = enable;
+}
+
+void wf_image_button_fade_out( lv_obj_t *button, uint32_t duration, uint32_t delay ) {
+    if( !wf_anim_enabled )
+        return;
+
+    lv_anim_t wf_btn_icon_anim;
+
+    lv_anim_init( &wf_btn_icon_anim );
+	lv_anim_set_exec_cb( &wf_btn_icon_anim, (lv_anim_exec_xcb_t)lv_img_set_zoom );
+	lv_anim_set_time( &wf_btn_icon_anim, duration );
+
+    lv_anim_set_var( &wf_btn_icon_anim, lv_obj_get_child( button, NULL ) );
+    lv_anim_set_values( &wf_btn_icon_anim, 256, 1 );
+    lv_anim_set_delay( &wf_btn_icon_anim, delay );
+    lv_anim_start( &wf_btn_icon_anim );
+}
+
+void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t delay ) {
+    if( !wf_anim_enabled )
+        return;
+
+    lv_anim_t wf_btn_icon_anim;
+
+    lv_anim_init( &wf_btn_icon_anim );
+	lv_anim_set_exec_cb( &wf_btn_icon_anim, (lv_anim_exec_xcb_t)lv_img_set_zoom );
+	lv_anim_set_time( &wf_btn_icon_anim, duration );
+
+    lv_anim_set_var( &wf_btn_icon_anim, lv_obj_get_child( button, NULL ) );
+    lv_anim_set_values( &wf_btn_icon_anim, 1, 256 );
+    lv_anim_set_delay( &wf_btn_icon_anim, delay );
+
+    lv_anim_start( &wf_btn_icon_anim );
+}
+
+lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
     lv_obj_t * button = lv_imgbtn_create( parent, NULL );
     lv_imgbtn_set_src( button, LV_BTN_STATE_RELEASED, &image );
     lv_imgbtn_set_src( button, LV_BTN_STATE_PRESSED, &image );
@@ -406,6 +443,33 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
     lv_obj_add_style( button, LV_OBJ_PART_MAIN, style );
 //    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, style );
     lv_obj_set_ext_click_area(button, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING);
+
+    if (event_cb != NULL) {
+        lv_obj_set_event_cb( button, event_cb );
+    }
+    return button;
+}
+    
+/**
+ * 
+ */
+lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
+    lv_obj_t *button = lv_btn_create( parent, NULL );
+    lv_obj_set_width( button, image.header.w + THEME_PADDING * 2 );
+    lv_obj_set_height( button, image.header.h + THEME_PADDING * 2 );
+    lv_obj_add_protect( button, LV_PROTECT_CLICK_FOCUS );
+    lv_obj_add_style( button, LV_BTN_PART_MAIN, ws_get_img_button_style() );
+
+    lv_obj_t *button_img = lv_img_create( button, NULL );
+    lv_img_set_src( button_img, &image );
+    lv_obj_align( button_img, button, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_set_click( button_img, false );
+
+    if (!style) {
+        style = ws_get_img_button_style();
+    }
+
+    lv_obj_add_style( button_img, LV_OBJ_PART_MAIN, style );
 
     if (event_cb != NULL) {
         lv_obj_set_event_cb( button, event_cb );

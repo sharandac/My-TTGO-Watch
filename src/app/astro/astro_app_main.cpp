@@ -50,6 +50,7 @@ lv_obj_t *astro_app_main_astrolabel = NULL;
 lv_obj_t *astro_app_main_start_btn = NULL;
 lv_obj_t *astro_app_main_stop_btn = NULL;
 lv_obj_t *astro_app_main_reset_btn = NULL;
+lv_obj_t *astro_app_main_exit_btn = NULL;
 
 lv_style_t astro_app_main_astrostyle;
 
@@ -58,8 +59,9 @@ lv_task_t * _astro_app_task = NULL;
 LV_FONT_DECLARE(Ubuntu_72px);
 LV_FONT_DECLARE(Ubuntu_32px);
 
-bool astro_button_event_cb( EventBits_t event, void *arg );
-bool astro_style_change_event_cb( EventBits_t event, void *arg );
+static void astro_main_activate_cb( void );
+static bool astro_button_event_cb( EventBits_t event, void *arg );
+static bool astro_style_change_event_cb( EventBits_t event, void *arg );
 static void exit_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void start_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
 static void stop_astro_app_main_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -100,14 +102,22 @@ void astro_app_main_setup( uint32_t tile_num ) {
     astro_app_main_reset_btn = wf_add_eject_button( astro_app_main_tile, reset_astro_app_main_event_cb );
     lv_obj_align(astro_app_main_reset_btn, astro_app_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING );
 
-    lv_obj_t * exit_btn = wf_add_exit_button( astro_app_main_tile, exit_astro_app_main_event_cb );
-    lv_obj_align(exit_btn, astro_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
+    astro_app_main_exit_btn = wf_add_exit_button( astro_app_main_tile, exit_astro_app_main_event_cb );
+    lv_obj_align( astro_app_main_exit_btn, astro_app_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING );
 
     styles_register_cb( STYLE_CHANGE, astro_style_change_event_cb, "astro style change" );
     mainbar_add_tile_button_cb( tile_num, astro_button_event_cb );
+    mainbar_add_tile_activate_cb( tile_num, astro_main_activate_cb );
 }
 
-bool astro_button_event_cb( EventBits_t event, void *arg ) {
+static void astro_main_activate_cb( void ) {
+    wf_image_button_fade_in( astro_app_main_exit_btn, 500, 0 );
+    wf_image_button_fade_in( astro_app_main_start_btn, 500, 100 );
+    wf_image_button_fade_in( astro_app_main_stop_btn, 500, 100 );
+    wf_image_button_fade_in( astro_app_main_reset_btn, 500, 200 );
+}
+
+static bool astro_button_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BUTTON_EXIT:   mainbar_jump_back();
                             break;
@@ -115,7 +125,7 @@ bool astro_button_event_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-bool astro_style_change_event_cb( EventBits_t event, void *arg ) {
+static bool astro_style_change_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case STYLE_CHANGE:      lv_style_copy( &astro_app_main_astrostyle, APP_STYLE );
                                 lv_style_set_text_font( &astro_app_main_astrostyle, LV_STATE_DEFAULT, &Ubuntu_32px);

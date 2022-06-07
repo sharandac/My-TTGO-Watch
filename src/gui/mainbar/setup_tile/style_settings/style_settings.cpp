@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include "style_settings.h"
+#include "config/styleconfig.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
@@ -36,6 +37,8 @@ lv_obj_t *style_settings_tile=NULL;
 lv_obj_t *theme_list=NULL;
 uint32_t style_tile_num;
 
+style_config_t style_config;
+
 LV_IMG_DECLARE(style_64px);
 
 static void select_style_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -44,6 +47,8 @@ static void exit_style_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void style_settings_tile_setup( void ) {
     // get an app tile and copy mainstyle
+    style_config.load();
+
     style_tile_num = mainbar_add_setup_tile( 1, 1, "style settings" );
     style_settings_tile = mainbar_get_tile_obj( style_tile_num );
 
@@ -55,14 +60,12 @@ void style_settings_tile_setup( void ) {
     lv_obj_t *header = wf_add_settings_header( style_settings_tile, "theme settings", exit_style_setup_event_cb );
     lv_obj_align( header, style_settings_tile, LV_ALIGN_IN_TOP_LEFT, 10, STATUSBAR_HEIGHT + 10 );
 
-    lv_obj_t *theme_cont = wf_add_labeled_list( style_settings_tile, "theme", &theme_list, "E-Ink\nE-Ink Neg\nColor", select_style_event_cb, SETUP_STYLE );
+    lv_obj_t *theme_cont = wf_add_labeled_list( style_settings_tile, "theme", &theme_list, "E-Ink\nE-Ink neg\nlight\ndark", select_style_event_cb, SETUP_STYLE );
     lv_obj_align( theme_cont, header, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
-#ifdef M5PAPER
-    lv_dropdown_set_selected( theme_list, 0 );
-#else
-    lv_dropdown_set_selected( theme_list, 2 );
-#endif
+    lv_dropdown_set_selected( theme_list, style_config.theme );
+    widget_style_theme_set( style_config.theme );
+    wf_enable_anim( style_config.anim );
 
     lv_obj_t *hint_cont = wf_add_label( style_settings_tile, "Not all apps support\ntheme change on the fly.\nAt this time it is only\nfor testing.", SETUP_STYLE );
     lv_obj_align( hint_cont, theme_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
@@ -72,8 +75,10 @@ void style_settings_tile_setup( void ) {
 static void select_style_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_VALUE_CHANGED ):     widget_style_theme_set( lv_dropdown_get_selected( obj ) );
+                                            wf_enable_anim( style_config.anim );
                                             lv_obj_invalidate( lv_scr_act() );
                                             lv_refr_now( NULL );
+                                            style_config.theme = lv_dropdown_get_selected( obj );
                                             break;
     }
 }
@@ -87,7 +92,8 @@ static void enter_style_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 static void exit_style_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
+        case( LV_EVENT_CLICKED ):       style_config.save();
+                                        mainbar_jump_back();
                                         break;
     }
 }
