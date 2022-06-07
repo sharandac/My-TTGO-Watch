@@ -817,6 +817,8 @@ float pmu_get_battery_discharge_current( void ) {
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
             current = M5.Axp.GetBatCurrent();
+            if( current < 0.0f )
+                current = current * -1.0f;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattDischargeCurrent();

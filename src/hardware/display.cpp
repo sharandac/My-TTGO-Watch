@@ -116,7 +116,27 @@ void display_loop( void ) {
         #if defined( M5PAPER )
 
         #elif defined( M5CORE2 )
-
+            if ( dest_brightness != brightness ) {
+                if ( brightness < dest_brightness ) {
+                    brightness++;
+                    M5.Axp.SetLcdVoltage( 2532 + brightness );
+                }
+                else {
+                    brightness--;
+                    M5.Axp.SetLcdVoltage( 2532 + brightness );
+                }
+            }
+            /**
+             * check timeout
+             */
+            if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+                }
+                else {
+                    dest_brightness = display_get_brightness();
+                }
+            }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             /**
@@ -225,6 +245,9 @@ void display_wakeup( bool silence ) {
                 M5.enableEPDPower();
                 delay(25);
             #elif defined( M5CORE2 )
+                M5.Axp.SetLcdVoltage( 2532 + display_get_brightness() );
+                brightness = 0;
+                dest_brightness = 0;
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 #if defined( LILYGO_WATCH_2020_V2 )

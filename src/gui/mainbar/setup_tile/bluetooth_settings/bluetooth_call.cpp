@@ -116,6 +116,7 @@ static void exit_bluetooth_call_event_cb( lv_obj_t * obj, lv_event_t event ) {
 void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
     static bool standby = false;
 
+    log_i("incoming call, json");
     /*
      * check if type and cmd available
      */
@@ -123,7 +124,7 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
         /*
          * check for an incoming call
          */
-        if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "accept" ) ) {
+        if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "incoming" ) ) {
             /*
              * hide statusbar and save current powerstate for later use after a call
              */
@@ -156,10 +157,10 @@ void bluetooth_call_msg_pharse( BluetoothJsonRequest &doc ) {
             lv_obj_align( bluetooth_call_number_label, bluetooth_call_img, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );                
             motor_vibe(100);            
         }
-        else if( !strcmp( doc["t"], "call" ) && !strcmp( doc["cmd"], "start" ) ) {
+        else {
             /*
-                * restore last powerstate after call
-                */
+            * restore last powerstate after call
+            */
             if ( standby == true ) {
                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
             }

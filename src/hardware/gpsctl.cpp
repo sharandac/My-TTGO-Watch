@@ -48,7 +48,6 @@
     #endif
 
     #include <TinyGPS++.h>
-    #include <SoftwareSerial.h>
 
     static const uint32_t GPSBaud = 9600;
 
@@ -58,6 +57,7 @@
     TinyGPSCustom TGC_sats_in_view_baidou;
 
     #if defined( USE_SOFTWARE_SERIAL )
+        #include <SoftwareSerial.h>
         SoftwareSerial *gps_serial = NULL;
     #else
         HardwareSerial *gps_serial = NULL;

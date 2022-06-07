@@ -91,8 +91,11 @@ void wifictl_setup( void ) {
     /*
      * limit wifi bandwidth to 20Mhz channel width
      */
-    esp_wifi_set_bandwidth( ESP_IF_WIFI_STA, WIFI_BW_HT20 );
-    esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
+    #ifdef ARDUNIO_NG
+    #else
+        esp_wifi_set_bandwidth( ESP_IF_WIFI_STA, WIFI_BW_HT20 );
+        esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
+    #endif
     /*
      * register WiFi events
      */
@@ -107,8 +110,11 @@ void wifictl_setup( void ) {
             wifictl_send_event_cb( WIFICTL_DISCONNECT, (void *)"scan ..." );
             WiFi.scanNetworks( true );
         }
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
-
+    #ifdef ARDUNIO_NG
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+    #else
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
+    #endif
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );
@@ -139,7 +145,11 @@ void wifictl_setup( void ) {
                 }
             }
         }
-    }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
+    #ifdef ARDUNIO_NG
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_SCAN_DONE );
+    #else
+        }, WiFiEvent_t::SYSTEM_EVENT_SCAN_DONE );
+    #endif
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_CONNECT | WIFICTL_ACTIVE );
@@ -168,7 +178,11 @@ void wifictl_setup( void ) {
             wifictl_config.networklist_tried[ entry ].ssid[ 0 ] = '\0';
             wifictl_config.networklist_tried[ entry ].password[ 0 ] = '\0';
         }
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
+    #ifdef ARDUNIO_NG
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP );
+    #else
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP );
+    #endif
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         wifictl_set_event( WIFICTL_ACTIVE );
@@ -181,7 +195,11 @@ void wifictl_setup( void ) {
             wifictl_send_event_cb( WIFICTL_ON, (void *)"scan ..." );
             WiFi.scanNetworks( true );
         }
-    }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
+    #ifdef ARDUNIO_NG
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_READY );
+    #else
+        }, WiFiEvent_t::SYSTEM_EVENT_WIFI_READY );
+    #endif
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         #ifdef ENABLE_WEBSERVER
@@ -189,23 +207,30 @@ void wifictl_setup( void ) {
         #endif
         wifictl_clear_event( WIFICTL_ACTIVE | WIFICTL_CONNECT | WIFICTL_OFF_REQUEST | WIFICTL_ON_REQUEST | WIFICTL_SCAN | WIFICTL_WPS_REQUEST );
         wifictl_send_event_cb( WIFICTL_OFF, (void *)"" );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
+    #ifdef ARDUNIO_NG
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_STOP );
+    #else
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_STOP );
+    #endif
 
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        esp_wifi_wps_disable();
-        WiFi.begin();
-        wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps success" );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
+    #ifdef ARDUNIO_NG
+    #else
+        WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+            esp_wifi_wps_disable();
+            WiFi.begin();
+            wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps success" );
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_SUCCESS );
 
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        esp_wifi_wps_disable();
-        wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps failed" );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_FAILED );
+        WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+            esp_wifi_wps_disable();
+            wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps failed" );
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_FAILED );
 
-    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
-        esp_wifi_wps_disable();
-        wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
-    }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
+        WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+            esp_wifi_wps_disable();
+            wifictl_send_event_cb( WIFICTL_WPS_SUCCESS, (void *)"wps timeout" );
+        }, WiFiEvent_t::SYSTEM_EVENT_STA_WPS_ER_TIMEOUT );
+    #endif
     /*
      * Add wifictl task
      */
@@ -571,23 +596,26 @@ void wifictl_start_wps( void ) {
 
     log_i("start WPS");
 #ifndef NATIVE_64BIT
-    esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
-    esp_wps_config.wps_type = ESP_WPS_MODE;
-    strlcpy( esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER, sizeof( esp_wps_config.factory_info.manufacturer ) );
-    strlcpy( esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER, sizeof( esp_wps_config.factory_info.model_number ) );
-    strlcpy( esp_wps_config.factory_info.model_name, ESP_MODEL_NAME, sizeof( esp_wps_config.factory_info.model_name ) );
-    strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
+    #ifdef ARDUNIO_NG
+    #else
+        esp_wps_config.crypto_funcs = &g_wifi_default_wps_crypto_funcs;
+        esp_wps_config.wps_type = ESP_WPS_MODE;
+        strlcpy( esp_wps_config.factory_info.manufacturer, ESP_MANUFACTURER, sizeof( esp_wps_config.factory_info.manufacturer ) );
+        strlcpy( esp_wps_config.factory_info.model_number, ESP_MODEL_NUMBER, sizeof( esp_wps_config.factory_info.model_number ) );
+        strlcpy( esp_wps_config.factory_info.model_name, ESP_MODEL_NAME, sizeof( esp_wps_config.factory_info.model_name ) );
+        strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
 
-    WiFi.mode( WIFI_OFF );
-    esp_wifi_stop();
+        WiFi.mode( WIFI_OFF );
+        esp_wifi_stop();
 
-    wifictl_set_event( WIFICTL_WPS_REQUEST );
+        wifictl_set_event( WIFICTL_WPS_REQUEST );
 
-    ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
-    ESP_ERROR_CHECK( esp_wifi_start() );
+        ESP_ERROR_CHECK( esp_wifi_set_mode( WIFI_MODE_STA ) );
+        ESP_ERROR_CHECK( esp_wifi_start() );
 
-    ESP_ERROR_CHECK( esp_wifi_wps_enable( &esp_wps_config ) );
-    ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
+        ESP_ERROR_CHECK( esp_wifi_wps_enable( &esp_wps_config ) );
+        ESP_ERROR_CHECK( esp_wifi_wps_start( 120000 ) ); 
+    #endif
 #endif
 }
 
