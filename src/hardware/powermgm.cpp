@@ -171,7 +171,7 @@ void powermgm_loop( void ) {
         #ifndef NATIVE_64BIT
             log_d("Free heap: %d", ESP.getFreeHeap());
             log_d("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_d("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
+            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
     }        
     else if( powermgm_get_event( POWERMGM_STANDBY_REQUEST ) ) {
@@ -200,7 +200,7 @@ void powermgm_loop( void ) {
         #ifndef NATIVE_64BIT
             log_d("Free heap: %d", ESP.getFreeHeap());
             log_d("Free PSRAM heap: %d", ESP.getFreePsram());
-            log_d("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
+            log_i("%s uptime: %d", HARDWARE_NAME, millis() / 1000 );
         #endif
 
         if ( standby ) {
@@ -267,8 +267,8 @@ void powermgm_loop( void ) {
                  * from here, the consumption is round about 20mA with ble
                  * total standby time is 15h with a 350mAh battery
                  */
-                pm_config.max_freq_mhz = 80;
-                pm_config.min_freq_mhz = 80;
+                pm_config.max_freq_mhz = 40;
+                pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_d("custom arduino-esp32 framework detected, enable PM/DFS support, 80/40MHz %s light sleep (%d)", lighsleep ? "without" : "with", lighsleep );

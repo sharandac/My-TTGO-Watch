@@ -606,7 +606,6 @@ void wifictl_start_wps( void ) {
         strlcpy( esp_wps_config.factory_info.device_name, ESP_DEVICE_NAME, sizeof( esp_wps_config.factory_info.device_name ) );
 
         WiFi.mode( WIFI_OFF );
-        esp_wifi_stop();
 
         wifictl_set_event( WIFICTL_WPS_REQUEST );
 
@@ -674,13 +673,11 @@ void wifictl_Task( void * pvParameters ) {
 
         if ( wifictl_get_event( WIFICTL_OFF_REQUEST ) ) {
             WiFi.mode( WIFI_OFF );
-            esp_wifi_stop();
             log_d("request wifictl off done");
             wifictl_set_event( WIFICTL_OFF );
             wifictl_clear_event( WIFICTL_ON );
         }
         else if ( wifictl_get_event( WIFICTL_ON_REQUEST ) ) {
-            esp_wifi_start();
             WiFi.mode( WIFI_STA );
             log_d("request wifictl on done");
             wifictl_set_event( WIFICTL_ON );
