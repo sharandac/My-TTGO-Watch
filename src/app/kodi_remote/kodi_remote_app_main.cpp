@@ -413,8 +413,8 @@ void kodi_remote_get_active_player_state() {
     if (httpcode >= 200 && httpcode < 400) {
         kodi_remote_app_set_indicator( ICON_INDICATOR_OK );
 
-        if (doc.containsKey("result")) {
-            if (doc["result"].containsKey("speed")) {
+        if ( doc.containsKey("result") ) {
+            if ( doc["result"].containsKey("speed") ) {
                 if( doc["result"]["speed"].as<uint8_t>() == 0 ) {
                     lv_obj_set_hidden( kodi_remote_play, false );
                     lv_obj_set_hidden( kodi_remote_pause, true );
@@ -451,10 +451,10 @@ void kodi_remote_get_active_player_item() {
     if (httpcode >= 200 && httpcode < 400) {
         kodi_remote_app_set_indicator( ICON_INDICATOR_OK );
 
-        if (doc.containsKey("result")) {
-            if (doc["result"].containsKey("item")) {
-                if (doc["result"]["item"].containsKey("artist")) {
-                    if (doc["result"]["item"]["artist"].is<JsonArray>()) {
+        if ( doc.containsKey("result") ) {
+            if ( doc["result"].containsKey("item") ) {
+                if ( doc["result"]["item"].containsKey("artist") ) {
+                    if ( doc["result"]["item"]["artist"].is<JsonArray>() ) {
                         JsonArray artists = doc["result"]["item"]["artist"].as<JsonArray>();
 
                         uint8_t num = 0;

@@ -100,7 +100,7 @@ bool BaseJsonConfig::load( uint32_t size ) {
             log_d("json config deserializeJson() failed: %s, file: %s", error.c_str(), fileName );
         }
         else {
-            log_d("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
+            log_i("json config deserializeJson() success: %s, file: %s", error.c_str(), fileName );
             result = onLoad(doc);
         }
         doc.clear();

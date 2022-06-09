@@ -25,6 +25,7 @@
 #include "update_setup.h"
 #include "update_check_version.h"
 
+#include "gui/gui.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/setup_tile/setup_tile.h"
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
@@ -172,6 +173,8 @@ void update_progress_task( lv_task_t *task ) {
 
 
 bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
+    gui_take();
+    
     switch( event ) {
 #ifdef NATIVE_64BIT
 #else
@@ -198,6 +201,9 @@ bool update_http_ota_event_cb( EventBits_t event, void *arg ) {
             break;
 #endif
     }
+
+    gui_give();
+    
     return( true );
 }
 
@@ -330,6 +336,9 @@ void update_Task( void * pvParameters ) {
 
     if ( xEventGroupGetBits( update_event) & UPDATE_GET_VERSION_REQUEST ) {
         int64_t firmware_version = update_check_new_version( update_setup_get_url() );
+        
+        gui_take();
+
         if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
             char version_msg[48] = "";
             snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
@@ -352,6 +361,8 @@ void update_Task( void * pvParameters ) {
             setup_hide_indicator( update_setup_icon );
         }
         lv_obj_invalidate( lv_scr_act() );
+
+        gui_give();
     }
     if ( ( xEventGroupGetBits( update_event) & UPDATE_REQUEST ) && ( update_get_url() != NULL ) ) {
         if( ( WiFi.status() == WL_CONNECTED ) ) {
@@ -362,6 +373,9 @@ void update_Task( void * pvParameters ) {
             if ( http_ota_start( update_get_url(), update_get_md5(), update_get_size() ) ) {
                 reset = true;
                 progress = 0;
+
+                gui_take();
+
                 lv_label_set_text( update_status_label, "update ok, turn off and on!" );
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
                 lv_label_set_text( update_btn_label, "restart");
@@ -375,24 +389,35 @@ void update_Task( void * pvParameters ) {
                     delay(500);
                     ESP.restart();
                 }
+
+                gui_give();
             }
             else {
                 reset = false;
+                gui_take();
                 lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+                gui_give();
             }
+
             progress = 0;
+            gui_take();
             lv_bar_set_value( update_progressbar, 0 , LV_ANIM_ON );
+            gui_give();
             display_set_timeout( display_timeout );
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         }
         else {
+            gui_take();
             lv_label_set_text( update_status_label, "turn wifi on!" );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
+            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            gui_give();  
         }
     }
     xEventGroupClearBits( update_event, UPDATE_REQUEST | UPDATE_GET_VERSION_REQUEST );
+    gui_take();
     lv_disp_trig_activity(NULL);
     lv_obj_invalidate( lv_scr_act() );
+    gui_give();
     log_i("finish update task, heap: %d", ESP.getFreeHeap() );
     vTaskDelete( NULL );
 #endif

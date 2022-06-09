@@ -220,7 +220,7 @@ void osmand_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
         return;
     }
 
-    if ( doc["t"] && doc["src"] && doc["title"] ) {
+    if ( doc.containsKey("t") && doc.containsKey("src") && doc.containsKey("title") ) {
         /*
          * React to messages from "OsmAnd" and "OsmAnd~"
          */

@@ -51,12 +51,18 @@
     #include <BLEServer.h>
     #include <BLEUtils.h>
     #include <BLE2902.h>
+    #include <BLEScan.h>
+    #include <BLEAdvertisedDevice.h>
     #include "blebatctl.h"
     #include "blestepctl.h"
+
+    #include "esp_bt_main.h"
+    #include "esp_gap_bt_api.h"
 
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
     QueueHandle_t blectl_msg_queue;
+    TaskHandle_t _blectl_scan_Task;
 #endif
 
 blectl_config_t blectl_config;
@@ -64,6 +70,7 @@ blectl_msg_t blectl_msg;
 callback_t *blectl_callback = NULL;
 uint8_t txValue = 0;
 
+static void blectl_scan_task( void * pvParameters );
 bool blectl_send_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
@@ -76,6 +83,7 @@ void blectl_loop( void );
     #ifdef M5PAPER
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #endif
+    BLEScan* pBLEScan;
     BLEServer *pServer = NULL;
     BLECharacteristic *pTxCharacteristic;
     BLECharacteristic *pRxCharacteristic;
@@ -238,12 +246,12 @@ void blectl_setup( void ) {
         esp_bt_controller_enable( ESP_BT_MODE_BLE );
         esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
         esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
+
         blectl_msg_queue = xQueueCreate( 5, sizeof( char * ) );
         if ( blectl_msg_queue == NULL ) {
             log_e("Failed to allocate msg queue");
             while(true);
         }
-
         /**
          *  Create the BLE Device
          * Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
@@ -251,6 +259,15 @@ void blectl_setup( void ) {
          * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
         BLEDevice::init("Espruino (" HARDWARE_NAME ")" );
+        /**
+         * get scan support
+         */
+/*
+        pBLEScan = BLEDevice::getScan();
+        pBLEScan->setActiveScan(true);
+        pBLEScan->setInterval(500);
+        pBLEScan->setWindow(99);
+*/
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
@@ -336,8 +353,8 @@ void blectl_setup( void ) {
          * Start advertising battery service
          */
         pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
-        blebatctl_setup(pServer);
-        blestepctl_setup();
+//        blebatctl_setup(pServer);
+//        blestepctl_setup();
         /*
          * Slow advertising interval for battery life
          */
@@ -378,6 +395,39 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
             break;
     }
     return( retval );
+}
+
+static void blectl_scan_task( void * pvParameters ) {
+    #ifdef NATIVE_64BIT
+    #else
+        log_i("start ble scan task, heap: %d", ESP.getFreeHeap() );
+
+        BLEScanResults foundDevices = pBLEScan->start( BLECTL_SCAN_TIME, false );
+        log_i("Devices found: %d", foundDevices.getCount() );
+        for( int i = 0 ; i < foundDevices.getCount(); i++ ) {
+            log_i("Device: %s, address: %s", foundDevices.getDevice( i ).getName().c_str(), foundDevices.getDevice( i ).getAddress().toString().c_str() );
+        }
+        pBLEScan->clearResults();
+
+        log_i("finish ble scan task, heap: %d", ESP.getFreeHeap() );
+        vTaskDelete( NULL );
+    #endif
+}
+
+bool blectl_start_scan( void ) {
+    #ifdef NATIVE_64BIT
+    #else
+        if( blectl_get_event( BLECTL_ON ) ) {
+            log_i("start ble scan");
+            xTaskCreate(    blectl_scan_task,
+                            "ble scan Task",
+                            2000,
+                            NULL,
+                            1,
+                            &_blectl_scan_Task );
+        }
+    #endif
+    return( true );
 }
 
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg ) {

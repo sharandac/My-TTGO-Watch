@@ -23,8 +23,9 @@
 
 #include "osmmap_app.h"
 #include "osmmap_app_main.h"
-#include "app/osmmap/config/osmmap_config.h"
+#include "config/osmmap_config.h"
 
+#include "gui/gui.h"
 #include "gui/mainbar/setup_tile/bluetooth_settings/bluetooth_message.h"
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -598,21 +599,27 @@ void osmmap_update_Task( void * pvParameters ) {
              */
             OSMMAP_APP_LOG("start osm map update");
             if( osm_map_update( osmmap_location ) ) {
+                gui_take();
                 if ( osm_map_get_tile_image( osmmap_location ) ) {
                     lv_img_set_src( osmmap_app_tile_img, osm_map_get_tile_image( osmmap_location ) );
                 }
                 lv_obj_align( osmmap_app_tile_img, lv_obj_get_parent( osmmap_app_tile_img ), LV_ALIGN_CENTER, 0 , 0 );
+                gui_give();
                 xEventGroupSetBits( osmmap_event_handle, OSM_APP_LOAD_AHEAD_REQUEST );
             }
             /**
              * update postion point on the tile image when is valid
              */
             if ( osmmap_location->tilexy_pos_valid ) {
+                gui_take();
                 lv_obj_align( osmmap_app_pos_img, lv_obj_get_parent( osmmap_app_pos_img ), LV_ALIGN_IN_TOP_LEFT, osmmap_location->tilex_pos - 8 , osmmap_location->tiley_pos - 8 );
                 lv_obj_set_hidden( osmmap_app_pos_img, false );
+                gui_give();
             }
             else {
+                gui_take();
                 lv_obj_set_hidden( osmmap_app_pos_img, true );
+                gui_give();
             }
             /**
              * clear update request flag

@@ -32,6 +32,7 @@
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
 
+    #define BLECTL_SCAN_TIME             30
     /**
      * connection state
      */
@@ -58,6 +59,13 @@
     #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
     #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
     #define BLECTL_MSG_JSON              _BV(13)        /** @brief event mask for blectl JSON msg */
+    /**
+     * scan state
+     */
+    #define BLECTL_SCAN                  _BV(14)        /** @brief event mask for blectl msg */
+    #define BLECTL_SCAN_DONE             _BV(15)        /** @brief event mask msg send success */
+
+
     /**
      *  See the following for generating UUIDs:
      * https://www.uuidgenerator.net/
@@ -260,6 +268,10 @@
      * @param enable    true if enabled, false if disable
      */
     void blectl_set_autoon( bool autoon );
+    /**
+     * @brief start an ble scan
+     */
+    bool blectl_start_scan( void );
 #ifndef NATIVE_64BIT
     /**
      * @brief get the raw BLE Server

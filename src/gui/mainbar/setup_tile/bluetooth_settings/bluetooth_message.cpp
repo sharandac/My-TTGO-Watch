@@ -504,81 +504,83 @@ void bluetooth_message_show_msg( int32_t entry ) {
         /*
          * if msg an notify msg?
          */
-        if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
-            /*
-             * set the receive time string
-             */
-            struct tm info;
-            char timestamp[16]="";
-            localtime_r( msg_chain_get_msg_timestamp_entry( bluetooth_msg_chain, entry ), &info );
-            int h = info.tm_hour;
-            int m = info.tm_min;
-            snprintf( timestamp, sizeof( timestamp ), "%02d:%02d", h, m );
-            lv_label_set_text( bluetooth_message_time_label, timestamp );
-            /*
-             * set the numbers of msg string
-             */
-            snprintf( msg_num, sizeof( msg_num ), "%d/%d", entry + 1, msg_chain_get_entrys( bluetooth_msg_chain ) );
-            lv_label_set_text( bluetooth_msg_entrys_label, msg_num );
-            lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
-            /*
-             * set notify source icon if msg src known
-             */
-            if ( doc.containsKey("src") ) {
-                lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
-                lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
-            }
-            else {
-                lv_img_set_src( bluetooth_message_img, default_msg_icon );
-                lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
-            }
-            /*
-             * set message if body known or set title and if no other information
-             * available set an emty msg
-             */
-            if ( doc.containsKey("body") ) {
-                lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
-            }
-            else if ( doc.containsKey("title") ) {
-                lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
-            }
-            else if ( doc.containsKey("temp") ) {
+        if( doc.containsKey("t" ) ) {
+            if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
                 /*
-                 * add special case when a weather information is set
-                 */
-                int temperature = doc["temp"];
-                const char temp_str[128] = "";
-                snprintf( (char*)temp_str, sizeof( temp_str ), "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
-                lv_label_set_text( bluetooth_message_msg_label, temp_str );
+                * set the receive time string
+                */
+                struct tm info;
+                char timestamp[16]="";
+                localtime_r( msg_chain_get_msg_timestamp_entry( bluetooth_msg_chain, entry ), &info );
+                int h = info.tm_hour;
+                int m = info.tm_min;
+                snprintf( timestamp, sizeof( timestamp ), "%02d:%02d", h, m );
+                lv_label_set_text( bluetooth_message_time_label, timestamp );
+                /*
+                * set the numbers of msg string
+                */
+                snprintf( msg_num, sizeof( msg_num ), "%d/%d", entry + 1, msg_chain_get_entrys( bluetooth_msg_chain ) );
+                lv_label_set_text( bluetooth_msg_entrys_label, msg_num );
+                lv_obj_align( bluetooth_msg_entrys_label, bluetooth_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, -5, 0 );
+                /*
+                * set notify source icon if msg src known
+                */
+                if ( doc.containsKey("src") ) {
+                    lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
+                    lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
+                }
+                else {
+                    lv_img_set_src( bluetooth_message_img, default_msg_icon );
+                    lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
+                }
+                /*
+                * set message if body known or set title and if no other information
+                * available set an emty msg
+                */
+                if ( doc.containsKey("body") ) {
+                    lv_label_set_text( bluetooth_message_msg_label, doc["body"] );
+                }
+                else if ( doc.containsKey("title") ) {
+                    lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
+                }
+                else if ( doc.containsKey("temp") ) {
+                    /*
+                    * add special case when a weather information is set
+                    */
+                    int temperature = doc["temp"];
+                    const char temp_str[128] = "";
+                    snprintf( (char*)temp_str, sizeof( temp_str ), "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
+                    lv_label_set_text( bluetooth_message_msg_label, temp_str );
+                }
+                else {
+                    lv_label_set_text( bluetooth_message_msg_label, "" );
+                }
+                /*
+                * scroll back to the top of the msg
+                */
+                if ( lv_page_get_scrl_height( bluetooth_message_page ) > 160 ) {
+                    lv_page_scroll_ver( bluetooth_message_page, lv_page_get_scrl_height( bluetooth_message_page ) ); 
+                }
+                /*
+                * set sender label from available source
+                */
+                if ( doc.containsKey("title") ) {
+                    lv_label_set_text( bluetooth_message_sender_label, doc["title"] );
+                }
+                else if ( doc.containsKey("sender") ) {
+                    lv_label_set_text( bluetooth_message_sender_label, doc["sender"] );
+                }
+                else if( doc.containsKey("tel") ) {
+                    lv_label_set_text( bluetooth_message_sender_label, doc["tel"] );
+                }
+                else {
+                    lv_label_set_text( bluetooth_message_sender_label, "n/a" );
+                }
+                /*
+                * trigger invalidate to redraw all information
+                */
+                lv_obj_invalidate( lv_scr_act() );
             }
-            else {
-                lv_label_set_text( bluetooth_message_msg_label, "" );
-            }
-            /*
-             * scroll back to the top of the msg
-             */
-            if ( lv_page_get_scrl_height( bluetooth_message_page ) > 160 ) {
-                lv_page_scroll_ver( bluetooth_message_page, lv_page_get_scrl_height( bluetooth_message_page ) ); 
-            }
-            /*
-             * set sender label from available source
-             */
-            if ( doc.containsKey("title") ) {
-                lv_label_set_text( bluetooth_message_sender_label, doc["title"] );
-            }
-            else if ( doc.containsKey("sender") ) {
-                lv_label_set_text( bluetooth_message_sender_label, doc["sender"] );
-            }
-            else if( doc.containsKey("tel") ) {
-                lv_label_set_text( bluetooth_message_sender_label, doc["tel"] );
-            }
-            else {
-                lv_label_set_text( bluetooth_message_sender_label, "n/a" );
-            }
-            /*
-             * trigger invalidate to redraw all information
-             */
-            lv_obj_invalidate( lv_scr_act() );
         }
     }        
     doc.clear();
@@ -658,11 +660,11 @@ void bluetooth_message_play_audio( int32_t entry ) {
                 snprintf( tts, sizeof( tts ), "%s.", text );
                 
                 sound_speak( tts );
-                log_i("playing custom tts audio notification: \"%s\"", tts );
+                log_d("playing custom tts audio notification: \"%s\"", tts );
             }
             else {
                 sound_play_spiffs_mp3( custom_audio_notification.value );
-                log_i("playing custom mp3 audio notification: \"%s\"", custom_audio_notification.value );
+                log_d("playing custom mp3 audio notification: \"%s\"", custom_audio_notification.value );
             }
         }
         /**
@@ -670,7 +672,7 @@ void bluetooth_message_play_audio( int32_t entry ) {
          */
         if ( !found ) {
             sound_play_progmem_wav( piep_wav, piep_wav_len );
-            log_i("playing default mp3 audio notification");
+            log_d("playing default mp3 audio notification");
         }
     }
     doc.clear();

@@ -22,6 +22,7 @@
 #include "config.h"
 #include "http_ota.h"
 #include "hardware/callback.h"
+#include "hardware/blectl.h"
 #include "utils/decompress/decompress.h"
 
 #ifdef NATIVE_64BIT
@@ -47,7 +48,7 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
      * disable ble and set esp32 voltage to 3.3V to
      * prevent some issues
      */
-//    blectl_off();
+    blectl_off();
 //    pmu_set_safe_voltage_for_update();
     /*
      * if firmware an .gz file, take compressed ota otherwise

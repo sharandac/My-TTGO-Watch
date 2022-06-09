@@ -54,6 +54,7 @@ LV_IMG_DECLARE(info_fail_16px);
 LV_IMG_DECLARE(up_32px);
 LV_IMG_DECLARE(down_32px);
 
+static void bluetooth_start_scan_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void down_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
 static void up_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -116,10 +117,16 @@ void bluetooth_settings_tile_setup( void ) {
     if ( bluetooth_settings_tile_2 ) {
         lv_obj_t *txpower_cont = wf_add_labeled_list( bluetooth_settings_tile_2, "tx power", &txpower_list, "-12db\n-9db\n-6db\n-3db\n0db", bluetooth_txpower_event_handler, ws_get_setup_tile_style() );
         lv_obj_align( txpower_cont, header_2, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+//        lv_obj_t *ble_sscan_btn = wf_add_button( bluetooth_settings_tile_2, "start scan", 120, 48, bluetooth_start_scan_cb );
+//        lv_obj_align( ble_sscan_btn, txpower_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
     }
     else {
         lv_obj_t *txpower_cont = wf_add_labeled_list( bluetooth_settings_tile_1, "tx power", &txpower_list, "-12db\n-9db\n-6db\n-3db\n0db", bluetooth_txpower_event_handler, SETUP_STYLE );
         lv_obj_align( txpower_cont, bluetooth_show_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+//        lv_obj_t *ble_sscan_btn = wf_add_button( bluetooth_settings_tile_1, "start scan", 120, 48, bluetooth_start_scan_cb );
+//        lv_obj_align( ble_sscan_btn, txpower_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
     }
 
     lv_dropdown_set_selected( txpower_list, blectl_get_txpower() );
@@ -146,6 +153,13 @@ bool blectl_onoff_event_cb( EventBits_t event, void *arg ) {
             break;
     }
     return( true );
+}
+
+static void bluetooth_start_scan_cb( lv_obj_t * obj, lv_event_t event ) {
+    switch( event ) {
+        case( LV_EVENT_CLICKED ):       blectl_start_scan();
+                                        break;
+    }   
 }
 
 static void enter_bluetooth_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {

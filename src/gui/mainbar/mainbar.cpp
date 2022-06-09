@@ -503,9 +503,11 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
             current_tile = i;
         }
     }
-
+    /**
+     * ignore tile jump if we a on destination
+     */
     if( current_tile == tile_number ) {
-        log_w("the destination tile is the current tile");
+        MAINBAR_INFO_LOG("the destination tile is the current tile");
         return;
     }
     /**

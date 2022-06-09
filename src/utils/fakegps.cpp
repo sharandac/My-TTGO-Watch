@@ -132,18 +132,16 @@ void fakegps_get_location_Task( void * pvParameters ) {
     #endif
             uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( GEOIP_URL );
             if ( uri_load_dsc ) {
-
                 SpiRamJsonDocument doc( uri_load_dsc->size * 4 );
-
                 DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
-                if (error) {
+
+                if (error)
                     log_e("fakegps deserializeJson() failed: %s", error.c_str() );
-                }
                 else {
-                    if ( doc["lat"] && doc["lon"] ) {
-                        lat = doc["lat"].as<float>();
-                        lon = doc["lon"].as<float>();
-                        log_i("lat: %f, lon:%f", lat, lon );
+                    if ( doc.containsKey("lat") && doc.containsKey("lon") ) {
+                        lat = doc["lat"];
+                        lon = doc["lon"];
+                        log_d("lat: %f, lon:%f", lat, lon );
                         gpsctl_set_location( lat, lon, 0, 0, GPS_SOURCE_IP, true );
                     }
                 }

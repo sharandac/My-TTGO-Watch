@@ -66,6 +66,8 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
+
+    SemaphoreHandle_t xGUI_SemaphoreMutex;
 #endif
 
 #if defined( M5CORE2 )
@@ -108,6 +110,12 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
 void gui_setup( void ) {
+    #ifdef NATIVE_64BIT
+    #else
+        xGUI_SemaphoreMutex = xSemaphoreCreateMutex();
+    #endif
+    gui_give();
+    gui_take();
     /**
      * install lv fs spiffs wrapper
      * files begin with "P:/foo.bar" -> "/spiffs/foo.bar"
@@ -145,10 +153,10 @@ void gui_setup( void ) {
     keyboard_setup();
     log_i("num keyboard setup");
     num_keyboard_setup();
+    gui_give();
     /*
      * add setup tool to the setup tile
      */
-
     battery_settings_tile_setup();
     display_settings_tile_setup();
     move_settings_tile_setup();
@@ -203,7 +211,23 @@ void gui_setup( void ) {
 #endif
 }
 
+bool gui_take( void ) {
+    #ifdef NATIVE_64BIT
+        return( true );
+    #else
+        return xSemaphoreTake( xGUI_SemaphoreMutex, portMAX_DELAY ) == pdTRUE;
+    #endif
+}
+
+void gui_give( void ) {
+    #ifdef NATIVE_64BIT
+    #else
+        xSemaphoreGive( xGUI_SemaphoreMutex );
+    #endif
+}
+
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
+    gui_take();
 
     switch ( event ) {
         case POWERMGM_STANDBY:          /*
@@ -249,6 +273,8 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                          */
                                         break;                                        
     }
+
+    gui_give();
     return( true );
 }
 
@@ -312,6 +338,8 @@ void gui_set_background_image ( uint32_t background_image ) {
 }
 
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
+    gui_take();
+    
     #ifdef NATIVE_64BIT
 
     #else
@@ -340,5 +368,8 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
         force_redraw = !force_redraw;
         lv_obj_invalidate( lv_scr_act() );
     }
+
+    gui_give();
+
     return( true );
 }

@@ -358,9 +358,21 @@ bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
 }
 
 void wifi_setup_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
+    if( !doc.containsKey("t") )
+        return;
+
+    if( !doc.containsKey("app") )
+        return;
+
     if( !strcmp( doc["t"], "conf" ) ) {
-        if ( !strcmp( doc["app"], "settings" ) ) {
-            if ( !strcmp( doc["settings"], "wlan" ) ) {
+        /**
+         * check for app settings and if settings aviable
+         */
+        if ( !strcmp( doc["app"], "settings" ) && doc.containsKey("settings") ) {
+            /**
+             * check if we have settings for wlan
+             */
+            if ( !strcmp( doc["settings"], "wlan" ) && doc.containsKey("ssid") && doc.containsKey("key") ) {
                 motor_vibe(100);
                 wifictl_insert_network(  doc["ssid"] |"" , doc["key"] |"" );
             }

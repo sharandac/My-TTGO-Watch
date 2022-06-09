@@ -39,5 +39,13 @@
      * @param force  true for redraw
      */
     void gui_force_redraw( bool force );
+    /**
+     * @brief take gui control to make LVGL threas safe
+     */    
+    bool gui_take( void );
+    /**
+     * @brief take gui control to make LVGL threas safe
+     */    
+    void gui_give( void );
 
 #endif // _STATUSBAR_H

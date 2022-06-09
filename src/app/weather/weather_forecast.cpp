@@ -24,6 +24,7 @@
 #include "weather_fetch.h"
 #include "weather_forecast.h"
 #include "images/resolve_owm_icon.h"
+#include "gui/gui.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/main_tile/main_tile.h"
 #include "gui/statusbar.h"
@@ -187,6 +188,8 @@ void weather_forecast_sync( void  ) {
         struct tm info;
         char buf[64];
 
+        gui_take();
+
         lv_label_set_text( weather_forecast_location_label, weather_forecast[ 0 ].name );
         #if defined( ROUND_DISPLAY )
             lv_obj_align( weather_forecast_location_label, weather_forecast_tile, LV_ALIGN_IN_TOP_MID, 0, 10 );
@@ -227,5 +230,7 @@ void weather_forecast_sync( void  ) {
             lv_obj_align( weather_forecast_update_label, weather_forecast_location_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0 );
         #endif
         lv_obj_invalidate( lv_scr_act() );
+
+        gui_give();
     }
 }

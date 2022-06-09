@@ -274,9 +274,8 @@ bool weather_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
 }
 
 void weather_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
-    if( !strcmp( doc["t"], "conf" ) ) {
-        if ( !strcmp( doc["app"], "weather" ) ) {
-
+    if( doc.containsKey("t") && doc.containsKey("weather") ) {
+        if( !strcmp( doc["t"], "conf" ) && !strcmp( doc["app"], "weather" ) ) {
             weather_config_t *weather_config = weather_get_config();
             strncpy( weather_config->apikey, doc["apikey"] |"", sizeof( weather_config->apikey ) );
             strncpy( weather_config->lat, doc["lat"] | "", sizeof( weather_config->lat ) );
@@ -289,7 +288,6 @@ void weather_bluetooth_message_msg_pharse( BluetoothJsonRequest &doc ) {
 
             motor_vibe(100);
         }
-
     }
 }
 

@@ -125,22 +125,22 @@ void powermeter_main_task( lv_task_t * task );
         if ( doc.containsKey("id") ) {
             lv_label_set_text( id_label, doc["id"] );
         }
-        if ( doc["all"]["power"] ) {
+        if ( doc["all"].containsKey("power") ) {
             char temp[16] = "";
             snprintf( temp, sizeof( temp ), "%0.2fkW", atof( doc["all"]["power"] ) );
             widget_set_label( powermeter_get_widget_icon(), temp );
         }
-        if ( doc["channel0"]["power"] ) {
+        if ( doc["channel0"].containsKey("power") ) {
             char temp[16] = "";
             snprintf( temp, sizeof( temp ), "%0.2fkW", atof( doc["channel0"]["power"] ) );
             lv_label_set_text( power_label, temp );
         }
-        if ( doc["channel0"]["voltage"] ) {
+        if ( doc["channel0"].containsKey("voltage") ) {
             char temp[16] = "";
             snprintf( temp, sizeof( temp ), "%0.1fV", atof( doc["channel0"]["voltage"] ) );
             lv_label_set_text( voltage_label, temp );
         }
-        if ( doc["channel0"]["current"] ) {
+        if ( doc["channel0"].containsKey("current") ) {
             char temp[16] = "";
             snprintf( temp, sizeof( temp ), "%0.1fA", atof( doc["channel0"]["current"] ) );
             lv_label_set_text( current_label, temp );

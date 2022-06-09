@@ -147,8 +147,9 @@ Special thanks to the following people for their help:
 [JoanMCD](https://github.com/JoanMCD)<br>
 [NorthernDIY](https://github.com/NorthernDIY)<br>
 [Neuroplant](https://github.com/Neuroplant)<br>
-[rnisthal](https://github.com/rnisthal)<br>
 [paulstueber](https://github.com/paulstueber)<br>
+[pavelmachek](https://github.com/pavelmachek)<br>
+[rnisthal](https://github.com/rnisthal)<br>
 [ssspeq](https://github.com/ssspeq)<br>
 
 and the following projects:

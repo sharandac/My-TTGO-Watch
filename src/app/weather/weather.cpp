@@ -25,6 +25,7 @@
 #include "weather_forecast.h"
 #include "weather_setup.h"
 #include "images/resolve_owm_icon.h"
+#include "gui/gui.h"
 #include "gui/app.h"
 #include "gui/widget.h"
 #include "gui/mainbar/mainbar.h"
@@ -182,6 +183,9 @@ void weather_sync_Task( void * pvParameters ) {
 
 void weather_widget_sync( void ) {
     uint32_t retval = weather_fetch_today( &weather_config, &weather_today );
+
+    gui_take();
+
     if ( retval == 200 ) {
         widget_set_label( weather_widget, weather_today.temp );
         widget_set_icon( weather_widget, (lv_obj_t*)resolve_owm_icon( weather_today.icon ) );
@@ -198,6 +202,8 @@ void weather_widget_sync( void ) {
         widget_set_indicator( weather_widget, ICON_INDICATOR_FAIL );
     }
     lv_obj_invalidate( lv_scr_act() );
+
+    gui_give();
 }
 
 void weather_save_config( void ) {

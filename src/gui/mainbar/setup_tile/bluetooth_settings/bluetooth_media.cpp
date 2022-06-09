@@ -45,9 +45,9 @@ static bool bluetooth_media_play_state = false;
 
 icon_t *bluetooth_media_app = NULL;
 lv_obj_t *bluetooth_media_tile = NULL;
-lv_style_t bluetooth_media_style;
 uint32_t bluetooth_media_tile_num;
 
+lv_obj_t *bluetooth_exit_btn = NULL;
 lv_obj_t *bluetooth_media_play = NULL;
 lv_obj_t *bluetooth_media_stop = NULL;
 lv_obj_t *bluetooth_media_prev = NULL;
@@ -88,12 +88,8 @@ void bluetooth_media_tile_setup( void ) {
     // bluetooth_media_tile_num = mainbar_add_tile( 0, 1, "bluetooth media", ws_get_app_style() );
     bluetooth_media_tile = mainbar_get_tile_obj( bluetooth_media_tile_num );
 
-    lv_style_copy( &bluetooth_media_style, APP_STYLE );
-    lv_style_set_text_font( &bluetooth_media_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-    lv_obj_add_style( bluetooth_media_tile, LV_OBJ_PART_MAIN, &bluetooth_media_style );
-
-    lv_obj_t *exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_cb, SYSTEM_ICON_STYLE );
-    lv_obj_align( exit_btn, bluetooth_media_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
+    bluetooth_exit_btn = wf_add_image_button( bluetooth_media_tile, cancel_32px, exit_bluetooth_media_cb, SYSTEM_ICON_STYLE );
+    lv_obj_align( bluetooth_exit_btn, bluetooth_media_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
     bluetooth_media_play = wf_add_image_button( bluetooth_media_tile, play_64px, bluetooth_media_play_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( bluetooth_media_play, bluetooth_media_tile, LV_ALIGN_CENTER, 0, 0 );
@@ -108,18 +104,14 @@ void bluetooth_media_tile_setup( void ) {
     bluetooth_media_prev = wf_add_image_button( bluetooth_media_tile, prev_32px, bluetooth_media_prev_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( bluetooth_media_prev, bluetooth_media_play, LV_ALIGN_OUT_LEFT_MID, -THEME_ICON_SIZE, 0 );
 
-    bluetooth_media_artist = lv_label_create( bluetooth_media_tile, NULL);
-    lv_obj_add_style( bluetooth_media_artist, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
-    lv_label_set_text( bluetooth_media_artist, "artist");
+    bluetooth_media_artist = wf_add_label( bluetooth_media_tile, "artist", APP_STYLE );
     lv_label_set_long_mode( bluetooth_media_artist, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE );
+    lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE - THEME_PADDING * 2 );
     lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
 
-    bluetooth_media_title = lv_label_create( bluetooth_media_tile, NULL);
-    lv_obj_add_style( bluetooth_media_title, LV_OBJ_PART_MAIN, &bluetooth_media_style  );
-    lv_label_set_text( bluetooth_media_title, "title");
+    bluetooth_media_title = wf_add_label( bluetooth_media_tile, "title", APP_STYLE );
     lv_label_set_long_mode( bluetooth_media_title, LV_LABEL_LONG_SROLL_CIRC );
-    lv_obj_set_width( bluetooth_media_title, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE );
+    lv_obj_set_width( bluetooth_media_title, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE - THEME_PADDING * 2 );
     lv_obj_align( bluetooth_media_title, bluetooth_media_artist, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
 
     bluetooth_media_speaker = wf_add_image_button( bluetooth_media_tile, sound_32px, NULL, SYSTEM_ICON_STYLE );
@@ -132,28 +124,18 @@ void bluetooth_media_tile_setup( void ) {
     lv_obj_align( bluetooth_media_volume_up, bluetooth_media_speaker, LV_ALIGN_OUT_RIGHT_MID, THEME_ICON_SIZE, 0 );
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_media_event_cb, "bluetooth media" );
-    styles_register_cb( STYLE_CHANGE, bluetooth_media_style_cb, "bluetooth media player" );
     mainbar_add_tile_activate_cb( bluetooth_media_tile_num, bluetooth_media_activate_cb );
     bluetooth_media_app = app_register( "media\nplayer", &play_64px, enter_bluetooth_media_cb );
 }
 
 static void bluetooth_media_activate_cb( void ) {
+    wf_image_button_fade_in( bluetooth_exit_btn, 300, 0 );
     wf_image_button_fade_in( bluetooth_media_play, 300, 0 );
     wf_image_button_fade_in( bluetooth_media_next, 300, 200 );
     wf_image_button_fade_in( bluetooth_media_prev, 300, 200 );
     wf_image_button_fade_in( bluetooth_media_speaker, 300, 0 );
     wf_image_button_fade_in( bluetooth_media_volume_down, 300, 200 );
     wf_image_button_fade_in( bluetooth_media_volume_up, 300, 200 );
-}
-
-static bool bluetooth_media_style_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
-        case STYLE_CHANGE:  lv_style_copy( &bluetooth_media_style, APP_STYLE );
-                            lv_style_set_text_font( &bluetooth_media_style, LV_STATE_DEFAULT, &Ubuntu_16px);
-                            lv_obj_add_style( bluetooth_media_tile, LV_OBJ_PART_MAIN, &bluetooth_media_style );
-                            break;
-    }
-    return( true );
 }
 
 static void enter_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event ) {
@@ -238,37 +220,54 @@ bool bluetooth_media_event_cb( EventBits_t event, void *arg ) {
 static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
     bool retval = false;
     
-    if( !strcmp( doc["t"], "musicstate" ) ) {
-        if( doc["state"] ) {
+    if( doc.containsKey("t") ) {
+        /**
+         * check if we have a music state
+         */
+        if( !strcmp( doc["t"], "musicstate" ) && doc.containsKey("state") ) {
+            /**
+             * check for play state
+             */
             if( !strcmp( doc["state"], "pause" ) ) {
                 lv_obj_set_hidden( bluetooth_media_play, false );
                 lv_obj_set_hidden( bluetooth_media_stop, true );
                 bluetooth_media_play_state = false;
             }
-            if( !strcmp( doc["state"], "play" ) ) {
+            /**
+             * check for play stop
+             */
+            else if( !strcmp( doc["state"], "play" ) ) {
                 lv_obj_set_hidden( bluetooth_media_play, true );
                 lv_obj_set_hidden( bluetooth_media_stop, false );
                 bluetooth_media_play_state = true;
             }
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
+            retval = true;
         }
-        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-        mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
-        retval = true;
+        /**
+         * check if we have a music information
+         */
+        else if( !strcmp( doc["t"], "musicinfo" ) ) {
+            /**
+             * check for track info update
+             */
+            if ( doc.containsKey("track") ) {
+                lv_label_set_text( bluetooth_media_title, doc["track"] );
+                lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -THEME_PADDING );
+            }
+            /**
+             * check for track artist update
+             */            
+            if ( doc.containsKey("artist") ) {
+                lv_label_set_text( bluetooth_media_artist, doc["artist"] );
+                lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
+            }
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
+            retval = true;
+        }
     }
-    if( !strcmp( doc["t"], "musicinfo" ) ) {
-        if ( doc.containsKey("track") ) {
-            lv_label_set_text( bluetooth_media_title, doc["track"] );
-            lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -THEME_PADDING );
-        }
-        
-        if ( doc.containsKey("artist") ) {
-            lv_label_set_text( bluetooth_media_artist, doc["artist"] );
-            lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
-        }
 
-        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-        mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
-        retval = true;
-    }
     return( retval );
 }
