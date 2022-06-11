@@ -16,6 +16,10 @@
     /**
      * @brief detach lvgl ticker function
      */
+    void hardware_attach_lvgl_ticker_slow( void );
+    /**
+     * @brief detach lvgl ticker function
+     */
     void hardware_detach_lvgl_ticker( void );
 
 #endif // _HARDWARE_H

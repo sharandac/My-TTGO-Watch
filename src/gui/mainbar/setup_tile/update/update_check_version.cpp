@@ -43,7 +43,7 @@ int64_t update_check_new_version( char *url ) {
      * load uri file into ram
      */
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
-    log_i("load update information from: %s", url );
+    log_d("load update information from: %s", url );
     /**
      * if was success, pharse the json
      */
@@ -61,17 +61,11 @@ int64_t update_check_new_version( char *url ) {
         if ( doc.containsKey("host") ) {
             if ( firmwarehost == NULL ) {
                 firmwarehost = (char*)CALLOC( strlen( doc["host"] ) + 1, 1 );
-                if ( firmwarehost == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwarehost, "calloc error" );
             }
             else {
                 char * tmp_firmwarehost = (char*)REALLOC( firmwarehost, strlen( doc["host"] ) + 1 );
-                if ( tmp_firmwarehost == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwarehost, "calloc error" );
                 firmwarehost = tmp_firmwarehost;
             }
             strcpy( firmwarehost, doc["host"] );
@@ -81,17 +75,11 @@ int64_t update_check_new_version( char *url ) {
         if ( doc.containsKey("file") ) {
             if ( firmwarefile == NULL ) {
                 firmwarefile = (char*)CALLOC( strlen( doc["file"] ) + 1, 1 );
-                if ( firmwarefile == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwarefile, "calloc error" );
             }
             else {
                 char * tmp_firmwarefile = (char*)REALLOC( firmwarefile, strlen( doc["file"] ) + 1 );
-                if ( tmp_firmwarefile == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwarefile, "calloc error" );
                 firmwarefile = tmp_firmwarefile;
             }
             strcpy( firmwarefile, doc["file"] );
@@ -101,17 +89,11 @@ int64_t update_check_new_version( char *url ) {
         if ( doc.containsKey("gzipfile") ) {
             if ( firmwarefile == NULL ) {
                 firmwarefile = (char*)CALLOC( strlen( doc["gzipfile"] ) + 1, 1 );
-                if ( firmwarefile == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwarefile, "calloc error" );
             }
             else {
                 char * tmp_firmwarefile = (char*)REALLOC( firmwarefile, strlen( doc["gzipfile"] ) + 1 );
-                if ( tmp_firmwarefile == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwarefile, "calloc error" );
                 firmwarefile = tmp_firmwarefile;
             }
             strcpy( firmwarefile, doc["gzipfile"] );
@@ -121,17 +103,11 @@ int64_t update_check_new_version( char *url ) {
         if ( firmwarehost != NULL && firmwarefile != NULL ) {
             if ( firmwareurl == NULL ) {
                 firmwareurl = (char*)CALLOC( strlen( firmwarehost ) + strlen( firmwarefile ) + 5, 1 );
-                if ( firmwareurl == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwareurl, "calloc error" );
             }
             else {
                 char * tmp_firmwareurl = (char*)REALLOC( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5 );
-                if ( tmp_firmwareurl == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwareurl, "calloc error" );
                 firmwareurl = tmp_firmwareurl;            
             }
             snprintf( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5, "%s/%s", firmwarehost, firmwarefile );
@@ -151,17 +127,11 @@ int64_t update_check_new_version( char *url ) {
         if ( doc.containsKey("md5") ) {
             if ( firmwaremd5 == NULL ) {
                 firmwaremd5 = (char*)CALLOC( strlen( doc["md5"] ) + 1, 1 );
-                if ( firmwaremd5 == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwaremd5, "calloc error" );
             }
             else {
                 char * tmp_firmwaremd5 = (char*)REALLOC( firmwaremd5, strlen( doc["md5"] ) + 1 );
-                if ( tmp_firmwaremd5 == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwaremd5, "calloc error" );
                 firmwaremd5 = tmp_firmwaremd5;
             }
             strcpy( firmwaremd5, doc["md5"] );
@@ -171,17 +141,11 @@ int64_t update_check_new_version( char *url ) {
         if ( doc.containsKey("comment") ) {
             if ( firmwarecomment == NULL ) {
                 firmwarecomment = (char*)CALLOC( strlen( doc["comment"] ) + 1, 1 );
-                if ( firmwarecomment == NULL ) {
-                    log_e("calloc error");
-                    while(true);
-                }
+                ASSERT( firmwarecomment, "calloc error" );
             }
             else {
                 char * tmp_firmwarecomment = (char*)REALLOC( firmwarecomment, strlen( doc["comment"] ) + 1 );
-                if ( tmp_firmwarecomment == NULL ) {
-                    log_e("realloc error");
-                    while(true);
-                }
+                ASSERT( tmp_firmwarecomment, "calloc error" );
                 firmwarecomment = tmp_firmwarecomment;
             }
             strcpy( firmwarecomment, doc["comment"] );

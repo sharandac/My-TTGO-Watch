@@ -379,7 +379,7 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
      */
     for ( int i = 0; src_icon[ i ].img != NULL; i++ ) {
         if ( strstr( src_name, src_icon[ i ].src_name ) ) {
-            log_i("hit: %s -> %s", src_name, src_icon[ i ].src_name );
+            log_d("hit: %s -> %s", src_name, src_icon[ i ].src_name );
             return( src_icon[ i ].img );
         }
     }
@@ -422,7 +422,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      */
     int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     if ( blectl_get_show_notification() ) {
-        log_i("force message view");
+        log_d("force message view");
         bluetooth_message_show_msg( entry );
         bluetooth_message_play_audio( entry );
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
@@ -594,7 +594,7 @@ void bluetooth_message_play_audio( int32_t entry ) {
      * check if audio played recently
      */
     if ( nextmillis >= millis() ) {
-        log_i("skip playing audio notification, because played one recently");
+        log_d("skip playing audio notification, because played one recently");
         nextmillis += 5000L;
         return;
     }

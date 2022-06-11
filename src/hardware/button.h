@@ -46,6 +46,8 @@
     #define     BUTTON_LEFT             _BV(9)          /** @brief event mask for left button */
     #define     BUTTON_RIGHT            _BV(10)         /** @brief event mask for right button */
     #define     BUTTON_KEYBOARD         _BV(11)         /** @brief event mask for keyboard button, data as uint32_t */
+    #define     BUTTON_MEDIA_TEST       _BV(12)
+    #define     BUTTON_NOTIFY_TEST      _BV(13))
     /**
      * @brief button setup function
      */

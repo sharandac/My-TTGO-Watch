@@ -52,10 +52,7 @@ void app_tile_setup( void ) {
         return;
     }
     app_entry = (icon_t*)MALLOC( sizeof( icon_t ) * MAX_APPS_ICON );
-    if( !app_entry ) {
-        log_e("error while alloc");
-        while( 1 ){};
-    }
+    ASSERT( app_entry, "error while app_entry alloc");
     /**
      * add tiles to to main tile
      */

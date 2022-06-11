@@ -105,7 +105,10 @@
 lv_obj_t *img_bin = NULL;
 
 static volatile bool force_redraw = false;
+static volatile int lvgl_thread_guard_catcher = 1;
 
+bool gui_powermgm_lvgl_guard_take_cb( EventBits_t event, void *arg );
+bool gui_powermgm_lvgl_guard_give_cb( EventBits_t event, void *arg );
 bool gui_powermgm_event_cb( EventBits_t event, void *arg );
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg );
 
@@ -198,6 +201,10 @@ void gui_setup( void ) {
     powermgm_register_cb_with_prio( POWERMGM_STANDBY, gui_powermgm_event_cb, "gui", CALL_CB_FIRST );
     powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "gui thread guard take", CALL_CB_LVGL_GUARD_TAKE );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "gui thread guard give", CALL_CB_LVGL_GUARD_GIVE );
+    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "gui loop thread guard take", CALL_CB_LVGL_GUARD_TAKE );
+    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "gui loop thread guard give", CALL_CB_LVGL_GUARD_GIVE );
 
 #if defined( NATIVE_64BIT ) && defined( ROUND_DISPLAY )
     LV_IMG_DECLARE( rounddisplaymask_240px );
@@ -211,11 +218,21 @@ void gui_setup( void ) {
 #endif
 }
 
+bool gui_powermgm_lvgl_guard_take_cb( EventBits_t event, void *arg ) {
+    gui_take();
+    return( true );
+}
+
+bool gui_powermgm_lvgl_guard_give_cb( EventBits_t event, void *arg ) {
+    gui_give();
+    return( true );
+}
+
 bool gui_take( void ) {
     #ifdef NATIVE_64BIT
         return( true );
     #else
-        return xSemaphoreTake( xGUI_SemaphoreMutex, portMAX_DELAY ) == pdTRUE;
+        return( xSemaphoreTake( xGUI_SemaphoreMutex, portMAX_DELAY ) == pdTRUE );
     #endif
 }
 
@@ -227,8 +244,6 @@ void gui_give( void ) {
 }
 
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
-    gui_take();
-
     switch ( event ) {
         case POWERMGM_STANDBY:          /*
                                          * get back to maintile if configure and
@@ -273,8 +288,6 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                          */
                                         break;                                        
     }
-
-    gui_give();
     return( true );
 }
 
@@ -338,26 +351,15 @@ void gui_set_background_image ( uint32_t background_image ) {
 }
 
 bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
-    gui_take();
-    
     #ifdef NATIVE_64BIT
 
     #else
         switch ( event ) {
-            case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000  || display_get_timeout() == DISPLAY_MAX_TIMEOUT ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
+            case POWERMGM_WAKEUP:           if ( lv_disp_get_inactive_time( NULL ) >= display_get_timeout() * 1000  && display_get_timeout() != DISPLAY_MAX_TIMEOUT )
                                                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
-
                                             break;
-            case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) < display_get_timeout() * 1000 ) {
-                                                lv_task_handler();
-                                            }
-                                            else {
+            case POWERMGM_SILENCE_WAKEUP:   if ( lv_disp_get_inactive_time( NULL ) >= display_get_timeout() * 1000 )
                                                 powermgm_set_event( POWERMGM_STANDBY_REQUEST );
-                                            }
                                             break;
         }
     #endif
@@ -368,8 +370,5 @@ bool gui_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
         force_redraw = !force_redraw;
         lv_obj_invalidate( lv_scr_act() );
     }
-
-    gui_give();
-
     return( true );
 }

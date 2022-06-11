@@ -59,7 +59,7 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg );
 char *wifiname=NULL;
 char *wifipassword=NULL;
 
-wifictl_config_t wifictl_config;
+wifictl_config_t *wifictl_config = NULL;
 
 bool wifictl_send_event_cb( EventBits_t event, void *arg );
 void wifictl_set_event( EventBits_t bits );
@@ -80,7 +80,8 @@ void wifictl_setup( void ) {
     /*
      * load config from spiff
      */
-    wifictl_config.load();
+    wifictl_config = new wifictl_config_t();
+    wifictl_config->load();
 #ifdef NATIVE_64BIT
     wifictl_lv_task = lv_task_create( wifictl_Task, 500, LV_TASK_PRIO_MID, NULL );
 #else
@@ -137,10 +138,10 @@ void wifictl_setup( void ) {
          */
         for( int i = 0 ; i < len ; i++ ) {
             for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
-                if ( !strcmp( wifictl_config.networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) && strcmp( wifictl_config.networklist[ entry ].ssid,  wifictl_config.networklist_tried[ entry ].ssid ) ) {
+                if ( !strcmp( wifictl_config->networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) && strcmp( wifictl_config->networklist[ entry ].ssid,  wifictl_config->networklist_tried[ entry ].ssid ) ) {
                     wifictl_send_event_cb( WIFICTL_MSG, (void *)"connecting ..." );
-                    WiFi.setHostname(wifictl_config.hostname);
-                    WiFi.begin( wifictl_config.networklist[ entry ].ssid, wifictl_config.networklist[ entry ].password );
+                    WiFi.setHostname(wifictl_config->hostname);
+                    WiFi.begin( wifictl_config->networklist[ entry ].ssid, wifictl_config->networklist[ entry ].password );
                     log_d("try to connect to network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
                 }
             }
@@ -162,21 +163,21 @@ void wifictl_setup( void ) {
         wifictl_send_event_cb( WIFICTL_CONNECT, (void *)WiFi.SSID().c_str() );
         wifictl_send_event_cb( WIFICTL_CONNECT_IP, (void *)WiFi.localIP().toString().c_str() );
         #ifdef ENABLE_WEBSERVER
-        if ( wifictl_config.webserver ) {
+        if ( wifictl_config->webserver ) {
             asyncwebserver_start();
         }
         #endif
         #ifdef ENABLE_FTPSERVER
-        if ( wifictl_config.ftpserver ) {
-            ftpserver_start( wifictl_config.ftpuser , wifictl_config.ftppass );
+        if ( wifictl_config->ftpserver ) {
+            ftpserver_start( wifictl_config->ftpuser , wifictl_config->ftppass );
         }
         # endif
         /*
          * clean tried networklist
          */
         for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
-            wifictl_config.networklist_tried[ entry ].ssid[ 0 ] = '\0';
-            wifictl_config.networklist_tried[ entry ].password[ 0 ] = '\0';
+            wifictl_config->networklist_tried[ entry ].ssid[ 0 ] = '\0';
+            wifictl_config->networklist_tried[ entry ].password[ 0 ] = '\0';
         }
     #ifdef ARDUNIO_NG
         }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP );
@@ -266,7 +267,7 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
     
     switch( event ) {
         case POWERMGM_STANDBY:          
-            if ( !wifictl_config.enable_on_standby || wifictl_get_event( WIFICTL_OFF ) ) {
+            if ( !wifictl_config->enable_on_standby || wifictl_get_event( WIFICTL_OFF ) ) {
                 wifictl_standby();
                 retval = true;
             }
@@ -288,47 +289,47 @@ bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {
 }
 
 void wifictl_save_config( void ) {
-    wifictl_config.save();
+    wifictl_config->save();
 }
 
 void wifictl_load_config( void ) {
-    wifictl_config.load();
+    wifictl_config->load();
 }
 
 bool wifictl_get_autoon( void ) {
-    return( wifictl_config.autoon );
+    return( wifictl_config->autoon );
 }
 
 bool wifictl_get_enable_on_standby( void ) {
-    return( wifictl_config.enable_on_standby );
+    return( wifictl_config->enable_on_standby );
 }
 
 void wifictl_set_autoon( bool autoon ) {
-    wifictl_config.autoon = autoon;
+    wifictl_config->autoon = autoon;
     wifictl_send_event_cb( WIFICTL_AUTOON, (void*)&autoon );
     wifictl_save_config();
 }
 
 void wifictl_set_enable_on_standby( bool enable ) {
-    wifictl_config.enable_on_standby = enable;
+    wifictl_config->enable_on_standby = enable;
     wifictl_save_config();
 }
 
 bool wifictl_get_webserver( void ) {
-    return( wifictl_config.webserver );
+    return( wifictl_config->webserver );
 }
 
 void wifictl_set_webserver( bool webserver ) {
-    wifictl_config.webserver = webserver;
+    wifictl_config->webserver = webserver;
     wifictl_save_config();
 }
 
 bool wifictl_get_ftpserver( void ) {
-    return( wifictl_config.ftpserver );
+    return( wifictl_config->ftpserver );
 }
 
 void wifictl_set_ftpserver( bool ftpserver ) {
-    wifictl_config.ftpserver = ftpserver;
+    wifictl_config->ftpserver = ftpserver;
     wifictl_save_config();
 }
 
@@ -426,7 +427,7 @@ bool wifictl_is_known( const char* networkname ) {
     * check if network already in the networklist
     */
     for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-        if( !strcmp( networkname, wifictl_config.networklist[ entry ].ssid ) ) {
+        if( !strcmp( networkname, wifictl_config->networklist[ entry ].ssid ) ) {
         retval = true;
         return( retval );
         }
@@ -447,9 +448,9 @@ bool wifictl_delete_network( const char *ssid ) {
     * search networklist entry and zero them
     */
     for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-        if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
-        wifictl_config.networklist[ entry ].ssid[ 0 ] = '\0';
-        wifictl_config.networklist[ entry ].password[ 0 ] = '\0';
+        if( !strcmp( ssid, wifictl_config->networklist[ entry ].ssid ) ) {
+        wifictl_config->networklist[ entry ].ssid[ 0 ] = '\0';
+        wifictl_config->networklist[ entry ].password[ 0 ] = '\0';
         wifictl_save_config();
         retval = true;
         return( retval );
@@ -471,8 +472,8 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
     * check if network exist
     */
     for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-        if( !strcmp( ssid, wifictl_config.networklist[ entry ].ssid ) ) {
-        strncpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
+        if( !strcmp( ssid, wifictl_config->networklist[ entry ].ssid ) ) {
+        strncpy( wifictl_config->networklist[ entry ].password, password, sizeof( wifictl_config->networklist[ entry ].password ) );
         wifictl_save_config();
 #ifndef NATIVE_64BIT
         WiFi.scanNetworks( true );
@@ -486,9 +487,9 @@ bool wifictl_insert_network( const char *ssid, const char *password ) {
     * check for an emty entry and insert
     */
     for( int entry = 0 ; entry < NETWORKLIST_ENTRYS; entry++ ) {
-        if( strlen( wifictl_config.networklist[ entry ].ssid ) == 0 ) {
-        strncpy( wifictl_config.networklist[ entry ].ssid, ssid, sizeof( wifictl_config.networklist[ entry ].ssid ) );
-        strncpy( wifictl_config.networklist[ entry ].password, password, sizeof( wifictl_config.networklist[ entry ].password ) );
+        if( strlen( wifictl_config->networklist[ entry ].ssid ) == 0 ) {
+        strncpy( wifictl_config->networklist[ entry ].ssid, ssid, sizeof( wifictl_config->networklist[ entry ].ssid ) );
+        strncpy( wifictl_config->networklist[ entry ].password, password, sizeof( wifictl_config->networklist[ entry ].password ) );
         wifictl_save_config();
 #ifndef NATIVE_64BIT
         WiFi.scanNetworks( true );
@@ -575,7 +576,7 @@ void wifictl_wakeup( void ) {
         return;
     }
     
-    if ( wifictl_config.autoon ) {
+    if ( wifictl_config->autoon ) {
         log_d("request wifictl wakeup");
         wifictl_on();
         log_d("request wifictl wakeup done");

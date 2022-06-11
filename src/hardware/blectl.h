@@ -268,10 +268,6 @@
      * @param enable    true if enabled, false if disable
      */
     void blectl_set_autoon( bool autoon );
-    /**
-     * @brief start an ble scan
-     */
-    bool blectl_start_scan( void );
 #ifndef NATIVE_64BIT
     /**
      * @brief get the raw BLE Server

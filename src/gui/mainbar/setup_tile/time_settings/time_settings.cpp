@@ -91,10 +91,7 @@ static void time_setting_set_region_location( const char *timezone ) {
     char *location_tmp = NULL;
 
     timezone_tmp = (char*)MALLOC( strlen( timezone ) + 1 );
-    if ( !timezone_tmp ) {
-        log_e("timezone_tmp malloc failed");
-        while(1);
-    }
+    ASSERT( timezone_tmp, "timezone_tmp malloc failed" );
     strncpy( timezone_tmp, timezone, strlen( timezone ) + 1 );
 
     region_tmp = timezone_tmp;
@@ -129,6 +126,7 @@ int32_t time_settings_create_regionlist( const char* selected_region ) {
         for ( JsonPair p : obj ) {
             int len = strlen( p.key().c_str() ) + 1 ;
             char * region = (char*)MALLOC( len );
+            ASSERT( region, "error while region alloc failed");
             strncpy( region, p.key().c_str(), len );
             char * key = region;
             while( key ) {
@@ -169,6 +167,7 @@ int32_t time_settings_create_locationlist( const char* selected_region, const ch
         for ( JsonPair p : obj ) {
             int len = strlen( p.key().c_str() ) +  1;
             char * region = (char*)MALLOC( len );
+            ASSERT( region, "error while region alloc failed");
             strncpy( region, p.key().c_str(), len );
             char * location = region;
             while( location ) {

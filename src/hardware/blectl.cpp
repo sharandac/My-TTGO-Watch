@@ -62,6 +62,7 @@
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
     QueueHandle_t blectl_msg_queue;
+    QueueHandle_t blectl_msg_receive_queue;
     TaskHandle_t _blectl_scan_Task;
 #endif
 
@@ -70,7 +71,6 @@ blectl_msg_t blectl_msg;
 callback_t *blectl_callback = NULL;
 uint8_t txValue = 0;
 
-static void blectl_scan_task( void * pvParameters );
 bool blectl_send_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
@@ -198,24 +198,18 @@ void blectl_loop( void );
                                             break;
                     case LineFeed:          {
                                                 log_d("attention, message complete");
-                                                const char *gbmsg = gadgetbridge_msg.c_str();
-                                                log_d( "msg: %s", gbmsg );
-                                                if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
-                                                    log_d("gadgetbridge message identified, cut down to json");
-                                                    gadgetbridge_msg.erase( gadgetbridge_msg.length() - 1 );
-                                                    gbmsg += 3;
-                                                    BluetoothJsonRequest request( gbmsg, strlen( gbmsg ) * 4 );
-                                                    if ( request.isValid() ) {
-                                                        blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
-                                                    }
-                                                    else {
-                                                        blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
-                                                    }        
-                                                    request.clear();
-                                                }
-                                                else {
-                                                    blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
-                                                }
+                                                /*
+                                                 * Duplicate message
+                                                 */
+                                                char *buff = (char *)CALLOC( strlen( gadgetbridge_msg.c_str() ) + 1, 1 );
+                                                ASSERT( buff, "buff calloc failed" );
+                                                strlcpy( buff, gadgetbridge_msg.c_str(), strlen( gadgetbridge_msg.c_str() ) + 1 );
+                                                /*
+                                                 * Send message
+                                                 */
+                                                if ( xQueueSendFromISR( blectl_msg_receive_queue, &buff, 0 ) != pdTRUE )
+                                                    log_e("fail to send a receive BLE msg");
+                                                gadgetbridge_msg.clear();
                                                 break;
                                             }
                     default:                gadgetbridge_msg.append( msg[ i ] );
@@ -241,17 +235,25 @@ void blectl_setup( void ) {
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
+        /**
+         * allocate event group
+         */
         blectl_status = xEventGroupCreate();
+        ASSERT( blectl_status, "Failed to allocate event group" );
+        /**
+         * allocate send and receive queue
+         */
+        blectl_msg_queue = xQueueCreate( 5, sizeof( char * ) );
+        ASSERT( blectl_msg_queue, "Failed to allocate msg queue" );
 
+        blectl_msg_receive_queue = xQueueCreate( 5, sizeof( char * ) );
+        ASSERT( blectl_msg_receive_queue, "Failed to allocate msg receive queue" );
+        /**
+         * Construct a new esp bt controller enable object
+         */
         esp_bt_controller_enable( ESP_BT_MODE_BLE );
         esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
         esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
-
-        blectl_msg_queue = xQueueCreate( 5, sizeof( char * ) );
-        if ( blectl_msg_queue == NULL ) {
-            log_e("Failed to allocate msg queue");
-            while(true);
-        }
         /**
          *  Create the BLE Device
          * Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
@@ -259,15 +261,6 @@ void blectl_setup( void ) {
          * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
         BLEDevice::init("Espruino (" HARDWARE_NAME ")" );
-        /**
-         * get scan support
-         */
-/*
-        pBLEScan = BLEDevice::getScan();
-        pBLEScan->setActiveScan(true);
-        pBLEScan->setInterval(500);
-        pBLEScan->setWindow(99);
-*/
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
@@ -353,12 +346,12 @@ void blectl_setup( void ) {
          * Start advertising battery service
          */
         pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
-//        blebatctl_setup(pServer);
-//        blestepctl_setup();
+        blebatctl_setup(pServer);
+        blestepctl_setup();
         /*
          * Slow advertising interval for battery life
          */
-        pAdvertising->setMinInterval( 700 );
+        pAdvertising->setMinInterval( 500 );
         pAdvertising->setMaxInterval( 800 );
     #endif
 
@@ -395,39 +388,6 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
             break;
     }
     return( retval );
-}
-
-static void blectl_scan_task( void * pvParameters ) {
-    #ifdef NATIVE_64BIT
-    #else
-        log_i("start ble scan task, heap: %d", ESP.getFreeHeap() );
-
-        BLEScanResults foundDevices = pBLEScan->start( BLECTL_SCAN_TIME, false );
-        log_i("Devices found: %d", foundDevices.getCount() );
-        for( int i = 0 ; i < foundDevices.getCount(); i++ ) {
-            log_i("Device: %s, address: %s", foundDevices.getDevice( i ).getName().c_str(), foundDevices.getDevice( i ).getAddress().toString().c_str() );
-        }
-        pBLEScan->clearResults();
-
-        log_i("finish ble scan task, heap: %d", ESP.getFreeHeap() );
-        vTaskDelete( NULL );
-    #endif
-}
-
-bool blectl_start_scan( void ) {
-    #ifdef NATIVE_64BIT
-    #else
-        if( blectl_get_event( BLECTL_ON ) ) {
-            log_i("start ble scan");
-            xTaskCreate(    blectl_scan_task,
-                            "ble scan Task",
-                            2000,
-                            NULL,
-                            1,
-                            &_blectl_scan_Task );
-        }
-    #endif
-    return( true );
 }
 
 bool blectl_powermgm_loop_cb( EventBits_t event, void *arg ) {
@@ -481,10 +441,7 @@ bool blectl_get_event( EventBits_t bits ) {
 bool blectl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
     if ( blectl_callback == NULL ) {
         blectl_callback = callback_init( "blectl" );
-        if ( blectl_callback == NULL ) {
-            log_e("blectl callback alloc failed");
-            while(true);
-        }
+        ASSERT( blectl_callback, "blectl callback alloc failed" );
     }    
     return( callback_register( blectl_callback, event, callback_func, id ) );
 }
@@ -620,23 +577,14 @@ bool blectl_send_msg( const char *msg ) {
             /*
             * Duplicate message
             */
-            size_t len = strlen( msg );
-            char *buff = (char *)CALLOC( len + 1, 1 );
-            if ( buff == NULL ) {
-                log_e("buff calloc failed");
-                while( true );
-            }
-            strcpy( buff, msg );
+            size_t len = strlen( msg ) + 1;
+            char *buff = (char *)CALLOC( len, 1 );
+            ASSERT( buff, "buff calloc failed" );
+            strlcpy( buff, msg, len );
             /*
             * Send message
             */
-            BaseType_t ret;
-            ret = xQueueSend( blectl_msg_queue, &buff, 0);
-            /*
-            * buff will be freeed on the receive part
-            */
-            buff = NULL;
-            if ( ret != pdTRUE ) {
+            if ( xQueueSend( blectl_msg_queue, &buff, 0 ) != pdTRUE ) {
                 log_e("fail to send msg");
                 return false;
             }
@@ -654,10 +602,7 @@ void blectl_send_next_msg( char *msg ) {
 
         if ( blectl_msg.msg == NULL ) { 
             blectl_msg.msg = (char *)CALLOC( BLECTL_MSG_MTU, 1 );
-            if ( blectl_msg.msg == NULL ) {
-                log_e("blectl_msg.msg calloc failed");
-                while( true );
-            }
+            ASSERT( blectl_msg.msg, "blectl_msg.msg calloc failed" );
         }
 
         strncpy( blectl_msg.msg, msg, BLECTL_MSG_MTU );
@@ -709,7 +654,7 @@ void blectl_off( void ) {
     blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
 }
 
-static void blectl_send_chunk ( int32_t len ) {
+static void blectl_send_chunk ( unsigned char *msg, int32_t len ) {
     /*
      * send msg chunk
      */
@@ -718,21 +663,9 @@ static void blectl_send_chunk ( int32_t len ) {
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
-        pTxCharacteristic->setValue( (unsigned char*)&blectl_msg.msg[ blectl_msg.msgpos ], len );
+        pTxCharacteristic->setValue( msg, len );
         pTxCharacteristic->notify();
     #endif
-
-    char chunk_msg[ 64 ] = "";
-    for( int i = 0 ; i < len ; i++ ) {
-        if ( blectl_msg.msg[ blectl_msg.msgpos + i ] > 0x1F ) {
-            chunk_msg[ i ] = blectl_msg.msg[ blectl_msg.msgpos + i ];
-        }
-        else {
-            chunk_msg[ i ] = '?';
-        }
-    }
-    chunk_msg[ len ] = '\0';
-    log_d("send %2dbyte [ \"%s\" ] chunk", len, chunk_msg );
 }
 
 void blectl_loop ( void ) {
@@ -750,9 +683,8 @@ void blectl_loop ( void ) {
         if ( !blectl_msg.active ) {
             // Retrieve next message
             char *msg;
-            BaseType_t available;
-            available = xQueueReceive( blectl_msg_queue, &msg, 0);
-            if ( available == pdTRUE ) {
+            BaseType_t available = xQueueReceive( blectl_msg_queue, &msg, 0);
+            if ( available == pdTRUE && msg ) {
                 blectl_send_next_msg( msg );
                 free( msg );
             }
@@ -763,11 +695,11 @@ void blectl_loop ( void ) {
         nextmillis = millis() + BLECTL_CHUNKDELAY;
         if ( blectl_msg.msgpos < blectl_msg.msglen ) {
             if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
-                blectl_send_chunk ( BLECTL_CHUNKSIZE );
+                blectl_send_chunk ( (unsigned char *)&blectl_msg.msg[ blectl_msg.msgpos ], BLECTL_CHUNKSIZE );
                 blectl_msg.msgpos += BLECTL_CHUNKSIZE;
             }
             else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
-                blectl_send_chunk ( blectl_msg.msglen - blectl_msg.msgpos );
+                blectl_send_chunk ( (unsigned char *)&blectl_msg.msg[ blectl_msg.msgpos ], blectl_msg.msglen - blectl_msg.msgpos );
                 blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
                 blectl_msg.active = false;
                 blectl_msg.msglen = 0;
@@ -787,6 +719,39 @@ void blectl_loop ( void ) {
             blectl_msg.msgpos = 0;
         }
     }
+#ifdef NATIVE_64BIT
+#else
+    /**
+     * get next msg from receive queue
+     */
+    char *gbmsg;
+    BaseType_t available = xQueueReceive( blectl_msg_receive_queue, &gbmsg, 0);
+    if ( available == pdTRUE && gbmsg ) {
+        /**
+         * check if we have a GB message
+         */
+        if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
+            /**
+             * copy gbmsg pointer to a new pointer to prevent detroying gbmsg pointer
+             */
+            char *GBmsg = gbmsg + 3;
+            GBmsg[ strlen( GBmsg ) - 1 ] = '\0';
+
+            BluetoothJsonRequest request( GBmsg, strlen( GBmsg ) * 4 );
+
+            if ( request.isValid() )
+                blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
+            else
+                blectl_send_event_cb( BLECTL_MSG, (void *)GBmsg );
+
+            request.clear();
+        }
+        else {
+            blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
+        }
+        free( gbmsg );
+    }
+#endif
 }
 
 #ifdef NATIVE_64BIT

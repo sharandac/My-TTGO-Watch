@@ -61,6 +61,7 @@
     #endif
 #endif
 
+static bool framebuffer_drawing = true;                             /** @brief disable */
 static bool framebuffer_use_dma = false;
 lv_color_t *framebuffer = NULL;                                     /** @brief pointer to a full size framebuffer */
 uint32_t framebuffer_size = FRAMEBUFFER_BUFFER_SIZE;                /** @brief framebuffer size */
@@ -136,10 +137,7 @@ void framebuffer_setup( void ) {
         else {
             framebuffer = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
         }
-        if ( framebuffer == NULL ) {
-            log_e("framebuffer malloc failed");
-            while( 1 );
-        }
+        ASSERT( framebuffer, "framebuffer malloc failed" );
     }
     /*
      * set LVGL driver
@@ -170,10 +168,13 @@ bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case POWERMGM_STANDBY:          log_d("go standby, refresh framebuffer");
                                         framebuffer_refresh();
+                                        framebuffer_drawing = false;
                                         break;
         case POWERMGM_WAKEUP:           log_d("go wakeup");
+                                        framebuffer_drawing = true;
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   log_d("go wakeup");
+                                        framebuffer_drawing = false;
                                         break;
     }
     return( true );
@@ -240,6 +241,9 @@ void framebuffer_refresh( void ) {
 }
 
 static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
+    if( !framebuffer_drawing )
+            lv_disp_flush_ready( disp_drv );
+
     #ifdef NATIVE_64BIT
         /**
          * flush SDL screen

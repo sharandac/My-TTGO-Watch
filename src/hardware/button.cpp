@@ -120,6 +120,8 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
     static bool right_button = false;
     static bool quickbar_button = false;
     static bool exit_button = false;
+    static bool media_button = false;
+    static bool notify_button = false;
 
     const uint8_t *state = SDL_GetKeyboardState( NULL );
 
@@ -143,6 +145,15 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
         if ( exit_button ) button_send_cb( BUTTON_EXIT, (void*)NULL );
     }
 
+    if ( state[ SDL_SCANCODE_P] != exit_button ) {
+        notify_button = state[ SDL_SCANCODE_P ];
+        if ( notify_button ) button_send_cb( BUTTON_MEDIA_TEST, (void*)NULL );
+    }
+
+    if ( state[ SDL_SCANCODE_M] != exit_button ) {
+        media_button = state[ SDL_SCANCODE_M ];
+        if ( media_button ) button_send_cb( BUTTON_MEDIA_TEST, (void*)NULL );
+    }
 #else
     /*
      * handle IRQ event

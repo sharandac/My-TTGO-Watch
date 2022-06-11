@@ -68,7 +68,6 @@ LV_IMG_DECLARE(up_32px);
 LV_IMG_DECLARE(down_32px);
 
 LV_FONT_DECLARE(Ubuntu_16px);
-LV_FONT_DECLARE(Ubuntu_32px);
 
 static void bluetooth_media_activate_cb( void );
 static bool bluetooth_media_event_cb( EventBits_t event, void *arg );

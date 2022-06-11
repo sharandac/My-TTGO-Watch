@@ -23,6 +23,7 @@
     #define _WATCHFACE_THEME_CONFIG_H
 
     #include "config.h"
+    #include "utils/alloc.h"
     #include "utils/basejsonconfig.h"
     #include "utils/tinyexpr/tinyexpr.h"
 
@@ -120,6 +121,15 @@
          * @brief watchface theme config
          */
         watchface_t dial;
+
+        static void *operator new(size_t sz) {
+            void* m = MALLOC( sz );
+            return m;
+        }
+
+        static void operator delete( void *m ){
+            free( m );
+        }
 
         protected:
         ////////////// Available for overloading: //////////////

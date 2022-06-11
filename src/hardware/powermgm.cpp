@@ -109,6 +109,7 @@ void powermgm_loop( void ) {
          * clear powermgm state
          */
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
+        // powermgm_enable_interrupts();
 
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             log_i("go silence wakeup");
@@ -194,6 +195,7 @@ void powermgm_loop( void ) {
          * check if an standby callback block lightsleep in standby
          */
         standby = powermgm_send_event_cb( POWERMGM_STANDBY );
+        // powermgm_disable_interrupts();
         /*
          * print some memory stats
          */
@@ -267,7 +269,7 @@ void powermgm_loop( void ) {
                  * from here, the consumption is round about 20mA with ble
                  * total standby time is 15h with a 350mAh battery
                  */
-                pm_config.max_freq_mhz = 40;
+                pm_config.max_freq_mhz = 80;
                 pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
@@ -299,7 +301,7 @@ void powermgm_loop( void ) {
         #ifdef NATIVE_64BIT
         #else
             if ( !standby )
-                vTaskDelay( 50 );
+                vTaskDelay( 100 );
         #endif
 
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
@@ -421,6 +423,17 @@ bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, 
         }
     }    
     return( callback_register( powermgm_loop_callback, event, callback_func, id ) );
+}
+
+bool powermgm_register_loop_cb_with_prio( EventBits_t event, CALLBACK_FUNC callback_func, const char *id, callback_prio_t prio ) {
+    if ( powermgm_loop_callback == NULL ) {
+        powermgm_loop_callback = callback_init( "powermgm loop" );
+        if ( powermgm_loop_callback == NULL ) {
+            log_e("powermgm loop callback alloc failed");
+            while(true);
+        }
+    }    
+    return( callback_register_with_prio( powermgm_loop_callback, event, callback_func, id, prio ) );
 }
 
 bool powermgm_send_event_cb( EventBits_t event ) {

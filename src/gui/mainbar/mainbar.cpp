@@ -71,10 +71,7 @@ void mainbar_setup( void ) {
     }
 
     mainbar_history = (mainbar_history_t*)MALLOC( sizeof( mainbar_history_t ) );
-    if( !mainbar_history ) {
-        log_e("error while alloc");
-        while( 1 ){};
-    }
+    ASSERT( mainbar_history, "error while alloc" );
 
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
     lv_tileview_set_edge_flash( mainbar, false);
@@ -269,32 +266,21 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
 
     if ( tile_pos_table == NULL ) {
         tile_pos_table = ( lv_point_t * )MALLOC( sizeof( lv_point_t ) * tile_entrys );
-        if ( tile_pos_table == NULL ) {
-            log_e("tile_pos_table malloc faild");
-            while(true);
-        }
+        ASSERT( tile_pos_table, "tile_pos_table malloc faild" );
+
         tile = ( lv_tile_t * )MALLOC( sizeof( lv_tile_t ) * tile_entrys );
-        if ( tile == NULL ) {
-            log_e("tile malloc faild");
-            while(true);
-        }
+        ASSERT( tile, "tile malloc faild" );
     }
     else {
         lv_point_t *new_tile_pos_table;
         lv_tile_t *new_tile;
 
         new_tile_pos_table = ( lv_point_t * )REALLOC( tile_pos_table, sizeof( lv_point_t ) * tile_entrys );
-        if ( new_tile_pos_table == NULL ) {
-            log_e("tile_pos_table realloc faild");
-            while(true);
-        }
+        ASSERT( new_tile_pos_table, "tile_pos_table realloc faild" );
         tile_pos_table = new_tile_pos_table;
         
         new_tile = ( lv_tile_t * )REALLOC( tile, sizeof( lv_tile_t ) * tile_entrys );
-        if ( new_tile == NULL ) {
-            log_e("tile realloc faild");
-            while(true);
-        }
+        ASSERT( new_tile, "tile realloc faild" );
         tile = new_tile;
     }
 

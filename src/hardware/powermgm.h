@@ -111,6 +111,15 @@
      */
     bool powermgm_register_loop_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
     /**
+     * @brief registers a callback function which is called on a corresponding loop event
+     * 
+     * @param   event               possible values: POWERMGM_STANDBY, POWERMGM_SILENCE_WAKEUP, POWERMGM_WAKEUP
+     * @param   callback_func       pointer to the callback function 
+     * @param   id                  pointer to an string
+     * @param   prio                prio from CALL_CB_FIRST to CALL_CB_LAST
+     */
+    bool powermgm_register_loop_cb_with_prio( EventBits_t event, CALLBACK_FUNC callback_func, const char *id, callback_prio_t prio );
+    /**
      * @brief send an interrupt disable request
      */
     void powermgm_disable_interrupts( void );

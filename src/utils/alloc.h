@@ -17,4 +17,7 @@
         #define CALLOC         calloc               /** @brief calloc from normal heap */
         #define REALLOC        realloc              /** @brief realloc from normal heap */
     #endif // BOARD_HAS_PSRAM
+
+    #define     ASSERT( test, message, ... ) do { if (!(test)) { log_e( "[A] %s (line:%d) " message "\r\n", __FILE__, __LINE__, ##__VA_ARGS__); while(true); } } while (0)
+
 #endif // _ALLOC_H

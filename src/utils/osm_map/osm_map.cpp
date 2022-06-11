@@ -714,13 +714,12 @@ uri_load_dsc_t *osm_map_get_cache_tile_image( osm_location_t *osm_location ) {
          * and take it back after that
          */
         char *uri = (char*)MALLOC( strlen( osm_location->current_tile_url ) + 1 );
-        if ( uri ) {
-            strncpy( uri, osm_location->current_tile_url, strlen( osm_location->current_tile_url ) + 1 );
-            osm_map_give( osm_location );
-            uri_load_dsc = uri_load_to_ram( (const char*)uri );
-            osm_map_take( osm_location );
-            free( uri );
-        }
+        ASSERT( uri, "error while uri alloc failed");
+        strncpy( uri, osm_location->current_tile_url, strlen( osm_location->current_tile_url ) + 1 );
+        osm_map_give( osm_location );
+        uri_load_dsc = uri_load_to_ram( (const char*)uri );
+        osm_map_take( osm_location );
+        free( uri );
         /**
          * 2nd stage
          * seek for a free tile cache
@@ -805,10 +804,9 @@ void osm_map_set_tile_server( osm_location_t *osm_location, const char* tile_ser
      * allocate new memory and copy new tile server
      */
     osm_location->tile_server = (char *)MALLOC( strlen( tile_server ) + 1 );
-    if ( osm_location->tile_server ) {
-        strcpy( osm_location->tile_server, tile_server );
-        OSM_MAP_LOG("osm_location->tile_server: %s", osm_location->tile_server );
-    }
+    ASSERT( osm_location->tile_server, "tile server alloc failed");
+    strcpy( osm_location->tile_server, tile_server );
+    OSM_MAP_LOG("osm_location->tile_server: %s", osm_location->tile_server );
     osm_location->tile_server_source_update = true;
     /**
      * leave critical section
@@ -837,10 +835,7 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
     if ( !osm_location->tile_server ) {
         OSM_MAP_LOG("set default osm tile server");
         osm_location->tile_server = (char*)MALLOC( sizeof( DEFAULT_OSM_TILE_SERVER ) );
-        if ( !osm_location->tile_server ) {
-            OSM_MAP_ERROR_LOG("osm_location->tile_server: alloc failed");
-            while(1);
-        }
+        ASSERT( osm_location->tile_server, "tile server alloc failed");
 #ifdef NATIVE_64BIT
         OSM_MAP_LOG("osm_location->tile_server: alloc %ld bytes at %p", sizeof( DEFAULT_OSM_TILE_SERVER ), osm_location->tile_server );
 #else
@@ -853,10 +848,7 @@ void osm_map_gen_url( osm_location_t *osm_location ) {
      */
     if ( !osm_location->current_tile_url ) {
         osm_location->current_tile_url = (char *)MALLOC( MAX_CURRENT_TILE_URL_LEN );
-        if ( !osm_location->current_tile_url ) {
-            OSM_MAP_ERROR_LOG("osm_location->current_tile_url: alloc failed");
-            while(1);
-        }
+        ASSERT( osm_location->current_tile_url, "current tile url alloc failed");
         OSM_MAP_LOG("osm_location->current_tile_url: alloc %d bytes at %p", MAX_CURRENT_TILE_URL_LEN, osm_location->current_tile_url );
         *osm_location->current_tile_url = '\0';
     }

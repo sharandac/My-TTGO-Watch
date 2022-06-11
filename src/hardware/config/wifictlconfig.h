@@ -24,6 +24,7 @@
     #define _WIFICTLCONFIG_H
 
     #include "config.h"
+    #include "utils/alloc.h"
     #include "utils/basejsonconfig.h"
     #include "utils/webserver/webserver.h"
     #include "utils/ftpserver/ftpserver.h"
@@ -53,6 +54,15 @@
         char ftppass[32] = FTPSERVER_PASSWORD;              /** @brief ftpserver password*/
         wifictl_networklist* networklist = NULL;            /** @brief network list config pointer */
         wifictl_networklist* networklist_tried = NULL;      /** @brief network list config pointer of networks a connection was tried */
+
+        static void *operator new(size_t sz) {
+            void* m = MALLOC( sz );
+            return m;
+        }
+
+        static void operator delete( void *m ){
+            free( m );
+        }
 
         protected:
         ////////////// Available for overloading: //////////////
