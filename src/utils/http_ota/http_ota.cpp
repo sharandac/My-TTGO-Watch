@@ -21,6 +21,7 @@
  */
 #include "config.h"
 #include "http_ota.h"
+#include "hardware/powermgm.h"
 #include "hardware/callback.h"
 #include "hardware/blectl.h"
 #include "utils/decompress/decompress.h"
@@ -49,6 +50,8 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
      * prevent some issues
      */
     blectl_off();
+    powermgm_set_lightsleep( false );
+    powermgm_set_perf_mode();
 //    pmu_set_safe_voltage_for_update();
     /*
      * if firmware an .gz file, take compressed ota otherwise

@@ -242,6 +242,24 @@ void wf_label_printf( lv_obj_t *label, lv_obj_t *base, lv_align_t align, lv_coor
     return;
 }
 
+void wf_label_printf( lv_obj_t *label, const char *format, ... ) {
+    va_list args;
+    va_start(args, format);
+
+    char *buffer = NULL;
+    int size = vasprintf( &buffer, format, args );
+    va_end(args);
+
+    if( size > 0 ) {
+        lv_label_set_text( label, buffer );
+    }
+
+    if( buffer )
+        free( buffer );
+    
+    return;
+}
+
 lv_obj_t * wf_add_label_container(lv_obj_t *parent, char const * text) {
     lv_obj_t *container = wf_add_container( parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     wf_add_label( container, text);

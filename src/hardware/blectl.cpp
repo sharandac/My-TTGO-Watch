@@ -727,6 +727,7 @@ void blectl_loop ( void ) {
     char *gbmsg;
     BaseType_t available = xQueueReceive( blectl_msg_receive_queue, &gbmsg, 0);
     if ( available == pdTRUE && gbmsg ) {
+        log_i("ble msg: %s", gbmsg );
         /**
          * check if we have a GB message
          */

@@ -36,12 +36,12 @@
     typedef struct {
         bool valide = false;
         time_t timestamp = 0;
-        char temp[8] = "";
-        char pressure[8] = "";
-        char humidity[8] = "";
+        char temp[16] = "";
+        char pressure[16] = "";
+        char humidity[16] = "";
         char name[32] = "";
-        char icon[8] = "";
-        char wind[8] = "";
+        char icon[16] = "";
+        char wind[16] = "";
     } weather_forcast_t;
 
     void weather_app_setup( void );

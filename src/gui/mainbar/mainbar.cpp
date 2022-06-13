@@ -487,14 +487,23 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
     for ( int i = 0 ; i < tile_entrys; i++ ) {
         if ( tile_pos_table[ i ].x == x && tile_pos_table[ i ].y == y ) {
             current_tile = i;
+            /**
+             * ignore tile jump if we a on destination
+             */
+            if( current_tile == tile_number ) {
+                MAINBAR_WARN_LOG("the destination tile is the current tile");
+                return;
+            }
         }
     }
     /**
-     * ignore tile jump if we a on destination
+     * check if tile alread in mainbar history to prevent loops
      */
-    if( current_tile == tile_number ) {
-        MAINBAR_INFO_LOG("the destination tile is the current tile");
-        return;
+    for ( int i = 0 ; i < mainbar_history->entrys; i++ ) {
+        if ( mainbar_history->tile[ i ].x == x && mainbar_history->tile[ i ].y == y ) {
+            MAINBAR_WARN_LOG("current tile already in mainbar_history");
+            return;
+        }
     }
     /**
      * jump

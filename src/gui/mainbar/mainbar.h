@@ -28,6 +28,8 @@
     typedef void ( * MAINBAR_CALLBACK_FUNC ) ( void );
 
     #define MAINBAR_INFO_LOG            log_d
+    #define MAINBAR_ERROR_LOG           log_e
+    #define MAINBAR_WARN_LOG            log_w
 
     #define MAINBAR_APP_TILE_X_START    0                       /** @brief x start pos for app tiles **/
     #define MAINBAR_APP_TILE_Y_START    8                       /** @brief y start for app tiles **/

@@ -88,10 +88,8 @@ void gps_settings_tile_setup( void ) {
     lv_obj_t *fakegps_cont = wf_add_labeled_switch( gps_settings_tile, "fake gps via ip", &fakegps_onoff, gpsctl_get_gps_over_ip(), fakegps_onoff_event_handler, SETUP_STYLE );
     lv_obj_align( fakegps_cont, app_use_gps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
-    #if defined( M5PAPER )
-        lv_obj_t *gps_port_cont = wf_add_labeled_list( gps_settings_tile, "gps port (need reboot)", &gps_port_list, "PORT.A\nPORT.B\nPORT.C\nNONE", gps_port_list_event_handler, SETUP_STYLE );
-        lv_obj_align( gps_port_cont, fakegps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
-    #endif
+    lv_obj_t *gps_port_cont = wf_add_labeled_list( gps_settings_tile, "gps port (need reboot)", &gps_port_list, "PORT.A\nPORT.B\nPORT.C\nNONE", gps_port_list_event_handler, SETUP_STYLE );
+    lv_obj_align( gps_port_cont, fakegps_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     gps_latlon_label = lv_label_create( gps_settings_tile, NULL);
     lv_obj_add_style( gps_latlon_label, LV_OBJ_PART_MAIN, ws_get_mainbar_style()  );
@@ -100,6 +98,10 @@ void gps_settings_tile_setup( void ) {
 
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_UPDATE_LOCATION, gps_settings_latlon_update_cb, "gps settings" );
     gpsctl_register_cb( GPSCTL_UPDATE_CONFIG, gps_settings_config_update_cb, "gps settings" );
+
+    #if defined( M5PAPER )
+        lv_obj_set_hidden( gps_port_cont, true );
+    #endif
 }
 
 bool gps_settings_config_update_cb( EventBits_t event, void *arg ) {

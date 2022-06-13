@@ -27,19 +27,20 @@
     /**
      * @brief gpx file definitions
      */
-    #define     GPX_LOGFILE                     "/%Y-%m-%d-%H%M%S.gpx"
-    #define     GPX_HEADER                      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\r\n"
-    #define     GPX_START                       "<gpx version=\"1.1\" creator=\"gps tracker\">\r\n"
-    #define     GPX_METADATA                    " <metadata> <!-- Metadaten --> </metadata>\r\n"
-    #define     GPX_TRACK_START                 " <trk>\r\n"
-    #define     GPX_TRACK_SEGMENT_START         "  <trkseg>\r\n"
-    #define     GPX_TRACK_SEGMENT_POINT_START   "   <trkpt lat=\"%f\" lon=\"%f\">\r\n"
-    #define     GPX_TRACK_SEGMENT_POINT_ELE     "    <ele>%f</ele>\r\n"
-    #define     GPX_TRACK_SEGMENT_POINT_TIME    "    <time>%Y-%m-%dT%H:%M:%SZ</time>\r\n"
-    #define     GPX_TRACK_SEGMENT_POINT_END     "   </trkpt>\r\n"
-    #define     GPX_TRACK_SEGMENT_END           "  </trkseg>\r\n"
-    #define     GPX_TRACK_END                   " </trk>\r\n"
-    #define     GPX_END                         "</gpx>\r\n"
+    #define     GPX_LOGFILE                         "/%Y-%m-%d-%H%M%S.gpx"
+    #define     GPX_HEADER                          "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\r\n"
+    #define     GPX_START                           "<gpx version=\"1.1\" creator=\"gps tracker\">\r\n"
+    #define     GPX_METADATA                        " <metadata> <!-- Metadaten --> </metadata>\r\n"
+    #define     GPX_TRACK_START                     " <trk>\r\n"
+    #define     GPX_TRACK_SEGMENT_START             "  <trkseg>\r\n"
+    #define     GPX_TRACK_SEGMENT_POINT_START       "   <trkpt lat=\"%f\" lon=\"%f\">\r\n"
+    #define     GPX_TRACK_SEGMENT_POINT_ELE         "    <ele>%f</ele>\r\n"
+    #define     GPX_TRACK_SEGMENT_POINT_TIME_SRF    "%Y-%m-%dT%H:%M:%SZ"
+    #define     GPX_TRACK_SEGMENT_POINT_TIME        "    <time>%s</time>\r\n"
+    #define     GPX_TRACK_SEGMENT_POINT_END         "   </trkpt>\r\n"
+    #define     GPX_TRACK_SEGMENT_END               "  </trkseg>\r\n"
+    #define     GPX_TRACK_END                       " </trk>\r\n"
+    #define     GPX_END                             "</gpx>\r\n"
     /**
      * @brief tracker main setup function
      */

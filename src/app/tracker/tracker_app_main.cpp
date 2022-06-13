@@ -185,17 +185,13 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
     if( !tracker_gps_data )
         tracker_gps_data = (gps_data_t*)CALLOC( 1, sizeof( gps_data_t ) );
 
-    if( !tracker_gps_data ) {
-        TRACKER_APP_ERROR_LOG("tracker gps data alloc failed");
-        while( true );
-    }
+    ASSERT( tracker_gps_data, "tracker gps data alloc failed" );
 
     switch( event ) {
         case GPSCTL_FIX:
             tracker_logging_gps_state = true;
             if( tracker_logging_state )
                 lv_obj_set_style_local_line_color( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, LV_COLOR_GREEN );
-            TRACKER_APP_LOG("gps fix");
             counter = 0;
             break;
         case GPSCTL_NOFIX:
@@ -203,11 +199,9 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
             if( tracker_logging_state )
                 lv_obj_set_style_local_line_color( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, LV_COLOR_BLUE );
             counter = 0;
-            TRACKER_APP_LOG("no gps fix");
             break;
         case GPSCTL_ENABLE:
             counter = 0;
-            TRACKER_APP_LOG("gps enabled");
             break;
         case GPSCTL_DISABLE:
             tracker_logging_gps_state = false;
@@ -215,15 +209,8 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
             lv_obj_set_style_local_line_color( tracker_progress_arc, LV_ARC_PART_INDIC, LV_STATE_DEFAULT, LV_COLOR_RED );
             lv_arc_set_end_angle( tracker_progress_arc, 0 );
             counter = 0;
-            TRACKER_APP_LOG("gps disabled");
             break;
         case GPSCTL_UPDATE_LOCATION:
-            TRACKER_APP_LOG("location: %f/%f", gps_data->lat, gps_data->lon );
-            TRACKER_APP_LOG("altitude: %f", gps_data->altitude_meters );
-            TRACKER_APP_LOG("speed: %f", gps_data->speed_kmh );
-            TRACKER_APP_LOG("satellite: %d", gps_data->satellites );
-            TRACKER_APP_LOG("distance: %.3f", distance );
-            TRACKER_APP_LOG("course: %.3f", course );
             if( tracker_logging_gps_state && tracker_logging_state ) {
                 /**
                  * calc distance between current gps pos and last gpx pos and avoid large distance jumps
@@ -255,7 +242,6 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
         case GPSCTL_UPDATE_SATELLITE:
             break;
         default:
-            TRACKER_APP_LOG("event not implement: %x", event );
             break;
     }
 
@@ -298,7 +284,6 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
              * convert filename to local filename
              */
             filepath_convert( filename, 256, prefix_filename );
-            TRACKER_APP_INFO_LOG("create logfile: %s", filename );
             /**
              * create file
              */
@@ -316,10 +301,8 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
                 fclose( fp );
                 logging = true;
                 wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
-                TRACKER_APP_LOG("write logfile header, start and metadata (%d bytes)", size );
             }
             else {
-                TRACKER_APP_ERROR_LOG("write logfile header, start and metadata failed");
                 free( filename );
                 filename = NULL;
                 logging = false;
@@ -338,17 +321,15 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
                  * write tracking pointer
                  */
                 char timestamp[ 128 ];
-                strftime( timestamp, 128, GPX_TRACK_SEGMENT_POINT_TIME, &info );
+                strftime( timestamp, 128, GPX_TRACK_SEGMENT_POINT_TIME_SRF, &info );
                 size += fprintf( fp, GPX_TRACK_SEGMENT_POINT_START, gps_data->lat, gps_data->lon );
                 size += fprintf( fp, GPX_TRACK_SEGMENT_POINT_ELE, gps_data->altitude_meters );
-                size += fprintf( fp, timestamp );
+                size += fprintf( fp, GPX_TRACK_SEGMENT_POINT_TIME, timestamp );
                 size += fprintf( fp, GPX_TRACK_SEGMENT_POINT_END );
                 fclose( fp );
                 wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
-                TRACKER_APP_LOG("write logfile track segmant (%d bytes)", size );
             }
             else {
-                TRACKER_APP_ERROR_LOG("write logfile track segmant failed");
                 free( filename );
                 filename = NULL;
                 logging = false;
@@ -367,10 +348,6 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
             size += fprintf( fp, GPX_END );
             fclose( fp );
             wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "%d bytes writen", size );
-            TRACKER_APP_INFO_LOG("write logfile end (overall %d bytes)", size );
-        }
-        else {
-            TRACKER_APP_ERROR_LOG("write logfile header, start and metadata failed");
         }
         free( filename );
         filename = NULL;
@@ -403,7 +380,6 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
         case LV_EVENT_RELEASED:
             if( counter >= 36 ) {
                 if( !tracker_logging_state ) {
-                    TRACKER_APP_LOG("start logging");
                     tracker_logging_state = true;
                     distance = 0.0f;
                     gpsctl_on();
@@ -414,12 +390,10 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
                     gpsctl_set_enable_on_standby( true );
                 }
                 else {
-                    TRACKER_APP_LOG("stop logging");
                     tracker_logging_state = false;
                     gpsctl_off();
                     sdcard_block_unmounting( false );
                     gpsctl_set_enable_on_standby( tracker_gps_on_standby_state );
-                    tracker_app_main_logging( false, NULL );
                 }
                 motor_vibe( 250, false );
             }
@@ -455,19 +429,17 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
 static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED: {
-            char path[256] = "";
+            char path[512] = "";
             DIR *d;
             struct dirent *dir;
 
             #ifdef NATIVE_64BIT
-                filepath_convert( path, 256, tracker_config.storage );
+                filepath_convert( path, sizeof( path ), tracker_config.storage );
                 strncat( path, "/.", sizeof( path ) );
-                TRACKER_APP_INFO_LOG("path: %s", path );
                 chdir( path );
                 d = opendir( "." );
             #else
                 strncat( path, tracker_config.storage, sizeof( path ) );
-                TRACKER_APP_INFO_LOG("path: %s", path );
                 d = opendir( path );
             #endif
 
@@ -478,7 +450,6 @@ static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) 
                         char filename[ 256 ] = "";
                         snprintf( path, sizeof( path ), "%s/%s", tracker_config.storage, dir->d_name );
                         filepath_convert( filename, sizeof( filename ), path );
-                        TRACKER_APP_INFO_LOG("remove %s", filename );
                         remove( filename );
                         file_count++;
                     }

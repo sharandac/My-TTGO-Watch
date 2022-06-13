@@ -201,10 +201,13 @@ void gui_setup( void ) {
     powermgm_register_cb_with_prio( POWERMGM_STANDBY, gui_powermgm_event_cb, "gui", CALL_CB_FIRST );
     powermgm_register_cb_with_prio( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_event_cb, "gui", CALL_CB_LAST );
     powermgm_register_loop_cb( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, gui_powermgm_loop_event_cb, "gui loop" );
-    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "gui thread guard take", CALL_CB_LVGL_GUARD_TAKE );
-    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "gui thread guard give", CALL_CB_LVGL_GUARD_GIVE );
-    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "gui loop thread guard take", CALL_CB_LVGL_GUARD_TAKE );
-    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "gui loop thread guard give", CALL_CB_LVGL_GUARD_GIVE );
+    /**
+     * add lvgl thread guard
+     */
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "LVGL thread guard take", CALL_CB_LVGL_GUARD_TAKE );
+    powermgm_register_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "LVGL thread guard give", CALL_CB_LVGL_GUARD_GIVE );
+    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_take_cb, "LVGL loop thread guard take", CALL_CB_LVGL_GUARD_TAKE );
+    powermgm_register_loop_cb_with_prio( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP , gui_powermgm_lvgl_guard_give_cb, "LVGL loop thread guard give", CALL_CB_LVGL_GUARD_GIVE );
 
 #if defined( NATIVE_64BIT ) && defined( ROUND_DISPLAY )
     LV_IMG_DECLARE( rounddisplaymask_240px );
@@ -246,8 +249,7 @@ void gui_give( void ) {
 bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
     switch ( event ) {
         case POWERMGM_STANDBY:          /*
-                                         * get back to maintile if configure and
-                                         * stop all LVGL activitys and tasks
+                                         * slow LVGL down ticker
                                          */
                                         log_d("go standby");                  
                                         #ifdef NATIVE_64BIT
@@ -255,24 +257,27 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             lv_obj_invalidate( lv_scr_act() );
                                             lv_refr_now( NULL );
                                             hardware_detach_lvgl_ticker();
+                                            hardware_attach_lvgl_ticker_slow();
                                         #endif
                                         break;
         case POWERMGM_WAKEUP:           /*
-                                         * resume all LVGL activitys and tasks
+                                         * resume LVGL ticker
                                          */
                                         log_d("go wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
+                                            hardware_detach_lvgl_ticker();
                                             hardware_attach_lvgl_ticker();
                                         #endif
                                         lv_disp_trig_activity( NULL );
                                         break;
         case POWERMGM_SILENCE_WAKEUP:   /*
-                                         * resume all LVGL activitys and tasks
+                                         * resume LVGL ticker
                                          */
                                         log_d("go silence wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
+                                            hardware_detach_lvgl_ticker();
                                             hardware_attach_lvgl_ticker();
                                         #endif
                                         lv_disp_trig_activity( NULL );

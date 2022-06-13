@@ -71,7 +71,6 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 static void bluetooth_media_activate_cb( void );
 static bool bluetooth_media_event_cb( EventBits_t event, void *arg );
-static bool bluetooth_media_style_cb( EventBits_t event, void *arg );
 static void enter_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_media_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event );

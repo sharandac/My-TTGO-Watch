@@ -70,7 +70,6 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
 bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
 bool pmu_blectl_event_cb( EventBits_t event, void *arg );
 bool pmu_send_cb( EventBits_t event, void *arg );
-void pmu_write_log( const char * filename );
 
 void pmu_setup( void ) {
     /*
@@ -92,9 +91,37 @@ void pmu_setup( void ) {
         M5.Axp.SetAdcState( true );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
+        /**
+         * if ADC sampling rate != 200, init charging current, samplingrate and coulomcounter
+         */
+        log_i("init AXP202 pmu controller");
+        if( ttgo->power->getAdcSamplingRate() != 200 ) {
+            int failCounter = 0;
+            log_i("init AXP charging settings and control to 200Hz, 300mA, Coulomcounter");
+
+            if ( ttgo->power->setChargeControlCur( 300 ) != AXP_PASS ) {
+                log_e("charge current set failed!");
+                failCounter++;
+            }
+
+            if ( ttgo->power->EnableCoulombcounter() != AXP_PASS ) {
+                log_e("enable coulumb counter failed!");
+                failCounter++;
+            }
+
+            if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) != AXP_PASS ) {
+                log_e("adc sample set failed!");
+                failCounter++;
+            }
+
+            if ( failCounter ) {
+                log_e("AXP202 setup failed, shutdown");
+                ttgo->power->shutdown();
+            }
+        }
         /*
-        * Turn on the IRQ used
-        */
+         * Turn on the IRQ used
+         */
         ttgo->power->adc1Enable( AXP202_BATT_VOL_ADC1 | AXP202_BATT_CUR_ADC1 | AXP202_VBUS_VOL_ADC1 | AXP202_VBUS_CUR_ADC1, AXP202_ON);
         ttgo->power->enableIRQ( AXP202_VBUS_REMOVED_IRQ | AXP202_VBUS_CONNECT_IRQ
                                 | AXP202_CHARGING_FINISHED_IRQ | AXP202_CHARGING_IRQ
@@ -103,16 +130,8 @@ void pmu_setup( void ) {
                                 , AXP202_ON );
         ttgo->power->clearIRQ();
         /*
-        * delete old charge logfile
-        */
-        if ( ttgo->power->isVBUSPlug() ) {
-            SPIFFS.remove( PMU_CHARGE_LOG_FILENAME );
-        }
-        /*
         * enable coulumb counter and set target voltage for charging
         */
-        if ( ttgo->power->EnableCoulombcounter() ) 
-            log_e("enable coulumb counter failed!");    
         if ( pmu_config.high_charging_target_voltage ) {
             log_d("set target voltage to 4.36V");
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
@@ -123,10 +142,6 @@ void pmu_setup( void ) {
             if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
                 log_e("target voltage 4.2V set failed!");
         }
-        if ( ttgo->power->setChargeControlCur( 300 ) )
-            log_e("charge current set failed!");
-        if ( ttgo->power->setAdcSamplingRate( AXP_ADC_SAMPLING_RATE_200HZ ) )
-            log_e("adc sample set failed!");
         /*
         * Turn off unused power
         */
@@ -914,6 +929,3 @@ bool pmu_is_vbus_plug( void ) {
 
     return( plug );
 }
-
-void pmu_write_log( const char * filename ) {
- }

@@ -76,10 +76,7 @@ void hardware_attach_lvgl_ticker( void ) {
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
-        if( !tickTicker )
-            tickTicker = new Ticker();
-
-        tickTicker->attach_ms(5, []() {
+        tickTicker->attach_ms( 5, []() {
             lv_tick_inc(5);
         });
     #endif
@@ -92,9 +89,6 @@ void hardware_attach_lvgl_ticker_slow( void ) {
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
-        if( !tickTicker )
-            tickTicker = new Ticker();
-
         tickTicker->attach_ms(250, []() {
             lv_tick_inc(250);
         });
@@ -109,8 +103,6 @@ void hardware_detach_lvgl_ticker( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
         tickTicker->detach();
-        tickTicker->~Ticker();
-        tickTicker = nullptr;
     #endif
 }
 

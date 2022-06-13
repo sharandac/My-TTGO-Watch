@@ -305,10 +305,7 @@ void update_Task( void * pvParameters ) {
     if ( update_event & UPDATE_GET_VERSION_REQUEST ) {
         int64_t firmware_version = update_check_new_version( update_setup_get_url() );
         if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
-            char version_msg[48] = "";
-            snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
-            lv_label_set_text( update_status_label, (const char*)version_msg );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5, "new version: %ld", firmware_version );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
             if ( last_firmware_version < firmware_version ) {
                 bluetooth_message_queue_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"update\",\"body\":\"new firmware version available\"}");
@@ -340,10 +337,7 @@ void update_Task( void * pvParameters ) {
         gui_take();
 
         if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
-            char version_msg[48] = "";
-            snprintf( version_msg, sizeof( version_msg ), "new version: %lld", firmware_version );
-            lv_label_set_text( update_status_label, (const char*)version_msg );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5, "new version: %ld", firmware_version );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
             if ( last_firmware_version < firmware_version ) {
                 bluetooth_message_queue_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"update\",\"body\":\"new firmware version available\"}");

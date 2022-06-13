@@ -106,7 +106,6 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
                      * TODO_ affect power loop rate
                      */
                     time_t timeout = request["int"].as<time_t>(); // Requested timeout, in seconds
-                    log_d("RECEIVED timeout: %d seconds", timeout);
                     stepcounter_ble_updater.setTimeout(timeout);
                 }
                 retval = true;
