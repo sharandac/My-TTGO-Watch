@@ -122,6 +122,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
     static bool exit_button = false;
     static bool media_button = false;
     static bool notify_button = false;
+    static bool notify_del_button = false;
 
     const uint8_t *state = SDL_GetKeyboardState( NULL );
 
@@ -145,12 +146,17 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
         if ( exit_button ) button_send_cb( BUTTON_EXIT, (void*)NULL );
     }
 
-    if ( state[ SDL_SCANCODE_P] != exit_button ) {
+    if ( state[ SDL_SCANCODE_P] != notify_button ) {
         notify_button = state[ SDL_SCANCODE_P ];
-        if ( notify_button ) button_send_cb( BUTTON_MEDIA_TEST, (void*)NULL );
+        if ( notify_button ) button_send_cb( BUTTON_NOTIFY_TEST, (void*)NULL );
     }
 
-    if ( state[ SDL_SCANCODE_M] != exit_button ) {
+    if ( state[ SDL_SCANCODE_D] != notify_del_button ) {
+        notify_del_button = state[ SDL_SCANCODE_D ];
+        if ( notify_del_button ) button_send_cb( BUTTON_NOTIFY_DEL_TEST, (void*)NULL );
+    }
+
+    if ( state[ SDL_SCANCODE_M] != media_button ) {
         media_button = state[ SDL_SCANCODE_M ];
         if ( media_button ) button_send_cb( BUTTON_MEDIA_TEST, (void*)NULL );
     }

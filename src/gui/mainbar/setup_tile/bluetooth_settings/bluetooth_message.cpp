@@ -36,6 +36,7 @@
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 #include "hardware/sound.h"
+#include "hardware/button.h"
 
 #include "utils/alloc.h"
 #include "utils/msg_chain.h"
@@ -177,6 +178,7 @@ LV_IMG_DECLARE(message_96px);
     lv_font_t *message_font = &Ubuntu_16px;
 #endif
 
+static bool bluetooth_message_button_event_cb( EventBits_t event, void *arg );
 static void bluetooth_message_activate_cb( void );
 static bool bluetooth_message_style_change_event_cb( EventBits_t event, void *arg );
 static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -267,8 +269,28 @@ void bluetooth_message_tile_setup( void ) {
 
     blectl_register_cb( BLECTL_MSG_JSON, bluetooth_message_event_cb, "bluetooth_message" );
     styles_register_cb( STYLE_CHANGE, bluetooth_message_style_change_event_cb, "bluetooth message style" );
+    button_register_cb( BUTTON_NOTIFY_TEST | BUTTON_NOTIFY_DEL_TEST, bluetooth_message_button_event_cb, "bluetooth message button cb" );
+    mainbar_add_tile_button_cb( bluetooth_message_tile_num, bluetooth_message_button_event_cb );
     mainbar_add_tile_activate_cb( bluetooth_message_tile_num, bluetooth_message_activate_cb );
     messages_app = app_register( "messages", &message_64px, enter_bluetooth_messages_cb );
+}
+
+static bool bluetooth_message_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_EXIT:           
+            mainbar_jump_back();
+            break;
+        case BUTTON_NOTIFY_TEST:
+            log_i("send test notify");
+            blectl_send_loop_msg( "{\"t\":\"notify\",\"id\":1654906064,\"src\":\"K-9 Mail\",\"title\":\"foo\",\"body\":\"bar 23\"}" );
+            break;
+        case BUTTON_NOTIFY_DEL_TEST:
+            log_i("send test del notify");
+            blectl_send_loop_msg( "{\"t\":\"notify-\",\"id\":1654906064}" );
+            break;
+    }
+
+    return( true );
 }
 
 static void bluetooth_message_activate_cb( void ) {
@@ -362,7 +384,7 @@ bool bluetooth_delete_msg_from_chain( int32_t entry ) {
         mainbar_jump_back();
     }
     else {
-        if ( bluetooth_current_msg == entry - 1 ) {
+        if ( bluetooth_current_msg == ( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 ) ) {
             msg_chain_delete_msg_entry( bluetooth_msg_chain, entry );
             bluetooth_current_msg--;
             bluetooth_message_show_msg( bluetooth_current_msg );
@@ -372,6 +394,25 @@ bool bluetooth_delete_msg_from_chain( int32_t entry ) {
             bluetooth_message_show_msg( bluetooth_current_msg );
         }
     }
+
+    switch ( msg_chain_get_entrys( bluetooth_msg_chain ) ) {
+        case 1:
+            widget_set_indicator( messages_widget, ICON_INDICATOR_1 );
+            app_set_indicator( messages_app, ICON_INDICATOR_1 );
+            break;
+        case 2:
+            widget_set_indicator( messages_widget, ICON_INDICATOR_2 );
+            app_set_indicator( messages_app, ICON_INDICATOR_2 );
+            break;
+        case 3:
+            widget_set_indicator( messages_widget, ICON_INDICATOR_3 );
+            app_set_indicator( messages_app, ICON_INDICATOR_3 );
+            break;
+        default:
+            widget_set_indicator( messages_widget, ICON_INDICATOR_N );
+            app_set_indicator( messages_app, ICON_INDICATOR_N );
+    }
+
     return( true );
 }
 
@@ -456,17 +497,19 @@ bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
                 log_i("add notify with id: %ld", doc["id"].as<long>() );
 
             int len = doc.memoryUsage();
-            char *msg = (char *)MALLOC( len );
+            char *msg = (char *)MALLOC_ASSERT( len, "bluetooth message alloc failed" );
             log_i("alloc json msg with size %d", len );
-            ASSERT( msg, "bluetooth message alloc failed" );
 
             serializeJson( doc, msg, len );
             retval = bluetooth_message_queue_msg( msg );
             free( msg );
         }
         else if( !strcmp( doc["t"], "notify-" ) && doc.containsKey("id" ) ) {
+            log_i("number of msg: %d", bluetooth_get_number_of_msg() );
             for( int i = 0 ; i < bluetooth_get_number_of_msg() ; i++ ) {
                 const char *msg = bluetooth_get_msg_entry( i );
+
+                log_i("msg[%d]: %s", i, msg );
 
                 BluetoothJsonRequest request( msg, strlen( msg ) * 4 );
                 if ( request.isValid() ) {
@@ -474,6 +517,7 @@ bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
                         if( request["id"].as<long>() == doc["id"].as<long>() ) {
                             log_i("delete notify with id %ld", doc["id"].as<long>() );
                             bluetooth_delete_msg_from_chain( i );
+                            break;
                         }
                     }
                 }
@@ -555,7 +599,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
 }
 
 int32_t bluetooth_get_number_of_msg( void ) {
-    return( bluetooth_current_msg < 0 ? 0 : bluetooth_current_msg );
+    return( bluetooth_current_msg < 0 ? 0 : bluetooth_current_msg + 1 );
 }
 
 void bluetooth_message_show_msg( int32_t entry ) {

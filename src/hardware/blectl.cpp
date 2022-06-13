@@ -566,35 +566,71 @@ void blectl_read_config( void ) {
     blectl_config.load();
 }
 
-bool blectl_send_msg( const char *msg ) {
+bool blectl_send_loop_msg( const char *format, ... ) {
+    bool retval = false;
+    /**
+     * build new string
+     */
+    va_list args;
+    va_start(args, format);
+    char *buffer = NULL;
+    vasprintf( &buffer, format, args );
+    va_end(args);
+    /**
+     * if we have a string, send it via via call back
+     */
+    if( buffer ) {
+        BluetoothJsonRequest request( buffer, strlen( buffer ) * 4 );
+        /**
+         * check if we have a valid json
+         */
+        if ( request.isValid() )
+            blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
+        else
+            blectl_send_event_cb( BLECTL_MSG, (void *)buffer );
+
+        request.clear();
+        
+        retval = true;
+        free( buffer );
+    }
+    
+    return retval;
+}
+
+bool blectl_send_msg( const char *format, ... ) {
+    bool retval = false;
+
     #ifdef NATIVE_64BIT
-        return( false );
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
+        /**
+         * check if we connected
+         */
         if ( blectl_get_event( BLECTL_CONNECT | BLECTL_AUTHWAIT ) ) {
-            /*
-            * Duplicate message
-            */
-            size_t len = strlen( msg ) + 1;
-            char *buff = (char *)CALLOC( len, 1 );
-            ASSERT( buff, "buff calloc failed" );
-            strlcpy( buff, msg, len );
-            /*
-            * Send message
-            */
-            if ( xQueueSend( blectl_msg_queue, &buff, 0 ) != pdTRUE ) {
-                log_e("fail to send msg");
-                return false;
+            /**
+             * build new string
+             */
+            va_list args;
+            va_start(args, format);
+            char *buffer = NULL;
+            vasprintf( &buffer, format, args );
+            va_end(args);
+            /**
+             * if we have a string, send it via msg_queue
+             */
+            if( buffer ) {
+                if ( xQueueSend( blectl_msg_queue, &buffer, 0 ) != pdTRUE )
+                    log_e("fail to send msg");
+                else
+                    retval = true;
             }
-            return true;
         }
         else {
             log_e("msg can't send while bluetooth is not connected");
-            return false;
         }
     #endif
+    
+    return retval;
 }
 
 void blectl_send_next_msg( char *msg ) {

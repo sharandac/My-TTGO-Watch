@@ -305,6 +305,16 @@ void pmu_loop( void ) {
                 */
                 log_d("AXP202: VBusPlugInIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                if ( pmu_config.high_charging_target_voltage ) {
+                    log_w("set target voltage to 4.36V for high target charging");
+                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
+                        log_e("target voltage 4.36V set failed!");
+                }
+                else {
+                    log_d("set target voltage to 4.20V for charging");
+                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                        log_e("target voltage 4.20V set failed!");
+                }
                 plug = true;
             }
             if ( ttgo->power->isVbusRemoveIRQ() ) {
@@ -325,17 +335,7 @@ void pmu_loop( void ) {
                 */
                 log_d("AXP202: ChargingIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                if ( pmu_config.high_charging_target_voltage ) {
-                    log_w("set target voltage to 4.36V for high target charging");
-                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_36V ) )
-                        log_e("target voltage 4.36V set failed!");
-                }
-                else {
-                    log_d("set target voltage to 4.20V for charging");
-                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
-                        log_e("target voltage 4.20V set failed!");
-                }
-                 charging = true;
+                charging = true;
             }
             if ( ttgo->power->isChargingDoneIRQ() ) {
                 /*
@@ -344,11 +344,9 @@ void pmu_loop( void ) {
                 */
                 log_d("AXP202: ChargingDoneIRQ");
                 powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                if ( pmu_config.high_charging_target_voltage ) {
-                    log_w("set target voltage to 4.20V after high target charging");
-                    if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
-                        log_e("target voltage 4.20V set failed!");
-                }
+                log_w("set target voltage to 4.20V after high target charging");
+                if ( ttgo->power->setChargingTargetVoltage( AXP202_TARGET_VOL_4_2V ) )
+                    log_e("target voltage 4.20V set failed!");
                 charging = false;
             }
             if ( ttgo->power->isBattPlugInIRQ() ) {
@@ -581,13 +579,17 @@ void pmu_standby( void ) {
             ttgo->power->setDCDC3Voltage( pmu_config.normal_power_save_voltage );
             log_d("go standby, enable %dmV standby voltage", pmu_config.normal_power_save_voltage );
         }
+        #if defined( LILYGO_WATCH_2020_V2 ) 
+            ttgo->power->setPowerOutPut(AXP202_LDO3, false);
+        #else
+            /*
+                * disable LD02, sound?
+                */
+            ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
+        #endif
         /*
-            * disable LD02, sound?
-            */
-        ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_OFF );
-        /*
-            * enable GPIO in lightsleep for wakeup
-            */
+         * enable GPIO in lightsleep for wakeup
+         */
         gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
         esp_sleep_enable_gpio_wakeup ();    
     #endif
@@ -638,7 +640,16 @@ void pmu_wakeup( void ) {
         /*
         * enable LDO2, backlight?
         */
-        ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
+        #if defined( LILYGO_WATCH_2020_V2 ) 
+            ttgo->power->setLDO3Voltage(3300);
+            ttgo->power->setPowerOutPut(AXP202_LDO3, true);
+        #else
+            /*
+             * disable LD02, sound?
+             */
+            ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
+        #endif
+
     #endif
 #endif
     /*

@@ -124,14 +124,17 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:
                 log_d("go silence wakeup");
+                sdcard_mounted = false;
                 retval = true;
                 break;
             case POWERMGM_STANDBY:
                 log_d("go standby");
+                sdcard_mounted = true;
                 retval = true;
                 break;
             case POWERMGM_WAKEUP:
                 log_d("go wakeup");
+                sdcard_mounted = true;
                 retval = true;
                 break;
         }

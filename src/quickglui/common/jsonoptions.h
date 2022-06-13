@@ -123,7 +123,7 @@ struct JsonStringOption : public JsonOption {
 
     JsonStringOption(const char* optionName, int maxValueLength, const char* defValue = nullptr) : JsonOption(optionName, OptionDataType::StringOption) {
         maxLength = maxValueLength;
-        value = (char*)MALLOC( maxLength );
+        value = (char*)MALLOC_ASSERT( maxLength, "JsonStringOption allocation failed" );
 
         if ( value == NULL ) {
             log_e("JsonStringOprtion alloc failed");

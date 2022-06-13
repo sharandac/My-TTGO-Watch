@@ -295,7 +295,7 @@ uri_load_dsc_t *uri_load_http_to_ram( uri_load_dsc_t *uri_load_dsc ) {
         CURLcode res;
         struct MemoryStruct chunk;
 
-        chunk.memory = (char*)malloc(1);  /* will be grown as needed by the realloc above */
+        chunk.memory = (char*)MALLOC(1);  /* will be grown as needed by the realloc above */
         chunk.size = 0;    /* no data at this point */
 
         curl_global_init(CURL_GLOBAL_ALL);
@@ -504,7 +504,7 @@ uri_load_dsc_t *uri_load_https_to_ram( uri_load_dsc_t *uri_load_dsc ) {
          * will be grown as needed by the realloc above
          * no data at this point
          */
-        chunk.memory = (char*)malloc( 1 );  
+        chunk.memory = (char*)MALLOC( 1 );  
         chunk.size = 0;
         /**
          * global curl init

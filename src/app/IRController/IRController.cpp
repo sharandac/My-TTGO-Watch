@@ -75,7 +75,7 @@
             lv_page_set_scrollbar_mode(desks, LV_SCROLLBAR_MODE_OFF);
             lv_obj_add_style(desks, LV_OBJ_PART_MAIN, ws_get_mainbar_style());
 
-            valid_pos = ( lv_point_t * )MALLOC( sizeof( lv_point_t ) * irConfig.pageCount );
+            valid_pos = ( lv_point_t * )MALLOC_ASSERT( sizeof( lv_point_t ) * irConfig.pageCount, "valid_pos allocation failed" );
             for (lv_coord_t i = 0; i < irConfig.pageCount; i++)
             {
                 valid_pos[i].x = i;

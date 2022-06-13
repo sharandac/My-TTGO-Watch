@@ -60,8 +60,7 @@ void setup_tile_setup( void ) {
         return;
     }
 
-    setup_entry = (icon_t*)MALLOC( sizeof( icon_t ) * MAX_SETUP_ICON );
-    ASSERT( setup_entry, "error while setup_entry alloc");
+    setup_entry = (icon_t*)MALLOC_ASSERT( sizeof( icon_t ) * MAX_SETUP_ICON, "error while setup_entry alloc" );
 
     for ( int tiles = 0 ; tiles < MAX_SETUP_TILES ; tiles++ ) {
 #if defined( M5PAPER )

@@ -41,7 +41,7 @@ WidgetHandle* WidgetManager::Allocate(lv_obj_t* obj) {
     auto type = buf.type[0] != NULL ? buf.type[0] : "lv_obj";
     log_d("WidgetHandle allocated for %s. Total count: %d", type, ++current);
     
-    auto addr = MALLOC(sizeof(WidgetHandle));
+    auto addr = MALLOC_ASSERT(sizeof(WidgetHandle),"WidgetManager::Allocate allocation failed");
     return new(addr) WidgetHandle();
 }
 

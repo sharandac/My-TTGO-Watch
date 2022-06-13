@@ -231,11 +231,18 @@
      */
     void blectl_update_battery( int32_t percent, bool charging, bool plug );
     /**
+     * @brief send an message and loop back as printf formatted 
+     * 
+     * @param   format  pointer to a string
+     * @param   ...     printf options
+     */
+    bool blectl_send_loop_msg( const char *format, ... );
+    /**
      * @brief send an message over bluettoth to gadgetbridge
      * 
      * @param   msg     pointer to a string
      */
-    bool blectl_send_msg( const char *msg );
+    bool blectl_send_msg( const char *format, ... );
     /**
      * @brief set the transmission power
      * 

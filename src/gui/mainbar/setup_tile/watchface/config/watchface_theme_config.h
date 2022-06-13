@@ -123,7 +123,7 @@
         watchface_t dial;
 
         static void *operator new(size_t sz) {
-            void* m = MALLOC( sz );
+            void* m = MALLOC_ASSERT( sz,"new operator allocation failed" );
             return m;
         }
 

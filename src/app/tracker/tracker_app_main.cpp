@@ -270,8 +270,7 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
         if( !logging ) {
             if( filename )
                 return( "error" );
-            filename = (char*)MALLOC( 256 );
-            ASSERT( filename, "malloc failed" );
+            filename = (char*)MALLOC_ASSERT( 256, "malloc failed" );
             /**
              * gen filename with timestamp and add storage prefix
              */

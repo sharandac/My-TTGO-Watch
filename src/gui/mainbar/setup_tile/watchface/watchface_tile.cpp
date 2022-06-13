@@ -173,8 +173,7 @@ void watchface_tile_setup( void ) {
         /**
          * alloc and copy default style
          */
-        watchface_app_label_style[ i ] = (lv_style_t *)MALLOC( sizeof( lv_style_t) );
-        ASSERT( watchface_app_label_style[ i ], "watchface_app_label_style[ %d ] alloc failed", i );
+        watchface_app_label_style[ i ] = (lv_style_t *)MALLOC_ASSERT( sizeof( lv_style_t), "watchface_app_label_style[ %d ] alloc failed", i );
 
         lv_style_copy( watchface_app_label_style[ i ], ws_get_mainbar_style() );
         lv_style_set_text_font( watchface_app_label_style[ i ], LV_OBJ_PART_MAIN, watchface_get_font( watchface_theme_config->dial.label[ i ].font, watchface_theme_config->dial.label[ i ].font_size ) );

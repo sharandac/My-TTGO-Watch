@@ -119,7 +119,7 @@ bool bluetooth_pairing_event_cb( EventBits_t event, void *arg ) {
 
 static void exit_bluetooth_pairing_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
-        case( LV_EVENT_CLICKED ):       mainbar_jump_to_maintile( LV_ANIM_OFF );
+        case( LV_EVENT_CLICKED ):       mainbar_jump_back();
                                         break;
     }
 }

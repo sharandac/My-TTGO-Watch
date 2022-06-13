@@ -170,21 +170,21 @@ int64_t update_check_new_version( char *url ) {
 
 const char* update_get_url( void ) {
     if ( firmwareversion > 0 ) {
-        return( (const char*)firmwareurl );
+        return( firmwareurl ? (const char*)firmwareurl : "" );
     }
     return( NULL );
 }
 
 const char* update_get_md5( void ) {
     if ( firmwareversion > 0 ) {
-        return( (const char*)firmwaremd5 );
+        return( firmwaremd5 ? (const char*)firmwaremd5 : "" );
     }
     return( NULL );
 }
 
 const char* update_get_comment( void ) {
     if ( firmwareversion > 0 ) {
-        return( (const char*)firmwarecomment );
+        return( firmwarecomment ? (const char*)firmwarecomment : "" );
     }
     return( NULL );
 }

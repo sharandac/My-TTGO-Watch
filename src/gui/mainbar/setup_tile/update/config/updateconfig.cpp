@@ -42,10 +42,8 @@ bool update_config_t::onSave(JsonDocument& doc) {
 bool update_config_t::onLoad(JsonDocument& doc) {
     autosync = doc["autosync"] | true;
     autorestart = doc["autorestart"] | false;
-    if ( !updateurl ) {
-        updateurl = (char*)MALLOC( FIRMWARE_UPDATE_URL_LEN );
-        ASSERT( updateurl, "update url alloc failed");
-    }
+    if ( !updateurl )
+        updateurl = (char*)MALLOC_ASSERT( FIRMWARE_UPDATE_URL_LEN, "update url alloc failed" );
     
     if ( doc["updateurl"] )
         strncpy( updateurl , doc["updateurl"], FIRMWARE_UPDATE_URL_LEN );
@@ -58,10 +56,8 @@ bool update_config_t::onLoad(JsonDocument& doc) {
 bool update_config_t::onDefault( void ) {
     autosync = true;
     autorestart = false;
-    if ( !updateurl ) {
-        updateurl = (char*)MALLOC( FIRMWARE_UPDATE_URL_LEN );
-        ASSERT( updateurl, "error while updateurl alloc failed");
-    }
+    if ( !updateurl )
+        updateurl = (char*)MALLOC_ASSERT( FIRMWARE_UPDATE_URL_LEN, "error while updateurl alloc failed" );
     strncpy( updateurl , FIRMWARE_UPDATE_URL, FIRMWARE_UPDATE_URL_LEN );
 
     return true;

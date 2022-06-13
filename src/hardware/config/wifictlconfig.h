@@ -56,7 +56,7 @@
         wifictl_networklist* networklist_tried = NULL;      /** @brief network list config pointer of networks a connection was tried */
 
         static void *operator new(size_t sz) {
-            void* m = MALLOC( sz );
+            void* m = MALLOC_ASSERT( sz, "new operator allocation failed" );
             return m;
         }
 

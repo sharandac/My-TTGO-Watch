@@ -257,7 +257,7 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             lv_obj_invalidate( lv_scr_act() );
                                             lv_refr_now( NULL );
                                             hardware_detach_lvgl_ticker();
-                                            hardware_attach_lvgl_ticker_slow();
+                                            lv_task_enable( false );
                                         #endif
                                         break;
         case POWERMGM_WAKEUP:           /*
@@ -266,8 +266,8 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_d("go wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
-                                            hardware_detach_lvgl_ticker();
                                             hardware_attach_lvgl_ticker();
+                                            lv_task_enable( true );
                                         #endif
                                         lv_disp_trig_activity( NULL );
                                         break;
@@ -277,8 +277,8 @@ bool gui_powermgm_event_cb( EventBits_t event, void *arg ) {
                                         log_d("go silence wakeup");
                                         #ifdef NATIVE_64BIT
                                         #else
-                                            hardware_detach_lvgl_ticker();
                                             hardware_attach_lvgl_ticker();
+                                            lv_task_enable( true );
                                         #endif
                                         lv_disp_trig_activity( NULL );
                                         break;

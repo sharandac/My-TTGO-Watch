@@ -70,8 +70,7 @@ void mainbar_setup( void ) {
         return;
     }
 
-    mainbar_history = (mainbar_history_t*)MALLOC( sizeof( mainbar_history_t ) );
-    ASSERT( mainbar_history, "error while alloc" );
+    mainbar_history = (mainbar_history_t*)MALLOC_ASSERT( sizeof( mainbar_history_t ), "error while alloc" );
 
     mainbar = lv_tileview_create( lv_scr_act(), NULL);
     lv_tileview_set_edge_flash( mainbar, false);
@@ -200,8 +199,12 @@ void mainbar_jump_back( void ) {
                  * call hibernate callback for the current tile if exist
                  */
                 if ( tile[ tile_number ].hibernate_cb != NULL ) {
-                    MAINBAR_INFO_LOG("call hibernate cb for tile: %d", tile_number );
-                    tile[ tile_number ].hibernate_cb();
+                    for( int i = 0 ; i < tile[ tile_number ].hibernate_cb_entry_count ; i++ ) {
+                        if ( tile[ tile_number ].hibernate_cb[ i ] != NULL ) {
+                            MAINBAR_INFO_LOG("call hibernate cb [%d] for tile: %d", i, tile_number );                            
+                            tile[ tile_number ].hibernate_cb[ i ]();
+                        }
+                    }
                 }
             }
         }
@@ -214,8 +217,12 @@ void mainbar_jump_back( void ) {
                  * call hibernate callback for the current tile if exist
                  */
                 if ( tile[ tile_number ].activate_cb != NULL ) {
-                    MAINBAR_INFO_LOG("call activation cb for tile: %d", tile_number );
-                    tile[ tile_number ].activate_cb();
+                    for( int i = 0 ; i < tile[ tile_number ].activate_cb_entry_count ; i++ ) {
+                        if ( tile[ tile_number ].activate_cb[ i ] != NULL ) {
+                            MAINBAR_INFO_LOG("call activation cb [%d] for tile: %d", i, tile_number );
+                            tile[ tile_number ].activate_cb[ i ]();
+                        }
+                    }
                 }
             }
         }
@@ -265,23 +272,15 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
     tile_entrys++;
 
     if ( tile_pos_table == NULL ) {
-        tile_pos_table = ( lv_point_t * )MALLOC( sizeof( lv_point_t ) * tile_entrys );
-        ASSERT( tile_pos_table, "tile_pos_table malloc faild" );
-
-        tile = ( lv_tile_t * )MALLOC( sizeof( lv_tile_t ) * tile_entrys );
-        ASSERT( tile, "tile malloc faild" );
+        tile_pos_table = ( lv_point_t * )MALLOC_ASSERT( sizeof( lv_point_t ) * tile_entrys, "tile_pos_table malloc faild" );
+        tile = ( lv_tile_t * )MALLOC_ASSERT( sizeof( lv_tile_t ) * tile_entrys, "tile malloc faild" );
     }
     else {
         lv_point_t *new_tile_pos_table;
         lv_tile_t *new_tile;
 
-        new_tile_pos_table = ( lv_point_t * )REALLOC( tile_pos_table, sizeof( lv_point_t ) * tile_entrys );
-        ASSERT( new_tile_pos_table, "tile_pos_table realloc faild" );
-        tile_pos_table = new_tile_pos_table;
-        
-        new_tile = ( lv_tile_t * )REALLOC( tile, sizeof( lv_tile_t ) * tile_entrys );
-        ASSERT( new_tile, "tile realloc faild" );
-        tile = new_tile;
+        tile_pos_table = ( lv_point_t * )REALLOC_ASSERT( tile_pos_table, sizeof( lv_point_t ) * tile_entrys, "tile_pos_table realloc faild" );
+        tile = ( lv_tile_t * )REALLOC_ASSERT( tile, sizeof( lv_tile_t ) * tile_entrys, "tile realloc faild" );
     }
 
     tile_pos_table[ tile_entrys - 1 ].x = x;
@@ -289,7 +288,9 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
 
     lv_obj_t *my_tile = lv_cont_create( mainbar, NULL);  
     tile[ tile_entrys - 1 ].tile = my_tile;
+    tile[ tile_entrys - 1 ].activate_cb_entry_count = 0;
     tile[ tile_entrys - 1 ].activate_cb = NULL;
+    tile[ tile_entrys - 1 ].hibernate_cb_entry_count = 0;
     tile[ tile_entrys - 1 ].hibernate_cb = NULL;
     tile[ tile_entrys - 1 ].button_cb = NULL;
     tile[ tile_entrys - 1 ].x = x;
@@ -316,7 +317,15 @@ bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC 
     }
 
     if ( tile_number < tile_entrys ) {
-        tile[ tile_number ].hibernate_cb = hibernate_cb;
+        tile[ tile_number ].hibernate_cb_entry_count++;
+
+        if( tile[ tile_number ].hibernate_cb == NULL )
+            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC(sizeof(MAINBAR_CALLBACK_FUNC*));
+        else
+            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC( tile[ tile_number ].hibernate_cb, sizeof(MAINBAR_CALLBACK_FUNC*) * tile[ tile_number ].hibernate_cb_entry_count );
+        ASSERT( tile[ tile_number ].hibernate_cb, "maintile hibernate_cb allocation failed");
+
+        tile[ tile_number ].hibernate_cb[ tile[ tile_number ].hibernate_cb_entry_count - 1 ] = hibernate_cb;
         return( true );
     }
     else {
@@ -333,9 +342,18 @@ bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC a
         log_e("main not initialized");
         while( true );
     }
-
+        
     if ( tile_number < tile_entrys ) {
-        tile[ tile_number ].activate_cb = activate_cb;
+        tile[ tile_number ].activate_cb_entry_count++;
+
+        if( tile[ tile_number ].activate_cb == NULL )
+            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC(sizeof(MAINBAR_CALLBACK_FUNC*));
+        else
+            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC( tile[ tile_number ].activate_cb, sizeof(MAINBAR_CALLBACK_FUNC*) * tile[ tile_number ].activate_cb_entry_count );
+        ASSERT( tile[ tile_number ].activate_cb, "maintile hibernate_cb allocation failed");
+
+        tile[ tile_number ].activate_cb[ tile[ tile_number ].activate_cb_entry_count - 1 ] = activate_cb;
+
         return( true );
     }
     else {
@@ -524,15 +542,23 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
          * call hibernate callback for the current tile if exist
          */
         if ( tile[ current_tile ].hibernate_cb != NULL ) {
-            MAINBAR_INFO_LOG("call hibernate cb for tile: %d", current_tile );
-            tile[ current_tile ].hibernate_cb();
+            for( int i = 0 ; i < tile[ current_tile ].hibernate_cb_entry_count ; i++ ) {
+                if ( tile[ current_tile ].hibernate_cb[ i ] != NULL ) {
+                    MAINBAR_INFO_LOG("call hibernate cb [%d] for tile: %d", i, tile_number );
+                    tile[ current_tile ].hibernate_cb[ i ]();
+                }
+            }
         }
         /**
          * call activate callback for the new tile if exist
          */
-        if ( tile[ tile_number ].activate_cb != NULL ) { 
-            MAINBAR_INFO_LOG("call activate cb for tile: %d", tile_number );
-            tile[ tile_number ].activate_cb();
+        if ( tile[ tile_number ].activate_cb != NULL ) {
+            for( int i = 0 ; i < tile[ tile_number ].activate_cb_entry_count ; i++ ) {
+                if ( tile[ tile_number ].activate_cb[ i ] != NULL ) {
+                    MAINBAR_INFO_LOG("call activation cb [%d] for tile: %d", i, tile_number );
+                    tile[ tile_number ].activate_cb[ i ]();
+                }
+            }
         }
     }
     else {

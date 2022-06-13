@@ -42,12 +42,8 @@
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "utils/millis.h"
-    #include <string>
     #include <mosquitto.h>
-
-    using namespace std;
-    #define String string
-
+    
     struct mosquitto *mosq;
 #else
     #include <Arduino.h>
@@ -107,12 +103,7 @@ void powermeter_main_task( lv_task_t * task );
     /**
      * alloc a msg buffer and copy payload and terminate it with '\0';
      */
-    char *mqttmsg = NULL;
-    mqttmsg = (char*)CALLOC( length + 1, 1 );
-    if ( mqttmsg == NULL ) {
-        log_e("calloc failed");
-        return;
-    }
+    char *mqttmsg = (char*)CALLOC_ASSERT( length + 1, 1, "mqttmsg calloc failed" );
     memcpy( mqttmsg, payload, length );
 
     SpiRamJsonDocument doc( strlen( mqttmsg ) * 2 );
@@ -126,30 +117,24 @@ void powermeter_main_task( lv_task_t * task );
             lv_label_set_text( id_label, doc["id"] );
         }
         if ( doc["all"].containsKey("power") ) {
-            char temp[16] = "";
-            snprintf( temp, sizeof( temp ), "%0.2fkW", atof( doc["all"]["power"] ) );
-            widget_set_label( powermeter_get_widget_icon(), temp );
+            wf_label_printf( voltage_label, "%0.2fkW", atof( doc["all"]["power"] ) );
         }
         if ( doc["channel0"].containsKey("power") ) {
-            char temp[16] = "";
-            snprintf( temp, sizeof( temp ), "%0.2fkW", atof( doc["channel0"]["power"] ) );
-            lv_label_set_text( power_label, temp );
+            wf_label_printf( voltage_label, "%0.2fkW", atof( doc["channel0"]["power"] ) );
         }
         if ( doc["channel0"].containsKey("voltage") ) {
-            char temp[16] = "";
-            snprintf( temp, sizeof( temp ), "%0.1fV", atof( doc["channel0"]["voltage"] ) );
-            lv_label_set_text( voltage_label, temp );
+            wf_label_printf( voltage_label, "%0.1fV", atof( doc["channel0"]["voltage"] ) );
         }
         if ( doc["channel0"].containsKey("current") ) {
-            char temp[16] = "";
-            snprintf( temp, sizeof( temp ), "%0.1fA", atof( doc["channel0"]["current"] ) );
-            lv_label_set_text( current_label, temp );
+            wf_label_printf( voltage_label, "%0.1fA", atof( doc["channel0"]["current"] ) );
         }
-        lv_obj_align( id_label, id_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-        lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-        lv_obj_align( voltage_label, voltage_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
-        lv_obj_align( current_label, current_cont, LV_ALIGN_IN_RIGHT_MID, -5, 0 );
+
+        lv_obj_align( id_label, id_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );
+        lv_obj_align( power_label, power_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );
+        lv_obj_align( voltage_label, voltage_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );
+        lv_obj_align( current_label, current_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );
     }
+
     doc.clear();
     free( mqttmsg );
 }

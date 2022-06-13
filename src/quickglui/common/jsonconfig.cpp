@@ -23,13 +23,13 @@ JsonConfig::~JsonConfig() {
 }
 
 JsonBoolOption& JsonConfig::addBoolean(const char* optionName, bool defValue) {
-  auto ptr = MALLOC(sizeof(JsonBoolOption));
+  auto ptr = MALLOC_ASSERT(sizeof(JsonBoolOption),"JsonConfig::addBoolean allocation failed");
   options[count] = new(ptr) JsonBoolOption(optionName, defValue);
   return *(JsonBoolOption*)options[count++];
 }
 
 JsonStringOption& JsonConfig::addString(const char* optionName, int maxValueLength, const char* defValue) {
-  auto ptr = MALLOC(sizeof(JsonStringOption));
+  auto ptr = MALLOC_ASSERT(sizeof(JsonStringOption),"JsonConfig::addString allocation failed");
   options[count] = new(ptr) JsonStringOption(optionName, maxValueLength, defValue);
   return *(JsonStringOption*)options[count++];
 }

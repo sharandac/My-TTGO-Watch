@@ -64,9 +64,17 @@ to move your json into PSRAM, here is enough RAM for all the crazy stuff you wil
 ```
 with
 ```c
-MALLOC( ... ); // repleace malloc or ps_malloc
-CALLOC( ... ); // repleace calloc or ps_calloc
-REALLOC( ... ); // repleace realloc or ps_realloc
+MALLOC( ... );      // repleace malloc or ps_malloc
+CALLOC( ... );      // repleace calloc or ps_calloc
+REALLOC( ... );     // repleace realloc or ps_realloc
+```
+
+or the save version with assert
+
+```c
+MALLOC_ASSERT( size, format, ... );         // like printf output on fail
+MALLOC_ASSERT( nmemb, size, format, ... );  // like printf output on fail
+REALLOC_ASSERT( size, format, ... );        // like printf output on fail
 ```
 
 as often as possible. It managed internal or PSRAM for you.
