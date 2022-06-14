@@ -73,7 +73,7 @@ or the save version with assert
 
 ```c
 MALLOC_ASSERT( size, format, ... );         // like printf output on fail
-MALLOC_ASSERT( nmemb, size, format, ... );  // like printf output on fail
+CALLOC_ASSERT( nmemb, size, format, ... );  // like printf output on fail
 REALLOC_ASSERT( size, format, ... );        // like printf output on fail
 ```
 

@@ -435,6 +435,19 @@ void wf_image_button_fade_out( lv_obj_t *button, uint32_t duration, uint32_t del
     lv_anim_start( &wf_btn_icon_anim );
 }
 
+void wf_image_button_fade_in_state_3( _lv_anim_t *anim ) {
+    lv_anim_del( anim->var, (lv_anim_exec_xcb_t)lv_img_set_zoom );
+}
+
+void wf_image_button_fade_in_state_2( _lv_anim_t *anim ) {
+
+    lv_anim_set_ready_cb( anim, wf_image_button_fade_in_state_3 );
+	lv_anim_set_time( anim, 100 );
+    lv_anim_set_values( anim, 300, 256 );
+    lv_anim_set_delay( anim, 0 );
+    lv_anim_start( anim );
+}
+
 void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t delay ) {
     if( !wf_anim_enabled )
         return;
@@ -444,11 +457,11 @@ void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t dela
     lv_anim_init( &wf_btn_icon_anim );
 	lv_anim_set_exec_cb( &wf_btn_icon_anim, (lv_anim_exec_xcb_t)lv_img_set_zoom );
 	lv_anim_set_time( &wf_btn_icon_anim, duration );
+    lv_anim_set_ready_cb( &wf_btn_icon_anim, wf_image_button_fade_in_state_2 );
 
     lv_anim_set_var( &wf_btn_icon_anim, lv_obj_get_child( button, NULL ) );
-    lv_anim_set_values( &wf_btn_icon_anim, 1, 256 );
+    lv_anim_set_values( &wf_btn_icon_anim, 1, 300 );
     lv_anim_set_delay( &wf_btn_icon_anim, delay );
-
     lv_anim_start( &wf_btn_icon_anim );
 }
 
@@ -459,16 +472,15 @@ lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, 
     lv_imgbtn_set_src( button, LV_BTN_STATE_CHECKED_RELEASED, &image );
     lv_imgbtn_set_src( button, LV_BTN_STATE_CHECKED_PRESSED, &image );
 
-    if (!style) {
+    if (!style)
         style = ws_get_img_button_style();
-    }
+
     lv_obj_add_style( button, LV_OBJ_PART_MAIN, style );
-//    lv_obj_add_style( button, LV_IMGBTN_PART_MAIN, style );
     lv_obj_set_ext_click_area(button, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING);
 
-    if (event_cb != NULL) {
+    if ( event_cb != NULL )
         lv_obj_set_event_cb( button, event_cb );
-    }
+
     return button;
 }
     

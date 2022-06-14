@@ -93,6 +93,7 @@ LV_IMG_DECLARE(message_96px);
     #define default_msg_icon        &message_96px
 
     LV_IMG_DECLARE(telegram_96px);
+    LV_IMG_DECLARE(signal_96px);
     LV_IMG_DECLARE(whatsapp_96px);
     LV_IMG_DECLARE(k9mail_96px);
     LV_IMG_DECLARE(email_96px);
@@ -101,9 +102,11 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(instagram_96px);
     LV_IMG_DECLARE(tinder_96px);
     LV_IMG_DECLARE(joyce_96px);
+    LV_IMG_DECLARE(update_96px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_96px },
+        { "Signal", &signal_96px },
         { "WhatsApp", &whatsapp_96px },
         { "K-9 Mail", &k9mail_96px },
         { "Gmail", &email_96px },
@@ -113,6 +116,7 @@ LV_IMG_DECLARE(message_96px);
         { "Instagram", &instagram_96px },
         { "Tinder", &tinder_96px },
         { "JOYCE", &tinder_96px },
+        { "Update", &update_96px },
         { "", NULL }
     };
 
@@ -122,6 +126,7 @@ LV_IMG_DECLARE(message_96px);
     #define default_msg_icon        &message_64px
 
     LV_IMG_DECLARE(telegram_64px);
+    LV_IMG_DECLARE(signal_64px);
     LV_IMG_DECLARE(whatsapp_64px);
     LV_IMG_DECLARE(k9mail_64px);
     LV_IMG_DECLARE(email_64px);
@@ -130,9 +135,11 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(instagram_64px);
     LV_IMG_DECLARE(tinder_64px);
     LV_IMG_DECLARE(joyce_64px);
+    LV_IMG_DECLARE(update_64px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_64px },
+        { "Signal", &signal_64px },
         { "WhatsApp", &whatsapp_64px },
         { "K-9 Mail", &k9mail_64px },
         { "Gmail", &email_64px },
@@ -142,6 +149,7 @@ LV_IMG_DECLARE(message_96px);
         { "Instagram", &instagram_64px },
         { "Tinder", &tinder_64px },
         { "JOYCE", &tinder_64px },
+        { "Update", &update_64px },
         { "", NULL }
     };
 
@@ -151,6 +159,7 @@ LV_IMG_DECLARE(message_96px);
     #define default_msg_icon        &message_32px
 
     LV_IMG_DECLARE(telegram_32px);
+    LV_IMG_DECLARE(signal_32px);
     LV_IMG_DECLARE(whatsapp_32px);
     LV_IMG_DECLARE(k9mail_32px);
     LV_IMG_DECLARE(email_32px);
@@ -159,9 +168,11 @@ LV_IMG_DECLARE(message_96px);
     LV_IMG_DECLARE(instagram_32px);
     LV_IMG_DECLARE(tinder_32px);    
     LV_IMG_DECLARE(joyce_32px);
+    LV_IMG_DECLARE(update_32px);
 
     src_icon_t src_icon[] = {
         { "Telegram", &telegram_32px },
+        { "Signal", &signal_32px },
         { "WhatsApp", &whatsapp_32px },
         { "K-9 Mail", &k9mail_32px },
         { "Gmail", &email_32px },
@@ -171,6 +182,7 @@ LV_IMG_DECLARE(message_96px);
         { "Instagram", &instagram_32px },
         { "Tinder", &tinder_32px },
         { "JOYCE", &tinder_32px },
+        { "Update", &update_32px },
         { "", NULL }
     };
 
@@ -493,29 +505,21 @@ bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
         * if msg an notify or weather msg?
         */
         if( !strcmp( doc["t"], "notify" ) || !strcmp( doc["t"], "weather" ) ) {
-            if( doc.containsKey("id") )
-                log_i("add notify with id: %ld", doc["id"].as<long>() );
-
             int len = doc.memoryUsage();
             char *msg = (char *)MALLOC_ASSERT( len, "bluetooth message alloc failed" );
-            log_i("alloc json msg with size %d", len );
 
             serializeJson( doc, msg, len );
             retval = bluetooth_message_queue_msg( msg );
             free( msg );
         }
         else if( !strcmp( doc["t"], "notify-" ) && doc.containsKey("id" ) ) {
-            log_i("number of msg: %d", bluetooth_get_number_of_msg() );
             for( int i = 0 ; i < bluetooth_get_number_of_msg() ; i++ ) {
                 const char *msg = bluetooth_get_msg_entry( i );
-
-                log_i("msg[%d]: %s", i, msg );
 
                 BluetoothJsonRequest request( msg, strlen( msg ) * 4 );
                 if ( request.isValid() ) {
                     if( request.containsKey("id") ) {
                         if( request["id"].as<long>() == doc["id"].as<long>() ) {
-                            log_i("delete notify with id %ld", doc["id"].as<long>() );
                             bluetooth_delete_msg_from_chain( i );
                             break;
                         }
@@ -555,13 +559,13 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      * only alert or alret and showing msg
      */
     int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
+    bluetooth_message_show_msg( entry );
+    bluetooth_message_play_audio( entry );
+
+
     if ( blectl_get_show_notification() ) {
         log_d("force message view");
-        bluetooth_message_show_msg( entry );
-        bluetooth_message_play_audio( entry );
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
-    } else {
-        bluetooth_message_play_audio( entry );
     }
     bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     motor_vibe(10);
