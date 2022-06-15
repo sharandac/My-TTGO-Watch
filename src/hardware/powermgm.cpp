@@ -301,24 +301,11 @@ void powermgm_loop( void ) {
      */
     if ( powermgm_get_event( POWERMGM_STANDBY ) ) {
         /*
-         * Idle when lightsleep in standby not allowed
-         * It make it possible for the IDLE task to trottle
-         * down CPU clock or go into light sleep.
-         * 
-         * note:    When change vTaskDelay to an higher value, please
-         *          note that the reaction time to wake up increase.
+         * suspend powermgm Task
          */
-        #ifdef NATIVE_64BIT
-        #else
-            /*
-             * suspend all Tasks
-             */
-            if ( !standby ) {
-                powermgm_suspend();
-            }
-
-        #endif
-
+        if ( !standby ) {
+            powermgm_suspend();
+        }
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
@@ -338,24 +325,24 @@ void powermgm_reset( void ) {
 }
 
 void powermgm_suspend( void ) {
-#ifdef NATIVE_64BIT
-#else
-    vTaskSuspend( _powermgmTask );
-#endif
+    #ifdef NATIVE_64BIT
+    #else
+        vTaskSuspend( _powermgmTask );
+    #endif
 }
 
 void powermgm_resume_from_ISR( void ) {
-#ifdef NATIVE_64BIT
-#else
-    xTaskResumeFromISR( _powermgmTask );
-#endif
+    #ifdef NATIVE_64BIT
+    #else
+        xTaskResumeFromISR( _powermgmTask );
+    #endif
 }
 
 void powermgm_resume( void ) {
-#ifdef NATIVE_64BIT
-#else
-    vTaskResume( _powermgmTask );
-#endif
+    #ifdef NATIVE_64BIT
+    #else
+        vTaskResume( _powermgmTask );
+    #endif
 }
 
 void powermgm_set_perf_mode( void ) {
