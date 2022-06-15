@@ -46,8 +46,14 @@
         bool enable_on_standby = false;                         /** @brief enable on standby on/off */
         bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
         bool show_notification = true;                          /** @brief enable show notifications */
+        bool vibe_notification = true;                          /** @brief enable vibe on notifications */
+        bool sound_notification = true;                          /** @brief enable sound on notifications */
         int txpower = 1;                                        /** @brief tx power, valide values are from 0 to 4 */
-        blectl_custom_audio* custom_audio_notifications = NULL; /** @brief custom audio notifications config pointer */
+        uint16_t minInterval = 0x06;                            /** @brief connParams for minInterval  0x10*1.25ms = 20ms */
+        uint16_t maxInterval = 0x20;                            /** @brief connParams for maxInterval  0x20*1.25ms = 40ms */
+        uint16_t latency = 20;                                  /** @brief skipped events */
+        uint16_t timeout = 400;                                 /** @brief connParams for minInterval  0x10*1.25ms = 20ms */
+        blectl_custom_audio* custom_audio_notifications = NULL; /** @brief timeout = 400*10ms = 4000ms */
 
         protected:
         ////////////// Available for overloading: //////////////

@@ -55,6 +55,7 @@
     #include <BLEAdvertisedDevice.h>
     #include "blebatctl.h"
     #include "blestepctl.h"
+    #include "blehid.h"
 
     #include "esp_bt_main.h"
     #include "esp_gap_bt_api.h"
@@ -92,13 +93,13 @@ void blectl_loop( void );
 
     class BleCtlServerCallbacks: public BLEServerCallbacks {
         void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
-            pServer->updateConnParams( param->connect.remote_bda, 1450, 1500, 0, 10000 );
+            pServer->getAdvertising()->stop();
+            pServer->updateConnParams( param->connect.remote_bda, blectl_config.minInterval, blectl_config.maxInterval, blectl_config.latency, blectl_config.timeout );
             blectl_set_event( BLECTL_AUTHWAIT );
             blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
             xQueueReset( blectl_msg_queue );
             log_d("BLE authwait");
             blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"authwait" );
-            pServer->getAdvertising()->stop();
         };
 
         void onDisconnect(BLEServer* pServer) {
@@ -348,6 +349,7 @@ void blectl_setup( void ) {
         pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
         blebatctl_setup(pServer);
         blestepctl_setup();
+        // blehid_setup();
         /*
          * Slow advertising interval for battery life
          */
@@ -465,6 +467,16 @@ void blectl_set_show_notification( bool show_notification ) {
     blectl_config.save();
 }
 
+void blectl_set_vibe_notification( bool vibe_notification ) {        
+    blectl_config.vibe_notification = vibe_notification;
+    blectl_config.save();
+}
+
+void blectl_set_sound_notification( bool sound_notification ) {        
+    blectl_config.vibe_notification = sound_notification;
+    blectl_config.save();
+}
+
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_config.save();
@@ -544,6 +556,14 @@ bool blectl_get_disable_only_disconnected( void ) {
 
 bool blectl_get_show_notification( void ) {
     return( blectl_config.show_notification );
+}
+
+bool blectl_get_vibe_notification( void ) {
+    return( blectl_config.vibe_notification );
+}
+
+bool blectl_get_sound_notification( void ) {
+    return( blectl_config.sound_notification );
 }
 
 bool blectl_get_autoon( void ) {

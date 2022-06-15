@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 18 12:37:31 2020
+ *   Aug 11 17:13:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,37 +19,31 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLUETOOTH_MESSAGE_H
-    #define _BLUETOOTH_MESSAGE_H
+#ifndef _BLEHID_H
+    #define _BLEHID_H
 
-    #include "lvgl.h"
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
 
-    /**
-     * @brief src icon structure
-     */
-    struct src_icon_t {
-        const char src_name[ 24 ];
-        bool reply;
-        const lv_img_dsc_t *img;
-    };
+    #endif
 
-    void bluetooth_message_tile_setup( void );
+    #include "callback.h"
+
+    #define BLEHID_CONNECT               _BV(0)         /** @brief event mask for blectl connect to an client */
+    #define BLEHID_DISCONNECT            _BV(1)         /** @brief event mask for blectl disconnect */
+
+    void blehid_setup( void );
+    void blehid_send_printf( const char* format, ... );
+    void blehid_send_key( const char *c );
     /**
-     * @brief disable show bluetooth message notification
-     */
-    void bluetooth_message_disable( void );
-    /**
-     * @brief enable show bluettoth message notification
-     */
-    void bluetooth_message_enable( void );
-    /**
-     * @brief add a msg to msg queue
+     * @brief registers a callback function which is called on a corresponding event
      * 
-     * @param msg   pointer to the msg string
-     * 
-     * @return  true if add was success od false if failed
+     * @param   event  possible values:     BLEHID_CONNECT,
+     *                                      BLEHID_DISCONNECT,
+     * @param   blectl_event_cb     pointer to the callback function
+     * @param   id                  pointer to an string
      */
-    bool bluetooth_message_queue_msg( const char *msg );
-    int32_t bluetooth_get_number_of_msg( void );
+    bool blehid_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
 
-#endif // _BLUETOOTH_MESSAGE_H
+#endif // _BLEHID_H

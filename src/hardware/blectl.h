@@ -179,6 +179,18 @@
      */
     void blectl_set_show_notification( bool show_notification );
     /**
+     * @brief enable vibe notification
+     * 
+     * @param   vibe_notification   true means enabled, false means disabled 
+     */
+    void blectl_set_vibe_notification( bool vibe_notification );
+    /**
+     * @brief enable sound notification
+     * 
+     * @param   sound_notification   true means enabled, false means disabled 
+     */
+    void blectl_set_sound_notification( bool sound_notification );
+    /**
      * @brief enable advertising
      * 
      * @param   advertising true means enabled, false means disabled
@@ -202,6 +214,18 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_show_notification( void );
+    /**
+     * @brief get the current vibe notification config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_vibe_notification( void );
+    /**
+     * @brief get the current sound notification config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_sound_notification( void );
     /**
      * @brief get the current advertising config
      * 

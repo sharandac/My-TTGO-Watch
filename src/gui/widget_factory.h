@@ -420,7 +420,7 @@ lv_obj_t * wf_add_down_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
 lv_img_dsc_t const &wf_get_down_img( void );
 
 /**
- * @brief   Creates and adds an down button to a container
+ * @brief   Creates and adds an location button to a container
  *
  * @param   parent   pointer to a parent container
  * @param   event_cb the button click event function
@@ -432,7 +432,7 @@ lv_obj_t * wf_add_location_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_s
 lv_img_dsc_t const &wf_get_location_img( void );
 
 /**
- * @brief   Creates and adds an down button to a container
+ * @brief   Creates and adds an play button to a container
  *
  * @param   parent   pointer to a parent container
  * @param   event_cb the button click event function
@@ -444,7 +444,7 @@ lv_obj_t * wf_add_play_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
 lv_img_dsc_t const &wf_get_play_img( void );
 
 /**
- * @brief   Creates and adds an down button to a container
+ * @brief   Creates and adds an stop button to a container
  *
  * @param   parent   pointer to a parent container
  * @param   event_cb the button click event function
@@ -456,7 +456,7 @@ lv_obj_t * wf_add_stop_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style
 lv_img_dsc_t const &wf_get_stop_img( void );
 
 /**
- * @brief   Creates and adds an down button to a container
+ * @brief   Creates and adds an eject button to a container
  *
  * @param   parent   pointer to a parent container
  * @param   event_cb the button click event function
@@ -466,6 +466,18 @@ lv_img_dsc_t const &wf_get_stop_img( void );
  */
 lv_obj_t * wf_add_eject_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
 lv_img_dsc_t const &wf_get_eject_img( void );
+
+/**
+ * @brief   Creates and adds an reply button to a container
+ *
+ * @param   parent   pointer to a parent container
+ * @param   event_cb the button click event function
+ * @param   style    style to apply
+ *
+ * @return  returns pointer to the added object
+ */
+lv_obj_t * wf_add_reply_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style = NULL );
+lv_img_dsc_t const &wf_get_reply_img( void );
 
 /**
  * @brief   Creates and adds an labeled button to a container

@@ -52,6 +52,7 @@
     LV_IMG_DECLARE(play_96px);
     LV_IMG_DECLARE(stop_96px);
     LV_IMG_DECLARE(eject_96px);
+    LV_IMG_DECLARE(reply_96px);
 
     const lv_img_dsc_t down_icon = down_96px;
     const lv_img_dsc_t up_icon = up_96px;
@@ -73,6 +74,7 @@
     const lv_img_dsc_t play_icon = play_96px;
     const lv_img_dsc_t stop_icon = stop_96px;
     const lv_img_dsc_t eject_icon = eject_96px;
+    const lv_img_dsc_t reply_icon = reply_96px;
 #elif defined( MID_THEME )
     LV_IMG_DECLARE(menu_64px);
     LV_IMG_DECLARE(setup_64px);
@@ -94,6 +96,7 @@
     LV_IMG_DECLARE(play_64px);
     LV_IMG_DECLARE(stop_64px);
     LV_IMG_DECLARE(eject_64px);
+    LV_IMG_DECLARE(reply_64px);
 
     const lv_img_dsc_t down_icon = down_64px;
     const lv_img_dsc_t up_icon = up_64px;
@@ -115,6 +118,7 @@
     const lv_img_dsc_t play_icon = play_64px;
     const lv_img_dsc_t stop_icon = stop_64px;
     const lv_img_dsc_t eject_icon = eject_64px;
+    const lv_img_dsc_t reply_icon = reply_64px;
 #else
     LV_IMG_DECLARE(menu_32px);
     LV_IMG_DECLARE(setup_32px);
@@ -136,6 +140,7 @@
     LV_IMG_DECLARE(play_32px);
     LV_IMG_DECLARE(stop_32px);
     LV_IMG_DECLARE(eject_32px);
+    LV_IMG_DECLARE(reply_32px);
 
     const lv_img_dsc_t down_icon = down_32px;
     const lv_img_dsc_t up_icon = up_32px;
@@ -157,7 +162,7 @@
     const lv_img_dsc_t play_icon = play_32px;
     const lv_img_dsc_t stop_icon = stop_32px;
     const lv_img_dsc_t eject_icon = eject_32px;
-
+    const lv_img_dsc_t reply_icon = reply_32px;
 #endif
 
 #define CLICKABLE_PADDING 6
@@ -419,6 +424,11 @@ void wf_enable_anim( bool enable ) {
     wf_anim_enabled = enable;
 }
 
+void wf_image_button_fade_out_state_2( _lv_anim_t *anim ) {
+    lv_obj_set_hidden( lv_obj_get_parent( (lv_obj_t*)anim->var ), true );
+    lv_anim_del( anim->var, (lv_anim_exec_xcb_t)lv_img_set_zoom );
+}
+
 void wf_image_button_fade_out( lv_obj_t *button, uint32_t duration, uint32_t delay ) {
     if( !wf_anim_enabled )
         return;
@@ -428,6 +438,7 @@ void wf_image_button_fade_out( lv_obj_t *button, uint32_t duration, uint32_t del
     lv_anim_init( &wf_btn_icon_anim );
 	lv_anim_set_exec_cb( &wf_btn_icon_anim, (lv_anim_exec_xcb_t)lv_img_set_zoom );
 	lv_anim_set_time( &wf_btn_icon_anim, duration );
+    lv_anim_set_ready_cb( &wf_btn_icon_anim, wf_image_button_fade_out_state_2 );
 
     lv_anim_set_var( &wf_btn_icon_anim, lv_obj_get_child( button, NULL ) );
     lv_anim_set_values( &wf_btn_icon_anim, 256, 1 );
@@ -463,6 +474,8 @@ void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t dela
     lv_anim_set_values( &wf_btn_icon_anim, 1, 300 );
     lv_anim_set_delay( &wf_btn_icon_anim, delay );
     lv_anim_start( &wf_btn_icon_anim );
+
+    lv_obj_set_hidden( button, false );
 }
 
 lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
@@ -656,6 +669,13 @@ lv_obj_t * wf_add_eject_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_styl
     return wf_add_image_button(parent, eject_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
 }
 lv_img_dsc_t const &wf_get_eject_img( void ) { return( eject_icon ); }
+/**
+ * 
+ */
+lv_obj_t * wf_add_reply_button(lv_obj_t *parent, lv_event_cb_t event_cb, lv_style_t *style){
+    return wf_add_image_button(parent, reply_icon, event_cb, style?style:SYSTEM_ICON_STYLE );
+}
+lv_img_dsc_t const &wf_get_reply_img( void ) { return( reply_icon ); }
 
 lv_obj_t * wf_add_settings_header(lv_obj_t *parent, char const * title, lv_obj_t ** ret_back_btn, lv_style_t *style ) {
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_ROW_MID, LV_FIT_PARENT, LV_FIT_TIGHT, false, style?style:SETUP_STYLE );

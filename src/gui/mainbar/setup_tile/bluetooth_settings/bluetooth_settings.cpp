@@ -47,6 +47,8 @@ lv_obj_t *bluetooth_standby_onoff = NULL;
 lv_obj_t *bluetooth_stayon_onoff = NULL;
 lv_obj_t *bluetooth_advertising_onoff = NULL;
 lv_obj_t *bluetooth_show_notifications_onoff = NULL;
+lv_obj_t *bluetooth_vibe_notifications_onoff = NULL;
+lv_obj_t *bluetooth_sound_notifications_onoff = NULL;
 lv_obj_t *txpower_list = NULL;
 
 LV_IMG_DECLARE(bluetooth_64px);
@@ -63,6 +65,8 @@ static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t eve
 static void bluetooth_stayon_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_show_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void bluetooth_vibe_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
+static void bluetooth_sound_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void bluetooth_settings_tile_setup( void ) {
@@ -114,12 +118,24 @@ void bluetooth_settings_tile_setup( void ) {
     lv_obj_align( bluetooth_show_notifications_cont, bluetooth_stayon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     if ( bluetooth_settings_tile_2 ) {
+        lv_obj_t *bluetooth_vibe_notifications_cont = wf_add_labeled_switch( bluetooth_settings_tile_2, "vibe notifications", &bluetooth_vibe_notifications_onoff, blectl_get_vibe_notification(), bluetooth_vibe_notifications_onoff_event_handler, SETUP_STYLE );
+        lv_obj_align( bluetooth_vibe_notifications_cont, header_2, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+        lv_obj_t *bluetooth_sound_notifications_cont = wf_add_labeled_switch( bluetooth_settings_tile_2, "sound notifications", &bluetooth_sound_notifications_onoff, blectl_get_sound_notification(), bluetooth_sound_notifications_onoff_event_handler, SETUP_STYLE );
+        lv_obj_align( bluetooth_sound_notifications_cont, bluetooth_vibe_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
         lv_obj_t *txpower_cont = wf_add_labeled_list( bluetooth_settings_tile_2, "tx power", &txpower_list, "-12db\n-9db\n-6db\n-3db\n0db", bluetooth_txpower_event_handler, ws_get_setup_tile_style() );
-        lv_obj_align( txpower_cont, header_2, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+        lv_obj_align( txpower_cont, bluetooth_sound_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
     }
     else {
+        lv_obj_t *bluetooth_vibe_notifications_cont = wf_add_labeled_switch( bluetooth_settings_tile_1, "vibe notifications", &bluetooth_vibe_notifications_onoff, blectl_get_vibe_notification(), bluetooth_vibe_notifications_onoff_event_handler, SETUP_STYLE );
+        lv_obj_align( bluetooth_vibe_notifications_cont, bluetooth_show_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+        lv_obj_t *bluetooth_sound_notifications_cont = wf_add_labeled_switch( bluetooth_settings_tile_1, "sound notifications", &bluetooth_sound_notifications_onoff, blectl_get_sound_notification(), bluetooth_sound_notifications_onoff_event_handler, SETUP_STYLE );
+        lv_obj_align( bluetooth_sound_notifications_cont, bluetooth_vibe_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
         lv_obj_t *txpower_cont = wf_add_labeled_list( bluetooth_settings_tile_1, "tx power", &txpower_list, "-12db\n-9db\n-6db\n-3db\n0db", bluetooth_txpower_event_handler, SETUP_STYLE );
-        lv_obj_align( txpower_cont, bluetooth_show_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+        lv_obj_align( txpower_cont, bluetooth_sound_notifications_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
     }
 
     lv_dropdown_set_selected( txpower_list, blectl_get_txpower() );
@@ -208,6 +224,20 @@ static void bluetooth_stayon_onoff_event_handler(lv_obj_t * obj, lv_event_t even
 static void bluetooth_show_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
         case ( LV_EVENT_VALUE_CHANGED): blectl_set_show_notification( lv_switch_get_state( obj ) );
+                                        break;
+    }
+}
+
+static void bluetooth_vibe_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED): blectl_set_vibe_notification( lv_switch_get_state( obj ) );
+                                        break;
+    }
+}
+
+static void bluetooth_sound_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED): blectl_set_sound_notification( lv_switch_get_state( obj ) );
                                         break;
     }
 }

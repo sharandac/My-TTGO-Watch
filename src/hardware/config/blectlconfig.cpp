@@ -35,7 +35,13 @@ bool blectl_config_t::onSave(JsonDocument& doc) {
     doc["enable_on_standby"] = enable_on_standby;
     doc["disable_only_disconnected"] = disable_only_disconnected;
     doc["show_notification"] = show_notification;
+    doc["vibe_notification"]= vibe_notification;
+    doc["sound_notification"]= sound_notification;
     doc["tx_power"] = txpower;
+    doc["minInterval"] = minInterval;
+    doc["maxInterval"] = maxInterval;
+    doc["latency"] = latency;
+    doc["timeout"] = timeout;
 
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
         doc["custom_audio_notifications"][ i ]["text"] = custom_audio_notifications[ i ].text;
@@ -69,6 +75,12 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
     disable_only_disconnected = doc["disable_only_disconnected"] | false;
     txpower = doc["tx_power"] | 1;
     show_notification = doc["show_notification"] | true;
+    vibe_notification = doc["vibe_notification"] | true;
+    sound_notification = doc["sound_notification"] | true;
+    minInterval = doc["minInterval"] | 0x06;
+    maxInterval = doc["maxInterval"] | 0x20;
+    latency = doc["latency"] | 20;
+    timeout = doc["timeout"] | 400;
 
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
         if ( doc["custom_audio_notifications"][ i ]["text"] && doc["custom_audio_notifications"][ i ]["value"] ) {
@@ -105,6 +117,12 @@ bool blectl_config_t::onDefault( void ) {
     disable_only_disconnected = false;
     txpower = 1;
     show_notification = true;
+    vibe_notification = true;
+    sound_notification = true;
+    minInterval = 0x06;
+    maxInterval = 0x20;
+    latency = 20;
+    timeout = 400;
 
     return true;
 }
