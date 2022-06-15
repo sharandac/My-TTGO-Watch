@@ -37,8 +37,11 @@
     #include "esp_err.h"
     #include "esp_pm.h"
     #include <Arduino.h>
+    #include <Ticker.h>
 
+    Ticker *powermgm_tickTicker = nullptr;
     EventGroupHandle_t powermgm_status = NULL;
+    TaskHandle_t _powermgmTask;
     portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
     esp_pm_config_esp32_t pm_config;
 #endif
@@ -46,6 +49,7 @@
 callback_t *powermgm_callback = NULL;
 callback_t *powermgm_loop_callback = NULL;
 static uint32_t lighsleep = 0;
+static bool powermgm_suspend_state = false;
 
 bool powermgm_button_event_cb( EventBits_t event, void *arg );
 bool powermgm_send_event_cb( EventBits_t event );
@@ -56,7 +60,13 @@ void powermgm_setup( void ) {
 #ifdef NATIVE_64BIT
     powermgm_status = 0;
 #else
+    _powermgmTask = xTaskGetCurrentTaskHandle();
     powermgm_status = xEventGroupCreate();
+
+    powermgm_tickTicker = new Ticker();
+    powermgm_tickTicker->attach_ms( 1000, []() {
+        powermgm_resume_from_ISR();
+    });
 #endif
     /*
      * register powerbutton event
@@ -80,6 +90,7 @@ void powermgm_loop( void ) {
          * delay loop fpr 5ms
          */
         SDL_Delay(5);
+    #else
     #endif // NATIVE_64BIT
     /*
      * check if power button was release
@@ -109,7 +120,6 @@ void powermgm_loop( void ) {
          * clear powermgm state
          */
         powermgm_clear_event( POWERMGM_STANDBY | POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP );
-        // powermgm_enable_interrupts();
 
         if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP_REQUEST ) ) {
             log_i("go silence wakeup");
@@ -300,8 +310,13 @@ void powermgm_loop( void ) {
          */
         #ifdef NATIVE_64BIT
         #else
-            if ( !standby )
-                vTaskDelay( 100 );
+            /*
+             * suspend all Tasks
+             */
+            if ( !standby ) {
+                powermgm_suspend();
+            }
+
         #endif
 
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
@@ -320,6 +335,27 @@ void powermgm_shutdown( void ) {
 
 void powermgm_reset( void ) {
     powermgm_send_event_cb( POWERMGM_RESET );
+}
+
+void powermgm_suspend( void ) {
+#ifdef NATIVE_64BIT
+#else
+    vTaskSuspend( _powermgmTask );
+#endif
+}
+
+void powermgm_resume_from_ISR( void ) {
+#ifdef NATIVE_64BIT
+#else
+    xTaskResumeFromISR( _powermgmTask );
+#endif
+}
+
+void powermgm_resume( void ) {
+#ifdef NATIVE_64BIT
+#else
+    vTaskResume( _powermgmTask );
+#endif
 }
 
 void powermgm_set_perf_mode( void ) {
@@ -368,6 +404,7 @@ void powermgm_set_event( EventBits_t bits ) {
         portENTER_CRITICAL(&powermgmMux);
         xEventGroupSetBits( powermgm_status, bits );
         portEXIT_CRITICAL(&powermgmMux);
+        powermgm_resume_from_ISR();
     #endif
 }
 
@@ -378,6 +415,7 @@ void powermgm_clear_event( EventBits_t bits ) {
         portENTER_CRITICAL(&powermgmMux);
         xEventGroupClearBits( powermgm_status, bits );
         portEXIT_CRITICAL(&powermgmMux);
+        powermgm_resume_from_ISR();
     #endif
 }
 
@@ -388,6 +426,7 @@ EventBits_t powermgm_get_event( EventBits_t bits ) {
         portENTER_CRITICAL(&powermgmMux);
         EventBits_t temp = xEventGroupGetBits( powermgm_status ) & bits;
         portEXIT_CRITICAL(&powermgmMux);
+        powermgm_resume_from_ISR();
     #endif
     return( temp );
 }

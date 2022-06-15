@@ -55,6 +55,7 @@ touch_config_t touch_config;
             /*
             * leave critical section
             */
+            powermgm_resume_from_ISR();
             portEXIT_CRITICAL_ISR(&Touch_IRQ_Mux);
         }
 

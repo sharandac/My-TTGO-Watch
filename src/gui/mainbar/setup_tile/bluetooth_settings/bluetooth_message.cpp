@@ -73,11 +73,11 @@ lv_obj_t *bluetooth_message_exit_btn = NULL;
 lv_obj_t *bluetooth_message_prev_msg_btn = NULL;
 lv_obj_t *bluetooth_message_next_msg_btn = NULL;
 lv_obj_t *bluetooth_message_trash_msg_btn = NULL;
-lv_obj_t *bluetooth_message_reply_msg_btn = NULL;
 lv_obj_t *bluetooth_message_msg_entrys_label = NULL;
 
 msg_chain_t *bluetooth_msg_chain = NULL;
 static bool bluetooth_message_active = true;
+static bool bluetooth_message_tile_active = false;
 int32_t bluetooth_current_msg = -1;
 
 LV_FONT_DECLARE(Ubuntu_12px);
@@ -194,6 +194,7 @@ LV_IMG_DECLARE(message_96px);
 static void bluetooth_message_set_indicator( void );
 static bool bluetooth_message_button_event_cb( EventBits_t event, void *arg );
 static void bluetooth_message_activate_cb( void );
+static void bluetooth_message_hibernate_cb( void );
 static bool bluetooth_message_style_change_event_cb( EventBits_t event, void *arg );
 static void bluetooth_prev_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void bluetooth_next_message_event_cb( lv_obj_t * obj, lv_event_t event );
@@ -279,9 +280,6 @@ void bluetooth_message_tile_setup( void ) {
     bluetooth_message_trash_msg_btn = wf_add_trash_button( bluetooth_message_tile, bluetooth_del_message_event_cb );
     lv_obj_align( bluetooth_message_trash_msg_btn, bluetooth_message_prev_msg_btn, LV_ALIGN_OUT_RIGHT_MID, 0, 0 );
 
-    bluetooth_message_reply_msg_btn = wf_add_reply_button( bluetooth_message_tile, bluetooth_del_message_event_cb );
-    lv_obj_align( bluetooth_message_reply_msg_btn, bluetooth_message_trash_msg_btn, LV_ALIGN_OUT_RIGHT_MID, 0, 0 );
-
     bluetooth_message_entrys_label = lv_label_create( bluetooth_message_tile, NULL );
     lv_obj_add_style( bluetooth_message_entrys_label, LV_OBJ_PART_MAIN, &bluetooth_message_sender_style );
     lv_label_set_text( bluetooth_message_entrys_label, "1/1");
@@ -292,6 +290,7 @@ void bluetooth_message_tile_setup( void ) {
     button_register_cb( BUTTON_NOTIFY_TEST | BUTTON_NOTIFY_DEL_TEST, bluetooth_message_button_event_cb, "bluetooth message button cb" );
     mainbar_add_tile_button_cb( bluetooth_message_tile_num, bluetooth_message_button_event_cb );
     mainbar_add_tile_activate_cb( bluetooth_message_tile_num, bluetooth_message_activate_cb );
+    mainbar_add_tile_hibernate_cb( bluetooth_message_tile_num, bluetooth_message_hibernate_cb );
     messages_app = app_register( "messages", &message_64px, enter_bluetooth_messages_cb );
 }
 
@@ -321,8 +320,12 @@ static void bluetooth_message_activate_cb( void ) {
         wf_image_button_fade_in( bluetooth_message_next_msg_btn, 300, 100 );
     if( !lv_obj_get_hidden( bluetooth_message_trash_msg_btn ) )
         wf_image_button_fade_in( bluetooth_message_trash_msg_btn, 300, 1000 );
-    if( !lv_obj_get_hidden( bluetooth_message_reply_msg_btn ) )
-        wf_image_button_fade_in( bluetooth_message_reply_msg_btn, 300, 1000 );
+
+    bluetooth_message_tile_active = true;
+}
+
+static void bluetooth_message_hibernate_cb( void ) {
+    bluetooth_message_tile_active = false;
 }
 
 static bool bluetooth_message_style_change_event_cb( EventBits_t event, void *arg ) {
@@ -391,6 +394,9 @@ bool bluetooth_delete_msg_from_chain( int32_t entry ) {
         bluetooth_message_send_del_json( entry );
         msg_chain_delete_msg_entry( bluetooth_msg_chain, entry );
         bluetooth_current_msg--;
+
+        if( bluetooth_message_tile_active )
+            mainbar_jump_back();
     }
     else {
         if ( bluetooth_current_msg == ( msg_chain_get_entrys( bluetooth_msg_chain ) - 1 ) ) {
@@ -681,21 +687,10 @@ void bluetooth_message_show_msg( int32_t entry ) {
                 if ( doc.containsKey("src") ) {
                     lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
                     lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
-                    
-                    if( bluetooth_message_find_reply( doc["src"] ) ) {
-                        if( lv_obj_get_hidden( bluetooth_message_reply_msg_btn ) )
-                            wf_image_button_fade_in( bluetooth_message_reply_msg_btn, 300, 0 );
-                    }
-                    else {
-                        if( !lv_obj_get_hidden( bluetooth_message_reply_msg_btn ) )
-                            wf_image_button_fade_in( bluetooth_message_reply_msg_btn, 300, 0 );                        
-                    }
-                }
+                                    }
                 else {
                     lv_img_set_src( bluetooth_message_img, default_msg_icon );
                     lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
-                    if( !lv_obj_get_hidden( bluetooth_message_reply_msg_btn ) )
-                        wf_image_button_fade_in( bluetooth_message_reply_msg_btn, 300, 0 ); 
                 }
                 /*
                 * set message if body known or set title and if no other information

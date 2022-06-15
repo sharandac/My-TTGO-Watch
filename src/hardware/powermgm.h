@@ -148,5 +148,17 @@
      * @return false 
      */
     bool powermgm_get_lightsleep( void );
+    /**
+     * @brief suspend alls Tasks
+     */
+    void powermgm_suspend( void );
+    /**
+     * @brief resume all Task
+     */
+    void powermgm_resume( void );
+    /**
+     * @brief resume only powermgm Task
+     */
+    void powermgm_resume_from_ISR( void );
 
 #endif // _POWERMGM_H

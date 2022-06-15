@@ -174,19 +174,14 @@ bool gpsctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     #else
         powermgm_set_perf_mode();
         /**
-         * abort if we have no softserial init
+         * abort if we have no serial init
          */
         if ( gps_serial ) {
-            uint32_t bytes = 0;
             /**
              * check for serial data and read
              */
-            while ( gps_serial->available() > 0 ) {
-                bytes++;
+            while ( gps_serial->available() > 0 )
                 gps.encode( gps_serial->read() );
-            }
-            if( bytes )
-                GPSCTL_DEBUG_LOG("new gps data (%d bytes)", bytes );
         }
     #endif
     /**

@@ -98,6 +98,7 @@ void blectl_loop( void );
             blectl_set_event( BLECTL_AUTHWAIT );
             blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
             xQueueReset( blectl_msg_queue );
+            powermgm_resume_from_ISR();
             log_d("BLE authwait");
             blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"authwait" );
         };
@@ -108,6 +109,7 @@ void blectl_loop( void );
             blectl_clear_event( BLECTL_CONNECT | BLECTL_AUTHWAIT );
             blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
             xQueueReset( blectl_msg_queue );
+            powermgm_resume_from_ISR();
             blectl_msg.active = false;
 
             if ( blectl_get_advertising() ) {
@@ -121,6 +123,7 @@ void blectl_loop( void );
 
         uint32_t onPassKeyRequest() {
             log_d("BLECTL pass key request");
+            powermgm_resume_from_ISR();
             return 123456;
         }
         void onPassKeyNotify( uint32_t pass_key ){
@@ -129,15 +132,18 @@ void blectl_loop( void );
             log_d("BLECTL pairing request, PIN: %s", pin );
             blectl_set_event( BLECTL_PIN_AUTH );
             blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
+            powermgm_resume_from_ISR();
         }
         bool onConfirmPIN( uint32_t pass_key ) {
             char pin[16]="";
             snprintf( pin, sizeof( pin ), "%06d", pass_key );
             log_d("BLECTL confirm PIN: %s", pin );
+            powermgm_resume_from_ISR();
             return false;
         }
         bool onSecurityRequest() {
             log_d("BLECTL security request");
+            powermgm_resume_from_ISR();
             return true;
         }
 
@@ -175,7 +181,7 @@ void blectl_loop( void );
                     return;
                 }
             }
-            
+            powermgm_resume_from_ISR();
             log_e("authentication not handle but %s. reason: %02x", cmpl.success ? "successful" : "not successful", cmpl.fail_reason );
         }
     };
@@ -208,6 +214,7 @@ void blectl_loop( void );
                                                 /*
                                                  * Send message
                                                  */
+                                                powermgm_resume_from_ISR();
                                                 if ( xQueueSendFromISR( blectl_msg_receive_queue, &buff, 0 ) != pdTRUE )
                                                     log_e("fail to send a receive BLE msg");
                                                 gadgetbridge_msg.clear();
@@ -220,6 +227,7 @@ void blectl_loop( void );
 
         void onRead( BLECharacteristic* pCharacteristic ) {
             std::string msg = pCharacteristic->getValue();
+            powermgm_resume_from_ISR();
             log_d("BLE received: %s, %i\n", msg.c_str(), msg.length() );
         }
     };

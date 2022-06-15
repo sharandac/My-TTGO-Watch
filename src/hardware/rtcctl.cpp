@@ -55,6 +55,7 @@
     void IRAM_ATTR rtcctl_irq( void ) {
         portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
         rtc_irq_flag = true;
+        powermgm_resume_from_ISR();
         portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
     }
 #endif
