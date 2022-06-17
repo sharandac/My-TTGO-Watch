@@ -47,7 +47,8 @@
         bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
         bool show_notification = true;                          /** @brief enable show notifications */
         bool vibe_notification = true;                          /** @brief enable vibe on notifications */
-        bool sound_notification = true;                          /** @brief enable sound on notifications */
+        bool sound_notification = true;                         /** @brief enable sound on notifications */
+        bool media_notification = true;                         /** @brief enable media on notifications */
         int txpower = 1;                                        /** @brief tx power, valide values are from 0 to 4 */
         uint16_t minInterval = 0x06;                            /** @brief connParams for minInterval  0x10*1.25ms = 20ms */
         uint16_t maxInterval = 0x20;                            /** @brief connParams for maxInterval  0x20*1.25ms = 40ms */

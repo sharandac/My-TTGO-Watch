@@ -239,8 +239,6 @@ static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
                 lv_obj_set_hidden( bluetooth_media_stop, false );
                 bluetooth_media_play_state = true;
             }
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
             retval = true;
         }
         /**
@@ -261,10 +259,15 @@ static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
                 lv_label_set_text( bluetooth_media_artist, doc["artist"] );
                 lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
             }
-            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
             retval = true;
         }
+    }
+
+    if( retval ) {
+        if( blectl_get_media_notification() ) {
+            powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+            mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );
+        }        
     }
 
     return( retval );

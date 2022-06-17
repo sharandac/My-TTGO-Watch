@@ -276,9 +276,6 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
         tile = ( lv_tile_t * )MALLOC_ASSERT( sizeof( lv_tile_t ) * tile_entrys, "tile malloc faild" );
     }
     else {
-        lv_point_t *new_tile_pos_table;
-        lv_tile_t *new_tile;
-
         tile_pos_table = ( lv_point_t * )REALLOC_ASSERT( tile_pos_table, sizeof( lv_point_t ) * tile_entrys, "tile_pos_table realloc faild" );
         tile = ( lv_tile_t * )REALLOC_ASSERT( tile, sizeof( lv_tile_t ) * tile_entrys, "tile realloc faild" );
     }
@@ -589,6 +586,7 @@ void mainbar_add_slide_element(lv_obj_t *element) {
     /*
      * check if mainbar already initialized
      */
+    ASSERT( mainbar, "mainbar not initialized" );
     if ( !mainbar ) {
         log_e("main not initialized");
         while( true );

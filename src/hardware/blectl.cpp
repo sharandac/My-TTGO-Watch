@@ -463,31 +463,43 @@ bool blectl_send_event_cb( EventBits_t event, void *arg ) {
 void blectl_set_enable_on_standby( bool enable_on_standby ) {        
     blectl_config.enable_on_standby = enable_on_standby;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_disable_only_disconnected( bool disable_only_disconnected ) {        
     blectl_config.disable_only_disconnected = disable_only_disconnected;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_show_notification( bool show_notification ) {        
     blectl_config.show_notification = show_notification;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_vibe_notification( bool vibe_notification ) {        
     blectl_config.vibe_notification = vibe_notification;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_sound_notification( bool sound_notification ) {        
-    blectl_config.vibe_notification = sound_notification;
+    blectl_config.sound_notification = sound_notification;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
+}
+
+void blectl_set_media_notification( bool media_notification ) {        
+    blectl_config.media_notification = media_notification;
+    blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
     if ( blectl_get_event( BLECTL_CONNECT ) )
         return;
 
@@ -536,6 +548,7 @@ void blectl_set_txpower( int32_t txpower ) {
         }
     #endif
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_set_autoon( bool autoon ) {
@@ -548,6 +561,7 @@ void blectl_set_autoon( bool autoon ) {
         blectl_off();
     }
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 int32_t blectl_get_txpower( void ) {
@@ -574,6 +588,10 @@ bool blectl_get_sound_notification( void ) {
     return( blectl_config.sound_notification );
 }
 
+bool blectl_get_media_notification( void ) {
+    return( blectl_config.media_notification );
+}
+
 bool blectl_get_autoon( void ) {
     return( blectl_config.autoon );
 }
@@ -588,10 +606,12 @@ blectl_custom_audio* blectl_get_custom_audio_notifications( void ) {
 
 void blectl_save_config( void ) {
     blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 void blectl_read_config( void ) {
     blectl_config.load();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 bool blectl_send_loop_msg( const char *format, ... ) {
@@ -716,6 +736,7 @@ void blectl_off( void ) {
     blectl_set_event( BLECTL_OFF );
     blectl_clear_event( BLECTL_ON );
     blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
 static void blectl_send_chunk ( unsigned char *msg, int32_t len ) {

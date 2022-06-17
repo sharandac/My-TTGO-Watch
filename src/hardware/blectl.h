@@ -64,6 +64,10 @@
      */
     #define BLECTL_SCAN                  _BV(14)        /** @brief event mask for blectl msg */
     #define BLECTL_SCAN_DONE             _BV(15)        /** @brief event mask msg send success */
+    /**
+     * config updates
+     */
+    #define BLECTL_CONFIG_UPDATE         _BV(16)        /** @brief event mask for blectl config update */
 
 
     /**
@@ -191,6 +195,12 @@
      */
     void blectl_set_sound_notification( bool sound_notification );
     /**
+     * @brief enable media notification
+     * 
+     * @param   media_notification   true means enabled, false means disabled 
+     */
+    void blectl_set_media_notification( bool media_notification );
+    /**
      * @brief enable advertising
      * 
      * @param   advertising true means enabled, false means disabled
@@ -226,6 +236,12 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_sound_notification( void );
+    /**
+     * @brief get the current media notification config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_media_notification( void );
     /**
      * @brief get the current advertising config
      * 

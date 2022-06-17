@@ -142,6 +142,12 @@
      */
     void powermgm_set_lightsleep( bool enable );
     /**
+     * @brief set the resume interval when standby is active and some devices blocked their
+     * 
+     * @param interval      in ms
+     */
+    void powermgm_set_resume_interval( int32_t interval );
+    /**
      * @brief get if CPU lightsleep enaled
      * 
      * @return true 

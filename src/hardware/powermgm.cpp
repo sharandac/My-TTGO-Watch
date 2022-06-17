@@ -49,7 +49,6 @@
 callback_t *powermgm_callback = NULL;
 callback_t *powermgm_loop_callback = NULL;
 static uint32_t lighsleep = 0;
-static bool powermgm_suspend_state = false;
 
 bool powermgm_button_event_cb( EventBits_t event, void *arg );
 bool powermgm_send_event_cb( EventBits_t event );
@@ -303,15 +302,23 @@ void powermgm_loop( void ) {
         /*
          * suspend powermgm Task
          */
-        if ( !standby ) {
+        if ( !standby )
             powermgm_suspend();
-        }
+        /**
+         * call powermgm loop standby cb
+         */
         powermgm_send_loop_event_cb( POWERMGM_STANDBY );
     }
     else if ( powermgm_get_event( POWERMGM_WAKEUP ) ) {
+        /**
+         * call powermgm loop wakeup cb
+         */
         powermgm_send_loop_event_cb( POWERMGM_WAKEUP );
     }
     else if ( powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ) {
+        /**
+         * call powermgm loop silence wakeup cb
+         */
         powermgm_send_loop_event_cb( POWERMGM_SILENCE_WAKEUP );
     }
 }
@@ -378,6 +385,15 @@ void powermgm_set_lightsleep( bool enable ) {
     }
     else
         lighsleep++;
+}
+
+void powermgm_set_resume_interval( int32_t interval ) {
+    #ifdef NATIVE_64BIT
+    #else
+        powermgm_tickTicker->attach_ms( interval, []() {
+            powermgm_resume_from_ISR();
+        });
+    #endif
 }
 
 bool powermgm_get_lightsleep( void ) {

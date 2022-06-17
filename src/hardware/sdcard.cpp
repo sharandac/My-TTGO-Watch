@@ -46,6 +46,7 @@
 
 #include "powermgm.h"
 
+static bool sdcard_mount_failed = false;
 static bool sdcard_mounted = false;
 static bool sdcard_block_unmount = false;
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg );
@@ -69,6 +70,7 @@ void sdcard_setup( void ) {
             }
             if (!SD.begin(SD_CS, *sdhander)) {
                 log_e("SD Card Mount Failed");
+                sdcard_mount_failed = true;
             }
             heap_caps_malloc_extmem_enable( 16 * 1024 );
 
@@ -81,6 +83,9 @@ void sdcard_setup( void ) {
 
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     bool retval = false;
+
+    if( sdcard_mount_failed )
+        return( true );
 
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         switch( event ) {

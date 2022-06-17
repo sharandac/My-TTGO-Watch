@@ -14,7 +14,6 @@
 #include "app/mail/mail_app.h"
 #include "app/sailing/sailing.h"
 #include "app/stopwatch/stopwatch_app.h"
-#include "app/presenter/presenter_app.h"
 #include "app/astro/astro_app.h"
 #include "app/wifimon/wifimon_app.h"
 #include "app/calendar/calendar.h"
@@ -64,7 +63,6 @@ void setup() {
     IRController_setup();
     sailing_setup();
     osmand_app_setup();
-    presenter_app_setup();
     fxrates_app_setup();
     powermeter_app_setup();
     FindPhone_setup();

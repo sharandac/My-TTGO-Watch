@@ -35,6 +35,7 @@
     #define NORMALPOWERSAVEVOLTAGE          3000                /** @brief defines the norminal voltages while in powersave */
     #define EXPERIMENTALNORMALVOLTAGE       3000                /** @brief defines the norminal voltages while working with exprimental powersave enabled */
     #define EXPERIMENTALPOWERSAVEVOLTAGE    2800                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
+    #define POWERMGMRESUMEINTERVAL          1000                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
     /**
      * @brief pmu config structure
      */
@@ -48,6 +49,7 @@
         int32_t normal_power_save_voltage = NORMALPOWERSAVEVOLTAGE;
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
         int32_t experimental_power_save_voltage = EXPERIMENTALPOWERSAVEVOLTAGE;
+        int32_t powermgm_resume_interval = POWERMGMRESUMEINTERVAL;
         bool high_charging_target_voltage = false;
         bool compute_percent = false;
         bool experimental_power_save = false;

@@ -38,6 +38,7 @@
 #include "mainbar/setup_tile/display_settings/display_settings.h"
 #include "mainbar/setup_tile/gps_settings/gps_settings.h"
 #include "mainbar/setup_tile/move_settings/move_settings.h"
+#include "mainbar/setup_tile/notify_settings/notify_settings.h"
 #include "mainbar/setup_tile/battery_settings/battery_settings.h"
 #include "mainbar/setup_tile/sound_settings/sound_settings.h"
 #include "mainbar/setup_tile/sdcard_settings/sdcard_settings.h"
@@ -164,6 +165,7 @@ void gui_setup( void ) {
     display_settings_tile_setup();
     move_settings_tile_setup();
     style_settings_tile_setup();
+    notify_settings_tile_setup();
     wlan_settings_tile_setup();
     #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 ) || defined( NATIVE_64BIT )
         touch_settings_tile_setup();

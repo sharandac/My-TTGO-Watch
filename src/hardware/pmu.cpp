@@ -169,6 +169,7 @@ void pmu_setup( void ) {
     powermgm_register_cb_with_prio( POWERMGM_STANDBY , pmu_powermgm_event_cb, "powermgm pmu", CALL_CB_LAST );
     powermgm_register_cb_with_prio( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , pmu_powermgm_event_cb, "powermgm pmu", CALL_CB_FIRST );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , pmu_powermgm_loop_cb, "powermgm pmu loop" );
+    // powermgm_set_resume_interval( pmu_config.powermgm_resume_interval );
     /*
      * register blectl callback function
      */
