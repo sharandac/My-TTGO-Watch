@@ -128,7 +128,10 @@ void bluetooth_media_tile_setup( void ) {
 
 static void bluetooth_media_activate_cb( void ) {
     wf_image_button_fade_in( bluetooth_exit_btn, 300, 0 );
-    wf_image_button_fade_in( bluetooth_media_play, 300, 0 );
+    if( !lv_obj_get_hidden( bluetooth_media_play ) )
+        wf_image_button_fade_in( bluetooth_media_play, 300, 0 );
+    else
+        wf_image_button_fade_in( bluetooth_media_stop, 300, 0 );
     wf_image_button_fade_in( bluetooth_media_next, 300, 200 );
     wf_image_button_fade_in( bluetooth_media_prev, 300, 200 );
     wf_image_button_fade_in( bluetooth_media_speaker, 300, 0 );

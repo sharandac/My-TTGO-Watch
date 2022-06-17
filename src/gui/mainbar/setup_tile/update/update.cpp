@@ -338,7 +338,7 @@ void update_Task( void * pvParameters ) {
         gui_take();
 
         if ( firmware_version > atoll( __FIRMWARE__ ) && firmware_version > 0 ) {
-            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5, "new version: %ld", firmware_version );
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "new version: %ld", firmware_version );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
             if ( last_firmware_version < firmware_version ) {
                 blectl_send_loop_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"new firmware version\",\"body\":\"update:\n%s\"}", update_get_comment() );
@@ -346,13 +346,15 @@ void update_Task( void * pvParameters ) {
             }
         }
         else if ( firmware_version == atoll( __FIRMWARE__ ) ) {
-            lv_label_set_text( update_status_label, "yeah! up to date ..." );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "yeah! up to date ..." );
+            setup_hide_indicator( update_setup_icon );
+        }
+        else if ( firmware_version < atoll( __FIRMWARE__ ) ) {
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "too new version ..." );
             setup_hide_indicator( update_setup_icon );
         }
         else {
-            lv_label_set_text( update_status_label, "get update info failed" );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );  
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "get update info failed" );
             setup_hide_indicator( update_setup_icon );
         }
         lv_obj_invalidate( lv_scr_act() );
@@ -371,8 +373,7 @@ void update_Task( void * pvParameters ) {
 
                 gui_take();
 
-                lv_label_set_text( update_status_label, "update ok, turn off and on!" );
-                lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+                wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "update ok, turn off and on!" );
                 lv_label_set_text( update_btn_label, "restart");
                 if( update_setup_get_autorestart() ) {
                     log_i("System reboot by user");
@@ -403,8 +404,7 @@ void update_Task( void * pvParameters ) {
         }
         else {
             gui_take();
-            lv_label_set_text( update_status_label, "turn wifi on!" );
-            lv_obj_align( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
+            wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING, "turn wifi on!" );
             gui_give();  
         }
     }

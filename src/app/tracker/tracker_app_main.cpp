@@ -80,6 +80,7 @@ lv_obj_t *tracker_file_info_label = NULL;
  */
 void tracker_app_main_activate_cb( void );
 void tracker_app_main_hibernate_cb( void );
+static bool tracker_app_main_button_cb( EventBits_t event, void *arg );
 const char *tracker_app_main_logging( bool start, gps_data_t *gps_data );
 static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg );
 static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event );
@@ -123,6 +124,7 @@ void tracker_app_main_setup( uint32_t tile ) {
     gpsctl_register_cb( GPSCTL_FIX | GPSCTL_NOFIX | GPSCTL_DISABLE | GPSCTL_ENABLE | GPSCTL_UPDATE_LOCATION | GPSCTL_UPDATE_ALTITUDE | GPSCTL_UPDATE_SOURCE | GPSCTL_UPDATE_SPEED | GPSCTL_UPDATE_SATELLITE, tracker_app_main_gps_event_cb, "tracker gps" );
     mainbar_add_tile_activate_cb( tile, tracker_app_main_activate_cb );
     mainbar_add_tile_hibernate_cb( tile, tracker_app_main_hibernate_cb );
+    mainbar_add_tile_button_cb( tile, tracker_app_main_button_cb );
 
     mainbar_add_slide_element( tracker_progress_arc );
     mainbar_add_slide_element( tracker_exit_btn );
@@ -131,6 +133,25 @@ void tracker_app_main_setup( uint32_t tile ) {
     mainbar_add_slide_element( tracker_file_info_label );
 }
 
+/**
+ * @brief call back function for button if the current tile active
+ * 
+ * @param event         event like BUTTON_LEFT, BUTTON_RIGHT, ...
+ * @param arg           here like NULL
+ * @return true 
+ * @return false 
+ */
+static bool tracker_app_main_button_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_RIGHT:
+            mainbar_jump_to_tilenumber( tracker_app_get_app_view_tile_num(), LV_ANIM_ON );
+            break;        
+        case BUTTON_EXIT:
+            mainbar_jump_back();
+            break;
+    }
+    return( true );
+}
 /**
  * @brief call back function if the current tile activate
  * 

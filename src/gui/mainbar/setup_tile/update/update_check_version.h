@@ -22,6 +22,8 @@
 #ifndef _UPDATE_CHECK_VERSION_H
     #define _UPDATE_CHECK_VERSION_H
     
+    #define UPDATE_CHECK_VERSION_LOG            log_i
+
     /**
      * @brief   get firmware discription file
      * 

@@ -38,6 +38,6 @@
      * 
      * @return uint32_t 
      */
-    uint32_t tracker_app_get_app_setup_tile_num( void );
+    uint32_t tracker_app_get_app_view_tile_num( void );
 
 #endif // _TRACKER_APP_H

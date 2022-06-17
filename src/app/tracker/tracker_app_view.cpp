@@ -57,6 +57,10 @@ lv_chart_series_t *tracker_altitude_series = NULL;
 /**
  * 
  */
+static bool tracker_app_view_button_cb( EventBits_t event, void *arg );
+/**
+ * 
+ */
 void tracker_app_view_setup( uint32_t tile ) {
     /**
      * add chart widget
@@ -110,6 +114,27 @@ void tracker_app_view_setup( uint32_t tile ) {
 
     mainbar_add_slide_element( tracker_speed_chart );
     mainbar_add_slide_element( tracker_altitude_chart );
+    mainbar_add_tile_button_cb( tile, tracker_app_view_button_cb );
+}
+
+/**
+ * @brief 
+ * 
+ * @param event 
+ * @param arg 
+ * @return true 
+ * @return false 
+ */
+static bool tracker_app_view_button_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_LEFT:
+            mainbar_jump_back();
+            break;
+        case BUTTON_EXIT:
+            mainbar_jump_back();
+            break;
+    }
+    return( true );
 }
 
 void tracker_app_view_add_data( gps_data_t *gps_data ) {

@@ -28,7 +28,7 @@
 #include "charbuffer.h"
 #include "utils/alloc.h"
 
-CharBuffer::CharBuffer( void ) : msg(NULL), capacity(0), size(0) {
+CharBuffer::CharBuffer( void ) : filter(true), msg(NULL), capacity(0), size(0) {
     // Do not alloc here, PSRAm subsystem is not necessarily ready
 }
 
@@ -57,8 +57,19 @@ void CharBuffer::append(char c) {
         capacity += CHUNK_CAPACITY;
     }
     size++;
+
+    if( filter ) {
+        if( !( ( c >= ' ' && c <= '~' ) || c == '\r' || c == '\n' || c == '\t') ) {
+            c = '?';
+        }
+    }
+
     msg[ size - 1 ] = c;
     msg[ size ] = '\0';
+}
+
+void CharBuffer::setFilter( bool enable ) {
+    filter = enable;
 }
 
 void CharBuffer::clear( void ) {

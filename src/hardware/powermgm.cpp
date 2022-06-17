@@ -63,9 +63,15 @@ void powermgm_setup( void ) {
     powermgm_status = xEventGroupCreate();
 
     powermgm_tickTicker = new Ticker();
-    powermgm_tickTicker->attach_ms( 1000, []() {
-        powermgm_resume_from_ISR();
-    });
+    #if defined( M5CORE2 )
+        powermgm_tickTicker->attach_ms( 100, []() {
+            powermgm_resume_from_ISR();
+        });
+    #else
+        powermgm_tickTicker->attach_ms( 1000, []() {
+            powermgm_resume_from_ISR();
+        });
+    #endif
 #endif
     /*
      * register powerbutton event

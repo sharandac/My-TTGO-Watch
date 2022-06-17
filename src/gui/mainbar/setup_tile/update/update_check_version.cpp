@@ -43,7 +43,7 @@ int64_t update_check_new_version( char *url ) {
      * load uri file into ram
      */
     uri_load_dsc_t *uri_load_dsc = uri_load_to_ram( url );
-    log_d("load update information from: %s", url );
+    UPDATE_CHECK_VERSION_LOG("load update information from: %s", url );
     /**
      * if was success, pharse the json
      */
@@ -69,7 +69,7 @@ int64_t update_check_new_version( char *url ) {
                 firmwarehost = tmp_firmwarehost;
             }
             strcpy( firmwarehost, doc["host"] );
-            log_d("firmwarehost: %s", firmwarehost );
+            UPDATE_CHECK_VERSION_LOG("firmwarehost: %s", firmwarehost );
         }
 
         if ( doc.containsKey("file") ) {
@@ -83,7 +83,7 @@ int64_t update_check_new_version( char *url ) {
                 firmwarefile = tmp_firmwarefile;
             }
             strcpy( firmwarefile, doc["file"] );
-            log_d("firmwarefile: %s", firmwarefile );
+            UPDATE_CHECK_VERSION_LOG("firmwarefile: %s", firmwarefile );
         }
 
         if ( doc.containsKey("gzipfile") ) {
@@ -97,7 +97,7 @@ int64_t update_check_new_version( char *url ) {
                 firmwarefile = tmp_firmwarefile;
             }
             strcpy( firmwarefile, doc["gzipfile"] );
-            log_d("firmwarefile: %s", firmwarefile );
+            UPDATE_CHECK_VERSION_LOG("firmwarefile: %s", firmwarefile );
         }
 
         if ( firmwarehost != NULL && firmwarefile != NULL ) {
@@ -111,17 +111,17 @@ int64_t update_check_new_version( char *url ) {
                 firmwareurl = tmp_firmwareurl;            
             }
             snprintf( firmwareurl, strlen( firmwarehost ) + strlen( firmwarefile ) + 5, "%s/%s", firmwarehost, firmwarefile );
-            log_d("firmwareurl: %s", firmwareurl );
+            UPDATE_CHECK_VERSION_LOG("firmwareurl: %s", firmwareurl );
         }
 
         if ( doc.containsKey("version") ) {
             firmwareversion = atoll( doc["version"] );
-            log_d("firmwareversion: %ld", firmwareversion );
+            UPDATE_CHECK_VERSION_LOG("firmwareversion: %ld", firmwareversion );
         }
 
         if ( doc.containsKey("size") ) {
             firmwaresize = atoi( doc["size"] );
-            log_d("firmwaresize: %d", firmwaresize );
+            UPDATE_CHECK_VERSION_LOG("firmwaresize: %d", firmwaresize );
         }
 
         if ( doc.containsKey("md5") ) {
@@ -135,7 +135,7 @@ int64_t update_check_new_version( char *url ) {
                 firmwaremd5 = tmp_firmwaremd5;
             }
             strcpy( firmwaremd5, doc["md5"] );
-            log_d("md5: %s", firmwaremd5 );
+            UPDATE_CHECK_VERSION_LOG("md5: %s", firmwaremd5 );
         }
 
         if ( doc.containsKey("comment") ) {
@@ -149,7 +149,7 @@ int64_t update_check_new_version( char *url ) {
                 firmwarecomment = tmp_firmwarecomment;
             }
             strcpy( firmwarecomment, doc["comment"] );
-            log_d("comment: %s", firmwarecomment );
+            UPDATE_CHECK_VERSION_LOG("comment: %s", firmwarecomment );
         }
         /**
          * clear json

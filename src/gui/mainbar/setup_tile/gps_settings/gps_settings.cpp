@@ -100,7 +100,7 @@ void gps_settings_tile_setup( void ) {
     gpsctl_register_cb( GPSCTL_UPDATE_CONFIG, gps_settings_config_update_cb, "gps settings" );
 
     #if defined( M5PAPER )
-        lv_obj_set_hidden( gps_port_cont, true );
+        lv_obj_set_hidden( gps_port_cont, false );
     #endif
 }
 

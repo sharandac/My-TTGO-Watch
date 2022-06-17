@@ -44,6 +44,12 @@
        */
       void append(char c);
       /**
+       * @brief enabled char filter
+       * 
+       * @param enable  true means enabled
+       */
+      void setFilter( bool enable );
+      /**
        * @brief Clear the buffer
        */
       void clear();
@@ -66,6 +72,10 @@
        */
       inline size_t length() { return size; }
       private:
+      /**
+       * @brief if true, all non printable char filtered out
+       */
+      bool filter;
       /**
        * @brief pointer to the buffer
        */

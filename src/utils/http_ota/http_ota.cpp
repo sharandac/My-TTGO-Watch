@@ -49,10 +49,11 @@ bool http_ota_start( const char* url, const char* md5, int32_t firmwaresize ) {
      * disable ble and set esp32 voltage to 3.3V to
      * prevent some issues
      */
-    blectl_off();
+    #ifndef NO_BLUETOOTH
+        blectl_off();
+    #endif
     powermgm_set_lightsleep( false );
     powermgm_set_perf_mode();
-//    pmu_set_safe_voltage_for_update();
     /*
      * if firmware an .gz file, take compressed ota otherwise
      * take a normal uncompressed firmware
