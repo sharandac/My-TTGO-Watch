@@ -45,6 +45,7 @@
         bool advertising = true;                                /** @brief advertising on/off */
         bool enable_on_standby = false;                         /** @brief enable on standby on/off */
         bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
+        bool wakeup_on_notification = true;                     /** @brief wakes up on notifications */
         bool show_notification = true;                          /** @brief enable show notifications */
         bool vibe_notification = true;                          /** @brief enable vibe on notifications */
         bool sound_notification = true;                         /** @brief enable sound on notifications */

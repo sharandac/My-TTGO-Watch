@@ -177,6 +177,12 @@
      */
     void blectl_set_disable_only_disconnected( bool disable_only_disconnected );
     /**
+     * @brief wakeup on notification
+     * 
+     * @param   wakeup_on_notification   true means enabled, false means disabled 
+     */
+    void blectl_set_wakeup_on_notification( bool wakeup_on_notification );
+    /**
      * @brief enable show notification
      * 
      * @param   show_notification   true means enabled, false means disabled 
@@ -218,6 +224,12 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_disable_only_disconnected( void );
+    /**
+     * @brief get wakeup on notification
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_wakeup_on_notification( void );
     /**
      * @brief get the current show notification config
      * 

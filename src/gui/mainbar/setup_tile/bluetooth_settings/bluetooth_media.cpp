@@ -68,6 +68,7 @@ LV_IMG_DECLARE(up_32px);
 LV_IMG_DECLARE(down_32px);
 
 LV_FONT_DECLARE(Ubuntu_16px);
+LV_FONT_DECLARE(Ubuntu_32px);
 
 static void bluetooth_media_activate_cb( void );
 static bool bluetooth_media_event_cb( EventBits_t event, void *arg );
@@ -103,6 +104,7 @@ void bluetooth_media_tile_setup( void ) {
     lv_obj_align( bluetooth_media_prev, bluetooth_media_play, LV_ALIGN_OUT_LEFT_MID, -THEME_ICON_SIZE, 0 );
 
     bluetooth_media_artist = wf_add_label( bluetooth_media_tile, "artist", APP_STYLE );
+    lv_obj_set_style_local_text_font( bluetooth_media_artist, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &Ubuntu_32px );
     lv_label_set_long_mode( bluetooth_media_artist, LV_LABEL_LONG_SROLL_CIRC );
     lv_obj_set_width( bluetooth_media_artist, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE - THEME_PADDING * 2 );
     lv_obj_align( bluetooth_media_artist, bluetooth_media_tile, LV_ALIGN_IN_TOP_LEFT, THEME_PADDING, THEME_PADDING );
@@ -110,7 +112,7 @@ void bluetooth_media_tile_setup( void ) {
     bluetooth_media_title = wf_add_label( bluetooth_media_tile, "title", APP_STYLE );
     lv_label_set_long_mode( bluetooth_media_title, LV_LABEL_LONG_SROLL_CIRC );
     lv_obj_set_width( bluetooth_media_title, lv_disp_get_hor_res( NULL ) - THEME_ICON_SIZE - THEME_PADDING * 2 );
-    lv_obj_align( bluetooth_media_title, bluetooth_media_artist, LV_ALIGN_OUT_BOTTOM_MID, 0, 0 );
+    lv_obj_align( bluetooth_media_title, bluetooth_media_play, LV_ALIGN_OUT_TOP_MID, 0, -THEME_PADDING );
 
     bluetooth_media_speaker = wf_add_image_button( bluetooth_media_tile, sound_32px, NULL, SYSTEM_ICON_STYLE );
     lv_obj_align( bluetooth_media_speaker, bluetooth_media_play, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_ICON_SIZE );
@@ -266,7 +268,7 @@ static bool bluetooth_media_queue_msg( BluetoothJsonRequest &doc ) {
         }
     }
 
-    if( retval ) {
+    if( retval && bluetooth_media_play_state ) {
         if( blectl_get_media_notification() ) {
             powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
             mainbar_jump_to_tilenumber( bluetooth_media_tile_num, LV_ANIM_OFF, true );

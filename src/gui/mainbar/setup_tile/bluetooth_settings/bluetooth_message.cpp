@@ -586,14 +586,20 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      */
     int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     bluetooth_message_show_msg( entry );
+
+    if( blectl_get_wakeup_on_notification() ) {
+        /**
+         * wakeup on nitification
+         */
+        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+    }
     /**
      * show on notification if enabled
      */
     if ( blectl_get_show_notification() ) {
         /*
-         * wakeup for showing msg/alert
+         * showing msg/alert
          */
-        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
     }
     /**

@@ -472,6 +472,12 @@ void blectl_set_disable_only_disconnected( bool disable_only_disconnected ) {
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
+void blectl_set_wakeup_on_notification( bool wakeup_on_notification ) {        
+    blectl_config.wakeup_on_notification = wakeup_on_notification;
+    blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
+}
+
 void blectl_set_show_notification( bool show_notification ) {        
     blectl_config.show_notification = show_notification;
     blectl_config.save();
@@ -574,6 +580,10 @@ bool blectl_get_enable_on_standby( void ) {
 
 bool blectl_get_disable_only_disconnected( void ) {
     return( blectl_config.disable_only_disconnected );
+}
+
+bool blectl_get_wakeup_on_notification( void ) {
+    return( blectl_config.wakeup_on_notification );
 }
 
 bool blectl_get_show_notification( void ) {
@@ -812,7 +822,6 @@ void blectl_loop ( void ) {
     char *gbmsg;
     BaseType_t available = xQueueReceive( blectl_msg_receive_queue, &gbmsg, 0);
     if ( available == pdTRUE && gbmsg ) {
-        log_i("ble msg: %s", gbmsg );
         /**
          * check if we have a GB message
          */

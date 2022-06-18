@@ -77,8 +77,8 @@ bool button_send_cb( EventBits_t event, void *arg );
     void IRAM_ATTR  button_irq( void ) {
         portENTER_CRITICAL_ISR(&BUTTON_IRQ_Mux);
         button_irq_flag = true;
-        powermgm_resume_from_ISR();
         portEXIT_CRITICAL_ISR(&BUTTON_IRQ_Mux);
+        powermgm_resume_from_ISR();
     }
 #endif
 

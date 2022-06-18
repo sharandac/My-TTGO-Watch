@@ -59,8 +59,8 @@
     void IRAM_ATTR  pmu_irq( void ) {
         portENTER_CRITICAL_ISR(&PMU_IRQ_Mux);
         pmu_irq_flag = true;
-        powermgm_resume_from_ISR();
         portEXIT_CRITICAL_ISR(&PMU_IRQ_Mux);
+        powermgm_resume_from_ISR();
     }
 #endif
 

@@ -67,8 +67,8 @@
     void IRAM_ATTR bma_irq( void ) {
         portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
         bma_irq_flag = true;
-        powermgm_resume_from_ISR();
         portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
+        powermgm_resume_from_ISR();
     }
 #endif
 

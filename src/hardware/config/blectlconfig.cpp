@@ -34,6 +34,7 @@ bool blectl_config_t::onSave(JsonDocument& doc) {
     doc["advertising"] = advertising;
     doc["enable_on_standby"] = enable_on_standby;
     doc["disable_only_disconnected"] = disable_only_disconnected;
+    doc["wakeup_on_notification"] = wakeup_on_notification;
     doc["show_notification"] = show_notification;
     doc["vibe_notification"]= vibe_notification;
     doc["sound_notification"]= sound_notification;
@@ -79,6 +80,7 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
     vibe_notification = doc["vibe_notification"] | true;
     sound_notification = doc["sound_notification"] | true;
     media_notification = doc["media_notification"] | true;
+    wakeup_on_notification = doc["wakeup_on_notification"] | true;
     minInterval = doc["minInterval"] | 0x06;
     maxInterval = doc["maxInterval"] | 0x20;
     latency = doc["latency"] | 20;
@@ -118,6 +120,7 @@ bool blectl_config_t::onDefault( void ) {
     enable_on_standby = false;
     disable_only_disconnected = false;
     txpower = 1;
+    wakeup_on_notification = true;
     show_notification = true;
     vibe_notification = true;
     sound_notification = true;
