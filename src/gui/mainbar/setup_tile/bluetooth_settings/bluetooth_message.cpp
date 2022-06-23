@@ -202,7 +202,6 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void exit_bluetooth_message_event_cb( lv_obj_t * obj, lv_event_t event );
 static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event );
 bool bluetooth_message_event_cb( EventBits_t event, void *arg );
-static bool bluetooth_message_find_reply( const char * src_name );
 const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name );
 
 static void bluetooth_message_send_del_json( int32_t entry );
@@ -300,11 +299,9 @@ static bool bluetooth_message_button_event_cb( EventBits_t event, void *arg ) {
             mainbar_jump_back();
             break;
         case BUTTON_NOTIFY_TEST:
-            log_i("send test notify");
             blectl_send_loop_msg( "{\"t\":\"notify\",\"id\":1654906064,\"src\":\"K-9 Mail\",\"title\":\"foo\",\"body\":\"bar 23\"}" );
             break;
         case BUTTON_NOTIFY_DEL_TEST:
-            log_i("send test del notify");
             blectl_send_loop_msg( "{\"t\":\"notify-\",\"id\":1654906064}" );
             break;
     }
@@ -348,7 +345,6 @@ static void enter_bluetooth_messages_cb( lv_obj_t * obj, lv_event_t event ) {
             }
             break;
         case ( LV_EVENT_LONG_PRESSED ):             
-            log_e("long press not implement!\r\n");
             break;
     }    
 }
@@ -380,8 +376,6 @@ static void bluetooth_del_message_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
             bluetooth_delete_msg_from_chain( bluetooth_current_msg );
-            if( msg_chain_get_entrys( bluetooth_msg_chain ) == 0 )
-                mainbar_jump_back();
             break;
     }
 }
@@ -423,7 +417,6 @@ static void bluetooth_message_send_del_json( int32_t entry ) {
     BluetoothJsonRequest request( msg, strlen( msg ) * 4 );
     if ( request.isValid() ) {
         if( request.containsKey("id") ) {
-            log_i( "{\"t\":\"notify-\",\"id\":%ld}", request["id"].as<long>() );
             blectl_send_msg("\r\n{\"t\":\"notify-\",\"id\":%ld}\r\n", request["id"].as<long>() );
         }
     }
@@ -495,24 +488,10 @@ const lv_img_dsc_t *bluetooth_message_find_img( const char * src_name ) {
      */
     for ( int i = 0; src_icon[ i ].img != NULL; i++ ) {
         if ( strstr( src_name, src_icon[ i ].src_name ) ) {
-            log_d("hit: %s -> %s", src_name, src_icon[ i ].src_name );
             return( src_icon[ i ].img );
         }
     }
     return( default_msg_icon );
-}
-
-static bool bluetooth_message_find_reply( const char * src_name ) {
-    /*
-     * search for the right src and get reply state
-     */
-    for ( int i = 0; src_icon[ i ].img != NULL; i++ ) {
-        if ( strstr( src_name, src_icon[ i ].src_name ) ) {
-            log_d("hit: %s -> %s", src_name, src_icon[ i ].src_name );
-            return( src_icon[ i ].reply );
-        }
-    }
-    return( false );
 }
 
 bool bluetooth_message_queue_msg( BluetoothJsonRequest &doc ) {
@@ -572,7 +551,6 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      */
     BluetoothJsonRequest request( msg, strlen( msg ) * 4 );
     if ( !request.isValid() ) {
-        log_e("Bluetooth msg not a valid json");
         request.clear();
         return( false );
     }
@@ -584,23 +562,19 @@ bool bluetooth_message_queue_msg( const char *msg ) {
     /*
      * only alert or alret and showing msg
      */
-    int32_t entry = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
+    int32_t entry = bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     bluetooth_message_show_msg( entry );
-
-    if( blectl_get_wakeup_on_notification() ) {
-        /**
-         * wakeup on nitification
-         */
-        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-    }
     /**
      * show on notification if enabled
      */
     if ( blectl_get_show_notification() ) {
-        /*
-         * showing msg/alert
-         */
         mainbar_jump_to_tilenumber( bluetooth_message_tile_num, LV_ANIM_OFF, true );
+    }
+    /**
+     * wakeup on nitification if enabled
+     */
+    if( blectl_get_wakeup_on_notification() ) {
+        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
     }
     /**
      * sound on notification if enabled
@@ -612,9 +586,8 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      * vibe on notification if enabled
      */
     if( blectl_get_vibe_notification() ) {
-        motor_vibe(10);
+        motor_vibe(20);
     }
-    bluetooth_current_msg = msg_chain_get_entrys( bluetooth_msg_chain ) - 1;
     /*
      * allocate an widget if nor allocated
      */
@@ -677,12 +650,10 @@ void bluetooth_message_show_msg( int32_t entry ) {
                 * set the receive time string
                 */
                 struct tm info;
-                char timestamp[16]="";
                 localtime_r( msg_chain_get_msg_timestamp_entry( bluetooth_msg_chain, entry ), &info );
                 int h = info.tm_hour;
                 int m = info.tm_min;
-                snprintf( timestamp, sizeof( timestamp ), "%02d:%02d", h, m );
-                lv_label_set_text( bluetooth_message_time_label, timestamp );
+                wf_label_printf( bluetooth_message_time_label, "%02d:%02d", h, m );
                 /*
                 * set the numbers of msg string
                 */
@@ -693,7 +664,7 @@ void bluetooth_message_show_msg( int32_t entry ) {
                 if ( doc.containsKey("src") ) {
                     lv_img_set_src( bluetooth_message_img, bluetooth_message_find_img( doc["src"] ) ); 
                     lv_label_set_text( bluetooth_message_notify_source_label, doc["src"] );
-                                    }
+                }
                 else {
                     lv_img_set_src( bluetooth_message_img, default_msg_icon );
                     lv_label_set_text( bluetooth_message_notify_source_label, "Message" );
@@ -708,14 +679,12 @@ void bluetooth_message_show_msg( int32_t entry ) {
                 else if ( doc.containsKey("title") ) {
                     lv_label_set_text( bluetooth_message_msg_label, doc["title"] );
                 }
-                else if ( doc.containsKey("temp") ) {
+                else if ( doc.containsKey("temp") && doc.containsKey("loc") && doc.containsKey("txt") ) {
                     /*
                     * add special case when a weather information is set
                     */
                     int temperature = doc["temp"];
-                    const char temp_str[128] = "";
-                    snprintf( (char*)temp_str, sizeof( temp_str ), "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
-                    lv_label_set_text( bluetooth_message_msg_label, temp_str );
+                    wf_label_printf( bluetooth_message_msg_label, "%s / %d °C / %s", doc["loc"].as<String>().c_str(), temperature - 273, doc["txt"].as<String>().c_str() );
                 }
                 else {
                     lv_label_set_text( bluetooth_message_msg_label, "" );
@@ -759,7 +728,6 @@ void bluetooth_message_play_audio( int32_t entry ) {
      * check if audio played recently
      */
     if ( nextmillis >= millis() ) {
-        log_d("skip playing audio notification, because played one recently");
         nextmillis += 5000L;
         return;
     }
@@ -825,11 +793,9 @@ void bluetooth_message_play_audio( int32_t entry ) {
                 snprintf( tts, sizeof( tts ), "%s.", text );
                 
                 sound_speak( tts );
-                log_d("playing custom tts audio notification: \"%s\"", tts );
             }
             else {
                 sound_play_spiffs_mp3( custom_audio_notification.value );
-                log_d("playing custom mp3 audio notification: \"%s\"", custom_audio_notification.value );
             }
         }
         /**
@@ -837,7 +803,6 @@ void bluetooth_message_play_audio( int32_t entry ) {
          */
         if ( !found ) {
             sound_play_progmem_wav( piep_wav, piep_wav_len );
-            log_d("playing default mp3 audio notification");
         }
     }
     doc.clear();

@@ -18,6 +18,7 @@
 #include "blectl.h"
 #include "callback.h"
 #include "sensor.h"
+#include "device.h"
 
 #include "utils/fakegps.h"
 #include "gui/splashscreen.h"
@@ -196,6 +197,7 @@ void hardware_setup( void ) {
     /**
      * driver init
      */
+    device_setup();
     sdcard_setup();
     powermgm_setup();
     button_setup();

@@ -19,41 +19,17 @@
  */
 
 #include "config.h"
-#ifdef NATIVE_64BIT
-    #include "logging.h"
-#else
-    #include <Arduino.h>
-#endif
-
 #include "charbuffer.h"
 #include "utils/alloc.h"
 
-CharBuffer::CharBuffer( void ) : filter(true), msg(NULL), capacity(0), size(0) {
-    // Do not alloc here, PSRAm subsystem is not necessarily ready
-}
+CharBuffer::CharBuffer( void ) : filter(true), msg(NULL), capacity(0), size(0) {}
 
 void CharBuffer::append(char c) {
-#ifdef NATIVE_64BIT
-    log_v("CharBuffer::append: size %ld capacity %ld", size, capacity);
-#else
-    log_v("CharBuffer::append: size %d capacity %d", size, capacity);
-#endif
     if ( capacity == 0 )
         clear();
+    
     if ( size + 2 > capacity ) {
-#ifdef NATIVE_64BIT
-        log_v("CharBuffer::append realloc: size %ld capacity %ld", size, capacity);
-#else
-        log_v("CharBuffer::append realloc: size %d capacity %d", size, capacity);
-#endif
-        // Realloc
-        char *new_msg = NULL;
-        new_msg = (char *)REALLOC( msg, capacity + CHUNK_CAPACITY );
-        if ( new_msg == NULL ) {
-            log_e("msg realloc fail");
-            while(true);            
-        }
-        msg = new_msg;
+        msg = (char *)REALLOC_ASSERT( msg, capacity + CHUNK_CAPACITY, "msg realloc fail" );
         capacity += CHUNK_CAPACITY;
     }
     size++;
@@ -68,31 +44,23 @@ void CharBuffer::append(char c) {
     msg[ size ] = '\0';
 }
 
-void CharBuffer::setFilter( bool enable ) {
-    filter = enable;
-}
-
 void CharBuffer::clear( void ) {
-    if ( capacity != INITIAL_CAPACITY ) {
-        log_d("CharBuffer::clear alloc");
-        free(msg);
-        msg = (char *)CALLOC( INITIAL_CAPACITY, 1 );
-        if ( msg == NULL ) {
-            log_e("msg alloc fail");
-            while(true);
-        }
-        capacity = INITIAL_CAPACITY;
-    }
-    msg[0] = '\0';
+    if( msg )
+        free( msg );
+
+    msg = (char *)CALLOC_ASSERT( INITIAL_CAPACITY, 1, "msg calloc fail" );
+    capacity = INITIAL_CAPACITY;
     size = 0;
+
+    msg[0] = '\0';
 }
 
 void CharBuffer::erase( size_t pos ) {
     if ( pos >= size )
-        // Nothing to do
         return;
-    for ( int i = pos ; i < size ; i++ ) {
+
+    for ( int i = pos ; i < size ; i++ )
         msg[i] = '\0';
-    }
+
     size = pos;
 }

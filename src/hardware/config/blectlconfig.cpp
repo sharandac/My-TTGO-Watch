@@ -87,7 +87,7 @@ bool blectl_config_t::onLoad(JsonDocument& doc) {
     timeout = doc["timeout"] | 400;
 
     for ( int i = 0 ; i < CUSTOM_AUDIO_ENTRYS ; i++ ) {
-        if ( doc["custom_audio_notifications"][ i ]["text"] && doc["custom_audio_notifications"][ i ]["value"] ) {
+        if ( doc["custom_audio_notifications"][ i ].containsKey("text") && doc["custom_audio_notifications"][ i ].containsKey("value") ) {
             strncpy( custom_audio_notifications[ i ].text   , doc["custom_audio_notifications"][ i ]["text"], sizeof( custom_audio_notifications[ i ].text ) );
             strncpy( custom_audio_notifications[ i ].value  , doc["custom_audio_notifications"][ i ]["value"], sizeof( custom_audio_notifications[ i ].value ) );
         }

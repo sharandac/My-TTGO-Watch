@@ -8,6 +8,8 @@
             #include <stddef.h>
             #include <stdbool.h>
             #include <esp32-hal-psram.h>
+            #include "logging.h"
+            #include <Arduino.h>
 
             #define MALLOC         ps_malloc            /** @brief malloac from PSRAM */
             #define CALLOC         ps_calloc            /** @brief calloc from PSRAM */

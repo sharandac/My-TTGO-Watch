@@ -142,6 +142,9 @@ static void enter_battery_setup_event_cb( lv_obj_t * obj, lv_event_t event ) {
         case( LV_EVENT_CLICKED ):       battery_history_start_chart_logging();
                                         mainbar_jump_to_tilenumber( battery_settings_tile_num, LV_ANIM_OFF );
                                         break;
+        case( LV_EVENT_LONG_PRESSED ):  battery_history_start_chart_logging();
+                                        mainbar_jump_to_tilenumber( battery_settings_tile_num + 2, LV_ANIM_OFF );
+                                        break;
     }
 
 }

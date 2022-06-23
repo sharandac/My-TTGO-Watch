@@ -69,6 +69,7 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_obj_set_style_local_bg_grad_dir( battery_history_voltage_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, LV_GRAD_DIR_VER );
     lv_obj_set_style_local_bg_main_stop( battery_history_voltage_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 255 );
     lv_obj_set_style_local_bg_grad_stop( battery_history_voltage_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 0 );
+//    lv_obj_set_style_local_line_width ( battery_history_voltage_chart, LV_CHART_PART_SERIES_BG, LV_STATE_DEFAULT, 0 );
 
     battery_history_current_chart = lv_chart_create( mainbar_get_tile_obj( battery_history_tile_num ), NULL );
     lv_obj_set_size( battery_history_current_chart, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) - STATUSBAR_HEIGHT ) / 2 );
@@ -82,6 +83,7 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_obj_set_style_local_bg_grad_dir( battery_history_current_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, LV_GRAD_DIR_VER );
     lv_obj_set_style_local_bg_main_stop( battery_history_current_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 255 );
     lv_obj_set_style_local_bg_grad_stop( battery_history_current_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 0 );
+//    lv_obj_set_style_local_line_width ( battery_history_current_chart, LV_CHART_PART_SERIES_BG, LV_STATE_DEFAULT, 0 );
 
     battery_history_voltage_series = lv_chart_add_series( battery_history_voltage_chart, LV_COLOR_BLUE );
     battery_history_charge_series = lv_chart_add_series( battery_history_current_chart, LV_COLOR_GREEN );

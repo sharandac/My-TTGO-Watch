@@ -29,6 +29,7 @@
 #include "pmu.h"
 #include "powermgm.h"
 #include "callback.h"
+#include "device.h"
 #include "utils/charbuffer.h"
 #include "utils/alloc.h"
 #include "utils/bluejsonrequest.h"
@@ -208,8 +209,7 @@ void blectl_loop( void );
                                                 /*
                                                  * Duplicate message
                                                  */
-                                                char *buff = (char *)CALLOC( strlen( gadgetbridge_msg.c_str() ) + 1, 1 );
-                                                ASSERT( buff, "buff calloc failed" );
+                                                char *buff = (char *)CALLOC_ASSERT( strlen( gadgetbridge_msg.c_str() ) + 1, 1, "buff calloc failed" );
                                                 strlcpy( buff, gadgetbridge_msg.c_str(), strlen( gadgetbridge_msg.c_str() ) + 1 );
                                                 /*
                                                  * Send message
@@ -269,7 +269,9 @@ void blectl_setup( void ) {
          * This is too long I think:
          * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
-        BLEDevice::init("Espruino (" HARDWARE_NAME ")" );
+        char deviceName[ 64 ];
+        snprintf( deviceName, sizeof( deviceName ), "Espruino (%s)", device_get_name() );
+        BLEDevice::init( deviceName );
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
@@ -290,16 +292,16 @@ void blectl_setup( void ) {
         /*
          * Enable encryption
          */
-        BLEDevice::setEncryptionLevel( ESP_BLE_SEC_ENCRYPT_NO_MITM );
+        BLEDevice::setEncryptionLevel( ESP_BLE_SEC_ENCRYPT );
         BLEDevice::setSecurityCallbacks( new BtlCtlSecurity() );
         /*
          * Enable authentication
          */
         BLESecurity *pSecurity = new BLESecurity();
-        pSecurity->setAuthenticationMode(ESP_LE_AUTH_REQ_SC_BOND);
-        pSecurity->setCapability(ESP_IO_CAP_OUT);
-        pSecurity->setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
-        pSecurity->setRespEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
+        pSecurity->setAuthenticationMode( ESP_LE_AUTH_REQ_SC_BOND );
+        pSecurity->setCapability( ESP_IO_CAP_OUT );
+        pSecurity->setInitEncryptionKey( ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK );
+        pSecurity->setRespEncryptionKey( ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK );
         /*
          * Create the BLE Server
          */

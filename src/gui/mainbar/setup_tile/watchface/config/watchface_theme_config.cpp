@@ -161,7 +161,6 @@ bool watchface_theme_config_t::onLoad(JsonDocument& doc) {
         if ( doc["label"][i].containsKey("enable") ) {
             if ( doc["label"][i]["enable"].is<bool>() ) {
                 const char *val = doc["label"][i]["enable"] ? "1.0" : "0.0";
-                log_i( "Enable : %s", val );
                 strncpy( dial.label[ i ].enable_expr, val, sizeof( dial.label[ i ].enable_expr ) );
             } else {
                 strncpy( dial.label[ i ].enable_expr, doc["label"][i]["enable"], sizeof( dial.label[ i ].enable_expr ) );

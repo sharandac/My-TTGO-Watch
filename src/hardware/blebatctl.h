@@ -24,15 +24,16 @@
     #else
         #include "BLEServer.h"
 
-        #ifdef M5PAPER
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #else // NEW_HARDWARE_TAG
+        #else
         #endif
-        /**
-         * @brief ble bat setup function
-         * 
-         * @param pServer   pointer to an BLEServer
-         */
-        void blebatctl_setup( BLEServer *pServer );
+            /**
+             * @brief ble bat setup function
+             * 
+             * @param pServer   pointer to an BLEServer
+             */
+            void blebatctl_setup( BLEServer *pServer );
     #endif
 #endif // _BLEBATCTL_H

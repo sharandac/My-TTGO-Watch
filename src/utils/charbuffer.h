@@ -32,62 +32,62 @@
      * Memory is allocated by chunks.
      */
     class CharBuffer {
-      public:
-      /**
-       * @brief Default constructor
-       */
-      CharBuffer();
-      /**
-       * @brief Append a char to the buffer
-       * 
-       * @param c char to append
-       */
-      void append(char c);
-      /**
-       * @brief enabled char filter
-       * 
-       * @param enable  true means enabled
-       */
-      void setFilter( bool enable );
-      /**
-       * @brief Clear the buffer
-       */
-      void clear();
-      /**
-       * @brief Erase trailing part of the buffer
-       * 
-       * @param pos starting position to erase
-       */
-      void erase(size_t pos =  0);
-      /**
-       * @brief C string buffer
-       * 
-       * @return pointer to C string
-       */
-      inline const char *c_str() { return msg; }
-      /**
-       * @brief length of the effective content
-       * 
-       * @return the size
-       */
-      inline size_t length() { return size; }
-      private:
-      /**
-       * @brief if true, all non printable char filtered out
-       */
-      bool filter;
-      /**
-       * @brief pointer to the buffer
-       */
-      char* msg;
-      /**
-       * @brief current capacity
-       */
-      size_t capacity;
-      /**
-       * @brief current size
-       */
-      size_t size;
+        public:
+            /**
+             * @brief Default constructor
+             */
+            CharBuffer();
+            /**
+             * @brief Append a char to the buffer
+             * 
+             * @param c char to append
+             */
+            void append(char c);
+            /**
+             * @brief enabled char filter
+             * 
+             * @param enable  true means enabled
+             */
+            void setFilter( bool enable ) { filter = enable; }
+            /**
+             * @brief Clear the buffer
+             */
+            void clear();
+            /**
+             * @brief Erase trailing part of the buffer
+             * 
+             * @param pos starting position to erase
+             */
+            void erase(size_t pos =  0);
+            /**
+             * @brief C string buffer
+             * 
+             * @return pointer to C string
+             */
+            inline const char *c_str() { return msg; }
+            /**
+             * @brief length of the effective content
+             * 
+             * @return the size
+             */
+            inline size_t length() { return size; }
+        private:
+            /**
+             * @brief if true, all non printable char filtered out
+             */
+            bool filter;
+            /**
+             * @brief pointer to the buffer
+             */
+            char* msg;
+            /**
+             * @brief current capacity
+             */
+            size_t capacity;
+            /**
+             * @brief current size
+             */
+            size_t size;
     };
 
 #endif // _CHAR_BUFFER_H

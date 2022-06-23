@@ -88,13 +88,15 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
 
     webserver = doc["webserver"] | false;
     ftpserver = doc["ftpserver"] | false;
-    if ( doc["ftpuser"] ) {
+
+    if ( doc.containsKey("ftpuser") ) {
         strncpy( ftpuser, doc["ftpuser"], sizeof( ftpuser ) );
     }
     else {
         strncpy( ftpuser, FTPSERVER_USER, sizeof( ftpuser ) );
     }
-    if ( doc["ftppass"] ) {
+
+    if ( doc.containsKey("ftppass") ) {
         strncpy( ftppass, doc["ftppass"], sizeof( ftppass ) );
     }
     else {
@@ -102,7 +104,7 @@ bool wifictl_config_t::onLoad(JsonDocument& doc) {
     }
 
     for ( int i = 0 ; i < NETWORKLIST_ENTRYS ; i++ ) {
-        if ( doc["networklist"][ i ]["ssid"] && doc["networklist"][ i ]["psk"] ) {
+        if ( doc["networklist"][ i ].containsKey("ssid") && doc["networklist"][ i ].containsKey("psk") ) {
             strncpy( networklist[ i ].ssid    , doc["networklist"][ i ]["ssid"], sizeof( networklist[ i ].ssid ) );
             strncpy( networklist[ i ].password, doc["networklist"][ i ]["psk"], sizeof( networklist[ i ].password ) );
         }

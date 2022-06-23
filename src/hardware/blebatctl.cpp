@@ -30,7 +30,8 @@
     #include <BLEServer.h>
     #include <BLE2902.h>
 
-    #ifdef M5PAPER
+    #if defined( M5PAPER )
+    #elif defined( M5CORE2 )
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #else
         #warning "no hardware driver for blebatctl"
@@ -38,58 +39,57 @@
 
     class BleBattLevelUpdater : public BleUpdater<uint8_t> {
         public:
-        BleBattLevelUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
-        void set(uint8_t power) {
-            characteristic->setValue(&power, 1);
-        }
-        
-        bool notify( uint8_t level ) {
-            bool retval = false;
-            /*
-            * TODO and fix me: add a threshold to notify only significant changes
-            *
-            * Do not notify on same value
-            */
-            if ( last_value == level ) {
-                return( retval );
+            BleBattLevelUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
+
+            void set(uint8_t power) {
+                characteristic->setValue(&power, 1);
             }
-            /*
-            * Send battery level via standard characteristic
-            */
-            characteristic->notify();
-            /*
-            * Send battery percent via BangleJS protocol
-            */
-            char msg[64]="";
-            snprintf( msg, sizeof(msg), "\r\n{t:\"status\", bat:%d}\r\n", level );
-            bool ret = blectl_send_msg( msg );
-            log_d("Notified batt level: new=%d last=%d => %d", level, last_value, ret);
-            return ret;
-        }
-        BLECharacteristic *characteristic;
+        
+            bool notify( uint8_t level ) {
+                bool retval = false;
+                /*
+                 * Do not notify on same value
+                 */
+                if ( last_value == level || level <= 0 ) {
+                    return( retval );
+                }
+                /*
+                 * Send battery level via standard characteristic
+                 */
+                characteristic->notify();
+                /*
+                 * Send battery percent via BangleJS protocol
+                 */
+                bool ret = blectl_send_msg( "\r\n{t:\"status\", bat:%d}\r\n", level );
+
+                return ret;
+            }
+
+            BLECharacteristic *characteristic;
     };
 
     class BleBattPowerUpdater : public BleUpdater<uint8_t> {
         public:
-        BleBattPowerUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
-        void set(uint8_t power) {
-            characteristic->setValue(&power, 1);
-        }
+            BleBattPowerUpdater(BLECharacteristic *charac, time_t timeout) : BleUpdater(timeout), characteristic(charac) {}
 
-        bool notify(uint8_t power) {
-            /*
-            * Do not notify on same value
-            */
-            if ( last_value == power ) {
-                return( false );
+            void set(uint8_t power) {
+                characteristic->setValue(&power, 1);
             }
-            /*
-            * update power
-            */
-            characteristic->notify();
-            return( true );
-        }
-        BLECharacteristic *characteristic;
+
+            bool notify(uint8_t power) {
+                /*
+                 * Do not notify on same value
+                 */
+                if ( last_value == power )
+                    return( false );
+                /*
+                 * update power
+                 */
+                characteristic->notify();
+
+                return( true );
+            }
+            BLECharacteristic *characteristic;
     };
 
     static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg );
@@ -103,9 +103,13 @@
     static BleBattPowerUpdater *blebatctl_power_updater;
 
     void blebatctl_setup(BLEServer *pServer) {
-        // Create battery service
+        /*
+         * Create battery service
+         */
         BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
-        // Create a BLE battery service, batttery level Characteristic - 
+        /*
+         * Create a BLE battery service, batttery level Characteristic - 
+         */
         pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
         pBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
         pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_LEVEL_DESCRIPTOR_UUID) );
@@ -113,13 +117,17 @@
         pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
         pBatteryPowerStateCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
         pBatteryPowerStateCharacteristic->addDescriptor( new BLE2902() );
-        // Start battery service
+        /*
+         * Start battery service
+         */
         pBatteryService->start();
-        // Start advertising battery service
+        /*
+         * Start advertising battery service
+         */
         pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
 
         blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 60 * 5 );
-        blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 60 * 5 );
+        blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 60 * 6 );
 
         pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery" );
         blectl_register_cb( BLECTL_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
@@ -142,16 +150,16 @@
 
     static void blebatctl_update_battery( int32_t percent, bool charging, bool plug ) {
         /*
-        * update battery level
-        */
+         * update battery level
+         */
         uint8_t level = (uint8_t)percent;
         if ( level > 100 ) {
             level = 100;
         }
         blebatctl_level_updater->update( level );
         /*
-        * Send powerstate via standard caracteristic
-        */
+         * Send powerstate via standard caracteristic
+         */
         uint8_t batteryPowerState = BATTERY_POWER_STATE_BATTERY_PRESENT
                                     | ( plug ? BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING : BATTERY_POWER_STATE_DISCHARGE_DISCHARING )
                                     | ( charging ? BATTERY_POWER_STATE_CHARGE_CHARING : BATTERY_POWER_STATE_CHARGE_NOT_CHARING )
@@ -165,8 +173,8 @@
         switch( event ) {
             case BLECTL_CONNECT:        
                     /*
-                    * Try to refresh values on (re)connect
-                    */
+                     * Try to refresh values on (re)connect
+                     */
                     bool charging = pmu_is_charging();
                     bool plug = pmu_is_vbus_plug();
                     int32_t percent = pmu_get_battery_percent();

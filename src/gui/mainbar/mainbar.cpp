@@ -66,7 +66,7 @@ void mainbar_setup( void ) {
      * check if mainbar already initialized
      */
     if ( mainbar ) {
-        log_e("main already initialized");
+        MAINBAR_ERROR_LOG("main already initialized");
         return;
     }
 
@@ -90,10 +90,7 @@ bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
     /**
      * get the current tile number
      */
@@ -104,7 +101,7 @@ bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
         }
     }
     /**
-     * call hibernate callback for the current tile if exist
+     * call button callback for the current tile if exist
      */
     if ( current_tile != -1 ) {
         if ( tile[ current_tile ].button_cb != NULL ) {
@@ -127,28 +124,27 @@ bool mainbar_button_event_cb( EventBits_t event, void *arg ) {
 }
 
 void mainbar_add_current_tile_to_history( lv_anim_enable_t anim ) {
-    lv_coord_t x,y;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     if ( mainbar_history->entrys < MAINBAR_MAX_HISTORY ) {
+        /**
+         * get current tile
+         */
+        lv_coord_t x,y;
         lv_tileview_get_tile_act( mainbar, &x, &y );
         /**
-         * only store in history when the last entry is not the current
+         * store tile pos in history
          */
-        if ( mainbar_history->tile[ mainbar_history->entrys ].x != x || mainbar_history->tile[ mainbar_history->entrys ].y != y ) {
-            mainbar_history->entrys++;
-            mainbar_history->tile[ mainbar_history->entrys ].x = x;
-            mainbar_history->tile[ mainbar_history->entrys ].y = y;
-            mainbar_history->statusbar[ mainbar_history->entrys ] = statusbar_get_hidden_state();
-            mainbar_history->anim[ mainbar_history->entrys ] = anim;
-            MAINBAR_INFO_LOG("store tile to history: %d, %d, %d, %d", x, y, statusbar_get_hidden_state(), anim );
-        }
+        mainbar_history->entrys++;
+        mainbar_history->tile[ mainbar_history->entrys ].x = x;
+        mainbar_history->tile[ mainbar_history->entrys ].y = y;
+        mainbar_history->statusbar[ mainbar_history->entrys ] = statusbar_get_hidden_state();
+        mainbar_history->anim[ mainbar_history->entrys ] = anim;
+        mainbar_history->powermgm_state[ mainbar_history->entrys ] = powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP );
+        MAINBAR_INFO_LOG("store tile to history: %d, %d, %d, %x, %d", x, y, statusbar_get_hidden_state(), powermgm_get_event( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP ), anim );
     }
 }
 
@@ -156,15 +152,13 @@ void mainbar_clear_history( void ) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     mainbar_history->entrys = 0;
     mainbar_history->tile[ 0 ].x = 0;
     mainbar_history->tile[ 0 ].y = 0;
     mainbar_history->statusbar[ 0 ] = true;
+    mainbar_history->powermgm_state[ 0 ] = 0;
     MAINBAR_INFO_LOG("clear mainbar history");
 }
 
@@ -173,12 +167,9 @@ void mainbar_jump_back( void ) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
-    if ( mainbar_history->entrys > 0 ) {
+    if ( mainbar_history->entrys > 0 && mainbar_history->entrys < MAINBAR_MAX_HISTORY ) {
         /**
          * get the current tile pos for later use
          */
@@ -190,6 +181,25 @@ void mainbar_jump_back( void ) {
         lv_tileview_set_tile_act( mainbar, mainbar_history->tile[ mainbar_history->entrys ].x, mainbar_history->tile[ mainbar_history->entrys ].y, mainbar_history->anim[ mainbar_history->entrys ] );
         statusbar_hide( mainbar_history->statusbar[ mainbar_history->entrys ] );
         gui_force_redraw( true );
+        /**
+         * restore powermgm state
+         */
+        switch( mainbar_history->powermgm_state[ mainbar_history->entrys ] ) {
+            case( POWERMGM_STANDBY ):
+                powermgm_set_event( POWERMGM_STANDBY_REQUEST );
+                MAINBAR_INFO_LOG("mainbar send standby request");
+                break;
+            case( POWERMGM_WAKEUP ):
+                powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                MAINBAR_INFO_LOG("mainbar send wakeup request");
+                break;
+            case( POWERMGM_SILENCE_WAKEUP ):
+                powermgm_set_event( POWERMGM_SILENCE_WAKEUP_REQUEST );
+                MAINBAR_INFO_LOG("mainbar send silence wakeup request");
+                break;
+            default:
+                break;
+        }
         /**
          * search for the hibernate cb
          */
@@ -264,10 +274,7 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     tile_entrys++;
 
@@ -294,7 +301,6 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
     tile[ tile_entrys - 1 ].y = y;
     tile[ tile_entrys - 1 ].id = id;
     lv_obj_set_size( tile[ tile_entrys - 1 ].tile, lv_disp_get_hor_res( NULL ), LV_VER_RES);
-    // lv_obj_reset_style_list( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN );
     lv_obj_add_style( tile[ tile_entrys - 1 ].tile, LV_OBJ_PART_MAIN, style );
     lv_obj_set_pos( tile[ tile_entrys - 1 ].tile, tile_pos_table[ tile_entrys - 1 ].x * lv_disp_get_hor_res( NULL ) , tile_pos_table[ tile_entrys - 1 ].y * LV_VER_RES );
     lv_tileview_add_element( mainbar, tile[ tile_entrys - 1 ].tile );
@@ -305,88 +311,78 @@ uint32_t mainbar_add_tile( uint16_t x, uint16_t y, const char *id, lv_style_t *s
 }
 
 bool mainbar_add_tile_hibernate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC hibernate_cb ) {
+    bool retval = false;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     if ( tile_number < tile_entrys ) {
         tile[ tile_number ].hibernate_cb_entry_count++;
 
-        if( tile[ tile_number ].hibernate_cb == NULL )
-            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC(sizeof(MAINBAR_CALLBACK_FUNC*));
+        if( tile[ tile_number ].hibernate_cb )
+            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC_ASSERT( tile[ tile_number ].hibernate_cb, sizeof( MAINBAR_CALLBACK_FUNC* ) * tile[ tile_number ].hibernate_cb_entry_count, "maintile hibernate_cb reallocation failed" );
         else
-            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC( tile[ tile_number ].hibernate_cb, sizeof(MAINBAR_CALLBACK_FUNC*) * tile[ tile_number ].hibernate_cb_entry_count );
-        ASSERT( tile[ tile_number ].hibernate_cb, "maintile hibernate_cb allocation failed");
+            tile[ tile_number ].hibernate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC_ASSERT( sizeof( MAINBAR_CALLBACK_FUNC* ), "maintile hibernate_cb allocation failed" );
 
         tile[ tile_number ].hibernate_cb[ tile[ tile_number ].hibernate_cb_entry_count - 1 ] = hibernate_cb;
-        return( true );
+        
+        retval = true;
     }
-    else {
-        log_e("tile number %d do not exist", tile_number );
-        return( false );
-    }
+    else
+        MAINBAR_ERROR_LOG("tile number %d do not exist", tile_number );
+
+    return( retval );
 }
 
 bool mainbar_add_tile_activate_cb( uint32_t tile_number, MAINBAR_CALLBACK_FUNC activate_cb ) {
+    bool retval = false;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
         
     if ( tile_number < tile_entrys ) {
         tile[ tile_number ].activate_cb_entry_count++;
 
-        if( tile[ tile_number ].activate_cb == NULL )
-            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC(sizeof(MAINBAR_CALLBACK_FUNC*));
+        if( tile[ tile_number ].activate_cb )
+            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC_ASSERT( tile[ tile_number ].activate_cb, sizeof(MAINBAR_CALLBACK_FUNC*) * tile[ tile_number ].activate_cb_entry_count, "maintile hibernate_cb reallocation failed" );
         else
-            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)REALLOC( tile[ tile_number ].activate_cb, sizeof(MAINBAR_CALLBACK_FUNC*) * tile[ tile_number ].activate_cb_entry_count );
-        ASSERT( tile[ tile_number ].activate_cb, "maintile hibernate_cb allocation failed");
+            tile[ tile_number ].activate_cb = (MAINBAR_CALLBACK_FUNC*)MALLOC_ASSERT(sizeof(MAINBAR_CALLBACK_FUNC*), "maintile hibernate_cb allocation failed" );
 
         tile[ tile_number ].activate_cb[ tile[ tile_number ].activate_cb_entry_count - 1 ] = activate_cb;
 
-        return( true );
+        retval = true;
     }
-    else {
-        log_e("tile number %d do not exist", tile_number );
-        return( false );
-    }
+    else
+        MAINBAR_ERROR_LOG("tile number %d do not exist", tile_number );
+
+    return( retval );
 }
 
 bool mainbar_add_tile_button_cb( uint32_t tile_number, CALLBACK_FUNC button_cb ) {
+    bool retval = false;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     if ( tile_number < tile_entrys ) {
         tile[ tile_number ].button_cb = button_cb;
-        return( true );
+        retval = true;
     }
-    else {
-        log_e("tile number %d do not exist", tile_number );
-        return( false );
-    }
+    else
+        MAINBAR_ERROR_LOG("tile number %d do not exist", tile_number );
+
+    return( retval );
 }
 
 uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
+    uint32_t retval = -1;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
+    ASSERT( mainbar, "main not initialized" );
     /*
      * prevent tile x pos goes out of range ( uint16_t )
      */
@@ -395,32 +391,29 @@ uint32_t mainbar_add_app_tile( uint16_t x, uint16_t y, const char *id ) {
         app_tile_x_pos = 0;
         app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
     }
-
-    uint32_t retval = -1;
-
+    /**
+     * crawl tiles
+     */
     for ( int hor = 0 ; hor < x ; hor++ ) {
         for ( int ver = 0 ; ver < y ; ver++ ) {
-            if ( retval == -1 ) {
+            if ( retval == -1 )
                 retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_app_style() );
-            }
-            else {
+            else
                 mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_app_style() );
-            }
         }
     }
+
     app_tile_x_pos = app_tile_x_pos + x + 1;
+
     return( retval );
 }
 
 uint32_t mainbar_add_setup_tile( uint16_t x, uint16_t y, const char *id ) {
+    uint32_t retval = -1;
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
-
+    ASSERT( mainbar, "main not initialized" );
     /*
      * prevent tile x pos goes out of range ( uint16_t )
      */
@@ -429,20 +422,20 @@ uint32_t mainbar_add_setup_tile( uint16_t x, uint16_t y, const char *id ) {
         app_tile_x_pos = 0;
         app_tile_y_pos = app_tile_y_pos + MAINBAR_APP_TILE_Y_START;
     }
-
-    uint32_t retval = -1;
-
+    /**
+     * crawl tiles
+     */
     for ( int hor = 0 ; hor < x ; hor++ ) {
         for ( int ver = 0 ; ver < y ; ver++ ) {
-            if ( retval == -1 ) {
+            if ( retval == -1 )
                 retval = mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_setup_tile_style() );
-            }
-            else {
+            else
                 mainbar_add_tile( hor + app_tile_x_pos, app_tile_y_pos + ver + MAINBAR_APP_TILE_Y_START, id, ws_get_setup_tile_style() );
-            }
         }
     }
+
     app_tile_x_pos = app_tile_x_pos + x + 1;
+
     return( retval );
 }
 
@@ -450,17 +443,13 @@ lv_obj_t *mainbar_get_tile_obj( uint32_t tile_number ) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
-    if ( tile_number < tile_entrys ) {
+    if ( tile_number < tile_entrys )
         return( tile[ tile_number ].tile );
-    }
-    else {
-        log_e( "tile number %d do not exist", tile_number );
-    }
+    else
+        MAINBAR_ERROR_LOG( "tile number %d do not exist", tile_number );
+
     return( NULL );
 }
 
@@ -468,10 +457,7 @@ void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     if ( tile_entrys != 0 ) {
         mainbar_jump_to_tilenumber( 0, anim );
@@ -481,7 +467,7 @@ void mainbar_jump_to_maintile( lv_anim_enable_t anim ) {
         mainbar_clear_history();
     }
     else {
-        log_e( "main tile do not exist" );
+        MAINBAR_ERROR_LOG( "main tile do not exist" );
     }
 }
 
@@ -491,10 +477,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
     /**
      * get the current tile number
      */
@@ -506,7 +489,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
              * ignore tile jump if we a on destination
              */
             if( current_tile == tile_number ) {
-                MAINBAR_WARN_LOG("the destination tile is the current tile");
+                MAINBAR_INFO_LOG("the destination tile is the current tile");
                 return;
             }
         }
@@ -516,7 +499,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
      */
     for ( int i = 0 ; i < mainbar_history->entrys; i++ ) {
         if ( mainbar_history->tile[ i ].x == x && mainbar_history->tile[ i ].y == y ) {
-            MAINBAR_WARN_LOG("current tile already in mainbar_history");
+            MAINBAR_INFO_LOG("current tile already in mainbar_history");
             return;
         }
     }
@@ -559,7 +542,7 @@ void mainbar_jump_to_tilenumber( uint32_t tile_number, lv_anim_enable_t anim, bo
         }
     }
     else {
-        log_e( "tile number %d do not exist", tile_number );
+        MAINBAR_ERROR_LOG( "tile number %d do not exist", tile_number );
     }    
 }
 
@@ -571,10 +554,7 @@ lv_obj_t * mainbar_obj_create(lv_obj_t *parent) {
     /*
      * check if mainbar already initialized
      */
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
+    ASSERT( mainbar, "main not initialized" );
 
     lv_obj_t * child = lv_obj_create( parent, NULL );
     lv_tileview_add_element( mainbar, child );
@@ -587,10 +567,6 @@ void mainbar_add_slide_element(lv_obj_t *element) {
      * check if mainbar already initialized
      */
     ASSERT( mainbar, "mainbar not initialized" );
-    if ( !mainbar ) {
-        log_e("main not initialized");
-        while( true );
-    }
 
     lv_tileview_add_element( mainbar, element );
 }

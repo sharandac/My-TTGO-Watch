@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
+ *   Tu May 22 21:23:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,40 +19,40 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _OSM_APP_H
-    #define _OSM_APP_H
+#include "config.h"
+#include "device.h"
+#include "config/deviceconfig.h"
+#include "utils/logging.h"
 
-    #define OSMMAP_APP_INFO_LOG     log_d
-    #define OSMMAP_APP_LOG          log_d
-    #define OSMMAP_APP_ERROR_LOG    log_e
+device_config_t *device_config = NULL;
 
+void device_setup( void ) {
     /**
-     * @brief osmmap app setup
+     * get config
      */
-    void osmmap_app_setup( void );
+    if( device_config )
+        return;
     /**
-     * @brief show/hide osmmap app icons
-     * 
-     * @param show true means hide and false means show
+     * alloc device config
      */
-    void osmmap_app_hide_app_icon_info( bool show );
-    /**
-     * @brief show/hide osmmap widget icon
-     * 
-     * @param show true means hide and false means show
-     */
-    void osmmap_app_hide_widget_icon_info( bool show );
-    /**
-     * @brief get osmmap setup tile number
-     * 
-     * @return uint32_t
-     */
-    uint32_t osmmap_app_get_app_setup_tile_num( void );
-    /**
-     * @brief get osmmap app tile number
-     * 
-     * @return uint32_t 
-     */
-    uint32_t osmmap_app_get_app_main_tile_num( void );
+    device_config = new device_config_t();
+    device_config->load();
+    log_i("set device name to '%s'", device_config->device_name );
+}
 
-#endif // _OSM_APP_H
+void device_set_name( const char * name ) {
+    if( !device_config ) {
+        device_config = new device_config_t();
+        device_config->load();        
+    }
+    strncpy( device_config->device_name, name, sizeof( device_config->device_name ) );
+    device_config->save();
+}
+
+const char *device_get_name( void ) {
+    if( !device_config ) {
+        device_config = new device_config_t();
+        device_config->load();        
+    }
+    return( (const char*)device_config->device_name );
+}

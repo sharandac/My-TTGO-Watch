@@ -74,11 +74,7 @@ static void refresh_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 
 void weather_forecast_tile_setup( uint32_t tile_num ) {
 
-    weather_forecast = (weather_forcast_t*)CALLOC( sizeof( weather_forcast_t ) * WEATHER_MAX_FORECAST , 1 );
-    if( !weather_forecast ) {
-      log_e("weather forecast calloc faild");
-      while(true);
-    }
+    weather_forecast = (weather_forcast_t*)CALLOC_ASSERT( sizeof( weather_forcast_t ) * WEATHER_MAX_FORECAST , 1, "weather forecast calloc faild" );
 
     weather_forecast_tile_num = tile_num;
     weather_forecast_tile = mainbar_get_tile_obj( weather_forecast_tile_num );

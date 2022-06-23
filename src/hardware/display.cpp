@@ -376,7 +376,6 @@ void display_set_rotation( uint32_t rotation ) {
         #endif
     #endif
     display_config.rotation = rotation;
-    lv_obj_invalidate( lv_scr_act() );
 }
 
 uint32_t display_get_background_image( void ) {

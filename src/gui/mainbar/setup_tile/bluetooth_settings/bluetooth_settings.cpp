@@ -64,9 +64,6 @@ static void bluetooth_enable_onoff_event_handler(lv_obj_t * obj, lv_event_t even
 static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_stayon_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
-static void bluetooth_show_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
-static void bluetooth_vibe_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
-static void bluetooth_sound_notifications_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void bluetooth_settings_tile_setup( void ) {

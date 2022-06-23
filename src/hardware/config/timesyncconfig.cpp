@@ -40,8 +40,14 @@ bool timesync_config_t::onLoad(JsonDocument& doc) {
     timesync = doc["timesync"] | true;
     timezone = doc["timezone"] | 0;
     use_24hr_clock = doc["use_24hr_clock"] | true;
-    strncpy( timezone_name, doc["timezone_name"] | TIMEZONE_NAME_DEFAULT, sizeof( timezone_name ) );
-    strncpy( timezone_rule, doc["timezone_rule"] | TIMEZONE_RULE_DEFAULT, sizeof( timezone_rule ) );
+    if( doc.containsKey("timezone_name") && doc.containsKey("timezone_rule") ) {
+        strncpy( timezone_name, doc["timezone_name"], sizeof( timezone_name ) );
+        strncpy( timezone_rule, doc["timezone_rule"], sizeof( timezone_rule ) );
+    }
+    else {
+        strncpy( timezone_name, TIMEZONE_NAME_DEFAULT, sizeof( timezone_name ) );
+        strncpy( timezone_rule, TIMEZONE_RULE_DEFAULT, sizeof( timezone_rule ) );
+    }
     setenv("TZ", timezone_rule, 1);
     tzset();
     

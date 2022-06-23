@@ -1,5 +1,5 @@
 /****************************************************************************
- *   Aug 3 12:17:11 2020
+ *   Tu May 22 21:23:51 2020
  *   Copyright  2020  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
@@ -19,40 +19,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _OSM_APP_H
-    #define _OSM_APP_H
+#include "deviceconfig.h"
 
-    #define OSMMAP_APP_INFO_LOG     log_d
-    #define OSMMAP_APP_LOG          log_d
-    #define OSMMAP_APP_ERROR_LOG    log_e
+device_config_t::device_config_t() : BaseJsonConfig( DEVICE_JSON_CONFIG_FILE ) {}
 
-    /**
-     * @brief osmmap app setup
-     */
-    void osmmap_app_setup( void );
-    /**
-     * @brief show/hide osmmap app icons
-     * 
-     * @param show true means hide and false means show
-     */
-    void osmmap_app_hide_app_icon_info( bool show );
-    /**
-     * @brief show/hide osmmap widget icon
-     * 
-     * @param show true means hide and false means show
-     */
-    void osmmap_app_hide_widget_icon_info( bool show );
-    /**
-     * @brief get osmmap setup tile number
-     * 
-     * @return uint32_t
-     */
-    uint32_t osmmap_app_get_app_setup_tile_num( void );
-    /**
-     * @brief get osmmap app tile number
-     * 
-     * @return uint32_t 
-     */
-    uint32_t osmmap_app_get_app_main_tile_num( void );
+bool device_config_t::onSave(JsonDocument& doc) {
+    doc["device_name"] = device_name;
+    return true;
+}
 
-#endif // _OSM_APP_H
+bool device_config_t::onLoad(JsonDocument& doc) {
+    if ( doc.containsKey("device_name") )
+        strncpy( device_name, doc["device_name"], sizeof( device_name ) );
+    else
+        strncpy( device_name, HARDWARE_NAME, sizeof( device_name ) );
+
+    return true;
+}
+
+bool device_config_t::onDefault( void ) {
+    return true;
+}
