@@ -103,20 +103,18 @@
         /*
          * Create battery service
          */
-        BLEService *pBatteryService = pServer->createService(BATTERY_SERVICE_UUID);
+        NimBLEService *pBatteryService = pServer->createService( BATTERY_SERVICE_UUID );
         /*
          * Create a BLE battery service, batttery level Characteristic - 
          */
         pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY );
         pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY );
-        /*
-         * Start battery service
-         */
         pBatteryService->start();
         /*
          * Start advertising battery service
          */
-        pServer->getAdvertising()->addServiceUUID( pBatteryService->getUUID() );
+        NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
+        pAdvertising->addServiceUUID( pBatteryService->getUUID() );
 
         blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 60 * 5 );
         blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 60 * 6 );

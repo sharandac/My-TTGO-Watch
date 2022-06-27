@@ -52,6 +52,8 @@
     #include "blebatctl.h"
     #include "blestepctl.h"
 
+    #include "NimBLEDescriptor.h"
+
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
     QueueHandle_t blectl_msg_queue;
@@ -64,19 +66,16 @@ blectl_msg_t blectl_msg;
 callback_t *blectl_callback = NULL;
 uint8_t txValue = 0;
 
-bool blectl_send_event_cb( EventBits_t event, void *arg );
-bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
-bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
-bool blectl_pmu_event_cb( EventBits_t event, void *arg );
-void blectl_send_next_msg( char *msg );
-void blectl_loop( void );
+static bool blectl_send_event_cb( EventBits_t event, void *arg );
+static bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
+static bool blectl_powermgm_loop_cb( EventBits_t event, void *arg );
+static void blectl_send_next_msg( char *msg );
+static void blectl_loop( void );
 
 #ifdef NATIVE_64BIT
 #else
-    #ifdef M5PAPER
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    #endif
-    BLEServer *pServer = NULL;
+    BLEServer *pServer = NULL;                          
+    NimBLEAdvertising *pAdvertising = NULL;
     NimBLECharacteristic *pTXCharacteristic = NULL;
     NimBLECharacteristic *pRXCharacteristic = NULL;
 
@@ -114,7 +113,7 @@ void blectl_loop( void );
             }
         };
 
-        void onMTUChange(uint16_t MTU, ble_gap_conn_desc* desc) {
+        void onMTUChange( uint16_t MTU, ble_gap_conn_desc* desc ) {
             log_i("MTU updated: %u for connection ID: %u\n", MTU, desc->conn_handle);
         };
         
@@ -128,7 +127,7 @@ void blectl_loop( void );
             blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
 
             powermgm_resume_from_ISR();
-            return pass_key;
+            return( pass_key );
         };
 
         void onPassKeyNotify( uint32_t pass_key ){
@@ -149,7 +148,7 @@ void blectl_loop( void );
 
             powermgm_resume_from_ISR();
 
-            return false;
+            return( false );
         };
 
         void onAuthenticationComplete(ble_gap_conn_desc* desc){
@@ -158,7 +157,7 @@ void blectl_loop( void );
                     log_d("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
                     blectl_clear_event( BLECTL_PIN_AUTH );
                     blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
-                    NimBLEDevice::getServer()->disconnect(desc->conn_handle);
+                    NimBLEDevice::getServer()->disconnect( desc->conn_handle );
                     return;
                 }
                 if ( blectl_get_event( BLECTL_AUTHWAIT | BLECTL_CONNECT ) ) {
@@ -192,7 +191,6 @@ void blectl_loop( void );
     class CharacteristicCallbacks: public NimBLECharacteristicCallbacks {
         void onRead(NimBLECharacteristic* pCharacteristic){
             std::string msg = pCharacteristic->getValue();
-            powermgm_resume_from_ISR();
             log_d("BLE received: %s, %i\n", msg.c_str(), msg.length() );
         };
 
@@ -234,7 +232,6 @@ void blectl_loop( void );
     };
 
     static CharacteristicCallbacks chrCallbacks;
-
 #endif
 
 void blectl_setup( void ) {
@@ -245,9 +242,6 @@ void blectl_setup( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         /**
          * allocate event group
          */
@@ -258,7 +252,6 @@ void blectl_setup( void ) {
          */
         blectl_msg_queue = xQueueCreate( 5, sizeof( char * ) );
         ASSERT( blectl_msg_queue, "Failed to allocate msg queue" );
-
         blectl_msg_receive_queue = xQueueCreate( 5, sizeof( char * ) );
         ASSERT( blectl_msg_receive_queue, "Failed to allocate msg receive queue" );
         /**
@@ -295,36 +288,45 @@ void blectl_setup( void ) {
          */
         pServer = NimBLEDevice::createServer();
         pServer->setCallbacks( new ServerCallbacks() );
+        pAdvertising = NimBLEDevice::getAdvertising();
         /*
          * Create the BLE Service
          */
-        NimBLEService *pService = pServer->createService( NimBLEUUID( SERVICE_UUID ) );
+        NimBLEService *pGadgetbridgeService = pServer->createService( NimBLEUUID( SERVICE_UUID ) );
         /*
-         * Create a BLE Characteristic
+         * Create Gadgetbridge TX/RX Characteristic
          */
-        pTXCharacteristic = pService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_TX ), NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
+        pTXCharacteristic = pGadgetbridgeService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_TX ), NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
         pTXCharacteristic->addDescriptor( new NimBLE2904() );
-        pRXCharacteristic = pService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_RX ), NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
+        pRXCharacteristic = pGadgetbridgeService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_RX ), NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
         pRXCharacteristic->setCallbacks( &chrCallbacks );
+        pGadgetbridgeService->start();
         /*
-         * Start the service
+         * Create device information service
          */
-        pService->start();
-        /*
-         * Start advertising
-         * ESP_BLE_APPEARANCE_GENERIC_WATCH
+        NimBLEService *pDeviceInformationService = pServer->createService( NimBLEUUID( DEVICE_INFORMATION_SERVICE_UUID ) );
+        NimBLECharacteristic* pManufacturerNameStringCharacteristic = pDeviceInformationService->createCharacteristic( MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ );
+        pManufacturerNameStringCharacteristic->setValue("Lily Go");
+        NimBLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ );
+        pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
+        pDeviceInformationService->start();
+        /**
+         * add some services
          */
-        NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
-        pAdvertising->addServiceUUID( pService->getUUID() );
-        pAdvertising->start();
-
         blebatctl_setup( pServer );
         blestepctl_setup();
+        /*
+         * Start advertising
+         */
+        pAdvertising->addServiceUUID( pGadgetbridgeService->getUUID() );
+        pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
+        pAdvertising->setAppearance( 0x00c0 );
+        pAdvertising->start();
     #endif
 
-    if ( blectl_get_autoon() ) {
+    if( blectl_get_autoon() )
         blectl_on();
-    }
+
     powermgm_register_cb_with_prio( POWERMGM_STANDBY, blectl_powermgm_event_cb, "powermgm blectl", CALL_CB_FIRST );
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "powermgm blectl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, blectl_powermgm_loop_cb, "powermgm blectl loop" );
@@ -357,7 +359,7 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( retval );
 }
 
-bool blectl_powermgm_loop_cb( EventBits_t event, void *arg ) {
+static bool blectl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     blectl_loop();
     return( true );
 }
@@ -366,12 +368,9 @@ void blectl_set_event( EventBits_t bits ) {
     #ifdef NATIVE_64BIT
         blectl_status |= bits;
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
-        portENTER_CRITICAL(&blectlMux);
+        portENTER_CRITICAL( &blectlMux );
         xEventGroupSetBits( blectl_status, bits );
-        portEXIT_CRITICAL(&blectlMux);
+        portEXIT_CRITICAL( &blectlMux );
     #endif
 }
 
@@ -379,12 +378,9 @@ void blectl_clear_event( EventBits_t bits ) {
     #ifdef NATIVE_64BIT
         blectl_status &= ~bits;
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
-        portENTER_CRITICAL(&blectlMux);
+        portENTER_CRITICAL( &blectlMux );
         xEventGroupClearBits( blectl_status, bits );
-        portEXIT_CRITICAL(&blectlMux);
+        portEXIT_CRITICAL( &blectlMux );
     #endif
 }
 
@@ -394,12 +390,9 @@ bool blectl_get_event( EventBits_t bits ) {
     #ifdef NATIVE_64BIT
         temp = blectl_status & bits;
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
-        portENTER_CRITICAL(&blectlMux);
+        portENTER_CRITICAL( &blectlMux );
         temp = xEventGroupGetBits( blectl_status ) & bits;
-        portEXIT_CRITICAL(&blectlMux);
+        portEXIT_CRITICAL( &blectlMux );
     #endif
 
     return( temp );
@@ -413,7 +406,7 @@ bool blectl_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const c
     return( callback_register( blectl_callback, event, callback_func, id ) );
 }
 
-bool blectl_send_event_cb( EventBits_t event, void *arg ) {
+static bool blectl_send_event_cb( EventBits_t event, void *arg ) {
     return( callback_send( blectl_callback, event, arg ) );
 }
 
@@ -462,21 +455,18 @@ void blectl_set_media_notification( bool media_notification ) {
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_config.save();
+
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
+
     if ( blectl_get_event( BLECTL_CONNECT ) )
         return;
 
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
-        if ( advertising ) {
+        if ( advertising )
             pServer->getAdvertising()->start();
-        }
-        else {
+        else
             pServer->getAdvertising()->stop();
-        }
     #endif
 }
 
@@ -484,17 +474,13 @@ void blectl_set_txpower( int32_t txpower ) {
     /**
      * check if tx power setting in range
      */
-    if ( txpower >= 0 && txpower <= 4 ) {
+    if ( txpower >= 0 && txpower <= 4 )
         blectl_config.txpower = txpower;
-    }
     /**
      * set tx power
      */
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         switch( blectl_config.txpower ) {
             case 0:             NimBLEDevice::setPower( ESP_PWR_LVL_N12 );
                                 break;
@@ -510,6 +496,7 @@ void blectl_set_txpower( int32_t txpower ) {
                                 break;
         }
     #endif
+
     blectl_config.save();
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
@@ -517,12 +504,11 @@ void blectl_set_txpower( int32_t txpower ) {
 void blectl_set_autoon( bool autoon ) {
     blectl_config.autoon = autoon;
 
-    if( autoon ) {
+    if( autoon )
         blectl_on();
-    }
-    else {
+    else
         blectl_off();
-    }
+
     blectl_config.save();
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
@@ -648,7 +634,7 @@ bool blectl_send_msg( const char *format, ... ) {
     return retval;
 }
 
-void blectl_send_next_msg( char *msg ) {
+static void blectl_send_next_msg( char *msg ) {
     if ( !blectl_msg.active && blectl_get_event( BLECTL_CONNECT ) ) {
 
         if ( blectl_msg.msg == NULL ) { 
@@ -673,9 +659,6 @@ void blectl_on( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         if ( blectl_config.advertising ) {
             pServer->getAdvertising()->start();
         }
@@ -694,9 +677,6 @@ void blectl_off( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         pServer->getAdvertising()->stop();
     #endif
 
@@ -712,28 +692,24 @@ static void blectl_send_chunk ( unsigned char *msg, int32_t len ) {
      */
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         pTXCharacteristic->setValue( msg, len );
         pTXCharacteristic->notify();
     #endif
 }
 
-void blectl_loop ( void ) {
+static void blectl_loop ( void ) {
     static uint64_t nextmillis = 0;
 
     if ( !blectl_get_event( BLECTL_CONNECT ) ) {
         return;
     }
 
+    /**
+     * @brief work on send and recieve queue
+     */
     #ifdef NATIVE_64BIT
     #else
-        #ifdef M5PAPER
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #endif
         if ( !blectl_msg.active ) {
-            // Retrieve next message
             char *msg;
             BaseType_t available = xQueueReceive( blectl_msg_queue, &msg, 0);
             if ( available == pdTRUE && msg ) {
@@ -744,7 +720,10 @@ void blectl_loop ( void ) {
     #endif
 
     if ( blectl_msg.active && nextmillis < millis() ) {
+        bool finish = false;
+
         nextmillis = millis() + BLECTL_CHUNKDELAY;
+
         if ( blectl_msg.msgpos < blectl_msg.msglen ) {
             if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
                 blectl_send_chunk ( (unsigned char *)&blectl_msg.msg[ blectl_msg.msgpos ], BLECTL_CHUNKSIZE );
@@ -753,57 +732,53 @@ void blectl_loop ( void ) {
             else if ( ( blectl_msg.msglen - blectl_msg.msgpos ) > 0 ) {
                 blectl_send_chunk ( (unsigned char *)&blectl_msg.msg[ blectl_msg.msgpos ], blectl_msg.msglen - blectl_msg.msgpos );
                 blectl_send_event_cb( BLECTL_MSG_SEND_SUCCESS , (char*)"msg send success" );
-                blectl_msg.active = false;
-                blectl_msg.msglen = 0;
-                blectl_msg.msgpos = 0;
+                finish = true;
             }
             else {
-                log_e("malformed chunksize");
                 blectl_send_event_cb( BLECTL_MSG_SEND_ABORT , (char*)"msg send abort, malformed chunksize" );
-                blectl_msg.active = false;
-                blectl_msg.msglen = 0;
-                blectl_msg.msgpos = 0;
+                finish = true;
             }
         }
-        else {
+
+        if( finish ) {
             blectl_msg.active = false;
             blectl_msg.msglen = 0;
             blectl_msg.msgpos = 0;
         }
     }
-#ifdef NATIVE_64BIT
-#else
-    /**
-     * get next msg from receive queue
-     */
-    char *gbmsg;
-    BaseType_t available = xQueueReceive( blectl_msg_receive_queue, &gbmsg, 0);
-    if ( available == pdTRUE && gbmsg ) {
+    #ifdef NATIVE_64BIT
+    #else
         /**
-         * check if we have a GB message
+         * get next msg from receive queue
          */
-        if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
+        char *gbmsg;
+        BaseType_t available = xQueueReceive( blectl_msg_receive_queue, &gbmsg, 0);
+        if ( available == pdTRUE && gbmsg ) {
             /**
-             * copy gbmsg pointer to a new pointer to prevent detroying gbmsg pointer
+             * check if we have a GB message
              */
-            char *GBmsg = gbmsg + 3;
-            GBmsg[ strlen( GBmsg ) - 1 ] = '\0';
+            if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
+                /**
+                 * copy gbmsg pointer to a new pointer to prevent detroying gbmsg pointer
+                 */
+                char *GBmsg = gbmsg + 3;
+                GBmsg[ strlen( GBmsg ) - 1 ] = '\0';
 
-            BluetoothJsonRequest request( GBmsg, strlen( GBmsg ) * 4 );
+                BluetoothJsonRequest request( GBmsg, strlen( GBmsg ) * 4 );
 
-            if ( request.isValid() )
-                blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
-            else
-                blectl_send_event_cb( BLECTL_MSG, (void *)GBmsg );
+                if ( request.isValid() )
+                    blectl_send_event_cb( BLECTL_MSG_JSON, (void *)&request );
+                else
+                    blectl_send_event_cb( BLECTL_MSG, (void *)GBmsg );
 
-            request.clear();
+                request.clear();
+            }
+            else {
+                blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
+            }
+            free( gbmsg );
         }
-        else {
-            blectl_send_event_cb( BLECTL_MSG, (void *)gbmsg );
-        }
-        free( gbmsg );
-    }
-#endif
+    #endif
 }
 
 #ifdef NATIVE_64BIT
@@ -816,6 +791,6 @@ void blectl_loop ( void ) {
     }
 
     NimBLEAdvertising *blectl_get_ble_advertising( void ) {
-    return pServer->getAdvertising();
+    return pAdvertising;
     }
 #endif
