@@ -31,8 +31,6 @@
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
 
-    #define USE_NIMBLE
-
     #define BLECTL_SCAN_TIME             30
     /**
      * connection state
@@ -54,77 +52,9 @@
     #define BLECTL_PAIRING_SUCCESS       _BV(8)         /** @brief event mask for blectl pairing success */
     #define BLECTL_PAIRING_ABORT         _BV(9)         /** @brief event mask for blectl pairing abort */
     /**
-     * message state
-     */
-    #define BLECTL_MSG                   _BV(10)        /** @brief event mask for blectl msg */
-    #define BLECTL_MSG_SEND_SUCCESS      _BV(11)        /** @brief event mask msg send success */
-    #define BLECTL_MSG_SEND_ABORT        _BV(12)        /** @brief event mask msg send abort */
-    #define BLECTL_MSG_JSON              _BV(13)        /** @brief event mask for blectl JSON msg */
-    /**
-     * scan state
-     */
-    #define BLECTL_SCAN                  _BV(14)        /** @brief event mask for blectl msg */
-    #define BLECTL_SCAN_DONE             _BV(15)        /** @brief event mask msg send success */
-    /**
      * config updates
      */
-    #define BLECTL_CONFIG_UPDATE         _BV(16)        /** @brief event mask for blectl config update */
-
-
-    /**
-     *  See the following for generating UUIDs:
-     * https://www.uuidgenerator.net/
-     */
-    #define SERVICE_UUID                                    "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"     /** @brief UART service UUID */
-    #define CHARACTERISTIC_UUID_RX                          "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-    #define CHARACTERISTIC_UUID_TX                          "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
-
-    #define DEVICE_INFORMATION_SERVICE_UUID                 (uint16_t)0x180A                           /** @brief Device Information server UUID */
-    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A29                           /** @brief Device Information - manufacturer name string UUID */
-    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A26                           /** @brief Device Information - firmware revision UUID */
-
-    #define BATTERY_SERVICE_UUID                            (uint16_t)0x180F                           /** @brief Battery service UUID */
-    #define BATTERY_LEVEL_CHARACTERISTIC_UUID               (uint16_t)0x2A19                           /** @brief battery level characteristic UUID */
-    #define BATTERY_LEVEL_DESCRIPTOR_UUID                   (uint16_t)0x2901                           /** @brief battery level descriptor UUID */
-    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID         (uint16_t)0x2A1A                           /** @brief battery power state characteristic UUID */
-
-    #define BATTERY_POWER_STATE_BATTERY_UNKNOWN             0x0
-    #define BATTERY_POWER_STATE_BATTERY_NOT_SUPPORTED       0x1
-    #define BATTERY_POWER_STATE_BATTERY_NOT_PRESENT         0x2
-    #define BATTERY_POWER_STATE_BATTERY_PRESENT             0x3
-
-    #define BATTERY_POWER_STATE_DISCHARGE_UNKNOWN           0x0
-    #define BATTERY_POWER_STATE_DISCHARGE_NOT_SUPPORTED     0x4
-    #define BATTERY_POWER_STATE_DISCHARGE_NOT_DISCHARING    0x8
-    #define BATTERY_POWER_STATE_DISCHARGE_DISCHARING        0xc
-
-    #define BATTERY_POWER_STATE_CHARGE_UNKNOWN              0x0
-    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARGEABLE       0x10
-    #define BATTERY_POWER_STATE_CHARGE_NOT_CHARING          0x20
-    #define BATTERY_POWER_STATE_CHARGE_CHARING              0x30
-
-    #define BATTERY_POWER_STATE_LEVEL_UNKNOWN               0x0
-    #define BATTERY_POWER_STATE_LEVEL_NOT_SUPPORTED         0x40
-    #define BATTERY_POWER_STATE_LEVEL_GOOD                  0x80
-    #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW        0xC0
-
-    #define EndofText               0x03
-    #define LineFeed                0x0a
-    #define DataLinkEscape          0x10
-
-    #define BLECTL_CHUNKSIZE        20      /** @brief chunksize for send msg */
-    #define BLECTL_CHUNKDELAY       50      /** @brief chunk delay in ms for each msg chunk */
-    #define BLECTL_MSG_MTU          512     /** @brief max msg size */
-
-    /**
-     * @brief blectl send msg structure
-     */
-    typedef struct {
-        char *msg;                      /** @brief pointer to an sending msg */
-        bool active;                    /** @brief send msg structure active */
-        int32_t msglen;                 /** @brief msg lenght */
-        int32_t msgpos;                 /** @brief msg postition for next send */
-    } blectl_msg_t;
+    #define BLECTL_CONFIG_UPDATE         _BV(10)        /** @brief event mask for blectl config update */
     /**
      * @brief ble setup function
      */
@@ -276,27 +206,6 @@
      */
     void blectl_read_config( void );
     /**
-     * @brief send an battery update over bluetooth to gadgetbridge
-     * 
-     * @param   percent     battery percent
-     * @param   charging    charging state
-     * @param   plug        powerplug state
-     */
-    void blectl_update_battery( int32_t percent, bool charging, bool plug );
-    /**
-     * @brief send an message and loop back as printf formatted 
-     * 
-     * @param   format  pointer to a string
-     * @param   ...     printf options
-     */
-    bool blectl_send_loop_msg( const char *format, ... );
-    /**
-     * @brief send an message over bluettoth to gadgetbridge
-     * 
-     * @param   msg     pointer to a string
-     */
-    bool blectl_send_msg( const char *format, ... );
-    /**
      * @brief set the transmission power
      * 
      * @param   txpower power from 0..4, from -12db to 0db in 3db steps
@@ -328,6 +237,7 @@
      * @param enable    true if enabled, false if disable
      */
     void blectl_set_autoon( bool autoon );
+
 #ifndef NATIVE_64BIT
     /**
      * @brief get the raw BLE Server

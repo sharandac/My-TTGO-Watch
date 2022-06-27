@@ -30,7 +30,7 @@
     #include "utils/logging.h"
 #else  
     #include "wifictl.h"
-    #include "blectl.h"
+    #include "hardware/ble/gadgetbridge.h"
     #include "rtcctl.h"
 
     EventGroupHandle_t time_event_handle = NULL;
@@ -60,7 +60,7 @@ void timesync_setup( void ) {
         * register wigi, ble and powermgm callback function
         */
         wifictl_register_cb( WIFICTL_CONNECT, timesync_wifictl_event_cb, "wifictl timesync" );
-        blectl_register_cb( BLECTL_MSG, timesync_blectl_event_cb, "blectl timesync" );
+        gadgetbridge_register_cb( GADGETBRIDGE_MSG, timesync_blectl_event_cb, "blectl timesync" );
     #endif
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, timesync_powermgm_event_cb, "powermgm timesync" );
     /*
@@ -171,7 +171,7 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
 
 #ifndef NATIVE_64BIT
     switch( event ) {
-        case BLECTL_MSG:
+        case GADGETBRIDGE_MSG:
             settime_str = strstr( (const char*)arg, "setTime(" );
             if ( settime_str ) {
                 settime_str = settime_str + 8;

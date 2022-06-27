@@ -11,6 +11,7 @@
 #include "ArduinoJson.h"
 #include "utils/bluejsonrequest.h"
 #include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "utils/json_psram_allocator.h"
 
 #define BLUETOOTH_MAX_RESPONSE_SIZE 512
@@ -48,16 +49,16 @@ public:
         int maxp = BLUETOOTH_MAX_TRANSMISSION_SIZE;
 
         if (len < maxp) {
-            blectl_send_msg(buf);
+            gadgetbridge_send_msg(buf);
         }
         else if (BLUETOOTH_MAX_RESPONSE_SIZE > maxp) {
-            // Probably should be resolved in blectl_send_msg:
+            // Probably should be resolved in gadgetbridge_send_msg:
             char saved = buf[maxp];
             buf[maxp] = '\0';
-            blectl_send_msg(buf);
+            gadgetbridge_send_msg(buf);
             
             buf[maxp] = saved;
-            blectl_send_msg(buf + maxp);
+            gadgetbridge_send_msg(buf + maxp);
         }
     }
 

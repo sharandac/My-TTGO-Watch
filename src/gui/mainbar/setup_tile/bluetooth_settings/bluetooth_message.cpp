@@ -33,6 +33,7 @@
 #include "gui/sound/piep.h"
 
 #include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 #include "hardware/sound.h"
@@ -284,7 +285,7 @@ void bluetooth_message_tile_setup( void ) {
     lv_label_set_text( bluetooth_message_entrys_label, "1/1");
     lv_obj_align( bluetooth_message_entrys_label, bluetooth_message_next_msg_btn, LV_ALIGN_OUT_LEFT_MID, 0, 0 );
 
-    blectl_register_cb( BLECTL_MSG_JSON, bluetooth_message_event_cb, "bluetooth_message" );
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, bluetooth_message_event_cb, "bluetooth_message" );
     styles_register_cb( STYLE_CHANGE, bluetooth_message_style_change_event_cb, "bluetooth message style" );
     button_register_cb( BUTTON_NOTIFY_TEST | BUTTON_NOTIFY_DEL_TEST, bluetooth_message_button_event_cb, "bluetooth message button cb" );
     mainbar_add_tile_button_cb( bluetooth_message_tile_num, bluetooth_message_button_event_cb );
@@ -299,10 +300,10 @@ static bool bluetooth_message_button_event_cb( EventBits_t event, void *arg ) {
             mainbar_jump_back();
             break;
         case BUTTON_NOTIFY_TEST:
-            blectl_send_loop_msg( "{\"t\":\"notify\",\"id\":1654906064,\"src\":\"K-9 Mail\",\"title\":\"foo\",\"body\":\"bar 23\"}" );
+            gadgetbridge_send_loop_msg( "{\"t\":\"notify\",\"id\":1654906064,\"src\":\"K-9 Mail\",\"title\":\"foo\",\"body\":\"bar 23\"}" );
             break;
         case BUTTON_NOTIFY_DEL_TEST:
-            blectl_send_loop_msg( "{\"t\":\"notify-\",\"id\":1654906064}" );
+            gadgetbridge_send_loop_msg( "{\"t\":\"notify-\",\"id\":1654906064}" );
             break;
     }
 
@@ -417,7 +418,7 @@ static void bluetooth_message_send_del_json( int32_t entry ) {
     BluetoothJsonRequest request( msg, strlen( msg ) * 4 );
     if ( request.isValid() ) {
         if( request.containsKey("id") ) {
-            blectl_send_msg("\r\n{\"t\":\"notify-\",\"id\":%ld}\r\n", request["id"].as<long>() );
+            gadgetbridge_send_msg("\r\n{\"t\":\"notify-\",\"id\":%ld}\r\n", request["id"].as<long>() );
         }
     }
     request.clear();   
@@ -458,7 +459,7 @@ const char* bluetooth_get_msg_entry( int32_t entry ) {
 
 bool bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG_JSON:    
+        case GADGETBRIDGE_JSON_MSG:    
             bluetooth_message_queue_msg( *(BluetoothJsonRequest*)arg );
             break;
     }

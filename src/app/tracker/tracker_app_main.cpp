@@ -43,6 +43,7 @@
 #include "hardware/sdcard.h"
 #include "hardware/display.h"
 #include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -408,14 +409,14 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
                     tracker_app_view_clean_data();
                     tracker_gps_on_standby_state = gpsctl_get_enable_on_standby();
                     gpsctl_set_enable_on_standby( true );
-                    blectl_send_msg( "\r\n{\"t\":\"info\",\"msg\":\"gps tracker started\"}\r\n" );
+                    gadgetbridge_send_msg( "\r\n{\"t\":\"info\",\"msg\":\"gps tracker started\"}\r\n" );
                 }
                 else {
                     tracker_logging_state = false;
                     gpsctl_off();
 //                    sdcard_block_unmounting( false );
                     gpsctl_set_enable_on_standby( tracker_gps_on_standby_state );
-                    blectl_send_msg( "\r\n{\"t\":\"info\",\"msg\":\"gps tracker stoped\"}\r\n" );
+                    gadgetbridge_send_msg( "\r\n{\"t\":\"info\",\"msg\":\"gps tracker stoped\"}\r\n" );
                 }
                 motor_vibe( 250, false );
             }

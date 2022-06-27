@@ -37,6 +37,7 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "hardware/sound.h"
 #include "hardware/motor.h"
 #include "hardware/powermgm.h"
@@ -98,7 +99,7 @@ void bluetooth_FindPhone_tile_setup(void)
     lv_obj_t *header = wf_add_settings_header( bluetooth_FindPhone_tile, NULL, exit_bluetooth_FindPhone_event_cb );
     lv_obj_align(header, bluetooth_FindPhone_tile, LV_ALIGN_IN_TOP_RIGHT, -10, 10);
 
-    blectl_register_cb(BLECTL_MSG_JSON, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, bluetooth_FindPhone_event_cb, "bluetooth_FindPhone");
 }
 
 void FindPhone_main_setup( uint32_t tile_num ) {
@@ -164,7 +165,7 @@ static void toggle_searching ()
 	if (searching_phone) 
 	{
 		REM(false);
-		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 		searching_phone = false;
 	}else {
 	    _FindPhone_PhoneSearch_task = lv_task_create( FindPhone_PhoneSearch_task, 1000, LV_TASK_PRIO_MID, NULL );
@@ -193,10 +194,10 @@ static void FindPhone_PhoneSearch_task( lv_task_t * task )
 { 
 	if (searching_phone) 
 	{
-		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"true\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"true\"}\r\n" );
 		REM(true);
 	} else {
-		blectl_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 	}
     lv_task_del( _FindPhone_PhoneSearch_task );
 }
@@ -207,31 +208,25 @@ static void FindPhone_WatchFind_task( lv_task_t * task )
 	motor_vibe(100); 
 }
 
-bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg)
-{
-    switch (event)
-    {
-    case BLECTL_MSG_JSON:
-        bluetooth_FindPhone_msg_pharse(*(BluetoothJsonRequest *)arg);
-        break;
+bool bluetooth_FindPhone_event_cb(EventBits_t event, void *arg) {
+    switch (event ) {
+        case GADGETBRIDGE_JSON_MSG:
+            bluetooth_FindPhone_msg_pharse(*(BluetoothJsonRequest *)arg);
+            break;
     }
     return (true);
 }
 
-static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event)
-{
-    switch (event)
-    {
-    case (LV_EVENT_CLICKED):
-        mainbar_jump_back();
-        break;
+static void exit_bluetooth_FindPhone_event_cb(lv_obj_t *obj, lv_event_t event) {
+    switch( event ) {
+        case (LV_EVENT_CLICKED):
+            mainbar_jump_back();
+            break;
     }
 }
 
-static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
-{    
-    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", true) )
-    {
+static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc) {    
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", true) ) {
         log_i("FindPhone screen active");
         powermgm_get_event(POWERMGM_STANDBY);          
         powermgm_set_event(POWERMGM_WAKEUP_REQUEST);
@@ -241,14 +236,13 @@ static void bluetooth_FindPhone_msg_pharse(BluetoothJsonRequest &doc)
         _FindPhone_WatchFind_task = lv_task_create( FindPhone_WatchFind_task, 1500, LV_TASK_PRIO_MID, NULL );           
     }
 
-    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", false) )
-    {
-        log_i("FindPhone screen closed");
-        if( _FindPhone_WatchFind_task!=nullptr)
-        {
+    if ( doc.isEqualKeyValue("t", "find") && doc.isEqualKeyValue("n", false) ) {
+
+        if( _FindPhone_WatchFind_task!=nullptr)  {
             lv_task_del( _FindPhone_WatchFind_task );
             _FindPhone_WatchFind_task = nullptr;
-        }            
+        }      
+              
         mainbar_jump_back();          
     }
 }

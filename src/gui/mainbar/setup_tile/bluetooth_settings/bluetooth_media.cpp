@@ -33,6 +33,8 @@
 #include "hardware/blectl.h"
 #include "hardware/powermgm.h"
 
+#include "hardware/ble/gadgetbridge.h"
+
 #include "utils/bluejsonrequest.h"
 
 #ifdef NATIVE_64BIT
@@ -123,7 +125,7 @@ void bluetooth_media_tile_setup( void ) {
     bluetooth_media_volume_up = wf_add_image_button( bluetooth_media_tile, up_32px, bluetooth_media_volume_up_event_cb, SYSTEM_ICON_STYLE );
     lv_obj_align( bluetooth_media_volume_up, bluetooth_media_speaker, LV_ALIGN_OUT_RIGHT_MID, THEME_ICON_SIZE, 0 );
 
-    blectl_register_cb( BLECTL_MSG_JSON, bluetooth_media_event_cb, "bluetooth media" );
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, bluetooth_media_event_cb, "bluetooth media" );
     mainbar_add_tile_activate_cb( bluetooth_media_tile_num, bluetooth_media_activate_cb );
     bluetooth_media_app = app_register( "media\nplayer", &play_64px, enter_bluetooth_media_cb );
 }
@@ -167,13 +169,13 @@ static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
                 lv_obj_set_hidden( bluetooth_media_play, true );
                 lv_obj_set_hidden( bluetooth_media_stop, false );
                 bluetooth_media_play_state = false;
-                blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"pause\"}\r\n" );
+                gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"pause\"}\r\n" );
             }
             else {
                 lv_obj_set_hidden( bluetooth_media_play, false );
                 lv_obj_set_hidden( bluetooth_media_stop, true );
                 bluetooth_media_play_state = true;
-                blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"play\"}\r\n" );
+                gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"play\"}\r\n" );
             }
             break;
     }
@@ -182,7 +184,7 @@ static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"volumeup\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"volumeup\"}\r\n" );
             break;
     }
 }
@@ -190,7 +192,7 @@ static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event
 static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"volumedown\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"volumedown\"}\r\n" );
             break;
     }
 }
@@ -198,7 +200,7 @@ static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t eve
 static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"next\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"next\"}\r\n" );
             break;
     }
 }
@@ -206,14 +208,14 @@ static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            blectl_send_msg( (char*)"\r\n{t:\"music\", n:\"previous\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"previous\"}\r\n" );
             break;
     }
 }
 
 bool bluetooth_media_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG_JSON:            
+        case GADGETBRIDGE_JSON_MSG:            
             bluetooth_media_queue_msg( *(BluetoothJsonRequest*)arg );
             break;
     }

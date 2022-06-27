@@ -19,9 +19,12 @@
  */
 #include "config.h"
 #include "blestepctl.h"
-#include "blectl.h"
-#include "motion.h"
-#include "bleupdater.h"
+#include "gadgetbridge.h"
+
+#include "hardware/blectl.h"
+#include "hardware/motion.h"
+
+#include "hardware/ble/bleupdater.h"
 #include "utils/bluejsonrequest.h"
 
 #ifdef NATIVE_64BIT
@@ -54,7 +57,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
          */
         char msg[64]="";
         snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
-        bool ret = blectl_send_msg( msg );
+        bool ret = gadgetbridge_send_msg( msg );
         log_d("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
     }
@@ -66,9 +69,9 @@ static int32_t stepcounter = 0;
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg );
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg);
 
-void blestepctl_setup( void ) {
+void blestepctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
     bma_register_cb( BMACTL_STEPCOUNTER, blestepctl_bma_event_cb, "ble step counter");
-    blectl_register_cb( BLECTL_CONNECT | BLECTL_MSG_JSON, blestepctl_bluetooth_event_cb, "ble step counter" );
+    gadgetbridge_register_cb( GADGETBRIDGE_CONNECT | GADGETBRIDGE_JSON_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
 }
 
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg ) {
@@ -88,14 +91,14 @@ static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg) {
     bool retval = false;
     
     switch( event ) {
-        case BLECTL_CONNECT: 
+        case GADGETBRIDGE_CONNECT: 
                 /*
                  * Try to refresh step counter value on (re)connect
                  */
                 stepcounter_ble_updater.update( stepcounter );
                 retval = true;
                 break;
-        case BLECTL_MSG_JSON:
+        case GADGETBRIDGE_JSON_MSG:
                 BluetoothJsonRequest &request = *(BluetoothJsonRequest*)arg;
 
                 if (request.isEqualKeyValue("t","act") && request.containsKey("stp") && request["stp"].as<bool>() && request.containsKey("int")) {

@@ -19,8 +19,10 @@
  */
 #include "config.h"
 #include "blebatctl.h"
-#include "pmu.h"
 #include "bleupdater.h"
+#include "gadgetbridge.h"
+
+#include "hardware/pmu.h"
 
 #ifdef NATIVE_64BIT
 
@@ -57,7 +59,7 @@
                 /*
                  * Send battery percent via BangleJS protocol
                  */
-                bool ret = blectl_send_msg( "\r\n{t:\"status\", bat:%d}\r\n", level );
+                bool ret = gadgetbridge_send_msg( "\r\n{t:\"status\", bat:%d}\r\n", level );
 
                 return ret;
             }
@@ -99,7 +101,7 @@
     static BleBattLevelUpdater *blebatctl_level_updater;
     static BleBattPowerUpdater *blebatctl_power_updater;
 
-    void blebatctl_setup( NimBLEServer *pServer) {
+    void blebatctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
         /*
          * Create battery service
          */
@@ -113,14 +115,13 @@
         /*
          * Start advertising battery service
          */
-        NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
         pAdvertising->addServiceUUID( pBatteryService->getUUID() );
 
         blebatctl_level_updater = new BleBattLevelUpdater( pBatteryLevelCharacteristic, 60 * 5 );
         blebatctl_power_updater = new BleBattPowerUpdater( pBatteryPowerStateCharacteristic, 60 * 6 );
 
         pmu_register_cb( PMUCTL_STATUS, blebatctl_pmu_event_cb, "ble battery" );
-        blectl_register_cb( BLECTL_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
+        gadgetbridge_register_cb( GADGETBRIDGE_CONNECT, blebatctl_bluetooth_event_cb, "ble battery" );
     }
 
     static bool blebatctl_pmu_event_cb( EventBits_t event, void *arg ) {
@@ -161,7 +162,7 @@
         bool retval = false;
 
         switch( event ) {
-            case BLECTL_CONNECT:        
+            case GADGETBRIDGE_CONNECT:        
                     /*
                      * Try to refresh values on (re)connect
                      */

@@ -87,7 +87,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2022062101"
+    #define __FIRMWARE__            "2022062801"
     /**
      * Allows to include config.h from C code
      */

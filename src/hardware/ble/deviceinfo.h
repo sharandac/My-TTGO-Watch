@@ -1,5 +1,7 @@
 /****************************************************************************
- *   Copyright  2021  Guilhem Bonnefille <guilhem.bonnefille@gmail.com>
+ *   Jun 27 21:38:51 2020
+ *   Copyright  2022  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
 /*
@@ -17,23 +19,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _BLEBATCTL_H
-    #define _BLEBATCTL_H
+#ifndef _DEVICEINFO_H
+    #define _DEVICEINFO_H
 
-    #ifdef NATIVE_64BIT
-    #else
-        #include "blectl.h"
+    #include "hardware/callback.h"
+    #include "hardware/blectl.h"
 
-        #if defined( M5PAPER )
-        #elif defined( M5CORE2 )
-        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-        #else
-        #endif
-            /**
-             * @brief ble bat setup function
-             * 
-             * @param pServer   pointer to an BLEServer
-             */
-            void blebatctl_setup( NimBLEServer *pServer );
-    #endif
-#endif // _BLEBATCTL_H
+    #define DEVICE_INFORMATION_SERVICE_UUID                 (uint16_t)0x180A                           /** @brief Device Information server UUID */
+    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A29                           /** @brief Device Information - manufacturer name string UUID */
+    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A26                           /** @brief Device Information - firmware revision UUID */
+    /**
+     * @brief setup gadgetbridge transmit/recieve over ble
+     */
+    void deviceinfo_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising );
+
+#endif // _DEVICEINFO_H

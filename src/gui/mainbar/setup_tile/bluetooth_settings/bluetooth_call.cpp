@@ -28,7 +28,7 @@
 #include "gui/statusbar.h"
 #include "gui/widget_factory.h"
 #include "gui/widget_styles.h"
-#include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "hardware/powermgm.h"
 #include "hardware/motor.h"
 
@@ -83,7 +83,7 @@ void bluetooth_call_tile_setup( void ) {
     lv_obj_t * exit_btn = wf_add_exit_button( bluetooth_call_tile, exit_bluetooth_call_event_cb );
     lv_obj_align( exit_btn, bluetooth_call_tile, LV_ALIGN_IN_TOP_RIGHT, -THEME_PADDING, THEME_PADDING );
 
-    blectl_register_cb( BLECTL_MSG_JSON, bluetooth_call_event_cb, "bluetooth_call" );
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, bluetooth_call_event_cb, "bluetooth_call" );
     styles_register_cb( STYLE_CHANGE, bluetooth_call_style_change_event_cb, "bluetooth call style" );
 }
 
@@ -98,7 +98,7 @@ bool bluetooth_call_style_change_event_cb( EventBits_t event, void *arg ) {
 
 bool bluetooth_call_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG_JSON:            
+        case GADGETBRIDGE_JSON_MSG:            
             bluetooth_call_msg_pharse( *(BluetoothJsonRequest*)arg );
             break;
     }

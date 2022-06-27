@@ -33,7 +33,7 @@
 #include "gui/widget_styles.h"
 
 #include "hardware/display.h"
-#include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "hardware/powermgm.h"
 #include "hardware/timesync.h"
 
@@ -161,7 +161,7 @@ void osmand_app_main_setup( uint32_t tile_num ) {
     mainbar_add_tile_activate_cb( tile_num, osmand_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, osmand_hibernate_cb );
 
-    blectl_register_cb( BLECTL_MSG_JSON | BLECTL_CONNECT | BLECTL_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG | GADGETBRIDGE_CONNECT | GADGETBRIDGE_DISCONNECT , osmand_bluetooth_message_event_cb, "OsmAnd main" );
     styles_register_cb( STYLE_CHANGE, osmand_style_change_event_cb, "osmand style" );
     osmand_app_main_tile_task = lv_task_create( osmand_app_main_tile_time_update_task, 1000, LV_TASK_PRIO_MID, NULL );
 }
@@ -200,14 +200,14 @@ static void exit_osmand_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
 
 bool osmand_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG_JSON:            
+        case GADGETBRIDGE_JSON_MSG:            
             osmand_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
             break;
-        case BLECTL_CONNECT:
+        case GADGETBRIDGE_CONNECT:
             lv_label_set_text( osmand_app_info_label, "wait for OsmAnd msg");
             lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             break;
-        case BLECTL_DISCONNECT:     
+        case GADGETBRIDGE_DISCONNECT:     
             lv_label_set_text( osmand_app_info_label, "no bluetooth connection");
             lv_obj_align( osmand_app_info_label, osmand_app_distance_label, LV_ALIGN_OUT_BOTTOM_MID, 0, 5 );
             break;

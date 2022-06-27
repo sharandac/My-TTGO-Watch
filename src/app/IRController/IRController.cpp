@@ -25,7 +25,7 @@
 #include "quickglui/quickglui.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
-#include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 
 
 #ifdef NATIVE_64BIT
@@ -61,7 +61,7 @@
             // Load config and build user interface
             IRController_build_UI(IRControlSettingsAction::Load);
 
-            blectl_register_cb(BLECTL_MSG_JSON, IRController_bluetooth_event_cb, "ir-remote setup");
+            gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, IRController_bluetooth_event_cb, "ir-remote setup");
         }
 
         void IRController_build_UI(IRControlSettingsAction settingsAction)
@@ -197,7 +197,7 @@
         }
 
         bool IRController_bluetooth_event_cb(EventBits_t event, void *arg) {
-            if (event != BLECTL_MSG_JSON) return false; // Not supported
+            if (event != GADGETBRIDGE_JSON_MSG) return false; // Not supported
 
             BluetoothJsonRequest &request = *(BluetoothJsonRequest *)arg;
 

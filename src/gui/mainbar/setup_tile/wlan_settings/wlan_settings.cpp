@@ -30,7 +30,7 @@
 #include "gui/widget_styles.h"
 #include "hardware/wifictl.h"
 #include "hardware/motor.h"
-#include "hardware/blectl.h"
+#include "hardware/ble/gadgetbridge.h"
 #include "utils/bluejsonrequest.h"
 #include "utils/webserver/webserver.h"
 #include "utils/ftpserver/ftpserver.h"
@@ -277,7 +277,7 @@ void wlan_setup_tile_setup( uint32_t wifi_setup_tile_num ) {
         lv_obj_set_hidden( wifi_ftpserver_onoff_cont, true );
     #endif
 
-    blectl_register_cb( BLECTL_MSG_JSON, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
+    gadgetbridge_register_cb( GADGETBRIDGE_JSON_MSG, wifi_setup_bluetooth_message_event_cb, "wifi settings" );
     wifictl_register_cb( WIFICTL_AUTOON, wifi_setup_autoon_event_cb, "wifi setup");
 }
 
@@ -353,7 +353,7 @@ bool wifi_setup_autoon_event_cb( EventBits_t event, void *arg ) {
 
 bool wifi_setup_bluetooth_message_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BLECTL_MSG_JSON:       wifi_setup_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
+        case GADGETBRIDGE_JSON_MSG: wifi_setup_bluetooth_message_msg_pharse( *(BluetoothJsonRequest*)arg );
                                     break;
     }
     return( true );
