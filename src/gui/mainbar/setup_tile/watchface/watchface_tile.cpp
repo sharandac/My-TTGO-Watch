@@ -792,7 +792,11 @@ bool watchface_powermgm_event_cb( EventBits_t event, void *arg ) {
              */
             if ( watchface_enable_after_wakeup && watchface_setup_get_watchface_enable() ) {
                 watchface_app_tile_update();
+                powermgm_clear_event( POWERMGM_STANDBY );
+                powermgm_set_event( POWERMGM_WAKEUP );
                 mainbar_jump_to_tilenumber( watchface_app_tile_num, LV_ANIM_OFF, true );
+                powermgm_clear_event( POWERMGM_WAKEUP );
+                powermgm_set_event( POWERMGM_STANDBY );
                 lv_obj_invalidate( lv_scr_act() );
                 lv_refr_now( NULL );
                 /**

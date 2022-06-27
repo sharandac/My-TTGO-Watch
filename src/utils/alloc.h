@@ -4,16 +4,22 @@
     #include <stdio.h>
     #include <stdlib.h>
 
-    #if defined( ESP32 ) && defined( BOARD_HAS_PSRAM )
+    #if defined( ESP32 )
             #include <stddef.h>
             #include <stdbool.h>
             #include <esp32-hal-psram.h>
             #include "logging.h"
             #include <Arduino.h>
 
-            #define MALLOC         ps_malloc            /** @brief malloac from PSRAM */
-            #define CALLOC         ps_calloc            /** @brief calloc from PSRAM */
-            #define REALLOC        ps_realloc           /** @brief realloc from PSRAM */
+            #if defined ( BOARD_HAS_PSRAM )
+                #define MALLOC         ps_malloc            /** @brief malloac from PSRAM */
+                #define CALLOC         ps_calloc            /** @brief calloc from PSRAM */
+                #define REALLOC        ps_realloc           /** @brief realloc from PSRAM */
+            #else
+                #define MALLOC         malloc               /** @brief malloac from normal heap */
+                #define CALLOC         calloc               /** @brief calloc from normal heap */
+                #define REALLOC        realloc              /** @brief realloc from normal heap */
+            #endif
         
             #define     ASSERT( test, message, ... ) do { if( !(test) ) { log_e( message, ##__VA_ARGS__); while( true ); } } while ( 0 )
     #else

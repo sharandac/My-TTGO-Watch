@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#include <dirent.h>
+// #include <dirent.h>
 #include <stdio.h>
 #include <unistd.h> 
 
@@ -451,6 +451,7 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
 static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED: {
+/*
             char path[512] = "";
             DIR *d;
             struct dirent *dir;
@@ -479,7 +480,7 @@ static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) 
                 closedir( d );
                 wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "remove %d files", file_count );
             }
-            break;    
+*/            break;    
         }
     }
 }

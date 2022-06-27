@@ -47,19 +47,10 @@
     #else
         #warning "no hardware driver for blectl"
     #endif
+
     #include <Arduino.h>
-    #include <BLEDevice.h>
-    #include <BLEServer.h>
-    #include <BLEUtils.h>
-    #include <BLE2902.h>
-    #include <BLEScan.h>
-    #include <BLEAdvertisedDevice.h>
     #include "blebatctl.h"
     #include "blestepctl.h"
-    #include "blehid.h"
-
-    #include "esp_bt_main.h"
-    #include "esp_gap_bt_api.h"
 
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
@@ -85,26 +76,30 @@ void blectl_loop( void );
     #ifdef M5PAPER
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #endif
-    BLEScan* pBLEScan;
     BLEServer *pServer = NULL;
-    BLECharacteristic *pTxCharacteristic;
-    BLECharacteristic *pRxCharacteristic;
+    NimBLECharacteristic *pTXCharacteristic = NULL;
+    NimBLECharacteristic *pRXCharacteristic = NULL;
 
     static CharBuffer gadgetbridge_msg;
 
-    class BleCtlServerCallbacks: public BLEServerCallbacks {
-        void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t* param ) {
-            pServer->getAdvertising()->stop();
-            pServer->updateConnParams( param->connect.remote_bda, blectl_config.minInterval, blectl_config.maxInterval, blectl_config.latency, blectl_config.timeout );
+    class ServerCallbacks: public NimBLEServerCallbacks {
+        void onConnect(NimBLEServer* pServer) {
+            log_i("Client connected");
+            NimBLEDevice::startAdvertising();
+        };
+
+        void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
+            pServer->updateConnParams(desc->conn_handle, blectl_config.minInterval, blectl_config.maxInterval, blectl_config.latency, blectl_config.timeout );
             blectl_set_event( BLECTL_AUTHWAIT );
             blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
             xQueueReset( blectl_msg_queue );
             powermgm_resume_from_ISR();
             log_d("BLE authwait");
             blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"authwait" );
+            log_i("Client address: %s", NimBLEAddress(desc->peer_ota_addr).toString().c_str() );
         };
 
-        void onDisconnect(BLEServer* pServer) {
+        void onDisconnect(NimBLEServer* pServer) {
             log_d("BLE disconnected");
             blectl_set_event( BLECTL_DISCONNECT );
             blectl_clear_event( BLECTL_CONNECT | BLECTL_AUTHWAIT );
@@ -117,40 +112,65 @@ void blectl_loop( void );
                 pServer->getAdvertising()->start();
                 log_d("BLE advertising...");
             }
-        }
-    };
+        };
 
-    class BtlCtlSecurity : public BLESecurityCallbacks {
+        void onMTUChange(uint16_t MTU, ble_gap_conn_desc* desc) {
+            log_i("MTU updated: %u for connection ID: %u\n", MTU, desc->conn_handle);
+        };
+        
+        uint32_t onPassKeyRequest(){
+            uint32_t pass_key = random( 0,999999 );
+            char pin[16]="";
+            snprintf( pin, sizeof( pin ), "%06d", pass_key );
+            log_d("BLECTL pairing request, PIN: %s", pin );
 
-        uint32_t onPassKeyRequest() {
-            log_d("BLECTL pass key request");
+            blectl_set_event( BLECTL_PIN_AUTH );
+            blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
+
             powermgm_resume_from_ISR();
-            return 123456;
-        }
+            return pass_key;
+        };
+
         void onPassKeyNotify( uint32_t pass_key ){
             char pin[16]="";
             snprintf( pin, sizeof( pin ), "%06d", pass_key );
             log_d("BLECTL pairing request, PIN: %s", pin );
+
             blectl_set_event( BLECTL_PIN_AUTH );
             blectl_send_event_cb( BLECTL_PIN_AUTH, (void *)pin );
+
             powermgm_resume_from_ISR();
-        }
+        };
+        
         bool onConfirmPIN( uint32_t pass_key ) {
             char pin[16]="";
             snprintf( pin, sizeof( pin ), "%06d", pass_key );
             log_d("BLECTL confirm PIN: %s", pin );
+
             powermgm_resume_from_ISR();
+
             return false;
-        }
-        bool onSecurityRequest() {
-            log_d("BLECTL security request");
-            powermgm_resume_from_ISR();
-            return true;
-        }
+        };
 
-        void onAuthenticationComplete( esp_ble_auth_cmpl_t cmpl ){
-
-            if( cmpl.success ){
+        void onAuthenticationComplete(ble_gap_conn_desc* desc){
+            if(!desc->sec_state.encrypted) {
+                if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
+                    log_d("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
+                    blectl_clear_event( BLECTL_PIN_AUTH );
+                    blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
+                    NimBLEDevice::getServer()->disconnect(desc->conn_handle);
+                    return;
+                }
+                if ( blectl_get_event( BLECTL_AUTHWAIT | BLECTL_CONNECT ) ) {
+                    log_d("BLECTL authentication unsuccessful, client disconnected, reason: %02x", cmpl.fail_reason );
+                    blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
+                    blectl_set_event( BLECTL_DISCONNECT );
+                    blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
+                    NimBLEDevice::getServer()->disconnect(desc->conn_handle);
+                    return;
+                }
+            }
+            else {
                 if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                     log_d("BLECTL pairing successful");
                     blectl_clear_event( BLECTL_PIN_AUTH );
@@ -165,31 +185,18 @@ void blectl_loop( void );
                     return;
                 }
             }
-            else {
-                if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
-                    log_d("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
-                    blectl_clear_event( BLECTL_PIN_AUTH );
-                    blectl_send_event_cb( BLECTL_PAIRING_ABORT, (void *)"abort" );
-                    pServer->startAdvertising();
-                    return;
-                }
-                if ( blectl_get_event( BLECTL_AUTHWAIT | BLECTL_CONNECT ) ) {
-                    log_d("BLECTL authentication unsuccessful, client disconnected, reason: %02x", cmpl.fail_reason );
-                    blectl_clear_event( BLECTL_AUTHWAIT | BLECTL_CONNECT );
-                    blectl_set_event( BLECTL_DISCONNECT );
-                    blectl_send_event_cb( BLECTL_DISCONNECT, (void *) "disconnected" );
-                    pServer->startAdvertising();
-                    return;
-                }
-            }
             powermgm_resume_from_ISR();
-            log_e("authentication not handle but %s. reason: %02x", cmpl.success ? "successful" : "not successful", cmpl.fail_reason );
-        }
+        };
     };
 
-    class BleCtlCallbacks : public BLECharacteristicCallbacks
-    {
-        void onWrite( BLECharacteristic *pCharacteristic ) {
+    class CharacteristicCallbacks: public NimBLECharacteristicCallbacks {
+        void onRead(NimBLECharacteristic* pCharacteristic){
+            std::string msg = pCharacteristic->getValue();
+            powermgm_resume_from_ISR();
+            log_d("BLE received: %s, %i\n", msg.c_str(), msg.length() );
+        };
+
+        void onWrite(NimBLECharacteristic* pCharacteristic) {
             size_t msgLen = pCharacteristic->getValue().length();
             const char *msg = pCharacteristic->getValue().c_str();
 
@@ -223,14 +230,11 @@ void blectl_loop( void );
                     default:                gadgetbridge_msg.append( msg[ i ] );
                 }
             }
-        }
-
-        void onRead( BLECharacteristic* pCharacteristic ) {
-            std::string msg = pCharacteristic->getValue();
-            powermgm_resume_from_ISR();
-            log_d("BLE received: %s, %i\n", msg.c_str(), msg.length() );
-        }
+        };
     };
+
+    static CharacteristicCallbacks chrCallbacks;
+
 #endif
 
 void blectl_setup( void ) {
@@ -258,68 +262,50 @@ void blectl_setup( void ) {
         blectl_msg_receive_queue = xQueueCreate( 5, sizeof( char * ) );
         ASSERT( blectl_msg_receive_queue, "Failed to allocate msg receive queue" );
         /**
-         * Construct a new esp bt controller enable object
-         */
-        esp_bt_controller_enable( ESP_BT_MODE_BLE );
-        esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT );
-        esp_bt_mem_release( ESP_BT_MODE_CLASSIC_BT );
-        /**
          *  Create the BLE Device
          * Name needs to match filter in Gadgetbridge's banglejs getSupportedType() function.
-         * This is too long I think:
-         * BLEDevice::init("Espruino Gadgetbridge Compatible Device");
          */
         char deviceName[ 64 ];
         snprintf( deviceName, sizeof( deviceName ), "Espruino (%s)", device_get_name() );
-        BLEDevice::init( deviceName );
+        NimBLEDevice::init( deviceName );
         /*
          * The minimum power level (-12dbm) ESP_PWR_LVL_N12 was too low
          */
         switch( blectl_config.txpower ) {
-            case 0:             BLEDevice::setPower( ESP_PWR_LVL_N12 );
+            case 0:             NimBLEDevice::setPower( ESP_PWR_LVL_N12 );
                                 break;
-            case 1:             BLEDevice::setPower( ESP_PWR_LVL_N9 );
+            case 1:             NimBLEDevice::setPower( ESP_PWR_LVL_N9 );
                                 break;
-            case 2:             BLEDevice::setPower( ESP_PWR_LVL_N6 );
+            case 2:             NimBLEDevice::setPower( ESP_PWR_LVL_N6 );
                                 break;
-            case 3:             BLEDevice::setPower( ESP_PWR_LVL_N3 );
+            case 3:             NimBLEDevice::setPower( ESP_PWR_LVL_N3 );
                                 break;
-            case 4:             BLEDevice::setPower( ESP_PWR_LVL_N0 );
+            case 4:             NimBLEDevice::setPower( ESP_PWR_LVL_N0 );
                                 break;
-            default:            BLEDevice::setPower( ESP_PWR_LVL_N9 );
+            default:            NimBLEDevice::setPower( ESP_PWR_LVL_N9 );
                                 break;
         }
         /*
          * Enable encryption
          */
-        BLEDevice::setEncryptionLevel( ESP_BLE_SEC_ENCRYPT );
-        BLEDevice::setSecurityCallbacks( new BtlCtlSecurity() );
-        /*
-         * Enable authentication
-         */
-        BLESecurity *pSecurity = new BLESecurity();
-        pSecurity->setAuthenticationMode( ESP_LE_AUTH_REQ_SC_BOND );
-        pSecurity->setCapability( ESP_IO_CAP_OUT );
-        pSecurity->setInitEncryptionKey( ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK );
-        pSecurity->setRespEncryptionKey( ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK );
+        NimBLEDevice::setSecurityAuth( true, true, true );
+        NimBLEDevice::setSecurityIOCap( BLE_HS_IO_DISPLAY_ONLY );
         /*
          * Create the BLE Server
          */
-        pServer = BLEDevice::createServer();
-        pServer->setCallbacks( new BleCtlServerCallbacks() );
+        pServer = NimBLEDevice::createServer();
+        pServer->setCallbacks( new ServerCallbacks() );
         /*
          * Create the BLE Service
          */
-        BLEService *pService = pServer->createService(SERVICE_UUID);
+        NimBLEService *pService = pServer->createService( NimBLEUUID( SERVICE_UUID ) );
         /*
          * Create a BLE Characteristic
          */
-        pTxCharacteristic = pService->createCharacteristic( CHARACTERISTIC_UUID_TX, BLECharacteristic::PROPERTY_NOTIFY );
-        pTxCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pTxCharacteristic->addDescriptor( new BLE2902() );
-        pRxCharacteristic = pService->createCharacteristic( CHARACTERISTIC_UUID_RX, BLECharacteristic::PROPERTY_WRITE );
-        pRxCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pRxCharacteristic->setCallbacks( new BleCtlCallbacks() );
+        pTXCharacteristic = pService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_TX ), NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
+        pTXCharacteristic->addDescriptor( new NimBLE2904() );
+        pRXCharacteristic = pService->createCharacteristic( NimBLEUUID( CHARACTERISTIC_UUID_RX ), NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ );
+        pRXCharacteristic->setCallbacks( &chrCallbacks );
         /*
          * Start the service
          */
@@ -328,43 +314,12 @@ void blectl_setup( void ) {
          * Start advertising
          * ESP_BLE_APPEARANCE_GENERIC_WATCH
          */
-        BLEAdvertising *pAdvertising = pServer->getAdvertising();
+        NimBLEAdvertising *pAdvertising = NimBLEDevice::getAdvertising();
         pAdvertising->addServiceUUID( pService->getUUID() );
-        pAdvertising->setAppearance( ESP_BLE_APPEARANCE_GENERIC_WATCH );
-        /*
-         * Create device information service
-         */
-        BLEService *pDeviceInformationService = pServer->createService(DEVICE_INFORMATION_SERVICE_UUID);
-        /*
-         * Create manufacturer name string Characteristic - 
-         */
-        BLECharacteristic* pManufacturerNameStringCharacteristic = pDeviceInformationService->createCharacteristic( MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
-        pManufacturerNameStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pManufacturerNameStringCharacteristic->addDescriptor( new BLE2902() );
-        pManufacturerNameStringCharacteristic->setValue("Lily Go");
-        /*
-         * Create manufacturer name string Characteristic - 
-         */
-        BLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ );
-        pFirmwareRevisionStringCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pFirmwareRevisionStringCharacteristic->addDescriptor( new BLE2902() );
-        pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
-        /*
-         * Start battery service
-         */
-        pDeviceInformationService->start();
-        /*
-         * Start advertising battery service
-         */
-        pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
-        blebatctl_setup(pServer);
+        pAdvertising->start();
+
+        blebatctl_setup( pServer );
         blestepctl_setup();
-        // blehid_setup();
-        /*
-         * Slow advertising interval for battery life
-         */
-        pAdvertising->setMinInterval( 500 );
-        pAdvertising->setMaxInterval( 800 );
     #endif
 
     if ( blectl_get_autoon() ) {
@@ -541,17 +496,17 @@ void blectl_set_txpower( int32_t txpower ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
         switch( blectl_config.txpower ) {
-            case 0:             BLEDevice::setPower( ESP_PWR_LVL_N12 );
+            case 0:             NimBLEDevice::setPower( ESP_PWR_LVL_N12 );
                                 break;
-            case 1:             BLEDevice::setPower( ESP_PWR_LVL_N9 );
+            case 1:             NimBLEDevice::setPower( ESP_PWR_LVL_N9 );
                                 break;
-            case 2:             BLEDevice::setPower( ESP_PWR_LVL_N6 );
+            case 2:             NimBLEDevice::setPower( ESP_PWR_LVL_N6 );
                                 break;
-            case 3:             BLEDevice::setPower( ESP_PWR_LVL_N3 );
+            case 3:             NimBLEDevice::setPower( ESP_PWR_LVL_N3 );
                                 break;
-            case 4:             BLEDevice::setPower( ESP_PWR_LVL_N0 );
+            case 4:             NimBLEDevice::setPower( ESP_PWR_LVL_N0 );
                                 break;
-            default:            BLEDevice::setPower( ESP_PWR_LVL_N9 );
+            default:            NimBLEDevice::setPower( ESP_PWR_LVL_N9 );
                                 break;
         }
     #endif
@@ -760,8 +715,8 @@ static void blectl_send_chunk ( unsigned char *msg, int32_t len ) {
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #endif
-        pTxCharacteristic->setValue( msg, len );
-        pTxCharacteristic->notify();
+        pTXCharacteristic->setValue( msg, len );
+        pTXCharacteristic->notify();
     #endif
 }
 
@@ -856,11 +811,11 @@ void blectl_loop ( void ) {
     #ifdef M5PAPER
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #endif
-    BLEServer *blectl_get_ble_server( void ) {
+    NimBLEServer *blectl_get_ble_server( void ) {
         return pServer;
     }
 
-    BLEAdvertising *blectl_get_ble_advertising( void ) {
+    NimBLEAdvertising *blectl_get_ble_advertising( void ) {
     return pServer->getAdvertising();
     }
 #endif

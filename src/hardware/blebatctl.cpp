@@ -19,7 +19,6 @@
  */
 #include "config.h"
 #include "blebatctl.h"
-#include "blectl.h"
 #include "pmu.h"
 #include "bleupdater.h"
 
@@ -27,8 +26,6 @@
 
 #else
     #include <Arduino.h>
-    #include <BLEServer.h>
-    #include <BLE2902.h>
 
     #if defined( M5PAPER )
     #elif defined( M5CORE2 )
@@ -102,7 +99,7 @@
     static BleBattLevelUpdater *blebatctl_level_updater;
     static BleBattPowerUpdater *blebatctl_power_updater;
 
-    void blebatctl_setup(BLEServer *pServer) {
+    void blebatctl_setup( NimBLEServer *pServer) {
         /*
          * Create battery service
          */
@@ -110,13 +107,8 @@
         /*
          * Create a BLE battery service, batttery level Characteristic - 
          */
-        pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
-        pBatteryLevelCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pBatteryLevelCharacteristic->addDescriptor( new BLEDescriptor(BATTERY_LEVEL_DESCRIPTOR_UUID) );
-        pBatteryLevelCharacteristic->addDescriptor( new BLE2902() );
-        pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY );
-        pBatteryPowerStateCharacteristic->setAccessPermissions(ESP_GATT_PERM_READ_ENCRYPTED | ESP_GATT_PERM_WRITE_ENCRYPTED);
-        pBatteryPowerStateCharacteristic->addDescriptor( new BLE2902() );
+        pBatteryLevelCharacteristic = pBatteryService->createCharacteristic( BATTERY_LEVEL_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY );
+        pBatteryPowerStateCharacteristic = pBatteryService->createCharacteristic( BATTERY_POWER_STATE_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY );
         /*
          * Start battery service
          */

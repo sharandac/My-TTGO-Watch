@@ -155,7 +155,7 @@ void framebuffer_setup( void ) {
     #ifdef NATIVE_64BIT
         log_d("framebuffer: 0x%p (%ld bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
     #else
-        log_d("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
+        log_i("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
     #endif
     /**
      * setup powermgm events and loop

@@ -28,8 +28,6 @@
     #include "utils/logging.h"
 #else
     #include <Arduino.h>
-    #include <BLEServer.h>
-    #include <BLE2902.h>
     #ifdef M5PAPER
 
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )

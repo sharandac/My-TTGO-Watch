@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include "motor.h"
+#include "button.h"
 #include "display.h"
 #include "touch.h"
 #include "powermgm.h"
@@ -56,7 +57,6 @@ touch_config_t touch_config;
             * leave critical section
             */
             portEXIT_CRITICAL_ISR(&Touch_IRQ_Mux);
-            powermgm_resume_from_ISR();
         }
 
         static SemaphoreHandle_t xSemaphores = NULL;
@@ -119,6 +119,7 @@ void touch_setup( void ) {
         * The level change can still trigger an interrupt, which we
         * use to start polling, and we don't stop polling till the level is high again.
         */
+        ttgo->touch->enableAutoCalibration();
         ttgo->touch->disableINT();
         detachInterrupt( TOUCH_INT );
         /*
@@ -479,18 +480,43 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             portEXIT_CRITICAL( &Touch_IRQ_Mux );
             touched |= temp_touch_irq_flag;
             /*
-            * check for an touch interrupt
-            */
-            data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
-            touched = digitalRead( TOUCH_INT ) == LOW;
-            if ( !touched ) {
-                /*
-                * Save power by switching to monitor mode now instead of waiting for 30 seconds.
-                */
-                if ( touch_lock_take() ) {
-                    TTGOClass::getWatch()->touchToMonitor();
-                    touch_lock_give();
-                }
+             * get touch event
+             */
+            GesTrue_t gesture = FOCALTECH_NO_GESTRUE;
+            if ( touch_lock_take() ) {
+                TTGOClass::getWatch()->touchToMonitor();
+                gesture = TTGOClass::getWatch()->touch->getGesture();
+                touch_lock_give();
+            }
+            /*
+             * check touch event
+             */
+            switch( gesture ) {
+                case FOCALTECH_MOVE_UP:
+                    break;
+                case FOCALTECH_MOVE_LEFT:
+                    break;
+                case FOCALTECH_MOVE_DOWN:
+                    break;
+                case FOCALTECH_MOVE_RIGHT:
+                    break;
+                case FOCALTECH_ZOOM_IN:
+                    break;
+                case FOCALTECH_ZOOM_OUT:
+                    break;
+                default:
+                    data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+                    touched = digitalRead( TOUCH_INT ) == LOW;
+                    if ( !touched ) {
+                        /*
+                        * Save power by switching to monitor mode now instead of waiting for 30 seconds.
+                        */
+                        if ( touch_lock_take() ) {
+                            TTGOClass::getWatch()->touchToMonitor();
+                            touch_lock_give();
+                        }
+                    }
+                    break;
             }
         #elif defined( LILYGO_WATCH_2021 )
             bool isTouch = TouchSensor.getTouchType();

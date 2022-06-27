@@ -36,7 +36,9 @@
      * @param percent   download in percent
      */
     typedef void ( progress_cb_t ) ( int32_t percent );
-
+    /**
+     * @brief typedef for uri_load_discriptor
+     */
     typedef struct {
         char *filename;             /** @brief pointer to the downloaded filename */
         char *uri;                  /** @brief pointer to the downloaded filename */
@@ -45,7 +47,6 @@
         uint8_t *data;              /** @brief pointer to the downloaded data */
         progress_cb_t *progresscb;  /** @brief progress call back */
     } uri_load_dsc_t;
-    
     /**
      * @brief doenload a file from a webserver into ram
      * 

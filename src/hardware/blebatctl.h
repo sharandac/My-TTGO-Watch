@@ -22,7 +22,7 @@
 
     #ifdef NATIVE_64BIT
     #else
-        #include "BLEServer.h"
+        #include "blectl.h"
 
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
@@ -34,6 +34,6 @@
              * 
              * @param pServer   pointer to an BLEServer
              */
-            void blebatctl_setup( BLEServer *pServer );
+            void blebatctl_setup( NimBLEServer *pServer );
     #endif
 #endif // _BLEBATCTL_H

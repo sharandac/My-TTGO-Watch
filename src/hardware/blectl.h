@@ -25,12 +25,13 @@
     #ifdef NATIVE_64BIT
         #include "utils/io.h"
     #else
-        #include <BLEServer.h>
-        #include <BLEAdvertising.h>
+        #include "NimBLEDevice.h"
     #endif
 
     #include "callback.h"
     #include "hardware/config/blectlconfig.h"
+
+    #define USE_NIMBLE
 
     #define BLECTL_SCAN_TIME             30
     /**
@@ -74,18 +75,18 @@
      *  See the following for generating UUIDs:
      * https://www.uuidgenerator.net/
      */
-    #define SERVICE_UUID                                    BLEUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E")     /** @brief UART service UUID */
-    #define CHARACTERISTIC_UUID_RX                          BLEUUID("6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-    #define CHARACTERISTIC_UUID_TX                          BLEUUID("6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+    #define SERVICE_UUID                                    "6E400001-B5A3-F393-E0A9-E50E24DCCA9E"     /** @brief UART service UUID */
+    #define CHARACTERISTIC_UUID_RX                          "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
+    #define CHARACTERISTIC_UUID_TX                          "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
-    #define DEVICE_INFORMATION_SERVICE_UUID                 BLEUUID((uint16_t)0x180A)                           /** @brief Device Information server UUID */
-    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    BLEUUID((uint16_t)0x2A29)                           /** @brief Device Information - manufacturer name string UUID */
-    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    BLEUUID((uint16_t)0x2A26)                           /** @brief Device Information - firmware revision UUID */
+    #define DEVICE_INFORMATION_SERVICE_UUID                 (uint16_t)0x180A                           /** @brief Device Information server UUID */
+    #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A29                           /** @brief Device Information - manufacturer name string UUID */
+    #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A26                           /** @brief Device Information - firmware revision UUID */
 
-    #define BATTERY_SERVICE_UUID                            BLEUUID((uint16_t)0x180F)                           /** @brief Battery service UUID */
-    #define BATTERY_LEVEL_CHARACTERISTIC_UUID               BLEUUID((uint16_t)0x2A19)                           /** @brief battery level characteristic UUID */
-    #define BATTERY_LEVEL_DESCRIPTOR_UUID                   BLEUUID((uint16_t)0x2901)                           /** @brief battery level descriptor UUID */
-    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID         BLEUUID((uint16_t)0x2A1A)                           /** @brief battery power state characteristic UUID */
+    #define BATTERY_SERVICE_UUID                            (uint16_t)0x180F                           /** @brief Battery service UUID */
+    #define BATTERY_LEVEL_CHARACTERISTIC_UUID               (uint16_t)0x2A19                           /** @brief battery level characteristic UUID */
+    #define BATTERY_LEVEL_DESCRIPTOR_UUID                   (uint16_t)0x2901                           /** @brief battery level descriptor UUID */
+    #define BATTERY_POWER_STATE_CHARACTERISTIC_UUID         (uint16_t)0x2A1A                           /** @brief battery power state characteristic UUID */
 
     #define BATTERY_POWER_STATE_BATTERY_UNKNOWN             0x0
     #define BATTERY_POWER_STATE_BATTERY_NOT_SUPPORTED       0x1
@@ -331,19 +332,11 @@
     /**
      * @brief get the raw BLE Server
      */
-    BLEServer *blectl_get_ble_server( void );
+    NimBLEServer *blectl_get_ble_server( void );
     /**
      * @brief get the raw BLE Advertising
      */
-    BLEAdvertising *blectl_get_ble_advertising( void );
-    /**
-     * @brief get the raw BLE Server
-     */
-    BLEServer *blectl_get_ble_server();
-    /**
-     * @brief get the raw BLE Advertising
-     */
-    BLEAdvertising *blectl_get_ble_advertising();
+    NimBLEAdvertising *blectl_get_ble_advertising( void );
 #endif
 
 #endif // _BLECTL_H

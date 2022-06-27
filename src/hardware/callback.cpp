@@ -87,40 +87,33 @@ callback_t *callback_init( const char *name ) {
     /**
      * allocate an callback table
      */
-    callback_t* callback = (callback_t*)CALLOC( sizeof( callback_t ), 1 );
+    callback_t* callback = (callback_t*)CALLOC_ASSERT( sizeof( callback_t ), 1, "callback_t structure calloc faild for: %s", name );
     /**
-     * was allocating successful
+     * if this the first callback table, set it as head table
      */
-    if ( callback == NULL ) {
-        log_e("callback_t structure calloc faild for: %s", name );
+    if ( callback_head == NULL ) {
+        callback_head = callback;
     }
-    else {
-        /**
-         * if this the first callback table, set it as head table
-         */
-        if ( callback_head == NULL ) {
-            callback_head = callback;
+    /**
+     * clear callback table
+     */
+    callback->entrys = 0;
+    callback->debug = false;
+    callback->table = NULL;
+    callback->name = name;
+    callback->next_callback_t = NULL;
+    /**
+     * add the callback table to the callback table chain
+     */
+    callback_t *callback_counter = callback_head;
+    if ( callback_head != callback ) {
+        while( callback_counter->next_callback_t ) {
+            callback_counter = callback_counter->next_callback_t;
         }
-        /**
-         * clear callback table
-         */
-        callback->entrys = 0;
-        callback->debug = false;
-        callback->table = NULL;
-        callback->name = name;
-        callback->next_callback_t = NULL;
-        /**
-         * add the callback table to the callback table chain
-         */
-        callback_t *callback_counter = callback_head;
-        if ( callback_head != callback ) {
-            while( callback_counter->next_callback_t ) {
-                callback_counter = callback_counter->next_callback_t;
-            }
-            callback_counter->next_callback_t = callback;
-        }
-        log_d("init callback_t structure success for: %s", name );
+        callback_counter->next_callback_t = callback;
     }
+    log_d("init callback_t structure success for: %s", name );
+
     return( callback );
 }
 
@@ -152,24 +145,11 @@ bool callback_register( callback_t *callback, EventBits_t event, CALLBACK_FUNC c
      * check if this entry is the first one for allocation or reallocate
      */
     if ( callback->table == NULL ) {
-        callback->table = ( callback_table_t * )CALLOC( sizeof( callback_table_t ) * callback->entrys, 1 );
-        if ( callback->table == NULL ) {
-            log_e("callback_table_t calloc faild for: %s", id );
-            return( retval );
-        }
+        callback->table = ( callback_table_t * )CALLOC_ASSERT( sizeof( callback_table_t ) * callback->entrys, 1, "callback_table_t calloc faild for: %s", id );
         retval = true;
     }
     else {
-        /**
-         * create a new callback entry
-         */
-        callback_table_t *new_callback_table = NULL;
-        new_callback_table = ( callback_table_t * )REALLOC( callback->table, sizeof( callback_table_t ) * callback->entrys );
-        if ( new_callback_table == NULL ) {
-            log_e("callback_table_t realloc faild for: %s", id );
-            return( retval );
-        }
-        callback->table = new_callback_table;
+        callback->table = ( callback_table_t * )REALLOC_ASSERT( callback->table, sizeof( callback_table_t ) * callback->entrys, "callback_table_t realloc faild for: %s", id );
         retval = true;
     }
     /**
@@ -237,24 +217,11 @@ bool callback_register_with_prio( callback_t *callback, EventBits_t event, CALLB
      * check if this entry is the first one for allocation or reallocate
      */
     if ( callback->table == NULL ) {
-        callback->table = ( callback_table_t * )CALLOC( sizeof( callback_table_t ) * callback->entrys, 1 );
-        if ( callback->table == NULL ) {
-            log_e("callback_table_t calloc faild for: %s", id );
-            return( retval );
-        }
+        callback->table = ( callback_table_t * )CALLOC_ASSERT( sizeof( callback_table_t ) * callback->entrys, 1, "callback_table_t calloc faild for: %s", id  );
         retval = true;
     }
     else {
-        /**
-         * create a new callback entry
-         */
-        callback_table_t *new_callback_table = NULL;
-        new_callback_table = ( callback_table_t * )REALLOC( callback->table, sizeof( callback_table_t ) * callback->entrys );
-        if ( new_callback_table == NULL ) {
-            log_e("callback_table_t realloc faild for: %s", id );
-            return( retval );
-        }
-        callback->table = new_callback_table;
+        callback->table = ( callback_table_t * )REALLOC_ASSERT( callback->table, sizeof( callback_table_t ) * callback->entrys,"callback_table_t realloc faild for: %s", id );
         retval = true;
     }
     /**
@@ -387,7 +354,7 @@ bool callback_send_no_log( callback_t *callback, EventBits_t event, void *arg ) 
      * crowl all callback entrys with their right mask
      */
     for( int prio = CALL_CB_NUM_START ; prio < CALL_CB_NUM ; prio++ ) {
-        for ( int entry = callback->entrys - 1; entry >= 0 ; entry-- ) {
+        for ( int entry = 0 ; entry < callback->entrys ; entry++ ) {
             yield();
             if ( event & callback->table[ entry ].event  && callback->table[ entry ].prio == prio && callback->table[ entry ].active ) {
                 /**

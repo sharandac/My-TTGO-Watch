@@ -61,7 +61,7 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_obj_set_size( battery_history_voltage_chart, lv_disp_get_hor_res( NULL ), ( lv_disp_get_ver_res( NULL ) - STATUSBAR_HEIGHT ) / 2 );
     lv_obj_align( battery_history_voltage_chart, NULL, LV_ALIGN_IN_TOP_MID, 0, STATUSBAR_HEIGHT );
     lv_chart_set_type( battery_history_voltage_chart, LV_CHART_TYPE_LINE );  
-    lv_chart_set_point_count( battery_history_voltage_chart, lv_disp_get_hor_res( NULL ) / 2 );
+    lv_chart_set_point_count( battery_history_voltage_chart, lv_disp_get_hor_res( NULL ) / 2);
     lv_chart_set_div_line_count( battery_history_voltage_chart, 1, 1 );
     lv_obj_add_style( battery_history_voltage_chart, LV_OBJ_PART_MAIN, APP_STYLE );
     lv_obj_set_style_local_size( battery_history_voltage_chart, LV_CHART_PART_SERIES, LV_STATE_DEFAULT, 1 );
@@ -126,10 +126,13 @@ void battery_history_start_chart_logging( void ) {
 }
 
 static bool battery_history_powermgm_loop_cb( EventBits_t event, void *arg ) {
-    static uint64_t NextMillis = millis() + 5000;
+    static uint64_t NextMillis = 0;
+
+    if( !NextMillis )
+        NextMillis = millis();
 
     if( millis() > NextMillis ) {
-        NextMillis = millis() + 5000;
+        NextMillis = millis() + BATTERY_HISTORY_INTERVALL * 1000;
         lv_chart_set_next( battery_history_voltage_chart, battery_history_voltage_series, pmu_get_battery_voltage() );
         lv_chart_set_next( battery_history_current_chart, battery_history_charge_series, pmu_get_battery_charge_current() );
         lv_chart_set_next( battery_history_current_chart, battery_history_discharge_series, pmu_get_battery_discharge_current() );

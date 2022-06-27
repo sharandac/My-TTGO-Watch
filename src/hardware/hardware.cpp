@@ -173,7 +173,8 @@ void hardware_setup( void ) {
             /**
              * setup wire interface
              */
-            Wire.begin( IICSDA, IICSCL, 1000000 );
+//            Wire.begin( IICSDA, IICSCL, 1000000 );
+            Wire.begin( IICSDA, IICSCL );
             /**
              * scan i2c devices
              */

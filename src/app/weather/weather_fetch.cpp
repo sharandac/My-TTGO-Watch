@@ -54,7 +54,7 @@ int weather_fetch_today( weather_config_t *weather_config, weather_forcast_t *we
 
         DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
         if (error) {
-            log_e("weather today deserializeJson() failed: %s", error.c_str() );
+            log_e("weather today deserializeJson() failed: %s (%d bytes)", error.c_str(), uri_load_dsc->size );
             doc.clear();
             uri_load_free_all( uri_load_dsc );
             return( httpcode );
@@ -113,7 +113,7 @@ int weather_fetch_forecast( weather_config_t *weather_config, weather_forcast_t 
 
         DeserializationError error = deserializeJson( doc, uri_load_dsc->data );
         if (error) {
-            log_e("weather forecast deserializeJson() failed: %s", error.c_str() );
+            log_e("weather forecast deserializeJson() failed: %s (%d bytes)", error.c_str(), uri_load_dsc->size );
             doc.clear();
             uri_load_free_all( uri_load_dsc );
             return( httpcode );
