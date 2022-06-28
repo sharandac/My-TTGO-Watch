@@ -69,7 +69,7 @@ static int32_t stepcounter = 0;
 static bool blestepctl_bma_event_cb( EventBits_t event, void *arg );
 static bool blestepctl_bluetooth_event_cb(EventBits_t event, void *arg);
 
-void blestepctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
+void blestepctl_setup( void ) {
     bma_register_cb( BMACTL_STEPCOUNTER, blestepctl_bma_event_cb, "ble step counter");
     gadgetbridge_register_cb( GADGETBRIDGE_CONNECT | GADGETBRIDGE_JSON_MSG, blestepctl_bluetooth_event_cb, "ble step counter" );
 }

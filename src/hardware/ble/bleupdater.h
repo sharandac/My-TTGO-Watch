@@ -19,6 +19,7 @@
  */
 #include "config.h"
 #include <time.h>
+#include "hardware/blectl.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"

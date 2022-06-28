@@ -44,7 +44,7 @@
     #define BATTERY_POWER_STATE_LEVEL_NOT_SUPPORTED         0x40
     #define BATTERY_POWER_STATE_LEVEL_GOOD                  0x80
     #define BATTERY_POWER_STATE_LEVEL_CRITICALLY_LOW        0xC0
-    
+
     #ifdef NATIVE_64BIT
     #else
         #include "hardware/blectl.h"
@@ -59,6 +59,6 @@
              * 
              * @param pServer   pointer to an BLEServer
              */
-            void blebatctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising );
+            void blebatctl_setup( void );
     #endif
 #endif // _BLEBATCTL_H

@@ -310,7 +310,7 @@ void update_Task( void * pvParameters ) {
             wf_label_printf( update_status_label, update_btn, LV_ALIGN_OUT_BOTTOM_MID, 0, 5, "new version: %ld", firmware_version );
             setup_set_indicator( update_setup_icon, ICON_INDICATOR_1 );
             if ( last_firmware_version < firmware_version ) {
-                blectl_send_loop_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"new firmware version\",\"body\":\"update:\n%s\"}", update_get_comment() );
+                gadgetbridge_send_loop_msg("{\"t\":\"notify\",\"id\":1575479849,\"src\":\"Update\",\"title\":\"new firmware version\",\"body\":\"update:\n%s\"}", update_get_comment() );
                 last_firmware_version = firmware_version;
             }
         }

@@ -25,11 +25,12 @@
 #include "hardware/callback.h"
 #include "hardware/pmu.h"
 #include "hardware/powermgm.h"
-
 #include "utils/charbuffer.h"
 #include "utils/alloc.h"
 #include "utils/bluejsonrequest.h"
-
+/**
+ * platform depended libs
+ */
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
     #include "utils/millis.h"
@@ -45,14 +46,18 @@
     #include <Arduino.h>
     #include "NimBLEDescriptor.h"
 
-    QueueHandle_t gadgetbridge_msg_transmit_queue;
-    QueueHandle_t gadgetbridge_msg_receive_queue;
+    QueueHandle_t gadgetbridge_msg_transmit_queue;                      /** @brief gadgetbridge transmit message queue */
+    QueueHandle_t gadgetbridge_msg_receive_queue;                       /** @brief gadgetbridge receive message queue */
 #endif
-
-static blectl_msg_t gadgetbridge_msg;                                   /** @brief gadgetbridge message buffer */
+/**
+ * local buffer and callback table
+ */
+static blectl_msg_t gadgetbridge_msg;                                   /** @brief gadgetbridge chunk message buffer */
 static callback_t *gadgetbridge_callback = NULL;                        /** @brief gadgetbridge callback structure */
 static CharBuffer gadgetbridge_RX_msg;                                  /** @brief RX msg buffer */
-
+/**
+ * local function declaration
+ */
 static void gadgetbridge_send_next_msg( char *msg );
 static void gadgetbridge_send_chunk( unsigned char *msg, int32_t len );
 static bool gadgetbridge_send_event_cb( EventBits_t event, void *arg );
@@ -61,11 +66,11 @@ static bool gadgetbridge_blectl_event_cb( EventBits_t event, void *arg );
 
 #ifdef NATIVE_64BIT
 #else
-    NimBLECharacteristic *pGadgetbridgeTXCharacteristic = NULL;         /** @brief TX Characteristic */
-    NimBLECharacteristic *pGadgetbridgeRXCharacteristic = NULL;         /** @brief RX Characteristic */
     /**
      * @brief Characteristic callback class für gadgetbridge
      */
+    NimBLECharacteristic *pGadgetbridgeTXCharacteristic = NULL;         /** @brief TX Characteristic */
+    NimBLECharacteristic *pGadgetbridgeRXCharacteristic = NULL;         /** @brief RX Characteristic */
     class CharacteristicCallbacks: public NimBLECharacteristicCallbacks {
 
         void onRead(NimBLECharacteristic* pCharacteristic){
@@ -77,30 +82,26 @@ static bool gadgetbridge_blectl_event_cb( EventBits_t event, void *arg );
             size_t msgLen = pCharacteristic->getValue().length();
             const char *msg = pCharacteristic->getValue().c_str();
 
-            log_d("receive %d bytes msg chunk", msgLen );
-
             for ( int i = 0 ; i < msgLen ; i++ ) {
                 switch( msg[ i ] ) {
                     case EndofText:         gadgetbridge_RX_msg.clear();
-                                            log_d("attention, new link establish");
                                             gadgetbridge_send_event_cb( GADGETBRIDGE_CONNECT, (void *)"connected" );
                                             break;
                     case DataLinkEscape:    gadgetbridge_RX_msg.clear();
-                                            log_d("attention, new message");
                                             break;
                     case LineFeed:          {
-                                                log_d("attention, message complete");
+                                                size_t size = strlen( gadgetbridge_RX_msg.c_str() ) + 1;
                                                 /*
                                                  * Duplicate message
                                                  */
-                                                char *buff = (char *)CALLOC_ASSERT( strlen( gadgetbridge_RX_msg.c_str() ) + 1, 1, "buff calloc failed" );
-                                                strlcpy( buff, gadgetbridge_RX_msg.c_str(), strlen( gadgetbridge_RX_msg.c_str() ) + 1 );
+                                                char *buff = (char *)CALLOC_ASSERT( size, 1, "buff calloc failed" );
+                                                strlcpy( buff, gadgetbridge_RX_msg.c_str(), size );
                                                 /*
                                                  * Send message
                                                  */
                                                 powermgm_resume_from_ISR();
                                                 if ( xQueueSendFromISR( gadgetbridge_msg_receive_queue, &buff, 0 ) != pdTRUE )
-                                                    log_e("fail to send a receive BLE msg");
+                                                    log_e("fail to send a receive BLE msg (%d bytes)", size );
                                                 gadgetbridge_RX_msg.clear();
                                                 break;
                                             }
@@ -113,7 +114,10 @@ static bool gadgetbridge_blectl_event_cb( EventBits_t event, void *arg );
     static CharacteristicCallbacks GadgetbridgeCallbacks;
 #endif
 
-void gadgetbridge_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
+void gadgetbridge_setup( void ) {
+    /**
+     * init gadgetbridge chunk buffer
+     */
     gadgetbridge_msg.active = false;
     gadgetbridge_msg.msg = NULL;
     gadgetbridge_msg.msglen = 0;
@@ -131,6 +135,8 @@ void gadgetbridge_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising 
         /**
          * Create the BLE Service
          */
+        NimBLEServer *pServer = blectl_get_ble_server();
+        NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
         NimBLEService *pGadgetbridgeService = pServer->createService( NimBLEUUID( GADGETBRIDGE_SERVICE_UUID ) );
         /**
          * Create Gadgetbridge TX/RX Characteristic
@@ -145,7 +151,9 @@ void gadgetbridge_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising 
          */
         pAdvertising->addServiceUUID( pGadgetbridgeService->getUUID() );
     #endif
-
+    /**
+     * init callback for powermgm and bluetooth
+     */
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, gadgetbridge_powermgm_loop_cb, "powermgm blectl loop" );
     blectl_register_cb( BLECTL_DISCONNECT, gadgetbridge_blectl_event_cb, "blectl gadgetbridge event cb");
     return;
@@ -190,12 +198,11 @@ bool gadgetbridge_send_loop_msg( const char *format, ... ) {
         /**
          * check if we have a valid json
          */
-        if ( request.isValid() ) {
+        if ( request.isValid() )
             gadgetbridge_send_event_cb( GADGETBRIDGE_JSON_MSG, (void *)&request );
-        }
-        else {
+        else
             gadgetbridge_send_event_cb( GADGETBRIDGE_MSG, (void *)buffer );
-        }
+
         request.clear();
         
         retval = true;
@@ -240,17 +247,22 @@ bool gadgetbridge_send_msg( const char *format, ... ) {
     return retval;
 }
 
+/**
+ * @brief put a message into gadgetbridge chunk buffer
+ * 
+ * @param msg   pointer to a msg
+ */
 static void gadgetbridge_send_next_msg( char *msg ) {
     if ( !gadgetbridge_msg.active && blectl_get_event( BLECTL_CONNECT ) ) {
 
-        if ( gadgetbridge_msg.msg == NULL ) { 
-            gadgetbridge_msg.msg = (char *)CALLOC( BLECTL_MSG_MTU, 1 );
-            ASSERT( gadgetbridge_msg.msg, "blectl_msg.msg calloc failed" );
-        }
+        size_t size = strlen( (const char*)msg ) + 1;
 
-        strncpy( gadgetbridge_msg.msg, msg, BLECTL_MSG_MTU );
+        if ( gadgetbridge_msg.msg == NULL )
+            gadgetbridge_msg.msg = (char *)CALLOC_ASSERT( size, 1, "blectl_msg.msg calloc failed" );
+
+        strncpy( gadgetbridge_msg.msg, msg, size );
         gadgetbridge_msg.active = true;
-        gadgetbridge_msg.msglen = strlen( (const char*)msg ) ;
+        gadgetbridge_msg.msglen = size;
         gadgetbridge_msg.msgpos = 0;
     }
     else {
@@ -260,6 +272,12 @@ static void gadgetbridge_send_next_msg( char *msg ) {
     }
 }
 
+/**
+ * @brief send a msg chunk to gadgetbridge over ble
+ * 
+ * @param msg       pointer to a msg
+ * @param len       chunk size (normaly 20bytes)
+ */
 static void gadgetbridge_send_chunk ( unsigned char *msg, int32_t len ) {
     /*
      * send msg chunk
@@ -271,6 +289,14 @@ static void gadgetbridge_send_chunk ( unsigned char *msg, int32_t len ) {
     #endif
 }
 
+/**
+ * @brief powermgm loop event callback funktion, handle gadgetbridge chunks and recieved msg
+ * 
+ * @param event             event type
+ * @param arg               event arg
+ * @return true             
+ * @return false 
+ */
 static bool gadgetbridge_powermgm_loop_cb( EventBits_t event, void *arg ) {
     static uint64_t nextmillis = 0;
     /**
@@ -299,23 +325,21 @@ static bool gadgetbridge_powermgm_loop_cb( EventBits_t event, void *arg ) {
      * send blectl_msg chunk when we have a active msg in it
      */
     if ( gadgetbridge_msg.active && nextmillis < millis() ) {
-        bool finish = false;
-
+        bool finish = true;
         nextmillis = millis() + BLECTL_CHUNKDELAY;
 
         if ( gadgetbridge_msg.msgpos < gadgetbridge_msg.msglen ) {
             if ( ( gadgetbridge_msg.msglen - gadgetbridge_msg.msgpos ) > BLECTL_CHUNKSIZE ) {
                 gadgetbridge_send_chunk ( (unsigned char *)&gadgetbridge_msg.msg[ gadgetbridge_msg.msgpos ], BLECTL_CHUNKSIZE );
                 gadgetbridge_msg.msgpos += BLECTL_CHUNKSIZE;
+                finish = false;
             }
             else if ( ( gadgetbridge_msg.msglen - gadgetbridge_msg.msgpos ) > 0 ) {
                 gadgetbridge_send_chunk ( (unsigned char *)&gadgetbridge_msg.msg[ gadgetbridge_msg.msgpos ], gadgetbridge_msg.msglen - gadgetbridge_msg.msgpos );
                 gadgetbridge_send_event_cb( GADGETBRIDGE_MSG_SEND_SUCCESS , (char*)"msg send success" );
-                finish = true;
             }
             else {
                 gadgetbridge_send_event_cb( GADGETBRIDGE_MSG_SEND_ABORT , (char*)"msg send abort, malformed chunksize" );
-                finish = true;
             }
         }
 
@@ -341,25 +365,23 @@ static bool gadgetbridge_powermgm_loop_cb( EventBits_t event, void *arg ) {
              */
             if( gbmsg[ 0 ] == 'G' && gbmsg[ 1 ] == 'B' ) {
                 /**
-                 * copy gbmsg pointer to a new pointer to prevent detroying gbmsg pointer
+                 * copy gbmsg pointer to a new pointer to prevent destroying gbmsg pointer
                  */
                 char *GBmsg = gbmsg + 3;
                 GBmsg[ strlen( GBmsg ) - 1 ] = '\0';
 
                 BluetoothJsonRequest request( GBmsg, strlen( GBmsg ) * 4 );
 
-                if ( request.isValid() ) {
+                if ( request.isValid() )
                     gadgetbridge_send_event_cb( GADGETBRIDGE_JSON_MSG, (void *)&request );
-                }
-                else {
+                else
                     gadgetbridge_send_event_cb( GADGETBRIDGE_MSG, (void *)GBmsg );
-                }
 
                 request.clear();
             }
-            else {
+            else
                 gadgetbridge_send_event_cb( GADGETBRIDGE_MSG, (void *)gbmsg );
-            }
+
             free( gbmsg );
         }
     #endif

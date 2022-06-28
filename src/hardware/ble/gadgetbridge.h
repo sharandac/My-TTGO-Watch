@@ -42,26 +42,25 @@
     #define GADGETBRIDGE_MSG_SEND_ABORT                         _BV(4)          /** @brief event mask for blectl wait for auth to get connect */
     #define GADGETBRIDGE_MSG_SEND_SUCCESS                       _BV(5)  
 
-    #define EndofText               0x03
-    #define LineFeed                0x0a
-    #define DataLinkEscape          0x10
+    #define EndofText                                           0x03            /** @brief gadgetbridge EndOfText marker */
+    #define LineFeed                                            0x0a            /** @brief gadgetbridge LineFeed marker */
+    #define DataLinkEscape                                      0x10            /** @brief gadgetbridge DataLinkEscape marker */
 
-    #define BLECTL_CHUNKSIZE        20      /** @brief chunksize for send msg */
-    #define BLECTL_CHUNKDELAY       50      /** @brief chunk delay in ms for each msg chunk */
-    #define BLECTL_MSG_MTU          512     /** @brief max msg size */
+    #define BLECTL_CHUNKSIZE                                    20              /** @brief chunksize for send msg */
+    #define BLECTL_CHUNKDELAY                                   50              /** @brief chunk delay in ms for each msg chunk */
     /**
      * @brief blectl send msg structure
      */
     typedef struct {
-        char *msg;                      /** @brief pointer to an sending msg */
-        bool active;                    /** @brief send msg structure active */
-        int32_t msglen;                 /** @brief msg lenght */
-        int32_t msgpos;                 /** @brief msg postition for next send */
+        char *msg;                                                              /** @brief pointer to an sending msg */
+        bool active;                                                            /** @brief send msg structure active */
+        int32_t msglen;                                                         /** @brief msg lenght */
+        int32_t msgpos;                                                         /** @brief msg postition for next send */
     } blectl_msg_t;
     /**
      * @brief setup gadgetbridge transmit/recieve over ble
      */
-    void gadgetbridge_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising );
+    void gadgetbridge_setup( void );
     /**
      * @brief registers a callback function which is called on a corresponding event
      * 

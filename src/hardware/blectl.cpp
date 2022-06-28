@@ -220,12 +220,12 @@ void blectl_setup( void ) {
         pAdvertising = NimBLEDevice::getAdvertising();
         pAdvertising->setAppearance( 0x00c0 );
         /**
-         * add some other services
+         * add services
          */
-        deviceinfo_setup( pServer, pAdvertising );
-        gadgetbridge_setup( pServer, pAdvertising );
-        blebatctl_setup( pServer, pAdvertising );
-        blestepctl_setup( pServer, pAdvertising );
+        deviceinfo_setup();
+        gadgetbridge_setup();
+        blebatctl_setup();
+        blestepctl_setup();
         /*
          * Start advertising
          */

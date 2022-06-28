@@ -101,7 +101,9 @@
     static BleBattLevelUpdater *blebatctl_level_updater;
     static BleBattPowerUpdater *blebatctl_power_updater;
 
-    void blebatctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
+    void blebatctl_setup( void ) {
+        NimBLEServer *pServer = blectl_get_ble_server();
+        NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
         /*
          * Create battery service
          */

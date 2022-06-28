@@ -24,7 +24,7 @@
     /**
      * @brief ble step setup function
      */
-    void blestepctl_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising );
-    void blestepctl_update(bool force=false);
+    void blestepctl_setup( void );
+    void blestepctl_update( bool force = false );
 
 #endif // _BLESTEPCTL_H

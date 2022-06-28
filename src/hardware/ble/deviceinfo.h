@@ -31,6 +31,6 @@
     /**
      * @brief setup gadgetbridge transmit/recieve over ble
      */
-    void deviceinfo_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising );
+    void deviceinfo_setup( void );
 
 #endif // _DEVICEINFO_H

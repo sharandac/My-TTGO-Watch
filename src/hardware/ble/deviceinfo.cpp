@@ -23,7 +23,12 @@
 #include "deviceinfo.h"
 #include "hardware/blectl.h"
 
-void deviceinfo_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) {
+void deviceinfo_setup( void ) {
+    #ifdef NATIVE_64BIT
+
+    #else
+        NimBLEServer *pServer = blectl_get_ble_server();
+        NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
         /*
          * Create device information service
          */
@@ -34,4 +39,5 @@ void deviceinfo_setup( NimBLEServer *pServer, NimBLEAdvertising *pAdvertising ) 
         pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
         pDeviceInformationService->start();
         pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
+    #endif
 }
