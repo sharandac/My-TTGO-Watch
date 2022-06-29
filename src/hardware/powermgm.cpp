@@ -68,7 +68,7 @@ void powermgm_setup( void ) {
             powermgm_resume_from_ISR();
         });
     #else
-        powermgm_tickTicker->attach_ms( 5000, []() {
+        powermgm_tickTicker->attach_ms( 1000, []() {
             powermgm_resume_from_ISR();
         });
     #endif
