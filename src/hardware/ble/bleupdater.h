@@ -36,69 +36,69 @@
 template <class T>
 class BleUpdater {
     public:
-    /**
-     * @brief Update of value.
-     * 
-     * @param value the new value
-     * @param force force the notification of the new value
-     */
-    void update(T value, bool force = false) {
-        if ( !blectl_get_event( BLECTL_CONNECT ) )
-            // BLE inactive, nothing to update
-            return;
-        time_t current_time;
-        time(&current_time);
-        log_d("Updating: last_value=%d value=%d last_time=%lu current_time=%lu", last_value, value, last_time, current_time);
-        if (force || last_value != value) {
-            set(value);
-        }
-        if (force ||
-            current_time - last_time  > timeout) {
-            // Time to notify
-            bool ret = notify(value);
-            if (ret) {
-                // new value was published
-                last_time = current_time;
-                last_value = value;
+        /**
+         * @brief Update of value.
+         * 
+         * @param value the new value
+         * @param force force the notification of the new value
+         */
+        void update(T value, bool force = false) {
+            if ( !blectl_get_event( BLECTL_CONNECT ) )
+                return;
+
+            time_t current_time;
+            time(&current_time);
+            log_d("Updating: last_value=%d value=%d last_time=%lu current_time=%lu", last_value, value, last_time, current_time);
+
+            if ( force || last_value != value ) {
+                set(value);
+            }
+
+            if (force || current_time - last_time  > timeout ) {
+                bool ret = notify(value);
+
+                if ( ret ) {
+                    last_time = current_time;
+                    last_value = value;
+                }
             }
         }
-    }
-    /**
-     * @brief Change the timeout.
-     * 
-     * @param timeout new timeout value, in seconds
-     */
-    void setTimeout(time_t timeout){ this->timeout = timeout; }
+        /**
+         * @brief Change the timeout.
+         * 
+         * @param timeout new timeout value, in seconds
+         */
+        void setTimeout(time_t timeout){ this->timeout = timeout; }
     protected:
-    /**
-     * @brief Constructor
-     * 
-     * @param timeout the timeout to respect, in seconds
-     */
-    BleUpdater(time_t timeout): timeout(timeout) {}
-    /**
-     * @brief Set the new value
-     * 
-     * Used to inform subclass of new value.
-     */
-    virtual void set(T value) { /* Nothing by default */ }
-    /**
-     * @brief Notify the value in BLE channels
-     * 
-     * @param value the new value
-     */
-    virtual bool notify(T value) = 0;
-    /**
-     * @brief the previous notified value
-     */
-    T last_value;
-    /**
-     * @brief the time of the previous notification
-     */
-    time_t last_time = 0;
-    /**
-     * @brief the current timeout
-     */
-    time_t timeout = 0;
+        /**
+         * @brief Constructor
+         * 
+         * @param timeout the timeout to respect, in seconds
+         */
+        BleUpdater(time_t timeout): timeout(timeout) {}
+        /**
+         * @brief Set the new value
+         * 
+         * Used to inform subclass of new value.
+         */
+        virtual void set(T value) { /* Nothing by default */ }
+        /**
+         * @brief Notify the value in BLE channels
+         * 
+         * @param value the new value
+         */
+        virtual bool notify(T value) = 0;
+        /**
+         * @brief the previous notified value
+         */
+        T last_value;
+        /**
+         * @brief the time of the previous notification
+         */
+        time_t last_time = 0;
+        /**
+         * @brief the current timeout
+         */
+        time_t timeout = 0;
 };
 

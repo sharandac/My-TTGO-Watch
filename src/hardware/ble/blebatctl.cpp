@@ -46,12 +46,17 @@
         
             bool notify( uint8_t level ) {
                 bool retval = false;
+                /**
+                 * round level to 5 units
+                 */
+                level = level - ( level % 5 );
                 /*
                  * Do not notify on same value
                  */
                 if ( last_value == level || level <= 0 ) {
                     return( retval );
                 }
+                last_value = level;
                 /*
                  * Send battery level via standard characteristic
                  */

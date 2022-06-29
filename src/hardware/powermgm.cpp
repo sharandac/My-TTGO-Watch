@@ -68,7 +68,7 @@ void powermgm_setup( void ) {
             powermgm_resume_from_ISR();
         });
     #else
-        powermgm_tickTicker->attach_ms( 1000, []() {
+        powermgm_tickTicker->attach_ms( 5000, []() {
             powermgm_resume_from_ISR();
         });
     #endif
@@ -285,7 +285,7 @@ void powermgm_loop( void ) {
                  * total standby time is 15h with a 350mAh battery
                  */
                 pm_config.max_freq_mhz = 80;
-                pm_config.min_freq_mhz = 10;
+                pm_config.min_freq_mhz = 40;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
                 log_d("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
