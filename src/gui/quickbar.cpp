@@ -123,7 +123,11 @@ void quickbar_setup( void ){
     lv_obj_set_height( quickbar, 48 * 2 );
     lv_obj_reset_style_list( quickbar, LV_OBJ_PART_MAIN );
     lv_obj_add_style( quickbar, LV_OBJ_PART_MAIN, &quickbarstyle[ QUICKBAR_STYLE_NORMAL ] );
-    lv_obj_align( quickbar, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    #if defined( ROUND_DISPLAY )
+        lv_obj_align( quickbar, lv_scr_act(), LV_ALIGN_CENTER, 0, 0 );
+    #else
+        lv_obj_align( quickbar, lv_scr_act(), LV_ALIGN_IN_BOTTOM_MID, 0, 0 );
+    #endif
 
     quickbar_time_label = lv_label_create( quickbar , NULL);
     lv_label_set_text( quickbar_time_label, "00:00");

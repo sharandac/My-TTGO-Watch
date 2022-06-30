@@ -32,6 +32,9 @@
 
     volatile bool rtc_irq_flag = false;
 #else
+    volatile bool rtc_irq_flag = false;
+    portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+
     #if defined( M5PAPER )
         #include <M5EPD.h>
         #include <SPIFFS.h>
@@ -39,25 +42,26 @@
         #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
+
+        void IRAM_ATTR rtcctl_irq( void );
+
+        void IRAM_ATTR rtcctl_irq( void ) {
+            portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+            rtc_irq_flag = true;
+            portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+            powermgm_resume_from_ISR();
+        }
+
     #elif defined( LILYGO_WATCH_2021 )
-        #include <pcf8563.h>
+        #include <PCF8563/pcf8563.h>
+        #include <Wire.h>
 
         PCF8563_Class rtc;
     #else
         #warning "no hardware driver for rtcctl"
     #endif
+
     #include <sys/time.h>
-
-    volatile bool DRAM_ATTR rtc_irq_flag = false;
-    portMUX_TYPE DRAM_ATTR RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
-    void IRAM_ATTR rtcctl_irq( void );
-
-    void IRAM_ATTR rtcctl_irq( void ) {
-        portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
-        rtc_irq_flag = true;
-        portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
-        powermgm_resume_from_ISR();
-    }
 #endif
 
 static rtcctl_alarm_t alarm_data; 
@@ -105,6 +109,7 @@ void rtcctl_setup( void ) {
         rtc.disableCLK();
     #endif
 #endif
+
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , rtcctl_powermgm_event_cb, "powermgm rtcctl" );
     powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, rtcctl_powermgm_loop_cb, "powermgm rtcctl loop" );
     timesync_register_cb( TIME_SYNC_OK, rtcctl_timesync_event_cb, "timesync rtcctl" );

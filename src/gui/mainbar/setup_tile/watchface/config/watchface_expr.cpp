@@ -185,9 +185,6 @@ bool watchface_expr_wifictl_event_cb( EventBits_t event, void *arg ) {
 }
 
 void watchface_expr_setup( void ) {
-    #if defined( ONLY_ESSENTIAL )
-        return;
-    #endif
     blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, watchface_expr_blectl_event_cb, "bluetooth state" );
     wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON, watchface_expr_wifictl_event_cb, "wifi state" );
     rtcctl_register_cb( RTCCTL_ALARM_ENABLED | RTCCTL_ALARM_DISABLED, watchface_expr_rtcctl_event_cb, "rtc state" );

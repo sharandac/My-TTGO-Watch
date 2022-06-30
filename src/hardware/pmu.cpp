@@ -56,7 +56,7 @@
     /**
      * pmu IRQ
      */
-    void IRAM_ATTR  pmu_irq( void ) {
+    void IRAM_ATTR pmu_irq( void ) {
         portENTER_CRITICAL_ISR(&PMU_IRQ_Mux);
         pmu_irq_flag = true;
         portEXIT_CRITICAL_ISR(&PMU_IRQ_Mux);

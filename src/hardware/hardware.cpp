@@ -260,4 +260,10 @@ void hardware_post_setup( void ) {
     #endif
 
     display_set_brightness( display_get_brightness() );
+
+    #ifdef NATIVE_64BIT
+    #else
+        log_i("Free heap: %d", ESP.getFreeHeap());
+        log_i("Free PSRAM heap: %d", ESP.getFreePsram());
+    #endif
 }

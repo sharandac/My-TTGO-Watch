@@ -38,7 +38,7 @@
         #define APP_ICON_Y_CLEARENCE    36
         #define MAX_APPS_TILES          4
     #elif defined( LILYGO_WATCH_2021 )
-        #define MAX_APPS_ICON_HORZ      3
+        #define MAX_APPS_ICON_HORZ      2
         #define MAX_APPS_ICON_VERT      1
         #define APP_ICON_X_CLEARENCE    8
         #define APP_ICON_Y_CLEARENCE    36

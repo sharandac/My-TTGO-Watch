@@ -28,6 +28,8 @@
 #include "powermgm.h"
 #include "callback.h"
 
+#include "utils/alloc.h"
+
 touch_config_t touch_config;
 
 #ifdef NATIVE_64BIT
@@ -72,7 +74,7 @@ touch_config_t touch_config;
         #include <twatch2021_config.h>
         #include <CST8165/CST816S.h>
 
-        CST816S TouchSensor;
+        CST816S_Class TouchSensor;
     #else
         #error "no hardware driver for touch, please setup minimal drivers ( framebuffer/touch )"
     #endif
@@ -138,8 +140,7 @@ void touch_setup( void ) {
         xSemaphores = xSemaphoreCreateMutex();
         attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
     #elif defined( LILYGO_WATCH_2021 )    
-        if ( !TouchSensor.begin( Wire, Touch_Res, Touch_Int, CTP_SLAVER_ADDR ) )
-            log_e("touch controler failed");
+        ASSERT( TouchSensor.begin( Wire, Touch_Res, Touch_Int, CTP_SLAVER_ADDR ), "touch controler failed" );
     #endif
 #endif
     /**
@@ -403,17 +404,12 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
                     motor_vibe( 3 );
             }
         #elif defined( LILYGO_WATCH_2021 )
-            static bool touchState;
-            touchState = TouchSensor.TouchInt();
-
-            if ( touchState == Press ) {
-                TouchSensor.ReadTouch();
+            if ( TouchSensor.read() ) {
                 x = TouchSensor.getX();
                 y = TouchSensor.getY();
-                touched = true;
+                return( true );
             }
             else {
-                touched = false;
                 return( false );
             }
         #endif
@@ -519,13 +515,7 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
                     break;
             }
         #elif defined( LILYGO_WATCH_2021 )
-            bool isTouch = TouchSensor.getTouchType();
-            data->state = isTouch ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
-            TouchSensor.ReadTouch();
-            if ( TouchSensor.getX() != 0 && TouchSensor.getY() != 0 ) {
-                data->point.x = TouchSensor.getX();
-                data->point.y = TouchSensor.getY();
-            }
+            data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
         #endif
     #endif
     if( data->state == LV_INDEV_STATE_PR ) {

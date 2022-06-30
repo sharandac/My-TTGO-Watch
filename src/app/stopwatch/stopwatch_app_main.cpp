@@ -52,7 +52,7 @@ lv_obj_t * stopwatch_app_main_exit_btn = NULL;
 
 lv_style_t stopwatch_app_main_stopwatchstyle;
 
-lv_task_t * _stopwatch_app_task;
+lv_task_t * _stopwatch_app_task = NULL;
 
 LV_FONT_DECLARE(Ubuntu_72px);
 
@@ -104,8 +104,10 @@ void stopwatch_app_main_setup( uint32_t tile_num ) {
 
 static void stopwatch_activate_event_cb( void ) {
     wf_image_button_fade_in(stopwatch_app_main_exit_btn, 300, 0 );
-    wf_image_button_fade_in(stopwatch_app_main_start_btn, 300, 100 );
-    wf_image_button_fade_in(stopwatch_app_main_stop_btn, 300, 100 );
+    if( !_stopwatch_app_task )
+        wf_image_button_fade_in(stopwatch_app_main_start_btn, 300, 100 );
+    else 
+        wf_image_button_fade_in(stopwatch_app_main_stop_btn, 300, 100 );
     wf_image_button_fade_in(stopwatch_app_main_reset_btn, 300, 200 );
 }
 
@@ -153,7 +155,8 @@ static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
     switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
                                         prev_time = time(0);
-                                        _stopwatch_app_task = lv_task_create( stopwatch_app_task, 1000, LV_TASK_PRIO_MID, NULL );
+                                        if( !_stopwatch_app_task )
+                                            _stopwatch_app_task = lv_task_create( stopwatch_app_task, 1000, LV_TASK_PRIO_MID, NULL );
                                         lv_obj_set_hidden(stopwatch_app_main_start_btn, true);
                                         lv_obj_set_hidden(stopwatch_app_main_stop_btn, false);
                                         stopwatch_add_widget();
@@ -165,7 +168,9 @@ static void start_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event 
 static void stop_stopwatch_app_main_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       // create an task that runs every secound
-                                        lv_task_del(_stopwatch_app_task);
+                                        if( _stopwatch_app_task )
+                                            lv_task_del(_stopwatch_app_task);
+                                        _stopwatch_app_task = NULL;
                                         lv_obj_set_hidden(stopwatch_app_main_start_btn, false);
                                         lv_obj_set_hidden(stopwatch_app_main_stop_btn, true);
                                         stopwatch_remove_widget();

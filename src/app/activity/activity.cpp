@@ -69,9 +69,6 @@ static void activity_reset_cb(lv_obj_t * obj, lv_event_t event);
  * setup routine for application
  */
 void activity_app_setup() {
-    #if defined( ONLY_ESSENTIAL )
-        return;
-    #endif
     // Create and register new application
     //   params: name, icon, auto add "refresh" button (this app will use synchronize function of the SynchronizedApplication class).
     //   Also, you can configure count of the required pages in the next two params (to have more app screens).

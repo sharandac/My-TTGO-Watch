@@ -316,14 +316,20 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
 
             if ( press_time != 0 ) {
-                if ( press_time < 1000 ) {
-                    if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) )
-                        button_send_cb( BUTTON_PWR, (void *)NULL );
-                    else
-                        button_send_cb( BUTTON_EXIT, (void *)NULL );
+                /**
+                 * special case when we are in standby or silence wakeup
+                 */
+                if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ){
+                    button_send_cb( BUTTON_PWR, (void *)NULL );
+                    powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 }
                 else {
-                    button_send_cb( BUTTON_QUICKBAR, (void *)NULL );
+                    if( press_time < 500 )
+                        button_send_cb( BUTTON_EXIT, (void *)NULL );
+                    else if ( press_time < 2000 )
+                        button_send_cb( BUTTON_PWR, (void *)NULL );                    
+                    else
+                        button_send_cb( BUTTON_QUICKBAR, (void *)NULL );
                 }
             }
         }
@@ -340,10 +346,19 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 press_time = millis() - setup_button_time;
 
             if ( press_time != 0 ) {
-                if ( press_time < 1000 )
-                    button_send_cb( BUTTON_DOWN, (void*)NULL );
-                else
-                    button_send_cb( BUTTON_SETUP, (void *)NULL );
+                /**
+                 * special case when we are in standby or silence wakeup
+                 */
+                if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ){
+                    button_send_cb( BUTTON_PWR, (void *)NULL );
+                    powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                }
+                else {
+                    if ( press_time < 500 )
+                        button_send_cb( BUTTON_DOWN, (void*)NULL );
+                    else
+                        button_send_cb( BUTTON_SETUP, (void *)NULL );
+                }
             }
         }
         /**
@@ -359,10 +374,19 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 press_time = millis() - refresh_button_time;
 
             if ( press_time != 0 ) {
-                if ( press_time < 1000 )
-                    button_send_cb( BUTTON_UP, (void*)NULL );
-                else
-                    button_send_cb( BUTTON_REFRESH, (void *)NULL );
+                /**
+                 * special case when we are in standby or silence wakeup
+                 */
+                if ( powermgm_get_event( POWERMGM_STANDBY ) || powermgm_get_event( POWERMGM_SILENCE_WAKEUP ) ){
+                    button_send_cb( BUTTON_PWR, (void *)NULL );
+                    powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                }
+                else {
+                    if ( press_time < 500 )
+                        button_send_cb( BUTTON_UP, (void*)NULL );
+                    else
+                        button_send_cb( BUTTON_REFRESH, (void *)NULL );
+                }
             }
 
             if ( refresh_button ) button_send_cb( BUTTON_REFRESH, (void*)NULL );
@@ -422,6 +446,8 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                     * enable GPIO in lightsleep for wakeup
                                                     */
                                                     gpio_wakeup_enable( (gpio_num_t)BTN_1, GPIO_INTR_LOW_LEVEL );
+                                                    gpio_wakeup_enable( (gpio_num_t)BTN_2, GPIO_INTR_LOW_LEVEL );
+                                                    gpio_wakeup_enable( (gpio_num_t)BTN_3, GPIO_INTR_LOW_LEVEL );
                                                     esp_sleep_enable_gpio_wakeup ();
                                                     retval = true;
                                                     break;

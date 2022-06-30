@@ -140,7 +140,7 @@ void wifictl_setup( void ) {
             for ( int entry = 0 ; entry < NETWORKLIST_ENTRYS ; entry++ ) {
                 if ( !strcmp( wifictl_config->networklist[ entry ].ssid,  WiFi.SSID(i).c_str() ) && strcmp( wifictl_config->networklist[ entry ].ssid,  wifictl_config->networklist_tried[ entry ].ssid ) ) {
                     wifictl_send_event_cb( WIFICTL_MSG, (void *)"connecting ..." );
-                    WiFi.setHostname(wifictl_config->hostname);
+                    WiFi.setHostname( wifictl_config->hostname );
                     WiFi.begin( wifictl_config->networklist[ entry ].ssid, wifictl_config->networklist[ entry ].password );
                     log_d("try to connect to network entry %s with %d rssi", WiFi.SSID(i).c_str(), WiFi.RSSI(i) );
                 }
@@ -253,6 +253,11 @@ void wifictl_setup( void ) {
      * set default state after init
      */
     wifictl_set_event( WIFICTL_OFF );
+    /**
+     * change here your network for first use if WPS noch work
+     */
+    if( !wifictl_is_known( "foo" ) )
+        wifictl_insert_network( "foo", "bar" );
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {

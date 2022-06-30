@@ -57,10 +57,9 @@
             #define HARDWARE_NAME   "T-Watch2021"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
+            #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define ONLY_ESSENTIAL
             #define ROUND_DISPLAY
-            #define NO_BLUETOOTH
-            #define NO_WATCHFACE
             #define NO_UPDATES
         #elif defined( M5PAPER )
             #define HARDWARE_NAME   "m5stack-fire"
@@ -87,7 +86,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2022062901"
+    #define __FIRMWARE__            "2022063001"
     /**
      * Allows to include config.h from C code
      */
