@@ -147,7 +147,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_d("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
             #else
                 #ifndef NATIVE_64BIT
                     setCpuFrequencyMhz(80);
@@ -176,7 +176,7 @@ void powermgm_loop( void ) {
                 pm_config.min_freq_mhz = 80;
                 pm_config.light_sleep_enable = lighsleep ? false : true ;
                 ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                log_d("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
+                log_i("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
             #else
                 #ifndef NATIVE_64BIT
                     setCpuFrequencyMhz(240);
@@ -260,7 +260,7 @@ void powermgm_loop( void ) {
                     pm_config.min_freq_mhz = 80;
                     pm_config.light_sleep_enable = lighsleep ? false : true ;
                     ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
-                    log_d("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
+                    log_i("custom arduino-esp32 framework detected, enable PM/DFS support, %d/%dMHz %s light sleep (%d)", pm_config.max_freq_mhz, pm_config.min_freq_mhz, lighsleep ? "without" : "with", lighsleep );
                 #else
                     #ifndef NATIVE_64BIT
                         setCpuFrequencyMhz(240);

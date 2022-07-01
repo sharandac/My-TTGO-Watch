@@ -576,6 +576,7 @@ bool bluetooth_message_queue_msg( const char *msg ) {
      */
     if( blectl_get_wakeup_on_notification() ) {
         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+        lv_disp_trig_activity( NULL );
     }
     /**
      * sound on notification if enabled

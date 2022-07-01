@@ -17,12 +17,9 @@ do
 	RESOLUTION=`echo $FILE | cut -d"_" -f2 | cut -d"p" -f1`
 	echo "$LINE -> $CNAME.c ($FILE) RESOLUTIOIN=$RESOLUTION"
 	php ../../../lv_utils/img_conv_core.php "name=$FILE&img=$LINE&cf=raw_alpha&format=c_array"
-#	mv $FILE.c .$CNAME.c
 	echo "cp $FILE.c $CNAME.c"
-#	curl POST -F img_file=@$LINE -F name=$FILE -F cf=true_color_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
-#	curl POST -F img_file=@$LINE -F name=$FILE -F cf=raw_alpha -F format=c_array -F submit=Convert https://lvgl.io/tools/img_conv_core.php > .$CNAME.c
-	sed -i "s/.h = ,/.h = $RESOLUTION,/g" .$CNAME.c
-	sed -i "s/.w = ,/.w = 240,/g" .$CNAME.c
+#	sed -i "s/.h = ,/.h = $RESOLUTION,/g" .$CNAME.c
+#	sed -i "s/.w = ,/.w = 240,/g" .$CNAME.c
 done < png-list.txt
 #
 # get a list of png file with *"96px.png"

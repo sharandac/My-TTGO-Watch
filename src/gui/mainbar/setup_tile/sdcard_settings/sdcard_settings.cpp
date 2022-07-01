@@ -160,14 +160,18 @@ static void sdcard_fs_browser_onoff_event_handler(lv_obj_t *obj, lv_event_t even
         {
 #ifdef LILYGO_WATCH_HAS_SDCARD
             log_d("enable SD");
-            setFsEditorFilesystem(SD);
+            #if defined( ENABLE_WEBSERVER )
+                setFsEditorFilesystem(SD);
+            #endif
 #endif
         }
         else
         {
 #ifndef NATIVE_64BIT
             log_d("enable SPIFFS");
-            setFsEditorFilesystem(SPIFFS);
+            #if defined( ENABLE_WEBSERVER )
+                setFsEditorFilesystem(SPIFFS);
+            #endif
 #endif
         }
     }

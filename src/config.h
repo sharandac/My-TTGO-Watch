@@ -74,7 +74,6 @@
             #define RES_Y_MAX       240
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
-//            #define NO_BLUETOOTH
         #else
             #error "no destination hardware version defined"
         #endif
@@ -86,7 +85,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2022063001"
+    #define __FIRMWARE__            "2022070101"
     /**
      * Allows to include config.h from C code
      */

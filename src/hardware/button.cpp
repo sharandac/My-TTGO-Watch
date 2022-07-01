@@ -324,7 +324,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                     powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 }
                 else {
-                    if( press_time < 500 )
+                    if( press_time < 250 )
                         button_send_cb( BUTTON_EXIT, (void *)NULL );
                     else if ( press_time < 2000 )
                         button_send_cb( BUTTON_PWR, (void *)NULL );                    
@@ -354,7 +354,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                     powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 }
                 else {
-                    if ( press_time < 500 )
+                    if ( press_time < 250 )
                         button_send_cb( BUTTON_DOWN, (void*)NULL );
                     else
                         button_send_cb( BUTTON_SETUP, (void *)NULL );
@@ -382,7 +382,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                     powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                 }
                 else {
-                    if ( press_time < 500 )
+                    if ( press_time < 250 )
                         button_send_cb( BUTTON_UP, (void*)NULL );
                     else
                         button_send_cb( BUTTON_REFRESH, (void *)NULL );
