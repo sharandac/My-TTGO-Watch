@@ -478,6 +478,11 @@ void wf_image_button_fade_in( lv_obj_t *button, uint32_t duration, uint32_t dela
     lv_obj_set_hidden( button, false );
 }
 
+void wf_image_button_set_style( lv_obj_t *button, lv_style_t *style ) {
+    lv_obj_reset_style_list( lv_obj_get_child( button, NULL ), LV_OBJ_PART_MAIN );
+    lv_obj_add_style( lv_obj_get_child( button, NULL ), LV_OBJ_PART_MAIN, style );
+}
+
 lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style){
     lv_obj_t * button = lv_imgbtn_create( parent, NULL );
     lv_imgbtn_set_src( button, LV_BTN_STATE_RELEASED, &image );

@@ -75,8 +75,8 @@ void app_tile_setup( void ) {
         /*
          * set x, y and mark it as inactive
          */
-        app_entry[ app ].x = APP_FIRST_X_POS + ( ( app % MAX_APPS_ICON_HORZ ) * ( APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE ) );
-        app_entry[ app ].y = APP_FIRST_Y_POS + ( ( ( app % ( MAX_APPS_ICON_VERT * MAX_APPS_ICON_HORZ  ) ) / MAX_APPS_ICON_HORZ ) * ( APP_ICON_Y_SIZE + APP_ICON_Y_CLEARENCE ) );
+        app_entry[ app ].x = APP_FIRST_X_POS + ( ( app % MAX_APPS_ICON_HORZ ) * ( APP_ICON_X_SIZE + APP_ICON_X_CLEARENCE ) ) + APP_ICON_X_OFFSET;
+        app_entry[ app ].y = APP_FIRST_Y_POS + ( ( ( app % ( MAX_APPS_ICON_VERT * MAX_APPS_ICON_HORZ  ) ) / MAX_APPS_ICON_HORZ ) * ( APP_ICON_Y_SIZE + APP_ICON_Y_CLEARENCE ) ) + APP_ICON_Y_OFFSET;
         app_entry[ app ].active = false;
         /*
          * create app icon container
@@ -107,11 +107,13 @@ void app_tile_setup( void ) {
 
 static bool app_tile_button_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
-        case BUTTON_LEFT:   mainbar_jump_to_tilenumber( main_tile_get_tile_num(), LV_ANIM_OFF );
+        case BUTTON_LEFT:   mainbar_jump_to_tilenumber( main_tile_get_tile_num(), LV_ANIM_ON );
                             mainbar_clear_history();
                             break;
-        case BUTTON_RIGHT:  mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_OFF );
+        case BUTTON_RIGHT:  mainbar_jump_to_tilenumber( setup_get_tile_num(), LV_ANIM_ON );
                             mainbar_clear_history();
+                            break;
+        case BUTTON_EXIT:   mainbar_jump_to_maintile( LV_ANIM_ON );
                             break;
     }
     return( true );

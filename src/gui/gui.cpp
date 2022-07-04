@@ -174,9 +174,7 @@ void gui_setup( void ) {
     gps_settings_tile_setup();
     utilities_tile_setup();
     sound_settings_tile_setup();
-    #ifndef NO_UPDATES
-        update_tile_setup();
-    #endif
+    update_tile_setup();
     #ifndef NO_BLUETOOTH
         bluetooth_settings_tile_setup();
     #endif

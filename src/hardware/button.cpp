@@ -326,7 +326,7 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
                 else {
                     if( press_time < 250 )
                         button_send_cb( BUTTON_EXIT, (void *)NULL );
-                    else if ( press_time < 2000 )
+                    else if ( press_time < 1000 )
                         button_send_cb( BUTTON_PWR, (void *)NULL );                    
                     else
                         button_send_cb( BUTTON_QUICKBAR, (void *)NULL );

@@ -1,6 +1,6 @@
 /****************************************************************************
- *   Aug 11 17:13:51 2020
- *   Copyright  2020  Dirk Brosswick
+ *   Mo July 4 21:17:51 2022
+ *   Copyright  2022  Dirk Brosswick
  *   Email: dirk.brosswick@googlemail.com
  ****************************************************************************/
  
@@ -19,38 +19,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#include "alarm_clock_config.h"
+#ifndef _COMPASS_H
+    #define _COMPASS_H
+    /**
+     * @brief setup compass
+     */
+    void compass_setup( void );
+    /**
+     * @brief check if compass available
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool compass_enable( void );
 
-#ifdef NATIVE_64BIT
-    #include "utils/logging.h"
-#endif
-
-alarm_properties_t::alarm_properties_t() : BaseJsonConfig( ALARM_CLOCK_JSON_CONFIG_FILE ) {}
-
-bool alarm_properties_t::onSave(JsonDocument& doc) {
-    doc[VERSION_KEY] = 1;
-    doc[BEEP_KEY] = beep;
-    doc[FADE_KEY] = fade;
-    doc[VIBE_KEY] = vibe;
-    doc[SHOW_ON_MAIN_TILE_KEY] = show_on_main_tile;
-
-    return( true );
-}
-
-bool alarm_properties_t::onLoad(JsonDocument& doc) {
-    beep = doc[BEEP_KEY] | true;
-    fade = doc[FADE_KEY] | true;
-    vibe = doc[VIBE_KEY] | true;
-    show_on_main_tile = doc[SHOW_ON_MAIN_TILE_KEY] | false;
-
-    return( true );
-}
-
-bool alarm_properties_t::onDefault( void ) {
-    beep = true;
-    fade = true;
-    vibe = true;
-    show_on_main_tile = false;
-
-    return( true );
-}
+#endif // _COMPASS_H

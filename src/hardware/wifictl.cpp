@@ -256,8 +256,8 @@ void wifictl_setup( void ) {
     /**
      * change here your network for first use if WPS noch work
      */
-    if( !wifictl_is_known( "foo" ) )
-        wifictl_insert_network( "foo", "bar" );
+    if( !wifictl_is_known( "karlshorst_BGN" ) )
+        wifictl_insert_network( "karlshorst_BGN", "RK.5-xQ23fram" );
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {

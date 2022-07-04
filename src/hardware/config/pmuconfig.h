@@ -37,6 +37,23 @@
     #define EXPERIMENTALPOWERSAVEVOLTAGE    2800                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
     #define POWERMGMRESUMEINTERVAL          1000                /** @brief defines the norminal voltages while in powersave with exprimental powersave enabled */
     /**
+     * battery voltage range for battery cap calculations
+     * is needed when the device has noch PMU
+     */
+    #if defined( M5PAPER )
+        #define BATTERY_LOWEST              3000
+        #define BATTERY_HIGHEST             4350
+    #elif defined( M5CORE2 )
+        #define BATTERY_LOWEST              3000
+        #define BATTERY_HIGHEST             4190
+    #elif defined( LILYGO_WATCH_2021 )
+        #define BATTERY_LOWEST              3000
+        #define BATTERY_HIGHEST             4350
+    #else    
+        #define BATTERY_LOWEST              3000
+        #define BATTERY_HIGHEST             4200
+    #endif
+    /**
      * @brief pmu config structure
      */
     class pmu_config_t : public BaseJsonConfig {
@@ -50,6 +67,9 @@
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
         int32_t experimental_power_save_voltage = EXPERIMENTALPOWERSAVEVOLTAGE;
         int32_t powermgm_resume_interval = POWERMGMRESUMEINTERVAL;
+        float battery_voltage_lowest = BATTERY_LOWEST;
+        float battery_voltage_highest = BATTERY_HIGHEST;
+        bool battery_run_calibration = false;
         bool high_charging_target_voltage = false;
         bool compute_percent = false;
         bool experimental_power_save = false;

@@ -45,7 +45,7 @@ bool weather_config_t::onLoad(JsonDocument& doc) {
     autosync = doc["autosync"] | true;
     showWind = doc["showWind"] | false;
     imperial = doc["imperial"] | false;
-    widget = doc["widget"] | true;
+    widget = doc["widget"] | false;
 
     return true;
 }

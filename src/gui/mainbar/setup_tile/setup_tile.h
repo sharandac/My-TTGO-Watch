@@ -30,21 +30,33 @@
         #define MAX_SETUP_ICON_VERT         5
         #define SETUP_ICON_X_CLEARENCE      48
         #define SETUP_ICON_Y_CLEARENCE      72
+        #define SETUP_ICON_X_OFFSET         0
+        #define SETUP_ICON_Y_OFFSET         0
         #define MAX_SETUP_TILES             1
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         #define MAX_SETUP_ICON_HORZ         3
         #define MAX_SETUP_ICON_VERT         2
         #define SETUP_ICON_X_CLEARENCE      8
         #define SETUP_ICON_Y_CLEARENCE      36
+        #define SETUP_ICON_X_OFFSET         0
+        #define SETUP_ICON_Y_OFFSET         0
         #define MAX_SETUP_TILES             4
     #elif defined( LILYGO_WATCH_2021 )
-        #define MAX_SETUP_ICON_HORZ         3
-        #define MAX_SETUP_ICON_VERT         1
+        #define MAX_SETUP_ICON_HORZ         2
+        #define MAX_SETUP_ICON_VERT         2
         #define SETUP_ICON_X_CLEARENCE      8
         #define SETUP_ICON_Y_CLEARENCE      36
+        #define SETUP_ICON_X_OFFSET         0
+        #define SETUP_ICON_Y_OFFSET         -16
         #define MAX_SETUP_TILES             6
     #else
-        #error "no setup tiles set"
+        #define MAX_SETUP_ICON_HORZ         4
+        #define MAX_SETUP_ICON_VERT         5
+        #define SETUP_ICON_X_CLEARENCE      48
+        #define SETUP_ICON_Y_CLEARENCE      72
+        #define SETUP_ICON_X_OFFSET         0
+        #define SETUP_ICON_Y_OFFSET         0
+        #define MAX_SETUP_TILES             1
     #endif
 
     #define MAX_SETUP_ICON            ( MAX_SETUP_ICON_HORZ * MAX_SETUP_ICON_VERT * MAX_SETUP_TILES )

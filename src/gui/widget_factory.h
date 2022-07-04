@@ -190,7 +190,13 @@ lv_obj_t * wf_add_image_button(lv_obj_t *parent, lv_img_dsc_t const &image, lv_e
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_image_button_old(lv_obj_t *parent, lv_img_dsc_t const &image, lv_event_cb_t event_cb, lv_style_t *style);
-
+/**
+ * @brief set a new style on image button
+ * 
+ * @param button    button
+ * @param style    style to apply
+ */
+void wf_image_button_set_style( lv_obj_t *button, lv_style_t *style );
 /**
  * @brief fade a img button in from 0 to full size
  * 

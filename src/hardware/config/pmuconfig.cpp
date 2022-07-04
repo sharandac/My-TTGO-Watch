@@ -38,6 +38,9 @@ bool pmu_config_t::onSave(JsonDocument& doc) {
     doc["designed_battery_cap"] = designed_battery_cap;
     doc["pmu_logging"] = pmu_logging;
     doc["powermgm_resume_interval"] = powermgm_resume_interval;
+    doc["battery_voltage_lowest"] = battery_voltage_lowest;
+    doc["battery_voltage_highest"] = battery_voltage_highest;
+    doc["battery_run_calibration"] = battery_run_calibration;
 
     return true;
 }
@@ -55,6 +58,9 @@ bool pmu_config_t::onLoad(JsonDocument& doc) {
     experimental_normal_voltage = doc["experimental_normal_voltage"] | EXPERIMENTALNORMALVOLTAGE;
     experimental_power_save_voltage = doc["experimental_power_save_voltage"] | EXPERIMENTALPOWERSAVEVOLTAGE;
     powermgm_resume_interval = doc["powermgm_resume_interval"] | POWERMGMRESUMEINTERVAL;
+    battery_voltage_lowest = doc["battery_voltage_lowest"] | BATTERY_LOWEST;
+    battery_voltage_highest = doc["battery_voltage_highest"] | BATTERY_HIGHEST;
+    battery_run_calibration = doc["battery_run_calibration"] | false;
     pmu_logging = doc["pmu_logging"] | false;
     
     return true;

@@ -342,6 +342,8 @@ void statusbar_setup( void )
     else {
         lv_obj_set_hidden( statusbar_volume_cont, true );
     }
+
+    statusbar_hide( false );
 }
 
 void statusbar_update_task( lv_task_t * task ) {
@@ -1038,8 +1040,13 @@ void statusbar_hide( bool hide ) {
         return;
     }
 
-    lv_obj_set_hidden( statusbar, hide );
-    statusbar_refresh_update = true;
+    #if defined( LILYGO_WATCH_2021 )
+        lv_obj_set_hidden( statusbar, true );
+        statusbar_refresh_update = true;
+    #else
+        lv_obj_set_hidden( statusbar, hide );
+        statusbar_refresh_update = true;
+    #endif
 }
 
 bool statusbar_get_hidden_state( void ) {

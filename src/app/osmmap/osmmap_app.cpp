@@ -49,9 +49,6 @@ static void enter_osmmap_app_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for example app
  */
 void osmmap_app_setup( void ) {
-    #if defined( ONLY_ESSENTIAL )
-        return;
-    #endif
     /*
      * register 2 vertical tiles and get the first tile number and save it for later use
      */

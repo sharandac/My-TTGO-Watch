@@ -30,24 +30,32 @@
         #define MAX_APPS_ICON_VERT      5
         #define APP_ICON_X_CLEARENCE    48
         #define APP_ICON_Y_CLEARENCE    72
+        #define APP_ICON_X_OFFSET       0
+        #define APP_ICON_Y_OFFSET       0
         #define MAX_APPS_TILES          1
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         #define MAX_APPS_ICON_HORZ      3
         #define MAX_APPS_ICON_VERT      2
         #define APP_ICON_X_CLEARENCE    8
         #define APP_ICON_Y_CLEARENCE    36
+        #define APP_ICON_X_OFFSET       0
+        #define APP_ICON_Y_OFFSET       0
         #define MAX_APPS_TILES          4
     #elif defined( LILYGO_WATCH_2021 )
         #define MAX_APPS_ICON_HORZ      2
-        #define MAX_APPS_ICON_VERT      1
-        #define APP_ICON_X_CLEARENCE    8
+        #define MAX_APPS_ICON_VERT      2
+        #define APP_ICON_X_CLEARENCE    4
         #define APP_ICON_Y_CLEARENCE    36
-        #define MAX_APPS_TILES          6
+        #define APP_ICON_X_OFFSET       0
+        #define APP_ICON_Y_OFFSET       -16
+        #define MAX_APPS_TILES          7
     #else
         #define MAX_APPS_ICON_HORZ      3
         #define MAX_APPS_ICON_VERT      2
         #define APP_ICON_X_CLEARENCE    8
         #define APP_ICON_Y_CLEARENCE    36
+        #define APP_ICON_X_OFFSET       0
+        #define APP_ICON_Y_OFFSET       0
         #define MAX_APPS_TILES          4
     #endif
 

@@ -39,7 +39,7 @@
         bool autosync = true;
         bool showWind = false;
         bool imperial = false;
-        bool widget = true;
+        bool widget = false;
     
         protected:
         ////////////// Available for overloading: //////////////

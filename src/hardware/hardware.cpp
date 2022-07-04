@@ -19,6 +19,7 @@
 #include "callback.h"
 #include "sensor.h"
 #include "device.h"
+#include "compass.h"
 
 #include "utils/fakegps.h"
 #include "gui/splashscreen.h"
@@ -50,6 +51,8 @@
     #include <Arduino.h>
     #include <SPIFFS.h>
     #include <Ticker.h>
+    #include <pthread.h>
+    #include "esp_pthread.h"
     #include "esp_bt.h"
     #include "esp_task_wdt.h"
     #include "lvgl.h"
@@ -123,6 +126,11 @@ void hardware_setup( void ) {
         * Create an SDL thread to do this*/
         SDL_CreateThread( tick_thread, "tick", NULL );
     #else
+        esp_pthread_cfg_t cfg = esp_pthread_get_default_config();
+        cfg.stack_size = ( 8 * 1024 );
+        cfg.inherit_cfg = false;
+        esp_pthread_set_cfg(&cfg);   
+
         #if defined( M5PAPER )
             /**
              * lvgl init
@@ -152,7 +160,6 @@ void hardware_setup( void ) {
              */
             ttgo->begin();
         #elif defined( LILYGO_WATCH_2021 )
-            heap_caps_malloc_extmem_enable( 32+1024 );
             /**
              * power all devices
              */
@@ -205,6 +212,7 @@ void hardware_setup( void ) {
     motor_setup();
     display_setup();
     screenshot_setup();
+    compass_setup();
     /**
      * splashscreen setup
      */

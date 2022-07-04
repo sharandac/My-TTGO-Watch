@@ -67,6 +67,7 @@
 callback_t *pmu_callback = NULL;
 pmu_config_t pmu_config;
 
+static int32_t pmu_get_voltage2percent( float mV );
 bool pmu_powermgm_event_cb( EventBits_t event, void *arg );
 bool pmu_powermgm_loop_cb( EventBits_t event, void *arg );
 bool pmu_blectl_event_cb( EventBits_t event, void *arg );
@@ -157,10 +158,9 @@ void pmu_setup( void ) {
     #elif defined( LILYGO_WATCH_2021 )    
         pinMode( PWR_ON, OUTPUT );
         digitalWrite( PWR_ON, HIGH );
-
-        pinMode( CHARGE, INPUT );
-
+        pinMode( CHARGE, INPUT_PULLUP );
         pinMode( BAT_ADC, INPUT );
+        attachInterrupt( CHARGE, &pmu_irq, CHANGE );
     #endif
 #endif
     /*
@@ -417,18 +417,17 @@ void pmu_loop( void ) {
         }
     #elif  defined( LILYGO_WATCH_2021 ) 
         static bool plug = false;
-        static bool charging = digitalRead( CHARGE );
-        static bool battery = false;
-
-        if ( charging != digitalRead( CHARGE ) ) {
-            charging = digitalRead( CHARGE );
-            pmu_update = true;
-        }
+        static bool charging = pmu_is_charging();
+        static bool battery = percent > 0 ? true : false;
 
         if ( temp_pmu_irq_flag ) {
+            if ( charging != pmu_is_charging() ) {
+                charging = pmu_is_charging();
+                pmu_update = true;
+            }
+            battery = percent > 0 ? true : false;
             log_e("hello Mc Fly, witch PMU irq on T-Watch2021?");
         }
-
     #endif
 #endif
     /*
@@ -444,6 +443,11 @@ void pmu_loop( void ) {
         else {
             nextmillis = millis() + 10000L;
         }
+        /**
+         * if battery voltage read failed, force read again
+         */
+        if( pmu_get_battery_voltage() == 0.0 && powermgm_get_event( POWERMGM_WAKEUP ) )
+            nextmillis = millis();
         /*
          * only update if an change is detected
          */
@@ -470,7 +474,7 @@ void pmu_loop( void ) {
          * send updates via pmu event
          */
         pmu_send_cb( PMUCTL_STATUS, (void*)&msg );
-        log_d("battery state: %d%%, %s, %s, %s (0x%04x)", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg );
+        log_d("battery state: %d%%, %s, %s, %s (0x%04x), voltage=%.2f", percent, plug ? "connected" : "unconnected", charging ? "charging" : "discharge", battery ? "battery ok" : "no battery", msg, pmu_get_battery_voltage() );
          /*
          * clear update flag
          */
@@ -593,7 +597,8 @@ void pmu_standby( void ) {
          * enable GPIO in lightsleep for wakeup
          */
         gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
-        esp_sleep_enable_gpio_wakeup ();    
+        esp_sleep_enable_gpio_wakeup ();
+    #elif  defined( LILYGO_WATCH_2021 )
     #endif
 #endif
 }
@@ -651,7 +656,7 @@ void pmu_wakeup( void ) {
              */
             ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
         #endif
-
+    #elif  defined( LILYGO_WATCH_2021 )
     #endif
 #endif
     /*
@@ -760,31 +765,25 @@ void pmu_set_safe_voltage_for_update( void ) {
 }
 
 int32_t pmu_get_battery_percent( void ) {
-    int32_t percent = 23;
+    static int32_t percent = 23;
     #ifdef NATIVE_64BIT
 
     #else
         #if defined( M5PAPER )
-
-            float voltage = pmu_get_battery_voltage();
-            if ( voltage > 3.3f ) {
-                percent = ( voltage - 3.3f ) * 100;
-            }
-            else {
-                percent = 0;
-            }
+            float mV = pmu_get_battery_voltage();
+            int32_t tmp_percent = pmu_get_voltage2percent( mV );
+            if( tmp_percent )
+                percent = tmp_percent;
+                
         #elif defined( M5CORE2 )
             if ( pmu_get_calculated_percent() ) {
                 percent = ( pmu_get_coulumb_data() / pmu_config.designed_battery_cap ) * 100;
             }
             else {
-                float voltage = pmu_get_battery_voltage();
-                if ( voltage > 3.2f ) {
-                    percent = ( voltage - 3.2f ) * 100;
-                }
-                else {
-                    percent = 0;
-                }
+                float mV = pmu_get_battery_voltage();
+                int32_t tmp_percent = pmu_get_voltage2percent( mV );
+                if( tmp_percent )
+                    percent = tmp_percent;
             }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
@@ -799,13 +798,54 @@ int32_t pmu_get_battery_percent( void ) {
             else {
                 percent = ttgo->power->getBattPercentage();
             }
-        #elif defined( LILYGO_WATCH_2021 )  
-            uint16_t battery = analogRead( BAT_ADC );
-
-            float voltage = ( ( battery * 3.3 ) / 4096 + 0.1 );
-            percent = voltage < 1.4 ? 0 : ( voltage - 1.4 ) / 0.6 * 100;
+        #elif defined( LILYGO_WATCH_2021 )
+            float mV = pmu_get_battery_voltage();
+            if( pmu_is_charging() )
+                mV = mV - 400.0;
+            int32_t tmp_percent = pmu_get_voltage2percent( mV );
+            if( tmp_percent )
+                percent = tmp_percent;
         #endif
     #endif
+    return( percent );
+}
+
+static int32_t pmu_get_voltage2percent( float mV ) {
+    int32_t percent;
+    /**
+     * mV to percent main conversation table
+     *                             0%   10%    20%   30%  40%    50%   60%   70%   80%   90%  100%
+     */
+    const float QcmMain[] =     { 3000, 3450, 3680, 3740, 3770, 3790, 3820, 3920, 3980, 4060, 4120 };
+    size_t size = ( sizeof( QcmMain ) / sizeof( float ) ) - 1;
+    float Qcm[ size ];
+    /**
+     * calc the table scale factor
+     */
+    if( pmu_config.battery_voltage_highest < pmu_config.battery_voltage_lowest ) {
+        pmu_config.battery_voltage_highest = QcmMain[ size ];
+        pmu_config.battery_voltage_lowest = QcmMain[ 0 ];
+        log_e("lowest and highest battery voltage not valid, reset");
+    }
+    float scale = ( pmu_config.battery_voltage_highest - pmu_config.battery_voltage_lowest ) / ( QcmMain[ size ] - QcmMain[ 0 ] );
+    /**
+     * scale the table into a new table
+     */
+    for( int i = size ; i >= 0; i-- ) {
+        Qcm[ i ] = ( QcmMain[ i ] - QcmMain[ 0 ] ) * scale + pmu_config.battery_voltage_lowest;
+    }
+
+    int i = size;
+    while ( mV <= Qcm[ i ] ) {
+        if (i == 0)
+            break;
+        i--;
+    }
+
+    float vol_section = ( Qcm[ i + 1 ] - Qcm[ i ] ) / ( 100.0 / size );
+    float div = i * ( 100.0 / size );
+    percent = constrain( div + ( ( mV - Qcm[ i ] ) / vol_section ), 0.0, 100.0 );
+    log_i("voltage: %.0fmV, percent: %d%%", mV, percent );
     return( percent );
 }
 
@@ -817,17 +857,28 @@ float pmu_get_battery_voltage( void ) {
     #else
         #if defined( M5PAPER )
             voltage = M5.getBatteryVoltage();
-            voltage = voltage / 1000;
-            log_d("battery voltage = %.3fV", voltage );
         #elif defined( M5CORE2 )
-            voltage = M5.Axp.GetBatVoltage();
+            voltage = M5.Axp.GetBatVoltage() * 1000.0;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getBattVoltage();
-        #elif defined( LILYGO_WATCH_2021 )  
-            uint16_t battery = analogRead( BAT_ADC );
-
-            voltage = ( ( battery * 3.3 ) / 4096 + 0.1 );
+        #elif defined( LILYGO_WATCH_2021 )
+            uint16_t battery = 0;
+            uint16_t count = 10;
+            /**
+             * dummy read
+             */
+            analogRead( BAT_ADC );
+            /**
+             * collect count measurements
+             */
+            for( int i = 0 ; i < count ; i++ )
+                battery += analogRead( BAT_ADC );
+            battery /= count;
+            /**
+             * calc voltage
+             */
+            voltage = ( ( battery * 3300 * 2 ) / 4096 ) + 200;
         #endif
     #endif
     return( voltage );
@@ -879,7 +930,10 @@ float pmu_get_vbus_voltage( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-            voltage = M5.Axp.GetVBusVoltage();
+            voltage = 0.0;
+            while( voltage == 0.0 ) {
+                voltage = M5.Axp.GetVBusVoltage() * 1000.0;
+            }
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getVbusVoltage();
@@ -919,6 +973,8 @@ bool pmu_is_charging( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             charging = ttgo->power->isChargeing();
+        #elif defined( LILYGO_WATCH_2021 )
+            charging = digitalRead( CHARGE ) ? false : true;
         #endif
     #endif
 

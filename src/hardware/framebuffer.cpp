@@ -63,7 +63,8 @@
 
 static bool framebuffer_drawing = true;                             /** @brief disable */
 static bool framebuffer_use_dma = false;
-lv_color_t *framebuffer = NULL;                                     /** @brief pointer to a full size framebuffer */
+lv_color_t *framebuffer_1 = NULL;                                     /** @brief pointer to a full size framebuffer */
+lv_color_t *framebuffer_2 = NULL;                                     /** @brief pointer to a full size framebuffer */
 uint32_t framebuffer_size = FRAMEBUFFER_BUFFER_SIZE;                /** @brief framebuffer size */
 
 bool framebuffer_powermgm_event_cb( EventBits_t event, void *arg );
@@ -113,50 +114,66 @@ void framebuffer_setup( void ) {
                 ttgo->tft->initDMA();
             }
         #elif defined( LILYGO_WATCH_2021 )
+            framebuffer_use_dma = true;
+
             pinMode(TFT_LED, OUTPUT);
             ledcSetup(0, 4000, 8);
             ledcAttachPin(TFT_LED, 0);
             ledcWrite(0, 0);
 
             tft.init();
-            tft.setRotation(0);
-            tft.setTextSize(1);
-            tft.setTextColor(TFT_GREEN, TFT_BLACK);
+            tft.fillScreen(TFT_BLACK);
             tft.initDMA();
-
-            framebuffer_use_dma = true;
         #endif
     #endif
     /*
      * allocate new framebuffer
      */
-    if ( !framebuffer ) {
+    if ( !framebuffer_1 ) {
         if ( framebuffer_use_dma ) {
-            framebuffer = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+            framebuffer_1 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
         }
         else {
-            framebuffer = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+            framebuffer_1 = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
         }
-        ASSERT( framebuffer, "framebuffer malloc failed" );
+        ASSERT( framebuffer_1, "framebuffer malloc failed" );
+        /**
+         * log info about framebuffer
+         */
+        #ifdef NATIVE_64BIT
+            log_d("framebuffer 1: 0x%p (%ld bytes, %dx%dpx)", framebuffer_1, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W, FRAMEBUFFER_BUFFER_H );
+        #else
+            log_i("framebuffer 1: 0x%p (%d bytes, %dx%dpx)", framebuffer_1, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W, FRAMEBUFFER_BUFFER_H );
+        #endif
+    }
+    if ( !framebuffer_2 ) {
+        if ( framebuffer_use_dma ) {
+            framebuffer_2 = (lv_color_t*)calloc( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+        }
+        else {
+            framebuffer_2 = (lv_color_t*)CALLOC( sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+        }
+        ASSERT( framebuffer_2, "framebuffer malloc failed" );
+        /**
+         * log info about framebuffer
+         */
+        #ifdef NATIVE_64BIT
+            log_d("framebuffer 2: 0x%p (%ld bytes, %dx%dpx)", framebuffer_2, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W, FRAMEBUFFER_BUFFER_H );
+        #else
+            log_i("framebuffer 2: 0x%p (%d bytes, %dx%dpx)", framebuffer_2, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), FRAMEBUFFER_BUFFER_W, FRAMEBUFFER_BUFFER_H );
+        #endif
     }
     /*
      * set LVGL driver
      */
-    lv_disp_buf_init( &disp_buf, framebuffer, NULL, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
+    lv_disp_buf_init( &disp_buf, framebuffer_1, framebuffer_2, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H );
     lv_disp_drv_init( &disp_drv );
     disp_drv.flush_cb = framebuffer_flush_cb;
     disp_drv.buffer = &disp_buf;
     disp_drv.hor_res = RES_X_MAX;
     disp_drv.ver_res = RES_Y_MAX;
     lv_disp_drv_register( &disp_drv );
-    /**
-     * log info about framebuffer
-     */
-    #ifdef NATIVE_64BIT
-        log_d("framebuffer: 0x%p (%ld bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
-    #else
-        log_i("framebuffer: 0x%p (%d bytes, %dx%dpx)", framebuffer, FRAMEBUFFER_BUFFER_W * FRAMEBUFFER_BUFFER_H * sizeof(lv_color_t), disp_drv.hor_res, disp_drv.ver_res );
-    #endif
+
     /**
      * setup powermgm events and loop
      */
@@ -348,13 +365,17 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
              * and start DMA transfer if enabled
              * stop transmission
              */
-            tft.startWrite();
-            tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1)); /* set the working window */
-            if ( framebuffer_use_dma )
-                tft.pushPixelsDMA(( uint16_t *)color_p, size);
-            else
-                tft.pushPixels(( uint16_t *)color_p, size);
-            tft.endWrite();
+            if ( framebuffer_use_dma ) {
+                tft.endWrite();
+                tft.startWrite();
+                tft.pushImageDMA( area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1), ( uint16_t *)color_p );
+            }
+            else {
+                tft.startWrite();
+                tft.pushImage( area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1), ( uint16_t *)color_p );
+                tft.flush();
+                tft.endWrite();
+            }
         #endif
     #endif
     lv_disp_flush_ready( disp_drv );

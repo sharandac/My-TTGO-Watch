@@ -26,6 +26,8 @@
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
+#include "gui/widget_factory.h"
+#include "gui/widget_styles.h"
 
 #include "gui/mainbar/app_tile/app_tile.h"
 #include "gui/mainbar/main_tile/main_tile.h"
@@ -37,6 +39,8 @@
 #include "hardware/powermgm.h"
 #include "hardware/pmu.h"
 #include "hardware/sensor.h"
+#include "hardware/blectl.h"
+#include "hardware/wifictl.h"
 
 #include "utils/alloc.h"
 
@@ -50,6 +54,11 @@ static bool maintile_init = false;
 
 static lv_obj_t *main_cont = NULL;
 static lv_obj_t *clock_cont = NULL;
+static lv_obj_t *info_cont = NULL;
+static lv_obj_t *batterylabel = NULL;
+static lv_obj_t *batteryicon = NULL;
+static lv_obj_t *wifiicon = NULL;
+static lv_obj_t *bluetoothicon = NULL;
 static lv_obj_t *timelabel = NULL;
 static lv_obj_t *infolabel = NULL;
 static lv_obj_t *templabel = NULL;
@@ -88,11 +97,13 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 lv_task_t * main_tile_task;
 
-void main_tile_update_task( lv_task_t * task );
-void main_tile_align_widgets( void );
-bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
-bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg );
-bool main_tile_style_event_cb( EventBits_t event, void *arg );
+static void main_tile_update_task( lv_task_t * task );
+static bool mainbar_blectl_event_cb( EventBits_t event, void *arg );
+static bool mainbar_wifictl_event_cb( EventBits_t event, void *arg );
+static bool mainbar_pmu_event_cb( EventBits_t event, void *arg );
+static bool main_tile_powermgm_event_cb( EventBits_t event, void *arg );
+static bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg );
+static bool main_tile_style_event_cb( EventBits_t event, void *arg );
 static bool main_tile_button_event_cb( EventBits_t event, void *arg );
 static bool main_tile_sensor_event_cb( EventBits_t event, void *arg );
 
@@ -146,15 +157,13 @@ void main_tile_setup( void ) {
     lv_obj_reset_style_list( infolabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( infolabel, LV_OBJ_PART_MAIN, &infostyle );
     lv_obj_align( infolabel, datelabel, LV_ALIGN_OUT_TOP_MID, 0, 0 );
-    #ifndef M5PAPER
-        lv_obj_set_hidden( infolabel, true );
-    #endif
 
     templabel = lv_label_create( clock_cont , NULL);
     lv_label_set_text(templabel, "temp/humidity: n/a");
     lv_obj_reset_style_list( templabel, LV_OBJ_PART_MAIN );
     lv_obj_add_style( templabel, LV_OBJ_PART_MAIN, &tempstyle );
     lv_obj_align( templabel, infolabel, LV_ALIGN_OUT_TOP_MID, 0, 0 );
+    
     if ( !sensor_get_available() )
         lv_obj_set_hidden( templabel, true );
 
@@ -193,18 +202,144 @@ void main_tile_setup( void ) {
         lv_obj_set_hidden( widget_entry[ widget ].ext_label, true );
     }
 
+    info_cont = mainbar_obj_create( clock_cont );
+    lv_obj_set_size( info_cont, lv_disp_get_hor_res( NULL ) , 16 );
+    lv_obj_add_style( info_cont, LV_OBJ_PART_MAIN, style );
+    lv_obj_align( info_cont, clock_cont, LV_ALIGN_IN_TOP_MID, 0, 8 );
+
+    batteryicon = lv_img_create( info_cont , NULL);
+    lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_FULL );
+    lv_obj_align( batteryicon, info_cont, LV_ALIGN_CENTER, 0, 0 );
+
+    wifiicon = lv_img_create( info_cont , NULL);
+    lv_img_set_src( wifiicon, LV_SYMBOL_WIFI );
+    lv_obj_align( wifiicon, batteryicon, LV_ALIGN_OUT_LEFT_MID, -THEME_PADDING, 0 );
+
+    bluetoothicon = lv_img_create( info_cont , NULL);
+    lv_img_set_src( bluetoothicon, LV_SYMBOL_BLUETOOTH );
+    lv_obj_align( bluetoothicon, wifiicon, LV_ALIGN_OUT_LEFT_MID, -THEME_PADDING, 0 );
+
+    batterylabel = lv_label_create( info_cont , NULL);
+    lv_label_set_text(batterylabel, "100%" );
+    lv_obj_reset_style_list( batterylabel, LV_OBJ_PART_MAIN );
+    lv_obj_add_style( batterylabel, LV_OBJ_PART_MAIN, &datestyle );
+    lv_obj_align(batterylabel, batteryicon, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0);
+
+    lv_obj_set_style_local_image_recolor( wifiicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+    lv_obj_set_style_local_image_recolor( bluetoothicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+    lv_obj_set_hidden( wifiicon, true );
+    lv_obj_set_hidden( bluetoothicon, true );
+
     main_tile_task = lv_task_create( main_tile_update_task, 500, LV_TASK_PRIO_MID, NULL );
 
+    pmu_register_cb( PMUCTL_STATUS, mainbar_pmu_event_cb, "mainbar pmu");
+    blectl_register_cb( BLECTL_CONNECT | BLECTL_DISCONNECT | BLECTL_ON | BLECTL_OFF, mainbar_blectl_event_cb, "mainbar bluetooth" );
+    wifictl_register_cb( WIFICTL_CONNECT | WIFICTL_DISCONNECT | WIFICTL_OFF | WIFICTL_ON, mainbar_wifictl_event_cb, "mainbar wifi" );
     powermgm_register_cb( POWERMGM_WAKEUP , main_tile_powermgm_event_cb, "main tile time update" );
     timesync_register_cb( TIME_SYNC_UPDATE, main_tile_time_update_ebent_cb, "main tile time sync" );
     sensor_register_cb( SENSOR_TEMPERATURE | SENSOR_RELHUMIDITY, main_tile_sensor_event_cb, "main tile sensor" );
     mainbar_add_tile_button_cb( main_tile_num, main_tile_button_event_cb );
     styles_register_cb( STYLE_CHANGE, main_tile_style_event_cb, "main tile style event" );
 
+    #ifndef ROUND_DISPLAY
+        lv_obj_set_hidden( info_cont, true );
+    #endif
+    #ifndef M5PAPER
+        lv_obj_set_hidden( infolabel, true );
+    #endif
+
     maintile_init = true;
 }
 
-bool main_tile_style_event_cb( EventBits_t event, void *arg ){
+static bool mainbar_pmu_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case PMUCTL_STATUS: {
+                int32_t pmu_info = *(int32_t*)arg;
+                int32_t percent = pmu_info & PMUCTL_STATUS_PERCENT;
+                wf_label_printf( batterylabel, "%d%%", percent );
+                lv_obj_align(batterylabel, batteryicon, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0);
+                if( pmu_info & PMUCTL_STATUS_CHARGING ) {
+                    lv_obj_set_style_local_image_recolor( batteryicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN );
+                    lv_img_set_src( batteryicon, LV_SYMBOL_CHARGE );
+                }
+                else {
+                    lv_obj_set_style_local_image_recolor( batteryicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE );
+                    if ( percent >= 75 ) { 
+                        lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_FULL );
+                    } else if( percent >=50 && percent < 74) {
+                        lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_3 );
+                    } else if( percent >=35 && percent < 49) {
+                        lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_2 );
+                    } else if( percent >=15 && percent < 34) {
+                        lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_1 );
+                        lv_obj_set_style_local_image_recolor( batteryicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW );
+                    } else if( percent >=0 && percent < 14) {
+                        lv_img_set_src( batteryicon, LV_SYMBOL_BATTERY_EMPTY );
+                        lv_obj_set_style_local_image_recolor( batteryicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED );
+                    }
+                }
+                break;
+            }
+    }
+    main_tile_align_widgets();
+    return( true );
+}
+
+static bool mainbar_blectl_event_cb( EventBits_t event, void *arg ) {
+    static bool blectl_state = false;
+    
+    switch( event ) {
+        case BLECTL_ON:
+            blectl_state = true;
+            lv_obj_set_hidden( bluetoothicon, false );
+            lv_obj_set_style_local_image_recolor( bluetoothicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+            break;
+        case BLECTL_OFF:
+            blectl_state = false;
+            lv_obj_set_hidden( bluetoothicon, true );
+            lv_obj_set_style_local_image_recolor( bluetoothicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED );
+            break;
+        case BLECTL_CONNECT:
+            if( blectl_state )
+                lv_obj_set_style_local_image_recolor( bluetoothicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE );
+            break;
+        case BLECTL_DISCONNECT:
+            if( blectl_state )
+                lv_obj_set_style_local_image_recolor( bluetoothicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+            break;
+    }
+    main_tile_align_widgets();
+    return( true );
+}
+
+static bool mainbar_wifictl_event_cb( EventBits_t event, void *arg ) {
+    static bool wifictl_state = false;
+    
+    switch( event ) {
+        case WIFICTL_ON:
+            wifictl_state = true;
+            lv_obj_set_hidden( wifiicon, false );
+            lv_obj_set_style_local_image_recolor( wifiicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+            break;
+        case WIFICTL_OFF:
+            wifictl_state = false;
+            lv_obj_set_hidden( wifiicon, true );
+            lv_obj_set_style_local_image_recolor( wifiicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED );
+            break;
+        case WIFICTL_CONNECT:
+            if( wifictl_state )
+                lv_obj_set_style_local_image_recolor( wifiicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE );
+            break;
+        case WIFICTL_DISCONNECT:
+            if( wifictl_state )
+                lv_obj_set_style_local_image_recolor( wifiicon, LV_IMG_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GRAY );
+            break;
+    }
+    main_tile_align_widgets();
+    return( true );    
+}
+
+static bool main_tile_style_event_cb( EventBits_t event, void *arg ){
     switch( event ) {
         case STYLE_CHANGE:     style = ws_get_mainbar_style();
 
@@ -256,7 +391,7 @@ static bool main_tile_button_event_cb( EventBits_t event, void *arg ) {
 }
 
 
-bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg ) {
+static bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case TIME_SYNC_UPDATE:
             main_tile_update_time( true );
@@ -265,7 +400,7 @@ bool main_tile_time_update_ebent_cb( EventBits_t event, void *arg ) {
     return( true );
 }
 
-bool main_tile_powermgm_event_cb( EventBits_t event, void *arg ) {
+static bool main_tile_powermgm_event_cb( EventBits_t event, void *arg ) {
     /*
      * check if maintile alread initialized
      */
@@ -290,7 +425,9 @@ lv_obj_t *main_tile_register_widget( void ) {
         log_e("maintile not initialized");
         while( true );
     }
-
+    /**
+     * search for a free widget and register it
+     */
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             widget_entry[ widget ].active = true;
@@ -311,7 +448,9 @@ icon_t *main_tile_get_free_widget_icon( void ) {
         log_e("maintile not initialized");
         while( true );
     }
-
+    /**
+     * search for a free widget and return the number
+     */
     for( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active == false ) {
             lv_obj_set_hidden( widget_entry[ widget ].icon_cont, false );
@@ -333,30 +472,39 @@ void main_tile_align_widgets( void ) {
 
     int active_widgets = 0;
     lv_coord_t xpos = 0;
-
+    /**
+     * count the number of active widgets
+     */
     for ( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active )
         active_widgets++;
     }
-
+    lv_obj_align( batteryicon, info_cont, LV_ALIGN_CENTER, 0, 0 );
+    lv_obj_align( wifiicon, batteryicon, LV_ALIGN_OUT_LEFT_MID, -THEME_PADDING, 0 );
+    lv_obj_align( bluetoothicon, wifiicon, LV_ALIGN_OUT_LEFT_MID, -THEME_PADDING, 0 );
+    lv_obj_align( batterylabel, batteryicon, LV_ALIGN_OUT_RIGHT_MID, THEME_PADDING, 0 );
+    /**
+     * if we habe zero active widget, realign with no widgets
+     */
     if ( active_widgets == 0 ) {
         lv_obj_align( clock_cont, main_cont, LV_ALIGN_CENTER, 0, 0 );
         return;
     };
-
+    /**
+     * set clock container to the top
+     */
     lv_obj_align( clock_cont, main_cont, LV_ALIGN_IN_TOP_MID, 0, 0 );
-
+    /**
+     * align the widgets
+     */
     xpos = 0 - ( ( WIDGET_X_SIZE * active_widgets ) + ( ( active_widgets - 1 ) * WIDGET_X_CLEARENCE ) ) / 2;
-
     active_widgets = 0;
-
     for ( int widget = 0 ; widget < MAX_WIDGET_NUM ; widget++ ) {
         if ( widget_entry[ widget ].active ) {
             lv_obj_align( widget_entry[ widget ].icon_cont , main_cont, LV_ALIGN_IN_BOTTOM_MID, xpos + ( WIDGET_X_SIZE * active_widgets ) + ( active_widgets * WIDGET_X_CLEARENCE ) + 32 , - ( ( lv_disp_get_ver_res( NULL ) / 4 ) -32 ) );
             active_widgets++;
         }
     }
-
 }
 
 uint32_t main_tile_get_tile_num( void ) {
@@ -428,7 +576,7 @@ void main_tile_update_time( bool force ) {
     }
 }
 
-void main_tile_update_task( lv_task_t * task ) {
+static void main_tile_update_task( lv_task_t * task ) {
     /*
      * check if maintile alread initialized
      */
