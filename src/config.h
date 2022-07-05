@@ -57,7 +57,6 @@
             #define HARDWARE_NAME   "T-Watch2021"
             #define RES_X_MAX       240
             #define RES_Y_MAX       240
-//            #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
             #define ONLY_ESSENTIAL
             #define ROUND_DISPLAY
@@ -86,7 +85,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2022070401"
+    #define __FIRMWARE__            "2022070501"
     /**
      * Allows to include config.h from C code
      */

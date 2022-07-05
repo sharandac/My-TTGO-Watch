@@ -111,7 +111,15 @@ static bool compass_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
             log_i("x = %d/%d", calibrationData[0][0], calibrationData[0][1] );
             log_i("y = %d/%d", calibrationData[1][0], calibrationData[1][1] );
             log_i("z = %d/%d", calibrationData[2][0], calibrationData[2][1] );
-            compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
+            #ifdef NATIVE_64BIT
+            #else
+                #if defined( M5PAPER )
+                #elif defined( M5CORE2 )
+                #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+                #elif defined( LILYGO_WATCH_2021 )
+                        compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
+                #endif
+            #endif
             compass_calibrated = true;
             log_i("stop calibration");
         }
