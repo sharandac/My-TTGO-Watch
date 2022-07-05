@@ -23,6 +23,7 @@
 #include "app/fx_rates/fx_rates.h"
 #include "app/IRController/IRController.h"
 #include "app/alarm_clock/alarm_clock.h"
+#include "app/compass/compass_app.h"
 
 #if defined( NATIVE_64BIT )
     /**
@@ -52,6 +53,7 @@ void setup() {
      */
     osmmap_app_setup();
     weather_app_setup();
+    compass_app_setup();
     stopwatch_app_setup();
     tracker_app_setup();
     alarm_clock_setup();

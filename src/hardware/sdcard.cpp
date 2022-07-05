@@ -113,6 +113,7 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     #if defined( M5PAPER )
 
     #elif defined( M5CORE2 )
+        retval = true;
 /*
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:

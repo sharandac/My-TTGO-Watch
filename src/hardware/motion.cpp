@@ -87,6 +87,7 @@
         portENTER_CRITICAL_ISR(&BMA_IRQ_Mux);
         bma_irq_flag = true;
         portEXIT_CRITICAL_ISR(&BMA_IRQ_Mux);
+        powermgm_resume_from_ISR();
     }
 #endif
 

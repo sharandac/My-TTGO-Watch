@@ -31,6 +31,8 @@
 
     volatile bool pmu_irq_flag = false;
     static bool pmu_update = true;
+
+    #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #else
     #include <Arduino.h>
     #if defined( M5PAPER )
@@ -599,6 +601,7 @@ void pmu_standby( void ) {
         gpio_wakeup_enable( (gpio_num_t)AXP202_INT, GPIO_INTR_LOW_LEVEL );
         esp_sleep_enable_gpio_wakeup ();
     #elif  defined( LILYGO_WATCH_2021 )
+        digitalWrite( PWR_ON, LOW );
     #endif
 #endif
 }
@@ -657,6 +660,7 @@ void pmu_wakeup( void ) {
             ttgo->power->setPowerOutPut( AXP202_LDO2, AXP202_ON );    
         #endif
     #elif  defined( LILYGO_WATCH_2021 )
+        digitalWrite( PWR_ON, HIGH );
     #endif
 #endif
     /*

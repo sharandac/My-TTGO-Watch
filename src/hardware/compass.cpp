@@ -22,9 +22,11 @@
 #include "config.h"
 #include "compass.h"
 #include "powermgm.h"
+#include "callback.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
+    #include "utils/millis.h"
 #else
     #if defined( M5PAPER )
         #include <M5EPD.h>
@@ -41,62 +43,256 @@
     #endif
 #endif
 
+static bool compass_init = false;
+static bool compass_active = false;
+static bool compass_calibrated = false;
+static int64_t compass_calibration = 0;
+callback_t *compass_callback = NULL;
+static int calibrationData[3][2];
+
+static void compass_calibration_loop( compass_data_t *compass_data );
+static bool compass_get_data( compass_data_t *compass_data );
 static bool compass_powermgm_event_cb( EventBits_t event, void *arg );
 static bool compass_powermgm_loop_event_cb( EventBits_t event, void *arg );
+static bool compass_send_event_cb( EventBits_t event, void *arg );
 
 void compass_setup( void ) {
-    #if defined( M5PAPER )
-    #elif defined( M5CORE2 )
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    #elif defined( LILYGO_WATCH_2021 )
-        compass.init();
-    #else
-    #endif
 
-    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, compass_powermgm_event_cb, "compass powermgm event" );
-    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, compass_powermgm_loop_event_cb, "compass powermgm loop event" );
+    #ifdef NATIVE_64BIT
+    #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            compass.init();
+            compass_off();
+        #else
+        #endif
+    #endif
+    powermgm_register_loop_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, compass_powermgm_loop_event_cb, "compass powermgm event" );
+    powermgm_register_cb( POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP, compass_powermgm_event_cb, "compass powermgm loop event" );
+
+    compass_init = true;
 }
 
 static bool compass_powermgm_event_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
-        case POWERMGM_STANDBY:
-            break;
-        case POWERMGM_WAKEUP:
-            break;
-        case POWERMGM_SILENCE_WAKEUP:
-            break;
-        default:
-            break;
-    }
+    #ifdef NATIVE_64BIT
+    #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            switch( event ) {
+                case POWERMGM_STANDBY:
+                    compass_off();
+                    break;
+                case POWERMGM_WAKEUP:
+                    compass_off();
+                    break;
+                case POWERMGM_SILENCE_WAKEUP:
+                    compass_off();
+                    break;
+                default:
+                    break;
+            }
+        #else
+        #endif
+    #endif
 
     return( true );
 }
 
 static bool compass_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
-    switch( event ) {
-        case POWERMGM_STANDBY:
-            break;
-        case POWERMGM_WAKEUP:
-            break;
-        case POWERMGM_SILENCE_WAKEUP:
-            break;
-        default:
-            break;
+    static int64_t nextmillis = millis() + COMPASS_UPDATE_INTERVAL;
+
+    if( compass_calibration != 0 ) {
+        if( compass_calibration < millis() ) {
+            compass_calibration = 0;
+            log_i("x = %d/%d", calibrationData[0][0], calibrationData[0][1] );
+            log_i("y = %d/%d", calibrationData[1][0], calibrationData[1][1] );
+            log_i("z = %d/%d", calibrationData[2][0], calibrationData[2][1] );
+            compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
+            compass_calibrated = true;
+            log_i("stop calibration");
+        }
+        else {
+            compass_data_t compass_data;
+            compass_get_data( &compass_data );
+            compass_calibration_loop( &compass_data );
+        }
+    }
+    else if( nextmillis < millis() && compass_active ) {
+        nextmillis = millis() + COMPASS_UPDATE_INTERVAL;
+
+        compass_data_t compass_data;
+
+        switch( event ) {
+            case POWERMGM_STANDBY:
+                break;
+            case POWERMGM_WAKEUP:
+                compass_get_data( &compass_data );
+                compass_send_event_cb( COMPASS_UPDATE, (void*)&compass_data );
+                break;
+            case POWERMGM_SILENCE_WAKEUP:
+                break;
+            default:
+                break;
+        }
     }
 
     return( true );
 }
 
-bool compass_enable( void ) {
-    bool retval = false;
-    
-    #if defined( M5PAPER )
-    #elif defined( M5CORE2 )
-    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-    #elif defined( LILYGO_WATCH_2021 )
-        retval = true;
+static bool compass_get_data( compass_data_t *compass_data ) {
+    #ifdef NATIVE_64BIT
     #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            compass.read();
+            compass_data->x = compass.getX();
+            compass_data->y = compass.getY();
+            compass_data->z = compass.getZ();
+            compass_data->azimuth = compass.getAzimuth();
+            compass_data->bearing = compass.getBearing( compass_data->azimuth );
+            compass.getDirection( compass_data->direction, compass_data->azimuth );
+            compass_data->direction[3] = '\0';
+            log_d("x=%d, y=%d, z=%d, azimuth=%d, bearing=%d, direction=%s", compass_data->x, compass_data->y, compass_data->z, compass_data->azimuth, compass_data->bearing, compass_data->direction );
+        #else
+        #endif
     #endif
 
+    return( true );
+}
+
+bool compass_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
+    if ( compass_callback == NULL ) {
+        compass_callback = callback_init( "compass" );
+        if ( compass_callback == NULL ) {
+            log_e("compass__callback alloc failed");
+            while(true);
+        }
+    }
+    return( callback_register( compass_callback, event, callback_func, id ) );
+}
+
+static bool compass_send_event_cb( EventBits_t event, void *arg ) {
+    return( callback_send( compass_callback, event, arg ) );
+}
+
+static void compass_calibration_loop( compass_data_t *compass_data ) {
+    bool change = false;
+    
+    if( compass_data->x < calibrationData[0][0] ) {
+        calibrationData[0][0] = compass_data->x;
+        change = true;
+    }
+
+    if( compass_data->x > calibrationData[0][1] ) {
+        calibrationData[0][1] = compass_data->x;
+        change = true;
+    }
+
+    if( compass_data->y < calibrationData[1][0] ) {
+        calibrationData[1][0] = compass_data->y;
+        change = true;
+    }
+
+    if( compass_data->y > calibrationData[1][1] ) {
+        calibrationData[1][1] = compass_data->y;
+        change = true;
+    }
+
+    if( compass_data->z < calibrationData[2][0] ) {
+        calibrationData[2][0] = compass_data->z;
+        change = true;
+    }
+
+    if( compass_data->z > calibrationData[2][1] ) {
+        calibrationData[2][1] = compass_data->z;
+        change = true;
+    }
+
+    if( change )
+        compass_calibration = millis() + 5000;
+}
+
+void compass_on( void ) {
+    compass_active = true;
+
+    #ifdef NATIVE_64BIT
+    #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            compass.init();
+            compass.setReset();
+            compass.setMode( 0x01, 0x0C, 0x10, 0x00 );
+            if( compass_calibrated )
+                compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
+        #else
+        #endif
+    #endif
+}
+
+void compass_off( void ) {
+    compass_active = false;
+    
+    #ifdef NATIVE_64BIT
+    #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            compass.init();
+            compass.setReset();
+            compass.setMode( 0x00, 0x0C, 0x10, 0x00 );
+        #else
+        #endif
+    #endif
+}
+
+bool compass_start_calibration( void ) {
+    if( compass_calibrated )
+        return( true );
+    /**
+     * reset calibration data
+     */
+    calibrationData[0][0] = 0;
+    calibrationData[0][1] = 0;
+    calibrationData[1][0] = 0;
+    calibrationData[1][1] = 0;
+    calibrationData[2][0] = 0;
+    calibrationData[2][1] = 0;
+    /**
+     * enable compass
+     */
+    compass_on();
+    /**
+     * set calibration active
+     */
+    compass_calibration = millis() + 20000;
+    log_i("start calibration");
+
+    return( true );
+}
+
+bool compass_available( void ) {
+    bool retval = false;
+
+    #ifdef NATIVE_64BIT
+        retval = true;
+    #else
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+            retval = true;
+        #else
+        #endif
+    #endif
+    
     return( retval );
 }

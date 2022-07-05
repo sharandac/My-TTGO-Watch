@@ -8,6 +8,8 @@ pio run -t upload
 or simple press "build and upload" in platformIO, 
 or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from ShotokuTech[ShotokuTech](https://github.com/ShotokuTech).
 
+Please pay attention to which version you have for the T-Watch 2020 and T-Watch-2021!
+
 ## Applications
 
 For quick clock application development use the new QuickGLUI - high level API. See [here](https://github.com/sharandac/My-TTGO-Watch/pull/163).

@@ -44,31 +44,6 @@ touch_config_t touch_config;
         #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include <TTGO.h>
-
-        volatile bool DRAM_ATTR touch_irq_flag = false;
-        portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
-        void IRAM_ATTR touch_irq( void );
-
-        void IRAM_ATTR touch_irq( void ) {
-            /*
-            * enter critical section and set interrupt flag
-            */
-            portENTER_CRITICAL_ISR(&Touch_IRQ_Mux);
-            touch_irq_flag = true;
-            /*
-            * leave critical section
-            */
-            portEXIT_CRITICAL_ISR(&Touch_IRQ_Mux);
-        }
-
-        static SemaphoreHandle_t xSemaphores = NULL;
-
-        bool touch_lock_take( void ) {
-            return xSemaphoreTake( xSemaphores, portMAX_DELAY ) == pdTRUE;
-        }
-        void touch_lock_give( void ) {
-            xSemaphoreGive( xSemaphores );
-        }
     #elif defined( LILYGO_WATCH_2021 )    
         #include <Wire.h>
         #include <twatch2021_config.h>
@@ -78,6 +53,31 @@ touch_config_t touch_config;
     #else
         #error "no hardware driver for touch, please setup minimal drivers ( framebuffer/touch )"
     #endif
+    volatile bool DRAM_ATTR touch_irq_flag = false;
+    portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
+    void IRAM_ATTR touch_irq( void );
+
+    void IRAM_ATTR touch_irq( void ) {
+        /*
+        * enter critical section and set interrupt flag
+        */
+        portENTER_CRITICAL_ISR(&Touch_IRQ_Mux);
+        touch_irq_flag = true;
+        /*
+        * leave critical section
+        */
+        portEXIT_CRITICAL_ISR(&Touch_IRQ_Mux);
+        powermgm_resume_from_ISR();
+    }
+
+    static SemaphoreHandle_t xSemaphores = NULL;
+
+    bool touch_lock_take( void ) {
+        return xSemaphoreTake( xSemaphores, portMAX_DELAY ) == pdTRUE;
+    }
+    void touch_lock_give( void ) {
+        xSemaphoreGive( xSemaphores );
+    }
 #endif
 
 callback_t *touch_callback = NULL;
@@ -107,6 +107,8 @@ void touch_setup( void ) {
         M5.TP.SetRotation(90);
     #elif defined( M5CORE2 )
         M5.Touch.begin();
+        pinMode( GPIO_NUM_39, INPUT );
+        attachInterrupt( GPIO_NUM_39, &touch_irq, CHANGE );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
@@ -137,11 +139,11 @@ void touch_setup( void ) {
         /*
         * create semaphore and register interrupt function
         */
-        xSemaphores = xSemaphoreCreateMutex();
         attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
     #elif defined( LILYGO_WATCH_2021 )    
         ASSERT( TouchSensor.begin( Wire, Touch_Res, Touch_Int, CTP_SLAVER_ADDR ), "touch controler failed" );
     #endif
+    xSemaphores = xSemaphoreCreateMutex();
 #endif
     /**
      * setup lvgl pointer driver
@@ -155,7 +157,7 @@ void touch_setup( void ) {
      * register powermgm callback function
      */
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP | POWERMGM_ENABLE_INTERRUPTS | POWERMGM_DISABLE_INTERRUPTS , touch_powermgm_event_cb, "touch" );
-    powermgm_register_loop_cb( POWERMGM_STANDBY , touch_powermgm_loop_event_cb, "touch powermgm loop" );
+    powermgm_register_loop_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP , touch_powermgm_loop_event_cb, "touch powermgm loop" );
 }
 
 bool touch_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id ) {
@@ -184,27 +186,31 @@ bool touch_send_event_cb( EventBits_t event, void *arg ) {
 
 bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
     bool retval = false;
-
+    
     #ifdef NATIVE_64BIT
 
     #else
+        /*
+        * handle IRQ event
+        */
+        portENTER_CRITICAL(&Touch_IRQ_Mux);
+        bool temp_pmu_irq_flag = touch_irq_flag;
+        touch_irq_flag = false;
+        portEXIT_CRITICAL(&Touch_IRQ_Mux);
+
         #if defined ( M5CORE2 )
             switch( event ) {
                 case POWERMGM_STANDBY:
-                    M5.Touch.update();
-                    if ( M5.Touch.ispressed() ) {
+                    if ( temp_pmu_irq_flag )
                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                    }              
                     retval = true;
                     break;
                 case POWERMGM_WAKEUP:
                     retval = true;
                     break;
                 case POWERMGM_SILENCE_WAKEUP:
-                    M5.Touch.update();
-                    if ( M5.Touch.ispressed() ) {
+                    if ( temp_pmu_irq_flag )
                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
-                    }              
                     retval = true;        
                     break;
             }
@@ -257,10 +263,11 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
             switch( event ) {
                 case POWERMGM_STANDBY:          log_d("go standby");
                                                 /**
-                                                 * block standby so is there no another option to handle
-                                                 * wakeup by touch. no real button :(
+                                                 * enable GPIO in lightsleep for wakeup
                                                  */
-                                                retval = false;
+                                                gpio_wakeup_enable( (gpio_num_t)GPIO_NUM_39, GPIO_INTR_LOW_LEVEL );
+                                                esp_sleep_enable_gpio_wakeup ();
+                                                retval = true;
                                                 break;
                 case POWERMGM_WAKEUP:           log_d("go wakeup");
                                                 retval = true;

@@ -32,6 +32,8 @@
 
     volatile bool rtc_irq_flag = false;
 #else
+    #include <sys/time.h>
+
     volatile bool rtc_irq_flag = false;
     portMUX_TYPE RTC_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
 
@@ -42,16 +44,6 @@
         #include <M5Core2.h>
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #include "TTGO.h"
-
-        void IRAM_ATTR rtcctl_irq( void );
-
-        void IRAM_ATTR rtcctl_irq( void ) {
-            portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
-            rtc_irq_flag = true;
-            portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
-            powermgm_resume_from_ISR();
-        }
-
     #elif defined( LILYGO_WATCH_2021 )
         #include <PCF8563/pcf8563.h>
         #include <Wire.h>
@@ -61,7 +53,14 @@
         #warning "no hardware driver for rtcctl"
     #endif
 
-    #include <sys/time.h>
+    void IRAM_ATTR rtcctl_irq( void );
+
+    void IRAM_ATTR rtcctl_irq( void ) {
+        portENTER_CRITICAL_ISR(&RTC_IRQ_Mux);
+        rtc_irq_flag = true;
+        portEXIT_CRITICAL_ISR(&RTC_IRQ_Mux);
+        powermgm_resume_from_ISR();
+    }
 #endif
 
 static rtcctl_alarm_t alarm_data; 
@@ -100,6 +99,8 @@ void rtcctl_setup( void ) {
         pinMode( RTC_INT_PIN, INPUT_PULLUP);
         attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
     #elif defined( LILYGO_WATCH_2021 )
+        #include <twatch2021_config.h>
+
         rtc.begin();
         if ( rtc.isTimerActive() || rtc.isTimerEnable() ) {
             log_d("clear/disable rtc timer");
@@ -107,6 +108,12 @@ void rtcctl_setup( void ) {
             rtc.disableTimer();
         }
         rtc.disableCLK();
+
+        #if defined( VERSION_2 )
+//            pinMode( RTC_Int, INPUT);
+//            attachInterrupt( RTC_Int, &rtcctl_irq, GPIO_INTR_POSEDGE );
+        #endif
+
     #endif
 #endif
 
@@ -282,7 +289,9 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 gpio_wakeup_enable( (gpio_num_t)RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
                                                 esp_sleep_enable_gpio_wakeup ();
-                                            #elif defined( LILYGO_WATCH_2021 )
+                                            #elif defined( LILYGO_WATCH_2021 ) && defined( VERSION_2 )
+                                                // gpio_wakeup_enable( (gpio_num_t)RTC_Int, GPIO_INTR_POSEDGE );
+                                                // esp_sleep_enable_gpio_wakeup ();
                                             #else
                                                 #warning "no rtcctl powermgm standby event"
                                             #endif
@@ -334,10 +343,12 @@ bool rtcctl_powermgm_loop_cb( EventBits_t event, void *arg ) {
     portEXIT_CRITICAL( &RTC_IRQ_Mux );
 #endif
     if ( temp_rtc_irq_flag ) {
-        /*
-        * fire callback
-        */
-        rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
+        #if defined( LILYGO_WATCH_2021 ) && defined( VERSION_2 )
+            if( rtc.status2() & PCF8563_ALARM_AF )
+                rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
+        #else
+                rtcctl_send_event_cb( RTCCTL_ALARM_OCCURRED );
+        #endif
     }
     return( true );
 }

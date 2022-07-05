@@ -21,16 +21,66 @@
  */
 #ifndef _COMPASS_H
     #define _COMPASS_H
+
+    #include "callback.h"
+
+    #ifdef NATIVE_64BIT
+        #include "utils/io.h"
+    #else
+
+    #endif
+
+    #define COMPASS_UPDATE_INTERVAL         100
+    #define COMPASS_CALIBRATION_INTERVAL    10
+    /**
+     * 
+     */
+    #define COMPASS_UPDATE                  _BV(0)              /** @brief event mask for data updatet */
+    #define COMPASS_CALIBRATION_START       _BV(1)              /** @brief event mask for data updatet */
+    #define COMPASS_CALIBRATION_DONE        _BV(2)              /** @brief event mask for data updatet */
+    #define COMPASS_CALIBRATION_FAILED      _BV(3)              /** @brief event mask for data updatet */
+    /**
+     * @brief 
+     */
+    typedef struct {
+        int x = 0;
+        int y = 0;
+        int z = 0;
+        int azimuth = 0;
+        uint8_t bearing = 0;
+        char direction[4] = "";
+    } compass_data_t;
     /**
      * @brief setup compass
      */
     void compass_setup( void );
+    /**
+     * @brief registers a callback function which is called on a corresponding event
+     * 
+     * @param   event           possible values: COMPASS_UPDATE
+     * @param   callback_func   pointer to the callback function
+     * @param   id              program id
+     * 
+     * @return  true if success, false if failed
+     */
+    bool compass_register_cb( EventBits_t event, CALLBACK_FUNC callback_func, const char *id );
+    /**
+     * @brief start compass calibration
+     * 
+     * @return true 
+     * @return false 
+     */
+    bool compass_start_calibration( void );
+
+    void compass_on( void );
+
+    void compass_off( void );
     /**
      * @brief check if compass available
      * 
      * @return true 
      * @return false 
      */
-    bool compass_enable( void );
+    bool compass_available( void );
 
 #endif // _COMPASS_H
