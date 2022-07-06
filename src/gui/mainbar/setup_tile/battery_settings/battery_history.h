@@ -22,7 +22,7 @@
 #ifndef _BATTERY_HISTROY_H
     #define _BATTERY_HISTROY_H
 
-    #define BATTERY_HISTORY_INTERVALL       5
+    #define BATTERY_HISTORY_INTERVALL       30
     /**
      * @brief system battery hirtory tile setup
      * 

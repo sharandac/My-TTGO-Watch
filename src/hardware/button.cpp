@@ -38,6 +38,7 @@ bool button_send_cb( EventBits_t event, void *arg );
         #include <M5EPD.h>
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
+        static bool button_active = true;
 
         HotZone left_btn( 0, 240, 106, 300 );
         HotZone power_btn( 106, 240, 212, 300 );
@@ -221,6 +222,9 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
         }
     #elif defined( M5CORE2 )
+        if( !button_active )
+            return( true );
+
         TouchPoint_t pos = M5.Touch.getPressPoint();
 
         static bool left_button = left_btn.inHotZone( pos );
@@ -432,6 +436,17 @@ bool button_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                     break;
             }
         #elif defined( M5CORE2 )
+            switch( event ) {
+                case POWERMGM_STANDBY:
+                    button_active = false;
+                    break;
+                case POWERMGM_SILENCE_WAKEUP:
+                    button_active = false;
+                    break;
+                case POWERMGM_WAKEUP:
+                    button_active = true;
+                    break;
+            }
             retval = true;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;

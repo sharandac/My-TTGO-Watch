@@ -321,6 +321,10 @@ void quickbar_hide( bool hide ) {
         wf_image_button_fade_out( quickbar_maintile_btn, 300, 0 );
         wf_image_button_fade_out( quickbar_setup_btn, 300, 0 );
         wf_image_button_fade_out( quickbar_screenshot_btn, 300, 0 );
+        #if defined( ROUND_DISPLAY )
+            wf_image_button_fade_out( quickbar_wifi_btn, 300, 0 );
+            wf_image_button_fade_out( quickbar_bluetooth_btn, 300, 0 );
+        #endif
     }
     else {
         lv_obj_set_hidden( quickbar, hide );
@@ -329,8 +333,10 @@ void quickbar_hide( bool hide ) {
         wf_image_button_fade_in( quickbar_maintile_btn, 300, 0 );
         wf_image_button_fade_in( quickbar_setup_btn, 300, 0 );
         wf_image_button_fade_in( quickbar_screenshot_btn, 300, 0 );
-        wf_image_button_fade_in( quickbar_wifi_btn, 300, 0 );
-        wf_image_button_fade_in( quickbar_bluetooth_btn, 300, 0 );
+        #if defined( ROUND_DISPLAY )
+            wf_image_button_fade_in( quickbar_wifi_btn, 300, 0 );
+            wf_image_button_fade_in( quickbar_bluetooth_btn, 300, 0 );
+        #endif
     }
 }
 

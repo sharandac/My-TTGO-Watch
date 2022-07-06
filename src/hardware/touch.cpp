@@ -108,7 +108,7 @@ void touch_setup( void ) {
     #elif defined( M5CORE2 )
         M5.Touch.begin();
         pinMode( GPIO_NUM_39, INPUT );
-        attachInterrupt( GPIO_NUM_39, &touch_irq, CHANGE );
+        attachInterrupt( GPIO_NUM_39, &touch_irq, FALLING );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
         /*
@@ -201,7 +201,7 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
         #if defined ( M5CORE2 )
             switch( event ) {
                 case POWERMGM_STANDBY:
-                    if ( temp_pmu_irq_flag )
+                    if( M5.Touch.ispressed() )
                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                     retval = true;
                     break;
@@ -209,7 +209,7 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                     retval = true;
                     break;
                 case POWERMGM_SILENCE_WAKEUP:
-                    if ( temp_pmu_irq_flag )
+                    if ( M5.Touch.ispressed() )
                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                     retval = true;        
                     break;
