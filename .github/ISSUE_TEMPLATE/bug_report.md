@@ -31,6 +31,7 @@ Please provide details on which board is used.
 - [ ] TWatch 2020 or TWatch 2021
 - [ ] M5Paper
 - [ ] M5Core2
+- [ ] WT32-SC01
 
 **Description of problem:**
 
