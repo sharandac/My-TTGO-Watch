@@ -172,7 +172,9 @@ and the following projects:
 [ESP8266Audio](https://github.com/earlephilhower/ESP8266Audio)<br>
 [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)<br>
 [LVGL](https://github.com/lvgl)<br>
+[NimBLE-Arduino]()h2zero/NimBLE-Arduino<br>
 [pubsubclient](https://github.com/knolleary/pubsubclient)<br>
+[TinyGPSPlus](mikalhart/TinyGPSPlus)<br>
 [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)<br>
 [TTGO_TWatch_Library](https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library)<br>
 
