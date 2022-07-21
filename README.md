@@ -133,9 +133,9 @@ Cf. [contribution guide](CONTRIBUTING.md)
 
 ## WT32-SC01
 
-![screenshot](images/WT32-SC01_img1.png)
-![screenshot](images/WT32-SC01_img2.png)
-![screenshot](images/WT32-SC01_img3.png)
+![screenshot](images/WT32_SC01_img1.png)
+![screenshot](images/WT32_SC01_img2.png)
+![screenshot](images/WT32_SC01_img3.png)
 
 ## TTGO T-Watch 2021
 
