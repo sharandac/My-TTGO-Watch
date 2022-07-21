@@ -18,6 +18,7 @@ Please provide details on which board is used.
 - [ ] TWatch 2020 or TWatch 2021
 - [ ] M5Paper
 - [ ] M5Core2
+- [ ] WT32-SC01
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
