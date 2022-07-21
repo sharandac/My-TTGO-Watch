@@ -279,7 +279,6 @@ static void reboot_utilities_event_cb( lv_obj_t * obj, lv_event_t event ) {
             log_i("System reboot by user");
             motor_vibe(20);
             delay(20);
-            display_standby();
             SPIFFS.end();
             log_i("SPIFFS unmounted!");
             delay(500);

@@ -72,8 +72,15 @@
             #define HARDWARE_NAME   "m5stack-core2"
             #define RES_X_MAX       320
             #define RES_Y_MAX       240
-//            #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+        #elif defined( WT32_SC01 )
+            #undef LILYGO_WATCH_LVGL
+            #define HARDWARE_NAME   "wt32-sc01"
+            #define RES_X_MAX       480
+            #define RES_Y_MAX       320
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+            #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+            #define NO_WATCHFACE
         #else
             #error "no destination hardware version defined"
         #endif
@@ -85,7 +92,7 @@
     /**
      * firmeware version string
      */
-    #define __FIRMWARE__            "2022070501"
+    #define __FIRMWARE__            "2022072101"
     /**
      * Allows to include config.h from C code
      */

@@ -57,6 +57,7 @@
         AudioFileSourcePROGMEM *progmem_file;
     #elif defined( LILYGO_WATCH_2020_V2 )
     #elif defined( LILYGO_WATCH_2021 )    
+    #elif defined( WT32_SC01 )
     #else
         #warning "no hardware driver for sound"
     #endif

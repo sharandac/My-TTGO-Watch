@@ -41,17 +41,25 @@
      * is needed when the device has noch PMU
      */
     #if defined( M5PAPER )
+        #define BATTERY_MONITOR_INTERVAL    60
         #define BATTERY_LOWEST              3000
         #define BATTERY_HIGHEST             4350
+        #define BATTERY_CHARGING_OFFSET     0
     #elif defined( M5CORE2 )
+        #define BATTERY_MONITOR_INTERVAL    60
         #define BATTERY_LOWEST              3000
         #define BATTERY_HIGHEST             4190
+        #define BATTERY_CHARGING_OFFSET     0
     #elif defined( LILYGO_WATCH_2021 )
+        #define BATTERY_MONITOR_INTERVAL    60
         #define BATTERY_LOWEST              3000
         #define BATTERY_HIGHEST             4350
+        #define BATTERY_CHARGING_OFFSET     400
     #else    
+        #define BATTERY_MONITOR_INTERVAL    60
         #define BATTERY_LOWEST              3000
         #define BATTERY_HIGHEST             4200
+        #define BATTERY_CHARGING_OFFSET     0
     #endif
     /**
      * @brief pmu config structure
@@ -67,9 +75,11 @@
         int32_t experimental_normal_voltage = EXPERIMENTALNORMALVOLTAGE;
         int32_t experimental_power_save_voltage = EXPERIMENTALPOWERSAVEVOLTAGE;
         int32_t powermgm_resume_interval = POWERMGMRESUMEINTERVAL;
+        int32_t battery_monitor_interval = BATTERY_MONITOR_INTERVAL;
         float battery_voltage_lowest = BATTERY_LOWEST;
         float battery_voltage_highest = BATTERY_HIGHEST;
-        bool battery_run_calibration = false;
+        float battery_chargingoffset = BATTERY_CHARGING_OFFSET;
+        bool battery_calibrated = false;
         bool high_charging_target_voltage = false;
         bool compute_percent = false;
         bool experimental_power_save = false;

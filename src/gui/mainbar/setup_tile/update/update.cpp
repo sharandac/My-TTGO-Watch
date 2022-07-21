@@ -252,7 +252,6 @@ static void update_event_handler(lv_obj_t * obj, lv_event_t event) {
                 log_i("System reboot by user");
                 motor_vibe(20);
                 delay(20);
-                display_standby();
                 SPIFFS.end();
                 log_i("SPIFFS unmounted!");
                 delay(500);
@@ -380,7 +379,6 @@ void update_Task( void * pvParameters ) {
                     log_i("System reboot by user");
                     motor_vibe(20);
                     delay(20);
-                    display_standby();
                     SPIFFS.end();
                     log_i("SPIFFS unmounted!");
                     delay(500);

@@ -65,8 +65,12 @@ void calendar_app_setup( void ) {
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-               mainbar_jump_to_tilenumber( calendar_overview_get_tile(), LV_ANIM_OFF, true );
-               break;
+                /**
+                 * switch to the current date
+                 */
+                calendar_overview_refresh_showed_ui();
+                mainbar_jump_to_tilenumber( calendar_overview_get_tile(), LV_ANIM_OFF, true );
+                break;
     }
 }
 

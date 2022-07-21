@@ -33,7 +33,7 @@
         return;
     }
 #else
-    #if defined( M5PAPER ) ||  defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )    
+    #if defined( M5PAPER ) ||  defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 ) || defined( WT32_SC01 )
         void IRController_setup( void ) {
             return;
         }

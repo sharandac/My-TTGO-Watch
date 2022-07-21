@@ -254,10 +254,11 @@ void wifictl_setup( void ) {
      */
     wifictl_set_event( WIFICTL_OFF );
     /**
-     * change here your network for first use if WPS noch work
+     * change here your network for first use if WPS not work
+     * or setup via display not possible
      */
-    if( !wifictl_is_known( "karlshorst_BGN" ) )
-        wifictl_insert_network( "karlshorst_BGN", "RK.5-xQ23fram" );
+    if( !wifictl_is_known( "foo" ) )
+        wifictl_insert_network( "foo", "bar" );
 }
 
 bool wifictl_powermgm_event_cb( EventBits_t event, void *arg ) {

@@ -42,6 +42,9 @@
         #elif defined( LILYGO_WATCH_2021 )
             #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
             #define FRAMEBUFFER_BUFFER_H        10
+        #elif defined( WT32_SC01 )
+            #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
+            #define FRAMEBUFFER_BUFFER_H        40
         #endif
     #endif
 

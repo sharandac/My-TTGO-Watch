@@ -48,11 +48,12 @@ lv_obj_t *battery_view_voltage;
 lv_obj_t *charge_view_current;
 lv_obj_t *discharge_view_current;
 lv_obj_t *vbus_view_voltage;
-lv_task_t *battery_view_task;
+lv_task_t *battery_view_task = NULL;
 
-void battery_view_update_task( lv_task_t *task );
-void battery_activate_cb( void );
-void battery_hibernate_cb( void );
+static void battery_view_update_task( lv_task_t *task );
+static bool battery_view_button_cb( EventBits_t event, void *arg );
+static void battery_activate_cb( void );
+static void battery_hibernate_cb( void );
 
 void battery_view_tile_setup( uint32_t tile_num ) {
     // get an app tile and copy mainstyle
@@ -137,21 +138,37 @@ void battery_view_tile_setup( uint32_t tile_num ) {
     lv_label_set_text( vbus_view_voltage, "2.4mV");
     lv_obj_align( vbus_view_voltage, vbus_voltage_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );
 
+    mainbar_add_tile_button_cb( battery_view_tile_num, battery_view_button_cb );
+
     mainbar_add_tile_activate_cb( tile_num, battery_activate_cb );
     mainbar_add_tile_activate_cb( tile_num + 1, battery_activate_cb );
     mainbar_add_tile_hibernate_cb( tile_num, battery_hibernate_cb );
     mainbar_add_tile_hibernate_cb( tile_num + 1, battery_hibernate_cb );
 }
 
-void battery_activate_cb( void ) {
-    battery_view_task = lv_task_create(battery_view_update_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
+static bool battery_view_button_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_EXIT:
+            mainbar_jump_back();
+            break;
+    }
+
+    return( true );
 }
 
-void battery_hibernate_cb( void ) {
-    lv_task_del( battery_view_task );
+static void battery_activate_cb( void ) {
+    if( !battery_view_task )
+        battery_view_task = lv_task_create( battery_view_update_task, 1000,  LV_TASK_PRIO_LOWEST, NULL );
 }
 
-void battery_view_update_task( lv_task_t *task ) {
+static void battery_hibernate_cb( void ) {
+    if( battery_view_task ) {
+        lv_task_del( battery_view_task );
+        battery_view_task = NULL;
+    }
+}
+
+static void battery_view_update_task( lv_task_t *task ) {
     char temp[16]="";
 
     if ( pmu_get_battery_percent( ) >= 0 ) {

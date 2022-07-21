@@ -1,3 +1,9 @@
+/****************************************************************************
+ *   Tu May 22 21:23:51 2020
+ *   Copyright  2020  Dirk Brosswick
+ *   Email: dirk.brosswick@googlemail.com
+ ****************************************************************************/
+ 
 /*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,28 +19,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _CALENDAR_OVREVIEW_H
-    #define _CALENDAR_OVREVIEW_H
-
-    #define CALENDAR_OVREVIEW_INFO_LOG               log_i
-    #define CALENDAR_OVREVIEW_DEBUG_LOG              log_i
-    #define CALENDAR_OVREVIEW_ERROR_LOG              log_i
-    
-    #define CALENDAR_OVREVIEW_HIGHLIGHTED_DAYS       31
+#ifndef _BATTERY_CALIBRATION_H
+    #define _BATTERY_CALIBRATION_H
 
     /**
-     * @brief setup calendar overview tile
-     */
-    void calendar_overview_setup();
-    /**
-     * @brief get calendar overview tile number
+     * @brief system battery hirtory tile setup
      * 
-     * @return  calendar overview tile number
+     * @param tile_num 
      */
-    uint32_t calendar_overview_get_tile( void );
-    /**
-     * @brief refresh calendar date ui
-     */
-    void calendar_overview_refresh_showed_ui( void );
+    void battery_calibration_tile_setup( uint32_t tile_num );
 
-#endif // _CALENDAR_OVREVIEW_H
+#endif // _BATTERY_CALIBRATION_H

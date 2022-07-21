@@ -37,12 +37,6 @@
      */
     void display_setup( void );
     /**
-     * @brief display loop
-     * 
-     * @param   ttgo    pointer to an TTGOClass
-     */
-    void display_loop( void );
-    /**
      * @brief save config for display to spiffs
      */
     void display_save_config( void );
@@ -146,14 +140,6 @@
      * @return true is vibe feedback is enabled, false otherwise
      */
     bool display_get_vibe( void );
-    /**
-     * @brief set display into standby
-     */
-    void display_standby( void );
-    /**
-     * @brief set display into normal mode or leave it in standby if a silence wakeup occur
-     */
-    void display_wakeup( bool silence );
     /**
      * @brief registers a callback function which is called on a corresponding event
      * 

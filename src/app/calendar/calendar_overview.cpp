@@ -82,12 +82,11 @@ static int calendar_day = 0;                                                    
 static void calendar_overview_exit_event_cb( lv_obj_t * obj, lv_event_t event );
 static void calendar_overview_date_event_cb( lv_obj_t * obj, lv_event_t event );
 static int calendar_overview_highlight_day_callback( void *data, int argc, char **argv, char **azColName );
-int calendar_overview_highlight_day( int year, int month );
-void calendar_overview_build_ui( void );
-void calendar_overview_refresh_showed_ui( void );
-void calendar_overview_refresh_today_ui( void );
-void calendar_overview_activate_cb( void );
-void calendar_overview_hibernate_cb( void );
+static int calendar_overview_highlight_day( int year, int month );
+static void calendar_overview_build_ui( void );
+static void calendar_overview_refresh_today_ui( void );
+static void calendar_overview_activate_cb( void );
+static void calendar_overview_hibernate_cb( void );
 /**
  * setup routine for application
  */
@@ -118,7 +117,7 @@ void calendar_overview_setup( void ) {
     }
 }
 
-void calendar_overview_build_ui( void ) {
+static void calendar_overview_build_ui( void ) {
     /**
      * get calendar object from tile number
      */
@@ -176,7 +175,7 @@ void calendar_overview_refresh_showed_ui( void ) {
     lv_calendar_set_showed_date( calendar_overview, &today);
 }
 
-void calendar_overview_refresh_today_ui( void ) {
+static void calendar_overview_refresh_today_ui( void ) {
     /**
      * Set today's date
      */
@@ -193,7 +192,7 @@ void calendar_overview_refresh_today_ui( void ) {
     lv_calendar_set_today_date( calendar_overview, &today);
 }
 
-void calendar_overview_activate_cb( void ) {
+static void calendar_overview_activate_cb( void ) {
     /**
      * open calendar date base
      */
@@ -209,7 +208,7 @@ void calendar_overview_activate_cb( void ) {
     }
 }
 
-void calendar_overview_hibernate_cb( void ) {
+static void calendar_overview_hibernate_cb( void ) {
     /**
      * close calendar date base
      */
@@ -282,7 +281,7 @@ static int calendar_overview_highlight_day_callback( void *data, int argc, char 
     return 0;
 }
 
-int calendar_overview_highlight_day( int year, int month ) {
+static int calendar_overview_highlight_day( int year, int month ) {
     int hitcounter = 0;
     /**
      * clear calendar_overview_highlight_table table

@@ -101,6 +101,8 @@
             */
             portEXIT_CRITICAL_ISR(&timerMux);
         }
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no hardware driver for motor/vibe"
     #endif
@@ -156,6 +158,8 @@ void motor_setup( void ) {
             timerAttachInterrupt(timer, &onTimer, true);
             timerAlarmWrite(timer, 10000, true);
             timerAlarmEnable(timer);
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
     /*
@@ -197,6 +201,7 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 timerDetachInterrupt(timer);
                                                 break;
             }
+        #elif defined( WT32_SC01 )
         #endif
     #endif
     return( true );

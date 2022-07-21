@@ -63,7 +63,8 @@ void app_tile_setup( void ) {
     #elif defined( LILYGO_WATCH_2021 )
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
     #else
-        #error "no app tiles setup"        
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
+        #warning "not app tile setup"
     #endif
         app_cont[ tiles ] = mainbar_get_tile_obj( app_tile_num[ tiles ] );
         mainbar_add_tile_button_cb( app_tile_num[ tiles ], app_tile_button_event_cb );

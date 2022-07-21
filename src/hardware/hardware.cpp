@@ -66,6 +66,8 @@
     #elif defined( LILYGO_WATCH_2021 )    
         #include <twatch2021_config.h>
         #include <Wire.h>
+    #elif defined( WT32_SC01 )
+        #include <Wire.h>
     #else
         #error "no hardware init"
     #endif
@@ -79,6 +81,7 @@ void hardware_attach_lvgl_ticker( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( WT32_SC01 )
         #endif
         tickTicker->attach_ms( 5, []() {
             lv_tick_inc(5);
@@ -92,6 +95,7 @@ void hardware_attach_lvgl_ticker_slow( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( WT32_SC01 )
         #endif
         tickTicker->attach_ms(250, []() {
             lv_tick_inc(250);
@@ -105,6 +109,7 @@ void hardware_detach_lvgl_ticker( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( WT32_SC01 )
         #endif
         tickTicker->detach();
     #endif
@@ -190,6 +195,24 @@ void hardware_setup( void ) {
                 if ( Wire.endTransmission() == 0 )
                     log_i("I2C device at: 0x%02x", address );
 
+            }
+        #elif defined( WT32_SC01 )
+            /**
+             * lvgl init
+             */
+            lv_init();     
+            /**
+             * setup wire interface
+             */
+//            Wire.begin( IICSDA, IICSCL, 1000000 );
+            Wire.begin( PIN_SDA, PIN_SCL );
+            /**
+             * scan i2c devices
+             */
+            for( uint8_t address = 1; address < 127; address++ ) {
+                Wire.beginTransmission(address);
+                if ( Wire.endTransmission() == 0 )
+                    log_i("I2C device at: 0x%02x", address );
             }
         #endif
         /**

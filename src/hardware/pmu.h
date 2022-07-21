@@ -34,6 +34,8 @@
     #define PMUCTL_TIMER_TIMEOUT            _BV(3)              /** @brief event mask for pmuctl timer timeout, no callback arg */
     #define PMUCTL_UP_PRESS                 _BV(4)              /** @brief event mask for pmuctl up press, no callback arg */
     #define PMUCTL_DOWN                     _BV(5)              /** @brief event mask for pmuctl down press, no callback arg */
+    #define PMUCTL_CALIBRATION_START        _BV(6)              /** @brief event mask for pmuctl calibration start event */
+    #define PMUCTL_CALIBRATION_UPDATE       _BV(7)              /** @brief event mask for pmuctl calibration new data event */
     /**
      * PMU status mask
      */
@@ -46,6 +48,21 @@
      */
     #define PMU_CHARGE_LOG_FILENAME         "/pmu_charge.csv"   /** @brief defines csv logfile while charging when pmu logging is enabled */
     #define PMU_DISCHARGE_LOG_FILENAME      "/pmu_discharge.csv"/** @brief defines csv logfile while discharging when pmu logging is enabled */
+    /**
+     * 
+     */
+    typedef struct {
+        bool    run = false;
+        bool    store = false;
+        bool    charging = false;
+        bool    VBUS = false;
+        int64_t nextmillis = 0;
+        float   batteryVoltage;
+        float   minVoltage;
+        float   maxVoltage;
+        float   maxVoltageCharge;
+        float   chargingVoltageOffset;
+    } calibration_data_t;
     /**
      * @brief setup pmu: axp202
      */
@@ -201,5 +218,13 @@
      *  @brief  set normal voltage (3.3V) for update/flashing
      */
     void pmu_set_safe_voltage_for_update( void );
+    /**
+     * @brief start battery voltage range calibration
+     * 
+     * @param start_calibration     true to start, only works when store is false
+     * @param store                 true to store values, only works when start_calibration is false
+     * @return pointer to the current calibration data or NULL
+     */
+    calibration_data_t *pmu_battery_calibration_loop( bool start_calibration, bool store );
 
 #endif // _PMU_H

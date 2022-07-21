@@ -38,6 +38,7 @@
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
+    #include "utils/millis.h"
 #else
     #include <Arduino.h>
     #include "esp_task_wdt.h"
@@ -60,6 +61,7 @@ lv_obj_t *weather_forecast_temperature_label[ WEATHER_MAX_FORECAST ];
 lv_obj_t *weather_forecast_wind_label[ WEATHER_MAX_FORECAST ];
 
 static weather_forcast_t *weather_forecast = NULL;
+static uint64_t weather_last_update = 0;
 
 LV_IMG_DECLARE(refresh_32px);
 LV_IMG_DECLARE(owm01d_64px);
@@ -138,6 +140,16 @@ static void weather_forecast_activate_cb( void ) {
     wf_image_button_fade_in( exit_btn, 300, 0 );
     wf_image_button_fade_in( setup_btn, 300, 100 );
     wf_image_button_fade_in( reload_btn, 300, 200 );
+    if( weather_last_update != 0 ) {
+        if( weather_last_update <= millis() - ( 15 * 60 * 1000 ) ) {
+            weather_sync_request();
+            weather_last_update = millis();
+        }
+    }
+    else {
+        weather_sync_request();
+        weather_last_update = millis();
+    }
 }
 
 bool weather_button_event_cb( EventBits_t event, void *arg ) {

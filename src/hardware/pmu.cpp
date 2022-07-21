@@ -24,6 +24,8 @@
 #include "powermgm.h"
 #include "blectl.h"
 #include "callback.h"
+#include "utils/alloc.h"
+#include "utils/filepath_convert.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -35,6 +37,7 @@
     #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #else
     #include <Arduino.h>
+
     #if defined( M5PAPER )
         #include <M5EPD.h>
         static uint64_t next_wakeup = 0;
@@ -45,6 +48,8 @@
         #include "TTGO.h"
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no hardware driver for pmu"
     #endif
@@ -163,6 +168,8 @@ void pmu_setup( void ) {
         pinMode( CHARGE, INPUT_PULLUP );
         pinMode( BAT_ADC, INPUT );
         attachInterrupt( CHARGE, &pmu_irq, CHANGE );
+    #elif defined( WT32_SC01 )
+
     #endif
 #endif
     /*
@@ -216,7 +223,7 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( AXP202_INT );
                                                 retval = true;
-                                                break; 
+                                                break;
             #endif
         #endif
     }
@@ -291,7 +298,6 @@ void pmu_loop( void ) {
         if ( temp_pmu_irq_flag ) {
             log_e("hello Mc Fly, witch AXP irq on M5Core2?");
         }
-
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         TTGOClass *ttgo = TTGOClass::getWatch();
 
@@ -430,6 +436,10 @@ void pmu_loop( void ) {
             battery = percent > 0 ? true : false;
             log_e("hello Mc Fly, witch PMU irq on T-Watch2021?");
         }
+    #elif defined( WT32_SC01 )
+        static bool plug = false;
+        static bool charging = false;
+        static bool battery = percent > 0 ? true : false;
     #endif
 #endif
     /*
@@ -458,6 +468,7 @@ void pmu_loop( void ) {
             pmu_update = true;
             percent = tmp_percent;
         }
+        pmu_battery_calibration_loop( false, false );
     }
     /*
      * check if update flag is set
@@ -805,10 +816,12 @@ int32_t pmu_get_battery_percent( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             float mV = pmu_get_battery_voltage();
             if( pmu_is_charging() )
-                mV = mV - 400.0;
+                mV = mV - pmu_config.battery_chargingoffset;
             int32_t tmp_percent = pmu_get_voltage2percent( mV );
             if( tmp_percent )
                 percent = tmp_percent;
+        #elif defined( WT32_SC01 )
+            percent = 100;
         #endif
     #endif
     return( percent );
@@ -820,7 +833,7 @@ static int32_t pmu_get_voltage2percent( float mV ) {
      * mV to percent main conversation table
      *                             0%   10%    20%   30%  40%    50%   60%   70%   80%   90%  100%
      */
-    const float QcmMain[] =     { 3000, 3450, 3680, 3740, 3770, 3790, 3820, 3920, 3980, 4060, 4120 };
+    const float QcmMain[] =     { 3000, 3490, 3680, 3745, 3780, 3810, 3845, 3890, 3950, 4050, 4220 };
     size_t size = ( sizeof( QcmMain ) / sizeof( float ) ) - 1;
     float Qcm[ size ];
     /**
@@ -829,7 +842,7 @@ static int32_t pmu_get_voltage2percent( float mV ) {
     if( pmu_config.battery_voltage_highest < pmu_config.battery_voltage_lowest ) {
         pmu_config.battery_voltage_highest = QcmMain[ size ];
         pmu_config.battery_voltage_lowest = QcmMain[ 0 ];
-        log_e("lowest and highest battery voltage not valid, reset");
+        log_w("lowest and highest battery voltage not valid, reset");
     }
     float scale = ( pmu_config.battery_voltage_highest - pmu_config.battery_voltage_lowest ) / ( QcmMain[ size ] - QcmMain[ 0 ] );
     /**
@@ -883,9 +896,96 @@ float pmu_get_battery_voltage( void ) {
              * calc voltage
              */
             voltage = ( ( battery * 3300 * 2 ) / 4096 ) + 200;
+        #elif defined( WT32_SC01 )
+            voltage = 3700.0;
         #endif
     #endif
     return( voltage );
+}
+
+calibration_data_t *pmu_battery_calibration_loop( bool start_calibration, bool store ) {
+    calibration_data_t *retval = NULL;
+    static calibration_data_t calibration_data;
+
+    if( start_calibration ) {
+        /**
+         * set min/max start values in mV
+         */
+        calibration_data.maxVoltage = pmu_config.battery_voltage_highest;
+        calibration_data.minVoltage = pmu_config.battery_voltage_lowest;
+        calibration_data.maxVoltageCharge = 0.0;
+        /**
+         * set calibration time
+         */
+        calibration_data.nextmillis = millis() + 60 * 1000;
+        calibration_data.run = false;
+        calibration_data.store = store;
+        retval = &calibration_data;
+    }
+    else if( calibration_data.nextmillis != 0 ) {
+        /**
+         * check if next data is coming AND we are not in standby
+         */
+        if( calibration_data.nextmillis < millis() && powermgm_get_event( POWERMGM_WAKEUP | POWERMGM_SILENCE_WAKEUP ) ) {
+            /**
+             * set next watchpoint
+             */
+            calibration_data.nextmillis = millis() + 60 * 1000;
+            /**
+             * collect pmu data
+             */
+            calibration_data.batteryVoltage = pmu_get_battery_voltage();
+            calibration_data.charging = pmu_is_charging();
+            calibration_data.VBUS = pmu_is_charging() || pmu_is_vbus_plug();
+            /**
+             * only measure if not charging and no VBUS connected
+             */
+            if( !calibration_data.charging && !calibration_data.VBUS ) {
+                if( !calibration_data.run ) {
+                    calibration_data.run = true;
+                    calibration_data.maxVoltage = 0;
+                    calibration_data.minVoltage = 10000;
+                    pmu_send_cb( PMUCTL_CALIBRATION_START, (void*)&calibration_data );
+                }
+
+                if( calibration_data.batteryVoltage < calibration_data.minVoltage ) {
+                    calibration_data.minVoltage = calibration_data.batteryVoltage;
+                }
+                if( calibration_data.batteryVoltage > calibration_data.maxVoltage ) {
+                    calibration_data.maxVoltage = calibration_data.batteryVoltage;
+                }
+                calibration_data.chargingVoltageOffset = calibration_data.maxVoltageCharge - calibration_data.maxVoltage;
+                /**
+                 * store new min/max while calibration if enabled
+                 */
+                if( calibration_data.store ) {
+                    pmu_config.battery_voltage_lowest = calibration_data.minVoltage;                
+                    pmu_config.battery_voltage_highest = calibration_data.maxVoltage;
+                    pmu_config.battery_chargingoffset = calibration_data.chargingVoltageOffset;
+                    pmu_config.save();
+                }
+            }
+            else {
+                if( calibration_data.batteryVoltage > calibration_data.maxVoltageCharge )
+                    calibration_data.maxVoltageCharge = calibration_data.batteryVoltage;
+            }
+            pmu_send_cb( PMUCTL_CALIBRATION_UPDATE, (void*)&calibration_data );
+            retval = &calibration_data;
+        }
+    }
+    else {
+        calibration_data.maxVoltage = pmu_config.battery_voltage_highest;
+        calibration_data.minVoltage = pmu_config.battery_voltage_lowest;
+        calibration_data.maxVoltageCharge = pmu_config.battery_voltage_highest + pmu_config.battery_chargingoffset;
+        calibration_data.chargingVoltageOffset = pmu_config.battery_chargingoffset;
+        calibration_data.batteryVoltage = pmu_get_battery_voltage();
+        calibration_data.charging = pmu_is_charging();
+        calibration_data.VBUS = pmu_is_charging() || pmu_is_vbus_plug();
+        pmu_send_cb( PMUCTL_CALIBRATION_UPDATE, (void*)&calibration_data );
+        retval = &calibration_data;
+    }
+
+    return( retval );
 }
 
 float pmu_get_battery_charge_current( void ) {
@@ -900,6 +1000,8 @@ float pmu_get_battery_charge_current( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattChargeCurrent();
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 
@@ -920,6 +1022,8 @@ float pmu_get_battery_discharge_current( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             current = ttgo->power->getBattDischargeCurrent();
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 
@@ -941,6 +1045,9 @@ float pmu_get_vbus_voltage( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             voltage = ttgo->power->getVbusVoltage();
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
+            voltage = 5.0f;
         #endif
     #endif
 
@@ -959,6 +1066,8 @@ float pmu_get_coulumb_data( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             coulumb_data = ttgo->power->getCoulombData();
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 
@@ -979,6 +1088,8 @@ bool pmu_is_charging( void ) {
             charging = ttgo->power->isChargeing();
         #elif defined( LILYGO_WATCH_2021 )
             charging = digitalRead( CHARGE ) ? false : true;
+        #elif defined( WT32_SC01 )
+            charging = true;
         #endif
     #endif
 
@@ -993,10 +1104,17 @@ bool pmu_is_vbus_plug( void ) {
     #else
         #if defined( M5PAPER )
         #elif defined( M5CORE2 )
-            plug = M5.Axp.isVBUS();
+            plug = M5.Axp.isACIN();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             plug = ttgo->power->isVBUSPlug();
+        #elif defined( LILYGO_WATCH_2021 )
+            if( pmu_get_battery_voltage() > 4300 )
+                plug = true;
+            else
+                plug = false;
+        #elif defined( WT32_SC01 )
+            plug = true;
         #endif
     #endif
 

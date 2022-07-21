@@ -153,6 +153,7 @@ lv_obj_t * wf_add_roller(lv_obj_t *parent, char const * data, lv_roller_mode_t m
  * @return  returns pointer to the added object
  */
 lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on = false);
+lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on, lv_event_cb_t event_cb );
 
 /**
  * @brief   Creates and adds a container with a label and a switch to a container

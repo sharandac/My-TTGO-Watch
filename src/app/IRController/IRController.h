@@ -25,7 +25,9 @@
     #ifdef NATIVE_64BIT
         void IRController_setup( void );
     #else
-        #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )    
+        #if defined( M5PAPER )
+            void IRController_setup( void );
+        #elif defined( M5CORE2 )
             void IRController_setup( void );
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             enum IRControlSettingsAction {
@@ -39,6 +41,10 @@
             void IRController_setup( void );
             void IRController_build_UI(IRControlSettingsAction settingsAction);
             void execute_ir_cmd(InfraButton* config);
+        #elif defined( LILYGO_WATCH_2021 )
+            void IRController_setup( void );
+        #elif defined( WT32_SC01 )
+            void IRController_setup( void );
         #else
             /**
              * NEW_HARDWARE_TAG or not defined

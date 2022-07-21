@@ -56,8 +56,12 @@
         #include <twatch2021_config.h>
 
         TFT_eSPI tft = TFT_eSPI();
+    #elif defined( WT32_SC01 )
+        #include "TFT_eSPI.h"
+
+        TFT_eSPI tft = TFT_eSPI();
     #else
-        #error "no hardware driver for framebuffer, please setup minimal drivers ( framebuffer/touch )"
+        #error "no hardware driver for framebuffer, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
 #endif
 
@@ -116,14 +120,24 @@ void framebuffer_setup( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             framebuffer_use_dma = true;
 
-            pinMode(TFT_LED, OUTPUT);
-            ledcSetup(0, 4000, 8);
-            ledcAttachPin(TFT_LED, 0);
-            ledcWrite(0, 0);
+            pinMode( TFT_LED, OUTPUT );
+            ledcSetup( 0, 4000, 8 );
+            ledcAttachPin( TFT_LED, 0 );
+            ledcWrite( 0, 0 );
 
             tft.init();
-            tft.fillScreen(TFT_BLACK);
+            tft.fillScreen( TFT_BLACK );
             tft.initDMA();
+        #elif defined( WT32_SC01 )
+            framebuffer_use_dma = true;
+            tft.init();
+            tft.setSwapBytes( true );
+            tft.fillScreen( TFT_BLACK );
+            tft.initDMA();
+            tft.setRotation( 1 );
+            ledcWrite(0, 0xff );
+        #else
+            #error "no framebuffer init function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     /*
@@ -231,7 +245,12 @@ bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg ) {
                     max_y = 0;
                 }
             }
+        #elif defined( M5CORE2 )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
+        #else
+            #error "no framebuffer powermgm loop event function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     return( true );
@@ -252,7 +271,12 @@ void framebuffer_refresh( void ) {
             max_x = 0;
             min_y = FRAMEBUFFER_BUFFER_H;
             max_y = 0;
+        #elif defined( M5CORE2 )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #elif defined( LILYGO_WATCH_2021 )
+        #elif defined( WT32_SC01 )
+        #else
+            #error "no framebuffer refresh function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
 }
@@ -376,6 +400,30 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
                 tft.flush();
                 tft.endWrite();
             }
+        #elif defined( WT32_SC01 )
+            /**
+             * get buffer size
+             */
+            uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+            /**
+             * stop/wait last transmission
+             * start data trnsmission
+             * set the working window
+             * and start DMA transfer if enabled
+             */
+            if ( framebuffer_use_dma ) {
+                tft.endWrite();
+                tft.startWrite();
+                tft.pushImageDMA( area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1), ( uint16_t *)color_p );
+            }
+            else {
+                tft.startWrite();
+                tft.pushImage( area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1), ( uint16_t *)color_p );
+                tft.flush();
+                tft.endWrite();
+            }
+        #else
+            #error "no LVGL display driver function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     lv_disp_flush_ready( disp_drv );

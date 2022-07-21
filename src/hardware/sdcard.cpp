@@ -30,8 +30,8 @@
     #include "esp_bt.h"
     #include "esp_task_wdt.h"
     #include "sdcard.h"
-    #if defined( M5PAPER )
 
+    #if defined( M5PAPER )
     #elif defined( M5CORE2 )
         #include <M5Core2.h>
 
@@ -42,7 +42,8 @@
         #if defined( LILYGO_WATCH_HAS_SDCARD )
             SPIClass *sdhander = nullptr;
         #endif
-    #elif defined( LILYGO_WATCH_2021 )    
+    #elif defined( LILYGO_WATCH_2021 )   
+    #elif defined( WT32_SC01 )
     #else
         #warning "no hardware driver for sd_card"
     #endif
@@ -60,7 +61,6 @@ void sdcard_setup( void ) {
 
 #else
     #if defined( M5PAPER )
-
     #elif defined( M5CORE2 )
         /**
          * as small hack to reduce internal heap memory
@@ -99,6 +99,8 @@ void sdcard_setup( void ) {
 
             sdcard_mounted = true;
         #endif    
+    #elif defined( LILYGO_WATCH_2021 )   
+    #elif defined( WT32_SC01 )
     #endif
 #endif
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sdcard_powermgm_event_cb, "sdcard powermgm" );
@@ -111,7 +113,6 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
         return( true );
 
     #if defined( M5PAPER )
-
     #elif defined( M5CORE2 )
         retval = true;
 /*
@@ -193,6 +194,10 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
                     break;
             }
         #endif
+    #elif defined( LILYGO_WATCH_2021 )   
+        retval = true;
+    #elif defined( WT32_SC01 )
+        retval = true;
     #else
         switch( event ) {
             case POWERMGM_SILENCE_WAKEUP:

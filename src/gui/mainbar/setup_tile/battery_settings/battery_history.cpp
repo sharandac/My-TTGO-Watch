@@ -50,6 +50,7 @@ lv_chart_series_t *battery_history_voltage_series = NULL;
 lv_chart_series_t *battery_history_charge_series = NULL;
 lv_chart_series_t *battery_history_discharge_series = NULL;
 
+static bool battery_history_button_event_cb( EventBits_t event, void *arg );
 static bool battery_history_powermgm_loop_cb( EventBits_t event, void *arg );
 
 void battery_history_tile_setup( uint32_t tile_num ) {
@@ -111,8 +112,20 @@ void battery_history_tile_setup( uint32_t tile_num ) {
     lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_charge_series ), 0, 300 );
     lv_chart_set_y_range( battery_history_current_chart, lv_chart_get_series_axis( battery_history_current_chart, battery_history_discharge_series ), 0, 300 );
 
+    mainbar_add_tile_button_cb( battery_history_tile_num, battery_history_button_event_cb );
+
     mainbar_add_slide_element( battery_history_voltage_chart );
     mainbar_add_slide_element( battery_history_current_chart );
+}
+
+static bool battery_history_button_event_cb( EventBits_t event, void *arg ) {
+    switch( event ) {
+        case BUTTON_EXIT:
+            mainbar_jump_back();
+            break;
+    }
+
+    return( true );
 }
 
 void battery_history_start_chart_logging( void ) {

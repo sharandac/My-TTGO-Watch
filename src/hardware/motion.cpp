@@ -67,6 +67,7 @@
             Wire.write(data, len);
             return (0 !=  Wire.endTransmission());
         }
+    #elif defined( WT32_SC01 )
 
     #else
         #warning "no hardware driver for bma/axis sensor"
@@ -140,6 +141,10 @@ void bma_setup( void ) {
                 log_w("stepcounter not valid. reset");
             }
             stepcounter = stepcounter + stepcounter_before_reset;
+        #elif defined( WT32_SC01 )
+            stepcounter = 0;
+            stepcounter_before_reset = 0;
+            stepcounter_valid = 0xa5a5a5a5;
         #endif
     #endif
     /*
@@ -211,6 +216,8 @@ void bma_setup( void ) {
             bma.enableStepCountInterrupt();
             bma.enableTiltInterrupt();
             bma.enableWakeupInterrupt();
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
     /*
@@ -249,6 +256,8 @@ bool bma_powermgm_event_cb( EventBits_t event, void *arg ) {
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( BMA_INT_1 );
                                                 break;
+            #elif defined( WT32_SC01 )
+
             #endif
         #endif
     }
@@ -318,6 +327,7 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
                 if ( bma.isStepCounter() ) {
                     BMA_stepcounter = true;
                 }
+            #elif defined( WT32_SC01 )
 
             #endif
         #endif         
@@ -370,6 +380,8 @@ void bma_notify_stepcounter( void ) {
             stepcounter_before_reset = ttgo->bma->getCounter();
         #elif defined( LILYGO_WATCH_2021 )
             stepcounter_before_reset = bma.getCounter();
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
     val = stepcounter + stepcounter_before_reset;
@@ -391,6 +403,8 @@ void bma_standby( void ) {
                 ttgo->bma->enableStepCountInterrupt( false );
             #elif defined( LILYGO_WATCH_2021 )
                 bma.enableStepCountInterrupt( false );
+            #elif defined( WT32_SC01 )
+
             #endif
         #endif
     }
@@ -406,6 +420,8 @@ void bma_standby( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             gpio_wakeup_enable ( (gpio_num_t)BMA_INT_1, GPIO_INTR_POSEDGE );
             esp_sleep_enable_gpio_wakeup ();
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
 }
@@ -425,6 +441,8 @@ void bma_wakeup( void ) {
                 ttgo->bma->enableStepCountInterrupt( true );
             #elif defined( LILYGO_WATCH_2021 )
                 bma.enableStepCountInterrupt( true );
+            #elif defined( WT32_SC01 )
+
             #endif
         #endif
     }
@@ -461,6 +479,7 @@ void bma_wakeup( void ) {
                     ttgo->bma->resetStepCounter();
                 #elif defined( LILYGO_WATCH_2021 )
                     bma.resetStepCounter();
+                #elif defined( WT32_SC01 )
                 #endif
             #endif
             stepcounter_before_reset = 0;
@@ -491,6 +510,7 @@ void bma_reload_settings( void ) {
             bma.enableStepCountInterrupt( bma_config.enable[ BMA_STEPCOUNTER ] );
             bma.enableWakeupInterrupt( bma_config.enable[ BMA_DOUBLECLICK ] );
             bma.enableTiltInterrupt( bma_config.enable[ BMA_TILT ] );
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 }
@@ -613,6 +633,8 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
                             bma.setRemapAxes(&remap_data);
                             break;
             }
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
 }
@@ -631,6 +653,8 @@ void bma_reset_stepcounter( void ) {
             ttgo->bma->resetStepCounter();
         #elif defined( LILYGO_WATCH_2021 )
             bma.resetStepCounter();
+        #elif defined( WT32_SC01 )
+
         #endif
     #endif
     /**

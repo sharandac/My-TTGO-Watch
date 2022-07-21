@@ -50,8 +50,12 @@ touch_config_t touch_config;
         #include <CST8165/CST816S.h>
 
         CST816S_Class TouchSensor;
+    #elif defined( WT32_SC01 )
+        #include <Adafruit_FT6206.h>
+
+        Adafruit_FT6206 ctp = Adafruit_FT6206();
     #else
-        #error "no hardware driver for touch, please setup minimal drivers ( framebuffer/touch )"
+        #error "no hardware driver for touch, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
     volatile bool DRAM_ATTR touch_irq_flag = false;
     portMUX_TYPE DRAM_ATTR Touch_IRQ_Mux = portMUX_INITIALIZER_UNLOCKED;
@@ -142,6 +146,11 @@ void touch_setup( void ) {
         attachInterrupt( TOUCH_INT, &touch_irq, FALLING );
     #elif defined( LILYGO_WATCH_2021 )    
         ASSERT( TouchSensor.begin( Wire, Touch_Res, Touch_Int, CTP_SLAVER_ADDR ), "touch controler failed" );
+    #elif defined( WT32_SC01 )
+        pinMode( GPIO_NUM_39, INPUT );
+        ASSERT( ctp.begin(40), "Couldn't start FT6206 touchscreen controller");
+    #else
+        #error "no touch init implemented, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
     xSemaphores = xSemaphoreCreateMutex();
 #endif
@@ -198,7 +207,9 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
         touch_irq_flag = false;
         portEXIT_CRITICAL(&Touch_IRQ_Mux);
 
-        #if defined ( M5CORE2 )
+        #if defined( M5PAPER )
+            retval = true;
+        #elif defined ( M5CORE2 )
             switch( event ) {
                 case POWERMGM_STANDBY:
                     if( M5.Touch.ispressed() )
@@ -214,8 +225,28 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                     retval = true;        
                     break;
             }
-        #else
+        #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             retval = true;
+        #elif defined( LILYGO_WATCH_2021 )
+            retval = true;
+        #elif defined( WT32_SC01 )
+            switch( event ) {
+                case POWERMGM_STANDBY:
+                    if( ctp.touched() )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    retval = true;
+                    break;
+                case POWERMGM_WAKEUP:
+                    retval = true;
+                    break;
+                case POWERMGM_SILENCE_WAKEUP:
+                    if ( ctp.touched() )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    retval = true;        
+                    break;
+            }    
+        #else
+            #error "no touch powermgm loop event implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     return( retval );
@@ -259,7 +290,7 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 retval = true;
                                                 break;
             }
-        #elif defined( M5CORE2 )
+        #elif defined( M5CORE2 ) || defined( WT32_SC01 )
             switch( event ) {
                 case POWERMGM_STANDBY:          log_d("go standby");
                                                 /**
@@ -315,6 +346,8 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 retval = true;
                                                 break;
             }
+        #else
+            #error "no touch powermgm event implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     return( retval );
@@ -377,7 +410,6 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
                 touched = false;
                 return( false );
             }
-
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
             static bool touch_press = false;
@@ -419,6 +451,18 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
             else {
                 return( false );
             }
+        #elif defined( WT32_SC01 )
+            if ( ctp.touched() ) {
+                TS_Point p = ctp.getPoint();
+                x = TFT_WIDTH - map( p.y, 0, TFT_WIDTH, TFT_WIDTH, 0 );
+                y = map( p.x, 0, TFT_HEIGHT, TFT_HEIGHT, 0 );
+                return( true );
+            }
+            else {
+                return( false );
+            }
+        #else
+            #error "no touch getXY function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     return( true );
@@ -523,6 +567,10 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
             }
         #elif defined( LILYGO_WATCH_2021 )
             data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+        #elif defined( WT32_SC01 )
+            data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+        #else
+            #error "no LVGL Input driver function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
     #endif
     if( data->state == LV_INDEV_STATE_PR ) {

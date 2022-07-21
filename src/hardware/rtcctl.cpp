@@ -49,6 +49,8 @@
         #include <Wire.h>
 
         PCF8563_Class rtc;
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no hardware driver for rtcctl"
     #endif
@@ -113,6 +115,7 @@ void rtcctl_setup( void ) {
 //            pinMode( RTC_Int, INPUT);
 //            attachInterrupt( RTC_Int, &rtcctl_irq, GPIO_INTR_POSEDGE );
         #endif
+    #elif defined( WT32_SC01 )
 
     #endif
 #endif
@@ -179,6 +182,8 @@ void set_next_alarm( void ) {
         ttgo->rtc->setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );    
     #elif defined( LILYGO_WATCH_2021 )
         rtc.setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );        
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -228,6 +233,8 @@ void set_next_alarm( void ) {
         ttgo->rtc->setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
     #elif defined( LILYGO_WATCH_2021 )
         rtc.setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -250,6 +257,8 @@ void rtcctl_set_next_alarm( void ) {
         ttgo->rtc->disableAlarm();
     #elif defined( LILYGO_WATCH_2021 )
         rtc.disableAlarm();
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -271,6 +280,8 @@ void rtcctl_set_next_alarm( void ) {
         ttgo->rtc->enableAlarm();
     #elif defined( LILYGO_WATCH_2021 )
         rtc.enableAlarm();
+    #elif defined( WT32_SC01 )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -292,6 +303,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #elif defined( LILYGO_WATCH_2021 ) && defined( VERSION_2 )
                                                 // gpio_wakeup_enable( (gpio_num_t)RTC_Int, GPIO_INTR_POSEDGE );
                                                 // esp_sleep_enable_gpio_wakeup ();
+                                            #elif defined( WT32_SC01 )
                                             #else
                                                 #warning "no rtcctl powermgm standby event"
                                             #endif
@@ -310,6 +322,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
                                             #elif defined( LILYGO_WATCH_2021 )
+                                            #elif defined( WT32_SC01 )
                                             #else
                                                 #warning "no rtcctl powermgm enable interrupts event"
                                             #endif
@@ -324,6 +337,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                                                 detachInterrupt( RTC_INT_PIN );
                                             #elif defined( LILYGO_WATCH_2021 )
+                                            #elif defined( WT32_SC01 )
                                             #else
                                                 #warning "no rtcctl powermgm disable interrupts event"
                                             #endif
@@ -398,6 +412,7 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
                 ttgo->rtc->disableAlarm();
             #elif defined( LILYGO_WATCH_2021 )
                 rtc.disableAlarm();
+            #elif defined( WT32_SC01 )
             #else
                 #warning "no rtcctl alarm function"
             #endif
@@ -430,6 +445,8 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
                 ttgo->rtc->enableAlarm();
             #elif defined( LILYGO_WATCH_2021 )
                 rtc.enableAlarm();
+            #elif defined( WT32_SC01 )
+
             #else
                 #warning "no rtcctl alarm function"
             #endif
@@ -448,6 +465,8 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
                 ttgo->rtc->enableAlarm();
             #elif defined( LILYGO_WATCH_2021 )
                 rtc.enableAlarm();
+            #elif defined( WT32_SC01 )
+
             #else
                 #warning "no rtcctl alarm function"
             #endif
@@ -521,6 +540,7 @@ void rtcctl_syncToSystem( void ) {
             ttgo->rtc->syncToSystem();
         #elif defined( LILYGO_WATCH_2021 )
             rtc.syncToSystem();
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 }
@@ -580,6 +600,7 @@ void rtcctl_syncToRtc( void ) {
             ttgo->rtc->syncToRtc();
         #elif defined( LILYGO_WATCH_2021 )
             rtc.syncToRtc();
+        #elif defined( WT32_SC01 )
         #endif
     #endif
 }

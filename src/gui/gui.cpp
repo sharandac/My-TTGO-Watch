@@ -91,6 +91,16 @@
     const lv_img_dsc_t bg1 = bg1_540px;
     const lv_img_dsc_t bg2 = bg2_540px;
     const lv_img_dsc_t bg3 = bg3_540px;
+#elif defined( WT32_SC01 )
+    LV_IMG_DECLARE( bg_480px );
+    LV_IMG_DECLARE( bg1_480px );
+    LV_IMG_DECLARE( bg2_480px );
+    LV_IMG_DECLARE( bg3_480px );
+
+    const lv_img_dsc_t bg = bg_480px;
+    const lv_img_dsc_t bg1 = bg1_480px;
+    const lv_img_dsc_t bg2 = bg2_480px;
+    const lv_img_dsc_t bg3 = bg3_480px;
 #else
     LV_IMG_DECLARE( bg_240px );
     LV_IMG_DECLARE( bg1_240px );
@@ -167,7 +177,7 @@ void gui_setup( void ) {
     style_settings_tile_setup();
     notify_settings_tile_setup();
     wlan_settings_tile_setup();
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 ) || defined( NATIVE_64BIT )
+    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 ) || defined( NATIVE_64BIT ) || defined( WT32_SC01 )
         touch_settings_tile_setup();
     #endif
     time_settings_tile_setup();

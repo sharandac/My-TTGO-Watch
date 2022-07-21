@@ -312,6 +312,29 @@ lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on){
     return _switch;
 }
 
+lv_obj_t * wf_add_switch(lv_obj_t *parent, bool on, lv_event_cb_t event_cb ){
+    lv_obj_t *_switch = lv_switch_create( parent, NULL );
+    //TODO: must it be here?
+    lv_obj_add_protect( _switch, LV_PROTECT_CLICK_FOCUS);
+
+    if (on) {
+        lv_switch_on( _switch, LV_ANIM_OFF );
+    } else {
+        lv_switch_off( _switch, LV_ANIM_OFF );
+    }
+
+    lv_obj_add_style( _switch, LV_SWITCH_PART_INDIC, ws_get_switch_style() );
+    #if defined( BIG_THEME )
+        lv_obj_set_size( _switch, 70, 35 );
+    #elif defined( MID_THEME )
+        lv_obj_set_size( _switch, 50, 25 );
+    #endif
+    lv_obj_set_ext_click_area(_switch, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING, CLICKABLE_PADDING);
+
+    lv_obj_set_event_cb( _switch, event_cb );
+    return _switch;
+}
+
 lv_obj_t * wf_add_labeled_switch(lv_obj_t *parent, char const * text, lv_obj_t ** ret_switch_obj){
     lv_obj_t *container = wf_add_container(parent, LV_LAYOUT_PRETTY_MID, LV_FIT_PARENT, LV_FIT_TIGHT );
     wf_add_label( container, text);

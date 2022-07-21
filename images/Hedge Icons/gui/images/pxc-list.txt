@@ -1,13 +1,17 @@
 ./bg3_540px.c
+./bg3_480px.c
 ./bg1_320px.c
+./bg1_480px.c
 ./bg2_540px.c
 ./bg_540px.c
 ./bg1_540px.c
 ./rounddisplaymask_240px.c
 ./bg_320px.c
+./bg2_480px.c
 ./bg3_320px.c
 ./bg1_240px.c
 ./bg_240px.c
 ./bg3_240px.c
 ./bg2_320px.c
 ./bg2_240px.c
+./bg_480px.c

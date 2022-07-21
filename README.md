@@ -9,7 +9,7 @@
 
 # My-TTGO-Watch
 
-A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021  (V1 and V2, no ota-updates), M5Paper, M5Core2 and native Linux support for testing.
+A GUI named hedge for smartwatch like devices based on ESP32. Currently support for T-Watch2020 (V1,V2,V3), T-Watch2021  (V1 and V2, no ota-updates), M5Paper, M5Core2, WT32-SC01 and native Linux support for testing.
 
 ## Features
 
@@ -51,6 +51,11 @@ A GUI named hedge for smartwatch like devices based on ESP32. Currently support 
 
 Clone this repository and open it with platformIO. Select the right env and then build and upload.
 Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from [ShotokuTech](https://github.com/ShotokuTech).
+
+Please check out
+    https://github.com/sharandac/My-TTGO-Watch/blob/709ed0c5863435aa966c1d6f44552ddc0909a57c/src/hardware/wifictl.cpp#L256-L261
+to setup your wifi when wps or input via display is not possible.
+
 If you are interested in native Linux support, please install sdl2, curl and mosquitto dev lib and change the env to emulator_* in platformIO.
 
 ```bash
@@ -119,12 +124,18 @@ Cf. [contribution guide](CONTRIBUTING.md)
 ![screenshot](images/image2.png)
 ![screenshot](images/image3.png)
 
-## M5Core2 ( experimental )
+## M5Core2
 
 ![screenshot](images/m5core2_img1.png)
 ![screenshot](images/m5core2_img2.png)
 ![screenshot](images/m5core2_img3.png)
 ![screenshot](images/m5core2_img4.png)
+
+## WT32-SC01
+
+![screenshot](images/WT32-SC01_img1.png)
+![screenshot](images/WT32-SC01_img2.png)
+![screenshot](images/WT32-SC01_img3.png)
 
 ## TTGO T-Watch 2021
 

@@ -68,7 +68,9 @@ void note_tile_setup( void ) {
         note_tile_num = mainbar_add_tile( 0, 1, "note tile", ws_get_mainbar_style() );
         note_cont = mainbar_get_tile_obj( note_tile_num );
     #else
-        #error "no note tiles setup"  
+        note_tile_num = mainbar_add_tile( 0, 1, "note tile", ws_get_mainbar_style() );
+        note_cont = mainbar_get_tile_obj( note_tile_num );
+        #warning "no note tiles setup"  
     #endif 
     style = ws_get_mainbar_style();
 

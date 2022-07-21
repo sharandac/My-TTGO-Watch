@@ -42,6 +42,13 @@
         #elif defined( LILYGO_WATCH_2021 )
             #define TOUCH_X_SCALE       1.0
             #define TOUCH_Y_SCALE       1.0
+        #elif defined( WT32_SC01 )
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
+        #else
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
+            #warning "no special hardware configuration for touch"
         #endif
     #endif
     /**

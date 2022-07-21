@@ -117,16 +117,28 @@ void powermeter_main_task( lv_task_t * task );
             lv_label_set_text( id_label, doc["id"] );
         }
         if ( doc["all"].containsKey("power") ) {
-            wf_label_printf( voltage_label, "%0.2fkW", atof( doc["all"]["power"] ) );
+            const char * unit = "kW";
+            if( doc.containsKey("PowerUnit") )
+                unit = doc["PowerUnit"];
+            wf_label_printf( power_label, "%0.2fkW", atof( doc["all"]["power"] ), unit );
         }
         if ( doc["channel0"].containsKey("power") ) {
-            wf_label_printf( voltage_label, "%0.2fkW", atof( doc["channel0"]["power"] ) );
+            const char * unit = "kW";
+            if( doc.containsKey("PowerUnit") )
+                unit = doc["PowerUnit"];
+            wf_label_printf( power_label, "%0.2f%s", atof( doc["channel0"]["power"] ), unit );
         }
         if ( doc["channel0"].containsKey("voltage") ) {
-            wf_label_printf( voltage_label, "%0.1fV", atof( doc["channel0"]["voltage"] ) );
+            const char * unit = "V";
+            if( doc.containsKey("VoltageUnit") )
+                unit = doc["VoltageUnit"];
+            wf_label_printf( voltage_label, "%0.1f%s", atof( doc["channel0"]["voltage"] ), unit );
         }
         if ( doc["channel0"].containsKey("current") ) {
-            wf_label_printf( voltage_label, "%0.1fA", atof( doc["channel0"]["current"] ) );
+            const char * unit = "A";
+            if( doc.containsKey("CurrentUnit") )
+                unit = doc["CurrentUnit"];
+            wf_label_printf( current_label, "%0.1f%s", atof( doc["channel0"]["current"] ), unit );
         }
 
         lv_obj_align( id_label, id_cont, LV_ALIGN_IN_RIGHT_MID, -THEME_PADDING, 0 );

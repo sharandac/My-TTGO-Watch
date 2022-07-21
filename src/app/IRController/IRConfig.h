@@ -7,8 +7,8 @@
 
     #ifdef NATIVE_64BIT
     #else
-        #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2021 )  
-
+        #if defined( M5PAPER )
+        #elif defined( M5CORE2 )
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             #define IR_BUTTONS_START 16
             #define IR_BUTTONS_TRESHOLD 8
@@ -44,6 +44,8 @@
                 InfraButton** buttons = nullptr;
                 size_t buttonCount = 0;
             };
+        #elif defined( LILYGO_WATCH_2021 )  
+        #elif defined( WT32_SC01 )
         #else
             /**
              * NEW_HARDWARE_TAG or not defined

@@ -63,7 +63,7 @@ void powermgm_setup( void ) {
     powermgm_status = xEventGroupCreate();
 
     powermgm_tickTicker = new Ticker();
-    #if defined( LILYGO_WATCH_2021 )
+    #if defined( LILYGO_WATCH_2021 ) || defined( WT32_SC01 )
         powermgm_tickTicker->attach_ms( 100, []() {
             powermgm_resume_from_ISR();
         });

@@ -43,6 +43,8 @@
         #endif
     #elif defined( M5CORE2 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/m5stack-core2.version.json"
+    #elif defined( WT32_SC01 )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/wt32-sc01.version.json"
     #endif
 
     #if !defined( FIRMWARE_UPDATE_URL )
