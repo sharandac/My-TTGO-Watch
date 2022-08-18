@@ -48,7 +48,6 @@
 #include "mainbar/setup_tile/time_settings/time_settings.h"
 #include "mainbar/setup_tile/touch_settings/touch_settings.h"
 #include "mainbar/setup_tile/watchface/watchface_manager.h"
-#include "gui/mainbar/setup_tile/watchface/config/watchface_expr.h"
 #include "mainbar/setup_tile/update/update.h"
 #include "mainbar/setup_tile/style_settings/style_settings.h"
 #include "hardware/powermgm.h"
@@ -177,9 +176,7 @@ void gui_setup( void ) {
     style_settings_tile_setup();
     notify_settings_tile_setup();
     wlan_settings_tile_setup();
-    #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 ) || defined( NATIVE_64BIT ) || defined( WT32_SC01 )
-        touch_settings_tile_setup();
-    #endif
+    touch_settings_tile_setup();
     time_settings_tile_setup();
     gps_settings_tile_setup();
     utilities_tile_setup();
@@ -188,11 +185,7 @@ void gui_setup( void ) {
     #ifndef NO_BLUETOOTH
         bluetooth_settings_tile_setup();
     #endif
-    #ifndef NO_WATCHFACE
-        watchface_manager_setup();
-        watchface_expr_setup();
-    #endif
-
+    watchface_manager_setup();
     #if defined( LILYGO_WATCH_HAS_SDCARD )
         sdcard_settings_tile_setup();
     #endif

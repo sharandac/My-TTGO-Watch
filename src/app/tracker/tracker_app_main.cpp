@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-// #include <dirent.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <unistd.h> 
 
@@ -278,9 +278,9 @@ static bool tracker_app_main_gps_event_cb( EventBits_t event, void *arg ) {
  * @return const char*  pointer to a current file or NULL
  */
 const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
-    static bool logging = false;
-    static char *filename = NULL;
-    static size_t size = 0;
+    static bool logging = false;        /** @brief logging state variable, true for loggings active **/
+    static char *filename = NULL;       /** @brief current full file name, if NULL no action **/
+    static size_t size = 0;             /** @brief file size write counter **/
     
     FILE *fp;
     time_t now;
@@ -334,7 +334,7 @@ const char *tracker_app_main_logging( bool start, gps_data_t *gps_data ) {
             if( !gps_data )
                 return( "error" );
             /**
-             * 
+             * open file for append
              */
             fp = fopen( filename, "at" );
             if( fp ) {
@@ -404,7 +404,7 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
                     tracker_logging_state = true;
                     distance = 0.0f;
                     gpsctl_on();
-//                    sdcard_block_unmounting( true );
+                    sdcard_block_unmounting( true );
                     tracker_app_main_logging( true, NULL );
                     tracker_app_view_clean_data();
                     tracker_gps_on_standby_state = gpsctl_get_enable_on_standby();
@@ -414,7 +414,7 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
                 else {
                     tracker_logging_state = false;
                     gpsctl_off();
-//                    sdcard_block_unmounting( false );
+                    sdcard_block_unmounting( false );
                     gpsctl_set_enable_on_standby( tracker_gps_on_standby_state );
                     gadgetbridge_send_msg( "\r\n{\"t\":\"info\",\"msg\":\"gps tracker stoped\"}\r\n" );
                 }
@@ -452,7 +452,6 @@ static void tracker_app_main_enter_location_cb( lv_obj_t * obj, lv_event_t event
 static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) {
     switch ( event ) {
         case LV_EVENT_CLICKED: {
-/*
             char path[512] = "";
             DIR *d;
             struct dirent *dir;
@@ -481,7 +480,7 @@ static void tracker_app_main_enter_trash_cb( lv_obj_t * obj, lv_event_t event ) 
                 closedir( d );
                 wf_label_printf( tracker_file_info_label, mainbar_get_tile_obj( tracker_app_get_app_main_tile_num() ), LV_ALIGN_IN_BOTTOM_MID, 0, -THEME_PADDING, "remove %d files", file_count );
             }
-*/            break;    
+            break;    
         }
     }
 }
