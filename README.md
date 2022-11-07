@@ -96,6 +96,7 @@ Cf. [Usage](USAGE.md)
 [NorthernDIY](https://github.com/NorthernDIY/My-TTGO-Watch)<br>
 [linuxthor](https://github.com/linuxthor/Hackers-TTGO-Watch)<br>
 [d03n3rfr1tz3](https://github.com/d03n3rfr1tz3/TTGO.T-Watch.2020)<br>
+[lunokjod](https://github.com/lunokjod/watch)<br>
 
 # For the programmers
 
