@@ -415,7 +415,7 @@ void bma_standby( void ) {
     #else
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_POSEDGE );
+            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
             esp_sleep_enable_gpio_wakeup ();
         #elif defined( LILYGO_WATCH_2021 )
             gpio_wakeup_enable ( (gpio_num_t)BMA_INT_1, GPIO_INTR_POSEDGE );
