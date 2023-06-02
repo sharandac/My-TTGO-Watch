@@ -33,6 +33,7 @@
     #include "utils/logging.h"
     #include "utils/millis.h"
     #include <string>
+    #include <time.h>
 
     using namespace std;
     #define String string

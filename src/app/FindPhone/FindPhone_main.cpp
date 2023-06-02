@@ -54,7 +54,7 @@ lv_obj_t *bluetooth_FindPhone_label = NULL;
 
 lv_style_t bluetooth_FindPhone_style;
 
-lv_task_t * _FindPhone_PhoneSearch_task; 
+lv_task_t * _FindPhone_PhoneSearch_task = nullptr; 
 lv_task_t * _FindPhone_WatchFind_task = nullptr;
 
 LV_IMG_DECLARE(eye_200px);
@@ -167,9 +167,12 @@ static void toggle_searching ()
 		REM(false);
 		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 		searching_phone = false;
-	}else {
-	    _FindPhone_PhoneSearch_task = lv_task_create( FindPhone_PhoneSearch_task, 1000, LV_TASK_PRIO_MID, NULL );
-		searching_phone = true;
+	}
+    else {
+        if( _FindPhone_PhoneSearch_task == nullptr ) {
+            _FindPhone_PhoneSearch_task = lv_task_create( FindPhone_PhoneSearch_task, 1000, LV_TASK_PRIO_MID, NULL );
+            searching_phone = true;
+        }
 	}		
 }
 
@@ -200,6 +203,7 @@ static void FindPhone_PhoneSearch_task( lv_task_t * task )
 		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
 	}
     lv_task_del( _FindPhone_PhoneSearch_task );
+    _FindPhone_PhoneSearch_task = nullptr;
 }
 
 static void FindPhone_WatchFind_task( lv_task_t * task )
