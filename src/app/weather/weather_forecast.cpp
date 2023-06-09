@@ -34,7 +34,6 @@
 #include "hardware/powermgm.h"
 #include "hardware/wifictl.h"
 #include "utils/alloc.h"
-#include "gui/mainbar/mainbar.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"

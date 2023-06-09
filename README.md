@@ -83,7 +83,7 @@ You might remove the example app commenting out these lines by adding two slashe
 
 (Line numbers are approximate and may change as the system develops.)
 
-Since each app includes a different set of files, you may need to comment out several apps to reduce it small enough for the Windows build.
+Since each app includes a different set of files, you may need to comment out several apps to reduce it small enough for the Windows build. And don't forget to delete the corresponding app files/directories. Commenting out is not enough.
 
 # How to use
 

@@ -90,14 +90,6 @@ void wifictl_setup( void ) {
      */
     wifictl_status = xEventGroupCreate();
     /*
-     * limit wifi bandwidth to 20Mhz channel width
-     */
-    #ifdef ARDUNIO_NG
-    #else
-        esp_wifi_set_bandwidth( ESP_IF_WIFI_STA, WIFI_BW_HT20 );
-        esp_wifi_set_ps(WIFI_PS_MAX_MODEM);
-    #endif
-    /*
      * register WiFi events
      */
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
