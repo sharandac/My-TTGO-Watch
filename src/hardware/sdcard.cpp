@@ -109,7 +109,7 @@ void sdcard_setup( void ) {
 bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     bool retval = false;
 
-    if( sdcard_mount_failed )
+    if( sdcard_mount_failed || !sdcard_mounted)
         return( true );
 
     #if defined( M5PAPER )
