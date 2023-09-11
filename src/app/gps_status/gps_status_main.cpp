@@ -70,7 +70,6 @@ LV_FONT_DECLARE(Ubuntu_16px);
 
 bool style_change_event_cb( EventBits_t event, void *arg );
 bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg );
-static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event);
 void gps_status_task(lv_task_t *task);
 void gps_status_hibernate_cb(void);
 void gps_status_activate_cb(void);
@@ -81,10 +80,6 @@ void gps_status_main_setup(uint32_t tile_num) {
 
     lv_obj_t * exit_btn = wf_add_exit_button( gps_status_main_tile );
     lv_obj_align(exit_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_LEFT, THEME_PADDING, -THEME_PADDING);
-
-    lv_obj_t *setup_btn = wf_add_setup_button(gps_status_main_tile, enter_gps_status_setup_event_cb );
-    lv_obj_align(setup_btn, gps_status_main_tile, LV_ALIGN_IN_BOTTOM_RIGHT, -THEME_PADDING, -THEME_PADDING);
-    lv_obj_set_hidden(setup_btn, true);
 
     lv_style_copy(&gps_status_value_style, ws_get_mainbar_style());
     lv_style_set_bg_color(&gps_status_value_style, LV_OBJ_PART_MAIN, LV_COLOR_BLACK);
@@ -247,15 +242,6 @@ bool style_change_event_cb( EventBits_t event, void *arg ) {
                             break;
     }
     return( true );
-}
-
-static void enter_gps_status_setup_event_cb(lv_obj_t *obj, lv_event_t event) {
-    
-    switch (event) {
-        case (LV_EVENT_CLICKED):
-            mainbar_jump_to_tilenumber(gps_status_get_app_setup_tile_num(), LV_ANIM_OFF, true );
-            break;
-    }
 }
 
 bool gpsctl_gps_status_event_cb( EventBits_t event, void *arg ) {

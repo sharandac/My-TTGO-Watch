@@ -31,71 +31,129 @@
 #include "gui/widget.h"
 
 #include "utils/json_psram_allocator.h"
-
+/*
+ * powermeter app config
+ */
 powermeter_config_t powermeter_config;
-
-// app and widget icon
-icon_t *powermeter_app = NULL;
-icon_t *powermeter_widget = NULL;
-
+/*
+ * app tiles
+ */
 uint32_t powermeter_app_main_tile_num;
 uint32_t powermeter_app_setup_tile_num;
-
-// declare you images or fonts you need
+/*
+ * app and widget icon
+ */
+icon_t *powermeter_app = NULL;
+icon_t *powermeter_widget = NULL;
+/*
+ * declare callback functions for the app and widget icon to enter the app
+ */
 LV_IMG_DECLARE(powermeter_64px);
-
-// declare callback functions
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
 static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event );
-
-// setup routine for example app
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &powermeter_app_setup, 12 );           /** @brief app autocall function */
+/**
+ * @brief setup routine for powermeter app
+ */
 void powermeter_app_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif
+    /*
+     * load config
+     */
     powermeter_config.load();
-
-    // register 2 vertical tiles and get the first tile number and save it for later use
+    /*
+     * register 2 tiles and get tile numbers and save it for later use
+     */
     powermeter_app_main_tile_num = mainbar_add_app_tile( 1, 1, "Powermeter App" );
     powermeter_app_setup_tile_num = mainbar_add_setup_tile( 1, 2, "Powermeter App" );
-
+    /*
+     * register app icon on the app tile
+     * set your own icon and register her callback to activate by an click
+     * remember, an app icon must have an size of 64x64 pixel with an alpha channel
+     * use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
+     * the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+     */
     powermeter_app = app_register( "power-\nmeter", &powermeter_64px, enter_powermeter_app_event_cb );
 
     if ( powermeter_config.widget ) {
         powermeter_add_widget();
     }
-
+    /*
+     * init main and setup tile, see sailing_main.cpp and sailing_setup.cpp
+     */
     powermeter_main_tile_setup( powermeter_app_main_tile_num );
     powermeter_setup_tile_setup( powermeter_app_setup_tile_num );
 }
-
+/**
+ * @brief get the app main tile number
+ * 
+ * @return uint32_t 
+ */
 uint32_t powermeter_get_app_main_tile_num( void ) {
     return( powermeter_app_main_tile_num );
 }
-
+/**
+ * @brief get the app setup tile number
+ * 
+ * @return uint32_t 
+ */
 uint32_t powermeter_get_app_setup_tile_num( void ) {
     return( powermeter_app_setup_tile_num );
 }
-
+/**
+ * @brief get the app icon structure
+ * 
+ * @return icon_t* 
+ */
 icon_t *powermeter_get_app_icon( void ) {
     return( powermeter_app );
 }
-
+/**
+ * @brief get the widget icon structure
+ * 
+ * @return icon_t* 
+ */
 icon_t *powermeter_get_widget_icon( void ) {
     return( powermeter_widget );
 }
-
+/**
+ * @brief call back function when enter the app
+ * 
+ * @return icon_t* 
+ */
 static void enter_powermeter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( powermeter_app_main_tile_num, LV_ANIM_OFF, true );
                                         break;
     }    
 }
-
-
+/**
+ * @brief get the powermeter config structure
+ * 
+ * @return powermeter_config_t* 
+ */
 powermeter_config_t *powermeter_get_config( void ) {
     return( &powermeter_config );
 }
-
+/**
+ * @brief add the widget to the mainbar
+ * 
+ * @return true 
+ * @return false 
+ */
 bool powermeter_add_widget( void ) {
     if ( powermeter_widget == NULL ) {
         powermeter_widget = widget_register( "n/a", &powermeter_64px, enter_powermeter_app_event_cb );
@@ -109,7 +167,12 @@ bool powermeter_add_widget( void ) {
     }
     return( true );
 }
-
+/**
+ * @brief remove the widget from the mainbar
+ * 
+ * @return true 
+ * @return false 
+ */
 bool powermeter_remove_widget( void ) {
     powermeter_widget = widget_remove( powermeter_widget );
     return( true );

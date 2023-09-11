@@ -19,8 +19,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-#ifndef _SAILING_H
-    #define _SAILING_H
+#pragma once
 
     #define SAILING_INFO_LOG        log_i
     #define SAILING_ERROR_LOG       log_e
@@ -29,7 +28,5 @@
     void sailing_setup( void );
     uint32_t sailing_get_app_setup_tile_num( void );
     uint32_t sailing_get_app_main_tile_num( void );
-
-#endif // _SAILING_H
 
 extern bool tracking;

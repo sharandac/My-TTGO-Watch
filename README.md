@@ -74,16 +74,9 @@ The development tools have a known issue with the size of the project on Windows
     xtensa-esp32-elf-g++: error: CreateProcess: No such file or directory
     *** [.pio\build\t-watch2020-v1\firmware.elf] Error 1
 
-This issue has not been seen on Linux or other platforms. If you must compile on Windows you may work around this linker issue by removing apps you do not use from the .\src\main.cpp file.
+This issue has not been seen on Linux or other platforms. This is a linker issue and can be fixed by removing apps. To remove unneeded apps you can simply delete the appropriate directory in /src/app. Then simply recompile. App can be added in the same way. But note that the app must support autocall_function . This allows the automatic integration of apps without touching the rest of the code ( [the magic behind autocall_function](autocall.md) ).
 
-You might remove the example app commenting out these lines by adding two slashes (```//```) on these locations:
-
-* main.cpp line 9:  ```//#include "app/example_app/example_app.h"```
-* main.cpp line 65: ```//  example_app_setup();```
-
-(Line numbers are approximate and may change as the system develops.)
-
-Since each app includes a different set of files, you may need to comment out several apps to reduce it small enough for the Windows build. And don't forget to delete the corresponding app files/directories. Commenting out is not enough.
+Since each app includes a different set of files, you may need to delete several apps to reduce it small enough for the Windows build.
 
 # How to use
 
@@ -100,7 +93,8 @@ Cf. [Usage](USAGE.md)
 
 # For the programmers
 
-Cf. [contribution guide](CONTRIBUTING.md)
+Cf. [contribution guide](CONTRIBUTING.md)<br>
+app autocall function [the magic behind autocall_function](autocall.md) or add a app without touching the rest
 
 # Interface
 

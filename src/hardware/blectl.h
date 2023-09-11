@@ -120,6 +120,12 @@
      */
     void blectl_set_show_notification( bool show_notification );
     /**
+     * @brief enable timesync over bluetooth
+     * 
+     * @param   timesync   true means enabled, false means disabled 
+     */
+    void blectl_set_timesync( bool timesync );
+    /**
      * @brief enable vibe notification
      * 
      * @param   vibe_notification   true means enabled, false means disabled 
@@ -149,6 +155,12 @@
      * @return  true means enabled, false means disabled
      */
     bool blectl_get_enable_on_standby( void );
+    /**
+     * @brief get the current timesync config
+     * 
+     * @return  true means enabled, false means disabled
+     */
+    bool blectl_get_timesync( void );
     /**
      * @brief get the current disable_only_disconnected config
      * 

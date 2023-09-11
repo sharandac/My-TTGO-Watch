@@ -46,6 +46,7 @@ lv_obj_t *bluetooth_enable_onoff = NULL;
 lv_obj_t *bluetooth_standby_onoff = NULL;
 lv_obj_t *bluetooth_stayon_onoff = NULL;
 lv_obj_t *bluetooth_advertising_onoff = NULL;
+lv_obj_t *bluetooth_timesync_onoff = NULL;
 lv_obj_t *bluetooth_show_notifications_onoff = NULL;
 lv_obj_t *bluetooth_vibe_notifications_onoff = NULL;
 lv_obj_t *bluetooth_sound_notifications_onoff = NULL;
@@ -65,6 +66,7 @@ static void bluetooth_standby_onoff_event_handler(lv_obj_t * obj, lv_event_t eve
 static void bluetooth_stayon_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_advertising_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event);
+static void bluetooth_timesync_onoff_event_handler(lv_obj_t * obj, lv_event_t event);
 
 void bluetooth_settings_tile_setup( void ) {
     lv_obj_t *header_2 = NULL;
@@ -110,6 +112,9 @@ void bluetooth_settings_tile_setup( void ) {
 
     lv_obj_t *bluetooth_stayon_cont = wf_add_labeled_switch( bluetooth_settings_tile_1, "stay on", &bluetooth_stayon_onoff, blectl_get_disable_only_disconnected(), bluetooth_stayon_onoff_event_handler, SETUP_STYLE );
     lv_obj_align( bluetooth_stayon_cont, bluetooth_standby_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
+
+    lv_obj_t *bluetooth_timesync_cont = wf_add_labeled_switch( bluetooth_settings_tile_1, "time sync", &bluetooth_timesync_onoff, blectl_get_timesync(), bluetooth_timesync_onoff_event_handler, SETUP_STYLE );
+    lv_obj_align( bluetooth_timesync_cont, bluetooth_stayon_cont, LV_ALIGN_OUT_BOTTOM_MID, 0, THEME_PADDING );
 
     if ( bluetooth_settings_tile_2 ) {
         lv_obj_t *txpower_cont = wf_add_labeled_list( bluetooth_settings_tile_2, "tx power", &txpower_list, "-12db\n-9db\n-6db\n-3db\n0db", bluetooth_txpower_event_handler, ws_get_setup_tile_style() );
@@ -207,5 +212,11 @@ static void bluetooth_txpower_event_handler(lv_obj_t * obj, lv_event_t event) {
     switch( event ) {
         case ( LV_EVENT_VALUE_CHANGED): blectl_set_txpower( lv_dropdown_get_selected( obj ) );
                                         break;
+    }
+}
+
+static void bluetooth_timesync_onoff_event_handler(lv_obj_t * obj, lv_event_t event) {
+    switch( event ) {
+        case ( LV_EVENT_VALUE_CHANGED): blectl_set_timesync( lv_switch_get_state( obj ) );
     }
 }

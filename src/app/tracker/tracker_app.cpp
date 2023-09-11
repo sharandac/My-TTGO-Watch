@@ -57,9 +57,22 @@ LV_IMG_DECLARE(info_1_16px);
  */
 static void tracker_enter_app_event_cb( lv_obj_t * obj, lv_event_t event );
 /*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &tracker_app_setup, 4 );           /** @brief app autocall function */
+/*
  * setup routine for wifimon app
  */
 void tracker_app_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
+    /*
+     * allow the app depending on the hardware
+     */
     #if defined( M5PAPER ) || defined( M5CORE2 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( NATIVE_64BIT )
         tracker_app_main_tile_num = mainbar_add_app_tile( 2, 1, "gps tracker" );
         tracker_app_view_tile_num = tracker_app_main_tile_num + 1;
@@ -73,15 +86,28 @@ void tracker_app_setup( void ) {
         tracker_app_view_setup( tracker_app_view_tile_num );
     #endif
 }
-
+/**
+ * @brief get the app tile number
+ * 
+ * @return uint32_t 
+ */
 uint32_t tracker_app_get_app_main_tile_num( void ) {
     return( tracker_app_main_tile_num );
 }
-
+/**
+ * @brief get the app stats view tile number
+ * 
+ * @return uint32_t 
+ */
 uint32_t tracker_app_get_app_view_tile_num( void ) {
     return( tracker_app_view_tile_num );
 }
-
+/**
+ * @brief call back function when enter the app
+ * 
+ * @param obj           pointer to the object
+ * @param event         the event
+ */
 static void tracker_enter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       app_hide_indicator( tracker_app );

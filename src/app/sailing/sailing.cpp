@@ -36,61 +36,82 @@
 #else
     #include <Arduino.h>
 #endif
-
+/*
+ * app tiles
+ */
 uint32_t sailing_main_tile_num;
 uint32_t sailing_setup_tile_num;
-
-// app icon
+/*
+ * app icon
+ */
 icon_t *sailing = NULL;
-
-
-// declare you images or fonts you need
+/*
+ * declare you images or fonts you need
+ */
 LV_IMG_DECLARE(sailing_64px);
 LV_IMG_DECLARE(info_1_16px);
-
-// declare callback functions for the app and widget icon to enter the app
+/*
+ * declare callback functions for the app and widget icon to enter the app
+ */
 static void enter_sailing_event_cb( lv_obj_t * obj, lv_event_t event );
-
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &sailing_setup, 8 );           /** @brief app autocall function */
 /*
  * setup routine for example app
  */
 void sailing_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif
-    // register 2 vertical tiles and get the first tile number and save it for later use
+    /*
+     * register 2 vertical tiles and get the first tile number and save it for later use
+     */
     sailing_main_tile_num = mainbar_add_app_tile( 1, 1, "Sailing" );
     sailing_setup_tile_num = mainbar_add_setup_tile( 1, 1, "Sailing" );
-
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+    /*
+     * register app icon on the app tile
+     * set your own icon and register her callback to activate by an click
+     * remember, an app icon must have an size of 64x64 pixel with an alpha channel
+     * use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
+     * the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+     */
     sailing = app_register( "Sailing", &sailing_64px, enter_sailing_event_cb );
     app_set_indicator( sailing, ICON_INDICATOR_OK );
-
-    // init main and setup tile, see sailing_main.cpp and sailing_setup.cpp
+    /*
+     * init main and setup tile, see sailing_main.cpp and sailing_setup.cpp
+     */
     sailing_main_setup( sailing_main_tile_num );
     sailing_setup_setup( sailing_setup_tile_num );
 }
-
-/*
- *
+/**
+ * @brief get the app main tile number
+ * 
+ * @return uint32_t 
  */
 uint32_t sailing_get_app_main_tile_num( void ) {
     return( sailing_main_tile_num );
 }
-
-/*
- *
+/**
+ * @brief get the app setup tile number
+ * 
+ * @return uint32_t 
  */
 uint32_t sailing_get_app_setup_tile_num( void ) {
     return( sailing_setup_tile_num );
 }
-
-/*
- *
+/**
+ * @brief call back function when enter the app
+ * 
+ * @param obj           pointer to the object (icon) which is clicked
+ * @param event         the event
  */
 static void enter_sailing_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {

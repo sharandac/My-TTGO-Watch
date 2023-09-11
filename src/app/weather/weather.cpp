@@ -51,28 +51,46 @@
     EventGroupHandle_t weather_sync_event_handle = NULL;
     TaskHandle_t _weather_sync_Task;
 #endif
-
-void weather_widget_sync( void );
-void weather_sync_Task( void * pvParameters );
-
+/*
+ * app config
+ */
 weather_config_t weather_config;
 weather_forcast_t weather_today;
-
+/*
+ * app tiles
+ */
 uint32_t weather_app_tile_num;
 uint32_t weather_app_setup_tile_num;
-
+/*
+ * app icon
+ */
 icon_t *weather_app = NULL;
 icon_t * weather_widget = NULL;
-
+/*
+ * declare callback functions for the app and widget icon to enter the app
+ */
 static void enter_weather_widget_event_cb( lv_obj_t * obj, lv_event_t event );
 bool weather_wifictl_event_cb( EventBits_t event, void *arg );
-
+void weather_widget_sync( void );
+void weather_sync_Task( void * pvParameters );
+/*
+ * declare you images or fonts you need
+ */
 LV_IMG_DECLARE(owm01d_64px);
 LV_IMG_DECLARE(info_ok_16px);
 LV_IMG_DECLARE(info_fail_16px);
 LV_FONT_DECLARE(Ubuntu_16px);
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &weather_app_setup, 0 );           /** @brief app autocall function */
+
 
 void weather_app_setup( void ) {
+    if( !registed ) {
+        return;
+    }
+    
 
     weather_config.load();
 

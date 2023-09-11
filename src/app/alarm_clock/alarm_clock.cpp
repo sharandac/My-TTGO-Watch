@@ -32,6 +32,7 @@
 #include "gui/statusbar.h"
 #include "gui/widget.h"
 #include "gui/widget_factory.h"
+#include "gui/app.h"
 #include "utils/json_psram_allocator.h"
 #include "hardware/powermgm.h"
 #include "hardware/rtcctl.h"
@@ -63,20 +64,28 @@ static icon_t *alarm_clock_widget = NULL;
 
 // declare callback functions
 static void enter_alarm_clock_event_cb( lv_obj_t * obj, lv_event_t event );
-
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &alarm_clock_setup, 1 );           /** @brief app autocall function */
 
 static void create_alarm_app_icon(){
-    // create an app icon, label it and get the lv_obj_t icon container
+    /*
+     * create an app icon, label it and get the lv_obj_t icon container
+     */
     lv_obj_t * alarm_clock_icon_cont = app_tile_register_app( "alarm");
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/
+    /*
+     * set your own icon and register her callback to activate by an click
+     * remember, an app icon must have an size of 64x64 pixel with an alpha channel
+     * use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
+     * the resulting c-file can put in /app/examples/images/
+     */
     lv_obj_t * alarm_clock_icon = wf_add_image_button( alarm_clock_icon_cont, alarm_clock_64px, enter_alarm_clock_event_cb );
     lv_obj_reset_style_list( alarm_clock_icon, LV_OBJ_PART_MAIN );
     lv_obj_align( alarm_clock_icon , alarm_clock_icon_cont, LV_ALIGN_CENTER, 0, 0 );
-
-    // make app icon drag scroll the mainbar
+    /*
+     * make app icon drag scroll the mainbar
+     */
     mainbar_add_slide_element(alarm_clock_icon);
 }
 
@@ -178,6 +187,13 @@ static bool powermgmt_callback( EventBits_t event, void *arg  ){
 
 // setup routine for example app
 void alarm_clock_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
+
     properties.load();
 
     create_alarm_app_icon();

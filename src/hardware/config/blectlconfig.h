@@ -44,6 +44,7 @@
         bool autoon = true;                                     /** @brief auto on/off */
         bool advertising = true;                                /** @brief advertising on/off */
         bool enable_on_standby = false;                         /** @brief enable on standby on/off */
+        bool timesync = true;                                   /** @brief timesync on/off */
         bool disable_only_disconnected = false;                 /** @brief disable only when disconnected on/off */
         bool wakeup_on_notification = true;                     /** @brief wakes up on notifications */
         bool show_notification = true;                          /** @brief enable show notifications */

@@ -355,6 +355,12 @@ void blectl_set_media_notification( bool media_notification ) {
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
 }
 
+void blectl_set_timesync( bool timesync ) {
+    blectl_config.timesync = timesync;
+    blectl_config.save();
+    blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
+}
+
 void blectl_set_advertising( bool advertising ) {  
     blectl_config.advertising = advertising;
     blectl_config.save();
@@ -450,6 +456,10 @@ bool blectl_get_media_notification( void ) {
 
 bool blectl_get_autoon( void ) {
     return( blectl_config.autoon );
+}
+
+bool blectl_get_timesync( void ) {
+    return( blectl_config.timesync );
 }
 
 bool blectl_get_advertising( void ) {

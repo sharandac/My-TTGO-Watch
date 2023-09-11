@@ -20,7 +20,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include "config.h"
-#
 
 #include "osmmap_app.h"
 #include "osmmap_app_main.h"
@@ -29,10 +28,11 @@
 #include "gui/statusbar.h"
 #include "gui/app.h"
 #include "gui/widget.h"
-
+/*
+ * app tiles
+ */
 uint32_t osmmap_app_main_tile_num;
 uint32_t osmmap_app_setup_tile_num;
-
 /*
  * app icon
  */
@@ -46,9 +46,19 @@ LV_IMG_DECLARE(osm_64px);
  */
 static void enter_osmmap_app_event_cb( lv_obj_t * obj, lv_event_t event );
 /*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &osmmap_app_setup, 16 );           /** @brief app autocall function */
+/*
  * setup routine for example app
  */
 void osmmap_app_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
     /*
      * register 2 vertical tiles and get the first tile number and save it for later use
      */
@@ -62,11 +72,20 @@ void osmmap_app_setup( void ) {
      */
     osmmap_app_main_setup( osmmap_app_main_tile_num );
 }
-
+/**
+ * @brief Get the app main tile num object
+ * 
+ * @return uint32_t 
+ */
 uint32_t osmmap_app_get_app_main_tile_num( void ) {
     return( osmmap_app_main_tile_num );
 }
-
+/**
+ * @brief callback function to enter the app
+ * 
+ * @param obj 
+ * @param event 
+ */
 static void enter_osmmap_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       mainbar_jump_to_tilenumber( osmmap_app_main_tile_num, LV_ANIM_OFF, true );

@@ -32,8 +32,8 @@
             #define     ASSERT( test, message, ... ) do { if( !(test) ) { log_e( message, ##__VA_ARGS__); exit( 1 ); } } while ( 0 )
     #endif
 
-    #define     MALLOC_ASSERT( size, message, ... ) ( { void *p = (void*)MALLOC( size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } ) 
-    #define     CALLOC_ASSERT( nmemb, size, message, ... ) ( { void *p = (void*)CALLOC( nmemb, size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } ) 
-    #define     REALLOC_ASSERT( ptr, size, message, ... ) ( { void *p = (void*)REALLOC( ptr, size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } ) 
+    #define     MALLOC_ASSERT( size, message, ... ) ( { void *p = (void*)MALLOC( size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } )                                /** @brief allocate with malloc and check if allocation was successfull */
+    #define     CALLOC_ASSERT( nmemb, size, message, ... ) ( { void *p = (void*)CALLOC( nmemb, size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } )                  /** @brief allocate with calloc and check if allocation was successfull */
+    #define     REALLOC_ASSERT( ptr, size, message, ... ) ( { void *p = (void*)REALLOC( ptr, size ); ASSERT( p, message, ##__VA_ARGS__ ); p; } )                    /** @brief allocate with realloc and check if allocation was successfull */
 
 #endif // _ALLOC_H

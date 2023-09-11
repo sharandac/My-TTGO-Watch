@@ -24,7 +24,6 @@
 
 #include "gps_status.h"
 #include "gps_status_main.h"
-#include "gps_status_setup.h"
 
 #include "gui/mainbar/mainbar.h"
 #include "gui/statusbar.h"
@@ -36,62 +35,72 @@
 #else
 
 #endif
-
+/*
+ * app tiles
+ */
 uint32_t gps_status_main_tile_num;
 uint32_t gps_status_setup_tile_num;
-
-// app icon
+/*
+ * app icon
+ */
 icon_t *gps_status = NULL;
-
-// widget icon
 icon_t *gps_status_widget = NULL;
-
-// declare you images or fonts you need
+/*
+ * declare you images or fonts you need
+ */
 LV_IMG_DECLARE(gps_status_64px);
 LV_IMG_DECLARE(info_1_16px);
-
-// declare callback functions for the app and widget icon to enter the app
+/*
+ * declare callback functions for the app and widget icon to enter the app
+ */
 static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event );
-
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &gps_status_setup, 8 );           /** @brief app autocall function */
 /*
  * setup routine for example app
  */
 void gps_status_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif
-    // register 2 vertical tiles and get the first tile number and save it for later use
+    /*
+     * register 1 and get the tile number and save it for later use
+     */
     gps_status_main_tile_num = mainbar_add_app_tile( 1, 1, "gps status" );
-    gps_status_setup_tile_num = mainbar_add_setup_tile( 1, 1, "gps status" );
-
-    // register app icon on the app tile
-    // set your own icon and register her callback to activate by an click
-    // remember, an app icon must have an size of 64x64 pixel with an alpha channel
-    // use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
-    // the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+    /*
+     * register app icon on the app tile
+     * set your own icon and register her callback to activate by an click
+     * remember, an app icon must have an size of 64x64 pixel with an alpha channel
+     * use https://lvgl.io/tools/imageconverter to convert your images and set "true color with alpha" to get fancy images
+     * the resulting c-file can put in /app/examples/images/ and declare it like LV_IMG_DECLARE( your_icon );
+     */
     gps_status = app_register( "gps status", &gps_status_64px, enter_gps_status_event_cb );
-
-    // init main and setup tile, see gps_status_main.cpp and gps_status_setup.cpp
+    /*
+     * init main and setup tile, see gps_status_main.cpp and gps_status_setup.cpp
+     */
     gps_status_main_setup( gps_status_main_tile_num );
-    gps_status_setup_setup( gps_status_setup_tile_num );
 }
-
-/*
- *
+/**
+ * @brief get the app main tile number
+ * 
+ * @return uint32_t 
  */
 uint32_t gps_status_get_app_main_tile_num( void ) {
     return( gps_status_main_tile_num );
 }
-
-/*
- *
- */
-uint32_t gps_status_get_app_setup_tile_num( void ) {
-    return( gps_status_setup_tile_num );
-}
-
-/*
- *
+/**
+ * @brief callback function to enter the app
+ * 
+ * @param obj 
+ * @param event 
  */
 static void enter_gps_status_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {

@@ -23,7 +23,25 @@
     #define _APP_H
     
     #include "gui/icon.h"
-
+    /**
+     * @brief core autocall type definition
+     */
+    typedef void ( * APP_AUTOCALL_FUNC ) ( void );
+    /**
+     * @brief callback table entry structure
+     */
+    typedef struct {
+        APP_AUTOCALL_FUNC function;             /** @brief pointer to a callback function */
+        size_t prio;                            /** @brief priority of the callback function */
+    } app_autocall_table_t;
+    /**
+     * @brief autocall function for module setup
+     * 
+     * @param function          pointer to the module registration function
+     * @param prio              priority of the module
+     */
+    int app_autocall_function( APP_AUTOCALL_FUNC function, size_t prio );
+    void app_autocall_all_setup_functions( void );
     /**
      * @brief register an application icon
      * 

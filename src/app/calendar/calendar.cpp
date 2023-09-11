@@ -34,7 +34,14 @@
  * calendar icon and fonts
  */
 icon_t *calendar_icon = NULL;                                       /** @brief calendar icon */
+/*
+ * declare you images or fonts you need
+ */
 LV_IMG_DECLARE(calendar_64px);                                      /** @brief calendar icon image */
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &calendar_app_setup, 15 );           /** @brief app autocall function */
 /**
  * internal function declaration
  */
@@ -43,6 +50,13 @@ static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event );
  * setup routine for application
  */
 void calendar_app_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
+
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif
@@ -61,7 +75,12 @@ void calendar_app_setup( void ) {
     calendar_day_setup();
     calendar_create_setup();
 }
-
+/**
+ * @brief call back function when enter the app
+ * 
+ * @param obj           object
+ * @param event         event
+ */
 static void calendar_enter_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):

@@ -20,6 +20,7 @@
 #include "activity.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
+#include "gui/app.h"
 #include "hardware/motion.h"
 // #include "hardware/blestepctl.h"
 #include "hardware/motor.h"
@@ -61,10 +62,12 @@ static lv_event_cb_t default_msgbox_cb;
 static void build_main_page();
 static void refresh_main_page();
 static void build_settings();
-
 static void activity_activate_cb();
 static void activity_reset_cb(lv_obj_t * obj, lv_event_t event);
-
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &activity_app_setup, 8 );           /** @brief app autocall function */
 /*
  * setup routine for application
  */

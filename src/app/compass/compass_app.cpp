@@ -38,7 +38,9 @@
 #else
     #include <Arduino.h>
 #endif
-
+/*
+ * app tiles obj and number
+ */
 lv_obj_t *compass_app_main_tile = NULL;
 uint32_t compass_app_main_tile_num;
 /*
@@ -54,9 +56,19 @@ LV_IMG_DECLARE(compass_64px);
  */
 static void compass_enter_app_event_cb( lv_obj_t * obj, lv_event_t event );
 /*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &compass_app_setup, 8 );           /** @brief app autocall function */
+/*
  * setup routine for wifimon app
  */
 void compass_app_setup( void ) {
+    /*
+     * check if app already registered for autocall
+     */
+    if( !registed ) {
+        return;
+    }
     /**
      * abort if no compass available
      */
@@ -70,11 +82,20 @@ void compass_app_setup( void ) {
     compass_app = app_register( "compass", &compass_64px, compass_enter_app_event_cb );
     compass_app_main_setup( compass_app_main_tile_num );
 }
-
+/**
+ * @brief get the app main tile number
+ * 
+ * @return uint32_t 
+ */
 uint32_t compass_app_get_app_main_tile_num( void ) {
     return( compass_app_main_tile_num );
 }
-
+/**
+ * @brief callback function to enter the app
+ * 
+ * @param obj           pointer to the object
+ * @param event         the event
+ */
 static void compass_enter_app_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):       app_hide_indicator( compass_app );

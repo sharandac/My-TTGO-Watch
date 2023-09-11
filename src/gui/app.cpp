@@ -24,6 +24,7 @@
 #include "app.h"
 #include "gui/mainbar/mainbar.h"
 #include "gui/mainbar/app_tile/app_tile.h"
+#include "utils/alloc.h"
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -31,6 +32,59 @@
     #include <Arduino.h>
 #endif
 
+size_t app_autocall_counter = 0;                   /** @brief counter for registered setup functions */
+app_autocall_table_t *app_autocall_table = NULL;  /** @brief table for registered setup functions */
+
+/**
+ * @brief register a app with prio
+ * 
+ * @param function      pointer to a function
+ * @param prio          priority of the function, 0 first, 1 second, ...
+ * @return int 
+ */
+int app_autocall_function( APP_AUTOCALL_FUNC function, size_t prio ) {
+    /**
+     * register a setup function
+     */
+    app_autocall_counter++;
+    /**
+     * alloc or realloc the table for a new entry
+     */
+    if( !app_autocall_table ) 
+        app_autocall_table = (app_autocall_table_t *)malloc( sizeof( app_autocall_table_t ) );
+    else
+        app_autocall_table = (app_autocall_table_t *)realloc( app_autocall_table, ( app_autocall_counter ) * sizeof( app_autocall_table_t ) );
+    /**
+     * store registration function
+     */
+    app_autocall_table[ app_autocall_counter - 1 ].function = function;
+    app_autocall_table[ app_autocall_counter - 1 ].prio = prio;
+    
+    return( 1 );
+}
+
+void app_autocall_all_setup_functions( void ) {
+    /**
+     * start core servies
+     */
+    if( app_autocall_counter && app_autocall_table ) {
+        /**
+         * call all registered setup functions
+         */
+        for( size_t prio = 0 ; prio < 32 ; prio++ ) {
+            for( size_t i = 0 ; i < app_autocall_counter ; i++ ) {
+                if( app_autocall_table[ i ].prio == prio )
+                    app_autocall_table[ i ].function();
+            }
+        }
+        /**
+         * free the table
+         */
+        app_autocall_counter = 0;
+        free( app_autocall_table );
+        app_autocall_table = NULL;
+    }
+}
 
 icon_t *app_register( const char* appname, const lv_img_dsc_t *icon, lv_event_cb_t event_cb ) {
 

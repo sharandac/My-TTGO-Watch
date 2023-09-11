@@ -362,7 +362,7 @@ void powermgm_set_perf_mode( void ) {
     #if CONFIG_PM_ENABLE
         pm_config.max_freq_mhz = 240;
         pm_config.min_freq_mhz = 240;
-        pm_config.light_sleep_enable = lighsleep ? false : true ;
+        pm_config.light_sleep_enable = false;
         ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
     #else
         #ifndef NATIVE_64BIT
@@ -375,7 +375,7 @@ void powermgm_set_normal_mode( void ) {
     #if CONFIG_PM_ENABLE
         pm_config.max_freq_mhz = 240;
         pm_config.min_freq_mhz = 80;
-        pm_config.light_sleep_enable = lighsleep ? false : true ;
+        pm_config.light_sleep_enable = true;
         ESP_ERROR_CHECK( esp_pm_configure(&pm_config) );
     #else
         #ifndef NATIVE_64BIT

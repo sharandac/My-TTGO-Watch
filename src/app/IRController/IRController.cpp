@@ -26,7 +26,12 @@
 #include "gui/mainbar/mainbar.h"
 #include "gui/widget_styles.h"
 #include "hardware/ble/gadgetbridge.h"
+#include "gui/app.h"
 
+/*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &IRController_setup, 8 );           /** @brief app autocall function */
 
 #ifdef NATIVE_64BIT
     void IRController_setup( void ) {
@@ -57,6 +62,11 @@
         * setup routine for IR Controller app
         */
         void IRController_setup( void ) {
+            if( !registed ) {
+                return;
+            }
+            
+
             irController.init("IR Remote", &IRController_64px);
             // Load config and build user interface
             IRController_build_UI(IRControlSettingsAction::Load);

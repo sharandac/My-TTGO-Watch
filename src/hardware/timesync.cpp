@@ -31,6 +31,7 @@
 #else  
     #include "wifictl.h"
     #include "hardware/ble/gadgetbridge.h"
+    #include "hardware/blectl.h"
     #include "rtcctl.h"
 
     EventGroupHandle_t time_event_handle = NULL;
@@ -173,7 +174,7 @@ bool timesync_blectl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case GADGETBRIDGE_MSG:
             settime_str = strstr( (const char*)arg, "setTime(" );
-            if ( settime_str ) {
+            if ( settime_str && blectl_get_timesync() ) {
                 settime_str = settime_str + 8;
                 time( &now );
                 log_d("old time: %d", now );

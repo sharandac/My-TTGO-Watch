@@ -25,10 +25,7 @@
 #ifndef _FindPhone_H
     #define _FindPhone_H
 
-//    #define EXAMPLE_WIDGET    // uncomment if an widget need
-
     void FindPhone_setup( void );
-    //uint32_t FindPhone_get_app_setup_tile_num( void );//No use just yet
     uint32_t FindPhone_get_app_main_tile_num( void );
 
 #endif // _FindPhone_H

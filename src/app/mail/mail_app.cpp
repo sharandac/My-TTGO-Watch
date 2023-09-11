@@ -49,9 +49,18 @@ static void enter_mail_app_event_cb( lv_obj_t * obj, lv_event_t event );
  */
 mail_config_t mail_config;
 /*
+ * automatic register the app setup function with explicit call in main.cpp
+ */
+static int registed = app_autocall_function( &mail_app_setup, 8 );           /** @brief app autocall function */
+/*
  * setup routine for example app
  */
 void mail_app_setup( void ) {
+    if( !registed ) {
+        return;
+    }
+    
+
     #if defined( ONLY_ESSENTIAL )
         return;
     #endif

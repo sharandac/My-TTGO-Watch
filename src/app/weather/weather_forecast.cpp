@@ -136,9 +136,9 @@ void weather_forecast_tile_setup( uint32_t tile_num ) {
 }
 
 static void weather_forecast_activate_cb( void ) {
-    wf_image_button_fade_in( exit_btn, 300, 0 );
-    wf_image_button_fade_in( setup_btn, 300, 100 );
-    wf_image_button_fade_in( reload_btn, 300, 200 );
+    wf_image_button_fade_in( exit_btn, 500, 0 );
+    wf_image_button_fade_in( setup_btn, 500, 100 );
+    wf_image_button_fade_in( reload_btn, 500, 200 );
     if( weather_last_update != 0 ) {
         if( weather_last_update <= millis() - ( 15 * 60 * 1000 ) ) {
             weather_sync_request();
