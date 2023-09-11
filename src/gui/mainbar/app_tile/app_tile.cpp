@@ -60,6 +60,8 @@ void app_tile_setup( void ) {
         app_tile_num[ tiles ] = mainbar_add_tile( 0, 1 + tiles, "app tile", ws_get_mainbar_style() );
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 ) || defined( M5CORE2 )
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
     #elif defined( LILYGO_WATCH_2021 )
         app_tile_num[ tiles ] = mainbar_add_tile( 1 + tiles, 0, "app tile", ws_get_mainbar_style() );
     #else

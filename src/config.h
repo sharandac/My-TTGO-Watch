@@ -53,6 +53,14 @@
             #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
             #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
             #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            #undef LILYGO_WATCH_LVGL
+            #define HARDWARE_NAME   "T-Display-S3-Touch"
+            #define RES_X_MAX       320
+            #define RES_Y_MAX       170
+            #define USE_PSRAM_ALLOC_LVGL                    /** @brief enabled LVGL to use PSRAM */ 
+            #define ENABLE_WEBSERVER                        /** @brief To disable built-in webserver, comment this line */
+            #define ENABLE_FTPSERVER                        /** @brief To disable built-in ftpserver, comment this line */
         #elif defined( LILYGO_WATCH_2021 )
             #define HARDWARE_NAME   "T-Watch2021"
             #define RES_X_MAX       240

@@ -80,6 +80,16 @@
     const lv_img_dsc_t bg1 = bg1_320px;
     const lv_img_dsc_t bg2 = bg2_320px;
     const lv_img_dsc_t bg3 = bg3_320px;
+#elif defined( T_DISPLAY_S3_TOUCH )
+    LV_IMG_DECLARE( bg_480px );
+    LV_IMG_DECLARE( bg1_480px );
+    LV_IMG_DECLARE( bg2_480px );
+    LV_IMG_DECLARE( bg3_480px );
+
+    const lv_img_dsc_t bg = bg_480px;
+    const lv_img_dsc_t bg1 = bg1_480px;
+    const lv_img_dsc_t bg2 = bg2_480px;
+    const lv_img_dsc_t bg3 = bg3_480px;
 #elif defined( M5PAPER )
     LV_IMG_DECLARE( bg_540px );
     LV_IMG_DECLARE( bg1_540px );

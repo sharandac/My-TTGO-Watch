@@ -41,6 +41,14 @@
         #define SETUP_ICON_X_OFFSET         0
         #define SETUP_ICON_Y_OFFSET         0
         #define MAX_SETUP_TILES             4
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        #define MAX_SETUP_ICON_HORZ         2
+        #define MAX_SETUP_ICON_VERT         2
+        #define SETUP_ICON_X_CLEARENCE      8
+        #define SETUP_ICON_Y_CLEARENCE      54
+        #define SETUP_ICON_X_OFFSET         0
+        #define SETUP_ICON_Y_OFFSET         0
+        #define MAX_SETUP_TILES             5
     #elif defined( LILYGO_WATCH_2021 )
         #define MAX_SETUP_ICON_HORZ         2
         #define MAX_SETUP_ICON_VERT         2

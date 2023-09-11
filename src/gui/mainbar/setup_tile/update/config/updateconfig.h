@@ -35,6 +35,8 @@
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v2.version.json"
     #elif defined( LILYGO_WATCH_2020_V3 )
         #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2020_v3.version.json"
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-display-s8-touch.version.json"
     #elif defined( LILYGO_WATCH_2021 )
         #if defined( VERSION_2 )
             #define FIRMWARE_UPDATE_URL            "http://www.neo-guerillaz.de/ttgo-t-watch2021-v2.version.json"
