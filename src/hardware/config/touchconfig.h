@@ -45,6 +45,9 @@
         #elif defined( WT32_SC01 )
             #define TOUCH_X_SCALE       1.0
             #define TOUCH_Y_SCALE       1.0
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            #define TOUCH_X_SCALE       1.0
+            #define TOUCH_Y_SCALE       1.0
         #else
             #define TOUCH_X_SCALE       1.0
             #define TOUCH_Y_SCALE       1.0

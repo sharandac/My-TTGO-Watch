@@ -103,6 +103,8 @@
         }
     #elif defined( WT32_SC01 )
 
+    #elif defined( T_DISPLAY_S3_TOUCH )
+
     #else
         #warning "no hardware driver for motor/vibe"
     #endif
@@ -160,6 +162,8 @@ void motor_setup( void ) {
             timerAlarmEnable(timer);
         #elif defined( WT32_SC01 )
 
+        #elif defined( T_DISPLAY_S3_TOUCH )
+
         #endif
     #endif
     /*
@@ -202,6 +206,7 @@ bool motor_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 break;
             }
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
     return( true );

@@ -43,7 +43,11 @@
     EventGroupHandle_t powermgm_status = NULL;
     TaskHandle_t _powermgmTask;
     portMUX_TYPE DRAM_ATTR powermgmMux = portMUX_INITIALIZER_UNLOCKED;
-    esp_pm_config_esp32_t pm_config;
+    #ifdef ESP32_S3
+        esp_pm_config_esp32s3_t pm_config;
+    #else
+        esp_pm_config_esp32_t pm_config;
+    #endif
 #endif
 
 callback_t *powermgm_callback = NULL;
@@ -63,7 +67,7 @@ void powermgm_setup( void ) {
     powermgm_status = xEventGroupCreate();
 
     powermgm_tickTicker = new Ticker();
-    #if defined( LILYGO_WATCH_2021 ) || defined( WT32_SC01 )
+    #if defined( LILYGO_WATCH_2021 ) || defined( WT32_SC01 ) || defined( T_DISPLAY_S3_TOUCH )
         powermgm_tickTicker->attach_ms( 100, []() {
             powermgm_resume_from_ISR();
         });

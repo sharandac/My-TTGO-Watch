@@ -36,6 +36,7 @@
     #elif defined( M5CORE2 )
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #warning "no hardware driver for blestepctl"
     #endif

@@ -60,6 +60,10 @@
         #include "TFT_eSPI.h"
 
         TFT_eSPI tft = TFT_eSPI();
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        #include "TFT_eSPI.h"
+
+        TFT_eSPI tft = TFT_eSPI();
     #else
         #error "no hardware driver for framebuffer, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
@@ -134,6 +138,14 @@ void framebuffer_setup( void ) {
             tft.setSwapBytes( true );
             tft.fillScreen( TFT_BLACK );
             tft.initDMA();
+            tft.setRotation( 1 );
+            ledcWrite(0, 0xff );
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            framebuffer_use_dma = false;
+            tft.init();
+            tft.setSwapBytes( true );
+            tft.fillScreen( TFT_BLACK );
+            //tft.initDMA();
             tft.setRotation( 1 );
             ledcWrite(0, 0xff );
         #else
@@ -249,6 +261,7 @@ bool framebuffer_powermgm_loop_cb( EventBits_t event, void *arg ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
             #error "no framebuffer powermgm loop event function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -275,6 +288,7 @@ void framebuffer_refresh( void ) {
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( LILYGO_WATCH_2021 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
             #error "no framebuffer refresh function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -422,6 +436,16 @@ static void framebuffer_flush_cb(lv_disp_drv_t *disp_drv, const lv_area_t *area,
                 tft.flush();
                 tft.endWrite();
             }
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            /**
+             * get buffer size
+             */
+            uint32_t size = (area->x2 - area->x1 + 1) * (area->y2 - area->y1 + 1) ;
+
+            tft.startWrite();
+            tft.pushImage( area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1), ( uint16_t *)color_p );
+            tft.flush();
+            tft.endWrite();
         #else
             #error "no LVGL display driver function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
