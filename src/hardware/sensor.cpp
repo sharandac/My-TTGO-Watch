@@ -33,6 +33,7 @@
     #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
     #elif defined( LILYGO_WATCH_2021 )    
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #warning "no hardware driver for sensor"
     #endif
@@ -54,6 +55,7 @@ void sensor_setup( void ) {
             M5.SHT30.Begin();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
     /**
@@ -101,6 +103,8 @@ bool sensor_powermgm_loop_cb( EventBits_t event, void *arg ) {
             retval = true;
         #elif defined( WT32_SC01 )
             retval = true;
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            retval = true;
         #else
             #warning "not sensor powermgm loop"
             retval = true;
@@ -140,6 +144,8 @@ bool sensor_powermgm_event_cb( EventBits_t event, void *arg ) {
             retval = true;
         #elif defined( WT32_SC01 )
             retval = true;
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            retval = true;
         #else
             #warning "not sensor powermgm"
             retval = true;
@@ -158,6 +164,7 @@ bool sensor_get_available( void ) {
             retval = true;
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 
@@ -181,6 +188,7 @@ float sensor_get_temperature( void ) {
             temperature = M5.SHT30.GetTemperature();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 
@@ -204,6 +212,7 @@ float sensor_get_humidity( void ) {
             humidity = M5.SHT30.GetAbsHumidity();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 
@@ -227,6 +236,7 @@ float sensor_get_relativ_humidity( void ) {
             relativ_humidity = M5.SHT30.GetRelHumidity();
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 
@@ -249,6 +259,7 @@ float sensor_get_pressure( void ) {
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 

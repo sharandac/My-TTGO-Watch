@@ -38,6 +38,7 @@
     #elif defined( LILYGO_WATCH_2021 )
         #include <twatch2021_config.h>
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #error "no hardware driver for display, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
@@ -86,6 +87,19 @@ void display_setup( void ) {
             ledcSetup(0, 4000, 8);
             ledcAttachPin(TFT_LED, 0);
             ledcWrite(0, 0x0 );
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            pinMode(TFT_LED, OUTPUT);
+            ledcSetup(0, 4000, 8);
+            ledcAttachPin(TFT_LED, 0);
+            ledcWrite(0, 0x0 );
+
+            // Lighten the screen with gradient 
+            ledcSetup(0, 10000, 8);
+            ledcAttachPin(TFT_LED, 0);
+            for (uint8_t i = 0; i < 0xFF; i++) {
+                ledcWrite(0, i);
+                delay(2);
+            }
         #else
             #error "no display init function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -227,6 +241,33 @@ static bool display_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
 
             retval = true;
+        #elif defined( T_DISPLAY_S3_TOUCH )
+             /**
+             * check if backlight adjust has change
+             */
+            if ( dest_brightness != brightness ) {
+                if ( brightness < dest_brightness ) {
+                    brightness++;
+                    ledcWrite(0, brightness );
+                }
+                else {
+                    brightness--;
+                    ledcWrite(0, brightness );
+                }
+            }
+            /**
+             * check timeout
+             */
+            if ( display_get_timeout() != DISPLAY_MAX_TIMEOUT ) {
+                if ( lv_disp_get_inactive_time(NULL) > ( ( display_get_timeout() * 1000 ) - display_get_brightness() * 8 ) ) {
+                    dest_brightness = ( ( display_get_timeout() * 1000 ) - lv_disp_get_inactive_time( NULL ) ) / 8 ;
+                }
+                else {
+                    dest_brightness = display_get_brightness();
+                }
+            }
+
+            retval = true;
         #else
             #error "no display init function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -274,6 +315,8 @@ static void display_standby( void ) {
             ledcWrite( 0, 0 );
         #elif defined( WT32_SC01 )
             ledcWrite( 0, 0 );
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            ledcWrite( 0, 0 );
         #else
             #error "no display statndby function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -316,6 +359,10 @@ static void display_wakeup( bool silence ) {
                 ledcWrite( 0, 0 );
                 brightness = 0;
                 dest_brightness = 0;
+            #elif defined( T_DISPLAY_S3_TOUCH )
+                ledcWrite( 0, 0 );
+                brightness = 0;
+                dest_brightness = 0;
             #else
                 #error "no silence display wakeup function implemented, please setup minimal drivers ( display/framebuffer/touch )"
             #endif
@@ -350,6 +397,10 @@ static void display_wakeup( bool silence ) {
                 brightness = 0;
                 dest_brightness = display_get_brightness();
             #elif defined( WT32_SC01 )
+                ledcWrite( 0, 0 );
+                brightness = 0;
+                dest_brightness = display_get_brightness();
+            #elif defined( T_DISPLAY_S3_TOUCH )
                 ledcWrite( 0, 0 );
                 brightness = 0;
                 dest_brightness = display_get_brightness();
@@ -433,6 +484,7 @@ void display_set_rotation( uint32_t rotation ) {
             display_config.rotation = rotation;
             ttgo->tft->setRotation( rotation / 90 );
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
             #warning "no display set rotation function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif

@@ -39,6 +39,7 @@
         #include <QMC5883LCompass.h>
         QMC5883LCompass compass;
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #warning "no hardware driver for compass"
     #endif
@@ -68,6 +69,7 @@ void compass_setup( void ) {
             compass.init();
             compass_off();
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif
@@ -98,6 +100,7 @@ static bool compass_powermgm_event_cb( EventBits_t event, void *arg ) {
                     break;
             }
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif
@@ -122,6 +125,7 @@ static bool compass_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                 #elif defined( LILYGO_WATCH_2021 )
                         compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
                 #elif defined( WT32_SC01 )
+                #elif defined( T_DISPLAY_S3_TOUCH )
                 #endif
             #endif
             compass_calibrated = true;
@@ -172,6 +176,7 @@ static bool compass_get_data( compass_data_t *compass_data ) {
             compass_data->direction[3] = '\0';
             log_d("x=%d, y=%d, z=%d, azimuth=%d, bearing=%d, direction=%s", compass_data->x, compass_data->y, compass_data->z, compass_data->azimuth, compass_data->bearing, compass_data->direction );
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif
@@ -246,6 +251,7 @@ void compass_on( void ) {
             if( compass_calibrated )
                 compass.setCalibration( calibrationData[0][0], calibrationData[0][1], calibrationData[1][0], calibrationData[1][1], calibrationData[2][0], calibrationData[2][1] );
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif
@@ -264,6 +270,7 @@ void compass_off( void ) {
             compass.setReset();
             compass.setMode( 0x00, 0x0C, 0x10, 0x00 );
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif
@@ -306,6 +313,7 @@ bool compass_available( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             retval = true;
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #else
         #endif
     #endif

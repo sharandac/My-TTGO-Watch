@@ -45,6 +45,9 @@
         #elif defined( WT32_SC01 )
             #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
             #define FRAMEBUFFER_BUFFER_H        40
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            #define FRAMEBUFFER_BUFFER_W        RES_X_MAX
+            #define FRAMEBUFFER_BUFFER_H        10
         #endif
     #endif
 

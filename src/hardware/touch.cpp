@@ -54,6 +54,17 @@ touch_config_t touch_config;
         #include <Adafruit_FT6206.h>
 
         Adafruit_FT6206 ctp = Adafruit_FT6206();
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        #include <Wire.h>
+        #include "TouchLib.h"
+
+        #if defined(TOUCH_MODULES_CST_MUTUAL)
+            TouchLib touch(Wire, PIN_IIC_SDA, PIN_IIC_SCL, CTS328_SLAVE_ADDRESS, PIN_TOUCH_RES);
+        #elif defined(TOUCH_MODULES_CST_SELF)
+            TouchLib touch(Wire, PIN_IIC_SDA, PIN_IIC_SCL, CTS820_SLAVE_ADDRESS, PIN_TOUCH_RES);
+        #else
+            #error "Please choose the correct touch driver model!"
+        #endif
     #else
         #error "no hardware driver for touch, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
@@ -149,6 +160,11 @@ void touch_setup( void ) {
     #elif defined( WT32_SC01 )
         pinMode( GPIO_NUM_39, INPUT );
         ASSERT( ctp.begin(40), "Couldn't start FT6206 touchscreen controller");
+    #elif defined( T_DISPLAY_S3_TOUCH )
+        Wire.begin(PIN_IIC_SDA, PIN_IIC_SCL, 800000);
+        bool inited_touch = touch.init();
+        ASSERT(inited_touch , "Couldn't start FT6206 touchscreen controller");
+        if(inited_touch) touch.setRotation(1);
     #else
         #error "no touch init implemented, please setup minimal drivers ( display/framebuffer/touch )"
     #endif
@@ -241,6 +257,22 @@ bool touch_powermgm_loop_event_cb( EventBits_t event, void *arg ) {
                     break;
                 case POWERMGM_SILENCE_WAKEUP:
                     if ( ctp.touched() )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    retval = true;        
+                    break;
+            }    
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            switch( event ) {
+                case POWERMGM_STANDBY:
+                    if( touch.read() )
+                        powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
+                    retval = true;
+                    break;
+                case POWERMGM_WAKEUP:
+                    retval = true;
+                    break;
+                case POWERMGM_SILENCE_WAKEUP:
+                    if ( touch.read() )
                         powermgm_set_event( POWERMGM_WAKEUP_REQUEST );
                     retval = true;        
                     break;
@@ -343,6 +375,29 @@ bool touch_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 break;
                 case POWERMGM_DISABLE_INTERRUPTS:
                                                 detachInterrupt( TOUCH_INT );
+                                                retval = true;
+                                                break;
+            }
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            switch( event ) {
+                case POWERMGM_STANDBY:          log_d("go standby");
+                                                /**
+                                                 * enable GPIO in lightsleep for wakeup
+                                                 */
+                                                gpio_wakeup_enable( (gpio_num_t)GPIO_NUM_16, GPIO_INTR_LOW_LEVEL );
+                                                esp_sleep_enable_gpio_wakeup ();
+                                                retval = true;
+                                                break;
+                case POWERMGM_WAKEUP:           log_d("go wakeup");
+                                                retval = true;
+                                                break;
+                case POWERMGM_SILENCE_WAKEUP:   log_d("go silence wakeup");
+                                                retval = true;
+                                                break;
+                case POWERMGM_ENABLE_INTERRUPTS:
+                                                retval = true;
+                                                break;
+                case POWERMGM_DISABLE_INTERRUPTS:
                                                 retval = true;
                                                 break;
             }
@@ -461,6 +516,16 @@ bool touch_getXY( int16_t &x, int16_t &y ) {
             else {
                 return( false );
             }
+        #elif defined( T_DISPLAY_S3_TOUCH )
+            if ( touch.read() ) {
+                TP_Point p = touch.getPoint(0);
+                x = p.x;
+                y = map( p.y, 0, TFT_WIDTH, TFT_WIDTH, 0 );
+                return( true );
+            }
+            else {
+                return( false );
+            }
         #else
             #error "no touch getXY function implemented, please setup minimal drivers ( display/framebuffer/touch )"
         #endif
@@ -568,6 +633,8 @@ static bool touch_read(lv_indev_drv_t * drv, lv_indev_data_t*data) {
         #elif defined( LILYGO_WATCH_2021 )
             data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
         #elif defined( WT32_SC01 )
+            data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+        #elif defined( T_DISPLAY_S3_TOUCH )
             data->state = touch_getXY( data->point.x, data->point.y ) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
         #else
             #error "no LVGL Input driver function implemented, please setup minimal drivers ( display/framebuffer/touch )"

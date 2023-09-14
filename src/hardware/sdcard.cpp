@@ -44,6 +44,7 @@
         #endif
     #elif defined( LILYGO_WATCH_2021 )   
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #warning "no hardware driver for sd_card"
     #endif
@@ -101,6 +102,7 @@ void sdcard_setup( void ) {
         #endif    
     #elif defined( LILYGO_WATCH_2021 )   
     #elif defined( WT32_SC01 )
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #endif
 #endif
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_STANDBY | POWERMGM_WAKEUP, sdcard_powermgm_event_cb, "sdcard powermgm" );
@@ -197,6 +199,8 @@ bool sdcard_powermgm_event_cb( EventBits_t event, void *arg ) {
     #elif defined( LILYGO_WATCH_2021 )   
         retval = true;
     #elif defined( WT32_SC01 )
+        retval = true;
+    #elif defined( T_DISPLAY_S3_TOUCH )
         retval = true;
     #else
         switch( event ) {

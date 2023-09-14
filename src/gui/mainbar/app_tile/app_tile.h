@@ -42,8 +42,8 @@
         #define APP_ICON_Y_OFFSET       0
         #define MAX_APPS_TILES          4
     #elif defined( T_DISPLAY_S3_TOUCH )
-        #define MAX_APPS_ICON_HORZ      2
-        #define MAX_APPS_ICON_VERT      2
+        #define MAX_APPS_ICON_HORZ      4
+        #define MAX_APPS_ICON_VERT      1
         #define APP_ICON_X_CLEARENCE    8
         #define APP_ICON_Y_CLEARENCE    54
         #define APP_ICON_X_OFFSET       0

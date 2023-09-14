@@ -51,6 +51,8 @@
         PCF8563_Class rtc;
     #elif defined( WT32_SC01 )
 
+    #elif defined( T_DISPLAY_S3_TOUCH )
+
     #else
         #warning "no hardware driver for rtcctl"
     #endif
@@ -116,7 +118,7 @@ void rtcctl_setup( void ) {
 //            attachInterrupt( RTC_Int, &rtcctl_irq, GPIO_INTR_POSEDGE );
         #endif
     #elif defined( WT32_SC01 )
-
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #endif
 #endif
 
@@ -183,7 +185,7 @@ void set_next_alarm( void ) {
     #elif defined( LILYGO_WATCH_2021 )
         rtc.setAlarm( PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM, PCF8563_NO_ALARM );        
     #elif defined( WT32_SC01 )
-
+    #elif defined( T_DISPLAY_S3_TOUCH )
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -235,6 +237,8 @@ void set_next_alarm( void ) {
         rtc.setAlarm( alarm_tm.tm_hour, alarm_tm.tm_min, alarm_tm.tm_mday, PCF8563_NO_ALARM );
     #elif defined( WT32_SC01 )
 
+    #elif defined( T_DISPLAY_S3_TOUCH )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -259,6 +263,8 @@ void rtcctl_set_next_alarm( void ) {
         rtc.disableAlarm();
     #elif defined( WT32_SC01 )
 
+    #elif defined( T_DISPLAY_S3_TOUCH )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -282,6 +288,8 @@ void rtcctl_set_next_alarm( void ) {
         rtc.enableAlarm();
     #elif defined( WT32_SC01 )
 
+    #elif defined( T_DISPLAY_S3_TOUCH )
+
     #else
         #warning "no alarm rtcctl function"
     #endif
@@ -304,6 +312,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 // gpio_wakeup_enable( (gpio_num_t)RTC_Int, GPIO_INTR_POSEDGE );
                                                 // esp_sleep_enable_gpio_wakeup ();
                                             #elif defined( WT32_SC01 )
+                                            #elif defined( T_DISPLAY_S3_TOUCH )
                                             #else
                                                 #warning "no rtcctl powermgm standby event"
                                             #endif
@@ -323,6 +332,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
                                             #elif defined( LILYGO_WATCH_2021 )
                                             #elif defined( WT32_SC01 )
+                                            #elif defined( T_DISPLAY_S3_TOUCH )
                                             #else
                                                 #warning "no rtcctl powermgm enable interrupts event"
                                             #endif
@@ -338,6 +348,7 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                                 detachInterrupt( RTC_INT_PIN );
                                             #elif defined( LILYGO_WATCH_2021 )
                                             #elif defined( WT32_SC01 )
+                                            #elif defined( T_DISPLAY_S3_TOUCH )
                                             #else
                                                 #warning "no rtcctl powermgm disable interrupts event"
                                             #endif
@@ -413,6 +424,7 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
             #elif defined( LILYGO_WATCH_2021 )
                 rtc.disableAlarm();
             #elif defined( WT32_SC01 )
+            #elif defined( T_DISPLAY_S3_TOUCH )
             #else
                 #warning "no rtcctl alarm function"
             #endif
@@ -447,6 +459,8 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
                 rtc.enableAlarm();
             #elif defined( WT32_SC01 )
 
+            #elif defined( T_DISPLAY_S3_TOUCH )
+
             #else
                 #warning "no rtcctl alarm function"
             #endif
@@ -466,6 +480,8 @@ void rtcctl_set_alarm( rtcctl_alarm_t *data ) {
             #elif defined( LILYGO_WATCH_2021 )
                 rtc.enableAlarm();
             #elif defined( WT32_SC01 )
+
+            #elif defined( T_DISPLAY_S3_TOUCH )
 
             #else
                 #warning "no rtcctl alarm function"
@@ -541,6 +557,7 @@ void rtcctl_syncToSystem( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             rtc.syncToSystem();
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 }
@@ -601,6 +618,7 @@ void rtcctl_syncToRtc( void ) {
         #elif defined( LILYGO_WATCH_2021 )
             rtc.syncToRtc();
         #elif defined( WT32_SC01 )
+        #elif defined( T_DISPLAY_S3_TOUCH )
         #endif
     #endif
 }
