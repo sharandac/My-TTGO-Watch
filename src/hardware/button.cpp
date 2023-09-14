@@ -470,6 +470,10 @@ bool button_powermgm_loop_cb( EventBits_t event, void *arg ) {
             }
         }
     #endif
+    /**
+     * prevent "warning: variable 'temp_button_irq_flag' set but not used" in some platform conditions
+     */
+    temp_button_irq_flag = ~temp_button_irq_flag;
 #endif
     return( true );
 }
