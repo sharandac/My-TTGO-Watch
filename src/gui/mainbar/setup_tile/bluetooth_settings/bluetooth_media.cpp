@@ -169,13 +169,13 @@ static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
                 lv_obj_set_hidden( bluetooth_media_play, true );
                 lv_obj_set_hidden( bluetooth_media_stop, false );
                 bluetooth_media_play_state = false;
-                gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"pause\"}\r\n" );
+                gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"pause\"}\r\n" );
             }
             else {
                 lv_obj_set_hidden( bluetooth_media_play, false );
                 lv_obj_set_hidden( bluetooth_media_stop, true );
                 bluetooth_media_play_state = true;
-                gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"play\"}\r\n" );
+                gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"play\"}\r\n" );
             }
             break;
     }
@@ -184,7 +184,7 @@ static void bluetooth_media_play_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"volumeup\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"volumeup\"}\r\n" );
             break;
     }
 }
@@ -192,7 +192,7 @@ static void bluetooth_media_volume_up_event_cb( lv_obj_t * obj, lv_event_t event
 static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"volumedown\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"volumedown\"}\r\n" );
             break;
     }
 }
@@ -200,7 +200,7 @@ static void bluetooth_media_volume_down_event_cb( lv_obj_t * obj, lv_event_t eve
 static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"next\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"next\"}\r\n" );
             break;
     }
 }
@@ -208,7 +208,7 @@ static void bluetooth_media_next_event_cb( lv_obj_t * obj, lv_event_t event ) {
 static void bluetooth_media_prev_event_cb( lv_obj_t * obj, lv_event_t event ) {
     switch( event ) {
         case( LV_EVENT_CLICKED ):
-            gadgetbridge_send_msg( (char*)"\r\n{t:\"music\", n:\"previous\"}\r\n" );
+            gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"music\", \"n\":\"previous\"}\r\n" );
             break;
     }
 }

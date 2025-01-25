@@ -65,7 +65,7 @@
                 /*
                  * Send battery percent via BangleJS protocol
                  */
-                bool ret = gadgetbridge_send_msg( "\r\n{t:\"status\", bat:%d}\r\n", level );
+                bool ret = gadgetbridge_send_msg( "\r\n{\"t\":\"status\", \"bat\":%d}\r\n", level );
 
                 return ret;
             }

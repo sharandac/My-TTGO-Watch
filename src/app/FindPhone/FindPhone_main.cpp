@@ -165,7 +165,7 @@ static void toggle_searching ()
 	if (searching_phone) 
 	{
 		REM(false);
-		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"findPhone\", \"n\":\"false\"}\r\n" );
 		searching_phone = false;
 	}
     else {
@@ -197,10 +197,10 @@ static void FindPhone_PhoneSearch_task( lv_task_t * task )
 { 
 	if (searching_phone) 
 	{
-		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"true\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"findPhone\", \"n\":\"true\"}\r\n" );
 		REM(true);
 	} else {
-		gadgetbridge_send_msg( (char*)"\r\n{t:\"findPhone\", n:\"false\"}\r\n" );
+		gadgetbridge_send_msg( (char*)"\r\n{\"t\":\"findPhone\", \"n\":\"false\"}\r\n" );
 	}
     lv_task_del( _FindPhone_PhoneSearch_task );
     _FindPhone_PhoneSearch_task = nullptr;

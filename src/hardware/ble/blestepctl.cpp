@@ -57,7 +57,7 @@ class StepcounterBleUpdater : public BleUpdater<int32_t> {
          * Cf. https://www.espruino.com/Gadgetbridge
          */
         char msg[64]="";
-        snprintf( msg, sizeof( msg ),"\r\n{t:\"act\", stp:%d}\r\n", delta );
+        snprintf( msg, sizeof( msg ),"\r\n{\"t\":\"act\", \"stp\":%d}\r\n", delta );
         bool ret = gadgetbridge_send_msg( msg );
         log_d("Notified stepcounter: new=%d last=%d -> delta=%d => %d", stepcounter, last_value, delta, ret);
         return ret;
