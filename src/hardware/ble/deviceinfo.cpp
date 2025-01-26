@@ -37,6 +37,8 @@ void deviceinfo_setup( void ) {
         pManufacturerNameStringCharacteristic->setValue("Lily Go");
         NimBLECharacteristic* pFirmwareRevisionStringCharacteristic = pDeviceInformationService->createCharacteristic( FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ );
         pFirmwareRevisionStringCharacteristic->setValue(__FIRMWARE__);
+        NimBLECharacteristic* pModelStringCharacteristic = pDeviceInformationService->createCharacteristic( MODEL_STRING_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ );
+        pModelStringCharacteristic->setValue(HARDWARE_NAME);
         pDeviceInformationService->start();
         pAdvertising->addServiceUUID( pDeviceInformationService->getUUID() );
     #endif

@@ -28,6 +28,7 @@
     #define DEVICE_INFORMATION_SERVICE_UUID                 (uint16_t)0x180A                           /** @brief Device Information server UUID */
     #define MANUFACTURER_NAME_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A29                           /** @brief Device Information - manufacturer name string UUID */
     #define FIRMWARE_REVISION_STRING_CHARACTERISTIC_UUID    (uint16_t)0x2A26                           /** @brief Device Information - firmware revision UUID */
+    #define MODEL_STRING_CHARACTERISTIC_UUID                (uint16_t)0x2A24                           /** @brief Device Information - model UUID */
     /**
      * @brief setup gadgetbridge transmit/recieve over ble
      */
