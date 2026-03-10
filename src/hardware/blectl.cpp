@@ -55,8 +55,7 @@
     #include "ble/gadgetbridge.h"
     #include "ble/deviceinfo.h"
     #include "ble/parkinsense_ble.h"
-    #include "esp_mac.h"
-
+    #include "esp_system.h"
     #include "NimBLEDescriptor.h"
 
     EventGroupHandle_t blectl_status = NULL;
@@ -234,8 +233,10 @@ void blectl_setup( void ) {
         blebatctl_setup();
         blestepctl_setup();
         /*
-         * Start advertising
+         * Start advertising with power-efficient intervals
          */
+        pAdvertising->setMinInterval(800);
+        pAdvertising->setMaxInterval(1600);
         pAdvertising->start();
     #endif
 
