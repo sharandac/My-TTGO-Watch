@@ -55,6 +55,7 @@
     #include "ble/gadgetbridge.h"
     #include "ble/deviceinfo.h"
     #include "ble/parkinsense_ble.h"
+    #include "esp_mac.h"
 
     #include "NimBLEDescriptor.h"
 
@@ -190,7 +191,10 @@ void blectl_setup( void ) {
          *  Create the BLE Device
          */
         char deviceName[ 64 ];
-        snprintf( deviceName, sizeof( deviceName ), "Espruino (%s)", device_get_name() );
+        uint8_t mac[6];
+        esp_read_mac(mac, ESP_MAC_BT);
+        snprintf(deviceName, sizeof(deviceName), "Espruino (%s-%02X%02X)", 
+        device_get_name(), mac[4], mac[5]);
         NimBLEDevice::init( deviceName );
         /*
          * set power level from config
