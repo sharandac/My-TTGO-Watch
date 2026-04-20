@@ -18,5 +18,7 @@
      * @return true if at least one notify was sent
      */
     bool parkinsense_ble_send(const char *data, size_t len);
+    /** Last BLE send failure reason: 0=ok, 1=no char, 2=no server, 3=no peers, 4=disconnected mid-send */
+    int parkinsense_ble_last_fail_reason(void);
 
 #endif // _PARKINSENSE_BLE_H

@@ -15,10 +15,12 @@
 #endif
 
 #define PARKINSENSE_DATA_PIPELINE_BUFFER_SIZE 1024
-/** Number of samples per PSRAM block (contiguous chunk we copy from circular buffer). */
-#define PARKINSENSE_PSRAM_BLOCK_SAMPLES 256
-/** Max formatted JSON size per block (256 samples * ~30 chars + header). */
-#define PARKINSENSE_SEND_BUF_SIZE (12 * 1024)
+/** Number of samples per PSRAM block (contiguous chunk we copy from circular buffer).
+ *  32 keeps each JSON message ~1 KB → only 3-5 BLE notifications instead of 30+,
+ *  which drastically reduces the chance of data loss from a dropped notification. */
+#define PARKINSENSE_PSRAM_BLOCK_SAMPLES 32
+/** Max formatted JSON size per block (32 samples * ~30 chars + header ≈ 1.2 KB). */
+#define PARKINSENSE_SEND_BUF_SIZE (2 * 1024)
 /** Task stack size and priority for the pipeline task. */
 #define PARKINSENSE_TASK_STACK 4096
 #define PARKINSENSE_TASK_PRIO 1
@@ -38,6 +40,10 @@ static bma_accel_data_t parkinsense_block_buf[PARKINSENSE_PSRAM_BLOCK_SAMPLES];
 #ifndef NATIVE_64BIT
 static SemaphoreHandle_t parkinsense_psram_mutex = NULL;
 static uint32_t parkinsense_last_auto_send_ms = 0;
+static unsigned parkinsense_blocks_sent = 0;
+static unsigned parkinsense_send_fails = 0;
+static unsigned parkinsense_send_attempts = 0;
+static unsigned parkinsense_send_early_returns = 0;
 static void parkinsense_task_loop(void* pv);
 #endif
 
@@ -119,23 +125,26 @@ void parkinsense_data_pipeline_reset(void) {
     circular_buff_init(&parkinsense_data_pipeline_buff);
 }
 
-void parkinsense_data_pipeline_send_data(void) {
+bool parkinsense_data_pipeline_send_data(void) {
 #ifndef NATIVE_64BIT
-    if (!parkinsense_psram_mutex) return;
+    parkinsense_send_attempts++;
+    if (!parkinsense_psram_mutex) { log_w("send: no mutex"); parkinsense_send_early_returns++; return false; }
     if (xSemaphoreTake(parkinsense_psram_mutex, pdMS_TO_TICKS(500)) != pdTRUE) {
-        log_w("Parkinsense send: mutex take timeout");
-        return;
+        log_w("send: mutex timeout");
+        parkinsense_send_early_returns++;
+        return false;
     }
     bool sent_ok = false;
     if (first_accel_block_ptr) {
         header_t* block = first_accel_block_ptr;
         if (!psram_validate_block(block)) {
-            log_e("Parkinsense send: invalid block seq=%lu", (unsigned long)block->seq_num);
+            log_w("send: validate fail seq=%lu, freeing", (unsigned long)block->seq_num);
             psram_free_first_block();
         } else {
             bma_accel_data_t* samples = (bma_accel_data_t*)((char*)block + sizeof(header_t));
             uint32_t n = block->num_elements;
             if (n > PSRAM_ACCEL_MAX_ELEMENTS) {
+                log_w("send: n=%lu > max, freeing", (unsigned long)n);
                 psram_free_first_block();
             } else {
                 size_t buf_size = sizeof(parkinsense_send_buf);
@@ -162,11 +171,13 @@ void parkinsense_data_pipeline_send_data(void) {
                     }
                 }
                 xSemaphoreGive(parkinsense_psram_mutex);
+                log_i("send: seq=%lu len=%d calling ble_send", (unsigned long)block->seq_num, len);
                 if (len > 0 && (size_t)len < buf_size) {
                     sent_ok = parkinsense_ble_send(parkinsense_send_buf, (size_t)len);
-                    if (!sent_ok)
-                        log_w("Parkinsense send: BLE send failed (no client?)");
+                    if (!sent_ok) parkinsense_send_fails++;
                 }
+                log_i("send: seq=%lu ble_send=%s R=%d", (unsigned long)block->seq_num,
+                    sent_ok ? "OK" : "FAIL", parkinsense_ble_last_fail_reason());
                 if (xSemaphoreTake(parkinsense_psram_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
                     if (first_accel_block_ptr) {
                         first_accel_block_ptr->sync = true;
@@ -174,16 +185,20 @@ void parkinsense_data_pipeline_send_data(void) {
                     }
                     xSemaphoreGive(parkinsense_psram_mutex);
                 }
-                log_i("Parkinsense send: block done (len=%d, ok=%d)", len, (int)sent_ok);
+                if (sent_ok) parkinsense_blocks_sent++;
                 if (parkinsense_data_callback)
                     callback_send(parkinsense_data_callback, PARKINSENSE_SEND_DONE, NULL);
-                return;
+                return sent_ok;
             }
         }
+    } else {
+        parkinsense_send_early_returns++;
     }
     xSemaphoreGive(parkinsense_psram_mutex);
+    return false;
 #else
     log_i("Parkinsense data pipeline send (native stub)");
+    return true;
 #endif
 }
 
@@ -200,6 +215,27 @@ int parkinsense_data_pipeline_buff_count(void) {
 
 bool parkinsense_data_pipeline_is_started(void) {
     return parkinsense_data_pipeline_started;
+}
+
+unsigned parkinsense_data_get_blocks_sent(void) { return parkinsense_blocks_sent; }
+unsigned parkinsense_data_get_send_fails(void) { return parkinsense_send_fails; }
+unsigned parkinsense_data_get_send_attempts(void) { return parkinsense_send_attempts; }
+unsigned parkinsense_data_get_early_returns(void) { return parkinsense_send_early_returns; }
+unsigned parkinsense_data_get_psram_queued(void) {
+#ifndef NATIVE_64BIT
+    unsigned count = 0;
+    if (parkinsense_psram_mutex && xSemaphoreTake(parkinsense_psram_mutex, pdMS_TO_TICKS(50)) == pdTRUE) {
+        header_t* p = first_accel_block_ptr;
+        while (p && count < 9999) {
+            count++;
+            p = (header_t*)p->next;
+        }
+        xSemaphoreGive(parkinsense_psram_mutex);
+    }
+    return count;
+#else
+    return 0;
+#endif
 }
 
 /** When buffer has reached 1024 (or any time there is at least one full block of 256), drain full blocks to PSRAM. Call from pipeline task after get_data or on a timer. */

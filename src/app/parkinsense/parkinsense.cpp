@@ -11,6 +11,7 @@
 #include "gui/app.h"
 #include "gui/widget_factory.h"
 #include "hardware/parkinsense_data.h"
+#include "hardware/ble/parkinsense_ble.h"
 #include "hardware/blectl.h"
 #include "hardware/motor.h"
 #ifndef NATIVE_64BIT
@@ -121,7 +122,7 @@ void build_main_page(void) {
         .align(lblAccel, LV_ALIGN_OUT_BOTTOM_MID);
 
     lblHint = Label(&screen);
-    lblHint.text("Auto-send every 5s over BLE")
+    lblHint.text("S:0 F:0 Q:0")
         .style(small, true)
         .align(lblBuffer, LV_ALIGN_OUT_BOTTOM_MID);
 }
@@ -141,8 +142,17 @@ void refresh_main_page(void) {
     lblAccel.text(buf).realign();
 
     int n = parkinsense_data_pipeline_buff_count();
-    snprintf(buf, sizeof(buf), "Buffer: %d", n);
+    snprintf(buf, sizeof(buf), "Buf: %d", n);
     lblBuffer.text(buf).realign();
+
+    snprintf(buf, sizeof(buf), "S:%u F:%u Q:%u A:%u E:%u R:%d",
+        parkinsense_data_get_blocks_sent(),
+        parkinsense_data_get_send_fails(),
+        parkinsense_data_get_psram_queued(),
+        parkinsense_data_get_send_attempts(),
+        parkinsense_data_get_early_returns(),
+        parkinsense_ble_last_fail_reason());
+    lblHint.text(buf).realign();
 #else
     (void)0;
 #endif

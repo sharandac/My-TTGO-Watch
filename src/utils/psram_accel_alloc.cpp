@@ -72,21 +72,27 @@ header_t* psram_write(int num_elements, bma_accel_data_t* buf){
 }
 
 uint32_t checksum(const void* ptr, size_t len){
+    size_t cs_off = offsetof(header_t, checksum);
+    size_t next_off = offsetof(header_t, next);
     uint32_t sum = 0;
     const uint8_t* p = (const uint8_t*)ptr;
     for (size_t i = 0; i < len; i++) {
+        if (i >= cs_off && i < cs_off + sizeof(uint32_t)) continue;
+        if (i >= next_off && i < next_off + sizeof(void*)) continue;
         sum += p[i];
     }
     return sum;
 }
 
-/** Compute checksum over block excluding the 4-byte checksum field (for validation). */
+/** Compute checksum over block excluding the checksum and next fields (both mutate after write). */
 static uint32_t checksum_block_for_validate(const void* ptr, size_t block_len){
     size_t cs_off = offsetof(header_t, checksum);
+    size_t next_off = offsetof(header_t, next);
     uint32_t sum = 0;
     const uint8_t* p = (const uint8_t*)ptr;
     for (size_t i = 0; i < block_len; i++) {
         if (i >= cs_off && i < cs_off + sizeof(uint32_t)) continue;
+        if (i >= next_off && i < next_off + sizeof(void*)) continue;
         sum += p[i];
     }
     return sum;
