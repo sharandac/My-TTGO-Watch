@@ -24,6 +24,11 @@
 #include "powermgm.h"
 #include "callback.h"
 #include "button.h"
+#ifndef NATIVE_64BIT
+    #ifndef NO_BLUETOOTH
+        #include "blectl.h"
+    #endif
+#endif
 
 #ifdef NATIVE_64BIT 
     #include <unistd.h>
@@ -210,6 +215,7 @@ void powermgm_loop( void ) {
          * check if an standby callback block lightsleep in standby
          */
         standby = powermgm_send_event_cb( POWERMGM_STANDBY );
+        log_i("[PWR_BLE] powermgm: STANDBY callbacks done -> allow_esp_light_sleep=%d (if 0, blocked path; BLE policy unchanged by firmware teardown)", (int)standby );
         // powermgm_disable_interrupts();
         /*
          * print some memory stats
@@ -232,13 +238,20 @@ void powermgm_loop( void ) {
             #ifdef NATIVE_64BIT
 
             #else
+                #ifndef NO_BLUETOOTH
+                blectl_before_light_sleep();
+                #endif
                 setCpuFrequencyMhz( 80 );
+                log_i("[PWR_BLE] powermgm: esp_light_sleep_start() next (modem/BLE may still cause wakeups)");
                 log_d("CPU speed = 80MHz, start light sleep");
                 /*
                 * from here, the consumption is round about 2.5mA
                 * total standby time is 152h (6days) without use?
                 */
                 esp_light_sleep_start();
+                #ifndef NO_BLUETOOTH
+                blectl_after_light_sleep();
+                #endif
                 /**
                  * check wakeup source
                  */
@@ -250,6 +263,7 @@ void powermgm_loop( void ) {
                         log_d("disable wakeup timer");
                         break;
                     default:
+                        log_i("[PWR_BLE] powermgm: light sleep wake cause=%d (not timer)", (int)esp_sleep_get_wakeup_cause() );
                         break;
                 }
                 /**
@@ -271,6 +285,7 @@ void powermgm_loop( void ) {
         }
         else {
             log_w("go standby blocked");
+            log_i("[PWR_BLE] powermgm: standby blocked -> 80MHz / esp_pm light sleep path (~20mA with BLE if CONFIG_PM_ENABLE)" );
             /*
              * set cpu speed
              * 

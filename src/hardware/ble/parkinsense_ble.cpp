@@ -37,6 +37,7 @@ void parkinsense_ble_setup(void) {
     );
     pService->start();
     pAdvertising->addServiceUUID(pService->getUUID());
+    log_i("[PWR_BLE] parkinsense_ble_setup: service registered (advertising already global in blectl_setup)");
 #endif
 }
 
