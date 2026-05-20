@@ -10,9 +10,10 @@
     #endif
 
     #define PARKINSENSE_DATA_UPDATE_INTERVAL 1000
-    /** How often (ms) the pipeline auto-sends PSRAM blocks over BLE.
-     *  1 s keeps latency low now that blocks are small (32 samples ≈ 1 KB). */
-    #define PARKINSENSE_AUTO_SEND_INTERVAL_MS 1000
+    /** Minimum time between hourly PSRAM sync attempts (ms). */
+    #define PARKINSENSE_HOURLY_SEND_INTERVAL_MS   (60UL * 60UL * 1000UL)
+    /** How long each hour we advertise and try to drain PSRAM (ms). */
+    #define PARKINSENSE_HOURLY_SYNC_WINDOW_MS       (5UL * 60UL * 1000UL)
 
     #ifndef _BV
     #define _BV(b) (1UL << (b))
