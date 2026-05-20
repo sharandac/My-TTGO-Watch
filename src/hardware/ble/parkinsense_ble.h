@@ -6,6 +6,8 @@
 
     #define PARKINSENSE_SERVICE_UUID              "4a6c5e01-7b8f-4a9d-b2c3-d4e5f6a7b8c9"
     #define PARKINSENSE_CHARACTERISTIC_UUID_TX    "4a6c5e02-7b8f-4a9d-b2c3-d4e5f6a7b8c9"
+    /** Read-only probe; READ_ENC triggers OS pairing before data notify subscribe. */
+    #define PARKINSENSE_CHARACTERISTIC_UUID_PAIR  "4a6c5e03-7b8f-4a9d-b2c3-d4e5f6a7b8c9"
 
     void parkinsense_ble_setup(void);
     /**

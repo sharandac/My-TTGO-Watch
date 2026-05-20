@@ -31,13 +31,23 @@ void parkinsense_ble_setup(void) {
     NimBLEAdvertising *pAdvertising = blectl_get_ble_advertising();
 
     NimBLEService *pService = pServer->createService(NimBLEUUID(PARKINSENSE_SERVICE_UUID));
+
+    /* Encrypted read triggers GATT_INSUFFICIENT_* until the link is paired. */
+    NimBLECharacteristic *pPairProbe = pService->createCharacteristic(
+        NimBLEUUID(PARKINSENSE_CHARACTERISTIC_UUID_PAIR),
+        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::READ_ENC
+    );
+    pPairProbe->setValue((uint8_t)1);
+
     pParkinsenseTXCharacteristic = pService->createCharacteristic(
         NimBLEUUID(PARKINSENSE_CHARACTERISTIC_UUID_TX),
-        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY
+        NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::NOTIFY
     );
+    pParkinsenseTXCharacteristic->setValue((uint8_t)0);
+
     pService->start();
     pAdvertising->addServiceUUID(pService->getUUID());
-    log_i("[PWR_BLE] parkinsense_ble_setup: service registered (advertising already global in blectl_setup)");
+    log_i("[PWR_BLE] parkinsense_ble_setup: encrypted service registered");
 #endif
 }
 
