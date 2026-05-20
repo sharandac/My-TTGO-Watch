@@ -209,7 +209,7 @@ static bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 
             powermgm_resume_from_ISR();
 
-            return( false );
+            return( true );
         };
 
         void onAuthenticationComplete(ble_gap_conn_desc* desc){
