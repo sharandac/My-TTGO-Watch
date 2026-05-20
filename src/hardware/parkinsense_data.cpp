@@ -178,14 +178,16 @@ bool parkinsense_data_pipeline_send_data(void) {
                 }
                 log_i("send: seq=%lu ble_send=%s R=%d", (unsigned long)block->seq_num,
                     sent_ok ? "OK" : "FAIL", parkinsense_ble_last_fail_reason());
-                if (xSemaphoreTake(parkinsense_psram_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
-                    if (first_accel_block_ptr) {
-                        first_accel_block_ptr->sync = true;
-                        psram_free_first_block();
+                if (sent_ok) {
+                    if (xSemaphoreTake(parkinsense_psram_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
+                        if (first_accel_block_ptr == block) {
+                            block->sync = true;
+                            psram_free_first_block();
+                        }
+                        xSemaphoreGive(parkinsense_psram_mutex);
                     }
-                    xSemaphoreGive(parkinsense_psram_mutex);
+                    parkinsense_blocks_sent++;
                 }
-                if (sent_ok) parkinsense_blocks_sent++;
                 if (parkinsense_data_callback)
                     callback_send(parkinsense_data_callback, PARKINSENSE_SEND_DONE, NULL);
                 return sent_ok;
