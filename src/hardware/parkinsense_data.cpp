@@ -9,6 +9,7 @@
 #include "hardware/ble/parkinsense_ble.h"
 #include "hardware/blectl.h"
 #include "hardware/motion.h"
+#include "NimBLEDevice.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
@@ -39,12 +40,17 @@ static callback_t* parkinsense_data_callback = NULL;
 static bma_accel_data_t parkinsense_block_buf[PARKINSENSE_PSRAM_BLOCK_SAMPLES];
 #ifndef NATIVE_64BIT
 static SemaphoreHandle_t parkinsense_psram_mutex = NULL;
-static uint32_t parkinsense_last_auto_send_ms = 0;
+static uint32_t parkinsense_last_hourly_ms = 0;
+static uint32_t parkinsense_sync_window_end_ms = 0;
+static bool parkinsense_sync_window_active = false;
 static unsigned parkinsense_blocks_sent = 0;
 static unsigned parkinsense_send_fails = 0;
 static unsigned parkinsense_send_attempts = 0;
 static unsigned parkinsense_send_early_returns = 0;
 static void parkinsense_task_loop(void* pv);
+static bool parkinsense_ble_client_connected(void);
+static void parkinsense_drain_psram_queue(void);
+static void parkinsense_hourly_sync_tick(uint32_t now_ms);
 #endif
 
 void parkinsense_data_pipeline_init(void) {
@@ -66,10 +72,9 @@ void parkinsense_data_pipeline_init(void) {
     parkinsense_psram_mutex = xSemaphoreCreateMutex();
     if (!parkinsense_psram_mutex)
         log_e("Parkinsense pipeline mutex create failed");
-    if (ok == pdPASS && parkinsense_data_task_handle)
-        vTaskSuspend(parkinsense_data_task_handle);
-    else
+    if (ok != pdPASS || !parkinsense_data_task_handle)
         log_e("Parkinsense pipeline task create failed");
+    parkinsense_last_hourly_ms = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
 #endif
 }
 
@@ -77,19 +82,13 @@ void parkinsense_data_pipeline_start(void) {
     log_i("Parkinsense data pipeline started");
     parkinsense_data_pipeline_started = true;
 #ifndef NATIVE_64BIT
-    parkinsense_last_auto_send_ms = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
-    if (parkinsense_data_task_handle)
-        vTaskResume(parkinsense_data_task_handle);
+    parkinsense_last_hourly_ms = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
 #endif
 }
 
 void parkinsense_data_pipeline_stop(void) {
     log_i("Parkinsense data pipeline stopped");
     parkinsense_data_pipeline_started = false;
-#ifndef NATIVE_64BIT
-    if (parkinsense_data_task_handle)
-        vTaskSuspend(parkinsense_data_task_handle);
-#endif
 }
 
 void parkinsense_data_pipeline_reset(void) {
@@ -289,20 +288,65 @@ void parkinsense_data_pipeline_unregister_cb(EventBits_t event, const char* id) 
 }
 
 #ifndef NATIVE_64BIT
+static bool parkinsense_ble_client_connected(void) {
+    NimBLEServer *pServer = blectl_get_ble_server();
+    return pServer && pServer->getConnectedCount() > 0;
+}
+
+static void parkinsense_drain_psram_queue(void) {
+    const unsigned max_blocks_per_tick = 8;
+    unsigned sent = 0;
+    while (first_accel_block_ptr && parkinsense_ble_client_connected() && sent < max_blocks_per_tick) {
+        if (!parkinsense_data_pipeline_send_data())
+            break;
+        sent++;
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+}
+
+static void parkinsense_hourly_sync_tick(uint32_t now_ms) {
+    const bool has_queue = first_accel_block_ptr != nullptr;
+
+    if (!parkinsense_sync_window_active) {
+        if (!has_queue)
+            return;
+        if ((now_ms - parkinsense_last_hourly_ms) < PARKINSENSE_HOURLY_SEND_INTERVAL_MS)
+            return;
+        parkinsense_last_hourly_ms = now_ms;
+        parkinsense_sync_window_active = true;
+        parkinsense_sync_window_end_ms = now_ms + PARKINSENSE_HOURLY_SYNC_WINDOW_MS;
+        blectl_on_hourly_advertise_window();
+        log_i("hourly sync: window opened, queued=%u", parkinsense_data_get_psram_queued());
+        return;
+    }
+
+    if (now_ms >= parkinsense_sync_window_end_ms) {
+        parkinsense_sync_window_active = false;
+        log_i("hourly sync: window closed (timeout), queued=%u", parkinsense_data_get_psram_queued());
+        return;
+    }
+
+    if (!has_queue) {
+        parkinsense_sync_window_active = false;
+        log_i("hourly sync: window closed (queue empty)");
+        return;
+    }
+
+    if (parkinsense_ble_client_connected())
+        parkinsense_drain_psram_queue();
+}
+
 static void parkinsense_task_loop(void* pv) {
     (void)pv;
     for (;;) {
         if (parkinsense_data_pipeline_started) {
             parkinsense_data_pipeline_get_data();
             parkinsense_data_pipeline_drain_if_full();
-
-            uint32_t now = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
-            if (first_accel_block_ptr &&
-                (now - parkinsense_last_auto_send_ms) >= PARKINSENSE_AUTO_SEND_INTERVAL_MS) {
-                parkinsense_last_auto_send_ms = now;
-                parkinsense_data_pipeline_send_data();
-            }
         }
+
+        uint32_t now = (uint32_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
+        parkinsense_hourly_sync_tick(now);
+
         vTaskDelay(pdMS_TO_TICKS(PARKINSENSE_TASK_DELAY_MS));
     }
 }
