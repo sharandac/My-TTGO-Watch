@@ -28,7 +28,9 @@ void test_circular_buffer_multi_overwrite(void);
 void test_circular_buffer_count_invariants(void);
 void test_circular_buffer_wrap_around(void);
 
-/* ---- Declare test functions from test_psram.cpp (ESP32 only) ---- */
+/* ---- Declare test functions from test_psram.cpp ---- */
+void test_psram_free_first_advances_queue(void);
+void test_psram_free_first_on_empty_list(void);
 #ifdef ESP32
 void test_psram_get_memory(void);
 void test_psram_init(void);
@@ -64,6 +66,9 @@ static void run_all_tests(void) {
     RUN_TEST(test_circular_buffer_multi_overwrite);
     RUN_TEST(test_circular_buffer_count_invariants);
     RUN_TEST(test_circular_buffer_wrap_around);
+
+    RUN_TEST(test_psram_free_first_advances_queue);
+    RUN_TEST(test_psram_free_first_on_empty_list);
 
     /* PSRAM tests (device only) */
 #ifdef ESP32

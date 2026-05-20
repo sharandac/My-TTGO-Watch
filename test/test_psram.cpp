@@ -7,10 +7,29 @@
 
 
 //-------- NATIVE TESTS --------//
-// get memory
-// get free memory?
-// basically status checks
-// initialization checks? 
+
+void test_psram_free_first_advances_queue(void) {
+    bma_accel_data_t a = {1, 2, 3, 1000};
+    bma_accel_data_t b = {4, 5, 6, 2000};
+
+    header_t* block0 = psram_write(1, &a);
+    header_t* block1 = psram_write(1, &b);
+    TEST_ASSERT_NOT_NULL(block0);
+    TEST_ASSERT_NOT_NULL(block1);
+
+    uint32_t seq1 = block1->seq_num;
+    psram_free_first_block();
+
+    TEST_ASSERT_NOT_NULL(first_accel_block_ptr);
+    TEST_ASSERT_EQUAL_UINT32(seq1, first_accel_block_ptr->seq_num);
+    TEST_ASSERT_EQUAL_INT(4, ((bma_accel_data_t*)((char*)first_accel_block_ptr + sizeof(header_t)))->x);
+}
+
+void test_psram_free_first_on_empty_list(void) {
+    TEST_ASSERT_NULL(first_accel_block_ptr);
+    psram_free_first_block();
+    TEST_ASSERT_NULL(first_accel_block_ptr);
+}
 
 //-------- ON DEVICE TESTS -------//
 
