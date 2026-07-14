@@ -52,9 +52,13 @@ static String size, length, goal_step, goal_dist;
 // Widgets
 static Label lblStepcounter, lblStepachievement;
 static Label lblDistance, lblDistachievement;
+static Label lblrawAccel;
 static Arc arcStepcounter, arcDistance;
 
+
 static Style big, small;
+static lv_task_t *accel_update_task = NULL;
+
 
 /* Default message box callback */
 static lv_event_cb_t default_msgbox_cb;
@@ -106,6 +110,11 @@ void activity_app_setup() {
         lv_obj_set_event_cb(mbox1, activity_reset_cb);
         lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0);
     });
+
+
+    accel_update_task = lv_task_create([](lv_task_t *task) {
+    refresh_main_page();  // Or just update accel part
+    }, 200, LV_TASK_PRIO_MID, NULL);
     
     refresh_main_page();
 }
@@ -132,6 +141,11 @@ void build_main_page()
     lblStepcounter.text("0")
         .style(big, true)
         .align(arcStepcounter, LV_ALIGN_OUT_TOP_MID);
+
+    lblrawAccel = Label(&screen);
+    lblrawAccel.text("0")
+           .style(big, true)
+           .align(lblStepcounter, LV_ALIGN_OUT_BOTTOM_MID);  // or another position
     
     lblStepachievement = Label(&screen);
     lblStepachievement.text("0%")
@@ -163,12 +177,19 @@ void refresh_main_page()
     uint32_t gDist = atoi( goal_dist.c_str() );
     // Get current value
     uint32_t stp = bma_get_stepcounter();
+    bma_accel_data_t accel = bma_get_accel();
+
     uint32_t ach = gStep == 0 ? 0 : 100 * stp / gStep;
     uint32_t dist = stp * atoi( length.c_str() ) / 100;
     log_d("Refresh activity: %d steps", stp);
     // Raw steps
     snprintf( buff, sizeof( buff ), "%d", stp );
     lblStepcounter.text(buff).realign();
+
+    // Raw Accelerometer Values
+    snprintf( buff, sizeof(buff), "X:%d Y:%d Z:%d", accel.x, accel.y, accel.z);
+    lblrawAccel.text(buff).realign();
+
     // Achievement
     snprintf( buff, sizeof( buff ), "%d%%", ach );
     lblStepachievement.text(buff).realign();

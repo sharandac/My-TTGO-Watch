@@ -22,11 +22,16 @@
 #include "config.h"
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 
+
+#include "drive/bma423/bma.h"
 #include "motion.h"
+#include "hardware/bma_fifo.h"
 #include "powermgm.h"
 #include "callback.h"
 #include "utils/alloc.h"
+
 
 #ifdef NATIVE_64BIT
     #include "utils/logging.h"
@@ -94,7 +99,6 @@
 
 bma_config_t bma_config;
 callback_t *bma_callback = NULL;
-
 bool first_loop_run = true;
 
 bool bma_send_event_cb( EventBits_t event, void *arg );
@@ -159,6 +163,7 @@ void bma_setup( void ) {
              * init stepcounter
              */
             ttgo->bma->begin();
+            log_i("[DEBUG] BMA423 initialized manually");
             ttgo->bma->attachInterrupt();
             ttgo->bma->direction();
             /*
@@ -293,6 +298,17 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 while( !ttgo->bma->readInterrupt() );
+#ifdef PARKINSENSE_BMA_FIFO
+                if (bma_fifo_is_enabled()) {
+                    /* isDoubleClick() = BMA423_WAKEUP (activity); isTilt() = orientation change */
+                    if ( ttgo->bma->isDoubleClick() || ttgo->bma->isTilt() ) {
+                        bma_fifo_on_motion();
+                    }
+                    if (bma_fifo_is_active()) {
+                        bma_fifo_service();
+                    }
+                }
+#endif
                 /*
                 * set powermgm wakeup event and save BMA_* event
                 */
@@ -372,11 +388,15 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
 
 void bma_notify_stepcounter( void ) {
     uint32_t val = 0;
+
+    log_i("Entered function: bma_notify_stepcounter");
     #ifdef NATIVE_64BIT
+    log_i("Emulator is running");
     #else
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
             TTGOClass *ttgo = TTGOClass::getWatch();
+            log_d('Over here 0');
             stepcounter_before_reset = ttgo->bma->getCounter();
         #elif defined( LILYGO_WATCH_2021 )
             stepcounter_before_reset = bma.getCounter();
@@ -415,7 +435,15 @@ void bma_standby( void ) {
     #else
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
+#ifdef PARKINSENSE_BMA_FIFO
+            if ( bma_fifo_is_active() ) {
+                bma_fifo_prepare_light_sleep();
+                gpio_wakeup_enable( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            } else
+#endif
+            {
+                gpio_wakeup_enable( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            }
             esp_sleep_enable_gpio_wakeup ();
         #elif defined( LILYGO_WATCH_2021 )
             gpio_wakeup_enable ( (gpio_num_t)BMA_INT_1, GPIO_INTR_POSEDGE );
@@ -641,6 +669,17 @@ void bma_set_rotate_tilt( uint32_t rotation ) {
 
 uint32_t bma_get_stepcounter( void ) {
     return stepcounter + stepcounter_before_reset;
+}
+
+
+bma_accel_data_t bma_get_accel() {
+    Accel accel;
+    TTGOClass *ttgo = TTGOClass::getWatch();
+    ttgo->bma->getAccel(accel);
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    uint32_t timestamp_ms = (uint32_t)(tv.tv_sec * 1000UL + tv.tv_usec / 1000);
+    return {accel.x, accel.y, accel.z, timestamp_ms};
 }
 
 void bma_reset_stepcounter( void ) {

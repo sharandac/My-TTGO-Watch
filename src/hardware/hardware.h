@@ -21,5 +21,9 @@
      * @brief detach lvgl ticker function
      */
     void hardware_detach_lvgl_ticker( void );
+    /**
+     * @brief minimal init for tests that need BMA (watch + bma_setup only)
+     */
+    void hardware_test_init_bma( void );
 
 #endif // _HARDWARE_H

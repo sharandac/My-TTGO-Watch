@@ -52,9 +52,9 @@
         bool sound_notification = true;                         /** @brief enable sound on notifications */
         bool media_notification = true;                         /** @brief enable media on notifications */
         int txpower = 1;                                        /** @brief tx power, valide values are from 0 to 4 */
-        uint16_t minInterval = 0x06;                            /** @brief connParams for minInterval  0x10*1.25ms = 20ms */
-        uint16_t maxInterval = 0x20;                            /** @brief connParams for maxInterval  0x20*1.25ms = 40ms */
-        uint16_t latency = 20;                                  /** @brief skipped events */
+        uint16_t minInterval = 0x18;                            /** @brief connParams for minInterval  0x18*1.25ms = 30ms */
+        uint16_t maxInterval = 0x40;                            /** @brief connParams for maxInterval  0x40*1.25ms = 80ms */
+        uint16_t latency = 20;                                  /** @brief skip up to 20 connection events (power saving; peripheral still wakes on pending notify) */
         uint16_t timeout = 400;                                 /** @brief connParams for minInterval  0x10*1.25ms = 20ms */
         blectl_custom_audio* custom_audio_notifications = NULL; /** @brief timeout = 400*10ms = 4000ms */
 

@@ -24,7 +24,8 @@
 
     #include "callback.h"
     #include "hardware/config/bmaconfig.h"
-    
+    #include "drive/bma423/bma.h"
+
     #define BMACTL_EVENT_INT            _BV(0)              /** @brief event mask for bma interrupt */
     #define BMACTL_DOUBLECLICK          _BV(1)              /** @brief event mask for an doubleclick event */
     #define BMACTL_STEPCOUNTER          _BV(2)              /** @brief event mask for an stepcounter update event, callback arg is (uint32*) */
@@ -93,5 +94,30 @@
      * @brief reset the stepcounter value
      */
     void bma_reset_stepcounter( void );
+
+
+    /**
+     * @brief common struct to return raw acceleromter values
+     */
+    typedef struct{
+
+        int16_t x;
+        int16_t y;
+        int16_t z;
+        uint32_t timestamp_ms;
+        //Should I add the time stamp?
+        //float 
+
+
+    } bma_accel_data_t;
+
+    /** 
+    * @brief wrapper for returning raw accelerometer values from bma
+    * 
+    */
+    bma_accel_data_t bma_get_accel(void);
+
+
+
     
 #endif // _MOTION_H

@@ -50,6 +50,9 @@ A GUI named hedge for smartwatch like devices based on ESP32. Currently support 
 ## Install
 
 Clone this repository and open it with platformIO. Select the right env and then build and upload.
+
+**WSL2 (Windows):** step-by-step USB attach, build, and upload — [docs/wsl_watch_upload.md](docs/wsl_watch_upload.md).
+
 Or follow the great step by step [tutorial](https://www.youtube.com/watch?v=wUGADCnerCs) from [ShotokuTech](https://github.com/ShotokuTech).
 
 Please check out

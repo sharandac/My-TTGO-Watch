@@ -238,6 +238,19 @@
      */
     void blectl_off( void );
     /**
+     * @brief Before esp_light_sleep: drop active links and stop advertising without changing saved "enable on wakeup" (autoon).
+     */
+    void blectl_before_light_sleep( void );
+    /**
+     * @brief After light sleep: does not start advertising; see blectl_on / hourly hook / WAKEUP policy.
+     */
+    void blectl_after_light_sleep( void );
+    /**
+     * @brief Call from a future hourly/cron feature when it is time to allow advertising
+     *        (e.g. scheduled visibility window). No-op if BLE / visibility off in settings.
+     */
+    void blectl_on_hourly_advertise_window( void );
+    /**
      * @brief get the current enable config
      * 
      * @return true if bl enabled, false if bl disabled

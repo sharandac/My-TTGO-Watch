@@ -230,6 +230,46 @@ bool pmu_powermgm_event_cb( EventBits_t event, void *arg ) {
     return( retval );
 }
 
+
+static int32_t pmu_smooth_battery_display_percent( int32_t raw, bool charging, bool plug ) {
+    static int32_t display = -1;
+
+    if ( display < 0 )
+        display = ( raw >= 0 ) ? raw : 0;
+
+    /* Charge finished on USB — treat as full. */
+    if ( plug && !charging ) {
+        display = 100;
+        return display;
+    }
+
+    if ( raw < 0 )
+        return display;
+
+    if ( charging || plug ) {
+        /* While charging: never drop; creep up slowly to reduce jitter. */
+        if ( raw >= 97 || display >= 97 )
+            display = ( display < 99 ) ? display + 1 : 100;
+        else if ( raw > display )
+            display = display + 1;
+    }
+    else {
+        /* On battery: allow slow decreases only. */
+        if ( raw < display - 2 )
+            display = display - 2;
+        else if ( raw > display + 2 )
+            display = display + 2;
+        else
+            display = raw;
+    }
+
+    if ( display < 0 )
+        display = 0;
+    if ( display > 100 )
+        display = 100;
+    return display;
+}
+
 bool pmu_blectl_event_cb( EventBits_t event, void *arg ) {
     switch( event ) {
         case BLECTL_CONNECT:
@@ -464,9 +504,12 @@ void pmu_loop( void ) {
          * only update if an change is detected
          */
         tmp_percent = pmu_get_battery_percent();
-        if ( tmp_percent != percent ) {
-            pmu_update = true;
-            percent = tmp_percent;
+        {
+            const int32_t shown = pmu_smooth_battery_display_percent( tmp_percent, charging, plug );
+            if ( shown != percent ) {
+                pmu_update = true;
+                percent = shown;
+            }
         }
         pmu_battery_calibration_loop( false, false );
     }
@@ -811,8 +854,30 @@ int32_t pmu_get_battery_percent( void ) {
                 percent = ( ttgo->power->getCoulombData() / pmu_config.designed_battery_cap ) * 100;
             }
             else {
-                percent = ttgo->power->getBattPercentage();
+                const bool on_usb = pmu_is_vbus_plug();
+                if ( pmu_is_charging() || on_usb ) {
+                    float mV = ttgo->power->getBattVoltage();
+                    const float offset = pmu_config.battery_chargingoffset > 0
+                        ? pmu_config.battery_chargingoffset
+                        : (float)BATTERY_CHARGING_OFFSET;
+                    if ( offset > 0 )
+                        mV -= offset;
+                    const int32_t from_v = pmu_get_voltage2percent( mV );
+                    if ( from_v > 0 )
+                        percent = from_v;
+                    else
+                        percent = ttgo->power->getBattPercentage();
+                }
+                else {
+                    percent = ttgo->power->getBattPercentage();
+                }
             }
+            if ( percent > 100 )
+                percent = 100;
+            if ( percent < 0 )
+                percent = 0;
+            if ( percent >= 97 && pmu_is_vbus_plug() && !pmu_is_charging() )
+                percent = 100;
         #elif defined( LILYGO_WATCH_2021 )
             float mV = pmu_get_battery_voltage();
             if( pmu_is_charging() )
@@ -862,7 +927,7 @@ static int32_t pmu_get_voltage2percent( float mV ) {
     float vol_section = ( Qcm[ i + 1 ] - Qcm[ i ] ) / ( 100.0 / size );
     float div = i * ( 100.0 / size );
     percent = constrain( div + ( ( mV - Qcm[ i ] ) / vol_section ), 0.0, 100.0 );
-    log_i("voltage: %.0fmV, percent: %d%%", mV, percent );
+    log_d("voltage: %.0fmV, percent: %d%%", mV, percent );
     return( percent );
 }
 

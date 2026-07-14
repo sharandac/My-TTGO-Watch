@@ -271,9 +271,42 @@ void hardware_setup( void ) {
     sound_read_config();
     fakegps_setup();
     blectl_read_config();
+    #ifndef NO_BLUETOOTH
+        blectl_setup();
+    #endif
 
     splash_screen_stage_update( "init gui", 80 );
     splash_screen_stage_finish();
+}
+
+void hardware_test_init_bma( void ) {
+    #ifdef NATIVE_64BIT
+        (void)0;
+    #else
+        esp_pthread_cfg_t cfg = esp_pthread_get_default_config();
+        cfg.stack_size = ( 8 * 1024 );
+        cfg.inherit_cfg = false;
+        esp_pthread_set_cfg(&cfg);
+        #if defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+            lv_init();
+            TTGOClass *ttgo = TTGOClass::getWatch();
+            ttgo->begin();
+        #elif defined( LILYGO_WATCH_2021 )
+            pinMode( PWR_ON, OUTPUT );
+            digitalWrite( PWR_ON, HIGH );
+            pinMode( Touch_Res, OUTPUT );
+            digitalWrite( Touch_Res, LOW );
+            delay(10);
+            digitalWrite( Touch_Res, HIGH );
+            delay(50);
+            lv_init();
+            Wire.begin( IICSDA, IICSCL );
+        #elif defined( WT32_SC01 )
+            lv_init();
+            Wire.begin( PIN_SDA, PIN_SCL );
+        #endif
+        bma_setup();
+    #endif
 }
 
 void hardware_post_setup( void ) {
@@ -285,10 +318,6 @@ void hardware_post_setup( void ) {
     sound_setup();
     gpsctl_setup();
     powermgm_set_event( POWERMGM_WAKEUP );
-
-    #ifndef NO_BLUETOOTH
-        blectl_setup();
-    #endif
 
     display_set_brightness( display_get_brightness() );
 

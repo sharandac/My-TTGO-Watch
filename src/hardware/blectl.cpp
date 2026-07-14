@@ -28,6 +28,7 @@
 #include "blectl.h"
 #include "pmu.h"
 #include "powermgm.h"
+#include "parkinsense_data.h"
 #include "callback.h"
 #include "device.h"
 #include "utils/charbuffer.h"
@@ -54,8 +55,12 @@
     #include "ble/blestepctl.h"
     #include "ble/gadgetbridge.h"
     #include "ble/deviceinfo.h"
-
+    #include "ble/parkinsense_ble.h"
+    #include "esp_system.h"
     #include "NimBLEDescriptor.h"
+    #include "freertos/FreeRTOS.h"
+    #include "freertos/task.h"
+    #include <vector>
 
     EventGroupHandle_t blectl_status = NULL;
     portMUX_TYPE DRAM_ATTR blectlMux = portMUX_INITIALIZER_UNLOCKED;
@@ -71,38 +76,135 @@ static bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 #else
     NimBLEServer *pServer = NULL;                          
     NimBLEAdvertising *pAdvertising = NULL;
+    /** Set while we expect onDisconnect to follow blectl_before_light_sleep. */
+    static bool blectl_light_sleep_disconnect_in_progress = false;
+    /**
+     * If false, firmware must not start advertising (onDisconnect, etc.). Set true only by:
+     *   user BLE on / visibility in settings, POWERMGM WAKEUP (device use), blectl_on_hourly_advertise_window.
+     * Cleared by blectl_off and blectl_before_light_sleep.
+     */
+    static bool blectl_may_start_ad = false;
+
+    static void blectl_apply_advertising_from_config( void ) {
+        if ( !pServer || !pAdvertising ) {
+            return;
+        }
+        if ( blectl_config.advertising ) {
+            pAdvertising->start();
+            log_i( "[PWR_BLE] advertising->start (visibility on)" );
+        }
+        else {
+            pAdvertising->stop();
+            log_i( "[PWR_BLE] advertising->stop (visibility off)" );
+        }
+    }
+
+    static bool blectl_privileged_start_advertising_if_runnable( const char *reason ) {
+        static uint32_t blectl_last_advert_defer_log_ms = 0;
+        if ( !blectl_may_start_ad || !blectl_get_autoon() || !blectl_get_advertising() ) {
+            return false;
+        }
+        if ( !pServer || !pAdvertising || pServer->getConnectedCount() > 0 ) {
+            return false;
+        }
+        if ( pAdvertising->isAdvertising() ) {
+            return true;
+        }
+        if ( pAdvertising->start() ) {
+            log_i( "[PWR_BLE] %s: advertising on", reason );
+            return true;
+        }
+        const uint32_t now = millis();
+        if ( now - blectl_last_advert_defer_log_ms >= 2000UL ) {
+            blectl_last_advert_defer_log_ms = now;
+            log_i( "[PWR_BLE] %s: advertising start failed (will retry; host may be resetting)", reason );
+        }
+        return false;
+    }
+
+    static void blectl_disconnect_all_or_log( const char *ctx ) {
+        if ( !pServer )
+            return;
+        const int max_rounds = 8;
+        for ( int round = 0; round < max_rounds && pServer->getConnectedCount() > 0; round++ ) {
+            const std::vector<uint16_t> peers = pServer->getPeerDevices();
+            if ( peers.empty() ) {
+                log_w( "[PWR_BLE] %s: stack reports %d link(s) but no peer ids; waiting", ctx,
+                    (int)pServer->getConnectedCount() );
+                vTaskDelay( pdMS_TO_TICKS( 30 ) );
+                continue;
+            }
+            if ( round == 0 )
+                log_i( "[PWR_BLE] %s: terminating %d link(s)", ctx, (int)pServer->getConnectedCount() );
+            const int rc = pServer->disconnect( peers[ 0 ] );
+            if ( rc != 0 )
+                vTaskDelay( pdMS_TO_TICKS( 50 ) );
+            else
+                vTaskDelay( pdMS_TO_TICKS( 15 ) );
+        }
+        if ( pServer->getConnectedCount() > 0 )
+            log_w( "[PWR_BLE] %s: %d link(s) still up after retries (may clear asynchronously)", ctx,
+                (int)pServer->getConnectedCount() );
+    }
 
     class ServerCallbacks: public NimBLEServerCallbacks {
-        void onConnect(NimBLEServer* pServer) {
-            log_i("Client connected");
-            NimBLEDevice::startAdvertising();
+        void onConnect(NimBLEServer* pServer ) {
+            log_i( "Client connected" );
+            if ( pAdvertising && pAdvertising->isAdvertising() ) {
+                pAdvertising->stop();
+                log_i( "[PWR_BLE] advertising stopped (client connected)" );
+            }
         };
 
         void onConnect(NimBLEServer* pServer, ble_gap_conn_desc* desc) {
+            blectl_may_start_ad = true;
             pServer->updateConnParams(desc->conn_handle, blectl_config.minInterval, blectl_config.maxInterval, blectl_config.latency, blectl_config.timeout );
+            parkinsense_ble_on_client_connected();
+#ifdef PARKINSENSE_BLE_UNSECURED
+            blectl_clear_event( BLECTL_DISCONNECT | BLECTL_AUTHWAIT );
+            blectl_set_event( BLECTL_CONNECT );
+            powermgm_resume_from_ISR();
+            blectl_send_event_cb( BLECTL_CONNECT, (void *)"connected" );
+            log_i("[PWR_BLE] Client connected (unsecured, no pairing): %s",
+                NimBLEAddress(desc->peer_ota_addr).toString().c_str());
+#else
             blectl_set_event( BLECTL_AUTHWAIT );
             blectl_clear_event( BLECTL_DISCONNECT | BLECTL_CONNECT );
             powermgm_resume_from_ISR();
             log_d("BLE authwait");
             blectl_send_event_cb( BLECTL_AUTHWAIT, (void *)"authwait" );
             log_i("Client address: %s", NimBLEAddress(desc->peer_ota_addr).toString().c_str() );
+#endif
         };
 
         void onDisconnect(NimBLEServer* pServer) {
             log_d("BLE disconnected");
+            parkinsense_ble_on_client_disconnected();
             blectl_set_event( BLECTL_DISCONNECT );
             blectl_clear_event( BLECTL_CONNECT | BLECTL_AUTHWAIT );
             blectl_send_event_cb( BLECTL_DISCONNECT, (void *)"disconnected" );
             powermgm_resume_from_ISR();
 
-            if ( blectl_get_advertising() ) {
-                pServer->getAdvertising()->start();
-                log_d("BLE advertising...");
+            if ( blectl_light_sleep_disconnect_in_progress ) {
+                blectl_light_sleep_disconnect_in_progress = false;
+                log_i( "[PWR_BLE] onDisconnect: post light-sleep drop — no auto advertising (may_start=%d)", (int)blectl_may_start_ad );
+            }
+            else if ( blectl_get_autoon() && blectl_get_advertising() ) {
+                /* Client dropped: re-advertise so phone/nRF can auto-reconnect. */
+                blectl_may_start_ad = true;
+                if ( !blectl_privileged_start_advertising_if_runnable( "client disconnect (reconnect)" ) ) {
+                    log_i( "[PWR_BLE] onDisconnect: reconnect ad deferred (autoon=%d visibility=%d)",
+                        (int)blectl_get_autoon(), (int)blectl_get_advertising() );
+                }
+            }
+            else {
+                log_i( "[PWR_BLE] onDisconnect: advertising not restarted (BLE off or visibility off)" );
             }
         };
 
         void onMTUChange( uint16_t MTU, ble_gap_conn_desc* desc ) {
             log_i("MTU updated: %u for connection ID: %u\n", MTU, desc->conn_handle);
+            parkinsense_ble_on_mtu_changed( MTU );
         };
         
         uint32_t onPassKeyRequest(){
@@ -136,10 +238,15 @@ static bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
 
             powermgm_resume_from_ISR();
 
-            return( false );
+            return( true );
         };
 
         void onAuthenticationComplete(ble_gap_conn_desc* desc){
+#ifdef PARKINSENSE_BLE_UNSECURED
+            (void)desc;
+            powermgm_resume_from_ISR();
+            return;
+#else
             if(!desc->sec_state.encrypted) {
                 if ( blectl_get_event( BLECTL_PIN_AUTH ) ) {
                     log_d("BLECTL pairing abort, reason: %02x", cmpl.fail_reason );
@@ -173,6 +280,7 @@ static bool blectl_powermgm_event_cb( EventBits_t event, void *arg );
                 }
             }
             powermgm_resume_from_ISR();
+#endif
         };
     };
 #endif
@@ -189,8 +297,12 @@ void blectl_setup( void ) {
          *  Create the BLE Device
          */
         char deviceName[ 64 ];
-        snprintf( deviceName, sizeof( deviceName ), "Espruino (%s)", device_get_name() );
+        uint8_t mac[6];
+        esp_read_mac(mac, ESP_MAC_BT);
+        snprintf(deviceName, sizeof(deviceName), "Espruino (%s-%02X%02X)", 
+        device_get_name(), mac[4], mac[5]);
         NimBLEDevice::init( deviceName );
+        NimBLEDevice::setMTU( 247 );
         /*
          * set power level from config
          */
@@ -208,16 +320,26 @@ void blectl_setup( void ) {
             default:            NimBLEDevice::setPower( ESP_PWR_LVL_N9 );
                                 break;
         }
+#ifdef PARKINSENSE_BLE_UNSECURED
+        /*
+         * Dev unsecured: no bonding, MITM, or link encryption — plain GATT only.
+         */
+        NimBLEDevice::setSecurityAuth( false, false, false );
+        NimBLEDevice::deleteAllBonds();
+        log_i("[PWR_BLE] BLE security disabled (PARKINSENSE_BLE_UNSECURED)");
+#else
         /*
          * Enable encryption and pairing options
          */
         NimBLEDevice::setSecurityAuth( true, true, true );
         NimBLEDevice::setSecurityIOCap( BLE_HS_IO_DISPLAY_ONLY );
+#endif
         /*
          * Create the BLE Server
          */
         pServer = NimBLEDevice::createServer();
         pServer->setCallbacks( new ServerCallbacks() );
+        pServer->advertiseOnDisconnect( false );
         pAdvertising = NimBLEDevice::getAdvertising();
         pAdvertising->setAppearance( 0x00c0 );
         /**
@@ -225,16 +347,38 @@ void blectl_setup( void ) {
          */
         deviceinfo_setup();
         gadgetbridge_setup();
+        parkinsense_ble_setup();
         blebatctl_setup();
         blestepctl_setup();
         /*
-         * Start advertising
+         * Start advertising with power-efficient intervals
          */
-        pAdvertising->start();
+        pAdvertising->setMinInterval(800);
+        pAdvertising->setMaxInterval(1600);
+        log_i( "[PWR_BLE] setup: intervals set; host will not auto-advertise on every disconnect" );
     #endif
 
-    if( blectl_get_autoon() )
-        blectl_on();
+    log_i("[PWR_BLE] setup: config autoon=%d advertising_cfg=%d enable_on_standby=%d disable_only_disc=%d",
+        (int)blectl_get_autoon(), (int)blectl_get_advertising(),
+        (int)blectl_get_enable_on_standby(), (int)blectl_get_disable_only_disconnected() );
+
+    #ifdef NATIVE_64BIT
+        if( blectl_get_autoon() ) {
+            blectl_set_event( BLECTL_ON );
+            blectl_clear_event( BLECTL_OFF );
+        } else
+            blectl_off();
+    #else
+        if( blectl_get_autoon() ) {
+            blectl_may_start_ad = false;
+            blectl_config.autoon = true;
+            blectl_set_event( BLECTL_ON );
+            blectl_clear_event( BLECTL_OFF );
+            pAdvertising->stop();
+            log_i( "[PWR_BLE] setup: autoon in config; advertising off until WAKEUP, BLE control, or hourly hook" );
+        } else
+            blectl_off();
+    #endif
 
     powermgm_register_cb_with_prio( POWERMGM_STANDBY, blectl_powermgm_event_cb, "powermgm blectl", CALL_CB_FIRST );
     powermgm_register_cb( POWERMGM_SILENCE_WAKEUP | POWERMGM_WAKEUP, blectl_powermgm_event_cb, "powermgm blectl" );
@@ -244,24 +388,50 @@ bool blectl_powermgm_event_cb( EventBits_t event, void *arg ) {
     bool retval = true;
 
     switch( event ) {
-        case POWERMGM_STANDBY:          
-            if ( blectl_get_enable_on_standby() && blectl_get_event( BLECTL_ON ) ) {
+        case POWERMGM_STANDBY: {
+            #ifndef NATIVE_64BIT
+                int nconn = pServer ? (int)pServer->getConnectedCount() : -1;
+            #else
+                int nconn = -1;
+            #endif
+            const bool on = blectl_get_event( BLECTL_ON );
+            const bool conn = blectl_get_event( BLECTL_CONNECT );
+            const bool en_stby = blectl_get_enable_on_standby();
+            const bool only_disc = blectl_get_disable_only_disconnected();
+
+            if ( en_stby && on ) {
                 retval = false;
                 log_w("standby blocked by \"enable_on_standby\" option");
             }
-            else if ( blectl_get_disable_only_disconnected() && blectl_get_event( BLECTL_CONNECT ) ) {
+            else if ( only_disc && conn ) {
                 retval = false;
                 log_w("standby blocked by \"disable_only_disconnected\" option");
+            }
+            else if ( nconn > 0 ) {
+                retval = false;
+                log_i("[PWR_BLE] standby blocked by active BLE link (nconn=%d)", nconn);
             }
             else {
                 log_d("go standby");
             }
+            log_i("[PWR_BLE] STANDBY cb: BLECTL_ON=%d BLECTL_CONNECT=%d nconn=%d enable_on_standby=%d stayon_if_conn=%d -> powermgm_allow_sleep=%d (note: BLE stack not stopped here)",
+                (int)on, (int)conn, nconn, (int)en_stby, (int)only_disc, (int)retval );
             break;
-        case POWERMGM_WAKEUP:           
-            log_d("go wakeup");
+        }
+        case POWERMGM_WAKEUP:
+            #ifndef NATIVE_64BIT
+                if ( pServer && pAdvertising ) {
+                    blectl_may_start_ad = true;
+                    if ( !blectl_privileged_start_advertising_if_runnable( "user WAKEUP (device in use)" ) ) {
+                        log_i( "[PWR_BLE] WAKEUP: ad not started (may_start=%d autoon=%d visibility=%d)",
+                            (int)blectl_may_start_ad, (int)blectl_get_autoon(), (int)blectl_get_advertising() );
+                    }
+                }
+            #endif
+            log_i( "[PWR_BLE] WAKEUP: may_start applied on device; ad only if autoon+visibility" );
             break;
-        case POWERMGM_SILENCE_WAKEUP:   
-            log_d("go silence wakeup");
+        case POWERMGM_SILENCE_WAKEUP:
+            log_i("[PWR_BLE] SILENCE_WAKEUP cb (BLE unchanged by this callback)");
             break;
     }
     return( retval );
@@ -372,10 +542,13 @@ void blectl_set_advertising( bool advertising ) {
 
     #ifdef NATIVE_64BIT
     #else
-        if ( advertising )
+        if ( advertising ) {
+            blectl_may_start_ad = true;
             pServer->getAdvertising()->start();
-        else
+        }
+        else {
             pServer->getAdvertising()->stop();
+        }
     #endif
 }
 
@@ -485,12 +658,8 @@ void blectl_on( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        if ( blectl_config.advertising ) {
-            pServer->getAdvertising()->start();
-        }
-        else {
-            pServer->getAdvertising()->stop();
-        }
+        blectl_may_start_ad = true;
+        blectl_apply_advertising_from_config();
     #endif
 
     blectl_set_event( BLECTL_ON );
@@ -503,13 +672,90 @@ void blectl_off( void ) {
 
     #ifdef NATIVE_64BIT
     #else
-        pServer->getAdvertising()->stop();
+        blectl_may_start_ad = false;
+        blectl_light_sleep_disconnect_in_progress = false;
+        blectl_disconnect_all_or_log( "blectl_off" );
+        if ( pAdvertising ) {
+            pAdvertising->stop();
+        }
+        log_i( "[PWR_BLE] blectl_off: advertising stopped; NimBLE still initialized" );
     #endif
 
     blectl_set_event( BLECTL_OFF );
     blectl_clear_event( BLECTL_ON );
     blectl_send_event_cb( BLECTL_OFF, (void *)NULL );
     blectl_send_event_cb( BLECTL_CONFIG_UPDATE, NULL );
+}
+
+void blectl_before_light_sleep( void ) {
+    #ifdef NATIVE_64BIT
+        return;
+    #else
+        /* visibility + always-on: stay discoverable (debug / manual connect). */
+        if ( blectl_get_enable_on_standby() && blectl_get_advertising() && blectl_get_autoon() ) {
+            blectl_may_start_ad = true;
+            blectl_privileged_start_advertising_if_runnable( "visibility+always-on standby" );
+            log_i( "[PWR_BLE] before_light_sleep: skip disconnect (visibility+always-on)" );
+            return;
+        }
+
+        const bool hourly_window = parkinsense_data_is_hourly_sync_window_active();
+        const bool client_connected = parkinsense_data_ble_client_connected();
+#ifdef PARKINSENSE_STREAM_WHILE_CONNECTED
+        const bool sync_active = parkinsense_data_pipeline_is_started() && client_connected;
+#else
+        const bool sync_active = hourly_window && client_connected;
+#endif
+        if ( client_connected ) {
+            log_i( "[PWR_BLE] before_light_sleep: skip disconnect (client connected; hourly=%d)",
+                (int)hourly_window );
+            return;
+        }
+        if ( hourly_window ) {
+            log_i( "[PWR_BLE] before_light_sleep: hourly window — keep advertising for phone" );
+            return;
+        }
+        if ( !hourly_window ) {
+            blectl_may_start_ad = false;
+        }
+        blectl_light_sleep_disconnect_in_progress = true;
+        blectl_disconnect_all_or_log( "light sleep" );
+        if ( pAdvertising ) {
+            pAdvertising->stop();
+        }
+        log_i( "[PWR_BLE] before_light_sleep: disconnect + ad stopped; may_start=%d hourly_window=%d",
+            (int)blectl_may_start_ad, (int)hourly_window );
+    #endif
+}
+
+void blectl_after_light_sleep( void ) {
+    #ifdef NATIVE_64BIT
+        return;
+    #else
+        if ( !pServer || !pAdvertising ) {
+            return;
+        }
+        const size_t npeers = pServer->getConnectedCount();
+        if ( npeers > 0 ) {
+            log_i( "[PWR_BLE] after_light_sleep: %u link(s) still up (onDisconnect will clear wait flags; no ad until permitted)", (unsigned)npeers );
+            return;
+        }
+        if ( blectl_light_sleep_disconnect_in_progress && pServer->getConnectedCount() == 0 ) {
+            blectl_light_sleep_disconnect_in_progress = false;
+        }
+        if ( blectl_may_start_ad ) {
+            blectl_privileged_start_advertising_if_runnable( "after light sleep" );
+        }
+    #endif
+}
+
+void blectl_on_hourly_advertise_window( void ) {
+    #ifdef NATIVE_64BIT
+        return;
+    #else
+        blectl_may_start_ad = true;
+        blectl_privileged_start_advertising_if_runnable( "hourly window (hook)" );
+    #endif
 }
 
 #ifdef NATIVE_64BIT

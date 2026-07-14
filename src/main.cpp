@@ -4,6 +4,7 @@
 
 #include "hardware/hardware.h"
 #include "hardware/powermgm.h"
+#include "hardware/motion.h"
 
 #if defined( NATIVE_64BIT )
     /**
@@ -40,4 +41,5 @@ void setup() {
 
 void loop(){
     powermgm_loop();
+    
 }

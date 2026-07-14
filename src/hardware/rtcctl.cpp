@@ -98,6 +98,49 @@ void rtcctl_setup( void ) {
         }
         ttgo->rtc->disableCLK();
 
+        /*
+         * The PCF8563 is battery-backed: alarm/timer flags and enable bits can
+         * persist from previous firmwares. Any latched AF/TF (with AIE/TIE set)
+         * holds the open-drain INT line low and turns light-sleep into a
+         * 1ms wake-storm via GPIO 37. Clear everything unconditionally.
+         */
+        {
+            const uint8_t s2_before = ttgo->rtc->status2();
+            const int int_before = gpio_get_level( (gpio_num_t)RTC_INT_PIN );
+            log_i(
+                "[RTC] (boot) stat2=0x%02X AF=%d AIE=%d TF=%d TIE=%d | INT(GPIO%d)=%d (0=asserted)",
+                s2_before,
+                ( s2_before & 0x08 ) ? 1 : 0,
+                ( s2_before & 0x02 ) ? 1 : 0,
+                ( s2_before & 0x04 ) ? 1 : 0,
+                ( s2_before & 0x01 ) ? 1 : 0,
+                (int)RTC_INT_PIN,
+                int_before
+            );
+        }
+
+        ttgo->rtc->disableAlarm();
+        ttgo->rtc->clearTimer();
+        ttgo->rtc->disableTimer();
+
+        {
+            const uint8_t s2_after = ttgo->rtc->status2();
+            const int int_after = gpio_get_level( (gpio_num_t)RTC_INT_PIN );
+            log_i(
+                "[RTC] (after clear) stat2=0x%02X AF=%d AIE=%d TF=%d TIE=%d | INT(GPIO%d)=%d",
+                s2_after,
+                ( s2_after & 0x08 ) ? 1 : 0,
+                ( s2_after & 0x02 ) ? 1 : 0,
+                ( s2_after & 0x04 ) ? 1 : 0,
+                ( s2_after & 0x01 ) ? 1 : 0,
+                (int)RTC_INT_PIN,
+                int_after
+            );
+            if ( int_after == 0 ) {
+                log_e("[RTC] INT still asserted after clear -- pin held by something else" );
+            }
+        }
+
         pinMode( RTC_INT_PIN, INPUT_PULLUP);
         attachInterrupt( RTC_INT_PIN, &rtcctl_irq, FALLING );
     #elif defined( LILYGO_WATCH_2021 )
@@ -298,8 +341,12 @@ bool rtcctl_powermgm_event_cb( EventBits_t event, void *arg ) {
                                             #if defined( M5PAPER )
                                             #elif defined( M5CORE2 )
                                             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-                                                gpio_wakeup_enable( (gpio_num_t)RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
-                                                esp_sleep_enable_gpio_wakeup ();
+                                                if ( alarm_data.enabled ) {
+                                                    gpio_wakeup_enable( (gpio_num_t)RTC_INT_PIN, GPIO_INTR_LOW_LEVEL );
+                                                    esp_sleep_enable_gpio_wakeup ();
+                                                } else {
+                                                    gpio_wakeup_disable( (gpio_num_t)RTC_INT_PIN );
+                                                }
                                             #elif defined( LILYGO_WATCH_2021 ) && defined( VERSION_2 )
                                                 // gpio_wakeup_enable( (gpio_num_t)RTC_Int, GPIO_INTR_POSEDGE );
                                                 // esp_sleep_enable_gpio_wakeup ();
