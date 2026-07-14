@@ -17,6 +17,7 @@
 #ifndef NATIVE_64BIT
 #include "NimBLEDevice.h"
 #include "hardware/motion.h"
+#include "hardware/powermgm.h"
 #endif
 
 #ifdef NATIVE_64BIT
@@ -43,6 +44,8 @@ static Label lblPipeline;
 static Label lblAccel;
 static Label lblBuffer;
 static Label lblHint;
+static Label lblPower;
+static Label lblPower2;
 static lv_task_t* parkinsense_refresh_task = NULL;
 static lv_event_cb_t default_msgbox_cb;
 
@@ -125,6 +128,16 @@ void build_main_page(void) {
     lblHint.text("S:0 F:0 Q:0")
         .style(small, true)
         .align(lblBuffer, LV_ALIGN_OUT_BOTTOM_MID);
+
+    lblPower = Label(&screen);
+    lblPower.text("Up:0s Sl:0ms")
+        .style(small, true)
+        .align(lblHint, LV_ALIGN_OUT_BOTTOM_MID);
+
+    lblPower2 = Label(&screen);
+    lblPower2.text("G:0 T:0 z:0")
+        .style(small, true)
+        .align(lblPower, LV_ALIGN_OUT_BOTTOM_MID);
 }
 
 void refresh_main_page(void) {
@@ -145,14 +158,55 @@ void refresh_main_page(void) {
     snprintf(buf, sizeof(buf), "Buf: %d", n);
     lblBuffer.text(buf).realign();
 
-    snprintf(buf, sizeof(buf), "S:%u F:%u Q:%u A:%u E:%u R:%d",
+    snprintf(buf, sizeof(buf), "S:%u F:%u Q:%u D:%u A:%u E:%u R:%d",
         parkinsense_data_get_blocks_sent(),
         parkinsense_data_get_send_fails(),
         parkinsense_data_get_psram_queued(),
+        parkinsense_data_get_psram_blocks_dropped(),
         parkinsense_data_get_send_attempts(),
         parkinsense_data_get_early_returns(),
         parkinsense_ble_last_fail_reason());
     lblHint.text(buf).realign();
+
+    snprintf(
+        buf,
+        sizeof(buf),
+        "Up:%lus Sl:%lums (%u%%)",
+        (unsigned long)(powermgm_get_awake_ms() / 1000ULL),
+        (unsigned long)powermgm_get_sleep_ms(),
+        powermgm_get_awake_percent()
+    );
+    lblPower.text(buf).realign();
+
+    {
+        const unsigned blocked = (unsigned)powermgm_get_standby_blocked_count();
+        if ( blocked > 0 ) {
+            snprintf(
+                buf,
+                sizeof(buf),
+                "lst:%ums G:%u T:%u z:%u b:%u",
+                (unsigned)powermgm_get_last_sleep_ms(),
+                (unsigned)powermgm_get_wake_gpio_count(),
+                (unsigned)powermgm_get_wake_timer_count(),
+                (unsigned)powermgm_get_light_sleep_count(),
+                blocked
+            );
+        } else {
+            snprintf(
+                buf,
+                sizeof(buf),
+                "lst:%ums G:%u T:%u z:%u %s",
+                (unsigned)powermgm_get_last_sleep_ms(),
+                (unsigned)powermgm_get_wake_gpio_count(),
+                (unsigned)powermgm_get_wake_timer_count(),
+                (unsigned)powermgm_get_light_sleep_count(),
+                powermgm_get_last_gpio_wake_pins()[0]
+                    ? powermgm_get_last_gpio_wake_pins()
+                    : powermgm_get_last_wake_name()
+            );
+        }
+    }
+    lblPower2.text(buf).realign();
 #else
     (void)0;
 #endif

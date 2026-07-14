@@ -64,11 +64,10 @@ void battery_calibration_tile_setup( uint32_t tile_num ) {
     lv_label_set_long_mode( battery_calibration_info_label, LV_LABEL_LONG_BREAK );
     lv_obj_set_width( battery_calibration_info_label, lv_page_get_width_fit ( battery_calibration_page ) );
     lv_obj_add_style( battery_calibration_info_label, LV_OBJ_PART_MAIN, SETUP_STYLE );
-    lv_label_set_text( battery_calibration_info_label, "Test message from bar.");
+    lv_label_set_text( battery_calibration_info_label, "Toggle run+store below. Discharge on battery, then charge on USB.");
 
-    battery_calibration_store_switch = wf_add_switch( mainbar_get_tile_obj( battery_calibration_tile_num ), false ,battery_calibration_store_switch_event_cb );
-    lv_obj_align( battery_calibration_store_switch, mainbar_get_tile_obj( battery_calibration_tile_num ), LV_ALIGN_IN_BOTTOM_MID, 0, -10 );
-    lv_obj_set_hidden( battery_calibration_store_switch, true );
+    lv_obj_t *battery_calibration_switch_cont = wf_add_labeled_switch( mainbar_get_tile_obj( battery_calibration_tile_num ), "run + store cal", &battery_calibration_store_switch, false, battery_calibration_store_switch_event_cb, SETUP_STYLE );
+    lv_obj_align( battery_calibration_switch_cont, mainbar_get_tile_obj( battery_calibration_tile_num ), LV_ALIGN_IN_BOTTOM_MID, 0, -10 );
 
     mainbar_add_slide_element( battery_calibration_page );
     mainbar_add_slide_element( battery_calibration_info_label );
@@ -95,10 +94,6 @@ static bool battery_calibration_pmu_event_cb( EventBits_t event, void *arg ) {
             break;
         case PMUCTL_CALIBRATION_UPDATE:
             wf_label_printf( battery_calibration_info_label, "battery = %.0fmV\nmin = %.0fmV\nmax = %.0fmV\nmaxCharge = %.0fmV\nchargingOffset = %.0fmV\nVBUS = %s\ncharging = %s\ncalibration run = %s\nstore = %s", calibration_data->batteryVoltage, calibration_data->minVoltage, calibration_data->maxVoltage, calibration_data->maxVoltageCharge, calibration_data->chargingVoltageOffset, calibration_data->VBUS ? "true":"false", calibration_data->charging ? "true":"false", calibration_data->run ? "true":"false", calibration_data->store ? "true":"false" );
-            if( calibration_data->VBUS && !calibration_data->charging )
-                lv_obj_set_hidden( battery_calibration_store_switch, false );
-            else
-                lv_obj_set_hidden( battery_calibration_store_switch, true );
             break;
     }
 

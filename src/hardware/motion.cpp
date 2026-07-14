@@ -27,6 +27,7 @@
 
 #include "drive/bma423/bma.h"
 #include "motion.h"
+#include "hardware/bma_fifo.h"
 #include "powermgm.h"
 #include "callback.h"
 #include "utils/alloc.h"
@@ -297,6 +298,17 @@ bool bma_powermgm_loop_cb( EventBits_t event , void *arg ) {
             #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
                 TTGOClass *ttgo = TTGOClass::getWatch();
                 while( !ttgo->bma->readInterrupt() );
+#ifdef PARKINSENSE_BMA_FIFO
+                if (bma_fifo_is_enabled()) {
+                    /* isDoubleClick() = BMA423_WAKEUP (activity); isTilt() = orientation change */
+                    if ( ttgo->bma->isDoubleClick() || ttgo->bma->isTilt() ) {
+                        bma_fifo_on_motion();
+                    }
+                    if (bma_fifo_is_active()) {
+                        bma_fifo_service();
+                    }
+                }
+#endif
                 /*
                 * set powermgm wakeup event and save BMA_* event
                 */
@@ -423,7 +435,15 @@ void bma_standby( void ) {
     #else
         #ifdef M5PAPER
         #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
-            gpio_wakeup_enable ( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL);
+#ifdef PARKINSENSE_BMA_FIFO
+            if ( bma_fifo_is_active() ) {
+                bma_fifo_prepare_light_sleep();
+                gpio_wakeup_enable( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            } else
+#endif
+            {
+                gpio_wakeup_enable( (gpio_num_t)BMA423_INT1, GPIO_INTR_HIGH_LEVEL );
+            }
             esp_sleep_enable_gpio_wakeup ();
         #elif defined( LILYGO_WATCH_2021 )
             gpio_wakeup_enable ( (gpio_num_t)BMA_INT_1, GPIO_INTR_POSEDGE );

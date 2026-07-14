@@ -55,6 +55,11 @@
         #define BATTERY_LOWEST              3000
         #define BATTERY_HIGHEST             4350
         #define BATTERY_CHARGING_OFFSET     400
+    #elif defined( LILYGO_WATCH_2020_V1 ) || defined( LILYGO_WATCH_2020_V2 ) || defined( LILYGO_WATCH_2020_V3 )
+        #define BATTERY_MONITOR_INTERVAL    60
+        #define BATTERY_LOWEST              3000
+        #define BATTERY_HIGHEST             4200
+        #define BATTERY_CHARGING_OFFSET     400
     #else    
         #define BATTERY_MONITOR_INTERVAL    60
         #define BATTERY_LOWEST              3000
@@ -67,7 +72,7 @@
     class pmu_config_t : public BaseJsonConfig {
         public:
         pmu_config_t();
-        int32_t designed_battery_cap = 300;
+        int32_t designed_battery_cap = 350;
         int32_t silence_wakeup_interval = SILENCEWAKEINTERVAL;
         int32_t silence_wakeup_interval_vbplug = SILENCEWAKEINTERVAL_PLUG;
         int32_t normal_voltage = NORMALVOLTAGE;

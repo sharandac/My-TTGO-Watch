@@ -1,7 +1,16 @@
 # Parkinsense BLE pairing (react-native-ble-plx)
 
-The watch exposes an encrypted GATT service. The phone must pair before reads,
+**Production / default builds:** encrypted GATT — the phone must pair before reads,
 subscribes, or data notifies succeed.
+
+**Dev unsecured build** (`t-watch2020-v3_dev_unsecured`, `PARKINSENSE_BLE_UNSECURED`):
+no pair-probe characteristic, data TX is plain `READ | NOTIFY`, and `blectl`
+disables bonding/encryption (`setSecurityAuth(false,…)`), clears stored bonds on
+boot, and treats connect as ready without `BLECTL_AUTHWAIT`. Connect and subscribe
+without the OS pairing dialog. For lab / nRF Connect only.
+
+If notify still fails after switching from secured firmware, **forget the watch**
+in the phone’s Bluetooth settings (stale phone-side bond).
 
 ## UUIDs
 

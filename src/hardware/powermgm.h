@@ -167,4 +167,23 @@
      */
     void powermgm_resume_from_ISR( void );
 
+
+    /** Cumulative awake time since boot (includes current awake stretch). */
+    uint64_t powermgm_get_awake_ms( void );
+    /** Cumulative time spent in esp_light_sleep since boot. */
+    uint64_t powermgm_get_sleep_ms( void );
+    /** Awake fraction 0-100 from accumulated awake/sleep times. */
+    unsigned powermgm_get_awake_percent( void );
+    /** Human-readable name of the last light-sleep wake cause (TIMER, GPIO, ...). */
+    const char* powermgm_get_last_wake_name( void );
+    /** Decoded GPIO wake pins, e.g. "35:AXP" (empty if not GPIO or unknown). */
+    const char* powermgm_get_last_gpio_wake_pins( void );
+    uint32_t powermgm_get_wake_timer_count( void );
+    uint32_t powermgm_get_wake_gpio_count( void );
+    uint32_t powermgm_get_wake_other_count( void );
+    uint32_t powermgm_get_light_sleep_count( void );
+    uint32_t powermgm_get_standby_blocked_count( void );
+    /** Duration of the most recent esp_light_sleep (ms). */
+    uint32_t powermgm_get_last_sleep_ms( void );
+
 #endif // _POWERMGM_H
